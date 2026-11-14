@@ -8,7 +8,7 @@ tags: [design-pattern, typescript, behavioral, strategy, state, template-method,
 language: vi
 ---
 
-[Bài mở đầu](/articles/design-pattern-la-gi) đã chia 23 pattern GoF thành ba nhóm và đặt từng pattern vào một chỗ cụ thể của [Tới Nơi](/articles/du-an-mau-toi-noi). Nhóm **Hành vi** (Behavioral) có tới 11 pattern, nên được tách làm hai bài:
+[Bài mở đầu](/articles/design-pattern-la-gi) đã chia 23 pattern GoF thành ba nhóm và đặt từng pattern vào một chỗ cụ thể của [Tới Nơi](/articles/du-an-mau-toi-noi). Nhóm **Hành vi** (Behavioral) có tới 11 pattern, nên được tách thành hai bài:
 
 - **Phần 1 — bài này:** đóng gói *một hành vi* thành đối tượng để thay, lưu hoặc đảo ngược nó: Strategy, State, Template Method, Command, Memento.
 - **Phần 2 — [ai nói chuyện với ai](/articles/nhom-hanh-vi-giao-tiep-doi-tuong):** Observer, Mediator, Chain of Responsibility, Iterator, Visitor, Interpreter, kèm bảng tổng kết cả 11 pattern.
@@ -17,7 +17,7 @@ Thử trả lời câu hỏi dưới đây trước khi đọc tiếp.
 
 <div class="tkh-callout tkh-callout--example">
 <span class="tkh-callout-title">Tổng đài Tới Nơi cần gì làm xương sống?</span>
-<p>Nhân viên tổng đài có ba thao tác: <b>huỷ chuyến</b>, <b>đổi tài xế</b>, <b>hoàn tiền một phần</b>. Bên vận hành yêu cầu: mọi thao tác ghi vào nhật ký kiểm toán (ai làm, làm gì, kết quả), tự thử lại khi cổng thanh toán timeout mà không hoàn tiền hai lần, và có nút «Hoàn tác» cho thao tác đổi tài xế. Pattern nào nên là xương sống?</p>
+<p>Nhân viên tổng đài có ba thao tác: <b>huỷ chuyến</b>, <b>đổi tài xế</b>, <b>hoàn tiền một phần</b>. Bộ phận vận hành yêu cầu: mọi thao tác ghi vào nhật ký kiểm toán (ai làm, làm gì, kết quả), tự thử lại khi cổng thanh toán timeout mà không hoàn tiền hai lần, và có nút «Hoàn tác» cho thao tác đổi tài xế. Pattern nào nên là xương sống?</p>
 <p><b>A.</b> Strategy</p>
 <p><b>B.</b> State</p>
 <p><b>C.</b> Command</p>
@@ -74,7 +74,7 @@ export function pickDriver(mode: string, drivers: Driver[], merchantId?: string)
 }
 ```
 
-Ba chỗ đau: mỗi thuật toán mới là sửa hàm này (và chạy lại toàn bộ test của mọi nhánh); tham số riêng của một nhánh (`merchantId`) lan ra chữ ký chung; và chuỗi `mode` gõ sai thì im lặng. Chạy thật `pickDriver('nearst', …)` trả về `undefined` — chuyến cứ thế nằm ở `searching`.
+Ba chỗ đau: mỗi thuật toán mới là sửa hàm này (và chạy lại toàn bộ test của mọi nhánh); tham số riêng của một nhánh (`merchantId`) lan ra chữ ký chung; và chuỗi `mode` gõ sai thì không báo gì. Chạy thật `pickDriver('nearst', …)` trả về `undefined` — chuyến cứ thế nằm ở `searching`.
 
 ### Lời giải
 
@@ -107,7 +107,7 @@ export class ScoredDriver implements MatchingStrategy {
 }
 ```
 
-Gom đơn đồ ăn cũng là một strategy, nhưng nó nhận một strategy khác làm phương án dự phòng khi không ai đang cầm đơn của quán đó. Việc chọn strategy nào được đẩy ra một hàm riêng, quyết định **lúc chạy** theo thành phố, khung giờ và loại chuyến:
+Gom đơn đồ ăn cũng là một strategy, nhưng nó nhận một strategy khác làm phương án dự phòng khi không ai đang cầm đơn của quán đó. Việc chọn strategy nào được tách thành một hàm riêng, quyết định **lúc chạy** theo thành phố, khung giờ và loại chuyến:
 
 ```ts
 export class BatchedFood implements MatchingStrategy {
@@ -371,10 +371,10 @@ const S: Record<Status, TripState> = {
 <text x="40" y="332" class="t-small">Hành động không có mũi tên ⇒ TripState.deny() ném IllegalTransition — ví dụ cancel() khi chuyến đang in_transit.</text>
 </svg>
 </div>
-<figcaption><b>Hình 1 · Mỗi trạng thái là một lớp.</b> Đây chính là vòng đời 8 trạng thái trong <a href="/articles/du-an-mau-toi-noi">hồ sơ Tới Nơi</a>, chỉ khác là mỗi ô giờ là một lớp và mỗi mũi tên là một method được ghi đè. Luật «huỷ được ở đâu» nằm đúng một chỗ: lớp cha <code>Cancellable</code>.</figcaption>
+<figcaption><b>Hình 1 · Mỗi trạng thái là một lớp.</b> Đây chính là vòng đời 8 trạng thái trong <a href="/articles/du-an-mau-toi-noi">hồ sơ Tới Nơi</a>, chỉ khác là bây giờ mỗi ô là một lớp và mỗi mũi tên là một method được ghi đè. Luật «huỷ được ở đâu» nằm đúng một chỗ: lớp cha <code>Cancellable</code>.</figcaption>
 </figure>
 
-Đối tượng chuyến (Context) chỉ giữ trạng thái hiện tại và chuyển lời. Nó được dựng lại từ cột `trips.status` mỗi lần đọc từ database:
+Đối tượng chuyến (Context) chỉ giữ trạng thái hiện tại và chuyển tiếp lời gọi. Đối tượng này được dựng lại từ cột `trips.status` mỗi lần đọc từ database:
 
 ```ts
 export class Trip { // Context
@@ -410,7 +410,7 @@ Nút Huỷ của app giờ đọc `trip.canCancel` — cùng nguồn với luậ
 
 <div class="tkh-callout tkh-callout--warn">
 <span class="tkh-callout-title">State không chống được hai tài xế cùng bấm nhận</span>
-<p>Lớp <code>Searching</code> kiểm tra luật trên <b>bản sao trong bộ nhớ</b> của từng tiến trình. Hai tài xế bấm nhận cùng một giây thì hai tiến trình đều thấy <code>searching</code> và đều cho phép. Chốt chặn cuối cùng phải ở database: <code>UPDATE trips SET status = 'accepted', driver_id = $1 WHERE id = $2 AND status = 'searching'</code> — câu nào cập nhật 0 dòng là người đến sau. State giữ luật nghiệp vụ gọn một chỗ; tính đúng khi chạy đồng thời là việc của giao dịch và khoá dòng.</p>
+<p>Lớp <code>Searching</code> kiểm tra luật trên <b>bản sao trong bộ nhớ</b> của từng tiến trình. Hai tài xế bấm nhận cùng một giây thì hai tiến trình đều thấy <code>searching</code> và đều cho phép. Chốt chặn cuối cùng phải ở database: <code>UPDATE trips SET status = 'accepted', driver_id = $1 WHERE id = $2 AND status = 'searching'</code> — câu nào cập nhật 0 dòng là người đến sau. State giữ luật nghiệp vụ gọn một chỗ; tính đúng đắn khi chạy đồng thời là việc của giao dịch và khoá dòng.</p>
 </div>
 
 ### Các vai
@@ -461,7 +461,7 @@ export const canCancel = (s: Status) => NEXT[s].cancel !== undefined;
 
 ### Vấn đề ở Tới Nơi
 
-Khi chuyến về `completed`, hệ thống chạy một quy trình năm bước: **khoá chuyến** (`SELECT … FOR UPDATE` để không ai sửa giữa chừng) → **tính cước cuối** → **thu tiền** → **chia tiền** cho tài xế, quán và Tới Nơi → **phát sự kiện** `trip.completed`. Thứ tự là cố định và quan trọng: chia tiền trước khi thu tiền là chuyển khoản tiền chưa có.
+Khi chuyến về `completed`, hệ thống chạy một quy trình năm bước: **khoá chuyến** (`SELECT … FOR UPDATE` để không ai sửa giữa chừng) → **tính cước cuối** → **thu tiền** → **chia tiền** cho tài xế, quán và Tới Nơi → **phát sự kiện** `trip.completed`. Thứ tự là cố định và quan trọng: chia tiền trước khi thu tiền nghĩa là chuyển khoản tiền chưa thu được.
 
 Nhưng hai bước giữa khác nhau theo loại chuyến: đặt xe cộng phụ phí chờ, đồ ăn cộng tiền món và chia cho quán, bưu kiện cộng phí bảo hiểm theo giá trị khai báo. Cách đầu tiên ai cũng làm là chép hàm:
 
@@ -482,7 +482,7 @@ export async function completeFood(t: Trip) {
 }
 ```
 
-Hai lỗi trong mười dòng, cả hai đều thật đến mức quen thuộc: bản chép **quên một bước chung** (không khoá chuyến) và **sửa lệch một bước chung** (tên sự kiện). Phần giống nhau đáng lẽ chỉ được viết một lần.
+Hai lỗi trong mười dòng, cả hai đều là lỗi quen thuộc trong thực tế: bản chép **quên một bước chung** (không khoá chuyến) và **sửa lệch một bước chung** (tên sự kiện). Phần giống nhau đáng lẽ chỉ được viết một lần.
 
 ### Lời giải
 
@@ -566,7 +566,7 @@ Hoàn tất ba chuyến: đặt xe báo giá 62.000đ, tài xế chờ 8 phút; 
 [parcel] phát sự kiện trip.completed
 ```
 
-Kiểm tay một dòng: chờ 8 phút thì tính tiền 3 phút, `62.000 + 3 × 3.000 = 71.000`; tài xế nhận 80% là 56.800đ. Đơn đồ ăn: quán nhận 75% của 145.000 = 108.750đ, tài xế 80% của 18.000 = 14.400đ, phần còn lại 39.850đ về Tới Nơi. Cả ba loại đều khoá chuyến, đều kiểm «chia đủ tổng», đều phát đúng một tên sự kiện — vì những việc đó chỉ được viết một lần.
+Tính tay một dòng: chờ 8 phút thì tính tiền 3 phút, `62.000 + 3 × 3.000 = 71.000`; tài xế nhận 80% là 56.800đ. Đơn đồ ăn: quán nhận 75% của 145.000 = 108.750đ, tài xế 80% của 18.000 = 14.400đ, phần còn lại 39.850đ về Tới Nơi. Cả ba loại đều khoá chuyến, đều kiểm «chia đủ tổng», đều phát đúng một tên sự kiện — vì những việc đó chỉ được viết một lần.
 
 <figure class="tkh-fig">
 <div class="tkh-fig-box">
@@ -643,11 +643,11 @@ Template Method là «nguyên lý Hollywood» ở dạng thuần nhất: lớp c
 
 **Dùng** khi nhiều biến thể chia sẻ một quy trình mà **thứ tự là luật** (khoá trước, thu trước chia), và phần khác nhau nhỏ hơn hẳn phần giống nhau.
 
-**Không dùng** khi phần khác nhau lớn hơn phần chung, hoặc khi cần trộn biến thể theo nhiều trục (đồ ăn × trả trước × khách doanh nghiệp): kế thừa chỉ cho một trục, trục thứ hai sẽ đẻ ra `FoodPrepaidCorporateCompletion`. Khi đó dùng composition (Strategy cho từng bước).
+**Không dùng** khi phần khác nhau lớn hơn phần chung, hoặc khi cần trộn biến thể theo nhiều trục (đồ ăn × trả trước × khách doanh nghiệp): kế thừa chỉ cho một trục, trục thứ hai sẽ sinh ra `FoodPrepaidCorporateCompletion`. Khi đó dùng composition (Strategy cho từng bước).
 
 <div class="tkh-callout tkh-callout--warn">
 <span class="tkh-callout-title">TypeScript không có <code>final</code></span>
-<p>Java và C# cho phép đánh dấu <code>complete()</code> là không ghi đè được; TypeScript thì không. Một lớp con «tiện tay» ghi đè <code>complete()</code> để bỏ bước khoá chuyến sẽ biên dịch sạch. Đây là cái giá cố hữu của kế thừa — lớp cha mong manh (fragile base class): sửa lớp cha có thể làm vỡ lớp con và ngược lại. Giữ cây kế thừa nông (một tầng), ghi rõ trong comment hàm nào là khung, và nếu lo thì chuyển sang dạng hàm ở dưới — ở đó không có gì để ghi đè.</p>
+<p>Java và C# cho phép đánh dấu <code>complete()</code> là không ghi đè được; TypeScript thì không. Một lớp con «tiện tay» ghi đè <code>complete()</code> để bỏ bước khoá chuyến sẽ biên dịch sạch. Đây là cái giá cố hữu của kế thừa — lớp cha mong manh (fragile base class): sửa lớp cha có thể làm hỏng lớp con và ngược lại. Giữ cây kế thừa nông (một tầng), ghi rõ trong comment hàm nào là khung, và nếu còn lo ngại thì chuyển sang dạng hàm ở phần dưới — ở đó không có gì để ghi đè.</p>
 </div>
 
 ### Viết gọn ở TypeScript hiện đại
@@ -681,7 +681,7 @@ export const rideSteps: CompletionSteps = {
 };
 ```
 
-Chạy `completeTrip` cho chuyến đặt xe ở trên ra đúng `{"driver":56800,"merchant":0,"platform":14200}`. Hook trở thành method tuỳ chọn (`beforePublish?`), gọi bằng `?.()`. Để ý: `CompletionSteps` giờ thực chất là một **strategy cho từng bước** — ranh giới giữa hai pattern này mỏng hơn ta tưởng, xem cặp hay nhầm thứ hai.
+Chạy `completeTrip` cho chuyến đặt xe ở trên ra đúng `{"driver":56800,"merchant":0,"platform":14200}`. Hook trở thành method tuỳ chọn (`beforePublish?`), gọi bằng `?.()`. Lưu ý: `CompletionSteps` giờ thực chất là một **strategy cho từng bước** — ranh giới giữa hai pattern này mỏng hơn ta tưởng, xem cặp hay nhầm thứ hai.
 
 ## Command — thao tác của tổng đài vận hành
 
@@ -700,7 +700,7 @@ export async function partialRefund(code: number, amount: number, actor: string)
 }
 ```
 
-Mỗi yêu cầu vận hành — nhật ký kiểm toán thống nhất, thử lại khi lỗi mạng, hoàn tác, xếp hàng chạy dần khi tổng đài xử lý hàng loạt — lại phải chép vào **từng** hàm. Và vì thao tác chỉ là một lời gọi hàm đã trôi qua, không có gì để cầm lấy mà lưu, gửi đi hay đảo ngược.
+Mỗi yêu cầu vận hành — nhật ký kiểm toán thống nhất, thử lại khi lỗi mạng, hoàn tác, xếp hàng chạy lần lượt khi tổng đài xử lý hàng loạt — lại phải chép vào **từng** hàm. Và vì thao tác chỉ là một lời gọi hàm đã trôi qua nên không có gì để cầm lấy mà lưu, gửi đi hay đảo ngược.
 
 ### Lời giải
 
@@ -794,7 +794,7 @@ export class OpsConsole { // Invoker
 }
 ```
 
-Kịch bản thử: chuyến 100500 đang `accepted` với tx-8123. Cổng thanh toán giả lập được cài để lần gọi đầu **hoàn tiền xong nhưng phản hồi bị mất** (timeout) — tình huống khó nhất của thử lại. Một chuyến khác đang `in_transit` bị yêu cầu huỷ. Sau đó một nhân viên khác thử hoàn tác hai lệnh đầu:
+Kịch bản thử: chuyến 100500 đang `accepted` với tx-8123. Cổng thanh toán giả lập được cài để lần gọi đầu **hoàn tiền xong nhưng phản hồi bị mất** (timeout) — tình huống khó nhất của cơ chế thử lại. Một chuyến khác đang `in_transit` bị yêu cầu huỷ. Sau đó một nhân viên khác thử hoàn tác hai lệnh đầu:
 
 ```ts
 const ops = new OpsConsole();
@@ -834,7 +834,7 @@ Bốn điều đọc được từ tám dòng này: lệnh hoàn tiền bị tim
 
 ### Khi nào dùng, khi nào không
 
-**Dùng** khi hành động cần một đời sống sau lúc được yêu cầu: chạy sau (hàng đợi), chạy lại (thử lại), được ghi lại (kiểm toán), được đảo ngược (hoàn tác), hoặc được gửi qua mạng (lệnh được tuần tự hoá thành JSON rồi một worker khác chạy). Thao tác của tổng đài cần cả năm.
+**Dùng** khi hành động cần tồn tại tiếp sau lúc được yêu cầu: chạy sau (hàng đợi), chạy lại (thử lại), được ghi lại (kiểm toán), được đảo ngược (hoàn tác), hoặc được gửi qua mạng (lệnh được tuần tự hoá thành JSON rồi một worker khác chạy). Thao tác của tổng đài cần cả năm.
 
 **Không dùng** khi hành động chỉ là một lời gọi hàm chạy ngay và không ai cần nhắc lại nó — bọc `getMenu()` thành `GetMenuCommand` chỉ thêm một tầng gián tiếp. Cái giá: mỗi thao tác một lớp, và lệnh phải mang theo đủ trạng thái để hoàn tác (`previous`), nghĩa là phải nghĩ trước «đảo ngược cái này cần nhớ gì».
 
@@ -861,7 +861,7 @@ export function setQty(cart: Cart, itemId: string, qty: number) {
 export function undo(): Cart | undefined { return history.pop(); }
 ```
 
-Chạy thật: giỏ có 2 cơm tấm, đổi thành 3, bấm hoàn tác — kết quả `Sau hoàn tác, số lượng cơm tấm = 3`. Dấu `...` chỉ chép lớp ngoài; mảng `lines` trong «bản sao» vẫn là mảng của giỏ đang sửa (chuyện sao chép nông/sâu đã nói ở phần Prototype của [bài Khởi tạo](/articles/nhom-khoi-tao-creational)). Lỗi thứ hai kín hơn: `history` chứa nguyên đối tượng `Cart`, nên bất kỳ màn hình nào cầm được lịch sử cũng đọc và sửa được cấu trúc giỏ — đổi cấu trúc giỏ là sửa luôn những chỗ đó.
+Chạy thật: giỏ có 2 cơm tấm, đổi thành 3, bấm hoàn tác — kết quả `Sau hoàn tác, số lượng cơm tấm = 3`. Dấu `...` chỉ chép lớp ngoài; mảng `lines` trong «bản sao» vẫn là mảng của giỏ đang sửa (chuyện sao chép nông/sâu đã nói ở phần Prototype của [bài Khởi tạo](/articles/nhom-khoi-tao-creational)). Lỗi thứ hai khó thấy hơn: `history` chứa nguyên đối tượng `Cart`, nên bất kỳ màn hình nào cầm được lịch sử cũng đọc và sửa được cấu trúc giỏ — đổi cấu trúc giỏ là sửa luôn những chỗ đó.
 
 ### Lời giải
 
@@ -946,7 +946,7 @@ hoàn tác "thêm trứng"  → 3×Cơm tấm, 1×Trà đá | 140.000đ
 còn trong lịch sử: thêm cơm tấm | thêm trà đá | cơm tấm ×3
 ```
 
-Hoàn tác «thêm trứng» lấy đúng topping ra khỏi mảng lồng bên trong — chỗ mà bản sao nông ở trên làm sai. Màn hình sửa lộ trình dùng y nguyên ba vai này, chỉ khác `CartState` thành danh sách điểm dừng.
+Hoàn tác «thêm trứng» lấy đúng topping ra khỏi mảng lồng bên trong — chỗ mà bản sao nông ở trên làm sai. Màn hình sửa lộ trình dùng y nguyên ba vai này, chỉ khác ở chỗ `CartState` đổi thành danh sách điểm dừng.
 
 ### Các vai
 
@@ -993,9 +993,9 @@ Phần «Viết gọn» của Template Method đã cho thấy điểm gặp: hà
 Cả hai đều «gói một đoạn hành vi vào đối tượng», và đều thường thu gọn thành một hàm. Khác ở **đối tượng đại diện cho cái gì**.
 
 - Strategy là **cách làm** một việc mà Context đã biết sẽ làm. `ScoredDriver` không có ý nghĩa nếu đứng một mình; nó được Context gọi đi gọi lại, mỗi lần với dữ liệu mới.
-- Command là **một yêu cầu cụ thể** đã gắn sẵn tham số: «hoàn 20.000đ chuyến 100500 vì tài xế tới trễ». Nó chạy một lần, có danh tính (`id`), có người yêu cầu, có lịch sử.
+- Command là **một yêu cầu cụ thể** đã gắn sẵn tham số: «hoàn 20.000đ chuyến 100500 vì tài xế tới trễ». Command chạy một lần, có danh tính (`id`), có người yêu cầu, có lịch sử.
 
-Câu hỏi phân biệt nhanh: *Đối tượng này có cần được lưu, xếp hàng, ghi nhật ký hay hoàn tác không?* Có → Command. Nó chỉ là một phương án thay thế được cho cùng một phép tính → Strategy.
+Câu hỏi phân biệt nhanh: *Đối tượng này có cần được lưu, xếp hàng, ghi nhật ký hay hoàn tác không?* Có → Command. Đối tượng này chỉ là một phương án thay thế được cho cùng một phép tính → Strategy.
 
 ### Command-undo vs Memento
 
@@ -1049,7 +1049,7 @@ Cả hai đều cho ra nút Hoàn tác, theo hai triết lý ngược nhau:
 - **Command-undo** lưu **phép đảo**: ít dữ liệu, nhưng mỗi thao tác phải viết đúng hàm `undo()`, và đảo sai thì trạng thái lệch dần sau nhiều lần hoàn tác/làm lại.
 - **Memento** lưu **ảnh chụp**: không cần hiểu thao tác, khôi phục luôn chính xác, nhưng tốn bộ nhớ và chỉ áp được cho trạng thái nằm trong tầm tay originator.
 
-Hai cách hay đi cùng nhau: một command chụp memento trong `execute()` rồi `undo()` chỉ việc `restore` — gọn khi phép đảo khó viết mà trạng thái đủ nhỏ. Câu hỏi phân biệt nhanh: *Phép đảo có dễ viết đúng không, và thao tác có chạm ra ngoài hệ thống không?* Đảo dễ, hoặc có tác dụng ngoài (tiền, tin nhắn) → Command (với lệnh bù). Đảo phiền, trạng thái nhỏ và chỉ ở trong bộ nhớ → Memento.
+Hai cách hay đi cùng nhau: một command chụp memento trong `execute()` rồi `undo()` chỉ việc `restore` — gọn khi phép đảo khó viết mà trạng thái đủ nhỏ. Câu hỏi phân biệt nhanh: *Phép đảo có dễ viết đúng không, và thao tác có chạm ra ngoài hệ thống không?* Phép đảo dễ viết, hoặc có tác dụng ngoài (tiền, tin nhắn) → Command (với lệnh bù). Phép đảo khó viết, trạng thái nhỏ và chỉ ở trong bộ nhớ → Memento.
 
 ## Chọn pattern nào
 
@@ -1062,7 +1062,7 @@ Hai cách hay đi cùng nhau: một command chụp memento trong `execute()` r�
 3. **Có một quy trình nhiều bước, thứ tự là luật**, chỉ vài bước khác nhau theo loại? → **Template Method**.
    - Biến thể theo hai trục trở lên, hoặc phải đổi lúc chạy? → hàm khung nhận **đối tượng các bước** (composition).
 4. **Có nhiều cách làm cùng một việc**, lựa chọn đến từ cấu hình, thành phố, khung giờ, thử nghiệm A/B? → **Strategy** — trong TypeScript thường chỉ là một kiểu hàm.
-5. **Không câu nào trả lời «có»?** → giữ `if`/`switch`. Một nhánh duy nhất không cần pattern; khi có nhánh thứ ba và nhánh thứ ba bắt đầu sửa lây sang hai nhánh kia, quay lại danh sách này.
+5. **Không câu nào trả lời «có»?** → giữ `if`/`switch`. Một nhánh duy nhất không cần pattern; khi có nhánh thứ ba và việc sửa nhánh này bắt đầu kéo theo phải sửa hai nhánh kia, quay lại danh sách này.
 
 ## Tóm tắt
 

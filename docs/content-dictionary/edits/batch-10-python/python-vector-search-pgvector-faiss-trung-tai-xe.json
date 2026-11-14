@@ -1,0 +1,215 @@
+{
+ "file": "python-vector-search-pgvector-faiss-trung-tai-xe.md",
+ "edits": [
+  {
+   "old": "tìm top-k cùng người khác tài khoản",
+   "new": "tìm top-k ảnh của cùng một người ở tài khoản khác",
+   "reason": "Cụm cụt, thiếu từ nối",
+   "severity": "medium"
+  },
+  {
+   "old": "So HNSW, IVFFlat về recall",
+   "new": "So sánh HNSW và IVFFlat về recall",
+   "reason": "Thiếu động từ",
+   "severity": "medium"
+  },
+  {
+   "old": "Có số đo thật.",
+   "new": "Có số liệu đo thật.",
+   "reason": "Cách nói gượng",
+   "severity": "low"
+  },
+  {
+   "old": "chỉ ra chỗ nó trả thiếu mà không báo lỗi",
+   "new": "chỉ ra trường hợp nó trả thiếu kết quả mà không báo lỗi",
+   "reason": "Thiếu danh từ, đại từ nó mơ hồ",
+   "severity": "medium"
+  },
+  {
+   "old": "không phải để cứu thời gian;",
+   "new": "không giúp tiết kiệm thời gian;",
+   "reason": "Dịch gượng",
+   "severity": "medium"
+  },
+  {
+   "old": "và lý do dùng chỉ mục là khi số dòng lớn hơn nhiều.",
+   "new": "còn chỉ mục có lợi khi số dòng lớn hơn nhiều.",
+   "reason": "Câu cụt, thiếu vị ngữ",
+   "severity": "medium"
+  },
+  {
+   "old": "cho thấy chỉ mục còn làm gì cho recall",
+   "new": "cho thấy chỉ mục còn ảnh hưởng gì đến recall",
+   "reason": "Cách nói gượng",
+   "severity": "low"
+  },
+  {
+   "old": "Lab này tự chứa, không dùng kết quả lab 49.",
+   "new": "Lab này độc lập, không dùng kết quả của lab 49.",
+   "reason": "Từ tự ghép",
+   "severity": "medium"
+  },
+  {
+   "old": "Chúng không phải người thật, chỉ để đủ số dòng đo thời gian và recall.",
+   "new": "Chúng không phải người thật, chỉ để có đủ số dòng cho việc đo thời gian và recall.",
+   "reason": "Câu cụt",
+   "severity": "medium"
+  },
+  {
+   "old": "kiểm đẳng thức này trên một truy vấn",
+   "new": "kiểm tra đẳng thức này trên một truy vấn",
+   "reason": "Thiếu chữ tra",
+   "severity": "low"
+  },
+  {
+   "old": "Một bẫy hạ tầng đo được khi viết lab",
+   "new": "Một bẫy hạ tầng mà ta gặp và đo được khi viết lab",
+   "reason": "Thiếu chủ ngữ",
+   "severity": "medium"
+  },
+  {
+   "old": "Đổi lại nó nhanh.",
+   "new": "Đổi lại, FAISS nhanh.",
+   "reason": "Nó chỉ sự vật ở đầu câu",
+   "severity": "medium"
+  },
+  {
+   "old": "mọi phía một luồng tính toán",
+   "new": "mọi phía đều chạy một luồng tính toán",
+   "reason": "Thiếu động từ",
+   "severity": "medium"
+  },
+  {
+   "old": "**Recall đổi bằng thời gian ở cả hai họ chỉ mục**",
+   "new": "**Ở cả hai họ chỉ mục, muốn recall cao hơn thì phải trả bằng thời gian**",
+   "reason": "Dịch gượng, thiếu động từ",
+   "severity": "medium"
+  },
+  {
+   "old": "lúc này nó chậm cỡ quét tuần tự",
+   "new": "lúc này IVFFlat chậm cỡ quét tuần tự",
+   "reason": "Nó mơ hồ",
+   "severity": "medium"
+  },
+  {
+   "old": "Khoảng cách với pgvector gồm cả vòng đi về qua mạng và giải mã kết quả, nên đây không phải so thuật toán thuần.",
+   "new": "Khoảng cách giữa FAISS và pgvector gồm cả vòng đi về qua mạng và giải mã kết quả, nên đây không phải phép so sánh thuần về thuật toán.",
+   "reason": "Thiếu chủ thể, trật tự kiểu Anh",
+   "severity": "medium"
+  },
+  {
+   "old": "FAISS và quét chính xác hoàn toàn lặp lại",
+   "new": "FAISS và quét chính xác cho kết quả lặp lại hoàn toàn",
+   "reason": "Thiếu động từ",
+   "severity": "medium"
+  },
+  {
+   "old": "nên mỗi lần dựng ra một phân ô khác",
+   "new": "nên mỗi lần dựng cho ra một cách phân ô khác",
+   "reason": "Cách nói gượng",
+   "severity": "low"
+  },
+  {
+   "old": "Ta chỉ khẳng định thứ bậc lớn;",
+   "new": "Ta chỉ khẳng định bậc độ lớn;",
+   "reason": "Cụm cụt",
+   "severity": "medium"
+  },
+  {
+   "old": "thời gian chồng lên nhau nên không xếp hạng",
+   "new": "thời gian chồng lấn nhau nên không xếp hạng",
+   "reason": "Cách nói tự nhiên hơn",
+   "severity": "low"
+  },
+  {
+   "old": "tỉ lệ 5 tài khoản cùng người nằm trong top-10",
+   "new": "tỉ lệ tài khoản (trong 5 tài khoản cùng người) nằm trong top-10",
+   "reason": "Câu mơ hồ",
+   "severity": "medium"
+  },
+  {
+   "old": "tức là bài 49.",
+   "new": "tức là nội dung của bài 49.",
+   "reason": "Cụm cụt",
+   "severity": "low"
+  },
+  {
+   "old": "Cùng một câu truy vấn có WHERE, hai hành vi.",
+   "new": "Cùng một câu truy vấn có WHERE nhưng cho hai hành vi.",
+   "reason": "Câu thiếu động từ",
+   "severity": "medium"
+  },
+  {
+   "old": "Bật `iterative_scan` đưa lại 10,00 dòng",
+   "new": "Bật `iterative_scan` đưa số dòng trả về trở lại 10,00",
+   "reason": "Cách nói gượng",
+   "severity": "medium"
+  },
+  {
+   "old": "Giới hạn là có thật:",
+   "new": "Giới hạn này có thật:",
+   "reason": "Cách nói gượng",
+   "severity": "low"
+  },
+  {
+   "old": "nên chỉ mục hợp với đúng tập đó tốt hơn:",
+   "new": "nên dựng chỉ mục riêng cho đúng tập đó thì tốt hơn:",
+   "reason": "Cách nói gượng",
+   "severity": "medium"
+  },
+  {
+   "old": "(1.020 dòng là rẻ)",
+   "new": "(1.020 dòng thì rất rẻ)",
+   "reason": "Cách nói gượng",
+   "severity": "low"
+  },
+  {
+   "old": "Cái bẫy là điều kiện hẹp mà không ai kiểm:",
+   "new": "Cái bẫy là điều kiện hẹp mà không ai kiểm tra:",
+   "reason": "Thiếu chữ tra",
+   "severity": "low"
+  },
+  {
+   "old": "lỗi không ném exception, chỉ làm hệ thống bỏ sót người",
+   "new": "lỗi này không ném exception mà chỉ làm hệ thống bỏ sót người",
+   "reason": "Câu rời rạc",
+   "severity": "medium"
+  },
+  {
+   "old": "quy mô nhân số ứng viên đáng ngờ,",
+   "new": "quy mô càng lớn thì số ứng viên đáng ngờ càng tăng,",
+   "reason": "Cụm tự ghép khó hiểu",
+   "severity": "high"
+  },
+  {
+   "old": "27 ca là bất biến, không có ngưỡng tốc độ. Các ca chính:",
+   "new": "27 test case đều là bất biến, không có ngưỡng tốc độ. Các test case chính:",
+   "reason": "Thống nhất cách gọi, thiếu động từ",
+   "severity": "medium"
+  },
+  {
+   "old": "các ca về `WHERE`",
+   "new": "các test case về `WHERE`",
+   "reason": "Thống nhất cách gọi",
+   "severity": "low"
+  },
+  {
+   "old": "(ca này chạy lại lab với URL sai)",
+   "new": "(test case này chạy lại lab với URL sai)",
+   "reason": "Thống nhất cách gọi",
+   "severity": "low"
+  },
+  {
+   "old": "Cùng truy vấn chậm nhanh thất thường",
+   "new": "Cùng một truy vấn lúc nhanh lúc chậm, thất thường",
+   "reason": "Câu gượng",
+   "severity": "medium"
+  },
+  {
+   "old": "cho chỉ mục gần đúng; ta chưa đo",
+   "new": "đối với chỉ mục gần đúng; ta chưa đo",
+   "reason": "Cách nói gượng",
+   "severity": "low"
+  }
+ ]
+}

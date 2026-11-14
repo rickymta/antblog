@@ -1,0 +1,131 @@
+{
+  "file": "dotnet10-validation-problem-details-openapi.md",
+  "edits": [
+    {
+      "old": "Các ví dụ target `net10.0`; code trong repository và các đoạn đầy đủ dưới đây dùng cùng implementation được chạy kiểm chứng.",
+      "new": "Các ví dụ nhắm tới `net10.0`; code trong repository và các đoạn đầy đủ dưới đây dùng cùng một bản cài đặt đã được chạy kiểm chứng.",
+      "reason": "Bỏ giọng dịch máy, 'target' và 'implementation' lọt vào văn xuôi.",
+      "severity": "medium"
+    },
+    {
+      "old": "field nào lỗi và cùng một cấu trúc phản hồi ổn định",
+      "new": "field nào lỗi và cần cùng một cấu trúc phản hồi ổn định",
+      "reason": "Câu thiếu động từ, 'cùng một' khó hiểu.",
+      "severity": "high"
+    },
+    {
+      "old": "không sao chép AddValidation sang một bài .NET cũ rồi mặc định hành vi giống nhau. Project dùng package và SDK đã được pin/kiểm thử.",
+      "new": "đừng sao chép AddValidation sang một bài .NET cũ rồi mặc định hành vi giống nhau. Project dùng package và SDK đã được ghim phiên bản và kiểm thử.",
+      "reason": "'pin/kiểm thử' lọt tiếng Anh, trộn cách viết; câu khuyến cáo nên dùng 'đừng'.",
+      "severity": "medium"
+    },
+    {
+      "old": "cũng có thể dùng nó.",
+      "new": "cũng có thể dùng policy đó.",
+      "reason": "'nó' chỉ vật trừu tượng, mơ hồ.",
+      "severity": "medium"
+    },
+    {
+      "old": "Validation trả lời yêu cầu có đúng shape/miền đầu vào cơ bản không. Nó không thay auth, không kiểm tiền đã thanh toán hay quyền nhận chuyến.",
+      "new": "Validation trả lời câu hỏi đầu vào có đúng hình dạng và miền giá trị cơ bản hay không. Validation không thay thế xác thực và phân quyền, không kiểm tra tiền đã thanh toán hay quyền nhận chuyến.",
+      "reason": "'yêu cầu' mơ hồ, 'Nó' đầu câu, 'auth' viết tắt.",
+      "severity": "high"
+    },
+    {
+      "old": "Không dùng một attribute cho mọi invariant liên quan dữ liệu đang thay đổi trong database.",
+      "new": "Đừng dùng một attribute để bảo vệ mọi invariant phụ thuộc vào dữ liệu đang thay đổi trong database.",
+      "reason": "Câu cụt, thiếu động từ nối giữa attribute và invariant.",
+      "severity": "medium"
+    },
+    {
+      "old": "Required từ chối thiếu/null; Range kiểm giá trị khi có. Nếu bỏ Required thì một attribute range không có nghĩa field bắt buộc hiện diện.",
+      "new": "Required từ chối giá trị thiếu hoặc null; Range kiểm giá trị khi giá trị đó có mặt. Nếu bỏ Required thì attribute Range không bảo đảm field bắt buộc phải có mặt.",
+      "reason": "Câu thiếu chủ ngữ, 'không có nghĩa field bắt buộc hiện diện' cụt.",
+      "severity": "high"
+    },
+    {
+      "old": "Hai cận đều được chấp nhận.",
+      "new": "Cả hai giá trị cận đều được chấp nhận.",
+      "reason": "'Hai cận' cụt.",
+      "severity": "low"
+    },
+    {
+      "old": "Dấu ! và .Value trong handler là dựa vào ranh giới validation đã được kiểm tra;",
+      "new": "Dấu ! và .Value trong handler dựa vào việc ranh giới validation đã kiểm tra trước đó;",
+      "reason": "Câu lủng củng 'là dựa vào', bị động thừa.",
+      "severity": "medium"
+    },
+    {
+      "old": "phải tự giữ hợp đồng và guard cần thiết.",
+      "new": "phải tự bảo đảm hợp đồng và thêm các bước kiểm tra chặn (guard) cần thiết.",
+      "reason": "'giữ ... guard' mơ hồ.",
+      "severity": "medium"
+    },
+    {
+      "old": "Validation failure của lab trả 400",
+      "new": "Khi validation thất bại, lab trả 400",
+      "reason": "Cụm danh từ ghép kiểu tiếng Anh.",
+      "severity": "medium"
+    },
+    {
+      "old": "đừng nghĩ gọi chúng sẽ tự chuẩn hoá",
+      "new": "đừng nghĩ rằng gọi chúng sẽ tự chuẩn hoá",
+      "reason": "Thiếu liên từ 'rằng', câu khó đọc.",
+      "severity": "low"
+    },
+    {
+      "old": "Bộ test riêng chỉ assert 400 cho ca đó, không áp một cấu trúc body",
+      "new": "Bộ test riêng chỉ assert 400 cho test case đó, không áp đặt một cấu trúc body",
+      "reason": "Thống nhất 'test case'; 'áp' thiếu nghĩa.",
+      "severity": "medium"
+    },
+    {
+      "old": "Trace identifier giúp tra log nội bộ",
+      "new": "Mã truy vết (trace identifier) giúp tra log nội bộ",
+      "reason": "Thống nhất cách gọi tiếng Việt.",
+      "severity": "low"
+    },
+    {
+      "old": "trong Development của lab. OpenAPI JSON không đồng nghĩa đã có",
+      "new": "ở môi trường Development của lab. OpenAPI JSON không đồng nghĩa với việc đã có",
+      "reason": "Thiếu danh từ 'môi trường'; 'đồng nghĩa đã có' cụt.",
+      "severity": "medium"
+    },
+    {
+      "old": "Không dùng một tệp schema đẹp làm bằng chứng kiểm tra request đã bật.",
+      "new": "Đừng coi một tệp schema đẹp là bằng chứng cho thấy việc kiểm tra request đã được bật.",
+      "reason": "Câu cụt, thiếu quan hệ.",
+      "severity": "medium"
+    },
+    {
+      "old": "Project pin Microsoft.OpenApi 2.7.5 trên dòng 2.x thay cho dependency cũ có advisory.",
+      "new": "Project ghim Microsoft.OpenApi 2.7.5 trên dòng 2.x, thay cho dependency cũ có cảnh báo bảo mật (advisory).",
+      "reason": "'pin' lọt tiếng Anh.",
+      "severity": "medium"
+    },
+    {
+      "old": "không đổi major tuỳ ý mà chỉ nhìn build thành công.",
+      "new": "không tuỳ ý đổi phiên bản major chỉ vì thấy build thành công.",
+      "reason": "Câu cụt, trật tự kiểu Anh.",
+      "severity": "medium"
+    },
+    {
+      "old": "Đây là lựa chọn phạm vi xuất tài liệu, không phải biện pháp thay auth cho API.",
+      "new": "Đây là quyết định về phạm vi công bố tài liệu, không phải biện pháp thay thế xác thực và phân quyền cho API.",
+      "reason": "Chuỗi danh từ ghép khó đọc; 'auth' viết tắt.",
+      "severity": "medium"
+    },
+    {
+      "old": "Ca thiếu/null phải phát hiện lỗi hợp đồng.",
+      "new": "Test case thiếu/null phải phát hiện lỗi hợp đồng.",
+      "reason": "Thống nhất 'test case'.",
+      "severity": "low"
+    },
+    {
+      "old": "Không triển khai ví dụ chưa có đầy đủ cấu hình service lên public endpoint.",
+      "new": "Đừng triển khai ví dụ này lên endpoint công khai khi service chưa có đầy đủ cấu hình.",
+      "reason": "Hai phủ định ngầm, khó nắm nghĩa.",
+      "severity": "medium"
+    }
+  ]
+}

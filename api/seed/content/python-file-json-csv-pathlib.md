@@ -10,7 +10,7 @@ language: vi
 
 Mỗi sáng, bộ phận vận hành của [Tới Nơi](/articles/du-an-mau-toi-noi) xuất danh sách chuyến hôm trước ra một file CSV, kèm danh mục sáu thành phố dạng JSON. Ta cần đọc hai file đó, tính cước các chuyến đã hoàn thành, gom theo thành phố rồi ghi một bản tóm tắt cho người khác đọc tiếp. File trong bài chỉ có 30 chuyến giả; với 2 triệu chuyến mỗi ngày, cách đọc phải khác (xem phần giới hạn ở cuối).
 
-Đây là bài 09 của lộ trình **Python cơ bản qua Tới Nơi**. Bạn cần nhớ `Decimal` (bài 02), `dict` và `list` (bài 05). Cước vẫn là 12.000 VND gồm 2 km đầu, mỗi km vượt 4.500 VND.
+Đây là bài 09 của lộ trình **Python cơ bản qua Tới Nơi**. Bạn cần nhớ `Decimal` (bài 02), `dict` và `list` (bài 05). Cước vẫn là 12.000 VND gồm 2 km đầu, mỗi km vượt quá là 4.500 VND.
 
 <div class="tkh-callout tkh-callout--example">
 <span class="tkh-callout-title">Thử trước khi đọc</span>
@@ -20,7 +20,7 @@ Mỗi sáng, bộ phận vận hành của [Tới Nơi](/articles/du-an-mau-toi-
 
 ## Đường dẫn: cwd khác với vị trí file nguồn
 
-Mỗi tiến trình có một **cwd** (current working directory), thư mục nó đang «đứng». Chuỗi `"data/trips.csv"` không nói gì về nơi chương trình nằm; hệ điều hành ghép nó vào cwd rồi tìm. Chạy từ thư mục gốc repository thì cwd là thư mục gốc, và file không có ở đó:
+Mỗi tiến trình có một **cwd** (current working directory), thư mục mà tiến trình đang «đứng». Chuỗi `"data/trips.csv"` không nói gì về nơi chương trình nằm; hệ điều hành ghép nó vào cwd rồi tìm. Chạy từ thư mục gốc repository thì cwd là thư mục gốc, và file không có ở đó:
 
 ```text
 FileNotFoundError: [Errno 2] No such file or directory: 'data/trips.csv'
@@ -59,7 +59,7 @@ Một cái bẫy: nếu vế phải của `/` là đường dẫn tuyệt đối
 
 ## Mở file: with, encoding và newline
 
-`Path.open()` (và hàm `open()` quen thuộc) trả về một đối tượng file. File mở là tài nguyên của hệ điều hành: không đóng thì dữ liệu ghi có thể còn kẹt trong bộ đệm, và số file mở mỗi tiến trình có hạn. Cách đúng là **context manager**, câu lệnh `with`:
+`Path.open()` (và hàm `open()` quen thuộc) trả về một đối tượng file. File mở là tài nguyên của hệ điều hành: không đóng thì dữ liệu ghi có thể còn kẹt trong bộ đệm, và số file mà mỗi tiến trình được mở có giới hạn. Cách đúng là **context manager**, câu lệnh `with`:
 
 ```python
 with path.open(encoding="utf-8") as f:
@@ -67,7 +67,7 @@ with path.open(encoding="utf-8") as f:
 # ra khỏi khối with: file đã đóng, kể cả khi bên trong có exception
 ```
 
-Khối `with` gọi `__enter__` khi vào và `__exit__` khi ra, kể cả khi exception văng ra giữa chừng; với file, `__exit__` đẩy bộ đệm xuống và đóng file.
+Khối `with` gọi `__enter__` khi vào và `__exit__` khi ra, kể cả khi exception văng ra giữa chừng; với file, `__exit__` đẩy dữ liệu trong bộ đệm ra và đóng file.
 
 <figure class="tkh-fig">
 <div class="tkh-fig-box">
@@ -78,11 +78,11 @@ Khối `with` gọi `__enter__` khi vào và `__exit__` khi ra, kể cả khi ex
 
 ### encoding="utf-8": tiếng Việt cần nó
 
-File văn bản là dãy byte; **encoding** quy định byte nào ứng với ký tự nào. Nếu không truyền `encoding`, Python dùng encoding mặc định của máy (phụ thuộc locale, có thể khác nhau giữa Windows và Linux). Theo PEP 686, UTF-8 chỉ trở thành mặc định từ Python 3.15; với 3.14, và để mã chạy giống nhau ở mọi nơi, hãy luôn ghi `encoding="utf-8"` khi mở file văn bản. Chữ "Đà Nẵng" có 7 ký tự nhưng 11 byte UTF-8; đọc sai encoding là ký tự vỡ ngay.
+File văn bản là dãy byte; **encoding** quy định byte nào ứng với ký tự nào. Nếu không truyền `encoding`, Python dùng encoding mặc định của máy (phụ thuộc locale, có thể khác nhau giữa Windows và Linux). Theo PEP 686, UTF-8 chỉ trở thành mặc định từ Python 3.15; với 3.14, và để mã chạy giống nhau ở mọi nơi, hãy luôn ghi `encoding="utf-8"` khi mở file văn bản. Chữ "Đà Nẵng" có 7 ký tự nhưng 11 byte UTF-8; đọc sai encoding thì ký tự bị vỡ ngay.
 
 ### newline: ai chuẩn hoá xuống dòng?
 
-Windows kết thúc dòng bằng `\r\n`, Linux và macOS bằng `\n`. Khi mở ở chế độ văn bản với tham số mặc định, Python **chuẩn hoá** mọi kiểu xuống dòng thành `\n` lúc đọc. Riêng với module `csv`, tài liệu yêu cầu mở file bằng `newline=""` để chính `csv` xử lý xuống dòng, kể cả khi một ô có chứa xuống dòng bên trong dấu ngoặc kép. Bạn thấy sự khác biệt bằng chế độ `--demo` của lab (trích năm trong số mười một dòng output):
+Windows kết thúc dòng bằng `\r\n`, Linux và macOS bằng `\n`. Khi mở ở chế độ văn bản với tham số mặc định, Python **chuẩn hoá** mọi kiểu xuống dòng thành `\n` lúc đọc. Riêng với module `csv`, tài liệu yêu cầu mở file bằng `newline=""` để chính `csv` xử lý xuống dòng, kể cả khi một ô có chứa xuống dòng bên trong dấu ngoặc kép. Chế độ `--demo` của lab cho thấy sự khác biệt này (trích năm trong số mười một dòng output):
 
 ```text
 cwd-relative exists: False
@@ -92,7 +92,7 @@ read_text: 'TN-0001\nTN-0002\n'
 newline='': 'TN-0001\r\nTN-0002\r\n'
 ```
 
-Hai dòng đầu là Hình 1 bằng số liệu thật (chạy từ thư mục gốc repository). Dòng ba: tiếng Việt, 7 ký tự, 11 byte. Hai dòng cuối là cùng một file chứa `\r\n`: `read_text` trả về `\n`, `newline=""` giữ nguyên.
+Hai dòng đầu là Hình 1 thể hiện bằng số liệu thật (chạy từ thư mục gốc repository). Dòng ba cho thấy chữ tiếng Việt có 7 ký tự, 11 byte. Hai dòng cuối là cùng một file chứa `\r\n`: `read_text` trả về `\n`, `newline=""` giữ nguyên.
 
 ## JSON: file cấu hình và dữ liệu có cấu trúc
 
@@ -116,7 +116,7 @@ def read_cities(path: Path) -> list[dict]:
         return json.load(f, parse_float=Decimal)["cities"]
 ```
 
-`parse_float` được gọi với chuỗi của mỗi số thực trong JSON; mặc định nó là `float`, và ta đã biết `0.1 + 0.2` ra `0.30000000000000004`. Cộng hai số đọc từ JSON theo hai cách (kết quả `--demo`):
+`parse_float` được gọi với chuỗi của mỗi số thực trong JSON; mặc định tham số này là `float`, và ta đã biết `0.1 + 0.2` ra `0.30000000000000004`. Cộng hai số đọc từ JSON theo hai cách (kết quả `--demo`):
 
 ```text
 float  : 0.30000000000000004
@@ -141,7 +141,7 @@ def _json_default(value: object) -> str:
     raise TypeError(f"Không serialize được {type(value).__name__}")
 ```
 
-Dòng `raise TypeError` cuối quan trọng: kiểu ta chưa nghĩ tới phải nổ rõ ràng, không được lặng lẽ ghi ra rác. Tiền là chuỗi hay số JSON là một **hợp đồng** giữa người ghi và người đọc, không phải chuẩn của JSON.
+Dòng `raise TypeError` cuối quan trọng: kiểu ta chưa nghĩ tới phải báo lỗi rõ ràng, không được lặng lẽ ghi ra dữ liệu rác. Tiền là chuỗi hay số JSON là một **hợp đồng** giữa người ghi và người đọc, không phải chuẩn của JSON.
 
 Khi ghi, `indent=2` làm file dễ đọc bằng mắt, còn `ensure_ascii=False` giữ nguyên tiếng Việt thay vì thoát thành `\u...`:
 
@@ -198,7 +198,7 @@ with path.open("w", encoding="utf-8", newline="") as f:
 
 `json.dump` ghi từng mẩu vào file. Nếu chương trình chết giữa chừng (hết đĩa, bị kill, exception khi serialize một phần tử), `summary.json` trên đĩa chỉ là nửa JSON, và ai đọc đúng lúc đó sẽ gặp file hỏng.
 
-Cách chuẩn: ghi toàn bộ vào **file tạm cùng thư mục**, đẩy xuống đĩa, rồi đổi tên đè lên file đích bằng `replace`. Người đọc thấy file cũ nguyên vẹn hoặc file mới nguyên vẹn, không bao giờ thấy ở giữa.
+Cách chuẩn: ghi toàn bộ vào **file tạm cùng thư mục**, ghi xuống đĩa, rồi đổi tên đè lên file đích bằng `replace`. Người đọc thấy file cũ nguyên vẹn hoặc file mới nguyên vẹn, không bao giờ thấy trạng thái ghi dở.
 
 ```python
 def write_json_atomic(path: Path, data: object) -> None:
@@ -222,11 +222,11 @@ def write_json_atomic(path: Path, data: object) -> None:
         raise
 ```
 
-Vài chi tiết đáng đọc kỹ. Tên file tạm do `tempfile` sinh nên hai tiến trình không đè lên nhau. `dir=path.parent` là bắt buộc: đổi tên chỉ nguyên tử khi nguồn và đích cùng filesystem (POSIX; Windows có hành vi riêng, xem tài liệu `os.replace`). `flush()` rồi `os.fsync()` đẩy dữ liệu xuống đĩa trước khi đổi tên. Khối `except` xoá file tạm rồi `raise` lại: lỗi vẫn lan lên, chỉ là không để rác. `--verify` thử đúng kịch bản này: ghi một đối tượng không serialize được, rồi xác nhận file cũ còn nguyên và không sót `.tmp`.
+Vài chi tiết đáng đọc kỹ. Tên file tạm do `tempfile` sinh nên hai tiến trình không đè lên nhau. `dir=path.parent` là bắt buộc: đổi tên chỉ nguyên tử khi nguồn và đích cùng filesystem (POSIX; Windows có hành vi riêng, xem tài liệu `os.replace`). `flush()` rồi `os.fsync()` đẩy dữ liệu xuống đĩa trước khi đổi tên. Khối `except` xoá file tạm rồi `raise` lại: lỗi vẫn lan lên, chỉ là không để lại file rác. `--verify` thử đúng kịch bản này: ghi một đối tượng không serialize được, rồi xác nhận file cũ còn nguyên và không sót `.tmp`.
 
 ## Chạy chương trình và đọc kết quả
 
-`calculate_fare` cùng công thức với bài 03, bỏ tham số `service` vì mọi dịch vụ cùng giá (miền 0 đến 100 km, phần vượt `max(0, km − 2)`, `quantize` với `ROUND_HALF_UP`). `summarize` chỉ tính tiền chuyến `completed`, đếm `cancelled`, còn trạng thái dở dang như `in_transit` chưa tính. `run` nối đọc, tính, ghi. Từ thư mục gốc repository:
+`calculate_fare` dùng cùng công thức với bài 03, bỏ tham số `service` vì mọi dịch vụ cùng giá (miền 0 đến 100 km, phần vượt `max(0, km − 2)`, `quantize` với `ROUND_HALF_UP`). `summarize` chỉ tính tiền chuyến `completed`, đếm `cancelled`, còn trạng thái dở dang như `in_transit` chưa tính. `run` nối ba bước đọc, tính và ghi. Từ thư mục gốc repository:
 
 ```bash
 uv run --project examples/toi-noi-python/09-file-json-csv-pathlib examples/toi-noi-python/09-file-json-csv-pathlib/main.py
@@ -263,7 +263,7 @@ OK 15/15
 
 <div class="tkh-callout tkh-callout--warn">
 <span class="tkh-callout-title">Giới hạn của ví dụ so với production</span>
-<p>Ta đọc toàn bộ CSV vào một <code>list</code>. Với 730 triệu dòng chuyến mỗi năm, hay 6.250 dòng vị trí mỗi giây, cách này hết bộ nhớ; bài 06 (generator) cho cách đọc từng dòng. Ví dụ chưa kiểm định schema đầy đủ (mã thành phố lạ chỉ nổ <code>KeyError</code>, file rỗng làm <code>min()</code> lỗi), chưa khoá khi nhiều tiến trình cùng ghi, và <code>replace</code> chưa bảo đảm bền khi mất điện nếu không fsync cả thư mục chứa. Đường dẫn trong bài do ta viết nên tin cậy được; đường dẫn từ người dùng phải được kiểm tra để không thoát ra ngoài thư mục cho phép. File tạm của <code>tempfile</code> có quyền 0600, nên file đích sau <code>replace</code> cũng vậy. Phía C#, <a href="/articles/csharp-integration-test-json-filesystem">bài 15</a> cũng ghi trực tiếp bằng <code>WriteAllTextAsync</code> và nêu cùng giới hạn.</p>
+<p>Ta đọc toàn bộ CSV vào một <code>list</code>. Với 730 triệu dòng chuyến mỗi năm, hay 6.250 dòng vị trí mỗi giây, cách này hết bộ nhớ; bài 06 (generator) cho cách đọc từng dòng. Ví dụ chưa kiểm tra schema đầy đủ (mã thành phố lạ chỉ gây ra <code>KeyError</code>, file rỗng làm <code>min()</code> lỗi), chưa khoá khi nhiều tiến trình cùng ghi, và <code>replace</code> chưa bảo đảm bền khi mất điện nếu không fsync cả thư mục chứa. Đường dẫn trong bài do ta viết nên tin cậy được; đường dẫn từ người dùng phải được kiểm tra để không thoát ra ngoài thư mục cho phép. File tạm của <code>tempfile</code> có quyền 0600, nên file đích sau <code>replace</code> cũng vậy. Phía C#, <a href="/articles/csharp-integration-test-json-filesystem">bài 15</a> cũng ghi trực tiếp bằng <code>WriteAllTextAsync</code> và nêu cùng giới hạn.</p>
 </div>
 
 **Bài tập:** (1) Thêm vào cuối `trips.csv` dòng `TN-0031,SG,ride,"2,5",completed,2026-11-02T18:00:00Z` (số km dùng dấu phẩy thập phân, đặt trong ngoặc kép). Chương trình báo gì, ở dòng mấy của file? Nên sửa ở đâu? (2) Vì sao file tạm của `write_json_atomic` phải nằm cùng thư mục với file đích?

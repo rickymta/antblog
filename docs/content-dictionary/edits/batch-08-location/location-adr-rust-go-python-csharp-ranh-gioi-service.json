@@ -1,0 +1,197 @@
+{
+ "file": "location-adr-rust-go-python-csharp-ranh-gioi-service.md",
+ "edits": [
+  {
+   "old": "Rust không yếu thuật toán; Go và Python giữ chỗ chúng có lợi thật;",
+   "new": "Rust không kém về thuật toán; Go và Python được giữ ở những chỗ chúng có lợi thật;",
+   "reason": "Câu thiếu động từ, \"giữ chỗ\" dễ hiểu nhầm",
+   "severity": "medium"
+  },
+  {
+   "old": "Một chuyến đi qua bốn ngôn ngữ, ba ranh giới mạng, và mọi bên dùng chung một file",
+   "new": "Một chuyến đi qua bốn ngôn ngữ và ba ranh giới mạng, còn mọi bên dùng chung một file",
+   "reason": "Liệt kê lệch vai: hai vế đầu là cái chuyến đi qua, vế sau là câu riêng",
+   "severity": "medium"
+  },
+  {
+   "old": "Câu hỏi đúng, và câu trả lời cũng phải được viết ra",
+   "new": "Đó là câu hỏi chính đáng, và câu trả lời cũng phải được viết ra",
+   "reason": "\"Câu hỏi đúng\" cụt, thiếu chủ ngữ",
+   "severity": "low"
+  },
+  {
+   "old": "nạp file này lên bộ nhớ mất khoảng bao lâu",
+   "new": "nạp file này vào bộ nhớ mất khoảng bao lâu",
+   "reason": "Dùng sai giới từ: nạp vào bộ nhớ",
+   "severity": "medium"
+  },
+  {
+   "old": "Nên một process có thể giữ nguyên bản đồ cả thành phố",
+   "new": "Vì vậy một process có thể giữ nguyên bản đồ cả thành phố",
+   "reason": "\"Nên\" đầu câu là cách nói dịch từ \"So\"",
+   "severity": "low"
+  },
+  {
+   "old": "Hồ sơ hư cấu của Tới Nơi cho các con số để cân nhắc",
+   "new": "Hồ sơ hư cấu của Tới Nơi đưa ra các con số làm cơ sở cân nhắc",
+   "reason": "\"cho các con số để cân nhắc\" gượng",
+   "severity": "medium"
+  },
+  {
+   "old": "mà là số chọn cho nhất quán với nhau trong cả blog",
+   "new": "mà là số được chọn để khớp với nhau trong cả blog",
+   "reason": "\"chọn cho nhất quán với nhau\" gượng",
+   "severity": "medium"
+  },
+  {
+   "old": "ai lái chuyến nào, theo giao dịch, có thể truy vết, không được gán đôi.",
+   "new": "ai lái chuyến nào: làm theo giao dịch, truy vết được, không được gán đôi.",
+   "reason": "Cụm rời rạc, thiếu động từ nối",
+   "severity": "medium"
+  },
+  {
+   "old": "Nguồn sự thật của assignment",
+   "new": "Nguồn dữ liệu gốc của assignment",
+   "reason": "Thuật ngữ chuẩn: nguồn dữ liệu gốc (calque \"nguồn sự thật\")",
+   "severity": "medium"
+  },
+  {
+   "old": "nhiều trong số đó, như",
+   "new": "nhiều thư viện trong số đó, như",
+   "reason": "Thiếu danh từ chính sau \"nhiều\"",
+   "severity": "low"
+  },
+  {
+   "old": "Nét đứt teal là đường offline",
+   "new": "Nét đứt màu xanh ngọc là đường offline",
+   "reason": "Từ tiếng Anh thông thường lọt vào văn xuôi",
+   "severity": "low"
+  },
+  {
+   "old": "trên máy viết (đo khi máy chịu tải nặng",
+   "new": "trên máy của tác giả (đo khi máy chịu tải nặng",
+   "reason": "\"máy viết\" gượng, dễ hiểu nhầm",
+   "severity": "low"
+  },
+  {
+   "old": "Trên máy viết, Python hệ thống là 3.9 nên không dùng",
+   "new": "Trên máy của tác giả, Python hệ thống là 3.9 nên không dùng",
+   "reason": "\"máy viết\" gượng",
+   "severity": "low"
+  },
+  {
+   "old": "Trên máy viết `cargo` không có sẵn trên PATH",
+   "new": "Trên máy của tác giả, `cargo` không có sẵn trên PATH",
+   "reason": "\"máy viết\" gượng",
+   "severity": "low"
+  },
+  {
+   "old": "**Ba**, kết quả này không ghi tải máy lúc đo",
+   "new": "**Ba**, kết quả này không ghi lại tải của máy lúc đo",
+   "reason": "\"ghi tải máy\" cụt",
+   "severity": "medium"
+  },
+  {
+   "old": "Nguyên nhân gãy ở 100.000 điểm/s cũng chưa được tách trọn vẹn.",
+   "new": "Nguyên nhân hệ thống gãy ở 100.000 điểm/s cũng chưa được tách bạch trọn vẹn.",
+   "reason": "Thiếu chủ thể của \"gãy\"",
+   "severity": "medium"
+  },
+  {
+   "old": "Và có một điều số này **không** nói",
+   "new": "Và có một điều các số này **không** nói",
+   "reason": "Thiếu từ chỉ số nhiều, câu cụt",
+   "severity": "low"
+  },
+  {
+   "old": "Cái giữ Go ở đây là sự khớp của mô hình lập trình (goroutine đồng bộ, đọc như tuần tự)",
+   "new": "Điều giữ Go lại ở đây là mô hình lập trình khớp với bài toán (goroutine viết theo kiểu đồng bộ, đọc như mã tuần tự)",
+   "reason": "\"sự khớp của mô hình\" và \"goroutine đồng bộ\" là giọng dịch máy",
+   "severity": "medium"
+  },
+  {
+   "old": "Nó không phục vụ request của khách nên độ trễ",
+   "new": "Pipeline này không phục vụ yêu cầu của khách nên độ trễ",
+   "reason": "Tránh \"Nó\" chỉ sự vật; \"request\" đã có từ Việt quen dùng",
+   "severity": "medium"
+  },
+  {
+   "old": "Python không nằm trên đường nóng, Rust không phải biết cách huấn luyện.",
+   "new": "Python không nằm trên đường nóng, còn Rust không cần biết cách huấn luyện.",
+   "reason": "\"không phải biết\" dịch cứng, thiếu liên kết vế",
+   "severity": "medium"
+  },
+  {
+   "old": "Dữ liệu dựng lại được thì không nên giữ nguồn sự thật.",
+   "new": "Dữ liệu dựng lại được thì không nên làm nguồn dữ liệu gốc.",
+   "reason": "Thuật ngữ chuẩn: nguồn dữ liệu gốc",
+   "severity": "medium"
+  },
+  {
+   "old": "thì lỗi của bản đồ thành lỗi của tiền",
+   "new": "thì lỗi của bản đồ sẽ trở thành lỗi về tiền",
+   "reason": "Câu thiếu động từ \"trở thành\" nên đọc cụt",
+   "severity": "low"
+  },
+  {
+   "old": "Có hợp đồng rõ không có nghĩa bốn ngôn ngữ miễn phí.",
+   "new": "Có hợp đồng rõ không có nghĩa là bốn ngôn ngữ miễn phí.",
+   "reason": "Thiếu \"là\" sau \"có nghĩa\"",
+   "severity": "medium"
+  },
+  {
+   "old": "mỗi nơi truyền trace một cách",
+   "new": "mỗi nơi truyền trace theo một cách riêng",
+   "reason": "Câu cụt",
+   "severity": "low"
+  },
+  {
+   "old": "Người trực ca phải đọc được cả bốn mã nguồn khi sự cố",
+   "new": "Người trực ca phải đọc được cả bốn mã nguồn khi có sự cố",
+   "reason": "Thiếu động từ \"có\"",
+   "severity": "medium"
+  },
+  {
+   "old": "Không có dòng nào là chặn đường, nhưng tất cả đều tính vào mỗi tuần làm việc.",
+   "new": "Không dòng nào trong bảng là rào cản chặn đường, nhưng tất cả đều tốn công mỗi tuần làm việc.",
+   "reason": "\"tính vào mỗi tuần làm việc\" gượng",
+   "severity": "medium"
+  },
+  {
+   "old": "Quyết định nào cũng cần điều kiện để lật.",
+   "new": "Quyết định nào cũng cần điều kiện để đảo ngược.",
+   "reason": "\"lật\" quá khẩu ngữ",
+   "severity": "low"
+  },
+  {
+   "old": "So p99 ở 6.250 và 50.000",
+   "new": "So sánh p99 ở 6.250 và 50.000",
+   "reason": "Thiếu động từ \"sánh\"",
+   "severity": "medium"
+  },
+  {
+   "old": "hoặc người trực ca không còn đủ người đọc nổi một trong bốn nơi",
+   "new": "hoặc không còn đủ người trực ca đọc nổi mã của một trong bốn nơi",
+   "reason": "Câu lặp \"người\" và thiếu \"mã\"",
+   "severity": "medium"
+  },
+  {
+   "old": "chọn ngưỡng làm kết quả mình muốn thắng",
+   "new": "chọn ngưỡng sao cho phương án mình muốn sẽ thắng",
+   "reason": "Câu méo, phải đoán ý",
+   "severity": "medium"
+  },
+  {
+   "old": "gộp thì tải đẩy kết nối làm ảnh hưởng độ trễ",
+   "new": "gộp thì tải đẩy dữ liệu qua các kết nối sẽ làm ảnh hưởng độ trễ",
+   "reason": "\"tải đẩy kết nối\" cụt",
+   "severity": "medium"
+  },
+  {
+   "old": "Ở cột 100.000 cả hai cột đều tô cam",
+   "new": "Ở mức tải 100.000, cả hai cột đều tô cam",
+   "reason": "Lặp \"cột\", \"cột 100.000\" gượng",
+   "severity": "low"
+  }
+ ]
+}

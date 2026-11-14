@@ -8,11 +8,11 @@ tags: [python, toi-noi, kyc, ocr, metric]
 language: vi
 ---
 
-Tài xế mới của [Tới Nơi](/articles/du-an-mau-toi-noi) đăng ký bằng điện thoại: chụp mặt trước CCCD, chụp GPLX, rồi một ảnh chân dung. Trước khi được nhận chuyến, hồ sơ phải được đối chiếu: số giấy tờ có đúng không, khuôn mặt có khớp không, có giống một kiểu gian lận đã biết không. Ba việc đó thuộc ba service Python, và cuối cùng vẫn là một người duyệt.
+Tài xế mới của [Tới Nơi](/articles/du-an-mau-toi-noi) đăng ký bằng điện thoại: chụp mặt trước CCCD, chụp GPLX, rồi một ảnh chân dung. Trước khi được nhận chuyến, hồ sơ phải được đối chiếu: số giấy tờ có đúng không, khuôn mặt có khớp không, có giống một kiểu gian lận đã biết không. Ba việc đó do ba service Python đảm nhận, và quyết định cuối cùng vẫn thuộc về một người duyệt.
 
-Trước khi chọn công cụ OCR hay tiền xử lý ảnh, ta cần ba thứ: luồng nghiệp vụ, dữ liệu có đáp án, và một thước đo cho câu «OCR đọc đúng bao nhiêu». Thiếu thước đo, mọi câu «đã cải thiện» chỉ là cảm giác. Bài này dựng cả ba rồi chạy Tesseract trần lấy một mốc.
+Trước khi chọn công cụ OCR hay tiền xử lý ảnh, ta cần ba thứ: luồng nghiệp vụ, dữ liệu có đáp án, và một thước đo cho câu «OCR đọc đúng bao nhiêu». Thiếu thước đo, mọi câu «đã cải thiện» chỉ là cảm giác. Bài này dựng cả ba rồi chạy Tesseract nguyên bản để lấy một mốc so sánh.
 
-Đây là bài 41 của lộ trình **Python nâng cao qua Tới Nơi**, bài mở đầu phần 05 (OCR giấy tờ định danh). Bạn cần quen worker ở [bài 40](/articles/python-worker-arq-scheduling-retry-dead-letter) và ảnh là mảng ở [bài 30](/articles/python-numpy-pillow-opencv-tien-xu-ly-anh).
+Đây là bài 41 của lộ trình **Python nâng cao qua Tới Nơi**, bài mở đầu phần 05 (OCR giấy tờ định danh). Bạn cần quen worker ở [bài 40](/articles/python-worker-arq-scheduling-retry-dead-letter) và biết ảnh là một mảng số ở [bài 30](/articles/python-numpy-pillow-opencv-tien-xu-ly-anh).
 
 <div class="tkh-callout tkh-callout--example">
 <span class="tkh-callout-title">Thử trước khi đọc</span>
@@ -22,7 +22,7 @@ Trước khi chọn công cụ OCR hay tiền xử lý ảnh, ta cần ba thứ:
 
 ## Luồng KYC và trạng thái hồ sơ
 
-Một hồ sơ KYC (`KYC-0001`) của tài xế `DR-001` đi theo năm bước: nộp ảnh, đọc giấy tờ (`kyc-ocr`), so khớp khuôn mặt (`kyc-face`), chấm điểm rủi ro (`fraud-scoring`), rồi người duyệt. Từ điển miền gọi trạng thái hồ sơ là `KycStatus`, một `StrEnum` như `TripStatus` ở [bài 13](/articles/python-frozen-dataclass-enum-immutability). Lab đặt nó cùng bảng chuyển hợp lệ trong `kyc.py` (trích):
+Một hồ sơ KYC (`KYC-0001`) của tài xế `DR-001` đi theo năm bước: nộp ảnh, đọc giấy tờ (`kyc-ocr`), so khớp khuôn mặt (`kyc-face`), chấm điểm rủi ro (`fraud-scoring`), rồi người duyệt. Từ điển miền gọi trạng thái hồ sơ là `KycStatus`, một `StrEnum` như `TripStatus` ở [bài 13](/articles/python-frozen-dataclass-enum-immutability). Lab đặt nó cùng bảng chuyển trạng thái hợp lệ trong `kyc.py` (trích):
 
 ```python
 class KycStatus(StrEnum):
@@ -53,7 +53,7 @@ def advance(current: KycStatus, target: KycStatus, *, auto_approve: bool = False
     return target
 ```
 
-Bảng chứa bốn quy tắc. Trạng thái là «đã có kết quả» chứ không phải «kết quả tốt». Bước nào cũng có đường sang `needs_review`, nên hồ sơ không kẹt mà đi tới người. `rejected` chỉ đến từ `needs_review`: máy không tự từ chối một con người. Cuối cùng, `risk_scored → approved` là đường tự duyệt, một quyết định kinh doanh chứ không phải kỹ thuật: nó không nằm trong `ALLOWED`, chỉ đi được khi gọi `advance(..., auto_approve=True)`; lab không bật và `--verify` kiểm điều đó. Mục baseline cho thấy cái giá của việc bật.
+Bảng chứa bốn quy tắc. Trạng thái là «đã có kết quả» chứ không phải «kết quả tốt». Bước nào cũng có đường sang `needs_review`, nên hồ sơ không bị kẹt mà đi tới người duyệt. `rejected` chỉ đến từ `needs_review`: máy không tự từ chối một con người. Cuối cùng, `risk_scored → approved` là đường tự duyệt, một quyết định kinh doanh chứ không phải kỹ thuật: nó không nằm trong `ALLOWED`, chỉ đi được khi gọi `advance(..., auto_approve=True)`; lab không bật và `--verify` kiểm điều đó. Mục baseline cho thấy cái giá của việc bật.
 
 `advance` ném `ValueError` thay vì lặng lẽ đổi trạng thái, giống `InvalidTransition` của chuyến ở [bài 16](/articles/python-match-pattern-matching-none). Lab đi một đường hợp lệ rồi thử bốn bước sai:
 
@@ -78,7 +78,7 @@ Bảng chứa bốn quy tắc. Trạng thái là «đã có kết quả» chứ 
 
 ## Ranh giới ba service
 
-Ba service Python không gọi nhau để quyết định thay nhau: mỗi service trả bằng chứng kèm độ tin cậy và chỉ ghi vào kho dữ liệu của chính nó. Người đọc cả ba kết quả rồi gọi `advance` là use case nộp hồ sơ (bài 70).
+Ba service Python không gọi nhau để quyết định thay nhau: mỗi service trả bằng chứng kèm độ tin cậy và chỉ ghi vào kho dữ liệu của chính nó. Bên đọc cả ba kết quả rồi gọi `advance` là use case nộp hồ sơ (bài 70).
 
 | Service | Nhận | Trả | Thước đo | Bài |
 | --- | --- | --- | --- | --- |
@@ -90,7 +90,7 @@ Cách chia này là lựa chọn của ta: ba mô hình đổi phiên bản theo
 
 ## Dữ liệu tổng hợp có đáp án
 
-Ảnh CCCD thật là dữ liệu cá nhân, không đưa vào repository hay CI, còn gán đáp án tay thì đắt. Vẽ ảnh bằng code giải quyết cả hai: hàm nhận một dict các trường rồi vẽ, nên chính dict đó là đáp án. Lab copy `synthetic_card.py` của bài 30, giữ nguyên tên hàm và bộ trường, và thêm GPLX (`make_license_card`), bốn biến thể chất lượng ảnh (`apply_variant`) cùng `photograph` đặt thẻ lên mặt bàn có xoay và phối cảnh (bài 42 dùng).
+Ảnh CCCD thật là dữ liệu cá nhân, không đưa vào repository hay CI, còn gán đáp án thủ công thì tốn kém. Vẽ ảnh bằng code giải quyết cả hai: hàm nhận một dict các trường rồi vẽ, nên chính dict đó là đáp án. Lab sao chép `synthetic_card.py` của bài 30, giữ nguyên tên hàm và bộ trường, và thêm GPLX (`make_license_card`), bốn biến thể chất lượng ảnh (`apply_variant`) cùng `photograph` đặt thẻ lên mặt bàn, có xoay và phối cảnh (bài 42 dùng).
 
 Bộ dữ liệu có 25 hồ sơ, mỗi hồ sơ hai giấy tờ. `dataset.py` lập kế hoạch trước khi vẽ (trích):
 
@@ -133,7 +133,7 @@ Bộ này (seed 2026) dùng cho bài 41 và 42; các bài sau sinh bộ riêng v
 
 ## Đo OCR: CER, WER, precision và cổng duyệt
 
-**Khoảng cách Levenshtein** là số phép sửa ít nhất (thay, xoá hoặc chèn một phần tử, mỗi phép giá 1) để biến chuỗi này thành chuỗi kia. Hàm trong `metrics.py` chạy trên bất kỳ dãy nào, nên đếm được cả ký tự (CER) lẫn từ (WER):
+**Khoảng cách Levenshtein** là số phép sửa ít nhất (thay, xoá hoặc chèn một phần tử, mỗi phép tính giá 1) để biến chuỗi này thành chuỗi kia. Hàm trong `metrics.py` chạy trên bất kỳ dãy nào, nên đếm được cả ký tự (CER) lẫn từ (WER):
 
 ```python
 def levenshtein(ref: Sequence[str], hyp: Sequence[str]) -> int:
@@ -148,7 +148,7 @@ def levenshtein(ref: Sequence[str], hyp: Sequence[str]) -> int:
     return prev[-1]
 ```
 
-**CER** (character error rate) là số phép sửa ký tự chia độ dài đáp án; **WER** (word error rate) cùng công thức với đơn vị là từ. Cả hai có thể lớn hơn 1 khi OCR chèn chữ thừa; đáp án rỗng thì không xác định nên hàm ném `ValueError`. Trước khi so, hai chuỗi qua `normalize` (NFC, gộp khoảng trắng), không đổi hoa thường hay dấu vì mất dấu là lỗi thật. Output của bước 2; ba dòng sau dòng `ref=` là câu hỏi đầu bài:
+**CER** (character error rate) là số phép sửa ký tự chia độ dài đáp án; **WER** (word error rate) cùng công thức với đơn vị là từ. Cả hai có thể lớn hơn 1 khi OCR chèn chữ thừa; đáp án rỗng thì không xác định nên hàm ném `ValueError`. Trước khi so, hai chuỗi qua `normalize` (NFC, gộp khoảng trắng), không đổi hoa thường hay dấu vì mất dấu là lỗi thật. Output của bước 2; ba dòng ngay sau dòng `ref=` chính là đáp án cho câu hỏi đầu bài:
 
 ```text
 [2] Metric: Levenshtein, CER, WER
@@ -162,7 +162,7 @@ ref='A' hyp='ABCD': CER = 3.0 (có thể lớn hơn 1)
 
 Hai điểm cần nhớ. Một: toàn bộ lỗi của ví dụ là dấu, nên bảng baseline có cột «CER bỏ dấu». Hai: khi gộp nhiều trường, đừng lấy trung bình các CER. Với hai trường mẫu, «C» sai một ký tự và một trường 12 ký tự đúng hết, trung bình là 0,500 nhưng CER gộp 0,077 (một lỗi trên 13 ký tự): trung bình cho trường ngắn nặng ngang trường dài, còn `corpus_cer` cộng số phép sửa rồi chia tổng độ dài.
 
-CER đo từng ký tự, nhưng nghiệp vụ hỏi «số CCCD này đúng hay sai»; một ký tự sai là sai cả số. Nên ta đo thêm theo trường, với khớp chính xác sau `normalize`. **Precision** của một trường là số lần OCR đưa ra giá trị đúng chia số lần OCR đưa ra giá trị (chuỗi không rỗng): khi OCR dám nói, đáng tin tới đâu. **Recall** là số lần đúng chia số lần trường đó có thật trên giấy tờ. Trường vắng làm recall giảm nhưng không làm precision giảm; giá trị sai làm cả hai giảm.
+CER đo từng ký tự, nhưng nghiệp vụ hỏi «số CCCD này đúng hay sai»; một ký tự sai là sai cả số. Nên ta đo thêm theo trường, bằng cách khớp chính xác sau `normalize`. **Precision** của một trường là số lần OCR đưa ra giá trị đúng chia số lần OCR đưa ra giá trị (chuỗi không rỗng): khi OCR đã đưa ra giá trị thì giá trị đó đáng tin tới đâu. **Recall** là số lần đúng chia số lần trường đó có thật trên giấy tờ. Trường vắng làm recall giảm nhưng không làm precision giảm; giá trị sai làm cả hai giảm.
 
 Metric cuối là **cổng chuyển người duyệt**: mỗi trường có độ tin cậy (ở baseline là độ tin cậy nhỏ nhất của các từ trong dòng giá trị, thang 0 đến 1); giấy tờ cần duyệt nếu thiếu một trường hoặc có trường dưới ngưỡng:
 
@@ -175,7 +175,7 @@ def needs_review(truth_fields, preds, threshold: float = 0.80) -> bool:
     return False
 ```
 
-Cổng không biết đáp án, nên tỉ lệ cần duyệt một mình không nói được cổng tốt hay xấu: chuyển hết về người thì không bao giờ sai. Ta cần hai số: **tỉ lệ cần duyệt** (công của người) và **số lọt qua cổng mà có trường sai** (rủi ro). Một hồ sơ có hai giấy tờ nên phải ghi rõ đơn vị đếm. Độ tin cậy của Tesseract chưa hiệu chỉnh thành xác suất, nên quan hệ giữa ngưỡng và rủi ro phải đo chứ không đoán.
+Cổng không biết đáp án, nên riêng tỉ lệ cần duyệt chưa cho biết cổng tốt hay xấu: chuyển hết cho người duyệt thì không bao giờ sai. Ta cần hai số: **tỉ lệ cần duyệt** (công sức của người duyệt) và **số lọt qua cổng mà có trường sai** (rủi ro). Một hồ sơ có hai giấy tờ nên phải ghi rõ đơn vị đếm. Độ tin cậy của Tesseract chưa được hiệu chỉnh thành xác suất, nên quan hệ giữa ngưỡng và rủi ro phải đo chứ không đoán.
 
 <figure class="tkh-fig">
 <div class="tkh-fig-box">
@@ -186,7 +186,7 @@ Cổng không biết đáp án, nên tỉ lệ cần duyệt một mình không 
 
 ## Baseline Tesseract trên 50 ảnh
 
-Baseline cố tình đơn giản: Tesseract trên nguyên ảnh, không tiền xử lý (bài 42), không chọn mô hình (bài 43), không regex hay sửa lỗi (bài 44). `baseline.py` gọi `tesseract <ảnh> stdout -l vie --psm 4 tsv`, gom từ của TSV thành dòng cùng độ tin cậy nhỏ nhất, rồi tách trường theo nhãn in trên thẻ (trích):
+Baseline cố tình đơn giản: Tesseract trên nguyên ảnh, không tiền xử lý (bài 42), không chọn mô hình (bài 43), không regex hay sửa lỗi (bài 44). `baseline.py` gọi `tesseract <ảnh> stdout -l vie --psm 4 tsv`, gom các từ trong TSV thành dòng, kèm độ tin cậy nhỏ nhất của các từ đó, rồi tách trường theo nhãn in trên thẻ (trích):
 
 ```python
 def extract_fields(lines, doc_type):
@@ -204,7 +204,7 @@ def extract_fields(lines, doc_type):
     return preds
 ```
 
-Với mỗi trường, ta tìm dòng giống nhãn nhất (so sau khi bỏ dấu, hạ chữ thường, chỉ giữ chữ và số, nên «S6 /No.:» vẫn khớp; ngưỡng giống 0,7) rồi lấy dòng ngay sau làm giá trị; không thấy nhãn thì trường vắng. `-l vie --psm 4` là mốc riêng của bài 41 và 42; từ bài 43 ta dùng cấu hình khác, và bảng cuối mục cho thấy đổi chế độ thì số khác hẳn. Kết quả trên 50 ảnh («trường vắng» là số trường OCR không đưa ra giá trị, «giấy tờ đúng hết» là số giấy tờ khớp chính xác mọi trường):
+Với mỗi trường, ta tìm dòng giống nhãn nhất (so sau khi bỏ dấu, hạ chữ thường, chỉ giữ chữ và số, nên «S6 /No.:» vẫn khớp; ngưỡng độ giống 0,7) rồi lấy dòng ngay sau làm giá trị; không thấy nhãn thì trường vắng. `-l vie --psm 4` là mốc riêng của bài 41 và 42; từ bài 43 ta dùng cấu hình khác, và bảng cuối mục cho thấy đổi chế độ thì số khác hẳn. Kết quả trên 50 ảnh («trường vắng» là số trường OCR không đưa ra giá trị, «giấy tờ đúng hết» là số giấy tờ khớp chính xác mọi trường):
 
 ```text
 [3] Baseline tesseract 5.5.4, -l vie --psm 4, không tiền xử lý
@@ -217,7 +217,7 @@ tất cả     50   0.217       0.204   0.352     40/250           15/50
 ```
 
 - **Ảnh sạch và ảnh tối** có CER 0,023 và 0,024, gần hết là lỗi dấu (CER bỏ dấu còn 0,005 và 0,004).
-- **Ảnh xoay sụp hoàn toàn**: CER 0,761, 35 trên 60 trường vắng, bước tìm nhãn hoặc dòng giá trị hỏng trước khi nói tới đọc sai chữ; bài 42 xử lý. WER 1,044 vượt 1 nghĩa là có chữ thừa.
+- **Ảnh xoay sụp hoàn toàn**: CER 0,761, 35 trên 60 trường vắng, bước tìm nhãn hoặc dòng giá trị đã hỏng từ trước khi tới chuyện đọc sai chữ; bài 42 xử lý. WER 1,044 vượt 1 nghĩa là có chữ thừa.
 - **Chỉ 15 trên 50 giấy tờ đúng hết**, dù CER gộp 0,217: CER nhìn từng ký tự, nghiệp vụ nhìn cả giấy tờ.
 
 Theo từng trường, gộp 50 ảnh:
@@ -264,7 +264,7 @@ Trường license_class sai (tối đa 9 ca đầu theo mã ảnh)
   IMG-044 rotate 'A2' -> '' (tin cậy 0.00)
 ```
 
-Trừ các ca vắng ở ảnh xoay, ca sai của `full_name` là mất hoặc đổi dấu, có ca độ tin cậy 0,93 (cột «CER bỏ dấu» thấp hơn: 0,225 so với 0,279). `license_class` có CER 0,841 dù precision 0,842: sáu ca vắng, hai ca «C» thành «c», và `IMG-036` lấy cả dòng nhãn kế tiếp, 24 ký tự cho đáp án một ký tự; CER có thể lớn hơn 1 nên một ca như vậy kéo cả cột. Phân loại lỗi có hệ thống là việc của bài 45.
+Trừ các ca vắng ở ảnh xoay, ca sai của `full_name` là mất hoặc đổi dấu, có ca độ tin cậy 0,93 (cột «CER bỏ dấu» thấp hơn: 0,225 so với 0,279). `license_class` có CER 0,841 dù precision 0,842: sáu ca vắng, hai ca «C» thành «c», và `IMG-036` lấy cả dòng nhãn kế tiếp, 24 ký tự cho đáp án một ký tự; CER có thể lớn hơn 1 nên một ca như vậy kéo cao cả cột. Phân loại lỗi có hệ thống là việc của bài 45.
 
 Cổng duyệt theo ngưỡng, rồi theo biến thể ở ngưỡng 0,80:
 
@@ -297,7 +297,7 @@ Gộp theo hồ sơ KYC (25 hồ sơ; cần duyệt nếu có ít nhất một t
    0.90         25    100%        0           0              1
 ```
 
-Ở ngưỡng 0,80, 21 giấy tờ lọt qua cổng và **10 trong số đó có trường sai**: bật đường tự duyệt chỉ dựa vào cổng thì gần một nửa số giấy tờ tự đi tiếp mang dữ liệu sai. Hạ ngưỡng xuống 0,50 giảm tỉ lệ cần duyệt từ 58% còn 32% giấy tờ nhưng số lọt mà sai tăng từ 10 lên 20. Ảnh xoay bị chuyển người hết (12 trên 12), đúng việc; ảnh tối có 4 trên 12 giấy tờ lọt mà sai (`IMG-006`: tên mất hết dấu, độ tin cậy 0,88). Cổng không bắt được lỗi mà OCR tự tin. Gộp theo hồ sơ thì bức tranh nặng hơn: ở ngưỡng 0,80, 22 trên 25 hồ sơ (88%) vẫn cần duyệt, và 2 trong 3 hồ sơ lọt qua có giấy tờ sai.
+Ở ngưỡng 0,80, 21 giấy tờ lọt qua cổng và **10 trong số đó có trường sai**: bật đường tự duyệt chỉ dựa vào cổng thì gần một nửa số giấy tờ tự đi tiếp mang dữ liệu sai. Hạ ngưỡng xuống 0,50 làm tỉ lệ cần duyệt giảm từ 58% xuống 32% giấy tờ nhưng số lọt mà sai tăng từ 10 lên 20. Ảnh xoay bị chuyển hết cho người duyệt (12 trên 12), đúng như mong muốn; ảnh tối có 4 trên 12 giấy tờ lọt mà sai (`IMG-006`: tên mất hết dấu, độ tin cậy 0,88). Cổng không bắt được lỗi mà OCR tự tin. Gộp theo hồ sơ thì bức tranh nặng hơn: ở ngưỡng 0,80, 22 trên 25 hồ sơ (88%) vẫn cần duyệt, và 2 trong 3 hồ sơ lọt qua có giấy tờ sai.
 
 Hai thí nghiệm cuối cho thấy con số baseline mong manh. Cùng 50 ảnh, đổi `--psm` (3 tự động, 4 một cột, 6 một khối, 11 chữ rải rác):
 
@@ -319,7 +319,7 @@ Không chế độ nào thắng ở mọi kiểu ảnh (chế độ 6 đọc ả
       2.0   0.503    115/250            2/50
 ```
 
-Mờ nhẹ (1,0) cho CER thấp hơn ảnh vẽ nguyên; ta chưa tìm ra nguyên nhân. Mờ 1,5 cho 0,253 ở đây nhưng 0,085 ở biến thể `blur`: biến thể chỉ có 13 ảnh, quá ít để đọc thứ bậc sít sao.
+Mờ nhẹ (1,0) cho CER thấp hơn ảnh vẽ nguyên; ta chưa tìm ra nguyên nhân. Mờ 1,5 cho 0,253 ở đây nhưng 0,085 ở biến thể `blur`: biến thể chỉ có 13 ảnh, quá ít để so chính xác thứ tự giữa các mức gần nhau.
 
 ## Chạy và kiểm chứng
 
@@ -330,13 +330,13 @@ uv run --project examples/toi-noi-python/41-kyc-bai-toan-du-lieu-metric examples
 uv run --project examples/toi-noi-python/41-kyc-bai-toan-du-lieu-metric examples/toi-noi-python/41-kyc-bai-toan-du-lieu-metric/main.py --verify
 ```
 
-Lệnh đầu in bảy bước ở trên; lệnh sau kiểm 43 điều và kết thúc bằng:
+Lệnh đầu in bảy bước ở trên; lệnh sau kiểm tra 43 điều và kết thúc bằng:
 
 ```text
 OK 43/43
 ```
 
-`--verify` không kiểm số tuyệt đối (phụ thuộc font và phiên bản Tesseract) mà kiểm bất biến và thứ bậc lớn. Số trong bài đo trên macOS với font Arial, Tesseract 5.5.4, trên máy đang rất bận (load average 111,2 lúc bắt đầu), mất 3 phút 37 giây.
+`--verify` không kiểm tra số tuyệt đối (phụ thuộc font và phiên bản Tesseract) mà kiểm tra các bất biến và bậc độ lớn. Số trong bài đo trên macOS với font Arial, Tesseract 5.5.4, trên máy đang rất bận (load average 111,2 lúc bắt đầu), mất 3 phút 37 giây.
 
 | Hiện tượng | Kiểm tra trước |
 | --- | --- |
@@ -351,9 +351,9 @@ OK 43/43
 
 **Bài tập 1:** Tổ vận hành chỉ duyệt nổi khoảng 40% số hồ sơ. Dùng bảng gộp theo hồ sơ: trong năm ngưỡng đã đo có ngưỡng nào làm được không, và cái giá của ngưỡng thấp nhất là gì?
 
-**Bài tập 2:** Viết hai ca `--verify` cho trường hợp OCR đọc `LÊ VĂN C` thành `LÊ VĂN`. Kỳ vọng CER và WER là bao nhiêu?
+**Bài tập 2:** Viết hai test case `--verify` cho trường hợp OCR đọc `LÊ VĂN C` thành `LÊ VĂN`. Kỳ vọng CER và WER là bao nhiêu?
 
-<details><summary>Xem lời giải</summary><p><b>1.</b> Không ngưỡng nào. Theo hồ sơ, ngay ở ngưỡng 0,50 vẫn có 16 trên 25 hồ sơ (64%) cần duyệt, vì chỉ một trong hai giấy tờ bị cờ là đủ. Con số 40% ở ngưỡng 0,70 của bảng theo giấy tờ (20 trên 50) ứng với 19 trên 25 hồ sơ (76%): đừng lẫn hai đơn vị. Cái giá của ngưỡng 0,50: chỉ 9 hồ sơ lọt qua và 8 trong số đó có giấy tờ sai. <b>2.</b> Đáp án có 8 ký tự, OCR bỏ hai ký tự cuối nên CER = 2/8 = <b>0,25</b>; đáp án có ba từ, mất một từ nên WER = 1/3 ≈ <b>0,333</b>. Hai ca kiểm: <code>assert abs(metrics.cer("LÊ VĂN C", "LÊ VĂN") - 0.25) &lt; 1e-9</code> và <code>assert abs(metrics.wer("LÊ VĂN C", "LÊ VĂN") - 1 / 3) &lt; 1e-9</code>.</p></details>
+<details><summary>Xem lời giải</summary><p><b>1.</b> Không ngưỡng nào. Theo hồ sơ, ngay ở ngưỡng 0,50 vẫn có 16 trên 25 hồ sơ (64%) cần duyệt, vì chỉ một trong hai giấy tờ bị cờ là đủ. Con số 40% ở ngưỡng 0,70 của bảng theo giấy tờ (20 trên 50) ứng với 19 trên 25 hồ sơ (76%): đừng nhầm lẫn hai đơn vị. Cái giá của ngưỡng 0,50: chỉ 9 hồ sơ lọt qua và 8 trong số đó có giấy tờ sai. <b>2.</b> Đáp án có 8 ký tự, OCR bỏ hai ký tự cuối nên CER = 2/8 = <b>0,25</b>; đáp án có ba từ, mất một từ nên WER = 1/3 ≈ <b>0,333</b>. Hai test case: <code>assert abs(metrics.cer("LÊ VĂN C", "LÊ VĂN") - 0.25) &lt; 1e-9</code> và <code>assert abs(metrics.wer("LÊ VĂN C", "LÊ VĂN") - 1 / 3) &lt; 1e-9</code>.</p></details>
 
 Bài trước: [bài 40](/articles/python-worker-arq-scheduling-retry-dead-letter). Bài tiếp: [bài 42](/articles/python-opencv-phat-hien-canh-perspective-deskew).
 

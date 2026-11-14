@@ -1,0 +1,179 @@
+{
+ "file": "rust-proptest-property-test-bat-bien-so-cai.md",
+ "edits": [
+  {
+   "old": "dùng proptest kiểm bất biến sổ cái Tới Nơi",
+   "new": "dùng proptest kiểm tra bất biến của sổ cái Tới Nơi",
+   "reason": "Thiếu chữ \"tra\" và thiếu \"của\", câu cụt",
+   "severity": "medium"
+  },
+  {
+   "old": "shrinking thu nhỏ phản ví dụ về còn 1 đồng",
+   "new": "shrinking thu gọn phản ví dụ xuống còn 1 đồng",
+   "reason": "\"về còn\" gượng",
+   "severity": "low"
+  },
+  {
+   "old": "kiểm các **bất biến** của sổ cái",
+   "new": "kiểm tra các **bất biến** của sổ cái",
+   "reason": "Lược mất chữ \"tra\"",
+   "severity": "medium"
+  },
+  {
+   "old": "mạnh ở các ca nghiệp vụ có tên",
+   "new": "mạnh ở các test case nghiệp vụ có tên",
+   "reason": "Thống nhất \"test case\" theo bảng thuật ngữ",
+   "severity": "low"
+  },
+  {
+   "old": "khi sai nó trả",
+   "new": "khi sai, macro này trả",
+   "reason": "Tránh \"nó\" chỉ sự vật trừu tượng, nêu rõ chủ ngữ",
+   "severity": "medium"
+  },
+  {
+   "old": "Muốn thử biên phải nói rõ, ta làm ở mục chia tiền.",
+   "new": "Muốn thử giá trị biên thì phải nói rõ; ta làm việc này ở mục chia tiền.",
+   "reason": "Cụm \"thử biên\" cụt, câu ghép nối lỏng",
+   "severity": "medium"
+  },
+  {
+   "old": "Loại quá nhiều thì proptest dừng báo lỗi.",
+   "new": "Loại quá nhiều thì proptest dừng lại và báo lỗi.",
+   "reason": "Cụm \"dừng báo lỗi\" cụt",
+   "severity": "medium"
+  },
+  {
+   "old": "để tổng tối đa 7 posting không tràn",
+   "new": "để tổng của tối đa 7 posting không tràn",
+   "reason": "Thiếu \"của\", đọc vướng",
+   "severity": "low"
+  },
+  {
+   "old": "Key trùng tự do: mỗi key một bút toán",
+   "new": "Key trùng nhau tuỳ ý: mỗi key một bút toán",
+   "reason": "\"trùng tự do\" gượng",
+   "severity": "medium"
+  },
+  {
+   "old": "Lệch một posting `delta` đồng thì",
+   "new": "Lệch một posting đi `delta` đồng thì",
+   "reason": "Thiếu động từ \"đi\", câu cụt",
+   "severity": "low"
+  },
+  {
+   "old": "Hai trong số đó:",
+   "new": "Hai trong sáu test này:",
+   "reason": "\"số đó\" không rõ chỉ cái gì sau câu về cấu hình",
+   "severity": "medium"
+  },
+  {
+   "old": "rồi so với code thật.",
+   "new": "rồi so sánh với code thật.",
+   "reason": "Thiếu động từ",
+   "severity": "low"
+  },
+  {
+   "old": "vì macro chèn text biểu thức vào chuỗi định dạng",
+   "new": "vì macro chèn nguyên văn biểu thức vào chuỗi định dạng",
+   "reason": "\"text biểu thức\" là chữ Anh lọt vào văn xuôi",
+   "severity": "medium"
+  },
+  {
+   "old": "Lab cài `split` theo largest remainder:",
+   "new": "Lab cài `split` theo phương pháp largest remainder:",
+   "reason": "Thiếu danh từ chính trước thuật ngữ",
+   "severity": "medium"
+  },
+  {
+   "old": "số đồng còn dư cộng thêm 1 đồng cho các bên có phần dư lớn nhất",
+   "new": "số đồng còn dư thì phát thêm 1 đồng cho từng bên có phần dư lớn nhất",
+   "reason": "Câu thiếu động từ, khó hiểu",
+   "severity": "medium"
+  },
+  {
+   "old": "qua `prop_filter` để tổng trọng số khác 0",
+   "new": "rồi lọc bằng `prop_filter` để tổng trọng số khác 0",
+   "reason": "Thiếu động từ",
+   "severity": "medium"
+  },
+  {
+   "old": "mỗi bên lệch phần chính xác dưới 1 đồng",
+   "new": "phần của mỗi bên lệch khỏi phần chính xác dưới 1 đồng",
+   "reason": "\"lệch phần chính xác\" gượng, khó hiểu",
+   "severity": "high"
+  },
+  {
+   "old": "Test kiểm cùng bất biến nằm ở",
+   "new": "Test kiểm tra cùng bất biến nằm ở",
+   "reason": "Lược mất chữ \"tra\"",
+   "severity": "low"
+  },
+  {
+   "old": "Output trên là của một lần chạy",
+   "new": "Kết quả trên là của một lần chạy",
+   "reason": "Từ Anh thông thường trong văn xuôi",
+   "severity": "low"
+  },
+  {
+   "old": "nên bug đã gặp không âm thầm quay lại",
+   "new": "nên bug đã gặp không thể quay lại mà không bị phát hiện",
+   "reason": "Calque \"không âm thầm\"",
+   "severity": "medium"
+  },
+  {
+   "old": "Để `cargo test` thường cũng kiểm shrinking",
+   "new": "Để `cargo test` thường cũng kiểm tra shrinking",
+   "reason": "Lược mất chữ \"tra\"",
+   "severity": "low"
+  },
+  {
+   "old": "Không thấy, nó in cảnh báo",
+   "new": "Nếu không thấy, proptest in cảnh báo",
+   "reason": "Thiếu \"nếu\" và chủ ngữ rõ",
+   "severity": "medium"
+  },
+  {
+   "old": "một thư mục cha nào đó có `main.rs` thì",
+   "new": "nếu một thư mục cha nào đó có `main.rs` thì",
+   "reason": "Thiếu \"nếu\" ở vế điều kiện",
+   "severity": "low"
+  },
+  {
+   "old": "Cột FsCheck theo tài liệu của FsCheck; lab này không chạy nó.",
+   "new": "Số liệu cột FsCheck lấy theo tài liệu của FsCheck; lab này không chạy FsCheck.",
+   "reason": "Thiếu danh từ chính, tránh \"nó\"",
+   "severity": "low"
+  },
+  {
+   "old": "`-- --verify` kiểm các giá trị trên",
+   "new": "`-- --verify` kiểm tra các giá trị trên",
+   "reason": "Lược mất chữ \"tra\"",
+   "severity": "low"
+  },
+  {
+   "old": "và nó chỉ mạnh bằng strategy.",
+   "new": "và sức mạnh của nó chỉ bằng strategy.",
+   "reason": "\"mạnh bằng\" gượng",
+   "severity": "low"
+  },
+  {
+   "old": "chỉ để bài in được kết quả lặp lại;",
+   "new": "chỉ để bài in ra kết quả lặp lại được;",
+   "reason": "Trật tự từ kiểu Anh",
+   "severity": "low"
+  },
+  {
+   "old": "ca fail đi qua shrinking trước khi được báo.",
+   "new": "ca fail đi qua shrinking trước khi runner báo lỗi.",
+   "reason": "Bị động cụt, thiếu chủ thể",
+   "severity": "low"
+  },
+  {
+   "old": "**Với người từ C#.** Công cụ tương ứng",
+   "new": "**Với người quen dùng C#.** Công cụ tương ứng",
+   "reason": "Thống nhất với các bài khác trong phần: \"người từ C#\" → \"người quen dùng C#\".",
+   "severity": "low"
+  }
+ ]
+}

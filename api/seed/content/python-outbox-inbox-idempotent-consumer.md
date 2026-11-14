@@ -8,26 +8,26 @@ tags: [python, toi-noi, outbox, kafka, idempotency]
 language: vi
 ---
 
-Khi một chuyến của [Tới Nơi](/articles/du-an-mau-toi-noi) kết thúc, ít nhất hai service phía sau cần biết: thanh toán ghi tiền chuyến cho tài xế, và `fraud-scoring` bằng Python chấm điểm cho chuyến vừa xong. Service chuyến giữ trạng thái `completed` trong PostgreSQL của nó, còn việc báo cho hai service kia đi qua Kafka. Ở cao điểm khoảng 70 chuyến mỗi giây, hai lỗi hiếm vẫn xảy ra hằng ngày. Một: chuyến đã `completed` mà sự kiện không bao giờ rời khỏi service, nên tài xế thiếu tiền và chuyến không được chấm điểm. Hai: cùng một sự kiện đến hai lần, và tài xế được trả hai lần.
+Khi một chuyến của [Tới Nơi](/articles/du-an-mau-toi-noi) kết thúc, ít nhất hai service phía sau cần biết: thanh toán ghi tiền chuyến cho tài xế, và `fraud-scoring` bằng Python chấm điểm cho chuyến vừa xong. Service chuyến giữ trạng thái `completed` trong PostgreSQL của nó, còn việc báo cho hai service kia đi qua Kafka. Vào giờ cao điểm, khoảng 70 chuyến mỗi giây, hai lỗi hiếm vẫn xảy ra hằng ngày. Một: chuyến đã `completed` mà sự kiện không bao giờ rời khỏi service, nên tài xế thiếu tiền và chuyến không được chấm điểm. Hai: cùng một sự kiện đến hai lần, và tài xế được trả hai lần.
 
 Đây là bài 39 của lộ trình **Python trung bình qua Tới Nơi**. Bạn cần nắm transaction và khoá idempotency ở [bài 25](/articles/python-transaction-optimistic-concurrency-idempotency), cùng producer, consumer và commit offset ở [bài 38](/articles/python-kafka-aiokafka-producer-consumer-schema). Loạt C# có bài cùng chủ đề là [Outbox và Inbox bằng .NET 10 và PostgreSQL](/articles/dotnet10-outbox-inbox-idempotent-consumer): mô hình giống nhau, nhưng bài C# dùng publisher giả trong bộ nhớ và phát `TripCreated`, chưa có lease hay `SKIP LOCKED`, và bắt SQLSTATE 23505 của khoá unique, còn lab Python này chạy với Kafka thật, phát `TripCompleted`, và dùng `ON CONFLICT DO NOTHING`. Lab dựng cả hai phía trong một database cho gọn, với hai consumer là `payout` (ghi tiền chuyến) và `fraud-scoring` (xếp yêu cầu chấm điểm); ở production mỗi service có database riêng.
 
 <div class="tkh-callout tkh-callout--example">
 <span class="tkh-callout-title">Thử trước khi đọc</span>
 <p>Service chuyến commit trạng thái <code>completed</code> vào PostgreSQL, rồi mới publish lên Kafka. Tiến trình bị kill đúng giữa hai bước. Khi khởi động lại, làm sao nó biết có một sự kiện chưa được phát?</p>
-<details><summary>Xem đáp án</summary><p>Không biết được. Trạng thái <code>completed</code> không cho biết sự kiện đã publish hay chưa, và ý định «cần publish» chỉ nằm trong bộ nhớ của tiến trình đã chết. Muốn khởi động lại phát được phần còn thiếu, ý định đó phải được lưu bền <b>cùng transaction</b> với thay đổi nghiệp vụ. Đó là outbox.</p></details>
+<details><summary>Xem đáp án</summary><p>Không biết được. Trạng thái <code>completed</code> không cho biết sự kiện đã publish hay chưa, và ý định «cần publish» chỉ nằm trong bộ nhớ của tiến trình đã chết. Muốn tiến trình sau khi khởi động lại phát được phần còn thiếu, ý định đó phải được lưu bền <b>cùng transaction</b> với thay đổi nghiệp vụ. Đó là outbox.</p></details>
 </div>
 
 ## Dual-write: hai nơi, một khoảng trống
 
-PostgreSQL và Kafka là hai hệ thống độc lập, không có transaction chung. Dù ta ghi bên nào trước, giữa hai lần ghi luôn có một khoảng mà tiến trình có thể chết. `naive.py` của lab làm cả hai thứ tự và mô phỏng cái chết bằng một exception `SimulatedCrash`. Thứ tự thứ nhất commit database rồi mới publish; thứ tự thứ hai publish rồi mới commit:
+PostgreSQL và Kafka là hai hệ thống độc lập, không có transaction chung. Dù ta ghi bên nào trước, giữa hai lần ghi luôn có một khoảng mà tiến trình có thể chết. `naive.py` của lab làm cả hai thứ tự và mô phỏng việc tiến trình chết bằng một exception `SimulatedCrash`. Thứ tự thứ nhất commit database rồi mới publish; thứ tự thứ hai publish rồi mới commit:
 
 ```text
 Commit rồi publish, chết giữa chừng: chuyến TN-0101 = completed, sự kiện trên topic = 0
 Publish rồi commit, database lỗi: chuyến TN-0102 = in_transit, sự kiện trên topic = 1
 ```
 
-Dòng đầu là **sự kiện mất**: chuyến đã xong nhưng không consumer nào được biết, và không có dấu vết nào để phát lại. Dòng hai là **sự kiện ma**: consumer nhận tin về một chuyến mà database chưa (và có thể không bao giờ) hoàn thành. Thử bọc `send` trong vòng retry cũng không chữa được, vì retry chỉ cứu lỗi mạng chớp nhoáng; khi tiến trình chết thì ý định gửi biến mất cùng bộ nhớ. Cách khác là đưa ý định gửi vào chính database, nơi nó sống sót qua mọi lần chết của tiến trình.
+Dòng đầu là **sự kiện mất**: chuyến đã xong nhưng không consumer nào được biết, và không có dấu vết nào để phát lại. Dòng hai là **sự kiện ma**: consumer nhận tin về một chuyến mà database chưa (và có thể không bao giờ) hoàn thành. Thử bọc `send` trong vòng retry cũng không chữa được, vì retry chỉ xử lý được lỗi mạng thoáng qua; khi tiến trình chết thì ý định gửi biến mất cùng bộ nhớ. Cách khác là đưa ý định gửi vào chính database, nơi nó sống sót qua mọi lần chết của tiến trình.
 
 ## Outbox: ý định phát nằm trong cùng transaction
 
@@ -79,7 +79,7 @@ with Session(engine) as session, session.begin():
     )
 ```
 
-Ba chi tiết đáng nhìn. **Một**, `with_for_update=True` khoá dòng chuyến để hai lần hoàn thành cùng lúc không chen nhau; lần thứ hai thấy `completed` và nhận `TripNotInTransit`, nên không sinh dòng outbox thứ hai. Lab chỉ kiểm tuần tự (lần hai gọi sau lần một); an toàn khi đồng thời dựa vào khoá dòng của PostgreSQL, và lab không dựng cuộc đua đó. **Hai**, `event_id` được sinh đúng một lần và nằm trong dòng outbox; dispatcher về sau phát nguyên envelope đã lưu, nên dù phát lại bao nhiêu lần, mọi bản sao mang cùng một `event_id`. Điều này cốt lõi cho inbox ở phần sau. **Ba**, envelope theo từ điển miền (`event_id`, `event_type`, `occurred_at` UTC, `version`, `payload`), tiền `Decimal` đi qua JSON dưới dạng chuỗi, và key của thông điệp là `trip_id` để mọi sự kiện của một chuyến vào cùng partition.
+Ba chi tiết đáng chú ý. **Một**, `with_for_update=True` khoá dòng chuyến để hai lần hoàn thành cùng lúc không chen nhau; lần thứ hai thấy `completed` và nhận `TripNotInTransit`, nên không sinh dòng outbox thứ hai. Lab chỉ kiểm tuần tự (lần hai gọi sau lần một); an toàn khi đồng thời dựa vào khoá dòng của PostgreSQL, và lab không dựng race condition đó. **Hai**, `event_id` được sinh đúng một lần và nằm trong dòng outbox; dispatcher về sau phát nguyên envelope đã lưu, nên dù phát lại bao nhiêu lần, mọi bản sao mang cùng một `event_id`. Điều này là cốt lõi cho inbox ở phần sau. **Ba**, envelope theo từ điển miền (`event_id`, `event_type`, `occurred_at` UTC, `version`, `payload`), tiền `Decimal` đi qua JSON dưới dạng chuỗi, và key của thông điệp là `trip_id` để mọi sự kiện của một chuyến vào cùng partition.
 
 Lab kiểm hai điều: lỗi xảy ra trước commit thì chuyến và dòng outbox cùng rollback, và hoàn thành 5 chuyến thì có đúng 5 dòng chờ phát.
 
@@ -90,7 +90,7 @@ Hoàn thành 5 chuyến: 5 chuyến completed, 5 dòng outbox chờ phát
 
 ## Dispatcher: thuê, phát, đánh dấu
 
-Dispatcher là vòng lặp đọc các dòng `published_at IS NULL`, phát lên Kafka rồi đánh dấu đã phát. Nó có hai yêu cầu mâu thuẫn nhau: nhiều dispatcher chạy song song để chịu tải và chịu lỗi, nhưng không được giữ transaction mở trong lúc gọi Kafka (đúng lời khuyên ở bài 25: transaction dài giữ khoá và làm nghẽn bảng). Lab giải bằng **lease**: một câu `UPDATE` ngắn «thuê» một lô dòng, commit ngay, rồi phát ngoài transaction. `claim_batch` (`outbox.py`, trích):
+Dispatcher là vòng lặp đọc các dòng `published_at IS NULL`, phát lên Kafka rồi đánh dấu đã phát. Dispatcher có hai yêu cầu mâu thuẫn nhau: nhiều dispatcher chạy song song để chịu tải và chịu lỗi, nhưng không được giữ transaction mở trong lúc gọi Kafka (đúng lời khuyên ở bài 25: transaction dài giữ khoá và làm nghẽn bảng). Lab giải bằng cách **thuê (lease)** dòng: một câu `UPDATE` ngắn thuê một lô dòng, commit ngay, rồi phát ngoài transaction. `claim_batch` (`outbox.py`, trích):
 
 ```python
 pending = (
@@ -111,7 +111,7 @@ rows = session.execute(
 return sorted((Claimed(*row) for row in rows), key=lambda c: c.seq)  # RETURNING không bảo đảm thứ tự
 ```
 
-`FOR UPDATE SKIP LOCKED` làm câu truy vấn con bỏ qua các dòng mà transaction khác đang khoá, thay vì chờ. Hai dispatcher chạy cùng lúc nhận hai tập dòng rời nhau. Lab kiểm bằng cách mở hai session, để session A thuê 3 dòng mà chưa commit, rồi cho session B thuê khi A còn giữ khoá: B nhận 2 dòng còn lại, không trùng dòng nào. Tài liệu PostgreSQL cũng nói rõ `SKIP LOCKED` cho một góc nhìn không nhất quán về dữ liệu, nên chỉ hợp với bảng kiểu hàng đợi, không hợp cho truy vấn tổng quát. Sau khi commit, khoá dòng được nhả nhưng `lease_until` ở lại: dispatcher khác bỏ qua các dòng đang được thuê cho tới khi lease hết hạn. Nếu dispatcher chết sau khi thuê, các dòng không bị kẹt mãi; hết lease là có người khác nhặt.
+`FOR UPDATE SKIP LOCKED` làm câu truy vấn con bỏ qua các dòng mà transaction khác đang khoá, thay vì chờ. Hai dispatcher chạy cùng lúc nhận hai tập dòng rời nhau. Lab kiểm bằng cách mở hai session, để session A thuê 3 dòng mà chưa commit, rồi cho session B thuê khi A còn giữ khoá: B nhận 2 dòng còn lại, không trùng dòng nào. Tài liệu PostgreSQL cũng nói rõ `SKIP LOCKED` cho kết quả không nhất quán về dữ liệu, nên chỉ hợp với bảng kiểu hàng đợi, không hợp cho truy vấn tổng quát. Sau khi commit, khoá dòng được nhả nhưng `lease_until` ở lại: dispatcher khác bỏ qua các dòng đang được thuê cho tới khi lease hết hạn. Nếu dispatcher chết sau khi thuê, các dòng không bị kẹt mãi; hết lease là có người khác nhặt.
 
 `dispatch_once` (trích) nối ba bước, và thứ tự của chúng là điểm mấu chốt:
 
@@ -131,7 +131,7 @@ if published:
         session.execute(update(OutboxEvent).where(OutboxEvent.seq.in_(published)).values(published_at=now))
 ```
 
-Ta **phát trước, đánh dấu sau**. Nếu đảo thứ tự, chết giữa hai bước sẽ đánh dấu «đã phát» cho thông điệp chưa hề đi, tức là mất sự kiện, đúng lỗi ta đang chạy trốn. Với thứ tự này, kết cục xấu nhất là phát ít nhất hai lần. Đây là bảo đảm **at-least-once**: không mất, có thể trùng. Producer của lab bật `enable_idempotence=True`, nhưng đừng nhầm: nó chỉ khử trùng lặp khi *chính producer* tự gửi lại một gói tin sau lỗi mạng. Hai lần `send` của hai lần chạy dispatcher là hai thông điệp khác nhau với Kafka.
+Ta **phát trước, đánh dấu sau**. Nếu đảo thứ tự, chết giữa hai bước sẽ đánh dấu «đã phát» cho thông điệp chưa hề đi, tức là mất sự kiện, đúng lỗi ta đang cố tránh. Với thứ tự này, kết cục xấu nhất là phát ít nhất hai lần. Đây là bảo đảm **at-least-once**: không mất, có thể trùng. Producer của lab bật `enable_idempotence=True`, nhưng đừng nhầm: nó chỉ khử trùng lặp khi *chính producer* tự gửi lại một gói tin sau lỗi mạng. Hai lần `send` của hai lần chạy dispatcher là hai thông điệp khác nhau với Kafka.
 
 Lab ép đúng cửa sổ đó bằng `crash_after_publish=3`, rồi cho dispatcher chạy lại ở ba thời điểm (thời gian `now` được truyền vào, nên không cần `sleep`):
 
@@ -148,7 +148,7 @@ Chạy lại sau 60 giây: thuê 5, phát 5; topic có 8 thông điệp, 5 event
 <figcaption>Hình 2. Một lần crash của dispatcher làm topic có 8 thông điệp cho 5 sự kiện. Lease chặn việc phát lại quá sớm, và inbox ở consumer biến 8 lần nhận thành 5 hiệu ứng.</figcaption>
 </figure>
 
-Kết quả thứ hai là lý do cần lease: chạy lại sau 5 giây, lô vẫn đang được thuê (lease 30 giây) nên dispatcher mới không động vào, tránh phát chồng lên một dispatcher có thể vẫn đang sống chỉ là chậm. Kết quả thứ ba là cái giá: 3 thông điệp đã đi trước khi chết được phát lần nữa, nên topic có 8 thông điệp nhưng chỉ 5 `event_id` khác nhau. Không có cách dispatcher nào tự loại bỏ chuyện này; việc khử trùng lặp phải ở phía nhận.
+Kết quả thứ hai là lý do cần lease: chạy lại sau 5 giây, lô vẫn đang được thuê (lease 30 giây) nên dispatcher mới không động vào, tránh phát chồng lên một dispatcher có thể vẫn đang chạy, chỉ là chậm. Kết quả thứ ba là cái giá: 3 thông điệp đã đi trước khi chết được phát lần nữa, nên topic có 8 thông điệp nhưng chỉ 5 `event_id` khác nhau. Dispatcher không có cách nào tự loại bỏ chuyện này; việc khử trùng lặp phải ở phía nhận.
 
 ## Inbox: consumer khử trùng lặp bằng (consumer, event_id)
 
@@ -190,7 +190,7 @@ Khởi động lại cùng group: nhận lại thông điệp, kết quả = ['d
 Lỗi sau khi ghi hiệu ứng: (inbox, tiền) = (0, 0); xử lý lại = processed
 ```
 
-Consumer xử lý chuyến thứ 6 rồi «chết» trước commit offset. Cùng group khởi động lại, nhận đúng thông điệp đó và nhận ra trùng: số dòng tiền vẫn là 6. Ca cuối: lỗi xảy ra sau khi ghi hiệu ứng nhưng trước commit, cả inbox lẫn tiền cùng rollback (0, 0), và lần xử lý lại thành công. Ta không tuyên bố «exactly-once delivery»: thông điệp vẫn được giao trùng (topic có 8 cho 5 sự kiện). Cái ta có là **hiệu ứng trong database của consumer xảy ra đúng một lần**, nhờ at-least-once cộng khử trùng lặp. Kafka có transaction cho luồng đọc-rồi-ghi bên trong Kafka, nhưng không bao trùm PostgreSQL của ta. Khi hiệu ứng nằm ngoài database (gọi API thanh toán, gửi email), một hàng inbox không đủ: dependency đó cần idempotency key của riêng nó, hoặc ta tiếp tục dùng outbox cho bước kế tiếp.
+Consumer xử lý chuyến thứ 6 rồi «chết» trước commit offset. Cùng group khởi động lại, nhận đúng thông điệp đó và nhận ra trùng: số dòng tiền vẫn là 6. Ca cuối: lỗi xảy ra sau khi ghi hiệu ứng nhưng trước commit, cả inbox lẫn tiền cùng rollback (0, 0), và lần xử lý lại thành công. Ta không tuyên bố «exactly-once delivery»: thông điệp vẫn được giao trùng (topic có 8 cho 5 sự kiện). Cái ta có là **hiệu ứng trong database của consumer xảy ra đúng một lần**, nhờ at-least-once cộng khử trùng lặp. Kafka có transaction cho luồng đọc-rồi-ghi bên trong Kafka, nhưng không bao trùm PostgreSQL của ta. Khi hiệu ứng nằm ngoài database (gọi API thanh toán, gửi email), một dòng inbox không đủ: hệ thống bên ngoài đó cần idempotency key của riêng nó, hoặc ta tiếp tục dùng outbox cho bước kế tiếp.
 
 ## Chạy và kiểm chứng
 
@@ -221,7 +221,7 @@ Hai dispatcher thuê đồng thời (limit 3): 3 và 2 dòng, không trùng nhau
 OK 21/21
 ```
 
-`--verify` chạy 21 kiểm tra, in `OK 21/21` khi đạt; sai thì in tên ca, `FAIL n/m` (n là số ca đạt) và exit 1; thiếu PostgreSQL hoặc Kafka thì in `FAIL: không nối được ...` và exit 1. Ta chạy lab ba lần liên tiếp, cả ba lần `OK 21/21`; các ca không dùng `sleep` để chờ cửa sổ lỗi mà dựng chúng bằng điểm chèn và thời gian truyền vào. Để biết `--verify` có bắt được lỗi thật, ta thử phá ba chỗ: tắt inbox theo mặc định (`FAIL 15/21`), nới điều kiện lease (`FAIL 19/21`), và bỏ nhánh `DUPLICATE` (`FAIL 15/21`). Phiên bản: Python 3.14.7, SQLAlchemy 2.1.8, psycopg 3.3.8, aiokafka 0.15.0, PostgreSQL 17, Kafka 3.9 (một broker).
+`--verify` chạy 21 kiểm tra, in `OK 21/21` khi đạt; sai thì in tên ca, `FAIL n/m` (n là số ca đạt) và exit 1; thiếu PostgreSQL hoặc Kafka thì in `FAIL: không nối được ...` và exit 1. Ta chạy lab ba lần liên tiếp, cả ba lần `OK 21/21`; các ca không dùng `sleep` để chờ cửa sổ lỗi mà dựng chúng bằng điểm gây lỗi cài sẵn và thời gian truyền vào. Để biết `--verify` có bắt được lỗi thật, ta thử phá ba chỗ: tắt inbox theo mặc định (`FAIL 15/21`), nới điều kiện lease (`FAIL 19/21`), và bỏ nhánh `DUPLICATE` (`FAIL 15/21`). Phiên bản: Python 3.14.7, SQLAlchemy 2.1.8, psycopg 3.3.8, aiokafka 0.15.0, PostgreSQL 17, Kafka 3.9 (một broker).
 
 | Hiện tượng | Kiểm tra trước |
 | --- | --- |
@@ -233,12 +233,12 @@ OK 21/21
 
 <div class="tkh-callout tkh-callout--warn">
 <span class="tkh-callout-title">Giới hạn của ví dụ so với production</span>
-<p>Lab chạy một PostgreSQL, một broker Kafka, một tiến trình dispatcher gọi tay từng vòng; chưa có vòng poll liên tục, chưa có <code>LISTEN/NOTIFY</code> để giảm độ trễ, và <code>attempts</code> chỉ được đếm chứ chưa dùng để backoff khi Kafka lỗi. Nhiều dispatcher thuê các lô khác nhau có thể phát lệch thứ tự giữa các lô, nên thứ tự theo chuyến chỉ giữ được khi mỗi chuyến chỉ có một sự kiện hoặc khi ta phân vùng việc thuê theo key; lab chỉ phát một sự kiện cho mỗi chuyến. Outbox và inbox đều lớn dần: cần xoá dòng đã phát (outbox) và dòng cũ (inbox), và thời hạn giữ inbox phải dài hơn khoảng thời gian một thông điệp còn có thể được giao lại. Lab dùng giờ của ứng dụng cho <code>lease_until</code>; production cần chọn một nguồn giờ nhất quán giữa các dispatcher. Consumer chưa xử lý thông điệp lỗi định dạng (poison message), nên một thông điệp hỏng sẽ chặn partition cho tới khi có chỗ cất nó (ví dụ một topic dead-letter riêng). Bài 40 chỉ làm dead-letter cho job của worker, không cho thông điệp Kafka. Lab cũng đặt cả phía phát lẫn phía nhận trong một database để dễ kiểm chứng, và chưa kiểm hợp đồng <code>version</code> của envelope với consumer C#. Tiền chuyến ở đây là dữ liệu giả, không có thanh toán thật.</p>
+<p>Lab chạy một PostgreSQL, một broker Kafka, một tiến trình dispatcher gọi tay từng vòng; chưa có vòng poll liên tục, chưa có <code>LISTEN/NOTIFY</code> để giảm độ trễ, và <code>attempts</code> chỉ được đếm chứ chưa dùng để backoff khi Kafka lỗi. Nhiều dispatcher thuê các lô khác nhau có thể phát lệch thứ tự giữa các lô, nên thứ tự theo chuyến chỉ giữ được khi mỗi chuyến chỉ có một sự kiện hoặc khi ta phân vùng việc thuê theo key; lab chỉ phát một sự kiện cho mỗi chuyến. Outbox và inbox đều lớn dần: cần xoá dòng đã phát (outbox) và dòng cũ (inbox), và thời hạn giữ inbox phải dài hơn khoảng thời gian một thông điệp còn có thể được giao lại. Lab dùng giờ của ứng dụng cho <code>lease_until</code>; production cần chọn một nguồn giờ nhất quán giữa các dispatcher. Consumer chưa xử lý thông điệp lỗi định dạng (poison message), nên một thông điệp hỏng sẽ chặn partition cho tới khi có nơi lưu nó (ví dụ một topic dead-letter riêng). Bài 40 chỉ làm dead-letter cho job của worker, không cho thông điệp Kafka. Lab cũng đặt cả phía phát lẫn phía nhận trong một database để dễ kiểm chứng, và chưa kiểm tra hợp đồng <code>version</code> của envelope với consumer C#. Tiền chuyến ở đây là dữ liệu giả, không có thanh toán thật.</p>
 </div>
 
 **Bài tập:** (1) Giả sử dispatcher sinh `event_id` mới ở mỗi lần phát lại thay vì dùng id lưu trong outbox. Inbox còn chặn được thông điệp trùng không? (2) Thêm ràng buộc `UNIQUE (trip_id)` vào `payout_lines` có thay được inbox không?
 
-<details><summary>Xem lời giải</summary><p>(1) <b>Không.</b> Inbox nhận diện bằng <code>(consumer, event_id)</code>; mỗi bản sao mang một id mới trông như một sự kiện mới, nên cả ba bản sao đều được xử lý. Vì vậy <code>event_id</code> phải sinh một lần, lưu cùng outbox, và dispatcher chỉ phát lại đúng giá trị đã lưu. (2) <b>Không thay hẳn, nhưng nên có cả hai.</b> Ràng buộc đó chặn trả tiền hai lần cho một chuyến ở mức hiệu ứng và là lớp phòng thủ thứ hai tốt, nhưng nó chỉ hợp khi hiệu ứng có khoá tự nhiên. Hiệu ứng như «cộng tiền vào số dư» hoặc «tăng bộ đếm» không có khoá tự nhiên để đặt UNIQUE; inbox bảo vệ chúng vì nó khử trùng lặp theo sự kiện, không theo dạng hiệu ứng. Ngoài ra, vi phạm UNIQUE phát sinh exception và rollback giữa chừng, trong khi inbox cho phép bỏ qua êm.</p></details>
+<details><summary>Xem lời giải</summary><p>(1) <b>Không.</b> Inbox nhận diện bằng <code>(consumer, event_id)</code>; mỗi bản sao mang một id mới trông như một sự kiện mới, nên cả ba bản sao đều được xử lý. Vì vậy <code>event_id</code> phải sinh một lần, lưu cùng outbox, và dispatcher chỉ phát lại đúng giá trị đã lưu. (2) <b>Không thay hẳn, nhưng nên có cả hai.</b> Ràng buộc đó chặn trả tiền hai lần cho một chuyến ở mức hiệu ứng và là lớp phòng thủ thứ hai tốt, nhưng nó chỉ hợp khi hiệu ứng có khoá tự nhiên. Hiệu ứng như «cộng tiền vào số dư» hoặc «tăng bộ đếm» không có khoá tự nhiên để đặt UNIQUE; inbox bảo vệ chúng vì nó khử trùng lặp theo sự kiện, không theo dạng hiệu ứng. Ngoài ra, vi phạm UNIQUE phát sinh exception và rollback giữa chừng, trong khi inbox cho phép bỏ qua mà không gây lỗi.</p></details>
 
 Bài trước: [bài 38](/articles/python-kafka-aiokafka-producer-consumer-schema). Bài tiếp: [bài 40](/articles/python-worker-arq-scheduling-retry-dead-letter).
 

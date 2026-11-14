@@ -1,0 +1,101 @@
+{
+ "file": "python-numpy-pillow-opencv-tien-xu-ly-anh.md",
+ "edits": [
+  {
+   "old": "vì nó được dựng trên một bản `bytes` của ảnh",
+   "new": "vì mảng này dựng trên một bản `bytes` của ảnh",
+   "reason": "Tránh «nó» và câu bị động",
+   "severity": "low"
+  },
+  {
+   "old": "Đổi màu bằng `cv2.cvtColor`; `[..., ::-1]` chỉ là một view với stride âm,",
+   "new": "Muốn đổi thứ tự kênh thì dùng `cv2.cvtColor`; `[..., ::-1]` chỉ là một view với stride âm,",
+   "reason": "Mệnh đề cụt, không nối được với vế sau",
+   "severity": "medium"
+  },
+  {
+   "old": "hoặc nhấc sang kiểu rộng hơn (`int16`, `float32`)",
+   "new": "hoặc chuyển sang kiểu rộng hơn (`int16`, `float32`)",
+   "reason": "«Nhấc» dịch gượng",
+   "severity": "low"
+  },
+  {
+   "old": "nên cả hai phép nhân cho kết quả (638, 1012, 3) mà không vòng lặp nào.",
+   "new": "nên cả hai phép nhân cho kết quả (638, 1012, 3) mà không cần vòng lặp nào.",
+   "reason": "Câu thiếu động từ",
+   "severity": "low"
+  },
+  {
+   "old": "với trung bình Gauss của lân cận `block_size × block_size`",
+   "new": "với trung bình có trọng số Gauss của vùng lân cận `block_size × block_size`",
+   "reason": "Dịch sát, thiếu chữ",
+   "severity": "medium"
+  },
+  {
+   "old": "bằng Otsu làm chuẩn, rồi",
+   "new": "bằng Otsu làm mốc chuẩn, rồi",
+   "reason": "Cụm cụt",
+   "severity": "low"
+  },
+  {
+   "old": "giữ tỉ lệ ba dải gần như chuẩn (",
+   "new": "giữ tỉ lệ ba dải gần sát mốc chuẩn (",
+   "reason": "«Gần như chuẩn» mơ hồ, nêu rõ mốc so sánh",
+   "severity": "medium"
+  },
+  {
+   "old": "(8 thẻ khác seed, lặp lại cho đủ số lượng)",
+   "new": "(8 thẻ với các seed khác nhau, lặp lại cho đủ số lượng)",
+   "reason": "Cụm tự ghép nghe cụt",
+   "severity": "medium"
+  },
+  {
+   "old": "**vòng lặp Python thuần không hưởng gì từ thread**",
+   "new": "**vòng lặp Python thuần không được lợi gì từ thread**",
+   "reason": "«Hưởng» dùng gượng",
+   "severity": "medium"
+  },
+  {
+   "old": "Hai phép chạy trong mã C có hưởng, nhưng mức hưởng dao động mạnh",
+   "new": "Hai phép chạy trong mã C có được lợi, nhưng mức lợi dao động mạnh",
+   "reason": "«Hưởng» dùng gượng",
+   "severity": "medium"
+  },
+  {
+   "old": "rồi kiểm 21 điều.",
+   "new": "rồi kiểm tra 21 điều.",
+   "reason": "Từ cụt",
+   "severity": "low"
+  },
+  {
+   "old": "nên không trượt khi máy bận)",
+   "new": "nên phép kiểm vẫn đạt khi máy bận)",
+   "reason": "«Trượt» là calque của fail",
+   "severity": "medium"
+  },
+  {
+   "old": "chỉ được in, không bị kiểm ngưỡng.",
+   "new": "chỉ được in, không bị kiểm tra theo ngưỡng.",
+   "reason": "Từ cụt",
+   "severity": "low"
+  },
+  {
+   "old": "không tự động là quyết định xác minh.",
+   "new": "không tự trở thành quyết định xác minh.",
+   "reason": "Dịch máy",
+   "severity": "medium"
+  },
+  {
+   "old": "Sau đó kiểm bằng lab.",
+   "new": "Sau đó kiểm tra lại bằng lab.",
+   "reason": "Từ cụt",
+   "severity": "low"
+  },
+  {
+   "old": "đều gần như bản sáng đều.",
+   "new": "đều gần như kết quả của ảnh sáng đều.",
+   "reason": "Cụm cụt, thiếu danh từ",
+   "severity": "medium"
+  }
+ ]
+}

@@ -1,0 +1,22 @@
+{"file":"python-comprehension-generator-iterator.md","edits":[
+{"old":"ý tưởng \"chưa chạy cho tới khi có người duyệt\";","new":"ý tưởng «chưa chạy cho tới khi có người duyệt»;","reason":"Thống nhất dấu trích dẫn « » trong bài","severity":"low"},
+{"old":"Nó xấu đi khi lồng nhiều tầng.","new":"Comprehension trở nên khó đọc khi lồng nhiều tầng.","reason":"Tránh Nó chỉ sự vật; xấu đi gượng","severity":"medium"},
+{"old":"tỷ lệ tích số tài xế và số chuyến.","new":"tỷ lệ với tích của số tài xế và số chuyến.","reason":"Thiếu giới từ, câu cụt","severity":"medium"},
+{"old":"một dòng \"thông minh\".","new":"một dòng «thông minh».","reason":"Thống nhất dấu trích dẫn « » trong bài","severity":"low"},
+{"old":"Lab kiểm ra ba điều:","new":"Lab kiểm tra ba điều:","reason":"Lược mất chữ tra","severity":"medium"},
+{"old":"nên mỗi lần chạy ra đúng cùng một dòng dữ liệu;","new":"nên mỗi lần chạy đều sinh đúng cùng một dòng dữ liệu;","reason":"Động từ ra gượng","severity":"low"},
+{"old":"Với list triệu điểm nó báo","new":"Với list một triệu điểm, hàm này báo","reason":"Thiếu số đếm, tránh Nó","severity":"medium"},
+{"old":"Với generator nó báo 296 byte","new":"Với generator, hàm này báo 296 byte","reason":"Tránh Nó chỉ sự vật","severity":"low"},
+{"old":"Lưu ý đó không phải bộ nhớ tiến trình","new":"Lưu ý rằng đó không phải bộ nhớ tiến trình","reason":"Câu cụt, Lưu ý đó mơ hồ","severity":"low"},
+{"old":"mà không materialize (tạo hẳn list trong bộ nhớ).","new":"mà không phải tạo hẳn list trong bộ nhớ (materialize).","reason":"Động từ tiếng Anh lọt vào văn xuôi; đưa vào ngoặc làm chú thích","severity":"medium"},
+{"old":"là hàm đặt bẫy người mới. Nó chỉ gom","new":"là hàm dễ khiến người mới sa bẫy. Hàm này chỉ gom","reason":"Đặt bẫy người mới gượng; tránh Nó","severity":"medium"},
+{"old":"có cùng khoá, không như","new":"có cùng khoá, khác với","reason":"Trật tự từ kiểu tiếng Anh","severity":"low"},
+{"old":"Muốn nhiều lần duyệt trong Python,","new":"Muốn duyệt nhiều lần trong Python,","reason":"Trật tự từ kiểu tiếng Anh","severity":"medium"},
+{"old":"lazy không đồng nghĩa mọi bước đều streaming.","new":"lazy không có nghĩa là mọi bước đều xử lý theo từng phần tử (streaming).","reason":"Câu khó đọc, hai thuật ngữ liền nhau không giải thích","severity":"medium"},
+{"old":"nơi bạn không nghĩ.","new":"nơi bạn không ngờ tới.","reason":"Câu thiếu bổ ngữ, nghe cụt","severity":"medium"},
+{"old":"độ trễ, thứ tự đảo và điểm thiếu.","new":"độ trễ, thứ tự bị đảo và điểm bị thiếu.","reason":"Thứ tự đảo dịch gượng","severity":"medium"},
+{"old":"số đo bộ nhớ là của một lần chạy","new":"kết quả đo bộ nhớ là của một lần chạy","reason":"Số đo gượng; dùng kết quả đo","severity":"low"},
+{"old":"Lệnh thứ hai kiểm 15 kết quả:","new":"Lệnh thứ hai kiểm tra 15 kết quả:","reason":"Lược mất chữ tra","severity":"medium"},
+{"old":"Sai kiểm tra nào, chương trình in","new":"Kiểm tra nào sai thì chương trình in","reason":"Calque kiểu tiếng Anh, thiếu từ nối","severity":"medium"},
+{"old":"Lỗi chỉ xuất hiện khi chạy một nơi xa chỗ khai báo","new":"Lỗi chỉ xuất hiện lúc chạy, ở một nơi xa chỗ khai báo","reason":"Câu rối, thiếu giới từ","severity":"medium"}
+]}

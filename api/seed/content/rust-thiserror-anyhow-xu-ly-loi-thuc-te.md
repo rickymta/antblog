@@ -1,7 +1,7 @@
 ---
 slug: rust-thiserror-anyhow-xu-ly-loi-thuc-te
 title: "thiserror, anyhow và ngữ cảnh lỗi: lỗi nghiệp vụ khác lỗi hạ tầng"
-summary: "Bài 17: thay impl Display/Error viết tay của LedgerError bằng thiserror, tách lỗi domain khỏi lỗi hạ tầng, dùng anyhow và context ở biên, in chuỗi nguyên nhân, downcast_ref và ánh xạ lỗi ra mã trả về."
+summary: "Bài 17: thay impl Display/Error viết tay của LedgerError bằng thiserror, tách lỗi domain khỏi lỗi hạ tầng, dùng anyhow và context ở biên, in chuỗi nguyên nhân, dùng downcast_ref và ánh xạ lỗi ra mã trả về."
 category: rust-beginner
 level: beginner
 tags: [rust, toi-noi, ledger, error-handling, thiserror, anyhow]
@@ -26,9 +26,9 @@ Quy tắc dùng ở lab: **thư viện trả lỗi có kiểu** (enum viết b�
 
 <figure class="tkh-fig">
 <div class="tkh-fig-box">
-<svg viewBox="0 0 880 290" role="img" aria-label="Hình 1. Hai kiểu lỗi có kiểu, LedgerError cho nghiệp vụ và StorageError cho hạ tầng, được anyhow::Error gom lại ở biên ứng dụng; biên dùng downcast_ref để chọn mã thoát hoặc mã HTTP."><defs><marker id="rust-thiserror-anyhow-xu-ly-loi-thuc-te-0-a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10 z" class="f-phys"/></marker></defs><rect x="20" y="30" width="250" height="100" rx="10" class="f-pk-soft s-pk"/><text x="36" y="58" class="t-b">LedgerError · nghiệp vụ</text><text x="36" y="82" class="t-small">Unbalanced, IdempotencyConflict…</text><text x="36" y="102" class="t-small">Dữ liệu sai: thử lại vẫn sai</text><rect x="20" y="160" width="250" height="100" rx="10" class="f-warn-soft s-warn"/><text x="36" y="188" class="t-b">StorageError · hạ tầng</text><text x="36" y="212" class="t-small">io::Error, ParseIntError</text><text x="36" y="232" class="t-small">Môi trường hỏng: có thể thử lại</text><rect x="325" y="70" width="230" height="150" rx="10" class="f-phys-soft s-phys"/><text x="341" y="100" class="t-b">anyhow::Error</text><text x="341" y="126" class="t-small">gom hai loại vào một kiểu</text><text x="341" y="146" class="t-small">+ context «khi ghi bút toán…»</text><text x="341" y="166" class="t-small">chỉ dùng ở biên: main, app.rs</text><rect x="610" y="70" width="250" height="150" rx="10" class="f-phys-soft s-phys"/><text x="626" y="100" class="t-b">Biên ra ngoài</text><text x="626" y="126" class="t-small">downcast_ref để phân loại</text><text x="626" y="146" class="t-small">exit code: 2 / 3 / 4</text><text x="626" y="166" class="t-small">HTTP sau này: 422/409/500</text><path d="M270 80 L325 118" class="f-none s-phys" stroke-width="2" marker-end="url(#rust-thiserror-anyhow-xu-ly-loi-thuc-te-0-a)"/><path d="M270 210 L325 172" class="f-none s-phys" stroke-width="2" marker-end="url(#rust-thiserror-anyhow-xu-ly-loi-thuc-te-0-a)"/><path d="M555 145 L610 145" class="f-none s-phys" stroke-width="2" marker-end="url(#rust-thiserror-anyhow-xu-ly-loi-thuc-te-0-a)"/></svg>
+<svg viewBox="0 0 880 290" role="img" aria-label="Hình 1. Hai kiểu lỗi cụ thể, LedgerError cho nghiệp vụ và StorageError cho hạ tầng, được anyhow::Error gom lại ở biên ứng dụng; biên dùng downcast_ref để chọn mã thoát hoặc mã HTTP."><defs><marker id="rust-thiserror-anyhow-xu-ly-loi-thuc-te-0-a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10 z" class="f-phys"/></marker></defs><rect x="20" y="30" width="250" height="100" rx="10" class="f-pk-soft s-pk"/><text x="36" y="58" class="t-b">LedgerError · nghiệp vụ</text><text x="36" y="82" class="t-small">Unbalanced, IdempotencyConflict…</text><text x="36" y="102" class="t-small">Dữ liệu sai: thử lại vẫn sai</text><rect x="20" y="160" width="250" height="100" rx="10" class="f-warn-soft s-warn"/><text x="36" y="188" class="t-b">StorageError · hạ tầng</text><text x="36" y="212" class="t-small">io::Error, ParseIntError</text><text x="36" y="232" class="t-small">Môi trường hỏng: có thể thử lại</text><rect x="325" y="70" width="230" height="150" rx="10" class="f-phys-soft s-phys"/><text x="341" y="100" class="t-b">anyhow::Error</text><text x="341" y="126" class="t-small">gom hai loại vào một kiểu</text><text x="341" y="146" class="t-small">+ context «khi ghi bút toán…»</text><text x="341" y="166" class="t-small">chỉ dùng ở biên: main, app.rs</text><rect x="610" y="70" width="250" height="150" rx="10" class="f-phys-soft s-phys"/><text x="626" y="100" class="t-b">Biên ra ngoài</text><text x="626" y="126" class="t-small">downcast_ref để phân loại</text><text x="626" y="146" class="t-small">exit code: 2 / 3 / 4</text><text x="626" y="166" class="t-small">HTTP sau này: 422/409/500</text><path d="M270 80 L325 118" class="f-none s-phys" stroke-width="2" marker-end="url(#rust-thiserror-anyhow-xu-ly-loi-thuc-te-0-a)"/><path d="M270 210 L325 172" class="f-none s-phys" stroke-width="2" marker-end="url(#rust-thiserror-anyhow-xu-ly-loi-thuc-te-0-a)"/><path d="M555 145 L610 145" class="f-none s-phys" stroke-width="2" marker-end="url(#rust-thiserror-anyhow-xu-ly-loi-thuc-te-0-a)"/></svg>
 </div>
-<figcaption>Hình 1. Hai kiểu lỗi có kiểu đi vào <code>anyhow::Error</code> ở biên; biên lấy lại kiểu gốc bằng <code>downcast_ref</code> để chọn mã trả về.</figcaption>
+<figcaption>Hình 1. Hai kiểu lỗi cụ thể đi vào <code>anyhow::Error</code> ở biên; biên lấy lại kiểu gốc bằng <code>downcast_ref</code> để chọn mã trả về.</figcaption>
 </figure>
 
 ## thiserror thay được những gì?
@@ -72,7 +72,7 @@ pub enum LedgerError {
 }
 ```
 
-`{sum}` và `{key}` đọc thẳng tên trường của biến thể, dùng `Display` của kiểu đó (`Money` in `-500 VND`). Quên `#[error(...)]` trên một biến thể là lỗi biên dịch, không phải lỗi âm thầm:
+`{sum}` và `{key}` đọc thẳng tên trường của biến thể, dùng `Display` của kiểu đó (`Money` in `-500 VND`). Quên `#[error(...)]` trên một biến thể là lỗi biên dịch, chứ không bị bỏ qua mà không báo gì:
 
 ```text
 error: missing #[error("...")] display attribute
@@ -82,7 +82,7 @@ error: missing #[error("...")] display attribute
    |     ^^^^^^^^^^^^^^
 ```
 
-Thông điệp giữ y như bản viết tay nên các test của lab 10 vẫn chạy nguyên.
+Thông điệp giữ y như bản viết tay nên các test của lab 10 vẫn chạy mà không cần sửa.
 
 ## `#[from]` và `#[source]` khác nhau thế nào?
 
@@ -108,7 +108,7 @@ pub enum StorageError {
 - `#[from]` sinh `impl From<io::Error> for StorageError` và đặt `io::Error` làm nguyên nhân. Có `From` thì toán tử `?` ở bài 07 tự đổi kiểu lỗi, không cần `map_err`.
 - `#[source]` chỉ khai báo «đây là nguyên nhân» mà không sinh `From`. Dùng khi biến thể còn mang dữ liệu khác (ở đây là tên khoá `key`), nên không thể tạo từ riêng một `ParseIntError`.
 
-Nếu thử `?` trên `ParseIntError` trong hàm trả `StorageError` mà chưa có `From`, rustc chỉ rõ thiếu gì (thông điệp rút gọn):
+Nếu thử `?` trên `ParseIntError` trong hàm trả `StorageError` mà chưa có `From`, rustc chỉ rõ đang thiếu gì (thông báo lỗi rút gọn):
 
 ```rust
 // Đoạn thử riêng, không có trong lab: thêm vào cuối src/storage.rs thì báo E0277.
@@ -128,13 +128,13 @@ error[E0277]: `?` couldn't convert the error to `StorageError`
     |                               -------^ the trait `From<ParseIntError>` is not implemented for `StorageError`
 ```
 
-Cách sửa tuỳ ý định: thêm biến thể `Parse(#[from] ParseIntError)`, hoặc dùng `map_err` để gắn tên khoá như `Config::parse` làm. Chọn cách thứ hai khi thông điệp cần biết «khoá nào sai».
+Cách sửa tuỳ thuộc ý định của bạn: thêm biến thể `Parse(#[from] ParseIntError)`, hoặc dùng `map_err` để gắn tên khoá như `Config::parse` làm. Chọn cách thứ hai khi thông điệp cần biết «khoá nào sai».
 
 Một điểm yếu của `#[from]` trên `io::Error`: lỗi không cho biết **file nào**. `Config::load` dùng `?` trên `read_to_string`, nên `StorageError::Io` chỉ nói «lỗi I/O». Phần đường dẫn sẽ do ngữ cảnh ở biên bù lại.
 
 ## anyhow ở biên: context nói chương trình đang làm gì
 
-`anyhow::Error` là một kiểu lỗi duy nhất nhận mọi lỗi `Error + Send + Sync + 'static`. Hai kiểu của lab thoả điều kiện đó, và test `error_types_can_cross_into_anyhow` kiểm lúc biên dịch. Hai công cụ chính của `anyhow` ở lab:
+`anyhow::Error` là một kiểu lỗi duy nhất nhận mọi lỗi `Error + Send + Sync + 'static`. Hai kiểu của lab thoả điều kiện đó, và test `error_types_can_cross_into_anyhow` kiểm tra lúc biên dịch. Hai công cụ chính của `anyhow` ở lab:
 
 - `anyhow::Result<T>` (tức `Result<T, anyhow::Error>`), để `?` nhận mọi loại lỗi;
 - `.context("…")` / `.with_context(|| …)`, để thêm một câu «khi làm gì» phía trước lỗi gốc. `with_context` nhận closure nên chỉ tạo chuỗi khi có lỗi.
@@ -195,13 +195,13 @@ Mọi lỗi chuẩn của Rust có method `source()` trả nguyên nhân kế ti
 <figcaption>Hình 2. Ba mắt xích của một lỗi hạ tầng. Mũi tên chỉ từ lớp ngoài tới nguyên nhân bên trong.</figcaption>
 </figure>
 
-Lab in cả hai dạng cho cùng một lỗi. Dạng `{:#}` phù hợp một dòng log:
+Lab in cả hai dạng cho cùng một lỗi. Dạng `{:#}` phù hợp để ghi log trên một dòng:
 
 ```text
 {:#}: khi lưu bút toán trip:TN-0001:capture xuống kho: lỗi I/O khi truy cập kho lưu trữ: ổ đĩa đầy (giả lập)
 ```
 
-Dạng `{:?}` là thứ `main` in khi trả `Err`, dễ đọc hơn cho người:
+Dạng `{:?}` là thứ `main` in khi trả `Err`, dễ đọc hơn đối với người đọc:
 
 ```text
 khi lưu bút toán trip:TN-0001:capture xuống kho
@@ -211,9 +211,9 @@ Caused by:
     1: ổ đĩa đầy (giả lập)
 ```
 
-Dạng `{}` thường chỉ in lớp ngoài cùng, nên tránh dùng nó khi log lỗi `anyhow`: bạn sẽ mất nguyên nhân. Nếu đặt biến môi trường `RUST_BACKTRACE=1`, `{:?}` còn in thêm backtrace.
+Dạng `{}` thường chỉ in lớp ngoài cùng, nên tránh dùng dạng này khi ghi log lỗi `anyhow`: bạn sẽ mất nguyên nhân. Nếu đặt biến môi trường `RUST_BACKTRACE=1`, `{:?}` còn in thêm backtrace.
 
-Không có `anyhow` vẫn đi hết chuỗi được, chỉ bằng `source()` của thư viện chuẩn:
+Không có `anyhow` vẫn duyệt hết chuỗi nguyên nhân được, chỉ bằng `source()` của thư viện chuẩn:
 
 ```rust
 // src/app.rs
@@ -239,7 +239,7 @@ Quy ước: thông điệp `#[error]` chỉ nói về lớp hiện tại và kh�
 
 ## Lấy lại lỗi domain và ánh xạ ra mã trả về
 
-Sau khi vào `anyhow::Error`, lỗi mất kiểu tĩnh nhưng không mất danh tính. `downcast_ref::<T>()` trả `Some(&T)` nếu lỗi đã đưa vào `anyhow` (hoặc một lớp context) thuộc kiểu `T`. Nó nhìn xuyên các lớp `context`, nên biên vẫn lấy lại được `LedgerError` dù đã bọc thêm câu «khi ghi bút toán…». Nó không đi xuống `source()`: với ổ đĩa đầy, `downcast_ref::<io::Error>()` trả `None`, muốn xem `io::Error` thì dùng `root_cause()`.
+Sau khi vào `anyhow::Error`, lỗi mất kiểu tĩnh nhưng không mất danh tính. `downcast_ref::<T>()` trả `Some(&T)` nếu lỗi đã đưa vào `anyhow` (hoặc một lớp context) thuộc kiểu `T`. Hàm này nhìn xuyên các lớp `context`, nên biên vẫn lấy lại được `LedgerError` dù đã bọc thêm câu «khi ghi bút toán…». Tuy vậy, hàm không đi xuống `source()`: với ổ đĩa đầy, `downcast_ref::<io::Error>()` trả `None`, muốn xem `io::Error` thì dùng `root_cause()`.
 
 ```rust
 // src/app.rs
@@ -266,7 +266,7 @@ pub fn exit_code(err: &anyhow::Error) -> u8 {
 }
 ```
 
-`LedgerError::http_status` nằm trong thư viện, là một `match` **không có nhánh `_`**. Thêm biến thể mới thì rustc bắt buộc quyết định mã HTTP cho nó, chứ không âm thầm rơi vào mặc định. Bảng của lab:
+`LedgerError::http_status` nằm trong thư viện, là một `match` **không có nhánh `_`**. Thêm biến thể mới thì rustc buộc bạn quyết định mã HTTP cho nó, chứ biến thể đó không tự rơi vào mặc định mà không ai hay. Bảng của lab:
 
 | Lỗi | Loại | Exit code | HTTP (sau này API dùng) |
 | --- | --- | ---: | ---: |
@@ -283,7 +283,7 @@ Lỗi: khi ghi bút toán trip:TN-0001:capture: key trip:TN-0001:capture đã d�
 
 ## Khi nào dùng `Box<dyn Error>` thay cho anyhow?
 
-`Box<dyn Error>` cũng gom nhiều kiểu lỗi qua `?`, và chỉ cần thư viện chuẩn. Chuỗi `&str` đổi được thành nó bằng `.into()`:
+`Box<dyn Error>` cũng gom nhiều kiểu lỗi qua `?`, và chỉ cần thư viện chuẩn. Chuỗi `&str` chuyển được thành kiểu đó bằng `.into()`:
 
 ```rust
 // src/app.rs
@@ -300,13 +300,13 @@ pub fn parse_limit_boxed(raw: &str) -> Result<usize, Box<dyn Error>> {
 | --- | --- | --- |
 | Thêm crate | không | có |
 | `.context(...)` | không | có |
-| Chuỗi nguyên nhân dạng `{:#}` | tự lặp `source()` | có sẵn |
+| Chuỗi nguyên nhân dạng `{:#}` | tự viết vòng lặp qua `source()` | có sẵn |
 | `Send + Sync` | không (cần viết `Box<dyn Error + Send + Sync>`) | có |
 | `downcast_ref` | có | có |
 
 Dùng `Box<dyn Error>` cho ví dụ ngắn hoặc khi không muốn thêm dependency; dùng `anyhow` khi chương trình có nhiều tầng và cần câu «khi làm gì» ở từng tầng. **Không** để `anyhow::Error` hoặc `Box<dyn Error>` xuất hiện trong chữ ký hàm công khai của thư viện: caller sẽ không còn biết hàm có thể từ chối vì lý do nào, và mất khả năng `match`.
 
-Với người từ C#:
+Với người quen dùng C#:
 
 | C# | Rust |
 | --- | --- |
@@ -331,7 +331,7 @@ cargo run --manifest-path examples/toi-noi-rust/17-thiserror-anyhow/Cargo.toml -
 cargo test --manifest-path examples/toi-noi-rust/17-thiserror-anyhow/Cargo.toml
 ```
 
-Lệnh đầu in tám phần, từ ca thành công tới `downcast_ref`. `--verify` kiểm 29 điều, gồm chuỗi `{:#}` đúng từng chữ, `downcast_ref` xuyên hai lớp context và bảng mã:
+Lệnh đầu in tám phần, từ trường hợp thành công tới `downcast_ref`. `--verify` kiểm tra 29 điều, gồm chuỗi `{:#}` đúng từng chữ, `downcast_ref` xuyên hai lớp context và bảng mã:
 
 ```text
 VERIFY OK (29 kiểm tra)
@@ -341,7 +341,7 @@ Kịch bản `disk-full` không có `--exit-code` nên `main` trả `Err`: stder
 
 <div class="tkh-callout tkh-callout--warn">
 <span class="tkh-callout-title">Giới hạn của ví dụ</span>
-<p>Kho lưu trữ là một <code>Vec</code> trong bộ nhớ có công tắc «ổ đầy», không phải đĩa thật. Ở <code>record</code>, bút toán vào sổ trong bộ nhớ trước, rồi mới ghi xuống kho. Ghi kho lỗi thì sổ và kho lệch nhau, lab không hoàn tác; thử lại cùng key còn ra <code>replayed</code> nên bỏ qua bước ghi kho, kho vẫn thiếu dòng (<code>--verify</code> kiểm đúng hành vi này). Production dùng một transaction của database cho cả hai việc, và phân loại lỗi hạ tầng thành «thử lại được» với «không thử lại được». Lab chưa có HTTP, log có cấu trúc hay trace.</p>
+<p>Kho lưu trữ là một <code>Vec</code> trong bộ nhớ có công tắc «ổ đầy», không phải đĩa thật. Ở <code>record</code>, bút toán vào sổ trong bộ nhớ trước, rồi mới ghi xuống kho. Ghi kho lỗi thì sổ và kho lệch nhau, lab không hoàn tác; thử lại cùng key còn trả về <code>replayed</code> nên bỏ qua bước ghi kho, kho vẫn thiếu dòng (<code>--verify</code> kiểm đúng hành vi này). Production dùng một transaction của database cho cả hai việc, và phân loại lỗi hạ tầng thành hai nhóm: «thử lại được» và «không thử lại được». Lab chưa có HTTP, log có cấu trúc hay trace.</p>
 </div>
 
 **Bài tập:** thêm biến thể `LedgerError::AccountFrozen { account: String }` (tài khoản bị khoá). Rustc sẽ báo lỗi ở đâu, và bạn phải quyết định gì?

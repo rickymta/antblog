@@ -1,0 +1,143 @@
+{
+  "file": "dotnet10-authentication-authorization.md",
+  "edits": [
+    {
+      "old": "Các ví dụ target `net10.0`; code trong repository và các đoạn đầy đủ dưới đây dùng cùng implementation được chạy kiểm chứng.",
+      "new": "Các ví dụ nhắm tới `net10.0`; code trong repository và các đoạn đầy đủ dưới đây dùng cùng một bản cài đặt đã được chạy kiểm chứng.",
+      "reason": "Bỏ giọng dịch máy, 'target' và 'implementation' lọt vào văn xuôi.",
+      "severity": "medium"
+    },
+    {
+      "old": "Authentication tạo principal từ credential đã kiểm; authorization quyết định principal đó có quyền trên thao tác/tài nguyên không.",
+      "new": "Authentication tạo principal từ credential đã được kiểm tra; authorization quyết định principal đó có quyền thực hiện thao tác hoặc truy cập tài nguyên hay không.",
+      "reason": "'kiểm' cụt, 'quyền trên thao tác' gượng.",
+      "severity": "medium"
+    },
+    {
+      "old": "Không nhận một header X-Role=dispatcher rồi coi như đã đăng nhập. Không lấy customerId trong body làm bằng chứng chủ sở hữu.",
+      "new": "Đừng nhận một header X-Role=dispatcher rồi coi như đã đăng nhập. Đừng lấy customerId trong body làm bằng chứng về chủ sở hữu.",
+      "reason": "Lời khuyên nên dùng 'đừng'; 'bằng chứng chủ sở hữu' cụt.",
+      "severity": "low"
+    },
+    {
+      "old": "bằng một ID tổng hợp; nó không đọc kho chuyến thật.",
+      "new": "bằng một ID giả lập; route này không đọc kho chuyến thật.",
+      "reason": "'ID tổng hợp' dịch gượng; 'nó' đầu vế mơ hồ.",
+      "severity": "medium"
+    },
+    {
+      "old": "tải aggregate/read model và kiểm OwnerId lưu tại server, không coi ownerId caller truyền là nguồn chân lý.",
+      "new": "tải aggregate/read model và kiểm tra OwnerId lưu tại server, không coi ownerId do caller truyền vào là nguồn dữ liệu gốc.",
+      "reason": "Theo terminology.json: 'nguồn dữ liệu gốc'; 'nguồn chân lý' dịch sát chữ.",
+      "severity": "high"
+    },
+    {
+      "old": "Tối thiểu hợp đồng token cần xác thực chữ ký với khoá tin cậy, issuer, audience và thời hạn;",
+      "new": "Hợp đồng token tối thiểu phải xác thực chữ ký bằng khoá tin cậy, cùng issuer, audience và thời hạn;",
+      "reason": "Cụm 'Tối thiểu hợp đồng token' tự ghép, nghe cụt.",
+      "severity": "high"
+    },
+    {
+      "old": "Không tự viết một parser base64 rồi dựng ClaimsPrincipal.",
+      "new": "Đừng tự viết một parser base64 rồi dựng ClaimsPrincipal.",
+      "reason": "Lời khuyên nên dùng 'đừng'.",
+      "severity": "low"
+    },
+    {
+      "old": "Nhà cung cấp token khác có thể dùng tên/shape khác, nên phải mapping có chủ đích.",
+      "new": "Nhà cung cấp token khác có thể dùng tên hoặc cấu trúc khác, nên phải ánh xạ có chủ đích.",
+      "reason": "Thống nhất cách gọi 'token issuer'; 'shape', 'mapping' lọt tiếng Anh.",
+      "severity": "medium"
+    },
+    {
+      "old": "Role hiển thị ở UI không thay enforcement phía server.",
+      "new": "Role hiển thị ở UI không thay thế được enforcement phía server.",
+      "reason": "Câu cụt thiếu 'được'.",
+      "severity": "low"
+    },
+    {
+      "old": "JWT bearer không mặc định mã hoá payload.",
+      "new": "Theo mặc định, JWT bearer không mã hoá payload.",
+      "reason": "Trật tự từ kiểu Anh, phủ định đặt sai chỗ.",
+      "severity": "medium"
+    },
+    {
+      "old": "Truyền bearer qua TLS ở môi trường triển khai;",
+      "new": "Truyền bearer token qua TLS ở môi trường triển khai;",
+      "reason": "'bearer' đứng một mình không rõ nghĩa.",
+      "severity": "low"
+    },
+    {
+      "old": "Policy Customer yêu cầu đã xác thực và có role customer;",
+      "new": "Policy Customer yêu cầu người gọi đã xác thực và có role customer;",
+      "reason": "Thiếu danh từ chính sau 'yêu cầu'.",
+      "severity": "high"
+    },
+    {
+      "old": "còn so claim sub với ownerId",
+      "new": "còn so sánh claim sub với ownerId",
+      "reason": "'so' cụt, thiếu 'sánh'.",
+      "severity": "medium"
+    },
+    {
+      "old": "Không có hoặc token không hợp lệ dẫn tới challenge",
+      "new": "Không có token hoặc token không hợp lệ dẫn tới challenge",
+      "reason": "Thiếu danh từ 'token' sau 'Không có'.",
+      "severity": "high"
+    },
+    {
+      "old": "để che tồn tại tài nguyên;",
+      "new": "để che giấu sự tồn tại của tài nguyên;",
+      "reason": "'che tồn tại' cụt.",
+      "severity": "medium"
+    },
+    {
+      "old": "thử request không credential để thấy 401.",
+      "new": "thử request không kèm credential để thấy 401.",
+      "reason": "Thiếu động từ 'kèm'.",
+      "severity": "low"
+    },
+    {
+      "old": "không phải cam kết mã hoá file local.",
+      "new": "không bảo đảm mã hoá file local.",
+      "reason": "'cam kết mã hoá' dịch gượng.",
+      "severity": "medium"
+    },
+    {
+      "old": "Khi cài cấu hình triển khai thật,",
+      "new": "Khi thiết lập cấu hình triển khai thật,",
+      "reason": "'cài cấu hình' gượng.",
+      "severity": "low"
+    },
+    {
+      "old": "## Bảng quyền phải có cả ca bị từ chối",
+      "new": "## Bảng quyền phải có cả test case bị từ chối",
+      "reason": "Thống nhất 'test case'.",
+      "severity": "medium"
+    },
+    {
+      "old": "nhưng không thay được bằng chứng JWT được kiểm đúng.",
+      "new": "nhưng không thay được bằng chứng cho thấy JWT được kiểm tra đúng.",
+      "reason": "Câu cụt, thiếu quan hệ.",
+      "severity": "medium"
+    },
+    {
+      "old": "Nếu token đổi payload role mà không ký lại",
+      "new": "Nếu token bị đổi payload role mà không ký lại",
+      "reason": "Thiếu 'bị', câu mơ hồ ai đổi.",
+      "severity": "low"
+    },
+    {
+      "old": "Ca wrong signing key trong suite kiểm chứng một token có chữ ký không được tin cậy.",
+      "new": "Test case wrong signing key trong suite kiểm chứng trường hợp token có chữ ký không được tin cậy.",
+      "reason": "Thống nhất 'test case'.",
+      "severity": "medium"
+    },
+    {
+      "old": "tự tạo fixture trong memory, không cần chạy các lệnh tạo token trên.",
+      "new": "tự tạo fixture trong bộ nhớ, không cần chạy các lệnh tạo token ở trên.",
+      "reason": "'memory' lọt tiếng Anh; 'trên' thiếu 'ở'.",
+      "severity": "low"
+    }
+  ]
+}

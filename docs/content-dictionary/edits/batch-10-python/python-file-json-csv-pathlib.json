@@ -1,0 +1,95 @@
+{
+ "file": "python-file-json-csv-pathlib.md",
+ "edits": [
+  {
+   "old": "2 km đầu, mỗi km vượt 4.500 VND.",
+   "new": "2 km đầu, mỗi km vượt quá là 4.500 VND.",
+   "reason": "\"mỗi km vượt\" nghe cụt",
+   "severity": "low"
+  },
+  {
+   "old": "thư mục nó đang «đứng».",
+   "new": "thư mục mà tiến trình đang «đứng».",
+   "reason": "\"nó\" mơ hồ, nêu rõ chủ thể",
+   "severity": "low"
+  },
+  {
+   "old": "số file mở mỗi tiến trình có hạn.",
+   "new": "số file mà mỗi tiến trình được mở có giới hạn.",
+   "reason": "cụm \"số file mở mỗi tiến trình\" cụt, trật tự kiểu tiếng Anh",
+   "severity": "medium"
+  },
+  {
+   "old": "`__exit__` đẩy bộ đệm xuống và đóng file.",
+   "new": "`__exit__` đẩy dữ liệu trong bộ đệm ra và đóng file.",
+   "reason": "\"đẩy xuống\" thiếu đích, calque của flush",
+   "severity": "low"
+  },
+  {
+   "old": "đọc sai encoding là ký tự vỡ ngay.",
+   "new": "đọc sai encoding thì ký tự bị vỡ ngay.",
+   "reason": "câu thiếu quan hệ điều kiện",
+   "severity": "low"
+  },
+  {
+   "old": "Bạn thấy sự khác biệt bằng chế độ `--demo` của lab",
+   "new": "Chế độ `--demo` của lab cho thấy sự khác biệt này",
+   "reason": "trật tự và giọng dịch máy",
+   "severity": "medium"
+  },
+  {
+   "old": "Hai dòng đầu là Hình 1 bằng số liệu thật (chạy từ thư mục gốc repository). Dòng ba: tiếng Việt, 7 ký tự, 11 byte.",
+   "new": "Hai dòng đầu là Hình 1 thể hiện bằng số liệu thật (chạy từ thư mục gốc repository). Dòng ba cho thấy chữ tiếng Việt có 7 ký tự, 11 byte.",
+   "reason": "câu thiếu động từ, phải đoán ý",
+   "severity": "medium"
+  },
+  {
+   "old": "mặc định nó là `float`, và ta đã biết",
+   "new": "mặc định tham số này là `float`, và ta đã biết",
+   "reason": "\"nó\" mơ hồ",
+   "severity": "low"
+  },
+  {
+   "old": "kiểu ta chưa nghĩ tới phải nổ rõ ràng, không được lặng lẽ ghi ra rác.",
+   "new": "kiểu ta chưa nghĩ tới phải báo lỗi rõ ràng, không được lặng lẽ ghi ra dữ liệu rác.",
+   "reason": "\"nổ\" là tiếng lóng, nên nói thẳng là báo lỗi",
+   "severity": "medium"
+  },
+  {
+   "old": "đẩy xuống đĩa, rồi đổi tên đè lên file đích bằng `replace`.",
+   "new": "ghi xuống đĩa, rồi đổi tên đè lên file đích bằng `replace`.",
+   "reason": "thiếu động từ rõ nghĩa",
+   "severity": "low"
+  },
+  {
+   "old": "không bao giờ thấy ở giữa.",
+   "new": "không bao giờ thấy trạng thái ghi dở.",
+   "reason": "thiếu danh từ chính, phải đoán ý",
+   "severity": "medium"
+  },
+  {
+   "old": "lỗi vẫn lan lên, chỉ là không để rác.",
+   "new": "lỗi vẫn lan lên, chỉ là không để lại file rác.",
+   "reason": "thiếu danh từ",
+   "severity": "medium"
+  },
+  {
+   "old": "`calculate_fare` cùng công thức với bài 03,",
+   "new": "`calculate_fare` dùng cùng công thức với bài 03,",
+   "reason": "câu thiếu động từ",
+   "severity": "medium"
+  },
+  {
+   "old": "`run` nối đọc, tính, ghi.",
+   "new": "`run` nối ba bước đọc, tính và ghi.",
+   "reason": "liệt kê động từ trần, nghe cụt",
+   "severity": "low"
+  },
+  {
+   "old": "Ví dụ chưa kiểm định schema đầy đủ (mã thành phố lạ chỉ nổ <code>KeyError</code>,",
+   "new": "Ví dụ chưa kiểm tra schema đầy đủ (mã thành phố lạ chỉ gây ra <code>KeyError</code>,",
+   "reason": "\"kiểm định\" sai nghĩa; \"nổ\" là tiếng lóng",
+   "severity": "high"
+  }
+ ]
+}

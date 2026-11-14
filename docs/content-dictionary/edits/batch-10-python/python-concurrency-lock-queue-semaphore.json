@@ -1,0 +1,95 @@
+{
+  "file": "python-concurrency-lock-queue-semaphore.md",
+  "edits": [
+    {
+      "old": "hệ thống chỉ còn tên người ghi sau.",
+      "new": "hệ thống chỉ còn giữ tên của người ghi sau cùng.",
+      "reason": "Câu cụt, phải đoán ý; nói rõ hệ thống giữ tên ai.",
+      "severity": "medium"
+    },
+    {
+      "old": "tái hiện race hai tài xế cùng nhận một chuyến",
+      "new": "tái hiện race khi hai tài xế cùng nhận một chuyến",
+      "reason": "Thiếu liên từ nên cụm nghe cụt.",
+      "severity": "medium"
+    },
+    {
+      "old": "**Không tái nhập.**",
+      "new": "**Lock không tái nhập được.**",
+      "reason": "Thiếu chủ ngữ.",
+      "severity": "medium"
+    },
+    {
+      "old": "## Thread cũng bị: Barrier để tái hiện, threading.Lock để sửa",
+      "new": "## Thread cũng gặp lỗi này: Barrier để tái hiện, threading.Lock để sửa",
+      "reason": "«Thread cũng bị» nghe cụt, thiếu bổ ngữ.",
+      "severity": "medium"
+    },
+    {
+      "old": "(`ThreadPoolExecutor(max_workers=count)`), nếu ít hơn,",
+      "new": "(`ThreadPoolExecutor(max_workers=count)`); nếu ít hơn,",
+      "reason": "Hai ý độc lập nối bằng dấu phẩy, tách bằng dấu chấm phẩy cho rõ.",
+      "severity": "low"
+    },
+    {
+      "old": "Theo cách CPython đang cài, một thread",
+      "new": "Theo cách CPython hiện thực, một thread",
+      "reason": "«đang cài» là giọng dịch máy của implemented.",
+      "severity": "medium"
+    },
+    {
+      "old": "nhờ **may mắn của một cài đặt** không",
+      "new": "nhờ **may mắn của một cách cài đặt** không",
+      "reason": "Cụm tự ghép nghe cụt.",
+      "severity": "low"
+    },
+    {
+      "old": "Ta đổi thời gian lấy việc phía sau không bị quá tải.",
+      "new": "Ta đánh đổi thời gian để phía sau không bị quá tải.",
+      "reason": "«đổi ... lấy việc» gượng, thiếu danh từ.",
+      "severity": "medium"
+    },
+    {
+      "old": "Về ý nghĩa, `Lock` là trường hợp",
+      "new": "Về bản chất, `Lock` là trường hợp",
+      "reason": "«Về ý nghĩa» dịch gượng.",
+      "severity": "low"
+    },
+    {
+      "old": "(kể cả mở khoá `join()` dù việc chưa làm)",
+      "new": "(kể cả việc mở khoá `join()` dù công việc chưa xử lý xong)",
+      "reason": "Thiếu danh từ và chủ thể, khó đoán ý.",
+      "severity": "medium"
+    },
+    {
+      "old": "một đường tắt bên ngoài là đủ để race quay lại",
+      "new": "chỉ cần một đường tắt bên ngoài là race quay lại",
+      "reason": "Trật tự câu kiểu tiếng Anh, viết lại cho tự nhiên.",
+      "severity": "low"
+    },
+    {
+      "old": "20 ca `--verify` kiểm các số logic lặp lại được",
+      "new": "20 test case của `--verify` kiểm các số liệu logic lặp lại được",
+      "reason": "Thống nhất «test case» theo bảng thuật ngữ; «số logic» thiếu danh từ.",
+      "severity": "medium"
+    },
+    {
+      "old": "Lock không tái nhập;",
+      "new": "Lock không cho tái nhập;",
+      "reason": "Câu thiếu động từ rõ nghĩa.",
+      "severity": "low"
+    },
+    {
+      "old": "Các ca thời gian dùng ngưỡng rộng",
+      "new": "Các test case về thời gian dùng ngưỡng rộng",
+      "reason": "Thống nhất «test case» thay cho «ca».",
+      "severity": "medium"
+    },
+    {
+      "old": "Race giữa nhiều server phải được chặn ở nơi sở hữu dữ liệu",
+      "new": "Phải chặn race giữa nhiều server ở nơi sở hữu dữ liệu",
+      "reason": "Tránh câu bị động «phải được».",
+      "severity": "medium"
+    }
+  ]
+}

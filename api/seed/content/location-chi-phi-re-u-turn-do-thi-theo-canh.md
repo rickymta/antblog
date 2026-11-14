@@ -1,14 +1,14 @@
 ---
 slug: location-chi-phi-re-u-turn-do-thi-theo-canh
 title: "Chi phí rẽ và quay đầu: đồ thị theo cạnh"
-summary: "Bài 23: vì sao Dijkstra theo nút bỏ sót quay đầu và cấm rẽ, đồ thị theo cạnh với chi phí rẽ, đọc cấm rẽ OSM (bỏ qua 784 có điều kiện và 112 có via là way), lối qua dải phân cách, đo 300 truy vấn HCM."
+summary: "Bài 23: vì sao Dijkstra theo nút bỏ sót quay đầu và cấm rẽ, đồ thị theo cạnh với chi phí rẽ, đọc cấm rẽ OSM (bỏ qua 784 quan hệ có điều kiện và 112 quan hệ có via là way), lối qua dải phân cách, đo 300 truy vấn HCM."
 category: location-routing
 level: intermediate
 tags: [toi-noi, location, rust, routing, turn-cost, u-turn, edge-based, openstreetmap]
 language: vi
 ---
 
-Trên đồ thị HCM, một xe ô tô đang chạy hướng 178° trên đường Lê Văn Thọ, đã đi qua 80% cạnh 73056. Khách đứng ở phía sau, cách đó hơn một kilômét theo chiều ngược lại. Dijkstra theo nút trả lời «đi hết đoạn phía trước, quay ngược trên chính đường này, rồi rẽ trái vào Phạm Văn Chiêu»: 120,5 s. Tuyến đó cho xe quay đầu giữa đường, miễn phí, ở một nút giao đang chạy xe cả hai chiều. Khi cấm quay đầu giữa đường, tuyến hợp lệ phải đi vòng qua ba đường nối ngắn không tên, rẽ phải ba lần, rồi quay lại: 160,8 s và 1.145 m. Câu hỏi «tài xế mất bao lâu để tới khách» có hai đáp án cách nhau 40,3 s, tuỳ vào việc đồ thị có biết xe đang quay mặt đi đâu hay không.
+Trên đồ thị HCM, một xe ô tô đang chạy hướng 178° trên đường Lê Văn Thọ, đã đi qua 80% cạnh 73056. Khách đứng ở phía sau, cách đó hơn một kilômét theo chiều ngược lại. Dijkstra theo nút trả lời «đi hết đoạn phía trước, quay ngược trên chính đường này, rồi rẽ trái vào Phạm Văn Chiêu»: 120,5 s. Tuyến đó cho xe quay đầu giữa đường, miễn phí, ở một nút giao có xe chạy cả hai chiều. Khi cấm quay đầu giữa đường, tuyến hợp lệ phải đi vòng qua ba đường nối ngắn không tên, rẽ phải ba lần, rồi quay lại: 160,8 s và 1.145 m. Câu hỏi «tài xế mất bao lâu để tới khách» có hai đáp án cách nhau 40,3 s, tuỳ vào việc đồ thị có biết xe đang quay mặt đi đâu hay không.
 
 Đây là bài 23 của lộ trình **Nền tảng định vị** qua [Tới Nơi](/articles/du-an-mau-toi-noi). Bài dùng CSR và Dijkstra của [bài 21](/articles/location-dijkstra-a-star-rust-do-thi-csr) và quan hệ cấm rẽ mà [bài 06](/articles/location-osm-pbf-do-thi-duong-bo-xe-may-o-to) đã đọc từ OpenStreetMap. Chi phí rẽ trong bài (rẽ phải 3 s, rẽ trái 6 s, quay đầu 20 s) là **giả định của lab**, chưa hiệu chuẩn bằng dữ liệu thật. Toàn bộ dữ liệu chuyến là mô phỏng.
 
@@ -32,7 +32,7 @@ Cả ba cùng một gốc: trạng thái của tìm kiếm thiếu thông tin «
 
 Trong **đồ thị theo cạnh** (edge-based), một trạng thái là một cạnh có hướng, tức «xe đang đi trên cạnh `e`». Chuyển từ `e1` sang `e2` chỉ hợp lệ khi `head(e1) = tail(e2)` và cặp đó không bị cấm; chi phí là `trọng số của e2` cộng `chi phí rẽ(e1, e2)`. Chi phí rẽ bây giờ là thuộc tính của **chuyển trạng thái**, đúng chỗ của nó.
 
-Đồ thị này **không được dựng ra bộ nhớ**: các chuyển trạng thái sinh ngay lúc duyệt từ CSR theo nút của bài 21. Số trạng thái bằng số cạnh (319.074), số chuyển trạng thái bằng tổng, trên mọi nút, của (số cạnh vào) × (số cạnh ra); không cần lưu. Phần lõi của A* theo cạnh chỉ khác bài 21 hai chỗ: khoá nhãn là chỉ số cạnh, và mỗi lần nới có thêm `turn_ms`.
+Đồ thị này **không được dựng sẵn trong bộ nhớ**: các chuyển trạng thái sinh ngay lúc duyệt từ CSR theo nút của bài 21. Số trạng thái bằng số cạnh (319.074), số chuyển trạng thái bằng tổng, trên mọi nút, của (số cạnh vào) × (số cạnh ra); không cần lưu. Phần lõi của A* theo cạnh chỉ khác bài 21 hai chỗ: khoá nhãn là chỉ số cạnh, và mỗi lần nới có thêm `turn_ms`.
 
 `examples/toi-noi-location/rust/crates/route-engine/src/turn.rs`
 
@@ -65,7 +65,7 @@ Hình 1 vẽ ca A của lab trên fixture «khu mẫu» (đồ thị giả lập
 <figcaption>Hình 1. Ca A trên fixture (đồ thị giả lập, không phải dữ liệu OSM): xe chạy hướng đông trên Đường Ngang 2, khách ở làn ngược chiều ngay chỗ xe đứng. Trái: mô hình theo nút, 12,7 s, 99 m. Phải: mô hình theo cạnh, 98,7 s, 489 m (49 + 93 + 97 + 98 + 151 m, làm tròn). Hình không theo tỉ lệ.</figcaption>
 </figure>
 
-Có thể kiểm chứng rằng «mô hình theo nút» của lab là mô hình theo nút thật chứ không phải một phiên bản tự chế: bằng cách tắt mọi luật (chi phí rẽ bằng 0, quay đầu miễn phí, không cấm rẽ), tìm kiếm theo cạnh phải cho đúng chi phí của Dijkstra theo nút. Test `no_cost_model_equals_node_dijkstra_when_nothing_is_restricted` kiểm điều đó trên 100 cặp nút ngẫu nhiên của fixture, và `proptest_vs_dijkstra.rs` kiểm lại ở cả ba profile.
+Có thể kiểm chứng rằng «mô hình theo nút» của lab là mô hình theo nút thật chứ không phải một phiên bản tự chế: bằng cách tắt mọi luật (chi phí rẽ bằng 0, quay đầu miễn phí, không cấm rẽ), tìm kiếm theo cạnh phải cho đúng chi phí của Dijkstra theo nút. Test `no_cost_model_equals_node_dijkstra_when_nothing_is_restricted` kiểm tra điều đó trên 100 cặp nút ngẫu nhiên của fixture, và `proptest_vs_dijkstra.rs` kiểm tra lại ở cả ba profile.
 
 Điểm đầu và điểm cuối cũng khác nút. Khách và xe đứng ở **giữa** một cạnh có hướng, nên API có `Start::Pos(Position)` (phải đi hết phần còn lại của cạnh theo hướng đó rồi mới rẽ) và `Goal::Pos(Position)` (phải đi vào điểm đó theo chiều của cạnh, tức đúng phía đường). Đây là nền cho bài chọn điểm đón theo phía đường ở phần P04.
 
@@ -97,7 +97,7 @@ Một lần rẽ được phân loại theo góc giữa hướng lúc rời `e1`
     }
 ```
 
-Góc có dấu `d` nằm trong [−180°, 180°). Dưới 35° là đi thẳng; từ 150° trở lên hoặc đi vào cạnh `twin` là quay đầu; còn lại dương là rẽ phải (xe đi bên phải đường, hướng quay theo chiều kim đồng hồ), âm là rẽ trái. Chi phí từng loại là bảng `TurnCosts::urban()`: thẳng 0 s, rẽ phải 3 s, rẽ trái 6 s, quay đầu 20 s, cộng thêm 4 s khi đi vào lối qua dải phân cách. Đó là **giả định** của lab: rẽ trái đắt hơn vì cắt dòng ngược chiều, nhưng 3 s và 6 s là số đặt, không đo.
+Góc có dấu `d` nằm trong [−180°, 180°). Dưới 35° là đi thẳng; từ 150° trở lên hoặc đi vào cạnh `twin` là quay đầu; các trường hợp còn lại, góc dương là rẽ phải (xe đi bên phải đường, hướng quay theo chiều kim đồng hồ), âm là rẽ trái. Chi phí từng loại là bảng `TurnCosts::urban()`: thẳng 0 s, rẽ phải 3 s, rẽ trái 6 s, quay đầu 20 s, cộng thêm 4 s khi đi vào lối qua dải phân cách. Đó là **giả định** của lab: rẽ trái đắt hơn vì cắt dòng ngược chiều, nhưng 3 s và 6 s là số lab tự đặt, không đo.
 
 Quyết định lớn hơn là **quay đầu ở đâu**. Có ba chính sách:
 
@@ -122,11 +122,11 @@ Quyết định lớn hơn là **quay đầu ở đâu**. Có ba chính sách:
         };
 ```
 
-`Free` là điều mô hình theo nút ngầm giả định. `Costed` cho quay đầu mọi nơi với 20 s. `DeadEndOnly`, mặc định của `urban()`, chỉ cho quay đầu trực tiếp ở ngõ cụt (nút mà mọi cạnh ra đều quay về nút vừa tới); muốn quay đầu giữa đường, xe phải đi vòng hoặc qua lối mở dải phân cách. Đây là giả định **mạnh**: xe máy thật quay đầu dễ hơn nhiều, và một số đường hai chiều ở TP.HCM có biển cho phép quay đầu. Lab giữ `Costed` làm phương án D để đo mức nhạy.
+`Free` là điều mô hình theo nút ngầm giả định. `Costed` cho quay đầu mọi nơi với 20 s. `DeadEndOnly`, mặc định của `urban()`, chỉ cho quay đầu trực tiếp ở ngõ cụt (nút mà mọi cạnh ra đều quay về nút vừa tới); muốn quay đầu giữa đường, xe phải đi vòng hoặc qua lối mở dải phân cách. Đây là giả định **mạnh**: xe máy thật quay đầu dễ hơn nhiều, và một số đường hai chiều ở TP.HCM có biển cho phép quay đầu. Lab giữ `Costed` làm phương án D để đo độ nhạy.
 
 ## Cấm rẽ trong OSM: dùng được hơn một phần tư
 
-OSM ghi cấm rẽ bằng relation `type=restriction`: một member `from` (way vào), một member `to` (way ra) và một member `via` (nút hoặc way), với `restriction=no_left_turn`, `only_straight_on` và các giá trị tương tự. Quy ước `no_*` cấm cặp đó, `only_*` chỉ cho phép đúng cặp đó từ cạnh vào. Lab đọc chúng thành `banned` (tập cặp bị cấm) và `only` (từ cạnh vào, danh sách cạnh ra duy nhất được phép), rồi `forbids` kiểm trong lúc duyệt.
+OSM ghi cấm rẽ bằng relation `type=restriction`: một member `from` (way vào), một member `to` (way ra) và một member `via` (nút hoặc way), với `restriction=no_left_turn`, `only_straight_on` và các giá trị tương tự. Quy ước `no_*` cấm cặp đó, `only_*` chỉ cho phép đúng cặp đó từ cạnh vào. Lab đọc chúng thành `banned` (tập cặp bị cấm) và `only` (từ cạnh vào, danh sách cạnh ra duy nhất được phép), rồi `forbids` kiểm tra trong lúc duyệt.
 
 `examples/toi-noi-location/rust/crates/route-engine/src/turn.rs`
 
@@ -159,8 +159,8 @@ OSM ghi cấm rẽ bằng relation `type=restriction`: một member `from` (way 
 Những dòng `continue` trong khối này là **những điều lab không làm**, và chúng nhiều hơn điều lab làm. Trong bbox TP.HCM có 1.262 quan hệ. Với ô tô, lab chỉ áp dụng **345**: 327 quan hệ `no_*` (ra 327 cặp bị cấm) và 18 quan hệ `only_*`. Số còn lại bị bỏ qua có chủ đích:
 
 - **784 quan hệ (62%) có điều kiện thời gian** (`restriction:conditional`, ví dụ cấm rẽ vào giờ cao điểm). Lab không có đồng hồ trong lúc tìm đường, nên bỏ qua hết. Hệ quả: một chỗ chỉ cấm rẽ trong khung giờ vẫn được coi là rẽ được cả ngày.
-- **112 quan hệ có `via` là way thay vì nút** (cấm đi từ `from` qua cả đoạn `via` rồi vào `to`). Đồ thị theo cạnh với trạng thái một cạnh không biểu diễn được chúng; muốn làm cần trạng thái là một chuỗi cạnh. Con số 112 là số còn lại theo thứ tự lab kiểm (điều kiện thời gian trước, `via` sau); bài 06 đếm chung 270 relation có `via` là way, kể cả phần có điều kiện, nên hai số không cộng được.
-- 11 quan hệ có thẻ `except` loại ô tô (199 loại xe máy), 7 quan hệ không khớp được với cạnh, 3 quan hệ dành cho loại phương tiện khác.
+- **112 quan hệ có `via` là way thay vì nút** (cấm đi từ `from` qua cả đoạn `via` rồi vào `to`). Đồ thị theo cạnh với trạng thái một cạnh không biểu diễn được chúng; muốn hỗ trợ thì cần trạng thái là một chuỗi cạnh. Con số 112 là số còn lại theo thứ tự lab kiểm (điều kiện thời gian trước, `via` sau); bài 06 đếm chung 270 relation có `via` là way, kể cả phần có điều kiện, nên hai số không cộng được.
+- 11 quan hệ có thẻ `except` loại trừ ô tô (với xe máy là 199 quan hệ), 7 quan hệ không khớp được với cạnh, 3 quan hệ dành cho loại phương tiện khác.
 
 Với xe máy, lab áp dụng 159 quan hệ (141 `no_*`, 18 `only_*`), cặp bị cấm 141. Hình 3 vẽ phân bổ này. Kết luận phải nói thẳng: lab chỉ áp dụng 27% số quan hệ cho ô tô (345/1.262), nên cấm rẽ trong bài là **một phần của bức tranh**. Một tuyến mà lab báo «không vi phạm cấm rẽ» có thể vẫn vi phạm cấm rẽ theo giờ hoặc cấm rẽ có `via` là way ngoài đời.
 
@@ -186,9 +186,9 @@ Phần 2 của lab chạy 300 truy vấn trên đồ thị HCM (126.699 nút, 31
 | Số quay đầu hình học (tổng 300 truy vấn) | A 398 · C 343 · D 368 |
 | Trạng thái cạnh đã duyệt | A 74.607 · C 75.953 |
 
-Ba điều đáng đọc kỹ. **Một**: cấm rẽ OSM riêng lẻ gần như vô hại ở trung bình (+1,3 s, trung vị 0) nhưng đuôi dài: một truy vấn tăng 64,3 s. **Hai**: phần lớn chênh lệch (+80,7 s) đến từ **chi phí rẽ cộng dồn**, không phải từ luật quay đầu. Cho quay đầu mọi nơi với 20 s (mô hình D) vẫn +72,0 s, và ngay 151 tuyến của A vốn không vi phạm gì cũng chênh +64,5 s; riêng việc cấm hẳn quay đầu giữa đường chỉ thêm 8,7 s ở trung bình, nhưng đổi đuôi nhiều (lớn nhất +386,7 s so với +147,9 s). Mà chi phí rẽ 3 s và 6 s là số lab đặt, nên +80,7 s là hệ quả của bảng giả định, không phải ước lượng đời thật. **Ba**: thêm luật gần như không đổi số trạng thái phải duyệt (74.607 so với 75.953), vì cả A và C đều là A* trên trạng thái cạnh. Cái giá của sự đúng nằm ở độ phức tạp cài đặt, và ở chỗ tìm theo cạnh không dùng được CH của bài 25.
+Ba điều đáng đọc kỹ. **Một**: cấm rẽ OSM riêng lẻ gần như vô hại ở trung bình (+1,3 s, trung vị 0) nhưng đuôi dài: một truy vấn tăng 64,3 s. **Hai**: phần lớn chênh lệch (+80,7 s) đến từ **chi phí rẽ cộng dồn**, không phải từ luật quay đầu. Cho quay đầu mọi nơi với 20 s (mô hình D) vẫn +72,0 s, và ngay 151 tuyến của A vốn không vi phạm gì cũng chênh +64,5 s; riêng việc cấm hẳn quay đầu giữa đường chỉ thêm 8,7 s ở trung bình, nhưng làm đuôi phân bố thay đổi nhiều (lớn nhất +386,7 s so với +147,9 s). Vì chi phí rẽ 3 s và 6 s do lab đặt, nên +80,7 s là hệ quả của bảng giả định, không phải ước lượng đời thật. **Ba**: thêm luật gần như không đổi số trạng thái phải duyệt (74.607 so với 75.953), vì cả A và C đều là A* trên trạng thái cạnh. Cái giá của việc tính đúng nằm ở độ phức tạp khi cài đặt, và ở chỗ tìm theo cạnh không dùng được CH của bài 25.
 
-Về quay đầu, số «hình học» đếm trường hợp tổng góc rẽ đạt từ 150° trở lên trong một chuỗi nút cách nhau không quá 60 m; nó bắt được cả quay đầu trực tiếp lẫn «rẽ trái hai lần qua dải phân cách». Số này là xấp xỉ hình học, không phải nhận diện biển quay đầu, và nó là cái `u_turns` mà simulator ở bài 30 sẽ đo. Mô hình A có 398 lần: 199 đi ngược trực tiếp, 40 qua lối dải phân cách, 159 «khác» (chuỗi nút gần nhau cộng góc). Mô hình C có 343 lần: 116, 39 và 188. Con số «đi ngược trực tiếp» của C vẫn khác 0 vì quay đầu ở ngõ cụt được phép.
+Về quay đầu, số «hình học» đếm trường hợp tổng góc rẽ đạt từ 150° trở lên trong một chuỗi nút cách nhau không quá 60 m; nó bắt được cả quay đầu trực tiếp lẫn «rẽ trái hai lần qua dải phân cách». Số này là xấp xỉ hình học, không phải nhận diện biển quay đầu, và nó chính là chỉ số `u_turns` mà simulator ở bài 30 sẽ đo. Mô hình A có 398 lần: 199 đi ngược trực tiếp, 40 qua lối dải phân cách, 159 «khác» (chuỗi nút gần nhau cộng góc). Mô hình C có 343 lần: 116, 39 và 188. Con số «đi ngược trực tiếp» của C vẫn khác 0 vì quay đầu ở ngõ cụt được phép.
 
 <figure class="tkh-fig">
 <div class="tkh-fig-box">
@@ -204,7 +204,7 @@ Về quay đầu, số «hình học» đếm trường hợp tổng góc rẽ �
 <figcaption>Hình 3. Trên: 1.262 quan hệ cấm rẽ trong bbox HCM được dùng ra sao, cho ô tô và xe máy; tỉ lệ theo số quan hệ. Dưới: tỉ lệ tuyến của mô hình theo nút vi phạm luật đầy đủ. Số đếm tái lập từng chữ số với seed 20261106. © OpenStreetMap contributors (ODbL).</figcaption>
 </figure>
 
-Ca thật ở Hình 2 là ví dụ cần nhớ. Xe đang chạy theo hướng 178° và khách ở phía sau. Mô hình theo nút đi hết 20% cạnh còn lại rồi quay ngược trên Lê Văn Thọ. Mô hình theo cạnh phải luồn qua ba cạnh nối ngắn, không tên, rẽ phải ba lần để quay về đúng đường rồi mới đi ngược. 40,3 s chênh lệch là thời gian đón khách chênh nhau giữa hai mô hình, và nếu km rỗng của tài xế tính theo mô hình theo nút thì sẽ thấp hơn thực tế.
+Ca thật ở Hình 2 là ví dụ cần nhớ. Xe đang chạy theo hướng 178° và khách ở phía sau. Mô hình theo nút đi hết 20% cạnh còn lại rồi quay ngược trên Lê Văn Thọ. Mô hình theo cạnh phải luồn qua ba cạnh nối ngắn, không tên, rẽ phải ba lần để quay về đúng đường rồi mới đi ngược. Chênh lệch 40,3 s là phần thời gian đón khách mà hai mô hình tính khác nhau, và nếu số km chạy rỗng (không chở khách) của tài xế tính theo mô hình theo nút thì sẽ thấp hơn thực tế.
 
 ## Hệ quả cho các bài sau
 
@@ -247,18 +247,18 @@ Cấu hình đo: `--release`, Apple M1 Max, 300 truy vấn, seed 20261106, ô t�
   một ca thật trên bản đồ này: xe ở 80% cạnh 73056 (hướng 178°), khách ở 16% cạnh 6486; theo nút đi ngược ngay còn theo cạnh phải đi vòng 1145 m, chậm hơn 40.3 s
 ```
 
-Ca C nói riêng ghi lại điều mô hình theo nút làm sai nhất: nó cho xe **rẽ thẳng vào chỗ bị cấm** ở cả hai cặp cấm của fixture (14,1 s và 13,7 s), trong khi tuân thủ cấm tốn thêm 49,1 s (371 m) và 54,8 s (383 m).
+Riêng ca C ghi lại chỗ mô hình theo nút sai nặng nhất: nó cho xe **rẽ thẳng vào chỗ bị cấm** ở cả hai cặp cấm của fixture (14,1 s và 13,7 s), trong khi tuân thủ cấm tốn thêm 49,1 s (371 m) và 54,8 s (383 m).
 
-Kiểm tự động trong `turn.rs`: A* theo cạnh cho cùng chi phí với Dijkstra theo cạnh khi có chi phí rẽ, chi phí tìm được khớp chi phí chấm lại cả tuyến bằng `path_cost`, chi phí rẽ không bao giờ làm tuyến rẻ đi, cặp bị cấm không bao giờ được dùng, chính sách `DeadEndOnly` cấm quay đầu giữa đường.
+Kiểm thử tự động trong `turn.rs`: A* theo cạnh cho cùng chi phí với Dijkstra theo cạnh khi có chi phí rẽ, chi phí tìm được khớp chi phí chấm lại cả tuyến bằng `path_cost`, chi phí rẽ không bao giờ làm tuyến rẻ đi, cặp bị cấm không bao giờ được dùng, chính sách `DeadEndOnly` cấm quay đầu giữa đường.
 
 ## Giới hạn của ví dụ
 
 - **Chi phí rẽ là giả định.** 3 s, 6 s, 20 s và 4 s qua dải phân cách do lab đặt; chưa đo từ dữ liệu thật hay hiệu chuẩn bằng simulator.
 - **Luật quay đầu quá chặt.** `DeadEndOnly` cấm quay đầu giữa đường ở mọi nơi, kể cả rẽ gắt từ 150° trở lên ở nút giao hình chữ Y; đó là lý do đuôi +386,7 s dài như vậy. Đường thật có chỗ cho phép quay đầu, xe máy quay đầu dễ hơn.
 - **Cấm rẽ chỉ dùng được một phần.** Bỏ qua 784 trên 1.262 quan hệ có điều kiện thời gian và 112 quan hệ có `via` là way; không có đồng hồ trong lúc tìm đường, và trạng thái một cạnh không biểu diễn được `via` là way.
-- **Nhận diện dải phân cách bằng hình học, chưa đối chiếu thủ công.** 1.619 cạnh có thể gồm nhầm và sót.
+- **Nhận diện dải phân cách bằng hình học, chưa đối chiếu thủ công.** Việc gắn nhãn 1.619 cạnh có thể nhận nhầm hoặc bỏ sót.
 - **Quay đầu hình học là xấp xỉ.** Ngưỡng 150° và 60 m là lựa chọn của lab, không phải nhận diện biển.
-- **Hướng xe là đầu vào.** Lab giả định xe đi hết phần còn lại của cạnh theo hướng đang chạy; hướng lấy từ GPS nhiễu mà sai thì tuyến đổi theo (bài bám đường 16, 17). Phần 2 chỉ đo ô tô.
+- **Hướng xe là đầu vào.** Lab giả định xe đi hết phần còn lại của cạnh theo hướng đang chạy; hướng lấy từ GPS nhiễu mà sai thì tuyến cũng thay đổi theo (bài bám đường 16, 17). Phần 2 chỉ đo ô tô.
 
 ## Bài tập
 
@@ -268,7 +268,7 @@ Kiểm tự động trong `turn.rs`: A* theo cạnh cho cùng chi phí với Dij
 <p>Tuyến có hai lần rẽ trái: 2 × 6 s = 12 s. Đi vào lối qua dải phân cách (Đường Dọc 10) cộng thêm 4 s. Tổng 16 s, khớp «chi phí rẽ 16,0 s» của lab. Mô hình theo nút chỉ cộng trọng số cạnh nên bỏ cả 16 s đó. Nếu một lần rẽ trái là 4 s, chênh lệch sẽ còn 12 s: kết luận phụ thuộc vào bảng giả định.</p>
 </details>
 
-**Bài 2.** Vì sao mô hình theo nút của lab (A) có thể kiểm bằng cách so với Dijkstra thông thường, trong khi mô hình C thì không? Kiểm C bằng cách nào?
+**Bài 2.** Vì sao mô hình theo nút của lab (A) có thể kiểm tra bằng cách so với Dijkstra thông thường, trong khi mô hình C thì không? Kiểm tra C bằng cách nào?
 
 <details><summary>Lời giải bài 2</summary>
 <p>Khi tắt hết luật (chi phí rẽ bằng 0, quay đầu miễn phí, không cấm rẽ), tìm kiếm theo cạnh phải trả đúng chi phí Dijkstra theo nút, nên có thể so trực tiếp (test <code>no_cost_model_equals_node_dijkstra_when_nothing_is_restricted</code>). Với C không có thuật toán nút tương đương. Lab kiểm C bằng các tính chất: A* và Dijkstra theo cạnh cùng chi phí; chi phí tìm được bằng chi phí chấm lại cả tuyến bằng <code>path_cost</code>; chi phí rẽ không bao giờ làm tuyến rẻ đi so với A; cặp bị cấm không xuất hiện trong tuyến.</p>

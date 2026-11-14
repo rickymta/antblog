@@ -1,7 +1,7 @@
 ---
 slug: python-tesseract-easyocr-paddleocr-so-sanh
 title: "Tesseract, EasyOCR và PaddleOCR: chạy và so sánh trên cùng bộ ảnh"
-summary: "Bài 43: chạy Tesseract, EasyOCR và PaddleOCR trên 24 thẻ căn cước giả, đưa bounding box và confidence về một dạng, đo lỗi theo trường, thời gian và CPU. PaddleOCR chỉ có wheel đến Python 3.13. Có output thật."
+summary: "Bài 43: chạy Tesseract, EasyOCR và PaddleOCR trên 24 thẻ căn cước giả, đưa bounding box và confidence về cùng một dạng, đo lỗi theo trường, thời gian và CPU. PaddleOCR chỉ có wheel tới Python 3.13. Kèm output chạy thật."
 category: python-advanced
 level: advanced
 tags: [python, toi-noi, ocr, tesseract, easyocr]
@@ -10,7 +10,7 @@ language: vi
 
 Tài xế DR-001 nộp ảnh căn cước, và dịch vụ `kyc-ocr` của [Tới Nơi](/articles/du-an-mau-toi-noi) phải đọc ra số thẻ, họ tên, ngày sinh. Nhóm có ba ứng viên: Tesseract (cài bằng một lệnh, chạy được trong CI; từ bản 5 mặc định dùng bộ nhận dạng LSTM), EasyOCR và PaddleOCR (mô hình học sâu, tải về từ vài chục đến vài trăm MB). Câu hỏi của ta hẹp: trên đúng loại ảnh của Tới Nơi, với chữ Việt có dấu, engine nào đọc đúng trường nào, tốn bao nhiêu CPU, và con số `confidence` mỗi engine trả về có dùng để chặn lỗi được không?
 
-Đây là bài 43 của lộ trình **Python nâng cao qua Tới Nơi**. Bài 42 lo phần hình học (nắn thẻ nghiêng, phối cảnh), nên bài này chỉ bàn về engine và dùng bộ ảnh nhỏ do code sinh. Dữ liệu hoàn toàn tổng hợp: số căn cước giả bắt đầu bằng `099`, tên mẫu, thẻ có dòng «KHÔNG PHẢI GIẤY TỜ THẬT». Kết quả OCR chỉ là đầu vào cho người duyệt hồ sơ, không tự động là quyết định xác minh.
+Đây là bài 43 của lộ trình **Python nâng cao qua Tới Nơi**. Bài 42 lo phần hình học (nắn thẻ nghiêng, phối cảnh), nên bài này chỉ bàn về engine và dùng bộ ảnh nhỏ do code sinh. Dữ liệu hoàn toàn tổng hợp: số căn cước giả bắt đầu bằng `099`, tên mẫu, thẻ có dòng «KHÔNG PHẢI GIẤY TỜ THẬT». Kết quả OCR chỉ là đầu vào cho người duyệt hồ sơ, không tự thành quyết định xác minh.
 
 <div class="tkh-callout tkh-callout--example">
 <span class="tkh-callout-title">Thử trước khi đọc</span>
@@ -20,7 +20,7 @@ Tài xế DR-001 nộp ảnh căn cước, và dịch vụ `kyc-ocr` của [Tớ
 
 ## Ba engine, ba cách cài, ba kiểu trả lời
 
-Ngày kiểm: 2026-11-06, trên Apple M1 Max 10 lõi, 64 GB RAM, macOS 26.6.2. Ta thử cài cả ba trên Python 3.14.7 trước.
+Ngày kiểm: 2026-11-06, trên Apple M1 Max 10 lõi, 64 GB RAM, macOS 26.6.2. Trước hết, ta thử cài cả ba trên Python 3.14.7.
 
 | Engine | Cài | Chạy trên 3.14? | Mô hình (cache, không commit) |
 | --- | --- | --- | --- |
@@ -36,7 +36,7 @@ Với PaddleOCR, `uv pip install paddlepaddle` trên Python 3.14 dừng ngay:
 hint: You require CPython 3.14 (`cp314`), but we only found wheels for `paddlepaddle` (v3.3.1) with the following Python ABI tags: `cp39`, `cp310`, `cp311`, `cp312`, `cp313`
 ```
 
-Loạt bài mặc định Python 3.14 nhưng cho hạ xuống 3.13 khi một thư viện bắt buộc chưa có wheel. Thay vì hạ cả lab, ta giữ lõi ở 3.14 và đặt PaddleOCR vào một project con `paddle/` có `requires-python = ">=3.13,<3.14"`; cả hai project dùng chung `main.py`:
+Loạt bài mặc định Python 3.14 nhưng cho phép hạ xuống 3.13 khi một thư viện bắt buộc chưa có wheel. Thay vì hạ cả lab, ta giữ lõi ở 3.14 và đặt PaddleOCR vào một project con `paddle/` có `requires-python = ">=3.13,<3.14"`; cả hai project dùng chung `main.py`:
 
 ```toml
 # paddle/pyproject.toml (trích). Kiểm ngày 2026-11-06: wheel paddlepaddle 3.3.1 chỉ có cp39 đến cp313.
@@ -44,9 +44,9 @@ requires-python = ">=3.13,<3.14"
 dependencies = ["numpy>=2.3", "pillow>=13", "pytesseract>=0.3.13", "paddlepaddle>=3.3.1", "paddleocr>=3.7"]
 ```
 
-Hệ quả cho dịch vụ thật: nếu chọn PaddleOCR, `kyc-ocr` phải chạy trong một tiến trình hoặc image riêng với Python 3.13; bài 46 tách API và worker cho Tesseract; đặt engine Python 3.13 vào một worker riêng dùng cùng ranh giới đó, nhưng bài 46 không chạy nó. Khi gọi `PaddleOCR(lang="vi")`, phiên bản 3.7.0 tự chọn cặp mô hình `PP-OCRv6_medium_det` và `PP-OCRv6_medium_rec`. Ta thêm cấu hình `ocr_version="PP-OCRv5"` (`PP-OCRv5_server_det`, `latin_PP-OCRv5_mobile_rec`) để xem kết quả có phụ thuộc đời mô hình không.
+Hệ quả cho dịch vụ thật: nếu chọn PaddleOCR, `kyc-ocr` phải chạy trong một tiến trình hoặc image riêng với Python 3.13; bài 46 tách API và worker cho Tesseract; đặt engine Python 3.13 vào một worker riêng dùng cùng ranh giới đó, nhưng bài 46 không chạy nó. Khi gọi `PaddleOCR(lang="vi")`, phiên bản 3.7.0 tự chọn cặp mô hình `PP-OCRv6_medium_det` và `PP-OCRv6_medium_rec`. Ta thêm cấu hình `ocr_version="PP-OCRv5"` (`PP-OCRv5_server_det`, `latin_PP-OCRv5_mobile_rec`) để xem kết quả có phụ thuộc vào thế hệ mô hình hay không.
 
-Ba engine còn trả lời theo ba kiểu khác nhau (Hình 1). Muốn so sánh, ta viết ba adapter đưa về một kiểu `OcrLine`:
+Ba engine còn trả kết quả theo ba kiểu khác nhau (Hình 1). Muốn so sánh, ta viết ba adapter đưa về một kiểu `OcrLine`:
 
 <figure class="tkh-fig">
 <div class="tkh-fig-box">
@@ -80,7 +80,7 @@ def recognize(self, path: Path) -> list[OcrLine]:           # PaddleOcrEngine
             result.append(OcrLine(text, float(score), tuple(int(v) for v in box)))
 ```
 
-Hai chi tiết đáng nói. Một: ta ép EasyOCR chạy CPU (`gpu=False`) và tắt ba mô-đun phụ của PaddleOCR (xoay trang, nắn phẳng, xoay dòng) để cả ba cùng điều kiện. Hai: Tesseract trả từng **từ** với confidence 0 đến 100, nên adapter gộp từ thành dòng theo `(block, par, line)` và lấy trung bình confidence của các từ. Ảnh `s1-clean` cho thấy cái giá của phép trung bình đó:
+Hai chi tiết đáng nói. Một: ta ép EasyOCR chạy CPU (`gpu=False`) và tắt ba mô-đun phụ của PaddleOCR (xoay trang, nắn phẳng, xoay dòng) để cả ba chạy cùng điều kiện. Hai: Tesseract trả từng **từ** với confidence 0 đến 100, nên adapter gộp từ thành dòng theo `(block, par, line)` và lấy trung bình confidence của các từ. Ảnh `s1-clean` cho thấy cái giá của phép trung bình đó:
 
 ```text
 từ              conf  trái  trên  rộng  cao
@@ -95,7 +95,7 @@ VAN             92.0   381   279    68   25
 C               90.0   463   279    21   25
 ```
 
-Hai từ rác `›` và `:` (confidence 27 và 47, ở x = 108 và 197, y = 299) nằm trong ô ảnh chân dung, cùng dải với chữ «ẢNH MẪU» vẽ giữa ô (tâm ở x = 167, y = 315), nên rất có thể là dấu hỏi và dấu ngã của hai chữ Ả và Ẫ bị tách ra thành từ; Tesseract gộp chúng vào dòng họ tên, nên dòng đó có hộp bắt đầu từ x = 108 thay vì 332 và confidence trung bình chỉ 0,70 dù ba từ chữ đều từ 90 trở lên. Bài 44 sẽ dùng confidence nhỏ nhất của các token thuộc trường thay vì trung bình.
+Hai từ rác `›` và `:` (confidence 27 và 47, ở x = 108 và 197, y = 299) nằm trong ô ảnh chân dung, cùng dải với chữ «ẢNH MẪU» vẽ giữa ô (tâm ở x = 167, y = 315), nên rất có thể là dấu hỏi và dấu ngã của hai chữ Ả và Ẫ bị tách ra thành từ; Tesseract gộp chúng vào dòng họ tên, nên dòng đó có box bắt đầu từ x = 108 thay vì 332 và confidence trung bình chỉ 0,70 dù ba từ chữ đều từ 90 trở lên. Bài 44 sẽ dùng confidence nhỏ nhất của các token thuộc trường thay vì trung bình.
 
 ## Chấm theo trường, không chấm theo trang
 
@@ -129,13 +129,13 @@ def best_substring_distance(truth: str, text: str) -> int:
     return best
 ```
 
-Ứng viên là từng dòng và từng cặp dòng liền nhau (để nhặt lại giá trị bị cắt đôi). Mỗi trường nhận ba con số: CER (khoảng cách chia độ dài đáp án), «khớp nguyên văn» (khoảng cách 0, giữ dấu) và «khớp khi bỏ dấu» (`fold` bỏ dấu cả hai phía). Cặp hai con số sau tách lỗi dấu khỏi lỗi chữ.
+Ứng viên là từng dòng và từng cặp dòng liền nhau (để nhặt lại giá trị bị cắt đôi). Mỗi trường nhận ba con số: CER (khoảng cách chia độ dài đáp án), «khớp nguyên văn» (khoảng cách 0, giữ dấu) và «khớp khi bỏ dấu» (`fold` bỏ dấu cả hai phía). Hai con số sau giúp tách lỗi dấu khỏi lỗi chữ.
 
-Phép chấm dễ dãi ở trường ngắn: «Nữ» có thể ăn may một ký tự trong dòng bất kỳ, nên khi engine hụt hẳn CER vẫn chỉ khoảng 0,50. Ta đọc **tỉ lệ khớp nguyên văn** là chính, CER chỉ để xếp thô. Bài 45 sẽ thay bằng `jiwer`.
+Phép chấm dễ dãi ở trường ngắn: «Nữ» có thể ăn may một ký tự trong dòng bất kỳ, nên khi engine đọc sai hoàn toàn, CER vẫn chỉ khoảng 0,50. Ta đọc **tỉ lệ khớp nguyên văn** là chính, CER chỉ để xếp thô. Bài 45 sẽ thay bằng `jiwer`.
 
 ## Tesseract: ngôn ngữ và --psm quyết định nhiều hơn tưởng
 
-`--psm` là «page segmentation mode», cách Tesseract chia ảnh thành vùng chữ: 3 là tự phân trang, 4 là một cột chữ, 6 là một khối chữ đều, 11 là chữ rời rạc. Lab quét `-l` (`eng`, `vie`, `vie+eng`) với bốn `--psm` trên cả 24 ảnh. Output thật, CER trung bình theo biến thể và phần trăm trường khớp nguyên văn:
+`--psm` là «page segmentation mode», cách Tesseract chia ảnh thành vùng chữ: 3 là tự phân trang, 4 là một cột chữ, 6 là một khối chữ đều, 11 là chữ rời rạc. Lab quét `-l` (`eng`, `vie`, `vie+eng`) với bốn `--psm` trên cả 24 ảnh. Kết quả chạy thật, CER trung bình theo biến thể và phần trăm trường khớp nguyên văn:
 
 ```text
 -l      --psm       clean      blur    rotate      dark    tất cả    đúng %  bỏ dấu %
@@ -153,9 +153,9 @@ vie+eng 6           0.025     0.026     0.056     0.034     0.035        76     
 vie+eng 11          0.009     0.050     0.099     0.012     0.043        75        87
 ```
 
-Gói `vie` là thứ quyết định: chỉ `eng` cho CER 0,143 ở `--psm 6`, thêm `vie` còn 0,024 hoặc 0,035. Còn `--psm` đổi kết quả mạnh nhất ở ảnh mờ: với `vie+eng`, `--psm 3` cho CER 0,152 trên ảnh mờ, `--psm 6` cho 0,026. `vie` và `vie+eng` ở `--psm 6` sát nhau (0,024 và 0,035). Lab giữ `vie+eng --psm 6` vì nhãn trên thẻ thật song ngữ («Số / No.»), nhưng đó là lựa chọn thiết kế, chưa có số đo nào ủng hộ: ở mọi bộ ta từng đo, `vie` riêng tốt hơn hoặc bằng `vie+eng`. CER ở bài này chỉ so được trong bài này (trung bình 5 trường trên mỗi ảnh, bộ 24 thẻ phẳng, chưa qua bài 42), không so với số của bài 41 và 42.
+Gói `vie` là yếu tố quyết định: chỉ dùng `eng` thì CER là 0,143 ở `--psm 6`, thêm `vie` thì còn 0,024 hoặc 0,035. Còn `--psm` làm kết quả thay đổi mạnh nhất ở ảnh mờ: với `vie+eng`, `--psm 3` cho CER 0,152 trên ảnh mờ, `--psm 6` cho 0,026. `vie` và `vie+eng` ở `--psm 6` sát nhau (0,024 và 0,035). Lab giữ `vie+eng --psm 6` vì nhãn trên thẻ thật song ngữ («Số / No.»), nhưng đó là lựa chọn thiết kế, chưa có số đo nào ủng hộ: ở mọi bộ ta từng đo, `vie` riêng tốt hơn hoặc bằng `vie+eng`. CER ở bài này chỉ so được trong bài này (trung bình 5 trường trên mỗi ảnh, bộ 24 thẻ phẳng, chưa qua bài 42), không so với số của bài 41 và 42.
 
-Cùng bốn cấu hình đo ở bốn bộ khác nhau cho thấy không có `--psm` tốt nhất chung. Cột lab 43 là output của lab này; các cột còn lại là số đo riêng của lab 41, 42 và 44, không phải output của lab này:
+Cùng bốn cấu hình đo ở bốn bộ khác nhau cho thấy không có giá trị `--psm` nào tốt nhất cho mọi bộ. Cột lab 43 là output của lab này; các cột còn lại là số đo riêng của lab 41, 42 và 44, không phải output của lab này:
 
 | Cấu hình | Lab 41, CER gộp | Lab 43, CER trung bình | Lab 44, trường đúng /320 | Ảnh lab 42 nắn qua parser bài 44, trường đúng /250 |
 | --- | --- | --- | --- | --- |
@@ -164,13 +164,13 @@ Cùng bốn cấu hình đo ở bốn bộ khác nhau cho thấy không có `--p
 | `vie+eng --psm 4` | 0,236 | 0,059 | 251 | chưa đo |
 | `vie+eng --psm 6` | 0,281 | 0,035 | 266 | 161 |
 
-`--psm 6` tốt nhất ở bộ của bài này và của bài 44 nhưng tệ nhất ở ảnh đã nắn của bài 42 và ở bộ của bài 41. Nguyên nhân sụp ta chưa tìm ra. Vì vậy mọi nhận xét về Tesseract dưới đây chỉ đúng với thẻ phẳng do bài này sinh.
+`--psm 6` tốt nhất ở bộ của bài này và của bài 44 nhưng tệ nhất ở ảnh đã nắn của bài 42 và ở bộ của bài 41. Ta chưa tìm ra nguyên nhân của sự sụt giảm này. Vì vậy mọi nhận xét về Tesseract dưới đây chỉ đúng với thẻ phẳng do bài này sinh.
 
 Với cấu hình đó, bảng chi tiết cho thấy hai kiểu lỗi (xem Bảng 2 ở mục sau). Họ tên chỉ khớp nguyên văn 21% nhưng khớp 96% khi bỏ dấu: Tesseract đọc «TRẦN THỊ B» thành «TRAN THỊ B» và «LÊ VĂN C» thành «LE VAN C», tức mất dấu của chữ hoa chứ không sai chữ. Số căn cước chỉ đúng 75%, và cả sáu ca sai nằm ở sáu ảnh nghiêng, nơi Tesseract chèn một dấu cách vào giữa số: `0991 73449390`. Lỗi dấu cách sửa được bằng hậu xử lý (bài 44); lỗi mất dấu thì khó hơn nhiều.
 
 ## Bảng so sánh có số đo
 
-Mỗi engine chạy một lần khởi động không tính giờ, rồi 24 ảnh, mỗi ảnh một lần. Lab ghi thời gian thật (`perf_counter`), CPU (user cộng system của tiến trình và tiến trình con, nên tính được cả `tesseract` chạy ngoài) và load average 1 phút trước và sau. Máy chạy rất nhiều việc khác lúc đo, nên cột thời gian thật chỉ nên đọc ở mức bậc độ lớn. Output thật (Bảng 1 đến 3 và Bảng 2b, trích từ lệnh `--compare`):
+Mỗi engine chạy một lượt khởi động (không tính giờ), rồi chạy 24 ảnh, mỗi ảnh một lần. Lab ghi thời gian thật (`perf_counter`), CPU (user cộng system của tiến trình và tiến trình con, nên tính được cả `tesseract` chạy ngoài) và load average 1 phút trước và sau. Máy chạy rất nhiều việc khác lúc đo, nên cột thời gian thật chỉ nên đọc để biết bậc độ lớn. Kết quả chạy thật (Bảng 1 đến 3 và Bảng 2b, trích từ lệnh `--compare`):
 
 ```text
 Bảng 1. Thời gian trên 24 ảnh, CPU và mô hình
@@ -213,9 +213,9 @@ paddleocr-v5  0.102  0.117   0.112  0.119   0.113
 <figcaption>Hình 2. CER trung bình của năm trường theo biến thể ảnh, từ Bảng 3: EasyOCR thấp nhất ở ba biến thể và cao nhất ở ảnh mờ, Tesseract ổn định, hai cấu hình PaddleOCR gần như phẳng ở mức cao hơn.</figcaption>
 </figure>
 
-**Tốc độ và CPU.** Cột thời gian thật bị tải làm nhiễu: dòng `paddleocr-v5` chạy trong lúc load average vọt từ 36,9 lên 167,5 nên 22,39 giây một ảnh không so được với 6,57 giây của dòng trên. CPU ít bị nhiễu hơn: Tesseract 0,42 giây, EasyOCR 3,06 giây, PaddleOCR 6,28 và 8,99 giây mỗi ảnh. Ta chỉ khẳng định thứ bậc lớn: EasyOCR tốn cỡ bảy lần CPU của Tesseract, PaddleOCR (PP-OCRv6) cỡ mười lăm lần, trên máy này, không GPU. CPU của EasyOCR lớn hơn thời gian thật (3,06 so với 2,38): PyTorch dùng nhiều thread. Thời gian «nạp» gồm cả `import` thư viện: 15,0 giây cho EasyOCR, 0,1 giây cho Tesseract; ta không tách bao nhiêu trong đó là import và bao nhiêu là đọc mô hình. Trong dịch vụ thật, nạp mô hình một lần lúc khởi động, không nạp theo từng request.
+**Tốc độ và CPU.** Cột thời gian thật bị tải làm nhiễu: dòng `paddleocr-v5` chạy trong lúc load average vọt từ 36,9 lên 167,5 nên 22,39 giây một ảnh không so được với 6,57 giây của dòng trên. CPU ít bị nhiễu hơn: Tesseract 0,42 giây, EasyOCR 3,06 giây, PaddleOCR 6,28 và 8,99 giây mỗi ảnh. Ta chỉ khẳng định bậc độ lớn: EasyOCR tốn cỡ bảy lần CPU của Tesseract, PaddleOCR (PP-OCRv6) cỡ mười lăm lần, trên máy này, không GPU. CPU của EasyOCR lớn hơn thời gian thật (3,06 so với 2,38): PyTorch dùng nhiều thread. Thời gian «nạp» gồm cả `import` thư viện: 15,0 giây cho EasyOCR, 0,1 giây cho Tesseract; ta không tách bao nhiêu trong đó là import và bao nhiêu là đọc mô hình. Trong dịch vụ thật, nạp mô hình một lần lúc khởi động, không nạp theo từng yêu cầu.
 
-**Độ chính xác theo trường.** EasyOCR đọc đúng 100% số căn cước và ngày sinh, và có CER thấp nhất ở ảnh sạch (0,009), nghiêng (0,008) và tối (0,014). Nó tệ nhất ở ảnh mờ: 0,159 so với 0,026 của Tesseract, và có hai kiểu lỗi riêng: nuốt dấu cách ở token cuối của tên («PHẠM THỊD», «VŨ THỊF») và làm rơi dấu chấm trong «TP.HCM» (thành «TPHCM» hoặc «TP HCM»). Tesseract ổn định hơn qua các biến thể nhưng mất dấu ở chữ hoa. PaddleOCR đọc đúng 100% số và ngày, rồi đuối ở chữ Việt: giới tính chỉ đúng 50%, quê quán 33%, và «bỏ dấu» vẫn chỉ 62% cho tên, nghĩa là nhiều chữ biến mất chứ không chỉ mất dấu: «Hà Nội» thành «Hà Ni», «Cần Thơ» thành «Cn Tho». Bảng sau cho thấy một lý do kiểm tra được:
+**Độ chính xác theo trường.** EasyOCR đọc đúng 100% số căn cước và ngày sinh, và có CER thấp nhất ở ảnh sạch (0,009), nghiêng (0,008) và tối (0,014). EasyOCR tệ nhất ở ảnh mờ: 0,159 so với 0,026 của Tesseract, và mắc hai kiểu lỗi riêng: nuốt dấu cách ở token cuối của tên («PHẠM THỊD», «VŨ THỊF») và làm rơi dấu chấm trong «TP.HCM» (thành «TPHCM» hoặc «TP HCM»). Tesseract ổn định hơn qua các biến thể nhưng mất dấu ở chữ hoa. PaddleOCR đọc đúng 100% số và ngày, nhưng yếu hẳn ở chữ Việt: giới tính chỉ đúng 50%, quê quán 33%, và «bỏ dấu» vẫn chỉ 62% cho tên, nghĩa là nhiều chữ biến mất chứ không chỉ mất dấu: «Hà Nội» thành «Hà Ni», «Cần Thơ» thành «Cn Tho». Bảng sau cho thấy một lý do kiểm tra được:
 
 ```text
 Bảng 5. Ký tự có dấu có trong đáp án của bộ ảnh mà bảng ký tự của mô hình nhận dạng KHÔNG có (Tesseract không được kiểm)
@@ -230,7 +230,7 @@ Lab đọc `character_dict` trong `inference.yml` của mô hình nhận dạng 
 
 ## Confidence: mỗi engine một thước
 
-Ba engine cho confidence ở ba dạng: Tesseract 0 đến 100 theo từng từ (adapter đưa về 0..1 rồi lấy trung bình theo dòng), EasyOCR và PaddleOCR 0..1 theo từng dòng. Cùng một ảnh, dòng họ tên của `s1-clean` (đáp án «LÊ VĂN C») theo từng engine, output thật:
+Ba engine trả confidence theo ba dạng: Tesseract 0 đến 100 theo từng từ (adapter đưa về 0..1 rồi lấy trung bình theo dòng), EasyOCR và PaddleOCR 0..1 theo từng dòng. Cùng một ảnh, dòng họ tên của `s1-clean` (đáp án «LÊ VĂN C») theo từng engine, kết quả chạy thật:
 
 ```text
 đáp án full_name = 'LÊ VĂN C'
@@ -254,11 +254,11 @@ paddleocr-v5        67     1.00          0/67       53     0.94         53/53
 
 Ba điều rút ra. Một: **không có ngưỡng chung.** Với EasyOCR, ngưỡng 0,8 chặn bớt lỗi (còn 9 trên 22 lọt) nhưng cũng chặn nhầm 17 trên 98 dòng đúng; với PaddleOCR nó không chặn được dòng sai nào, vì mọi dòng, đúng hay sai, đều trên 0,8. Hai: **confidence cao không bảo đảm đúng.** Dòng sai của PaddleOCR trung bình 0,95; ta không đo vì sao, nhưng sự trùng hợp với bảng ký tự thiếu ở trên là lý do để không dùng một mình confidence cho engine này. Ba: EasyOCR tách đúng sai rõ nhất (0,92 cho dòng đúng, 0,71 cho dòng sai), Tesseract tách yếu hơn (0,95 và 0,82) và để lọt 17 trên 29. Ngưỡng nên chọn theo từng engine và từng trường trên dữ liệu có đáp án, kèm kiểm tra khác như định dạng và bảng ký tự; bài 45 chọn một ngưỡng chung cho Tesseract trên bộ ảnh vàng; ta chưa có ngưỡng riêng cho từng engine hay từng trường.
 
-Vậy chọn engine nào cho `kyc-ocr`? Theo số đo trên bộ ảnh này: Tesseract là mặc định hợp lý cho CI và các bài sau của loạt bài vì nhẹ nhất, khá ổn định qua mờ, nghiêng, tối ở 24 thẻ phẳng (không áp dụng cho ảnh đã nắn của bài 42, xem bảng chéo ở trên), và có gói `vie`, nhưng mất dấu chữ hoa. EasyOCR là ứng viên thứ hai đáng thử trên ảnh chụp thật, vì giữ dấu tốt hơn trên ảnh rõ (họ tên khớp nguyên văn 14 trên 18 ảnh sạch, nghiêng và tối, so với 2 trên 18 của Tesseract; Bảng 2b), nhưng kém Tesseract ở ảnh mờ (0 trên 6 so với 3 trên 6). PaddleOCR với hai cấu hình đã thử chưa đủ cho họ tên và quê quán tiếng Việt. Dù chọn cái nào, kết quả vẫn qua hậu xử lý (bài 44) và người duyệt.
+Vậy chọn engine nào cho `kyc-ocr`? Theo số đo trên bộ ảnh này: Tesseract là mặc định hợp lý cho CI và các bài sau của loạt bài vì nhẹ nhất, khá ổn định khi ảnh mờ, nghiêng hay tối ở 24 thẻ phẳng (không áp dụng cho ảnh đã nắn của bài 42, xem bảng chéo ở trên), và có gói `vie`, nhưng mất dấu chữ hoa. EasyOCR là ứng viên thứ hai đáng thử trên ảnh chụp thật, vì giữ dấu tốt hơn trên ảnh rõ (họ tên khớp nguyên văn 14 trên 18 ảnh sạch, nghiêng và tối, so với 2 trên 18 của Tesseract; Bảng 2b), nhưng kém Tesseract ở ảnh mờ (0 trên 6 so với 3 trên 6). PaddleOCR với hai cấu hình đã thử chưa đủ tốt cho họ tên và quê quán tiếng Việt. Dù chọn cái nào, kết quả vẫn qua hậu xử lý (bài 44) và người duyệt.
 
 <div class="tkh-callout tkh-callout--warn">
 <span class="tkh-callout-title">Giới hạn của ví dụ so với production</span>
-<p>Bộ ảnh chỉ có 24 ảnh từ 6 thẻ, một font (Arial), nền phẳng, chữ in hoa sạch; mờ, nghiêng và tối là hiệu ứng sinh bằng code, không phải nhiễu của camera điện thoại, loá, nén JPEG hay thẻ cong. Sáu tên và sáu thành phố là toàn bộ từ vựng, nên con số theo trường (một trường sai ở một thẻ là 4 điểm phần trăm) chỉ đáng tin ở mức thứ bậc lớn. Phép chấm dễ dãi với trường ngắn, ta chỉ thử một cấu hình mỗi engine ngoài lưới của Tesseract, và chỉ chạy CPU trên một máy đang bận. Trước khi chọn engine cho production, cần đo lại trên ảnh thật đã được phép dùng, đủ lớn, theo đúng quy trình của người duyệt.</p>
+<p>Bộ ảnh chỉ có 24 ảnh từ 6 thẻ, một font (Arial), nền phẳng, chữ in hoa sạch; mờ, nghiêng và tối là hiệu ứng sinh bằng code, không phải nhiễu của camera điện thoại, loá, nén JPEG hay thẻ cong. Sáu tên và sáu thành phố là toàn bộ từ vựng, nên con số theo trường (một trường sai ở một thẻ là 4 điểm phần trăm) chỉ đáng tin ở mức bậc độ lớn. Phép chấm dễ dãi với trường ngắn, ta chỉ thử một cấu hình mỗi engine ngoài lưới của Tesseract, và chỉ chạy CPU trên một máy đang bận. Trước khi chọn engine cho production, cần đo lại trên ảnh thật đã được phép dùng, đủ lớn, theo đúng quy trình của người duyệt.</p>
 </div>
 
 ## Chạy và kiểm chứng
@@ -276,7 +276,7 @@ uv run --project $L $L/exercise_crop.py                          # bài tập 1
 uv run --project $L $L/main.py --verify                          # chỉ cần Tesseract
 ```
 
-Bảng so sánh chỉ có hàng của engine đã có file `out/results-<engine>.json`. Engine không chạy được (hoặc chưa chạy) không có hàng và không có số bịa; chạy lõi mà không cài gì thêm, bảng chỉ có hàng `tesseract`. `--verify` chỉ cần Tesseract và kiểm 31 điều, không điều nào là ngưỡng tốc độ. Các ca gồm: dữ liệu (24 ảnh, cùng seed cùng ảnh), phép chấm (Levenshtein, CER, `fold`, `nfc`), Tesseract trên thẻ sạch và ảnh mờ, ảnh trắng, file hỏng hoặc không tồn tại ném `OcrError`, thiếu `easyocr` ném `EngineUnavailable` kèm hướng dẫn `--extra easyocr`.
+Bảng so sánh chỉ có hàng của engine đã có file `out/results-<engine>.json`. Engine không chạy được (hoặc chưa chạy) không có hàng và không có số bịa; chạy lõi mà không cài gì thêm, bảng chỉ có hàng `tesseract`. `--verify` chỉ cần Tesseract và kiểm tra 31 điều, không điều nào là ngưỡng tốc độ. Các test case gồm: dữ liệu (24 ảnh, cùng seed thì cùng ảnh), phép chấm (Levenshtein, CER, `fold`, `nfc`), Tesseract trên thẻ sạch và ảnh mờ, ảnh trắng, file hỏng hoặc không tồn tại ném `OcrError`, thiếu `easyocr` ném `EngineUnavailable` kèm hướng dẫn `--extra easyocr`.
 
 ```text
 OK 31/31
@@ -294,7 +294,7 @@ OK 31/31
 
 **Bài tập 2:** Chạy `main.py --compare --threshold 0.9`. Với EasyOCR, nâng ngưỡng từ 0,8 lên 0,9 thì số lỗi lọt đổi thế nào và số dòng đúng bị chặn nhầm đổi thế nào? Ngưỡng 0,9 có sửa được vấn đề của PaddleOCR không?
 
-<details><summary>Xem lời giải</summary><p>(1) <b>Không.</b> Trên 12 ảnh thẻ thẳng (sạch và tối), họ tên khớp nguyên văn 1 trên 12 khi để nguyên ảnh và 0 trên 12 khi cắt; số căn cước, ngày sinh, giới tính, quê quán không đổi (12, 12, 12, 12 ở cả hai cách). Dòng họ tên sau khi cắt hết từ rác (`'› : LE VAN C'` thành `'LE VAN C'` ở `s1-clean`) nhưng vẫn mất dấu, nên từ rác không phải nguyên nhân mất dấu; nguyên nhân thật ta chưa đo (giả thuyết cần kiểm: mô hình <code>vie</code> kém với chữ hoa có dấu chồng, thử bằng chữ thường). Ngoài ra cắt cố định chỉ đúng với thẻ giả có bố cục biết trước; ảnh thật cần phát hiện thẻ trước (bài 42). (2) Với EasyOCR, lỗi lọt giảm từ 9 trên 22 xuống 6 trên 22, nhưng dòng đúng bị chặn nhầm tăng từ 17 trên 98 lên 29 trên 98: giảm lỗi lọt phải trả bằng thêm hồ sơ chuyển cho người duyệt. Với PaddleOCR (PP-OCRv6), ngưỡng 0,9 vẫn để lọt 44 trên 47 dòng sai, nên không sửa được; chỗ hỏng là bảng ký tự, chỉ một phép kiểm khác (như đối chiếu bảng ký tự hay định dạng) mới bắt được.</p></details>
+<details><summary>Xem lời giải</summary><p>(1) <b>Không.</b> Trên 12 ảnh thẻ thẳng (sạch và tối), họ tên khớp nguyên văn 1 trên 12 khi để nguyên ảnh và 0 trên 12 khi cắt; số căn cước, ngày sinh, giới tính, quê quán không đổi (12, 12, 12, 12 ở cả hai cách). Dòng họ tên sau khi cắt hết từ rác (`'› : LE VAN C'` thành `'LE VAN C'` ở `s1-clean`) nhưng vẫn mất dấu, nên từ rác không phải nguyên nhân mất dấu; nguyên nhân thật ta chưa đo (giả thuyết cần kiểm: mô hình <code>vie</code> kém với chữ hoa có dấu chồng, thử bằng chữ thường). Ngoài ra cắt cố định chỉ đúng với thẻ giả có bố cục biết trước; ảnh thật cần phát hiện thẻ trước (bài 42). (2) Với EasyOCR, lỗi lọt giảm từ 9 trên 22 xuống 6 trên 22, nhưng dòng đúng bị chặn nhầm tăng từ 17 trên 98 lên 29 trên 98: giảm lỗi lọt phải đánh đổi bằng việc chuyển thêm hồ sơ cho người duyệt. Với PaddleOCR (PP-OCRv6), ngưỡng 0,9 vẫn để lọt 44 trên 47 dòng sai, nên không sửa được; chỗ hỏng là bảng ký tự, chỉ một phép kiểm khác (như đối chiếu bảng ký tự hay định dạng) mới bắt được.</p></details>
 
 Bài trước: [bài 42](/articles/python-opencv-phat-hien-canh-perspective-deskew). Bài tiếp: [bài 44](/articles/python-hau-xu-ly-ocr-regex-parse-truong-checksum).
 

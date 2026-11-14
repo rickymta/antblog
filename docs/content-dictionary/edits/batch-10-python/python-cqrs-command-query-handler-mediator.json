@@ -1,0 +1,143 @@
+{
+  "file": "python-cqrs-command-query-handler-mediator.md",
+  "edits": [
+    {
+      "old": "nghĩa là đường ghi và đường đọc được hiểu như hai việc khác nhau, mỗi việc có mô hình riêng. Nó **không** bắt buộc",
+      "new": "nghĩa là coi đường ghi và đường đọc là hai việc khác nhau, mỗi việc có mô hình riêng. CQRS **không** bắt buộc",
+      "reason": "Bỏ bị động kiểu Anh, bỏ 'Nó' đầu câu",
+      "severity": "medium"
+    },
+    {
+      "old": "Các chú thích kiểu mô tả luôn hình dạng hợp lệ:",
+      "new": "Các chú thích kiểu đồng thời mô tả hình dạng hợp lệ:",
+      "reason": "'mô tả luôn' gây hiểu nhầm là 'luôn luôn'",
+      "severity": "medium"
+    },
+    {
+      "old": "Một chú ý trung thực:",
+      "new": "Một lưu ý thẳng thắn:",
+      "reason": "Dịch máy của 'honest note'",
+      "severity": "low"
+    },
+    {
+      "old": "Hai kiểu hàm cho bước kế tiếp và lớp bọc, rồi `register` và `send`:",
+      "new": "Trước hết là hai kiểu hàm cho bước kế tiếp và lớp bọc, rồi đến `register` và `send`:",
+      "reason": "Câu cụt, thiếu động từ",
+      "severity": "medium"
+    },
+    {
+      "old": "Mediator này là phiên bản giảng giải. Nó không có notification",
+      "new": "Mediator này là bản minh hoạ: không có notification",
+      "reason": "'giảng giải' gượng; bỏ 'Nó' đầu câu",
+      "severity": "medium"
+    },
+    {
+      "old": "dựng bộ kiểm **đúng một lần** cho mỗi kiểu",
+      "new": "dựng bộ kiểm tra **đúng một lần** cho mỗi kiểu",
+      "reason": "'bộ kiểm' là cụm tự ghép, cụt",
+      "severity": "medium"
+    },
+    {
+      "old": "dựng lại bộ kiểm ở mọi lần gửi, và một ca `--verify`",
+      "new": "dựng lại bộ kiểm tra ở mọi lần gửi, và một test case `--verify`",
+      "reason": "Tự ghép 'bộ kiểm'; thống nhất 'test case'",
+      "severity": "medium"
+    },
+    {
+      "old": "đưa dataclass về dict để kiểm, và",
+      "new": "đưa dataclass về dict để kiểm tra, và",
+      "reason": "Lược mất chữ 'tra'",
+      "severity": "medium"
+    },
+    {
+      "old": "handler vẫn ăn dữ liệu chưa qua kiểm.",
+      "new": "handler vẫn nhận dữ liệu chưa qua kiểm tra.",
+      "reason": "'ăn' khẩu ngữ; lược chữ 'tra'",
+      "severity": "medium"
+    },
+    {
+      "old": "cùng lúc cho hai lỗi)",
+      "new": "cùng lúc cho ra hai lỗi)",
+      "reason": "Thiếu động từ rõ nghĩa",
+      "severity": "low"
+    },
+    {
+      "old": "Ưu điểm so với kiểm trong API:",
+      "new": "Ưu điểm so với việc kiểm tra trong API:",
+      "reason": "Lược mất danh từ",
+      "severity": "medium"
+    },
+    {
+      "old": "cũng được kiểm giống hệt, vì",
+      "new": "cũng được kiểm tra giống hệt, vì",
+      "reason": "Lược chữ 'tra'",
+      "severity": "low"
+    },
+    {
+      "old": "Log ở ngoài cùng nên thấy cả lỗi validate.",
+      "new": "Lớp log ở ngoài cùng nên thấy được cả lỗi validate.",
+      "reason": "Câu thiếu chủ ngữ rõ ràng",
+      "severity": "medium"
+    },
+    {
+      "old": "không âm thầm chạy bằng bảng tra cố định",
+      "new": "không lặng lẽ chạy bằng bảng tra cố định",
+      "reason": "Calque 'not silently' theo terminology",
+      "severity": "medium"
+    },
+    {
+      "old": "Test: OCR tắt cho `['begin', 'commit']` và đúng một hồ sơ trong kho.",
+      "new": "Test: khi OCR tắt, kết quả là `['begin', 'commit']` và đúng một hồ sơ trong kho.",
+      "reason": "'cho' dịch máy, câu khó hiểu",
+      "severity": "medium"
+    },
+    {
+      "old": "Đây là ca mà bài 67 để lại",
+      "new": "Đây là trường hợp mà bài 67 để lại",
+      "reason": "'ca' khẩu ngữ, thống nhất cách gọi",
+      "severity": "low"
+    },
+    {
+      "old": "lab có ca kiểm điều này để ai nối cơ sở dữ liệu thật không bất ngờ vì",
+      "new": "lab có test case kiểm tra điều này để ai chuyển sang cơ sở dữ liệu thật không bất ngờ trước",
+      "reason": "'nối' lệch nghĩa; thống nhất 'test case'",
+      "severity": "medium"
+    },
+    {
+      "old": "Kiểm các kết quả trên:",
+      "new": "Kiểm tra các kết quả trên:",
+      "reason": "Lược chữ 'tra'",
+      "severity": "medium"
+    },
+    {
+      "old": "31 ca: 4 ca mediator",
+      "new": "31 test case: 4 test case mediator",
+      "reason": "Thống nhất 'test case'",
+      "severity": "low"
+    },
+    {
+      "old": "21 ca pipeline",
+      "new": "21 test case pipeline",
+      "reason": "Thống nhất 'test case'",
+      "severity": "low"
+    },
+    {
+      "old": "và 6 ca qua HTTP",
+      "new": "và 6 test case qua HTTP",
+      "reason": "Thống nhất 'test case'",
+      "severity": "low"
+    },
+    {
+      "old": "để số đo gồm cả thời gian validate",
+      "new": "để số liệu đo bao gồm cả thời gian validate",
+      "reason": "'số đo' theo terminology",
+      "severity": "low"
+    },
+    {
+      "old": "mở rộng phạm vi khoá cho việc không cần",
+      "new": "mở rộng phạm vi khoá cho một việc không cần thiết",
+      "reason": "Cụm cụt, thiếu từ",
+      "severity": "medium"
+    }
+  ]
+}

@@ -8,16 +8,16 @@ tags: [python, toi-noi, clean-architecture, import-linter]
 language: vi
 ---
 
-Ba service Python của [Tới Nơi](/articles/du-an-mau-toi-noi) đã chạy riêng lẻ: OCR đọc CCCD và GPLX, so khớp khuôn mặt cho điểm tương đồng, fraud-scoring cho điểm rủi ro. Giờ cần một service **hồ sơ tài xế** gọi cả ba theo thứ tự rồi đưa hồ sơ vào hàng chờ người duyệt. Cách nhanh nhất là viết thẳng vào route FastAPI: nhận ảnh, gọi `pytesseract`, gọi gRPC, ghi PostgreSQL, trả JSON. Nó chạy. Rồi sprint sau ta muốn đổi engine OCR, hoặc chỉ muốn test luật «hồ sơ không có đồng ý khuôn mặt thì không gọi kyc-face», và phát hiện test nào cũng cần Tesseract, mạng và cơ sở dữ liệu.
+Ba service Python của [Tới Nơi](/articles/du-an-mau-toi-noi) đã chạy riêng lẻ: OCR đọc CCCD và GPLX, so khớp khuôn mặt cho điểm tương đồng, fraud-scoring cho điểm rủi ro. Giờ cần một service **hồ sơ tài xế** gọi cả ba theo thứ tự rồi đưa hồ sơ vào hàng chờ người duyệt. Cách nhanh nhất là viết thẳng vào route FastAPI: nhận ảnh, gọi `pytesseract`, gọi gRPC, ghi PostgreSQL, trả JSON. Cách đó chạy được. Rồi sprint sau ta muốn đổi engine OCR, hoặc chỉ muốn test luật «hồ sơ không có đồng ý khuôn mặt thì không gọi kyc-face», và phát hiện test nào cũng cần Tesseract, mạng và cơ sở dữ liệu.
 
-Bài này chia service thành bốn lớp để việc đổi OCR, đổi cơ sở dữ liệu và kiểm luật nghiệp vụ không kéo nhau theo. Quan trọng hơn, ta biến ranh giới thành thứ máy kiểm được: một import sai chiều làm lệnh `lint-imports` thất bại.
+Bài này chia service thành bốn lớp để việc đổi OCR, đổi cơ sở dữ liệu và kiểm thử luật nghiệp vụ không kéo nhau theo. Quan trọng hơn, ta biến ranh giới thành thứ máy kiểm được: một import sai chiều làm lệnh `lint-imports` thất bại.
 
-Đây là bài 67 của lộ trình **Python nâng cao qua Tới Nơi**, bài mở đầu phần 09. Bạn cần quen `Protocol` và tiêm phụ thuộc ([bài 14](/articles/python-abc-protocol-composition-dependency-injection)), bố cục `src` ([bài 20](/articles/python-dong-goi-ruff-pre-commit-cau-truc-du-an)) và bảng trạng thái hồ sơ KYC ([bài 41](/articles/python-kyc-tai-xe-bai-toan-du-lieu-metric)). Bài C# cùng chủ đề là [bài 31 của loạt .NET 10](/articles/dotnet10-clean-architecture-layers).
+Đây là bài 67 của lộ trình **Python nâng cao qua Tới Nơi**, bài mở đầu phần 09. Bạn cần quen `Protocol` và dependency injection ([bài 14](/articles/python-abc-protocol-composition-dependency-injection)), bố cục `src` ([bài 20](/articles/python-dong-goi-ruff-pre-commit-cau-truc-du-an)) và bảng trạng thái hồ sơ KYC ([bài 41](/articles/python-kyc-tai-xe-bai-toan-du-lieu-metric)). Bài C# cùng chủ đề là [bài 31 của loạt .NET 10](/articles/dotnet10-clean-architecture-layers).
 
 <div class="tkh-callout tkh-callout--example">
 <span class="tkh-callout-title">Thử trước khi đọc</span>
-<p>Use case gọi OCR qua một interface, còn adapter OCR nằm ở lớp <code>infrastructure</code> và hiện thực interface đó. Vậy lớp <code>application</code> có phải <code>import</code> lớp <code>infrastructure</code> không? Và trong Python, adapter có cần kế thừa interface không?</p>
-<details><summary>Xem đáp án</summary><p><b>Không cho cả hai.</b> Interface (port) do <code>application</code> khai báo; <code>infrastructure</code> import <code>application</code>, không ngược lại. Với <code>typing.Protocol</code>, adapter chỉ cần có đúng phương thức, không cần import hay kế thừa port; mypy kiểm khớp cấu trúc. Chỉ lớp ngoài cùng, <code>api</code>, biết cả hai và ghép chúng lại. Bài sẽ chạy <code>lint-imports</code> và mypy để xem máy nói gì.</p></details>
+<p>Use case gọi OCR qua một interface, còn adapter OCR nằm ở lớp <code>infrastructure</code> và triển khai interface đó. Vậy lớp <code>application</code> có phải <code>import</code> lớp <code>infrastructure</code> không? Và trong Python, adapter có cần kế thừa interface không?</p>
+<details><summary>Xem đáp án</summary><p><b>Không cho cả hai.</b> Interface (port) do <code>application</code> khai báo; <code>infrastructure</code> import <code>application</code>, không ngược lại. Với <code>typing.Protocol</code>, adapter chỉ cần có đúng phương thức, không cần import hay kế thừa port; mypy kiểm tra xem có khớp cấu trúc không. Chỉ lớp ngoài cùng, <code>api</code>, biết cả hai và ghép chúng lại. Bài sẽ chạy <code>lint-imports</code> và mypy để xem máy nói gì.</p></details>
 </div>
 
 ## Bốn lớp và một chiều phụ thuộc
@@ -52,7 +52,7 @@ Nếu bạn đã đọc loạt C#, đây là cùng ý với bốn project Domain
 
 ## Domain: quy tắc không biết ai gọi nó
 
-`domain/kyc.py` giữ bảng trạng thái của bài 41 và aggregate `KycApplication`. Hai quy tắc đáng nhìn lại: bước nào không đủ tin cậy đều có đường sang `needs_review`, và `approved`, `rejected` chỉ đến từ `needs_review`. Máy không tự duyệt hay từ chối một người. Khác bài 41, cạnh `risk_scored` → `approved` (tham số `auto_approve`) đã bị gỡ khỏi domain từ phần 09; muốn duyệt tự động về sau phải thêm lại bằng một quyết định nghiệp vụ có chủ ý.
+`domain/kyc.py` giữ bảng trạng thái của bài 41 và aggregate `KycApplication`. Hai quy tắc đáng nhìn lại: bước nào không đủ tin cậy đều có đường sang `needs_review`, và `approved`, `rejected` chỉ đến từ `needs_review`. Hệ thống không tự duyệt hay từ chối một người. Khác bài 41, cạnh `risk_scored` → `approved` (tham số `auto_approve`) đã bị gỡ khỏi domain từ phần 09; muốn duyệt tự động về sau phải thêm lại bằng một quyết định nghiệp vụ có chủ ý.
 
 ```python
 # src/kyc_service/domain/kyc.py (trích)
@@ -114,11 +114,11 @@ Aggregate đổi trạng thái qua các phương thức; mọi lần đổi đi 
         self.review = ReviewDecision(reviewer_id, decision, reason, now)
 ```
 
-Ba điểm cần để ý. Một hồ sơ gồm **đúng hai giấy tờ** (một CCCD, một GPLX); `submit()` từ chối hồ sơ thiếu, thừa hoặc hai giấy cùng loại. Kết quả OCR, điểm khuôn mặt, điểm rủi ro được lưu trong hồ sơ như **đầu vào cho người duyệt**: không có phương thức nào biến một điểm thành `approved`. Điểm khuôn mặt `FaceMatch` là cosine từ -1 đến 1 (miền của SFace; điểm âm là có thật), còn `RiskScore` là 0 đến 1; nguồn nào dùng thang khác (như 0 đến 100) thì adapter chia về 0 đến 1 trước khi vào domain. Mã hồ sơ nhận `KYC-` kèm từ bốn chữ số `[0-9]` trở lên, nên không ngừng nhận ở `KYC-10000`. Và domain không import gì ngoài thư viện chuẩn: không FastAPI, không pydantic, không biết «PostgreSQL» là gì. Nhờ vậy test domain (`tests/test_domain.py`, gồm cả ma trận 7 × 7 trạng thái) chạy không cần dựng thứ gì.
+Ba điểm cần để ý. Một hồ sơ gồm **đúng hai giấy tờ** (một CCCD, một GPLX); `submit()` từ chối hồ sơ thiếu, thừa hoặc hai giấy cùng loại. Kết quả OCR, điểm khuôn mặt, điểm rủi ro được lưu trong hồ sơ như **đầu vào cho người duyệt**: không có phương thức nào biến một điểm thành `approved`. Điểm khuôn mặt `FaceMatch` là cosine từ -1 đến 1 (miền của SFace; điểm âm là có thật), còn `RiskScore` là 0 đến 1; nguồn nào dùng thang khác (như 0 đến 100) thì adapter chia về 0 đến 1 trước khi vào domain. Mã hồ sơ nhận `KYC-` kèm từ bốn chữ số `[0-9]` trở lên, nên từ `KYC-10000` trở đi mã vẫn hợp lệ. Và domain không import gì ngoài thư viện chuẩn: không FastAPI, không pydantic, không biết «PostgreSQL» là gì. Nhờ vậy test domain (`tests/test_domain.py`, gồm cả ma trận 7 × 7 trạng thái) chạy không cần dựng thứ gì.
 
 ## Application: port là Protocol, use case chỉ biết port
 
-Use case cần bốn thứ từ bên ngoài: đọc giấy tờ, so khuôn mặt, chấm điểm rủi ro, lưu hồ sơ. Lớp `application` khai báo chúng thành `Protocol`, đúng hình thức mà bài 14 đã dùng cho chính sách cước:
+Use case cần bốn thứ từ bên ngoài: đọc giấy tờ, so khuôn mặt, chấm điểm rủi ro, lưu hồ sơ. Lớp `application` khai báo chúng thành `Protocol`, đúng hình thức mà bài 14 đã dùng cho chính sách tính cước:
 
 ```python
 # src/kyc_service/application/ports.py (trích)
@@ -140,7 +140,7 @@ class RiskScorePort(Protocol):
     def score(self, application: KycApplication) -> RiskScore: ...
 ```
 
-`KycRepository` và `Clock` khai báo cùng cách trong `ports.py`. Điểm khác ABC: adapter không phải import hay kế thừa port. `FakeOcr` ở lớp ngoài chỉ cần có `read(document) -> OcrResult`. Nếu sai tên hoặc chữ ký, mypy ở chế độ `--strict` báo ngay tại chỗ ghép. Lab có sẵn `demo-errors/bad_adapter.py`, một adapter đặt tên phương thức là `read_document` rồi truyền vào `build_container`; `verify.sh` chạy mypy trên đúng file này và kỳ vọng đúng một lỗi:
+`KycRepository` và `Clock` khai báo cùng cách trong `ports.py`. Điểm khác so với ABC: adapter không phải import hay kế thừa port. `FakeOcr` ở lớp ngoài chỉ cần có `read(document) -> OcrResult`. Nếu sai tên hoặc chữ ký, mypy ở chế độ `--strict` báo ngay tại chỗ ghép. Lab có sẵn `demo-errors/bad_adapter.py`, một adapter đặt tên phương thức là `read_document` rồi truyền vào `build_container`; `verify.sh` chạy mypy trên đúng file này và kỳ vọng đúng một lỗi:
 
 ```bash
 uv run --project examples/toi-noi-python/67-clean-architecture-layers mypy --config-file examples/toi-noi-python/67-clean-architecture-layers/pyproject.toml examples/toi-noi-python/67-clean-architecture-layers/demo-errors/bad_adapter.py
@@ -151,7 +151,7 @@ demo-errors/bad_adapter.py:12: error: Argument "ocr" to "build_container" has in
 Found 1 error in 1 file (checked 1 source file)
 ```
 
-Use case là lớp nhận port qua constructor (tiêm phụ thuộc, bài 14) và điều phối. Nó không chứa quy tắc nghiệp vụ, vì quy tắc nằm ở domain, và không biết HTTP:
+Use case là lớp nhận port qua constructor (dependency injection, bài 14) và điều phối. Use case không chứa quy tắc nghiệp vụ, vì quy tắc nằm ở domain, và không biết HTTP:
 
 ```python
 # src/kyc_service/application/use_cases.py (trích)
@@ -189,7 +189,7 @@ Use case là lớp nhận port qua constructor (tiêm phụ thuộc, bài 14) v�
 
 Ba quyết định trong đoạn này. **Nhận hồ sơ trước, kiểm sau**: `add()` chạy trước khi gọi service ngoài, nên OCR tắt không làm mất hồ sơ. **Lỗi lường trước đi qua `PortFailure`**: adapter dịch mọi lỗi của service (tắt, trả dữ liệu sai miền) về một kiểu chung có tên service; use case giữ hồ sơ ở trạng thái đã đạt và báo `pending_check`, API trả `202 Accepted` thay vì `201`. **Bảng chuyển quyết định đường đi**: nếu tài xế chưa đồng ý so khớp khuôn mặt, hồ sơ đi `ocr_done` rồi `needs_review`; use case không gọi `kyc-face` và `advance` cũng không cho nhảy sang điểm rủi ro.
 
-Use case ở bài này cố ý mỏng: nó luôn kết thúc ở `needs_review`. Ngưỡng điểm, domain event và bảng ca nằm ở bài 70.
+Use case ở bài này cố ý mỏng: nó luôn kết thúc ở `needs_review`. Ngưỡng điểm, domain event và bảng các trường hợp nằm ở bài 70.
 
 ## Infrastructure và api: nơi duy nhất biết adapter cụ thể
 
@@ -221,7 +221,7 @@ class FakeOcr:
 
 Adapter thật cho OCR, khuôn mặt và fraud nằm ở phần 05 đến 07; cơ sở dữ liệu thật ở bài 69. Adapter giả chỉ để chạy luồng và test: dữ liệu là tổng hợp (CCCD giả bắt đầu `099`), không phải mô hình. Kho `InMemoryKycRepository` trả **bản sao** như một cơ sở dữ liệu thật: sửa object đã nạp mà không `save` thì không có gì đổi, nên test không vô tình dựa vào việc hai biến cùng trỏ một object.
 
-Chỗ ghép là `api/container.py`, composition root. Port nào không truyền thì dùng adapter giả **và phát cảnh báo** `UserWarning` nêu tên các port đó: một bản chạy thật quên truyền adapter OCR sẽ đọc giấy tờ bằng bảng tra cố định, nên việc dùng adapter giả không được âm thầm.
+Chỗ ghép là `api/container.py`, composition root. Port nào không truyền thì dùng adapter giả **và phát cảnh báo** `UserWarning` nêu tên các port đó: một bản chạy thật quên truyền adapter OCR sẽ đọc giấy tờ bằng bảng tra cố định, nên việc dùng adapter giả không được diễn ra mà không báo gì.
 
 ```python
 # src/kyc_service/api/container.py (trích)
@@ -279,7 +279,7 @@ Lớp `api` còn một việc: dịch use case sang HTTP. `POST /applications` t
 
 ## import-linter: biến ranh giới thành test
 
-Thư mục tách đôi không ngăn ai viết `from kyc_service.infrastructure... import ...` trong domain vào lúc 11 giờ đêm. `import-linter` đọc đồ thị import của package và kiểm các hợp đồng khai báo trong `pyproject.toml`:
+Việc chia thư mục không ngăn được ai viết `from kyc_service.infrastructure... import ...` trong domain vào lúc 11 giờ đêm. `import-linter` đọc đồ thị import của package và kiểm các hợp đồng khai báo trong `pyproject.toml`:
 
 ```toml
 # pyproject.toml (trích)
@@ -318,7 +318,7 @@ Lõi không import framework KEPT
 Contracts: 2 kept, 0 broken.
 ```
 
-Một hợp đồng chỉ có giá trị nếu nó **có thể vỡ**. Trong bản sao ở thư mục tạm, ta thêm một dòng đầu `domain/kyc.py` (import kho trong bộ nhớ) và một dòng đầu `application/use_cases.py` (`import fastapi`), rồi chạy lại:
+Một hợp đồng chỉ có giá trị nếu nó **có thể vỡ**. Trong bản sao ở thư mục tạm, ta thêm một dòng ở đầu `domain/kyc.py` (import kho trong bộ nhớ) và một dòng ở đầu `application/use_cases.py` (`import fastapi`), rồi chạy lại:
 
 ```text
 Analyzed 29 files, 48 dependencies.
@@ -352,7 +352,7 @@ kyc_service.application is not allowed to import fastapi:
 
 Bộ test của lab làm đúng việc đó tự động (`tests/test_architecture.py`): một test chạy trên code thật, bốn test phá có chủ ý trên bản sao rồi kỳ vọng `returncode == 1`. Nếu có ai sửa cấu hình cho hợp đồng lỏng đi, test «phải vỡ» sẽ đỏ.
 
-Hợp đồng `layers` bản đầu của lab chỉ liệt kê bốn lớp, và khi ta thử thêm `kyc_service/workers.py` (import `api` và `infrastructure`, một module nằm ngoài bốn lớp) thì vẫn «2 kept»: module lạ lọt khỏi hợp đồng mà không ai hay. Vì vậy hợp đồng hiện dùng `containers` kèm `exhaustive = true`; cùng thử nghiệm đó cho:
+Hợp đồng `layers` bản đầu của lab chỉ liệt kê bốn lớp, và khi ta thử thêm `kyc_service/workers.py` (import `api` và `infrastructure`, một module nằm ngoài bốn lớp) thì vẫn «2 kept»: module lạ lọt khỏi hợp đồng mà không ai hay. Vì vậy hợp đồng hiện dùng `containers` kèm `exhaustive = true`; chạy cùng thử nghiệm đó thì cho kết quả:
 
 ```text
 Analyzed 30 files, 48 dependencies.
@@ -409,7 +409,7 @@ KYC-0001 DR-001 approved     id=099*******83   face=0.88 risk=0.09
 KYC-0001 DR-001 submitted    id=-              face=-    risk=-    pending=kyc-ocr
 ```
 
-KYC-0002 có độ tin cậy OCR thấp và điểm khuôn mặt thấp nên hai lý do xuất hiện, nhưng hồ sơ vẫn chỉ vào hàng chờ; KYC-0003 chưa đồng ý khuôn mặt nên `face` và `risk` trống. Dòng cuối cho thấy OCR tắt vẫn nhận hồ sơ. Lệnh kiểm các kết quả trên:
+KYC-0002 có độ tin cậy OCR thấp và điểm khuôn mặt thấp nên hai lý do xuất hiện, nhưng hồ sơ vẫn chỉ vào hàng chờ; KYC-0003 chưa đồng ý khuôn mặt nên `face` và `risk` trống. Dòng cuối cho thấy OCR tắt vẫn nhận hồ sơ. Lệnh kiểm tra các kết quả trên:
 
 ```bash
 uv run --project examples/toi-noi-python/67-clean-architecture-layers examples/toi-noi-python/67-clean-architecture-layers/main.py --verify
@@ -419,7 +419,7 @@ uv run --project examples/toi-noi-python/67-clean-architecture-layers examples/t
 OK 23/23
 ```
 
-23 ca gồm: ba hồ sơ đều dừng ở `needs_review`, mặt nạ số giấy tờ, không đồng ý khuôn mặt thì `kyc-face` không được gọi, ba kiểu service tắt hoặc nói dối (OCR tắt, face tắt, face trả điểm 1,7), điểm cosine âm vẫn tới người duyệt, cảnh báo adapter giả, thứ tự trạng thái (`approved` chỉ từ `needs_review`, quyết định lần hai bị từ chối), đầu vào nói dối (ảnh GPLX nộp vào ô CCCD, `status` tự đặt, hai CCCD) và 6 ca qua HTTP (thêm ca `face_consent` gửi dạng chuỗi `"false"` bị từ chối thay vì đoán). Cả chuỗi ruff, mypy `--strict`, mypy phải bắt adapter sai chữ ký, import-linter, pytest và `--verify` nằm trong `verify.sh`:
+23 test case gồm: ba hồ sơ đều dừng ở `needs_review`, mặt nạ số giấy tờ, không đồng ý khuôn mặt thì `kyc-face` không được gọi, ba kiểu service tắt hoặc nói dối (OCR tắt, face tắt, face trả điểm 1,7), điểm cosine âm vẫn tới người duyệt, cảnh báo adapter giả, thứ tự trạng thái (`approved` chỉ từ `needs_review`, quyết định lần hai bị từ chối), đầu vào nói dối (ảnh GPLX nộp vào ô CCCD, `status` tự đặt, hai CCCD) và 6 test case qua HTTP (thêm test case `face_consent` gửi dạng chuỗi `"false"` bị từ chối thay vì đoán). Cả chuỗi ruff, mypy `--strict`, mypy phải bắt adapter sai chữ ký, import-linter, pytest và `--verify` nằm trong `verify.sh`:
 
 ```bash
 sh examples/toi-noi-python/67-clean-architecture-layers/verify.sh
@@ -455,7 +455,7 @@ OK 7/7
 
 Python 3.14.7, FastAPI 0.162.0, pydantic 2.14.3, import-linter 2.16, mypy 2.4.1, pytest 9.2.0, ruff 0.17.4 (theo `uv.lock`).
 
-Một ca trong `--verify` ghi nhận **giới hạn của lab này**: khi risk adapter ném lỗi lập trình bất ngờ (không phải `PortFailure`), hồ sơ `KYC-0001` đã được `add()` và còn lại ở `submitted` trong kho, không có kết quả OCR. Bốn lớp sạch không tự cho ta transaction. Bài 68 thêm nó dưới dạng một behavior quanh mỗi command.
+Một test case trong `--verify` ghi nhận **giới hạn của lab này**: khi risk adapter ném lỗi lập trình bất ngờ (không phải `PortFailure`), hồ sơ `KYC-0001` đã được `add()` và còn lại ở `submitted` trong kho, không có kết quả OCR. Kiến trúc bốn lớp không tự cung cấp transaction. Bài 68 thêm nó dưới dạng một behavior quanh mỗi command.
 
 | Hiện tượng | Kiểm tra trước |
 | --- | --- |
@@ -473,7 +473,7 @@ Một ca trong `--verify` ghi nhận **giới hạn của lab này**: khi risk a
 
 **Bài tập:** (1) Thêm một `Notifier` Protocol vào `application/ports.py` để use case báo cho tài xế khi hồ sơ vào hàng chờ; adapter thật gửi SMS. Lớp nào được import gì, và hợp đồng nào cần sửa? (2) Một đồng nghiệp muốn `domain/kyc.py` dùng `datetime.now(UTC)` cho `submitted_at` cho tiện. `lint-imports` có báo không? Vì sao lab truyền `now` vào `submit()`?
 
-<details><summary>Xem lời giải</summary><p>(1) <code>Notifier</code> là port nên nằm trong <code>application/ports.py</code>; adapter SMS nằm trong <code>infrastructure/</code> và import <code>application</code> (nếu cần dùng <code>PortFailure</code>); chỉ <code>api/container.py</code> ghép chúng. Không hợp đồng nào phải sửa: <code>layers</code> và <code>forbidden</code> đã bao mọi module trong từng lớp; chỉ khi thêm một lớp mới ngang hàng với bốn lớp này mới phải khai báo thêm. (2) <b>Không báo</b>: <code>datetime</code> là thư viện chuẩn, import-linter không có gì để cấm. Nhưng domain mất tính xác định, test phải patch đồng hồ. Truyền <code>now</code> từ use case (lấy từ port <code>Clock</code>) giữ domain thuần và cho test dùng <code>FixedClock</code>.</p></details>
+<details><summary>Xem lời giải</summary><p>(1) <code>Notifier</code> là port nên nằm trong <code>application/ports.py</code>; adapter SMS nằm trong <code>infrastructure/</code> và import <code>application</code> (nếu cần dùng <code>PortFailure</code>); chỉ <code>api/container.py</code> ghép chúng. Không có hợp đồng nào phải sửa: <code>layers</code> và <code>forbidden</code> đã bao mọi module trong từng lớp; chỉ khi thêm một lớp mới ngang hàng với bốn lớp này mới phải khai báo thêm. (2) <b>Không báo</b>: <code>datetime</code> là thư viện chuẩn, import-linter không có gì để cấm. Nhưng domain mất tính xác định, test phải patch đồng hồ. Truyền <code>now</code> từ use case (lấy từ port <code>Clock</code>) giữ domain thuần và cho test dùng <code>FixedClock</code>.</p></details>
 
 Bài trước: [bài 66](/articles/python-notebook-den-production-code). Bài tiếp: [bài 68](/articles/python-cqrs-command-query-handler-mediator).
 

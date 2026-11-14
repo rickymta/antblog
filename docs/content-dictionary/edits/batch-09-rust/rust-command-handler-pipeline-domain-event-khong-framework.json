@@ -1,0 +1,149 @@
+{
+ "file": "rust-command-handler-pipeline-domain-event-khong-framework.md",
+ "edits": [
+  {
+   "old": "pipeline validate, trace, transaction đo bằng log, domain event ghi outbox cùng transaction, chi phí Box,",
+   "new": "pipeline gồm validate, trace, transaction với thứ tự chứng minh bằng log, domain event ghi outbox cùng transaction, chi phí của Box,",
+   "reason": "Danh sách cụt, thiếu động từ",
+   "severity": "medium"
+  },
+  {
+   "old": "Sau đó nó thêm kiểm đầu vào, log",
+   "new": "Sau đó nó thêm bước kiểm tra đầu vào, log",
+   "reason": "Cụm 'kiểm đầu vào' cụt",
+   "severity": "medium"
+  },
+  {
+   "old": "tách các việc đó thành lớp có thứ tự",
+   "new": "tách các việc đó thành các lớp có thứ tự",
+   "reason": "Thiếu từ chỉ số nhiều",
+   "severity": "low"
+  },
+  {
+   "old": "rồi chạy các ca hỏng để xem",
+   "new": "rồi chạy các kịch bản hỏng để xem",
+   "reason": "'ca' mơ hồ",
+   "severity": "medium"
+  },
+  {
+   "old": "Kiểm đầu vào là trait riêng",
+   "new": "Việc kiểm tra đầu vào dùng trait riêng",
+   "reason": "Cụm cụt, thiếu động từ",
+   "severity": "medium"
+  },
+  {
+   "old": "Thông điệp liệt kê cả các command",
+   "new": "Thông điệp lỗi liệt kê cả các command",
+   "reason": "Thiếu danh từ",
+   "severity": "low"
+  },
+  {
+   "old": "Kiểu hệ thống bắt được",
+   "new": "Hệ thống kiểu bắt được",
+   "reason": "Trật tự từ kiểu tiếng Anh (type system)",
+   "severity": "medium"
+  },
+  {
+   "old": "Thứ tự chứng minh bằng log.",
+   "new": "Log chứng minh thứ tự này.",
+   "reason": "Câu thiếu chủ ngữ",
+   "severity": "medium"
+  },
+  {
+   "old": "Lệnh cước 0 qua `Validated` ngoài cùng",
+   "new": "Lệnh có cước 0 đi qua `Validated` ở ngoài cùng",
+   "reason": "Câu thiếu động từ",
+   "severity": "medium"
+  },
+  {
+   "old": "thì cùng lệnh để lại ba dòng",
+   "new": "thì lệnh đó để lại ba dòng",
+   "reason": "Trật tự gượng",
+   "severity": "medium"
+  },
+  {
+   "old": "Sau ca thành công (1 bút toán, 1 dòng outbox), lab chạy ba ca hỏng",
+   "new": "Sau kịch bản thành công (1 bút toán, 1 dòng outbox), lab chạy ba kịch bản hỏng",
+   "reason": "'ca' mơ hồ",
+   "severity": "medium"
+  },
+  {
+   "old": "| Ca | Hỏng ở lớp |",
+   "new": "| Kịch bản | Hỏng ở lớp |",
+   "reason": "Thống nhất với 'kịch bản'",
+   "severity": "low"
+  },
+  {
+   "old": "Ca thứ ba đáng đọc kỹ.",
+   "new": "Kịch bản thứ ba đáng đọc kỹ.",
+   "reason": "Thống nhất với 'kịch bản'",
+   "severity": "low"
+  },
+  {
+   "old": "Nó sinh ra trước commit nhưng chỉ ở RAM.",
+   "new": "Sự kiện sinh ra trước commit nhưng chỉ nằm ở RAM.",
+   "reason": "Tránh 'Nó' chỉ sự vật trừu tượng đầu câu",
+   "severity": "medium"
+  },
+  {
+   "old": "Pipeline chuẩn cùng hoàn cảnh để outbox đúng một dòng",
+   "new": "Pipeline chuẩn trong cùng hoàn cảnh để outbox có đúng một dòng",
+   "reason": "Câu thiếu động từ",
+   "severity": "medium"
+  },
+  {
+   "old": "Cấp phát đếm bằng allocator bọc `System`",
+   "new": "Số lần cấp phát đếm bằng allocator bọc `System`",
+   "reason": "Thiếu danh từ chính",
+   "severity": "medium"
+  },
+  {
+   "old": "Bài đó không dựng ca thiếu đăng ký handler",
+   "new": "Bài đó không dựng kịch bản thiếu đăng ký handler",
+   "reason": "'ca' mơ hồ",
+   "severity": "low"
+  },
+  {
+   "old": "`Ctx` là cái túi mà handler lấy transaction từ đó",
+   "new": "`Ctx` là ngữ cảnh chứa transaction mà handler lấy ra dùng",
+   "reason": "Ẩn dụ 'cái túi' không rõ nghĩa",
+   "severity": "medium"
+  },
+  {
+   "old": "Hàm thẳng đủ khi chỉ có một hai use case ghi.",
+   "new": "Hàm thẳng đủ khi chỉ có một hoặc hai use case ghi.",
+   "reason": "Khẩu ngữ",
+   "severity": "low"
+  },
+  {
+   "old": "Pipeline có lời khi nhiều command cùng cần khung",
+   "new": "Pipeline đáng dùng khi nhiều command cùng cần khung",
+   "reason": "Cụm 'có lời' thông tục",
+   "severity": "medium"
+  },
+  {
+   "old": "dọn cuối ca) cùng",
+   "new": "dọn cuối test case) cùng",
+   "reason": "Thống nhất test case",
+   "severity": "low"
+  },
+  {
+   "old": "Chưa có phía đọc, ca huỷ giữa chừng",
+   "new": "Chưa có phía đọc, kịch bản huỷ giữa chừng",
+   "reason": "'ca' mơ hồ",
+   "severity": "low"
+  },
+  {
+   "old": "chỉ để dựng ca hỏng;",
+   "new": "chỉ để dựng kịch bản hỏng;",
+   "reason": "'ca' mơ hồ",
+   "severity": "low"
+  },
+  {
+   "old": "doc test thật sự đo được",
+   "new": "doc test thật sự kiểm được",
+   "reason": "Từ 'đo' không đúng nghĩa",
+   "severity": "low"
+  }
+ ]
+}

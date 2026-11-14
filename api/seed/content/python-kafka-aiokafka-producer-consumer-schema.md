@@ -8,9 +8,9 @@ tags: [python, toi-noi, kafka, aiokafka, event]
 language: vi
 ---
 
-Khi một chuyến được đặt, nhiều bên cần biết: fraud-scoring muốn chấm điểm, analytics muốn đếm, thông báo muốn nhắn khách. Nếu Dispatch của [Tới Nơi](/articles/du-an-mau-toi-noi) gọi từng bên một thì thêm một bên là sửa Dispatch, và một bên chậm kéo cả đường đặt chuyến chậm theo. Cách khác là Dispatch chỉ ghi một sự kiện `BookingCreated` vào Kafka rồi thôi; ai quan tâm thì đọc. Cái giá là những câu hỏi mà lời gọi trực tiếp không có: nếu fraud-scoring sập giữa chừng thì sự kiện đang xử lý ra sao, sự kiện của cùng một khách có đến theo thứ tự không, và khi hình dạng sự kiện đổi thì consumer cũ có gãy không.
+Khi một chuyến được đặt, nhiều bên cần biết: fraud-scoring muốn chấm điểm, analytics muốn đếm, thông báo muốn nhắn khách. Nếu Dispatch của [Tới Nơi](/articles/du-an-mau-toi-noi) gọi từng bên một thì thêm một bên là phải sửa Dispatch, và một bên chậm kéo cả đường đặt chuyến chậm theo. Cách khác là Dispatch chỉ ghi một sự kiện `BookingCreated` vào Kafka rồi thôi; ai quan tâm thì đọc. Cái giá là những câu hỏi mà lời gọi trực tiếp không có: nếu fraud-scoring sập giữa chừng thì sự kiện đang xử lý ra sao, sự kiện của cùng một khách có đến theo thứ tự không, và khi hình dạng sự kiện đổi thì consumer cũ có gãy không.
 
-Đây là bài 38 của lộ trình **Python trung bình qua Tới Nơi**. Bạn cần quen `async`/`await` ([bài 21](/articles/python-asyncio-coroutine-task-timeout-cancellation)) và hàng đợi cùng xử lý đồng thời ([bài 23](/articles/python-concurrency-lock-queue-semaphore)). Kafka chạy sẵn trong hạ tầng dùng chung (`localhost:9094`, xem `infra/README.md` của loạt bài). Mọi topic của lab có tiền tố `lab38.` và bị xoá khi chạy xong; bài dùng `aiokafka`, client Kafka bất đồng bộ cho `asyncio`.
+Đây là bài 38 của lộ trình **Python trung bình qua Tới Nơi**. Bạn cần quen `async`/`await` ([bài 21](/articles/python-asyncio-coroutine-task-timeout-cancellation)) và hàng đợi cùng việc xử lý đồng thời ([bài 23](/articles/python-concurrency-lock-queue-semaphore)). Kafka chạy sẵn trong hạ tầng dùng chung (`localhost:9094`, xem `infra/README.md` của loạt bài). Mọi topic của lab có tiền tố `lab38.` và bị xoá khi chạy xong; bài dùng `aiokafka`, client Kafka bất đồng bộ cho `asyncio`.
 
 <div class="tkh-callout tkh-callout--example">
 <span class="tkh-callout-title">Thử trước khi đọc</span>
@@ -20,7 +20,7 @@ Khi một chuyến được đặt, nhiều bên cần biết: fraud-scoring mu�
 
 ## Topic, partition, key và consumer group
 
-Một **topic** là nhật ký chỉ ghi thêm, chia thành các **partition**; mỗi bản ghi trong partition có một **offset** tăng dần từ 0. Thứ tự chỉ được bảo đảm **trong một partition**, không giữa các partition. Producer chọn partition bằng **key**: cùng key đi cùng partition. Với `BookingCreated` ta lấy key là `customer_id`, nên mọi sự kiện của một khách nằm cùng chỗ và đến theo thứ tự đặt. **Consumer group** là một nhóm consumer chia nhau các partition: mỗi partition thuộc đúng một thành viên trong group tại một thời điểm, và mỗi group giữ offset đã commit riêng.
+Một **topic** là nhật ký chỉ ghi thêm, chia thành các **partition**; mỗi bản ghi trong partition có một **offset** tăng dần từ 0. Thứ tự chỉ được bảo đảm **trong một partition**, không giữa các partition. Producer chọn partition bằng **key**: cùng key đi cùng partition. Với `BookingCreated` ta lấy key là `customer_id`, nên mọi sự kiện của một khách nằm trong cùng một partition và đến theo thứ tự đặt. **Consumer group** là một nhóm consumer chia nhau các partition: mỗi partition thuộc đúng một thành viên trong group tại một thời điểm, và mỗi group giữ offset đã commit riêng.
 
 <figure class="tkh-fig">
 <div class="tkh-fig-box">
@@ -45,7 +45,7 @@ for event, event_id in events:
 await producer.flush()
 ```
 
-`send` trả về một future; lô được gửi nền và `flush` chờ tất cả xong, mỗi future cho ra partition và offset. `acks="all"` chờ mọi replica đồng bộ xác nhận (lab chỉ có một broker nên khác biệt chưa thể hiện); `enable_idempotence=True` làm broker bỏ qua bản gửi lại do lỗi mạng, nhưng chỉ trong một lần sống của producer, không thay được khử trùng lặp ở consumer. Output (trích):
+`send` trả về một future; lô được gửi nền và `flush` chờ tất cả xong, mỗi future cho ra partition và offset. `acks="all"` chờ mọi replica đồng bộ xác nhận (lab chỉ có một broker nên khác biệt chưa thể hiện); `enable_idempotence=True` làm broker bỏ qua bản gửi lại do lỗi mạng, nhưng chỉ trong một lần sống của producer, không thay thế được việc khử trùng lặp ở consumer. Output (trích):
 
 ```text
 khách -> partition: {'CU-001': [1], 'CU-002': [1], 'CU-003': [0], 'CU-004': [2], 'CU-005': [2], 'CU-006': [2]}
@@ -63,7 +63,7 @@ Hai dòng đầu cho thấy hai điều. Mỗi khách đúng một partition, nh
 
 Hai hàng đầu khớp nhau, hàng mặc định thì lệch. Ta chưa chạy chính client C#; kết luận dựa trên việc nó dùng cùng librdkafka.
 
-Cuối cùng, đo cho thấy `send_and_wait` từng cái chậm hơn nhiều so với gửi theo lô:
+Cuối cùng, đo cho thấy gọi `send_and_wait` cho từng sự kiện chậm hơn nhiều so với gửi theo lô:
 
 ```text
 tải máy lúc đo (load average 1 phút): 52.1
@@ -104,7 +104,7 @@ offset 4: rejected invalid_json
 version méo kiểu (list, dict, chuỗi, true) và payload không phải object: ['unsupported_version', 'unsupported_version', 'unsupported_version', 'unsupported_version', 'invalid_payload']
 ```
 
-Offset 2 là bản v2 có thêm field `coupon` mà consumer không biết: vẫn đọc được. Offset 3 là version 3, offset 4 là chuỗi không phải JSON. Hai thông điệp bị từ chối nhưng consumer phải **commit qua chúng và đi tiếp**: một «độc dược» không đọc nổi mà không bao giờ được commit sẽ chặn cả partition. Lab chỉ đếm và bỏ qua; nơi cất thông điệp độc dược (ví dụ một topic riêng cho thông điệp hỏng) bạn tự thiết kế, còn dead-letter của bài 40 là cho job nền trong Redis, không phải cho Kafka. Kiểm kiểu phải đi trước tra cứu: `version` có thể là list, dict hay `true` do bên gửi lỗi, nên `decode` chỉ nhận đúng `int` (`true` bằng 1 trong Python, không được lọt). Dòng cuối của output trên là năm thông điệp méo kiểu như vậy, đều bị từ chối bằng `EnvelopeError` thay vì ném `TypeError` ra ngoài. Schema registry với Avro, Protobuf hoặc JSON Schema là cách quản lý hợp đồng chặt hơn; lab dùng một file `envelope.py` làm hợp đồng và kiểm bằng `--verify`. Một quy tắc triển khai đi kèm: khi bắt đầu phát version mới, **consumer phải biết version đó trước producer**, vì sự kiện đã vào Kafka thì không rút lại được.
+Offset 2 là bản v2 có thêm field `coupon` mà consumer không biết: vẫn đọc được. Offset 3 là version 3, offset 4 là chuỗi không phải JSON. Hai thông điệp bị từ chối nhưng consumer phải **commit vượt qua chúng và đi tiếp**: một poison message không đọc nổi mà không bao giờ được commit sẽ chặn cả partition. Lab chỉ đếm và bỏ qua; nơi lưu poison message (ví dụ một topic riêng cho thông điệp hỏng) do bạn tự thiết kế, còn dead-letter của bài 40 là cho job nền trong Redis, không phải cho Kafka. Phải kiểm tra kiểu trước khi tra cứu: `version` có thể là list, dict hay `true` do bên gửi lỗi, nên `decode` chỉ nhận đúng `int` (`true` bằng 1 trong Python, không được lọt). Dòng cuối của output trên là năm thông điệp méo kiểu như vậy, đều bị từ chối bằng `EnvelopeError` thay vì ném `TypeError` ra ngoài. Schema registry với Avro, Protobuf hoặc JSON Schema là cách quản lý hợp đồng chặt hơn; lab dùng một file `envelope.py` làm hợp đồng và kiểm bằng `--verify`. Một quy tắc triển khai đi kèm: khi bắt đầu phát version mới, **consumer phải biết version đó trước producer**, vì sự kiện đã vào Kafka thì không rút lại được.
 
 ## Consumer group và commit offset
 
@@ -126,13 +126,13 @@ async def commit_through(consumer, rec) -> None:
     await consumer.commit({TopicPartition(rec.topic, rec.partition): rec.offset + 1})
 ```
 
-`enable_auto_commit` mặc định là `True`: aiokafka commit vị trí đã đọc theo chu kỳ (mặc định 5 giây), không biết ta đã xử lý xong chưa. Tắt đi và tự commit mới kiểm soát được thời điểm. Offset được commit là offset của bản ghi **sẽ đọc tiếp**, nên là `offset + 1`.
+`enable_auto_commit` mặc định là `True`: aiokafka commit vị trí đã đọc theo chu kỳ (mặc định 5 giây), không biết ta đã xử lý xong chưa. Phải tắt đi và tự commit thì mới kiểm soát được thời điểm commit. Offset được commit là offset của bản ghi **sẽ đọc tiếp**, nên là `offset + 1`.
 
 <figure class="tkh-fig">
 <div class="tkh-fig-box">
 <svg viewBox="0 0 880 330" role="img" aria-label="Hai dải offset từ 0 đến 7. Dải trên, commit sau xử lý: offset 0 đến 2 đã xử lý và commit, offset 3 và 4 đã xử lý nhưng chưa commit nên sẽ được đọc lại. Dải dưới, commit trước xử lý: offset 0 đến 2 đã xong, offset 3 đã commit nhưng chưa xử lý nên bị mất."><rect x="200" y="50" width="56" height="44" rx="6" class="f-phys-soft s-phys"/><text x="222" y="77" class="t-mono">0</text><rect x="264" y="50" width="56" height="44" rx="6" class="f-phys-soft s-phys"/><text x="286" y="77" class="t-mono">1</text><rect x="328" y="50" width="56" height="44" rx="6" class="f-phys-soft s-phys"/><text x="350" y="77" class="t-mono">2</text><rect x="392" y="50" width="56" height="44" rx="6" class="f-warn-soft s-warn"/><text x="414" y="77" class="t-mono">3</text><rect x="456" y="50" width="56" height="44" rx="6" class="f-warn-soft s-warn"/><text x="478" y="77" class="t-mono">4</text><rect x="520" y="50" width="56" height="44" rx="6" class="f-surface s-line"/><text x="542" y="77" class="t-mono">5</text><rect x="584" y="50" width="56" height="44" rx="6" class="f-surface s-line"/><text x="606" y="77" class="t-mono">6</text><rect x="648" y="50" width="56" height="44" rx="6" class="f-surface s-line"/><text x="670" y="77" class="t-mono">7</text><text x="20" y="70" class="t-b">Commit sau xử lý</text><text x="20" y="88" class="t-small">(at-least-once)</text><text x="200" y="120" class="t-small">đã commit: 3. Sập sau khi xử lý 3 và 4: khởi động lại đọc từ 3,</text><text x="200" y="138" class="t-small">nên 3 và 4 được xử lý hai lần.</text><rect x="200" y="190" width="56" height="44" rx="6" class="f-phys-soft s-phys"/><text x="222" y="217" class="t-mono">0</text><rect x="264" y="190" width="56" height="44" rx="6" class="f-phys-soft s-phys"/><text x="286" y="217" class="t-mono">1</text><rect x="328" y="190" width="56" height="44" rx="6" class="f-phys-soft s-phys"/><text x="350" y="217" class="t-mono">2</text><rect x="392" y="190" width="56" height="44" rx="6" class="f-none s-dead dash"/><text x="414" y="217" class="t-mono t-dead">3</text><rect x="456" y="190" width="56" height="44" rx="6" class="f-surface s-line"/><text x="478" y="217" class="t-mono">4</text><rect x="520" y="190" width="56" height="44" rx="6" class="f-surface s-line"/><text x="542" y="217" class="t-mono">5</text><rect x="584" y="190" width="56" height="44" rx="6" class="f-surface s-line"/><text x="606" y="217" class="t-mono">6</text><rect x="648" y="190" width="56" height="44" rx="6" class="f-surface s-line"/><text x="670" y="217" class="t-mono">7</text><text x="20" y="210" class="t-b">Commit trước xử lý</text><text x="20" y="228" class="t-small">(at-most-once)</text><text x="200" y="260" class="t-small">đã commit: 4, rồi sập trước khi xử lý 3: khởi động lại đọc từ 4,</text><text x="200" y="278" class="t-small">nên sự kiện 3 không bao giờ được xử lý.</text><rect x="20" y="302" width="16" height="16" rx="3" class="f-phys-soft s-phys"/><text x="44" y="315" class="t-small">đã xử lý và commit</text><rect x="260" y="302" width="16" height="16" rx="3" class="f-warn-soft s-warn"/><text x="284" y="315" class="t-small">đã xử lý, chưa commit</text><rect x="520" y="302" width="16" height="16" rx="3" class="f-none s-dead dash"/><text x="544" y="315" class="t-small">đã commit, chưa xử lý</text></svg>
 </div>
-<figcaption>Hình 2. Vị trí commit nằm lệch so với vị trí xử lý một khoảng; sập trong khoảng đó thì hoặc lặp (commit sau) hoặc mất (commit trước).</figcaption>
+<figcaption>Hình 2. Vị trí commit nằm lệch so với vị trí xử lý một khoảng; sập trong khoảng đó thì sự kiện hoặc bị lặp (commit sau) hoặc bị mất (commit trước).</figcaption>
 </figure>
 
 Lab tái hiện cả hai. Ca đầu (commit sau xử lý): consumer A xử lý 12 sự kiện và commit từng cái, xử lý thêm 5 rồi «sập» (đóng consumer mà không commit gì thêm); consumer B cùng group khởi động và đọc nốt:
@@ -152,13 +152,13 @@ consumer A: xử lý 17, đã commit 12, rồi sập
 consumer B (cùng group): nhận 18; tổng lượt xử lý 35 cho 30 sự kiện khác nhau; xử lý trùng 5
 ```
 
-B bắt đầu từ offset đã commit, nên nhận 30 − 12 = 18 sự kiện, trong đó 5 sự kiện A đã xử lý. Không mất cái nào; đổi lại 5 lượt trùng. Ca thứ hai đảo thứ tự: commit trước, xử lý sau, sập ở sự kiện thứ ba:
+B bắt đầu từ offset đã commit, nên nhận 30 − 12 = 18 sự kiện, trong đó 5 sự kiện A đã xử lý. Không mất sự kiện nào; đổi lại là có 5 lượt trùng. Ca thứ hai đảo thứ tự: commit trước, xử lý sau, sập ở sự kiện thứ ba:
 
 ```text
 đã xử lý 29 / 30; sự kiện mất: 1
 ```
 
-Với dữ liệu tài chính hay chấm điểm, mất sự kiện thường tệ hơn trùng, nên lựa chọn thông dụng là at-least-once cộng handler **idempotent**: cùng `event_id` đến lần thứ hai không tạo thêm hiệu ứng. Lab cho thấy khử trùng lặp theo `event_id` đưa 35 lượt về đúng 30 sự kiện; cách làm bền (bảng inbox với khoá duy nhất) là bài 39. Một chi tiết thật: lab «sập» bằng cách đóng consumer, nên consumer rời group ngay và B vào được ngay. Tiến trình bị kill thật thì broker chỉ biết sau `session_timeout_ms` (mặc định của aiokafka là 10 giây), và trong lúc đó các partition của nó đứng yên.
+Với dữ liệu tài chính hay chấm điểm, mất sự kiện thường tệ hơn trùng, nên lựa chọn thông dụng là at-least-once cộng handler **idempotent**: cùng `event_id` đến lần thứ hai không tạo thêm hiệu ứng. Lab cho thấy khử trùng lặp theo `event_id` đưa 35 lượt về đúng 30 sự kiện; cách làm bền (bảng inbox với khoá duy nhất) là bài 39. Một chi tiết sát thực tế: lab «sập» bằng cách đóng consumer, nên consumer rời group ngay và B vào được ngay. Nếu tiến trình bị kill thật thì broker chỉ biết sau `session_timeout_ms` (mặc định của aiokafka là 10 giây), và trong lúc đó các partition của nó đứng yên.
 
 ## Chia việc trong group
 
@@ -169,7 +169,7 @@ phân công (đổi theo lần chạy): {'E': [0, 2], 'F': [1]}
 số sự kiện mỗi consumer: {'E': 20, 'F': 10}
 ```
 
-Hai tập partition rời nhau và hợp lại đủ ba; mỗi sự kiện được đúng một consumer xử lý. Phân công cụ thể **đổi theo từng lần chạy** (lần khác E có thể nhận partition 1 còn F nhận 0 và 2); lab chỉ kiểm bất biến, và số sự kiện mỗi consumer luôn bằng tổng các partition được giao. Ở lần chạy này E giữ hai partition, gồm partition 2 là partition nóng, nên nhận nhiều gấp đôi. Từ đây rút ra giới hạn: số consumer có việc trong một group không vượt quá số partition (consumer thứ tư trong group ba partition ngồi không), và thêm consumer không cứu được một partition nóng vì nó vẫn chỉ có một người đọc. Mỗi lần thành viên vào hoặc rời, group **cân bằng lại** và việc đọc dừng một nhịp; khi nhóm đang rỗng, broker chờ thêm một nhịp trước khi chia việc cho thành viên đầu tiên. Lab đọc cấu hình đó qua admin client (dòng `broker group.initial.rebalance.delay.ms = 3000` ở đầu output) và đo `start()` của consumer đầu tiên: 3,01 giây. Cùng với việc chờ vài giây không còn tin mới để biết đã đọc hết, đó là lý do ba phần dùng consumer group mất 9,1 giây, 9,1 giây và 8,0 giây trong tổng khoảng 30 giây (các dòng `[… giây]` do lab in). Thứ tự theo khách vẫn giữ: lab kiểm rằng trong mỗi consumer, các chuyến của cùng một khách được xử lý theo thứ tự tăng dần.
+Hai tập partition rời nhau và hợp lại đủ ba; mỗi sự kiện được đúng một consumer xử lý. Phân công cụ thể **đổi theo từng lần chạy** (lần khác E có thể nhận partition 1 còn F nhận 0 và 2); lab chỉ kiểm bất biến, và số sự kiện mỗi consumer luôn bằng tổng các partition được giao. Ở lần chạy này E giữ hai partition, trong đó có partition 2 là partition nóng, nên nhận nhiều gấp đôi. Từ đây rút ra giới hạn: số consumer có việc trong một group không vượt quá số partition (consumer thứ tư trong group ba partition ngồi không), và thêm consumer không giải quyết được vấn đề của một partition nóng vì nó vẫn chỉ có một người đọc. Mỗi lần thành viên vào hoặc rời, group **cân bằng lại** và việc đọc tạm dừng; khi nhóm đang rỗng, broker chờ thêm một khoảng thời gian trước khi chia việc cho thành viên đầu tiên. Lab đọc cấu hình đó qua admin client (dòng `broker group.initial.rebalance.delay.ms = 3000` ở đầu output) và đo `start()` của consumer đầu tiên: 3,01 giây. Cộng thêm vài giây chờ không còn tin mới để biết đã đọc hết, đó là lý do ba phần dùng consumer group mất 9,1 giây, 9,1 giây và 8,0 giây trong tổng khoảng 30 giây (các dòng `[… giây]` do lab in). Thứ tự theo khách vẫn giữ: lab kiểm rằng trong mỗi consumer, các chuyến của cùng một khách được xử lý theo thứ tự tăng dần.
 
 ## Chạy và kiểm chứng
 
@@ -200,7 +200,7 @@ Hai ca hỏng đúng chỗ ta nói: không key thì khách rải nhiều partiti
 | Cùng khách bị xử lý không theo thứ tự | producer có `key` không; mọi producer của topic có cùng thuật toán chọn partition không |
 | Xử lý trùng sau khi deploy hoặc restart | bình thường với at-least-once; handler có khử trùng lặp theo `event_id` không |
 | `CommitFailedError` | group đã cân bằng lại khi ta xử lý quá lâu; xử lý nhanh hơn hoặc chỉnh `max_poll_interval_ms` |
-| Một partition không bao giờ tiến | có thông điệp «độc dược» chưa được commit qua; từ chối có lý do rồi commit |
+| Offset của một partition không bao giờ tăng | có poison message chưa được commit vượt qua; từ chối có lý do rồi commit |
 
 <div class="tkh-callout tkh-callout--warn">
 <span class="tkh-callout-title">Giới hạn của ví dụ so với production</span>

@@ -1,0 +1,22 @@
+{"file":"python-functools-itertools-pipeline.md","edits":[
+{"old":"groupby phải sort trước, chain","new":"groupby cần sắp xếp trước, chain","reason":"Câu cụt, giọng khẩu ngữ trong summary","severity":"medium"},
+{"old":"ba vòng lặp trộn ba mối quan tâm vào nhau","new":"ba vòng lặp trộn lẫn ba việc khác nhau vào cùng một chỗ","reason":"Calque của separation of concerns, nghe gượng","severity":"medium"},
+{"old":"So với `lambda`, `partial` hơn ở chỗ **chốt giá trị ngay lúc tạo**","new":"So với `lambda`, ưu điểm của `partial` là **chốt giá trị ngay lúc tạo**","reason":"Cấu trúc «hơn ở chỗ» gượng","severity":"medium"},
+{"old":"và không có `__name__` (lab kiểm `hasattr(fare_food, \"__name__\")` ra `False`), nên nếu cần log tên thì tự đặt.","new":"và không có `__name__` (lab kiểm `hasattr(fare_food, \"__name__\")` ra `False`), nên nếu cần ghi tên vào log thì phải tự đặt.","reason":"Câu cụt, thiếu rõ nghĩa","severity":"low"},
+{"old":"đã bao các phép gộp phổ biến và đọc dễ hơn","new":"đã đủ cho các phép gộp phổ biến và đọc dễ hơn","reason":"«bao các phép gộp» là cách nói gượng","severity":"medium"},
+{"old":"và phép gộp phải được đọc theo thứ tự trái sang phải.","new":"và phải đọc phép gộp theo thứ tự trái sang phải.","reason":"Bị động kiểu tiếng Anh","severity":"low"},
+{"old":"Bẫy thật là hàm đọc thêm biến nằm ngoài khoá:","new":"Bẫy thực tế là hàm đọc thêm một biến không nằm trong khoá:","reason":"Câu gượng, thiếu chính xác","severity":"medium"},
+{"old":"thì mọi người gọi dùng chung một đối tượng","new":"thì mọi nơi gọi hàm đều dùng chung một đối tượng","reason":"«người gọi» dễ hiểu nhầm là con người","severity":"medium"},
+{"old":"cách gom một lượt không cần sort thường hợp hơn với luồng lớn","new":"cách gom một lượt không cần sắp xếp thường phù hợp hơn với luồng lớn","reason":"«thường hợp hơn» gượng","severity":"medium"},
+{"old":"(lab kiểm `grouped == one_pass`), đây là bảng thật của lô 8.365 chuyến:","new":"(lab kiểm `grouped == one_pass`); đây là bảng kết quả thật của lô 8.365 chuyến:","reason":"Hai mệnh đề nối bằng dấu phẩy, cụm «bảng thật» cụt","severity":"low"},
+{"old":"cột phải ghi chỗ khác nhau cần cẩn thận.","new":"cột bên phải ghi những chỗ khác nhau cần thận trọng.","reason":"Câu cụt, thiếu danh từ","severity":"low"},
+{"old":"query LINQ duyệt lại sẽ chạy lại từ nguồn","new":"query LINQ khi duyệt lại sẽ chạy lại từ nguồn","reason":"Thiếu từ nối khiến câu khó đọc","severity":"medium"},
+{"old":"Lợi ích bộ nhớ của pipeline, đo bằng `tracemalloc` với cùng việc «gom doanh thu theo thành phố» trên 10.000 chuyến.","new":"Ta đo lợi ích bộ nhớ của pipeline bằng `tracemalloc`, với cùng việc «gom doanh thu theo thành phố» trên 10.000 chuyến.","reason":"Câu thiếu chủ ngữ và vị ngữ","severity":"high"},
+{"old":"con số của pipeline sẽ đẹp giả tạo.","new":"con số của pipeline sẽ đẹp hơn thực tế.","reason":"«đẹp giả tạo» gượng","severity":"low"},
+{"old":"nhưng lợi thế của streaming là thứ nhân lên khi lô lớn lên,","new":"nhưng lợi thế của streaming tăng theo kích thước lô,","reason":"Câu dịch gượng, «thứ nhân lên» không rõ nghĩa","severity":"medium"},
+{"old":"với thứ tự đảo, trùng lặp và dòng lỗi","new":"với thứ tự bị đảo lộn, bản ghi trùng lặp và dòng lỗi","reason":"Cụm cụt, thiếu động từ và danh từ","severity":"medium"},
+{"old":"Hai cách gom nhóm chỉ đúng khi mọi khoá vừa trong bộ nhớ;","new":"Hai cách gom nhóm chỉ dùng được khi mọi khoá vừa trong bộ nhớ;","reason":"«chỉ đúng» không rõ nghĩa","severity":"low"},
+{"old":"Số đo thời gian và bộ nhớ là của một lần chạy trên một máy.","new":"Số liệu đo thời gian và bộ nhớ là của một lần chạy trên một máy.","reason":"Thống nhất «số liệu đo»","severity":"low"},
+{"old":"Lệnh thứ hai kiểm 21 ca:","new":"Lệnh thứ hai kiểm 21 test case:","reason":"Thống nhất «test case»","severity":"medium"},
+{"old":"Sai ca nào, chương trình in tên ca đó cùng `FAIL n/21` (n là số ca đạt)","new":"Test case nào sai, chương trình in tên test case đó cùng `FAIL n/21` (n là số test case đạt)","reason":"Thống nhất «test case» thay cho «ca»","severity":"medium"}
+]}

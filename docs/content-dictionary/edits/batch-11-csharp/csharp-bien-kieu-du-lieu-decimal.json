@@ -1,0 +1,15 @@
+{"file":"csharp-bien-kieu-du-lieu-decimal.md","edits":[
+{"old": "ta sẽ đưa currency và quy tắc vào một kiểu Money riêng", "new": "ta sẽ đưa đơn vị tiền tệ (currency) và quy tắc vào một kiểu Money riêng", "reason": "Từ tiếng Anh lọt vào văn xuôi, thêm từ Việt", "severity": "medium"},
+{"old": "không phải bắt buộc deploy lại ứng dụng mỗi lần đổi giá", "new": "chứ không có nghĩa là bắt buộc phải deploy lại ứng dụng mỗi lần đổi giá", "reason": "Câu dễ hiểu ngược nghĩa", "severity": "medium"},
+{"old": "giữ chính xác các giá trị như 0,1 trong khả năng của nó", "new": "giữ chính xác các giá trị thập phân như 0,1 trong phạm vi biểu diễn của nó", "reason": "Cụm 'khả năng của nó' mơ hồ", "severity": "low"},
+{"old": "chọn nó không thay thế validation hoặc quy tắc tiền tệ", "new": "chọn nó không thay thế việc kiểm tra đầu vào hoặc quy tắc tiền tệ", "reason": "Thống nhất validation là kiểm tra đầu vào", "severity": "medium"},
+{"old": "xác định cách parse và hợp đồng số từ đầu", "new": "xác định ngay từ đầu cách parse và quy ước biểu diễn số", "reason": "'hợp đồng số' là cách gọi lạ, trật tự từ kiểu Anh", "severity": "medium"},
+{"old": "Bài về chuỗi/ngày giờ sẽ tách format máy trao đổi và format người đọc.", "new": "Bài về chuỗi/ngày giờ sẽ tách định dạng dùng để máy trao đổi dữ liệu và định dạng dành cho người đọc.", "reason": "Cụm 'format máy trao đổi' dịch gượng", "severity": "medium"},
+{"old": "Mặc định mọi tiền đều 2 chữ số lẻ", "new": "Mặc định mọi loại tiền đều có 2 chữ số thập phân", "reason": "'chữ số lẻ' không tự nhiên, thiếu danh từ", "severity": "medium"},
+{"old": "Ép decimal sang int không phải làm tròn gần nhất.", "new": "Ép decimal sang int không phải phép làm tròn về số gần nhất.", "reason": "Câu thiếu danh từ, nghe cụt", "severity": "medium"},
+{"old": "Nó khác `dynamic`, vốn dời nhiều kiểm tra sang lúc chạy.", "new": "Cách này khác `dynamic`, vốn dời nhiều kiểm tra sang lúc chạy.", "reason": "Tránh 'Nó' chỉ sự vật trừu tượng đầu câu", "severity": "low"},
+{"old": "Kiểu biến nhận kết quả không thay đổi phép toán đã diễn ra.", "new": "Kiểu của biến nhận kết quả không làm thay đổi phép toán đã thực hiện.", "reason": "Câu cụt, dịch sát tiếng Anh", "severity": "low"},
+{"old": "Format `:0` hoặc `:0.00` chỉ tạo cách hiển thị.", "new": "Định dạng `:0` hoặc `:0.00` chỉ tạo cách hiển thị.", "reason": "Từ tiếng Anh thông thường đã có từ Việt", "severity": "low"},
+{"old": "Chỉ format `:0`", "new": "Chỉ dùng định dạng `:0`", "reason": "Thống nhất 'định dạng', câu đủ động từ", "severity": "low"},
+{"old": "để đầu ra kiểm chứng ổn định giữa máy;", "new": "để đầu ra kiểm chứng ổn định giữa các máy;", "reason": "Thiếu từ chỉ số nhiều", "severity": "low"}
+]}

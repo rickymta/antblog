@@ -1,7 +1,7 @@
 ---
 slug: rust-graceful-shutdown-health-readiness-backpressure
 title: "Graceful shutdown, health, readiness và backpressure"
-summary: "Bài 39: bắt SIGTERM và ctrl-c bằng tokio::signal, lan CancellationToken tới HTTP, consumer Kafka và relay outbox; tắt đúng thứ tự, tách /healthz với /readyz, hàng đợi bounded với pause/resume; bị SIGKILL vẫn không mất bút toán."
+summary: "Bài 39: bắt SIGTERM và ctrl-c bằng tokio::signal, lan CancellationToken tới HTTP, consumer Kafka và relay outbox; tắt đúng thứ tự, tách /healthz với /readyz, hàng đợi có giới hạn (bounded) với pause/resume; dù bị SIGKILL vẫn không mất bút toán."
 category: rust-intermediate
 level: intermediate
 tags: [rust, toi-noi, ledger, tokio, kafka, graceful-shutdown]
@@ -15,7 +15,7 @@ Mỗi lần triển khai bản mới, trình điều phối gửi SIGTERM cho se
 <div class="tkh-callout tkh-callout--example">
 <span class="tkh-callout-title">Thử trước khi đọc</span>
 <p>Service bị SIGKILL giữa lúc một transaction ghi bút toán đang mở. Sổ cái có thể còn một bút toán nửa vời không?</p>
-<details><summary>Xem đáp án</summary><p><b>Không.</b> Transaction chưa commit thì PostgreSQL huỷ khi mất kết nối. Thứ có thể xảy ra là tin Kafka được giao lại, và <code>inbox</code> cùng <code>idempotency_key</code> hấp thụ nó.</p></details>
+<details><summary>Xem đáp án</summary><p><b>Không.</b> Transaction chưa commit thì PostgreSQL huỷ khi mất kết nối. Thứ có thể xảy ra là tin Kafka được giao lại, và <code>inbox</code> cùng <code>idempotency_key</code> chặn bản trùng đó.</p></details>
 </div>
 
 ## Service nhận SIGTERM và ctrl-c như thế nào?
@@ -58,7 +58,7 @@ let report = running.shutdown().await;
 ExitCode::from(report.exit_code())
 ```
 
-Mã thoát là hợp đồng với bên ngoài: 0 tắt sạch, 3 drain quá hạn, 4 bị tín hiệu thứ hai ép. Test trong `tests/signals.rs` spawn chính binary `serve`, gửi tín hiệu bằng `kill`, rồi kiểm mã thoát và thứ tự log.
+Mã thoát là hợp đồng với bên ngoài: 0 tắt sạch, 3 drain quá hạn, 4 do tín hiệu thứ hai ép thoát. Test trong `tests/signals.rs` spawn chính binary `serve`, gửi tín hiệu bằng `kill`, rồi kiểm mã thoát và thứ tự log.
 
 ## Thứ tự tắt: sáu bước và vì sao không đảo được
 
@@ -71,7 +71,7 @@ Mã thoát là hợp đồng với bên ngoài: 0 tắt sạch, 3 drain quá h�
 
 1. **`/readyz` đổi 503, vẫn phục vụ.** Trình điều phối gỡ pod khỏi danh sách endpoint không tức thì, nên request vẫn đang trên đường tới; `readiness_grace` cho chúng đến nơi.
 2. **Ngừng nhận việc mới.** Huỷ token `intake`: `axum::serve(...).with_graceful_shutdown(...)` ngừng accept, vòng consumer ngừng `recv` và drop `Sender`.
-3. **Drain có thời hạn.** Worker đọc `rx.recv()` tới khi nhận `None`, tức mọi `Sender` đã drop và hàng đợi cạn. Request HTTP đang bay chạy nốt.
+3. **Drain có thời hạn.** Worker đọc `rx.recv()` tới khi nhận `None`, tức mọi `Sender` đã drop và hàng đợi cạn. Request HTTP đang xử lý dở chạy nốt.
 4. **Commit offset cuối**, chỉ gồm tin worker đã làm xong và đã lưu.
 5. **Relay dọn nốt rồi flush.** Worker là bên ghi vào outbox nên relay phải dừng sau worker; huỷ `relay_stop` ra lệnh làm lượt dọn cuối.
 6. **Đóng pool sau cùng**, vì bước 3 và 5 còn dùng nó.
@@ -143,7 +143,7 @@ ngay sau tắt: 1 bút toán, inbox 1, outbox 1, offset commit 1
 chạy lại: tin trùng 0, cuối cùng 6 bút toán, 6 key khác nhau, tổng posting 0
 ```
 
-Worker bị abort, transaction đang mở bị drop nên rollback cùng dòng `inbox` của nó. Tin đó chưa lưu offset nên đến lại, và lần sau là tin mới chứ không phải tin trùng. Bước 4 đến 6 vẫn chạy, rồi thoát mã 3.
+Worker bị abort, transaction đang mở bị drop nên rollback cùng dòng `inbox` của nó. Tin đó chưa lưu offset nên được giao lại, và lần sau là tin mới chứ không phải tin trùng. Bước 4 đến 6 vẫn chạy, rồi thoát mã 3.
 
 Còn SIGKILL thì không có bước nào chạy. Tiến trình con bị `kill -KILL` khi đã ghi 8 bút toán, chu kỳ auto-commit được đặt 60 giây để offset chưa kịp lên broker, tức tình huống xấu nhất:
 
@@ -160,7 +160,7 @@ Bút toán, `inbox` và `outbox` có số dòng bằng nhau vì cùng một tran
 <div class="tkh-fig-box">
 <svg viewBox="0 0 880 270" role="img" aria-label="Hình 2. Hai đường dừng: SIGTERM drain rồi commit offset nên chạy lại không có tin trùng; SIGKILL rollback giao dịch dở, offset chưa commit, tin đến lại và inbox bỏ qua. Cả hai kết thúc với cùng một sổ cái."><defs><marker id="rust-graceful-shutdown-health-readiness-backpressure-1-a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10 z" class="f-phys"/></marker></defs><rect x="20" y="30" width="190" height="80" rx="10" class="f-phys-soft s-phys"/><text x="34" y="62" class="t-b">SIGTERM</text><text x="34" y="86" class="t-small">handler đã đăng ký</text><rect x="233" y="30" width="190" height="80" rx="10" class="f-phys-soft s-phys"/><text x="247" y="62" class="t-b">drain + commit</text><text x="247" y="86" class="t-small">tin xong đều có offset</text><rect x="446" y="30" width="190" height="80" rx="10" class="f-phys-soft s-phys"/><text x="460" y="62" class="t-b">chạy lại</text><text x="460" y="86" class="t-small">đọc từ offset đã commit</text><rect x="659" y="30" width="201" height="80" rx="10" class="f-pk-soft s-pk"/><text x="673" y="62" class="t-b">tin trùng = 0</text><text x="673" y="86" class="t-small">sổ cái đủ, không trùng</text><rect x="20" y="150" width="190" height="80" rx="10" class="f-warn-soft s-warn"/><text x="34" y="182" class="t-b">SIGKILL</text><text x="34" y="206" class="t-small">không bắt, không log</text><rect x="233" y="150" width="190" height="80" rx="10" class="f-warn-soft s-warn"/><text x="247" y="182" class="t-b">PostgreSQL rollback</text><text x="247" y="206" class="t-small">giao dịch dở biến mất</text><rect x="446" y="150" width="190" height="80" rx="10" class="f-warn-soft s-warn"/><text x="460" y="182" class="t-b">offset chưa commit</text><text x="460" y="206" class="t-small">tin đã xong đến lại</text><rect x="659" y="150" width="201" height="80" rx="10" class="f-pk-soft s-pk"/><text x="673" y="182" class="t-b">inbox bỏ qua</text><text x="673" y="206" class="t-small">sổ cái đủ, không trùng</text><path d="M210 70 L231 70" class="f-none s-phys" stroke-width="2" marker-end="url(#rust-graceful-shutdown-health-readiness-backpressure-1-a)"/><path d="M423 70 L444 70" class="f-none s-phys" stroke-width="2" marker-end="url(#rust-graceful-shutdown-health-readiness-backpressure-1-a)"/><path d="M636 70 L657 70" class="f-none s-phys" stroke-width="2" marker-end="url(#rust-graceful-shutdown-health-readiness-backpressure-1-a)"/><path d="M210 190 L231 190" class="f-none s-warn" stroke-width="2" marker-end="url(#rust-graceful-shutdown-health-readiness-backpressure-1-a)"/><path d="M423 190 L444 190" class="f-none s-warn" stroke-width="2" marker-end="url(#rust-graceful-shutdown-health-readiness-backpressure-1-a)"/><path d="M636 190 L657 190" class="f-none s-warn" stroke-width="2" marker-end="url(#rust-graceful-shutdown-health-readiness-backpressure-1-a)"/></svg>
 </div>
-<figcaption>Hình 2. Hai đường dừng dẫn tới cùng một sổ cái. Chỉ số tin giao lại và thời gian chờ khác nhau.</figcaption>
+<figcaption>Hình 2. Hai đường dừng dẫn tới cùng một sổ cái. Chỉ có số tin giao lại và thời gian chờ là khác nhau..</figcaption>
 </figure>
 
 | Cách dừng | Offset commit | Tin giao lại khi chạy lại | Bút toán mất hoặc nửa vời |
@@ -169,7 +169,7 @@ Bút toán, `inbox` và `outbox` có số dòng bằng nhau vì cùng một tran
 | SIGTERM, drain quá hạn (mã 3) | bằng số tin đã xong (1) | 0, tin dở là tin mới | 0 |
 | SIGKILL | chưa kịp commit | 8, bằng số tin đã xong | 0 |
 
-Tắt đẹp vẫn đáng làm: ít tin giao lại hơn và chạy lại nhanh hơn. Sau SIGTERM, lần chạy lại mất 649 ms vì bước 6 gọi `unsubscribe()` để rời group ngay. Sau SIGKILL, broker chỉ giao partition cho tiến trình mới khi coi tiến trình cũ đã chết, tức sau `session.timeout.ms`: lab đặt 6 giây, mặc định của librdkafka là 45 giây. Relay chỉ bảo đảm at-least-once: ở một lần chạy khác trong lúc viết bài, topic nhận 25 sự kiện cho 24 key, vì tiến trình bị giết giữa `send` và `UPDATE published_at`. Consumer phía sau phải tự dedupe, như bài 37.
+Tắt đẹp vẫn đáng làm: ít tin giao lại hơn và chạy lại nhanh hơn. Sau SIGTERM, lần chạy lại mất 649 ms vì bước 6 gọi `unsubscribe()` để rời group ngay. Sau SIGKILL, broker chỉ giao partition cho tiến trình mới khi coi tiến trình cũ đã chết, tức sau `session.timeout.ms`: lab đặt 6 giây, mặc định của librdkafka là 45 giây. Relay chỉ bảo đảm at-least-once: ở một lần chạy khác trong lúc viết bài, topic nhận 25 sự kiện cho 24 key, vì tiến trình bị giết giữa `send` và `UPDATE published_at`. Consumer phía sau phải tự khử trùng lặp, như bài 37.
 
 ## `/healthz` và `/readyz` trả lời hai câu hỏi khác nhau
 
@@ -199,7 +199,7 @@ Kafka mất       healthz 200  readyz 503  (1015 ms)  {"kafka":"Meta data fetch 
 
 Vì sao không đưa DB vào liveness? Giả sử PostgreSQL mất hai phút. Nếu `/healthz` kiểm DB, kubelet restart mọi pod: mỗi pod mất chỗ trong consumer group, và khi DB về thì tất cả mở lại kết nối cùng lúc. Restart không sửa được PostgreSQL. Với readiness, pod chỉ ra khỏi load balancer và vẫn sống để tự nối lại.
 
-Kafka mất khiến `/readyz` trả lời sau 1015 ms, xấp xỉ `PROBE_TIMEOUT`. Hai phụ thuộc kiểm lần lượt nên tệ nhất là gấp đôi, và `timeoutSeconds` của probe phải lớn hơn mức đó.
+Kafka mất khiến `/readyz` trả lời sau 1015 ms, xấp xỉ `PROBE_TIMEOUT`. Hai phụ thuộc được kiểm lần lượt nên trường hợp xấu nhất lâu gấp đôi, và `timeoutSeconds` của probe phải lớn hơn mức đó.
 
 ## Backpressure: consumer nhanh hơn worker thì sao?
 
@@ -247,7 +247,7 @@ hàng đợi lớn: sức chứa 32, resume khi còn <= 24: nhận 60, xong 60, 
 
 Cả hai giữ hàng đợi trong sức chứa và không mất tin; khác nhau ở thời gian. Sau mỗi `resume`, lô tin kế tiếp đến chậm vài trăm mili giây, nên ngưỡng thấp làm worker ngồi chờ. Thời gian dao động mạnh giữa các lần chạy (một lần khác cho 7500 ms và 3325 ms; lúc máy tải cao, hai số sát nhau hơn), nên `--verify` không so chúng; nó chỉ kiểm không mất tin, hàng đợi không vượt sức chứa và ngưỡng cao pause ít lần hơn.
 
-Chậm vì đâu? Bật `debug=fetch,topic` của librdkafka 2.12.1 thấy luồng chính nhận lệnh resume ngay, còn luồng broker chỉ xét lại partition khi nó thức dậy: lúc Fetch đang treo trả về (`fetch.wait.max.ms`, mặc định 500 ms) hoặc tới nhịp 1 giây trong mã nguồn. Vì thế giảm tham số này lại tệ hơn, do không còn Fetch treo để đánh thức luồng đó. Lệnh `-- resume` của lab đo:
+Chậm vì đâu? Bật `debug=fetch,topic` của librdkafka 2.12.1 thấy luồng chính nhận lệnh resume ngay, còn luồng broker chỉ xét lại partition khi nó thức dậy: lúc Fetch đang treo trả về (`fetch.wait.max.ms`, mặc định 500 ms) hoặc tới nhịp 1 giây trong mã nguồn. Vì thế nếu giảm tham số này thì tình hình còn tệ hơn, do không còn Fetch treo để đánh thức luồng đó. Lệnh `-- resume` của lab đo:
 
 ```text
 fetch.wait.max.ms = 500: 20 lần, nhỏ nhất 103 ms, trung vị 282 ms, lớn nhất 398 ms
@@ -255,11 +255,11 @@ fetch.wait.max.ms = 20: 20 lần, nhỏ nhất 562 ms, trung vị 778 ms, lớn 
 (số đo trên máy viết bài, không phải SLA)
 ```
 
-Đây là điều đọc từ log và mã nguồn bản này, tài liệu không cam kết. Quy tắc rút ra: ngưỡng resume phải đủ cao để việc còn trong hàng đợi che được độ trễ lấy lại tin.
+Đây là điều đọc từ log và mã nguồn bản này, tài liệu không cam kết. Quy tắc rút ra: ngưỡng resume phải đủ cao để lượng việc còn trong hàng đợi đủ lấp khoảng trễ khi lấy lại tin.
 
 ## `pause` và `resume` giúp gì với `max.poll.interval.ms`?
 
-librdkafka có hai đồng hồ. `session.timeout.ms` đo heartbeat, do một luồng nền gửi, ứng dụng không cần làm gì. `max.poll.interval.ms` đo khoảng cách giữa hai lần ứng dụng gọi poll; vượt thì tài liệu nói consumer bị coi là hỏng và group rebalance. `StreamConsumer` không có luồng poll riêng: poll chỉ xảy ra khi có `recv()` đang được await. Thư viện đánh thức `recv` đang chờ mỗi nửa `max.poll.interval.ms`, nên `recv` treo lúc topic rỗng vẫn an toàn. Còn đứng ở `send().await` khi hàng đợi đầy thì không có `recv` nào để đánh thức, và nếu worker chậm quá mức đó (mặc định 5 phút), consumer bị đá khỏi group dù heartbeat vẫn đều.
+librdkafka có hai đồng hồ. `session.timeout.ms` đo heartbeat, do một luồng nền gửi, ứng dụng không cần làm gì. `max.poll.interval.ms` đo khoảng cách giữa hai lần ứng dụng gọi poll; vượt thì tài liệu nói consumer bị coi là hỏng và group rebalance. `StreamConsumer` không có luồng poll riêng: poll chỉ xảy ra khi có `recv()` đang được await. Thư viện đánh thức `recv` đang chờ mỗi nửa `max.poll.interval.ms`, nên `recv` treo lúc topic rỗng vẫn an toàn. Còn khi consumer đang chờ ở `send().await` vì hàng đợi đầy thì không có `recv` nào để đánh thức, và nếu worker chậm quá mức đó (mặc định 5 phút), consumer bị loại khỏi group dù heartbeat vẫn đều.
 
 `pause` không tự giữ consumer trong group. Việc của nó là làm cho *việc tiếp tục poll* vô hại: partition đã pause thì poll không trả tin mới, nên không phải chứa tin vào đâu. Lab kiểm bằng hai consumer cùng `max.poll.interval.ms` 6000 (librdkafka đòi giá trị này ≥ `session.timeout.ms`), cùng đứng yên 8 giây sau tin đầu tiên:
 
@@ -286,7 +286,7 @@ Phía .NET xem bài [BackgroundService và Channel](/articles/dotnet10-backgroun
 
 ## Chạy ví dụ và kiểm chứng
 
-Hạ tầng và ba biến môi trường theo `examples/toi-noi-rust/infra/README.md`; thiếu thì lab thất bại rõ ràng. Từ gốc repository:
+Hạ tầng và ba biến môi trường theo `examples/toi-noi-rust/infra/README.md`; thiếu thì lab báo lỗi rõ ràng. Từ gốc repository:
 
 ```bash
 export TOI_NOI_PG_URL='postgres://toi_noi:toi_noi_lab@127.0.0.1:5433/toi_noi_rust_lab'
@@ -311,7 +311,7 @@ cargo test --manifest-path examples/toi-noi-rust/39-graceful-shutdown/Cargo.toml
  INFO shutdown phase=6 pool=closed
 ```
 
-Mỗi ca có schema, topic và group riêng, dọn cuối ca, nên test chạy song song được.
+Mỗi test case có schema, topic và group riêng, dọn khi test case kết thúc, nên test chạy song song được.
 
 <div class="tkh-callout tkh-callout--warn">
 <span class="tkh-callout-title">Giới hạn của ví dụ</span>

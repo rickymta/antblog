@@ -1,0 +1,131 @@
+{
+ "file": "rust-audit-append-only-hash-chain-phan-quyen-pii.md",
+ "edits": [
+  {
+   "old": "điểm neo ngoài database lộ cả chuỗi bị tính lại",
+   "new": "điểm neo ngoài database cho thấy cả chuỗi đã bị tính lại",
+   "reason": "Câu dịch máy, sai động từ",
+   "severity": "high"
+  },
+  {
+   "old": "đo bằng role thật",
+   "new": "kiểm bằng role thật",
+   "reason": "Từ 'đo' không đúng nghĩa",
+   "severity": "low"
+  },
+  {
+   "old": "`TRUNCATE` chặn bug và SQL nhầm",
+   "new": "`TRUNCATE` thì chặn được bug và SQL nhầm",
+   "reason": "Câu thiếu quan hệ từ, khó tách vế",
+   "severity": "medium"
+  },
+  {
+   "old": "## Mỗi lớp chặn một loại kẻ, và bị loại kế tiếp vượt qua",
+   "new": "## Mỗi lớp chặn một loại kẻ tấn công, và bị loại kế tiếp vượt qua",
+   "reason": "Cụm cụt, thiếu danh từ",
+   "severity": "medium"
+  },
+  {
+   "old": "nên mỗi ca tạo năm role mang tiền tố theo uuid của ca",
+   "new": "nên mỗi test case tạo năm role mang tiền tố theo uuid của test case",
+   "reason": "Thống nhất test case",
+   "severity": "medium"
+  },
+  {
+   "old": "cuối ca, kể cả khi thân ca lỗi.",
+   "new": "cuối test case, kể cả khi thân test case lỗi.",
+   "reason": "Thống nhất test case",
+   "severity": "medium"
+  },
+  {
+   "old": "`{p}` là tiền tố của ca",
+   "new": "`{p}` là tiền tố của test case",
+   "reason": "Thống nhất test case",
+   "severity": "low"
+  },
+  {
+   "old": "để hai ca lab không chờ nhau",
+   "new": "để hai test case của lab không chờ nhau",
+   "reason": "Thống nhất test case",
+   "severity": "low"
+  },
+  {
+   "old": "dọn schema và năm role kể cả khi thân ca lỗi",
+   "new": "dọn schema và năm role kể cả khi thân test case lỗi",
+   "reason": "Thống nhất test case",
+   "severity": "low"
+  },
+  {
+   "old": "(cuộc đua dựng bằng `Barrier`",
+   "new": "(race condition dựng bằng `Barrier`",
+   "reason": "Thuật ngữ race condition",
+   "severity": "low"
+  },
+  {
+   "old": "trong ca «sửa bút toán 4»",
+   "new": "trong kịch bản «sửa bút toán 4»",
+   "reason": "'ca' mơ hồ, thực chất là kịch bản",
+   "severity": "low"
+  },
+  {
+   "old": "Sửa một byte trong bút toán đổi",
+   "new": "Sửa một byte trong bút toán sẽ làm đổi",
+   "reason": "Thiếu động từ",
+   "severity": "low"
+  },
+  {
+   "old": "mọi bên phải ra cùng byte từ cùng bút toán, mãi mãi",
+   "new": "mọi bên phải cho ra cùng dãy byte từ cùng một bút toán, mãi mãi",
+   "reason": "Cụm cụt 'ra cùng byte'",
+   "severity": "medium"
+  },
+  {
+   "old": "Bảng theo đúng thứ tự byte, phủ đủ mọi cột",
+   "new": "Bảng dưới liệt kê theo đúng thứ tự byte và phủ đủ mọi cột",
+   "reason": "Thiếu động từ",
+   "severity": "medium"
+  },
+  {
+   "old": "một đoạn Python dựng cùng byte rồi `shasum -a 256` cho cùng kết quả",
+   "new": "một đoạn Python dựng cùng dãy byte rồi băm bằng `shasum -a 256` cho cùng kết quả",
+   "reason": "Thiếu động từ",
+   "severity": "medium"
+  },
+  {
+   "old": "Khoá advisory là của cả database",
+   "new": "Khoá advisory có phạm vi toàn database",
+   "reason": "Diễn đạt gượng",
+   "severity": "medium"
+  },
+  {
+   "old": "để đoạn xếp hàng chỉ từ lúc xin khoá tới `COMMIT`",
+   "new": "để đoạn phải xếp hàng chỉ kéo dài từ lúc xin khoá tới `COMMIT`",
+   "reason": "Thiếu động từ",
+   "severity": "medium"
+  },
+  {
+   "old": "nối theo lô bởi một tiến trình",
+   "new": "nối theo lô bằng một tiến trình",
+   "reason": "Tránh 'bởi' kiểu tiếng Anh",
+   "severity": "medium"
+  },
+  {
+   "old": "đổi độ trễ phát hiện lấy thông lượng",
+   "new": "đánh đổi độ trễ phát hiện để lấy thông lượng",
+   "reason": "Diễn đạt gượng",
+   "severity": "medium"
+  },
+  {
+   "old": "MFA và approval nằm ở tầng trên",
+   "new": "MFA và bước phê duyệt nằm ở tầng trên",
+   "reason": "Từ tiếng Anh thông thường, thống nhất với phần còn lại",
+   "severity": "low"
+  },
+  {
+   "old": "ghi lách service thì không có, đó là lúc",
+   "new": "ghi không qua service thì không có dòng nào, và đó là lúc",
+   "reason": "Cụm 'ghi lách service' gượng, thiếu danh từ",
+   "severity": "medium"
+  }
+ ]
+}

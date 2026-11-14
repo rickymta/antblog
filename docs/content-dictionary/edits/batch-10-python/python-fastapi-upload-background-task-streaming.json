@@ -1,0 +1,221 @@
+{
+  "file": "python-fastapi-upload-background-task-streaming.md",
+  "edits": [
+    {
+      "old": "qua ba lớp kiểm, lưu object storage giả",
+      "new": "qua ba lớp kiểm tra, lưu vào object storage giả",
+      "reason": "Thiếu «tra»; thiếu giới từ «vào»",
+      "severity": "medium"
+    },
+    {
+      "old": "chỉ giới hạn các trường chữ của form",
+      "new": "chỉ giới hạn các trường văn bản của form",
+      "reason": "«Trường chữ» gượng",
+      "severity": "medium"
+    },
+    {
+      "old": "Ba lớp kiểm của một upload",
+      "new": "Ba lớp kiểm tra của một upload",
+      "reason": "Thiếu «tra»",
+      "severity": "low"
+    },
+    {
+      "old": "header có thể vắng (chunked) hoặc nói dối",
+      "new": "header có thể không có (chunked) hoặc khai sai",
+      "reason": "«Nói dối» khẩu ngữ, «vắng» gượng",
+      "severity": "medium"
+    },
+    {
+      "old": "## UploadFile và ba lớp kiểm",
+      "new": "## UploadFile và ba lớp kiểm tra",
+      "reason": "Thiếu «tra»",
+      "severity": "low"
+    },
+    {
+      "old": "đáng tin ngang một lời nói; thứ đáng tin là byte",
+      "new": "chỉ đáng tin ngang một lời tự khai; thứ đáng tin là byte",
+      "reason": "«Lời nói» mơ hồ, phải chỉ rõ là lời tự khai",
+      "severity": "medium"
+    },
+    {
+      "old": "là lười: nó chỉ đọc header, còn giải nén điểm ảnh xảy ra ở",
+      "new": "chạy theo kiểu lazy: hàm chỉ đọc header, còn việc giải nén điểm ảnh xảy ra ở",
+      "reason": "«Lười» là calque của lazy",
+      "severity": "medium"
+    },
+    {
+      "old": "từ gấp đôi, khoảng 179 triệu",
+      "new": "từ mức gấp đôi, khoảng 179 triệu",
+      "reason": "Câu cụt, thiếu danh từ",
+      "severity": "medium"
+    },
+    {
+      "old": "và kiểm từ header",
+      "new": "và kiểm tra theo header",
+      "reason": "Thiếu «tra»",
+      "severity": "low"
+    },
+    {
+      "old": "cả hai thành 400",
+      "new": "cả hai đều trả 400",
+      "reason": "Câu cụt",
+      "severity": "medium"
+    },
+    {
+      "old": "không phản chiếu giá trị đã gửi",
+      "new": "không lặp lại giá trị đã gửi",
+      "reason": "«Phản chiếu» là calque của reflect",
+      "severity": "medium"
+    },
+    {
+      "old": "và kiểm đường dẫn cuối nằm trong thư mục gốc",
+      "new": "và kiểm tra đường dẫn cuối có nằm trong thư mục gốc",
+      "reason": "Thiếu «tra», thiếu «có»",
+      "severity": "low"
+    },
+    {
+      "old": "nên tải cùng ảnh hai lần ra cùng khoá và ghi lại là vô hại",
+      "new": "nên tải cùng một ảnh hai lần cho ra cùng khoá, và việc ghi lại là vô hại",
+      "reason": "Câu cụt, thiếu động từ",
+      "severity": "medium"
+    },
+    {
+      "old": "ảnh gửi lại với tên khác ra cùng khoá",
+      "new": "ảnh gửi lại với tên khác cho ra cùng khoá",
+      "reason": "Thiếu động từ",
+      "severity": "low"
+    },
+    {
+      "old": "Status là",
+      "new": "Mã trạng thái là",
+      "reason": "Tiếng Anh thông thường trong văn xuôi",
+      "severity": "medium"
+    },
+    {
+      "old": "không ai bắt ngoại lệ hộ",
+      "new": "không ai bắt ngoại lệ thay",
+      "reason": "«Bắt ngoại lệ hộ» gượng",
+      "severity": "medium"
+    },
+    {
+      "old": "vì nó chặn mọi request khác",
+      "new": "vì việc ấy chặn mọi request khác",
+      "reason": "«Nó» mơ hồ",
+      "severity": "low"
+    },
+    {
+      "old": "Ca này có thật:",
+      "new": "Tình huống này có thật:",
+      "reason": "«Ca này» không rõ nghĩa",
+      "severity": "low"
+    },
+    {
+      "old": "Sự kiện `failed` gửi client chỉ",
+      "new": "Sự kiện `failed` gửi cho client chỉ",
+      "reason": "Thiếu giới từ",
+      "severity": "low"
+    },
+    {
+      "old": "Việc đắt hoặc phải chạy chắc chắn",
+      "new": "Việc tốn nhiều tài nguyên hoặc phải bảo đảm chạy được",
+      "reason": "«Việc đắt» là calque của expensive",
+      "severity": "medium"
+    },
+    {
+      "old": "Mã job cũng liên quan.",
+      "new": "Mã job cũng có liên quan đến vấn đề này.",
+      "reason": "Câu cụt",
+      "severity": "medium"
+    },
+    {
+      "old": "Client cần thấy tiến độ: hỏi lặp, WebSocket, hoặc",
+      "new": "Client cần thấy tiến độ thì có ba cách: polling, WebSocket, hoặc",
+      "reason": "«Hỏi lặp» là calque của polling",
+      "severity": "medium"
+    },
+    {
+      "old": "SSE đơn giản nhất: HTTP thường,",
+      "new": "SSE là cách đơn giản nhất: HTTP thường,",
+      "reason": "Câu thiếu chủ ngữ",
+      "severity": "medium"
+    },
+    {
+      "old": "Định dạng trên dây là các dòng",
+      "new": "Định dạng truyền qua mạng là các dòng",
+      "reason": "«Trên dây» là calque của on the wire",
+      "severity": "medium"
+    },
+    {
+      "old": "Hai ý khiến luồng dùng được ngoài đời.",
+      "new": "Hai chi tiết giúp luồng này dùng được ngoài thực tế.",
+      "reason": "Khẩu ngữ, thiếu danh từ",
+      "severity": "medium"
+    },
+    {
+      "old": "báo nginx đừng đệm luồng",
+      "new": "báo cho nginx đừng đệm luồng",
+      "reason": "Thiếu giới từ",
+      "severity": "low"
+    },
+    {
+      "old": "client dùng `fetch` đọc stream hoặc cookie",
+      "new": "client dùng `fetch` đọc stream hoặc dùng cookie",
+      "reason": "Câu cụt",
+      "severity": "medium"
+    },
+    {
+      "old": "lab cần uv, mạng ở lần đầu, không cần Docker",
+      "new": "lab cần uv, cần có mạng ở lần chạy đầu, không cần Docker",
+      "reason": "Câu cụt",
+      "severity": "medium"
+    },
+    {
+      "old": "Ca file chữ cho",
+      "new": "Test case file chữ cho",
+      "reason": "Thống nhất thuật ngữ test case",
+      "severity": "low"
+    },
+    {
+      "old": "ca ảnh thật cho",
+      "new": "test case ảnh thật cho",
+      "reason": "Thống nhất thuật ngữ test case",
+      "severity": "low"
+    },
+    {
+      "old": "Các ca đo thời gian chỉ kiểm bất biến, không kiểm số tuyệt đối.",
+      "new": "Các test case đo thời gian chỉ kiểm các điều kiện bất biến, không kiểm giá trị tuyệt đối.",
+      "reason": "Thiếu danh từ sau «kiểm»; thống nhất test case",
+      "severity": "medium"
+    },
+    {
+      "old": "Phá có chủ ý để biết ca có thể đỏ.",
+      "new": "Cố ý phá để biết test case có thể báo đỏ.",
+      "reason": "Cụm tự ghép, thống nhất test case",
+      "severity": "medium"
+    },
+    {
+      "old": "nhưng ca chunked lọt qua và handler nhận đủ",
+      "new": "nhưng test case chunked lọt qua và handler nhận đủ",
+      "reason": "Thống nhất thuật ngữ test case",
+      "severity": "low"
+    },
+    {
+      "old": "Kho đối tượng là một thư mục",
+      "new": "Object storage là một thư mục",
+      "reason": "Một khái niệm một tên: object storage",
+      "severity": "medium"
+    },
+    {
+      "old": "mà đổi ít nhất, bạn đổi gì",
+      "new": "mà ít phải đổi nhất, bạn đổi gì",
+      "reason": "Trật tự từ kiểu tiếng Anh",
+      "severity": "medium"
+    },
+    {
+      "old": "hỏi lặp theo <code>Last-Event-ID</code> mỗi giây",
+      "new": "polling theo <code>Last-Event-ID</code> mỗi giây",
+      "reason": "«Hỏi lặp» là calque của polling; thống nhất với phần trên",
+      "severity": "medium"
+    }
+  ]
+}

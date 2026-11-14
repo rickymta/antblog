@@ -8,7 +8,7 @@ tags: [data-analysis, da-008, confounding, hypothesis, segmentation, toi-noi]
 language: vi
 ---
 
-Vận hành cho rằng huỷ cao điểm tăng vì tài xế thiếu. Sản phẩm cho rằng khách không tìm được điểm đón. Kỹ thuật nhớ tuần vừa rồi có đổi tracking. Mỗi bên có một lời giải thích hợp lý, nhưng tính hợp lý chưa cho biết lời giải thích nào đúng.
+Vận hành cho rằng huỷ cao điểm tăng vì tài xế thiếu. Sản phẩm cho rằng khách không tìm được điểm đón. Kỹ thuật nhớ tuần vừa rồi có đổi cách ghi nhận. Mỗi bên có một lời giải thích hợp lý, nhưng tính hợp lý chưa cho biết lời giải thích nào đúng.
 
 DA cần biến các lời kể thành giả thuyết có thể kiểm tra, tìm bằng chứng phân biệt chúng và chủ động tìm điều có thể bác bỏ cách giải thích mình đang nghiêng về.
 
@@ -19,9 +19,9 @@ DA cần biến các lời kể thành giả thuyết có thể kiểm tra, tìm
 
 ## 1. Tách hiện tượng thực tế khỏi phép đo
 
-Số huỷ trên báo cáo có thể đổi vì khách/tài xế hành xử khác, hoặc vì cách ghi nhận/lọc/tổng hợp khác. Hai nhóm nguyên nhân này có thể xảy ra cùng lúc.
+Số huỷ trên báo cáo có thể đổi vì khách hoặc tài xế hành xử khác đi, hoặc vì cách ghi nhận, lọc, tổng hợp khác đi. Hai nhóm nguyên nhân này có thể xảy ra cùng lúc.
 
-Một phiên bản ứng dụng mới có thể làm khó luồng tìm điểm đón, đồng thời sửa việc gửi event huỷ. Khi thấy số huỷ tăng sau phát hành, ta không được chọn một trong hai lời giải thích chỉ bằng thứ tự thời gian. Cần đối soát nguồn, độ phủ và hành vi thực tế.
+Một phiên bản ứng dụng mới có thể làm khó luồng tìm điểm đón, đồng thời sửa việc gửi sự kiện huỷ. Khi thấy số huỷ tăng sau khi phát hành, ta không được chọn một trong hai lời giải thích chỉ bằng thứ tự thời gian. Cần đối soát nguồn, độ phủ và hành vi thực tế.
 
 Mẫu tư duy đơn giản:
 
@@ -41,16 +41,16 @@ Mỗi mắt xích có thể làm số cuối thay đổi. Sơ đồ này là khu
 | Môi trường | Mưa, sự kiện địa phương, đường bị hạn chế | Dữ liệu đúng địa điểm/thời gian và độ phủ |
 | Cung cầu | Nhu cầu tăng nhanh hơn tài xế sẵn sàng | Cung có thể phục vụ, trạng thái bận/rảnh, khoảng cách |
 | Sản phẩm | Ghim điểm đón, hướng dẫn hoặc màn hình thay đổi | Lịch rollout, mức tiếp xúc, lỗi ứng dụng |
-| Dữ liệu | Nhãn huỷ, timezone, định nghĩa cohort thay đổi | Schema/metric version, đối soát và kiểm tra dữ liệu |
+| Dữ liệu | Nhãn huỷ, múi giờ, định nghĩa cohort thay đổi | Phiên bản schema/metric, đối soát và kiểm tra dữ liệu |
 | Hệ thống | Pipeline trễ hoặc lỗi ghi sự kiện | Log, thời điểm nhận dữ liệu, độ thiếu theo nhóm |
 
-Tất cả đang là giả thuyết. P01 không có ngày thực tế, nên chưa được gắn W2 với một trận mưa hay ngày lễ cụ thể. Việc có sẵn công cụ tra thời tiết không giải quyết được thiếu mapping ngày/vùng của bộ minh hoạ.
+Tất cả đang là giả thuyết. P01 không có ngày thực tế, nên chưa thể gắn W2 với một trận mưa hay ngày lễ cụ thể. Việc có sẵn công cụ tra thời tiết không giải quyết được việc bộ minh hoạ thiếu ánh xạ ngày và vùng.
 
 ## 3. Yếu tố gây nhiễu: một biến cùng liên quan nhiều phía
 
 Giả sử ta muốn hiểu mối liên hệ giữa thời gian chờ và huỷ. Mưa có thể khiến tài xế di chuyển chậm hơn và khách dễ đổi kế hoạch hơn. Khi ấy, quan hệ quan sát giữa chờ lâu và huỷ có thể phản ánh một phần tác động của mưa.
 
-**Confounder — yếu tố gây nhiễu** là khái niệm cần xem xét khi một yếu tố có vai trò trong cả phía phơi nhiễm và kết quả của câu hỏi nhân quả. Không phải mọi cột tương quan đều là biến nên “kiểm soát”. Phải hiểu thứ tự và cơ chế trước khi chọn cách phân tích.
+**Confounder — yếu tố gây nhiễu** là khái niệm cần xem xét khi một yếu tố có liên quan tới cả hai phía là phơi nhiễm và kết quả của câu hỏi nhân quả. Không phải mọi cột tương quan đều là biến nên “kiểm soát”. Phải hiểu thứ tự và cơ chế trước khi chọn cách phân tích.
 
 Ví dụ, nếu đang đánh giá thay đổi hướng dẫn điểm đón, thời gian tìm nhau có thể là một mắt xích mà hướng dẫn tác động qua đó. Giữ thời gian này cố định có thể làm mất một phần tác động muốn đo. Đưa tất cả cột vào mô hình không tự loại được sai lệch.
 
@@ -65,21 +65,21 @@ Ngay ở mức P01, hãy ghi: yếu tố xảy ra trước hay sau kết quả; 
 | V1 | 100 / 20 | 20% | 900 / 90 | 10% | 110/1.000 = 11% |
 | V2 | 900 / 162 | 18% | 100 / 8 | 8% | 170/1.000 = 17% |
 
-Trong mỗi nhóm, tỷ lệ giảm 2 điểm phần trăm, nhưng toàn bộ tăng từ 11% lên 17%. Nguyên nhân toán học là tỷ trọng nhóm H có tỷ lệ cao tăng từ 10% lên 90%.
+Trong mỗi nhóm, tỷ lệ giảm 2 điểm phần trăm, nhưng toàn bộ tăng từ 11% lên 17%. Nguyên nhân toán học là tỷ trọng của nhóm H, nhóm có tỷ lệ cao, tăng từ 10% lên 90%.
 
-Nếu dùng tỷ trọng V1 làm một phép chuẩn hoá mô tả, tỷ lệ V2 theo cơ cấu ấy là 10% × 18% + 90% × 8% = **9%**. Con số 9% không thay tỷ lệ thực tế V2 là 17%; nó trả lời câu hỏi khác: nếu cân các tỷ lệ nhóm V2 theo cơ cấu tham chiếu V1 thì kết quả là gì?
+Nếu dùng tỷ trọng V1 làm một phép chuẩn hoá mô tả, tỷ lệ V2 theo cơ cấu ấy là 10% × 18% + 90% × 8% = **9%**. Con số 9% không thay tỷ lệ thực tế V2 là 17%; con số này trả lời câu hỏi khác: nếu cân các tỷ lệ nhóm V2 theo cơ cấu tham chiếu V1 thì kết quả là gì?
 
 Phép tính không chứng minh dịch vụ đã được một can thiệp làm tốt hơn. Nhóm có thể còn khác nhau ở nhiều yếu tố, và cách chia nhóm có thể chưa thích hợp cho câu hỏi nhân quả. Giá trị của ví dụ là buộc DA kiểm tra cơ cấu trước khi kết luận từ số chung.
 
-Trong baseline P01 gốc, cao điểm và còn lại đều chiếm 50% mỗi tuần. Không dùng lời giải thích đổi tỷ trọng của MIX-01 cho bảng P01 khi tỷ trọng ở đó không đổi.
+Trong baseline P01 gốc, cao điểm và còn lại đều chiếm 50% mỗi tuần. Không áp lời giải thích về thay đổi tỷ trọng của MIX-01 cho bảng P01 khi tỷ trọng ở đó không đổi.
 
 ## 5. Biến giả thuyết thành kế hoạch có thể bác bỏ
 
 | ID | Giả thuyết | Dấu hiệu dự kiến nếu đúng | Bằng chứng làm yếu giả thuyết | Bước xác minh |
 |---|---|---|---|---|
-| H-01 | Thiếu event ở W1 làm tỷ lệ cao điểm trông thấp | Nguồn và kho lệch riêng W1/cao điểm | Đối soát đầy đủ, lịch ghi nhận ổn định | DE/backend kiểm tra SRC-05 và lịch sử |
-| H-02 | Điểm đón nhiều cổng gây khó tìm nhau | Ca đã xác minh tập trung khó khăn đó | Ca đối chiếu cùng địa điểm không có dấu hiệu, hoặc nhãn sai | Lập mẫu ca huỷ và ca đón thành công để review |
-| H-03 | Cung có thể phục vụ giảm ở cao điểm | Thời gian chờ và mức thiếu cung đồng biến trong phạm vi phù hợp | Cung ổn định, biến động chỉ ở bản app mới | Xác định phép đo cung và phân tích theo thời gian/vùng |
+| H-01 | Thiếu sự kiện ở W1 làm tỷ lệ cao điểm trông thấp | Nguồn và kho lệch riêng W1/cao điểm | Đối soát đầy đủ, lịch ghi nhận ổn định | DE/backend kiểm tra SRC-05 và lịch sử |
+| H-02 | Điểm đón nhiều cổng gây khó tìm nhau | Ca đã xác minh tập trung khó khăn đó | Ca đối chiếu cùng địa điểm không có dấu hiệu, hoặc nhãn sai | Lập mẫu ca huỷ và ca đón thành công để rà soát |
+| H-03 | Cung có thể phục vụ giảm ở cao điểm | Thời gian chờ và mức thiếu cung đồng biến trong phạm vi phù hợp | Cung ổn định, biến động chỉ ở bản ứng dụng mới | Xác định phép đo cung và phân tích theo thời gian/vùng |
 | H-04 | Nhãn lý do huỷ bị đổi cách dùng | Phân bố nhãn đổi quanh phiên bản/form mới | Nhãn và quy trình ổn định qua đối soát | Review phiên bản và mẫu nhãn với CSKH |
 
 “Bằng chứng làm yếu” không phải phép bác bỏ tuyệt đối. Chẳng hạn, cung ổn định toàn thành phố chưa bác được thiếu cung ở một cụm nhỏ. Mọi phép kiểm tra phải khớp phạm vi của giả thuyết.
@@ -90,19 +90,19 @@ Với H-02, chỉ hỏi người đã huỷ sẽ thiếu nhóm đối chiếu. C
 
 Kiểm tra cách đo thường nên làm sớm vì nếu sai, các phân tích tiếp theo có thể phải tính lại. Nhưng thứ tự cụ thể phụ thuộc chi phí, độ sẵn sàng và tác động của từng thiếu hụt.
 
-Một bảng ưu tiên tốt nêu lý do: H-01 cần xác minh trước khi so sánh; H-02 có thể giúp thiết kế phương án điểm đón nhưng cần kế hoạch mẫu; H-03 cần nguồn mới nên chưa hứa kết quả trong cùng hạn. Không gán xác suất “80% do tài xế” nếu chỉ có cảm nhận.
+Một bảng ưu tiên tốt nêu lý do: H-01 cần xác minh trước khi so sánh; H-02 có thể giúp thiết kế phương án điểm đón nhưng cần kế hoạch mẫu; H-03 cần nguồn mới nên chưa hứa kết quả trong cùng thời hạn. Không gán xác suất “80% do tài xế” nếu chỉ có cảm nhận.
 
-Sau mỗi phép kiểm tra, cập nhật trạng thái: chưa kiểm tra, có dấu hiệu, bị yếu đi, chưa phân biệt được, hoặc cần thiết kế đánh giá tác động. Không dùng “đã xác nhận” chỉ vì tìm được một ca phù hợp câu chuyện.
+Sau mỗi phép kiểm tra, cập nhật trạng thái: chưa kiểm tra, có dấu hiệu, bị yếu đi, chưa phân biệt được, hoặc cần thiết kế đánh giá tác động. Không dùng “đã xác nhận” chỉ vì tìm được một ca khớp với câu chuyện mình đang kể.
 
 ## 7. Những sai lầm cần tránh
 
-- Dùng thời điểm release làm bằng chứng đủ cho nguyên nhân; nhiều thay đổi có thể trùng ngày.
+- Dùng thời điểm phát hành làm bằng chứng đủ để kết luận nguyên nhân; nhiều thay đổi có thể trùng ngày.
 - Chỉ lấy nhóm có kết quả đầy đủ, bỏ qua lượt huỷ/treo rồi kết luận trải nghiệm chung tốt hơn.
 - Chọn nhóm sau khi xem dữ liệu nhưng trình bày như giả thuyết đặt trước.
 - Gộp dịch vụ hoặc vùng có cơ cấu thay đổi mà không kiểm tra tỷ trọng.
 - Coi lý do người dùng chọn là nguyên nhân đã xác minh; nhãn có thể phản ánh lựa chọn gần nhất hoặc mặc định.
 
-Tinh thần khám phá và kiểm tra giả định được trình bày trong [NIST — What is EDA?](https://www.itl.nist.gov/div898/handbook/eda/section1/eda11.htm). Bản đồ giả thuyết giúp áp dụng tinh thần đó vào bài toán cụ thể thay vì chỉ vẽ thêm biểu đồ.
+[NIST — What is EDA?](https://www.itl.nist.gov/div898/handbook/eda/section1/eda11.htm) trình bày tinh thần khám phá và kiểm tra giả định. Bản đồ giả thuyết giúp áp dụng tinh thần đó vào bài toán cụ thể thay vì chỉ vẽ thêm biểu đồ.
 
 ## 8. Bài tập và tự đánh giá
 

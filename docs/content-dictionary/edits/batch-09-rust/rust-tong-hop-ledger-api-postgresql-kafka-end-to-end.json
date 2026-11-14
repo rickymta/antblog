@@ -1,0 +1,89 @@
+{
+ "file": "rust-tong-hop-ledger-api-postgresql-kafka-end-to-end.md",
+ "edits": [
+  {
+   "old": "TripCompleted từ Kafka thành bút toán",
+   "new": "Biến TripCompleted từ Kafka thành bút toán",
+   "reason": "Thiếu động từ",
+   "severity": "medium"
+  },
+  {
+   "old": "test chờ sự kiện thật, phát lại và kill giữa chừng",
+   "new": "test chờ sự kiện thật, phát lại và dừng đột ngột giữa chừng",
+   "reason": "Việt hoá kill",
+   "severity": "low"
+  },
+  {
+   "old": "Redis không là nguồn sự thật, và lab không cần nó",
+   "new": "Redis không phải là nguồn dữ liệu gốc, và lab không cần cache",
+   "reason": "Thiếu từ phải là; nguồn sự thật là calque",
+   "severity": "high"
+  },
+  {
+   "old": "Service không tự tính tiền; nó chỉ ghép sự kiện",
+   "new": "Service không tự tính tiền mà chỉ ghép sự kiện",
+   "reason": "Tránh Nó ở đầu vế",
+   "severity": "low"
+  },
+  {
+   "old": "không khiến orchestrator giết nhầm",
+   "new": "không khiến trình điều phối giết nhầm",
+   "reason": "Từ tiếng Anh thông thường; thống nhất với bài 39",
+   "severity": "medium"
+  },
+  {
+   "old": "Điều kiện giữa nhận từ `post_rebalance`",
+   "new": "Điều kiện ở giữa lấy từ `post_rebalance`",
+   "reason": "Cách nói cụt",
+   "severity": "low"
+  },
+  {
+   "old": "Test không giả Kafka:",
+   "new": "Test không giả lập Kafka:",
+   "reason": "Thiếu từ lập",
+   "severity": "low"
+  },
+  {
+   "old": "và kiểm thoát mã 0, log JSON",
+   "new": "và kiểm tra mã thoát là 0, log JSON",
+   "reason": "Câu cụt, thiếu động từ",
+   "severity": "medium"
+  },
+  {
+   "old": "cả hai test chết giữa chừng đỏ sau hạn 30 giây",
+   "new": "cả hai test chết giữa chừng đều đỏ khi hết hạn 30 giây",
+   "reason": "Câu khó đọc",
+   "severity": "medium"
+  },
+  {
+   "old": "Replay qua `PostEntry` cũng đốt một id",
+   "new": "Replay qua `PostEntry` cũng tiêu mất một id",
+   "reason": "Đốt là ẩn dụ không chuẩn",
+   "severity": "medium"
+  },
+  {
+   "old": "nó chết đúng khe hở mà ta muốn kiểm",
+   "new": "service chết đúng khe hở mà ta muốn kiểm",
+   "reason": "Nó chỉ đối tượng không rõ",
+   "severity": "low"
+  },
+  {
+   "old": "thì bị đá khỏi group",
+   "new": "thì bị loại khỏi group",
+   "reason": "Khẩu ngữ",
+   "severity": "low"
+  },
+  {
+   "old": "Cùng `TN-0001` với cước mới bị bỏ qua im lặng",
+   "new": "Cùng `TN-0001` với cước mới bị bỏ qua mà không báo gì",
+   "reason": "Style guide: im lặng thành không báo gì",
+   "severity": "low"
+  },
+  {
+   "old": "Lab bỏ qua im lặng:",
+   "new": "Lab bỏ qua mà không báo gì:",
+   "reason": "Style guide: im lặng thành không báo gì",
+   "severity": "low"
+  }
+ ]
+}

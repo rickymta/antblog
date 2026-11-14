@@ -1,0 +1,11 @@
+{
+  "file": "rust-use-case-thanh-toan-chuyen-end-to-end.md",
+  "edits": [
+    {
+      "old": ": cuộc đua tạo không đi qua",
+      "new": ": race condition khi tạo không đi qua",
+      "reason": "Theo terminology.json (race-condition) và lựa chọn của rust-r3, rust-r4: «cuộc đua» thành «race condition»; các chỗ này còn sót sau vòng 2.",
+      "severity": "low"
+    }
+  ]
+}

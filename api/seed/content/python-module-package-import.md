@@ -10,7 +10,7 @@ language: vi
 
 Sau sáu bài, hàm tính cước của [Tới Nơi](/articles/du-an-mau-toi-noi) vẫn nằm chung một file với phần in kết quả. Giờ có thêm hai nhu cầu: service báo giá cần gọi hàm này, và script kiểm thử cũng cần gọi chính hàm đó, không phải một bản sao. Sao chép file sang thư mục khác chỉ tạo ra hai quy tắc cước dễ lệch nhau. Việc cần làm là tách mã thành **module** và gom chúng vào một **package** để mọi nơi `import` cùng một bản.
 
-Đây là bài 07 của lộ trình **Python cơ bản qua Tới Nơi**. Bạn cần biết hàm và cách chạy project bằng uv (bài 01 và 03). Lab dùng lại mô hình cước quen thuộc: 12.000 VND cho 2 km đầu, 4.500 VND mỗi km vượt, và thêm cận trên 100 km.
+Đây là bài 07 của lộ trình **Python cơ bản qua Tới Nơi**. Bạn cần biết hàm và cách chạy project bằng uv (bài 01 và 03). Lab dùng lại mô hình cước quen thuộc: 12.000 VND cho 2 km đầu, 4.500 VND cho mỗi km vượt quá, và thêm giới hạn trên 100 km.
 
 <div class="tkh-callout tkh-callout--example">
 <span class="tkh-callout-title">Thử trước khi đọc</span>
@@ -29,7 +29,7 @@ Sau sáu bài, hàm tính cước của [Tới Nơi](/articles/du-an-mau-toi-noi
 
 ## Module là một file, import chạy nó một lần
 
-Một **module** là một file `.py`. Câu lệnh `import pricing` làm theo thứ tự: tra `sys.modules` xem tên đã có chưa; nếu chưa, tìm `pricing.py` trong các thư mục của `sys.path`; tạo object module và **ghi nó vào `sys.modules` ngay lúc này**; sau đó mới chạy thân file từ trên xuống trong namespace của module; cuối cùng gắn tên `pricing` vào nơi gọi. Nếu thân file ném lỗi, Python gỡ module khỏi `sys.modules` và lỗi bay tiếp lên nơi import. Phần định nghĩa hàm, hằng số và cả lệnh `print` ở mức module đều chạy trong bước chạy thân file.
+Một **module** là một file `.py`. Câu lệnh `import pricing` làm theo thứ tự: tra `sys.modules` xem tên đã có chưa; nếu chưa, tìm `pricing.py` trong các thư mục của `sys.path`; tạo object module và **ghi nó vào `sys.modules` ngay lúc này**; sau đó mới chạy thân file từ trên xuống trong namespace của module; cuối cùng gắn tên `pricing` vào nơi gọi. Nếu thân file ném lỗi, Python gỡ module khỏi `sys.modules` và lỗi tiếp tục truyền lên nơi import. Phần định nghĩa hàm, hằng số và cả lệnh `print` ở mức module đều chạy trong bước chạy thân file.
 
 <figure class="tkh-fig">
 <div class="tkh-fig-box">
@@ -38,7 +38,7 @@ Một **module** là một file `.py`. Câu lệnh `import pricing` làm theo th
 <figcaption>Hình 2. Trình tự import. Chỉ lần đầu mới đi qua các bước 2 đến 4; các lần sau dừng ở bước 1 và trả lại cùng một object. Module được ghi vào <code>sys.modules</code> trước khi thân file chạy, và bị gỡ nếu thân file ném lỗi.</figcaption>
 </figure>
 
-Việc ghi cache **trước** khi chạy thân file là chi tiết quan trọng, vì nó giải thích lỗi import vòng ở mục sau. Ta kiểm chứng bằng một module tạm do `main.py` tự tạo. Thân module in ra một dòng, trong đó có việc tên của nó đã nằm trong `sys.modules` chưa, rồi ta import hai lần:
+Việc ghi cache **trước** khi chạy thân file là chi tiết quan trọng, vì chi tiết này giải thích lỗi import vòng ở mục sau. Ta kiểm chứng bằng một module tạm do `main.py` tự tạo. Thân module in ra một dòng, trong đó có việc tên của nó đã nằm trong `sys.modules` chưa, rồi ta import hai lần:
 
 ```python
 # main.py: tạo probe_mod.py trong thư mục tạm rồi import hai lần
@@ -82,7 +82,7 @@ Quy tắc dễ nhớ: file trong gói thì không chạy trực tiếp bằng đ
 
 ## `sys.path` và lỗi «No module named»
 
-Danh sách thư mục Python tìm module nằm ở `sys.path`. Trong môi trường của lab, khi chạy `python -c`, danh sách gồm sáu phần tử: chuỗi rỗng (thư mục hiện tại), file zip thư viện chuẩn, thư mục thư viện chuẩn, `lib-dynload`, `site-packages` của virtualenv, và cuối cùng là thư mục `src` của lab (do uv thêm, xem mục src layout). Khi chạy `python main.py`, phần tử đầu là **thư mục chứa `main.py`**, không phải thư mục hiện tại của terminal; với `python -m`, phần tử đầu là thư mục hiện tại. Vì vậy `import` tìm theo vị trí của script, không theo nơi bạn đứng khi gõ lệnh. Việc mở file dữ liệu bằng `open("data.csv")` là chuyện khác hẳn: nó đi theo thư mục hiện tại của tiến trình, chứ không theo `sys.path` (bài 09 sẽ dùng `pathlib` để định vị file một cách rõ ràng).
+Danh sách thư mục Python tìm module nằm ở `sys.path`. Trong môi trường của lab, khi chạy `python -c`, danh sách gồm sáu phần tử: chuỗi rỗng (thư mục hiện tại), file zip thư viện chuẩn, thư mục thư viện chuẩn, `lib-dynload`, `site-packages` của virtualenv, và cuối cùng là thư mục `src` của lab (do uv thêm, xem mục src layout). Khi chạy `python main.py`, phần tử đầu là **thư mục chứa `main.py`**, không phải thư mục hiện tại của terminal; với `python -m`, phần tử đầu là thư mục hiện tại. Vì vậy `import` tìm theo vị trí của script, không theo nơi bạn đứng khi gõ lệnh. Việc mở file dữ liệu bằng `open("data.csv")` là chuyện khác hẳn: lệnh này đi theo thư mục hiện tại của tiến trình, chứ không theo `sys.path` (bài 09 sẽ dùng `pathlib` để định vị file một cách rõ ràng).
 
 Khi `sys.path` không có thư mục chứa module cần tìm, Python báo `ModuleNotFoundError: No module named '...'`, lớp con của `ImportError`. Lab chủ động tạo lỗi này trước khi thêm thư mục tạm vào `sys.path`:
 
@@ -126,10 +126,10 @@ def quote(distance_km, policy: FarePolicy = DEFAULT_POLICY) -> Quote:
 
 `models.py` giữ `FarePolicy` và `Quote` (hai `NamedTuple` như ở bài 05) cùng hằng `DEFAULT_POLICY`. Lõi tính cước là `calculate_fare`; `quote()` chỉ đóng gói kết quả, nên mọi nơi gọi cùng một quy tắc.
 
-- **Import tuyệt đối** bắt đầu từ tên gói trên cùng: `from toinoi_fare.pricing import calculate_fare`. Nó rõ ràng, đọc ở đâu cũng hiểu, và là lựa chọn mặc định theo PEP 8. `main.py` và `__main__.py` dùng kiểu này.
-- **Import tương đối** dùng dấu chấm: `.models` là module `models` cùng gói, `..` là gói cha, `..x` là module `x` trong gói cha. Nó chỉ dùng được bên trong một package, và giúp đổi tên gói mà không sửa từng dòng import nội bộ. PEP 8 coi import tương đối tường minh là chấp nhận được khi gói có bố cục phức tạp. `pricing.py` và `__init__.py` dùng kiểu này; lab cố ý trộn hai kiểu để bạn thấy cả hai. Trong dự án thật, hãy thống nhất một quy ước, thường là tuyệt đối ở mọi nơi.
+- **Import tuyệt đối** bắt đầu từ tên gói trên cùng: `from toinoi_fare.pricing import calculate_fare`. Kiểu này rõ ràng, đọc ở đâu cũng hiểu, và là lựa chọn mặc định theo PEP 8. `main.py` và `__main__.py` dùng kiểu này.
+- **Import tương đối** dùng dấu chấm: `.models` là module `models` cùng gói, `..` là gói cha, `..x` là module `x` trong gói cha. Kiểu này chỉ dùng được bên trong một package, và giúp đổi tên gói mà không sửa từng dòng import nội bộ. PEP 8 coi import tương đối tường minh là chấp nhận được khi gói có bố cục phức tạp. `pricing.py` và `__init__.py` dùng kiểu này; lab cố ý trộn hai kiểu để bạn thấy cả hai. Trong dự án thật, hãy thống nhất một quy ước, thường là tuyệt đối ở mọi nơi.
 
-Còn một lựa chọn nữa: `import x` hay `from x import y`. Với `import toinoi_fare.pricing`, bạn phải viết đầy đủ `toinoi_fare.pricing.calculate_fare(...)` nhưng luôn thấy hàm đến từ đâu. Với `from toinoi_fare import calculate_fare`, ngắn hơn, nhưng bạn nhận một **tham chiếu** tới object tại thời điểm import; nếu module gốc gán lại tên đó sau này, tên trong module của bạn không đổi theo. Tránh `from x import *` vì nó làm không ai biết tên đến từ đâu. Lab xác nhận `toinoi_fare.quote` và `toinoi_fare.pricing.quote` là cùng một object, và `toinoi_fare.pricing` đã nằm trong `sys.modules` sau khi import gói, vì `__init__.py` đã import nó.
+Còn một lựa chọn nữa là viết `import x` hay `from x import y`. Với `import toinoi_fare.pricing`, bạn phải viết đầy đủ `toinoi_fare.pricing.calculate_fare(...)` nhưng luôn thấy hàm đến từ đâu. Với `from toinoi_fare import calculate_fare`, dòng lệnh ngắn hơn, nhưng bạn nhận một **tham chiếu** tới object tại thời điểm import; nếu module gốc gán lại tên đó sau này, tên trong module của bạn không đổi theo. Tránh `from x import *` vì cách này khiến không ai biết tên đến từ đâu. Lab xác nhận `toinoi_fare.quote` và `toinoi_fare.pricing.quote` là cùng một object, và `toinoi_fare.pricing` đã nằm trong `sys.modules` sau khi import gói, vì `__init__.py` đã import nó.
 
 ## Import vòng: khi hai module đợi nhau
 
@@ -139,7 +139,7 @@ Nếu `fare_pricing` import `fare_models` ở dòng đầu, còn `fare_models` l
 import vòng: ImportError: cannot import name 'quote' from partially initialized module 'cycle_demo.fare_pricing' (most likely due to a circular import)
 ```
 
-Hãy nhớ cụm **«partially initialized module»**: nó cho biết module đang được import dở, đúng dấu hiệu của import vòng. Cách chữa tốt nhất là sửa thiết kế: đưa phần dùng chung ra **module thứ ba** mà cả hai cùng import một chiều (trong gói của lab, `models.py` không import `pricing`, chỉ `pricing` import `models`). Import đặt trong thân hàm cũng gỡ được vòng, nhưng chỉ nên dùng khi bạn hiểu vì sao.
+Hãy nhớ cụm **«partially initialized module»**: nó cho biết module đang được import dở, đúng dấu hiệu của import vòng. Cách chữa tốt nhất là sửa thiết kế: tách phần dùng chung thành **module thứ ba** mà cả hai cùng import một chiều (trong gói của lab, `models.py` không import `pricing`, chỉ `pricing` import `models`). Import đặt trong thân hàm cũng gỡ được vòng, nhưng chỉ nên dùng khi bạn hiểu vì sao.
 
 ## src layout và cấu hình để chạy được thật
 
@@ -166,7 +166,7 @@ package = true
 module-name = "toinoi_fare"
 ```
 
-Tên project có dấu gạch (`toi-noi-py-07-...`) khác tên package để `import` (`toinoi_fare`), nên ta khai báo `module-name` tường minh; nếu để mặc định, uv_build suy ra tên thư mục từ tên project. Ràng buộc `uv_build>=0.12.11,<0.13.0` là do uv 0.12.11 sinh ra khi tạo project; phiên bản bạn ghi sẽ theo phiên bản uv bạn đang cài. Khi chạy `uv run`, uv dựng virtualenv, cài gói ở chế độ **editable** và để lại file `.pth` có một dòng trỏ vào `src/`. Từ lúc đó `sys.path` có thêm thư mục này, và sửa file trong `src/toinoi_fare` có hiệu lực ngay, không cần cài lại.
+Tên project có dấu gạch (`toi-noi-py-07-...`) khác tên package dùng để `import` (`toinoi_fare`), nên ta khai báo `module-name` tường minh; nếu để mặc định, uv_build suy ra tên thư mục từ tên project. Ràng buộc `uv_build>=0.12.11,<0.13.0` là do uv 0.12.11 sinh ra khi tạo project; phiên bản bạn ghi sẽ theo phiên bản uv bạn đang cài. Khi chạy `uv run`, uv dựng virtualenv, cài gói ở chế độ **editable** và để lại file `.pth` có một dòng trỏ vào `src/`. Từ lúc đó `sys.path` có thêm thư mục này, và sửa file trong `src/toinoi_fare` có hiệu lực ngay, không cần cài lại.
 
 ## Phụ thuộc, `uv.lock` và giới hạn của ví dụ
 
@@ -182,9 +182,9 @@ dependencies = [
 ]
 ```
 
-Phiên bản được chọn phụ thuộc thời điểm bạn chạy lệnh. `pyproject.toml` ghi **ràng buộc** bạn chấp nhận (`>=2026.6`); `uv.lock` ghi **phiên bản cụ thể** của cả cây phụ thuộc. Commit cả hai để đồng đội và CI cài đúng như bạn. Lab 07 không có phụ thuộc nào ngoài chính nó, nên `uv.lock` chỉ có một mục, và ta không `uv add` thật trong lab vì lab không cần mạng khi chạy. Khi thêm phụ thuộc, hãy đọc kỹ tên gói: gói có tên gần giống gói nổi tiếng là một đường tấn công chuỗi cung ứng.
+Phiên bản được chọn phụ thuộc vào thời điểm bạn chạy lệnh. `pyproject.toml` ghi **ràng buộc** bạn chấp nhận (`>=2026.6`); `uv.lock` ghi **phiên bản cụ thể** của cả cây phụ thuộc. Commit cả hai để đồng đội và CI cài đúng như bạn. Lab 07 không có phụ thuộc bên ngoài nào, nên `uv.lock` chỉ có một mục, và ta không `uv add` thật trong lab vì lab không cần mạng khi chạy. Khi thêm phụ thuộc, hãy đọc kỹ tên gói: gói có tên gần giống gói nổi tiếng là một đường tấn công chuỗi cung ứng.
 
-Gói của lab rất nhỏ. Nó chưa có kiểu tĩnh kiểm bằng mypy, chưa có test (bài 10), chưa khai báo entry point để cài ra lệnh `toinoi-fare` và chưa phát hành lên registry. Bài 20 sẽ nâng cấu hình đóng gói, thêm ruff, mypy và cấu trúc dự án sẵn sàng cho service. Mô hình cước ở đây cũng chỉ là bản học tập: không phụ phí, thuế hay giảm giá.
+Gói của lab rất nhỏ. Gói chưa được kiểm tra kiểu tĩnh bằng mypy, chưa có test (bài 10), chưa khai báo entry point để cài ra lệnh `toinoi-fare` và chưa phát hành lên registry. Bài 20 sẽ nâng cấu hình đóng gói, thêm ruff, mypy và cấu trúc dự án sẵn sàng để đưa thành service. Mô hình cước ở đây cũng chỉ là bản học tập: không phụ phí, thuế hay giảm giá.
 
 | Hiện tượng | Kiểm tra trước |
 | --- | --- |
@@ -202,7 +202,7 @@ uv run --project examples/toi-noi-python/07-module-package-import examples/toi-n
 uv run --project examples/toi-noi-python/07-module-package-import python -m toinoi_fare 2.5
 ```
 
-Lệnh đầu in bảng cước, thí nghiệm `sys.modules`, hai lỗi import. Lệnh thứ hai chạy 18 kiểm tra và kết thúc bằng `OK 18/18`; có ca sai thì in tên ca, dòng `FAIL n/18` và thoát với mã 1. Lệnh thứ ba in `2.5 km => 14250 VND`; bỏ đối số thì mặc định 5 km và in `5 km => 25500 VND`. Bốn dòng bảng cước từ lab:
+Lệnh đầu in bảng cước, kết quả thí nghiệm `sys.modules` và hai lỗi import. Lệnh thứ hai chạy 18 kiểm tra và kết thúc bằng `OK 18/18`; có kiểm tra nào sai thì in tên kiểm tra đó, dòng `FAIL n/18` và thoát với mã 1. Lệnh thứ ba in `2.5 km => 14250 VND`; bỏ đối số thì mặc định 5 km và in `5 km => 25500 VND`. Bốn dòng bảng cước do lab in ra:
 
 ```text
 0 km => 12000 VND

@@ -1,7 +1,7 @@
 ---
 slug: rust-validation-problem-details-openapi-utoipa
 title: "Validation, Problem Details và OpenAPI với utoipa: hợp đồng API"
-summary: "Bài 32: validate thủ công gom mọi lỗi theo trường, trả application/problem+json (RFC 9457), ánh xạ LedgerError sang 422/409, bắt rejection của axum::Json và sinh OpenAPI 3.1 bằng utoipa kèm Swagger UI."
+summary: "Bài 32: validate thủ công gom mọi lỗi theo trường, trả application/problem+json (RFC 9457), ánh xạ LedgerError sang 422/409, bắt lỗi từ chối (rejection) của axum::Json và sinh OpenAPI 3.1 bằng utoipa kèm Swagger UI."
 category: rust-intermediate
 level: intermediate
 tags: [rust, toi-noi, ledger, axum, openapi, utoipa]
@@ -15,16 +15,16 @@ Payment BFF viết bằng C# gọi `POST /v1/entries` để ghi bút toán `trip
 <div class="tkh-callout tkh-callout--example">
 <span class="tkh-callout-title">Thử trước khi đọc</span>
 <p>Client gửi JSON bị cụt giữa chừng tới handler dùng <code>axum::Json</code>. Handler còn chạy không, và client nhận được gì?</p>
-<details><summary>Xem đáp án</summary><p>Handler không chạy: extractor thất bại trước đó và axum tự trả lỗi 400 với <code>text/plain</code>. Client đã quen đọc <code>application/problem+json</code> sẽ gặp một định dạng thứ hai trừ khi ta tự bắt rejection. Lab chạy đúng ca này ở mục về rejection bên dưới.</p></details>
+<details><summary>Xem đáp án</summary><p>Handler không chạy: extractor thất bại trước đó và axum tự trả lỗi 400 với <code>text/plain</code>. Client đã quen đọc <code>application/problem+json</code> sẽ gặp một định dạng thứ hai trừ khi ta tự bắt rejection. Lab chạy đúng trường hợp này ở mục về rejection bên dưới.</p></details>
 </div>
 
 ## Validate ở biên cần gom được gì, và không được làm gì?
 
 Validation ở biên HTTP trả lời một câu hỏi hẹp: request có đúng hình dạng và miền giá trị cơ bản không. Nó phải **gom mọi lỗi** thay vì dừng ở lỗi đầu tiên, để client sửa ba trường trong một lần gửi.
 
-Crate `validator` (bản 0.21.0 khi viết) là lựa chọn quen thuộc, với `#[derive(Validate)]`. Bài chỉ nhắc, lab không dùng: `ValidationErrors` là cây lồng nhau nên để ra đường dẫn `postings[0].account` vẫn phải tự duyệt cây, và hàm `schema` mặc định không chạy khi một trường đã lỗi. Lab chọn **validate thủ công**: ít phụ thuộc hơn, đường dẫn của từng trường nằm ngay trong code.
+Crate `validator` (bản 0.21.0 khi viết) là lựa chọn quen thuộc, với `#[derive(Validate)]`. Bài chỉ nhắc, lab không dùng: `ValidationErrors` là cây lồng nhau nên muốn lấy ra đường dẫn `postings[0].account` vẫn phải tự duyệt cây, và hàm `schema` mặc định không chạy khi một trường đã lỗi. Lab chọn **validate thủ công**: ít phụ thuộc hơn, đường dẫn của từng trường nằm ngay trong code.
 
-Lý do lớn hơn nằm ở chỗ đặt bất biến. Quy tắc «bút toán phải cân, không tràn `i64`» **không** thuộc về DTO. Bút toán còn đến từ consumer Kafka (bài 36) và gRPC (bài 35); nếu quy tắc sống trong DTO HTTP, các cửa đó phải chép lại. Vì vậy nó nằm ở `ledger-core`: trường của `JournalEntry` là private, nên không dựng được một bút toán lệch ([bài 13](/articles/rust-double-entry-journal-entry-posting), [bài 20](/articles/rust-tong-hop-ledger-core-cargo-doc-workspace)). Lớp HTTP chỉ kiểm thứ nó sở hữu: chuỗi không rỗng, độ dài, số dòng tối đa, `amountDong` khác 0.
+Lý do lớn hơn nằm ở nơi đặt các bất biến (invariant). Quy tắc «bút toán phải cân, không tràn `i64`» **không** thuộc về DTO. Bút toán còn đến từ consumer Kafka (bài 36) và gRPC (bài 35); nếu quy tắc sống trong DTO HTTP, các cửa đó phải chép lại. Vì vậy nó nằm ở `ledger-core`: trường của `JournalEntry` là private, nên không dựng được một bút toán lệch ([bài 13](/articles/rust-double-entry-journal-entry-posting), [bài 20](/articles/rust-tong-hop-ledger-core-cargo-doc-workspace)). Lớp HTTP chỉ kiểm tra những gì nó sở hữu: chuỗi không rỗng, độ dài, số dòng tối đa, `amountDong` khác 0.
 
 ```rust
 // src/validate.rs
@@ -57,7 +57,7 @@ pub fn field_errors(req: &PostEntryRequest) -> Vec<FieldError> {
 }
 ```
 
-Chỉ khi hình dạng đạt, `into_entry` mới gọi `JournalEntry::try_new` và để miền quyết định.
+Chỉ khi hình dạng đạt, `into_entry` mới gọi `JournalEntry::try_new` và để tầng miền quyết định.
 
 <figure class="tkh-fig">
 <div class="tkh-fig-box">
@@ -78,7 +78,7 @@ RFC 9457 (thay thế RFC 7807) định nghĩa media type `application/problem+js
 
 Lab không dùng `about:blank`, vì client cần một `type` riêng để rẽ nhánh. RFC khuyến nghị `type` là URI tuyệt đối, cho phép URI không mở được nhưng khuyến khích URI mở ra tài liệu; miền `toi-noi.example` chỉ để minh hoạ. Schema của lab chặt hơn RFC: năm thành phần cộng `traceId` đều `required`, đó là cam kết riêng của API này.
 
-RFC cho phép thành phần mở rộng, và client phải bỏ qua mở rộng nó không nhận ra. Lab thêm hai, đều không thuộc chuẩn: `errors` (chỉ có khi lỗi validation) và `traceId`. RFC có ví dụ `errors` gồm `detail` và `pointer`, nhưng đó chỉ là ví dụ; lab chọn `field`, `code`, `message` để client rẽ nhánh theo `code`.
+RFC cho phép thành phần mở rộng, và client phải bỏ qua thành phần mở rộng mà nó không nhận ra. Lab thêm hai, đều không thuộc chuẩn: `errors` (chỉ có khi lỗi validation) và `traceId`. RFC có ví dụ `errors` gồm `detail` và `pointer`, nhưng đó chỉ là ví dụ; lab chọn `field`, `code`, `message` để client rẽ nhánh theo `code`.
 
 ```rust
 // src/problem.rs (rút gọn: bỏ chú thích schema)
@@ -97,7 +97,7 @@ pub struct Problem {
 }
 ```
 
-`IntoResponse` cho `Problem` gọi `Json` rồi **ghi đè** `Content-Type` thành `application/problem+json`, vì `Json` đặt `application/json`. Một ca validation thật trong lab:
+`IntoResponse` cho `Problem` gọi `Json` rồi **ghi đè** `Content-Type` thành `application/problem+json`, vì `Json` đặt `application/json`. Kết quả chạy thật của một lỗi validation trong lab:
 
 ```text
 POST /v1/entries -> 422 application/problem+json
@@ -107,7 +107,7 @@ detail: 3 trường không hợp lệ
   postings[1].amountDong [zero_amount] số tiền phải khác 0
 ```
 
-Client rẽ nhánh theo `code` (`blank`, `zero_amount`), không phân tích câu tiếng Việt. Còn `traceId` (32 ký tự hex, dạng W3C trace-id) sinh ngẫu nhiên cho từng lỗi; bài 33 mới có `x-request-id` do middleware cấp và đi vào log, còn nối hai thứ đó là việc của service thật. `instance` ở đây là đường dẫn request, một cách đơn giản hoá: hai lần gọi cùng đường dẫn có cùng `instance`, nên nó chưa định danh được lần xảy ra, và `traceId` gánh phần đó.
+Client rẽ nhánh theo `code` (`blank`, `zero_amount`), không phân tích câu tiếng Việt. Còn `traceId` (32 ký tự hex, dạng W3C trace-id) sinh ngẫu nhiên cho từng lỗi; bài 33 mới có `x-request-id` do middleware cấp và đi vào log, còn nối hai thứ đó là việc của service thật. `instance` ở đây là đường dẫn request, một cách đơn giản hoá: hai lần gọi cùng đường dẫn có cùng `instance`, nên nó chưa định danh được lần xảy ra, còn `traceId` đảm nhận phần đó.
 
 Lỗi nội bộ không kèm chi tiết: `LedgerError::InvalidFee` ra 500 với `detail` cố định «xem log với traceId».
 
@@ -141,7 +141,7 @@ match err {
 
 Bảng này giữ nguyên các mã của [bài 31](/articles/rust-axum-http-endpoint-ghi-but-toan-tra-so-du), chỉ đổi thân lỗi. `EmptyAccountId` là 422 khi nó đến từ body; mã rỗng trên đường dẫn của `GET` là tham số sai dạng, handler trả 400 như bài 31. Lab chưa có route nào chạm tới `UnknownEntry` và `InvalidEntryId`, nhưng `match` vét cạn vẫn buộc chọn mã cho chúng.
 
-Lợi ích của việc không có nhánh `_` lộ ra khi `ledger-core` thêm biến thể. Tôi thử trên một bản sao: thêm `AccountFrozen` vào `LedgerError` rồi biên dịch lab, kết quả là lỗi chứ không phải một mã 500 âm thầm:
+Lợi ích của việc không có nhánh `_` lộ ra khi `ledger-core` thêm biến thể. Tôi thử trên một bản sao: thêm `AccountFrozen` vào `LedgerError` rồi biên dịch lab, kết quả là lỗi biên dịch, chứ không phải một mã 500 xuất hiện mà không ai hay:
 
 ```text
 error[E0004]: non-exhaustive patterns: `&LedgerError::AccountFrozen` not covered
@@ -190,11 +190,11 @@ where
 
 `problem_from_rejection` giữ nguyên mã trạng thái axum đã chọn (`rejection.status()`) và chỉ đổi cách trình bày: cú pháp sai là 400 `malformed-json`, thiếu trường, sai kiểu hay trường lạ là 422 `invalid-json-body`, thiếu `Content-Type` là 415, vượt 2 MB của `DefaultBodyLimit` là 413 `unreadable-body`. Đây đúng là bảng mã của bài 31. `get_balance` bọc `Path` theo cùng ý: `%FF` trên đường dẫn ra 400 Problem Details thay vì `text/plain`. Trong axum 0.8, `FromRequest` dùng `async fn` trực tiếp trong trait, không còn `#[async_trait]`.
 
-`detail` ở các ca này là thông điệp tiếng Anh của serde, không phải văn bản ta cam kết ổn định. Hợp đồng ổn định là `type` và `status`. `instance` lấy từ `OriginalUri`, vì `nest("/v1", …)` cắt tiền tố khỏi `req.uri()` trước khi extractor chạy.
+`detail` ở các trường hợp này là thông điệp tiếng Anh của serde, không phải văn bản ta cam kết ổn định. Hợp đồng ổn định là `type` và `status`. `instance` lấy từ `OriginalUri`, vì `nest("/v1", …)` cắt tiền tố khỏi `req.uri()` trước khi extractor chạy.
 
 ## utoipa sinh OpenAPI từ code ra sao?
 
-Cách tiếp cận **code-first**: ba thứ trong code là nguồn của tài liệu. DTO và `Problem` derive `ToSchema`; mỗi handler gắn `#[utoipa::path]` khai báo route và các status hợp đồng cam kết; `#[derive(OpenApi)]` gom lại.
+Cách tiếp cận **code-first**: ba thứ trong code là nguồn của tài liệu. DTO và `Problem` derive `ToSchema`; mỗi handler gắn `#[utoipa::path]` khai báo route và các mã trạng thái mà hợp đồng cam kết; `#[derive(OpenApi)]` gom lại.
 
 ```rust
 // src/openapi.rs (rút gọn: bỏ mô tả info)
@@ -210,7 +210,7 @@ Cách tiếp cận **code-first**: ba thứ trong code là nguồn của tài li
 pub struct ApiDoc;
 ```
 
-Mỗi response lỗi khai báo `content_type = "application/problem+json"` để tài liệu nói đúng media type thật. Version API là một tiền tố: route của phiên bản 1 nằm dưới `Router::nest("/v1", …)`, còn `path` trong `#[utoipa::path]` ghi đầy đủ `/v1/...`.
+Mỗi response lỗi khai báo `content_type = "application/problem+json"` để tài liệu nói đúng media type thật. Phiên bản API là một tiền tố: route của phiên bản 1 nằm dưới `Router::nest("/v1", …)`, còn `path` trong `#[utoipa::path]` ghi đầy đủ `/v1/...`.
 
 <figure class="tkh-fig">
 <div class="tkh-fig-box">
@@ -231,7 +231,7 @@ Router::new()
     .with_state(state)
 ```
 
-Lab bật feature `vendored` của `utoipa-swagger-ui` nên build không cần tải gì; không có feature đó, theo README của crate, gói Swagger UI được tải về lúc build. Hai `fallback` biến 404 và 405 của chính router thành Problem Details, để lỗi của API cùng một dạng; `method_not_allowed_fallback` vẫn giữ header `Allow` mà RFC 9110 bắt buộc với 405, và một test kiểm điều đó.
+Lab bật feature `vendored` của `utoipa-swagger-ui` nên build không cần tải gì; không có feature đó, theo README của crate, gói Swagger UI được tải về lúc build. Hai `fallback` biến 404 và 405 của chính router thành Problem Details, để lỗi của API có cùng một dạng; `method_not_allowed_fallback` vẫn giữ header `Allow` mà RFC 9110 bắt buộc với 405, và một test kiểm tra điều đó.
 
 Điều tài liệu **không** nói được cũng phải biết. Kiểu `i64` thành `integer` `int64`, `deny_unknown_fields` thành `additionalProperties: false` (lab in ra giá trị `false`), nhưng «khác 0» của `amountDong` không biểu diễn được bằng minimum hay maximum, nên lab chỉ ghi nó trong mô tả (OpenAPI 3.1 có `not` của JSON Schema, lab không dùng). Quy tắc đó vẫn thực thi ở `validate.rs`.
 
@@ -264,7 +264,7 @@ PostingDto.additionalProperties: false
 GET /swagger-ui/ -> 200 text/html
 ```
 
-Ca lệch và ca xung đột cho:
+Trường hợp lệch và trường hợp xung đột cho:
 
 ```text
 POST /v1/entries -> 422 application/problem+json
@@ -272,7 +272,7 @@ POST /v1/entries -> 422 application/problem+json
 POST /v1/entries -> 409 application/problem+json
 ```
 
-`--verify` kiểm 43 điều kiện và in `VERIFY OK (43 điều kiện)`, thoát mã 1 nếu một điều kiện sai. `cargo test` có bốn test đơn vị cho `validate` và mười test tích hợp. Chín test dùng `tower::ServiceExt::oneshot` (không mở cổng): một test kiểm biên 2 MB, một test duyệt từng đường dẫn và phương thức trong tài liệu rồi gọi thật. Test còn lại chạy toàn bộ kịch bản qua TCP.
+`--verify` kiểm tra 43 điều kiện và in `VERIFY OK (43 điều kiện)`, thoát mã 1 nếu một điều kiện sai. `cargo test` có bốn test đơn vị cho `validate` và mười test tích hợp. Chín test dùng `tower::ServiceExt::oneshot` (không mở cổng): một test kiểm tra ngưỡng 2 MB, một test duyệt từng đường dẫn và phương thức trong tài liệu rồi gọi thật. Test còn lại chạy toàn bộ kịch bản qua TCP.
 
 <div class="tkh-callout tkh-callout--warn">
 <span class="tkh-callout-title">Giới hạn của ví dụ</span>
@@ -283,7 +283,7 @@ POST /v1/entries -> 409 application/problem+json
 
 **Bài tập:** `ledger-core` thêm biến thể `LedgerError::AccountFrozen`. (a) Việc gì xảy ra ở lab, và bạn chọn mã HTTP nào? (b) Sau khi sửa, hợp đồng OpenAPI cần đổi gì và test nào bắt nếu bạn quên?
 
-<details><summary>Xem lời giải</summary><p>(a) <code>problem_from_ledger</code> không biên dịch (E0004) tới khi có nhánh mới. 422 hợp lý nếu coi là «nội dung bị từ chối»; 409 hợp lý nếu coi là xung đột trạng thái tài khoản. Chọn một, ghi vào bảng ánh xạ, và dùng một <code>type</code> mới như <code>account-frozen</code>. (b) Thêm dòng <code>(status = ..., body = Problem, content_type = "application/problem+json")</code> vào <code>#[utoipa::path]</code> của <code>post_entry</code> nếu mã đó chưa được liệt kê. Test duyệt tài liệu không bắt việc quên: nó chỉ chắc route tồn tại. Cần một test gọi ca đóng băng và kiểm mã trả về có trong <code>responses</code> của tài liệu.</p></details>
+<details><summary>Xem lời giải</summary><p>(a) <code>problem_from_ledger</code> không biên dịch (E0004) tới khi có nhánh mới. 422 hợp lý nếu coi là «nội dung bị từ chối»; 409 hợp lý nếu coi là xung đột trạng thái tài khoản. Chọn một, ghi vào bảng ánh xạ, và dùng một <code>type</code> mới như <code>account-frozen</code>. (b) Thêm dòng <code>(status = ..., body = Problem, content_type = "application/problem+json")</code> vào <code>#[utoipa::path]</code> của <code>post_entry</code> nếu mã đó chưa được liệt kê. Test duyệt tài liệu không bắt việc quên: nó chỉ bảo đảm route tồn tại. Cần một test gọi trường hợp đóng băng và kiểm tra mã trả về có trong <code>responses</code> của tài liệu.</p></details>
 
 Bài trước: [bài 31](/articles/rust-axum-http-endpoint-ghi-but-toan-tra-so-du). Bài tiếp: [bài 33](/articles/rust-tower-middleware-timeout-request-id-jwt-rate-limit).
 

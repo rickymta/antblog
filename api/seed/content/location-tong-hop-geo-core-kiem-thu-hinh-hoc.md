@@ -1,16 +1,16 @@
 ---
 slug: location-tong-hop-geo-core-kiem-thu-hinh-hoc
 title: "Tổng hợp P01: thư viện geo-core và kiểm thử hình học"
-summary: "Bài 10: tổng kết Phần 1: crate geo-core có gì và chưa có gì, kiểm thử thuộc tính bằng proptest, đồ thị tổng hợp «khu mẫu» cho CI, và danh sách việc chưa làm hoặc chưa tra của P01."
+summary: "Bài 10: tổng kết Phần 1: crate geo-core có gì và chưa có gì, kiểm thử thuộc tính bằng proptest, đồ thị tổng hợp «khu mẫu» cho CI, và danh sách việc chưa làm hoặc chưa kiểm chứng của P01."
 category: location-routing
 level: intermediate
 tags: [toi-noi, location, rust, geo-core, proptest, testing, fixture, ci]
 language: vi
 ---
 
-Trong «khu mẫu» tổng hợp của lab có một đại lộ hai chiều ngăn bằng dải phân cách. Hai khách ghim hai bên đại lộ, cách nhau **56,0 m** chim bay. Tài xế ô tô đi từ cạnh đường gần khách phía bắc sang cạnh gần khách phía nam mất **305,5 m** theo một chiều và **114,8 m** theo chiều ngược lại, gấp khoảng 5,5 và 2 lần đường chim bay. Đó là bài toán «ghim sai phía đường» của cả loạt bài, thu nhỏ vào vài trăm nút giao mà chạy được trong CI không cần mạng.
+Trong «khu mẫu» tổng hợp của lab có một đại lộ hai chiều ngăn bằng dải phân cách. Hai khách ghim hai bên đại lộ, cách nhau **56,0 m** chim bay. Tài xế ô tô đi từ cạnh đường gần khách phía bắc sang cạnh gần khách phía nam phải chạy **305,5 m** theo một chiều và **114,8 m** theo chiều ngược lại, gấp khoảng 5,5 và 2 lần đường chim bay. Đó là bài toán «ghim sai phía đường» của cả loạt bài, thu nhỏ vào vài trăm nút giao, đủ nhẹ để chạy trong CI mà không cần mạng.
 
-Đây là bài 10 của lộ trình **Nền tảng định vị** qua [Tới Nơi](/articles/du-an-mau-toi-noi), bài cuối của Phần 1. Bài này không thêm thuật toán mới. Nó đóng sổ: crate `geo-core` đã có gì, cách kiểm các phép hình học bằng kiểm thử thuộc tính, vì sao có một đồ thị tổng hợp được commit, và quan trọng nhất, những gì P01 **chưa** làm hoặc chưa tra được. Mã nguồn được dựng dần từ [bài 03](/articles/location-toa-do-wgs84-newtype-lat-lng-do-chinh-xac) tới [bài 09](/articles/location-tim-tai-xe-gan-nhat-bon-cach-co-so-do). Tên đường trong khu mẫu là giả lập, không phải dữ liệu OSM.
+Đây là bài 10 của lộ trình **Nền tảng định vị** qua [Tới Nơi](/articles/du-an-mau-toi-noi), bài cuối của Phần 1. Bài này không thêm thuật toán mới. Bài này đóng sổ: crate `geo-core` đã có gì, cách kiểm tra các phép hình học bằng kiểm thử thuộc tính, vì sao có một đồ thị tổng hợp được commit, và quan trọng nhất, những gì P01 **chưa** làm hoặc chưa kiểm chứng được. Mã nguồn được dựng dần từ [bài 03](/articles/location-toa-do-wgs84-newtype-lat-lng-do-chinh-xac) tới [bài 09](/articles/location-tim-tai-xe-gan-nhat-bon-cach-co-so-do). Tên đường trong khu mẫu là giả lập, không phải dữ liệu OSM.
 
 <div class="tkh-callout tkh-callout--example">
 <span class="tkh-callout-title">Thử trước khi đọc</span>
@@ -20,7 +20,7 @@ Trong «khu mẫu» tổng hợp của lab có một đại lộ hai chiều ng�
 
 ## `geo-core` có gì
 
-`geo-core` là crate nền của P01. Mọi crate khác dựa vào nó, và nó không biết gì về bản đồ hay mạng. Phần đầu `lib.rs` liệt kê chín mô-đun và những kiểu được xuất lại:
+`geo-core` là crate nền của P01. Mọi crate khác dựa vào crate này, và crate này không biết gì về bản đồ hay mạng. Phần đầu `lib.rs` liệt kê chín mô-đun và những kiểu được xuất lại:
 
 `examples/toi-noi-location/rust/crates/geo-core/src/lib.rs`
 
@@ -55,7 +55,7 @@ pub use segment::{PolylineProjection, SegmentProjection, project_to_polyline, pr
 
 <figure class="tkh-fig">
 <div class="tkh-fig-box">
-<svg viewBox="0 0 880 380" role="img" aria-label="Hình 1. Ba crate của phần P01: geo-core ở dưới, road-graph và driver-store dựa vào nó; các lab loc03 đến loc10 dùng từng crate; số test của mỗi crate: 28 test đơn vị và 16 thuộc tính cho geo-core, 32 cho road-graph, 6 cho driver-store."><defs><marker id="location-tong-hop-geo-core-kiem-thu-hinh-hoc-1-a" viewBox="0 0 10 10" refX="9" refY="5" markerUnits="userSpaceOnUse" markerWidth="11" markerHeight="11" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10 z" class="f-muted"/></marker></defs><rect x="20" y="60" width="260" height="170" rx="10" class="f-phys-soft s-phys" stroke-width="2"/><text x="34.0" y="86.0" class="t-b">geo-core</text><text x="34.0" y="112.0" class="t-mono">coord</text><text x="158.0" y="112.0" class="t-mono">distance</text><text x="34.0" y="130.0" class="t-mono">projection</text><text x="158.0" y="130.0" class="t-mono">segment</text><text x="34.0" y="148.0" class="t-mono">bearing</text><text x="158.0" y="148.0" class="t-mono">polyline</text><text x="34.0" y="166.0" class="t-mono">geojson</text><text x="158.0" y="166.0" class="t-mono">h3</text><text x="34.0" y="184.0" class="t-mono">geohash</text><text x="34.0" y="216.0" class="t-small">28 test + 16 thuộc tính proptest</text><rect x="330" y="60" width="260" height="170" rx="10" class="f-pk-soft s-pk" stroke-width="2"/><text x="344.0" y="86.0" class="t-b">road-graph</text><text x="344.0" y="112.0" class="t-mono">model (CSR)</text><text x="468.0" y="112.0" class="t-mono">tags</text><text x="344.0" y="130.0" class="t-mono">builder</text><text x="468.0" y="130.0" class="t-mono">pbf</text><text x="344.0" y="148.0" class="t-mono">components</text><text x="468.0" y="148.0" class="t-mono">io</text><text x="344.0" y="166.0" class="t-mono">snap</text><text x="468.0" y="166.0" class="t-mono">fixture</text><text x="344.0" y="184.0" class="t-mono">sp</text><text x="344.0" y="216.0" class="t-small">32 test</text><rect x="640" y="60" width="220" height="170" rx="10" class="f-warn-soft s-warn" stroke-width="2"/><text x="654.0" y="86.0" class="t-b">driver-store</text><text x="654.0" y="112.0" class="t-mono">scan</text><text x="758.0" y="112.0" class="t-mono">rtree</text><text x="654.0" y="130.0" class="t-mono">h3_buckets</text><text x="758.0" y="130.0" class="t-mono">redis_geo</text><text x="654.0" y="216.0" class="t-small">6 test; 1 test cần Redis</text><path d="M280.0 145.0 L328.0 145.0" class="f-none s-muted" stroke-width="2" marker-end="url(#location-tong-hop-geo-core-kiem-thu-hinh-hoc-1-a)"/><path d="M150.0 60.0 L150.0 42.0 L750.0 42.0 L750.0 58.0" class="f-none s-muted" stroke-width="2" stroke-linejoin="round" stroke-linecap="round" marker-end="url(#location-tong-hop-geo-core-kiem-thu-hinh-hoc-1-a)"/><text x="450.0" y="36.0" class="t-small" text-anchor="middle">driver-store cũng chỉ dựa vào geo-core</text><text x="20.0" y="28.0" class="t-b">Cargo workspace của P01</text><text x="20.0" y="262.0" class="t-b">Lab dùng crate nào</text><rect x="20" y="274" width="168" height="50" rx="8" class="f-phys-soft s-phys" stroke-width="1.5"/><text x="32.0" y="294.0" class="t-mono">loc03, loc05</text><text x="32.0" y="312.0" class="t-small">geo-core</text><rect x="200" y="274" width="188" height="50" rx="8" class="f-pk-soft s-pk" stroke-width="1.5"/><text x="212.0" y="294.0" class="t-mono">loc04, loc06, loc07</text><text x="212.0" y="312.0" class="t-small">road-graph + geo-core</text><rect x="400" y="274" width="198" height="50" rx="8" class="f-phys-soft s-phys" stroke-width="1.5"/><text x="412.0" y="294.0" class="t-mono">loc08</text><text x="412.0" y="312.0" class="t-small">geo-core (h3, geohash)</text><rect x="610" y="274" width="118" height="50" rx="8" class="f-warn-soft s-warn" stroke-width="1.5"/><text x="622.0" y="294.0" class="t-mono">loc09</text><text x="622.0" y="312.0" class="t-small">driver-store</text><rect x="740" y="274" width="120" height="50" rx="8" class="f-surface s-line" stroke-width="1.5"/><text x="752.0" y="294.0" class="t-mono">loc10</text><text x="752.0" y="312.0" class="t-small">road-graph, geo-core</text><text x="20.0" y="352.0" class="t-small">Test chạy bằng cargo test --workspace; kiểm tra toàn phần bằng verify-p01.sh.</text></svg>
+<svg viewBox="0 0 880 380" role="img" aria-label="Hình 1. Ba crate của phần P01: geo-core ở dưới, road-graph và driver-store dựa vào nó; các lab loc03 đến loc10 dùng từng crate; số test của mỗi crate: 28 test đơn vị và 16 thuộc tính cho geo-core, 32 cho road-graph, 6 cho driver-store."><defs><marker id="location-tong-hop-geo-core-kiem-thu-hinh-hoc-1-a" viewBox="0 0 10 10" refX="9" refY="5" markerUnits="userSpaceOnUse" markerWidth="11" markerHeight="11" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10 z" class="f-muted"/></marker></defs><rect x="20" y="60" width="260" height="170" rx="10" class="f-phys-soft s-phys" stroke-width="2"/><text x="34.0" y="86.0" class="t-b">geo-core</text><text x="34.0" y="112.0" class="t-mono">coord</text><text x="158.0" y="112.0" class="t-mono">distance</text><text x="34.0" y="130.0" class="t-mono">projection</text><text x="158.0" y="130.0" class="t-mono">segment</text><text x="34.0" y="148.0" class="t-mono">bearing</text><text x="158.0" y="148.0" class="t-mono">polyline</text><text x="34.0" y="166.0" class="t-mono">geojson</text><text x="158.0" y="166.0" class="t-mono">h3</text><text x="34.0" y="184.0" class="t-mono">geohash</text><text x="34.0" y="216.0" class="t-small">28 test + 16 thuộc tính proptest</text><rect x="330" y="60" width="260" height="170" rx="10" class="f-pk-soft s-pk" stroke-width="2"/><text x="344.0" y="86.0" class="t-b">road-graph</text><text x="344.0" y="112.0" class="t-mono">model (CSR)</text><text x="468.0" y="112.0" class="t-mono">tags</text><text x="344.0" y="130.0" class="t-mono">builder</text><text x="468.0" y="130.0" class="t-mono">pbf</text><text x="344.0" y="148.0" class="t-mono">components</text><text x="468.0" y="148.0" class="t-mono">io</text><text x="344.0" y="166.0" class="t-mono">snap</text><text x="468.0" y="166.0" class="t-mono">fixture</text><text x="344.0" y="184.0" class="t-mono">sp</text><text x="344.0" y="216.0" class="t-small">32 test</text><rect x="640" y="60" width="220" height="170" rx="10" class="f-warn-soft s-warn" stroke-width="2"/><text x="654.0" y="86.0" class="t-b">driver-store</text><text x="654.0" y="112.0" class="t-mono">scan</text><text x="758.0" y="112.0" class="t-mono">rtree</text><text x="654.0" y="130.0" class="t-mono">h3_buckets</text><text x="758.0" y="130.0" class="t-mono">redis_geo</text><text x="654.0" y="216.0" class="t-small">6 test; 1 test cần Redis</text><path d="M280.0 145.0 L328.0 145.0" class="f-none s-muted" stroke-width="2" marker-end="url(#location-tong-hop-geo-core-kiem-thu-hinh-hoc-1-a)"/><path d="M150.0 60.0 L150.0 42.0 L750.0 42.0 L750.0 58.0" class="f-none s-muted" stroke-width="2" stroke-linejoin="round" stroke-linecap="round" marker-end="url(#location-tong-hop-geo-core-kiem-thu-hinh-hoc-1-a)"/><text x="450.0" y="36.0" class="t-small" text-anchor="middle">driver-store cũng chỉ dựa vào geo-core</text><text x="20.0" y="28.0" class="t-b">Cargo workspace của P01</text><text x="20.0" y="262.0" class="t-b">Lab dùng crate nào</text><rect x="20" y="274" width="168" height="50" rx="8" class="f-phys-soft s-phys" stroke-width="1.5"/><text x="32.0" y="294.0" class="t-mono">loc03, loc05</text><text x="32.0" y="312.0" class="t-small">geo-core</text><rect x="200" y="274" width="188" height="50" rx="8" class="f-pk-soft s-pk" stroke-width="1.5"/><text x="212.0" y="294.0" class="t-mono">loc04, loc06, loc07</text><text x="212.0" y="312.0" class="t-small">road-graph + geo-core</text><rect x="400" y="274" width="198" height="50" rx="8" class="f-phys-soft s-phys" stroke-width="1.5"/><text x="412.0" y="294.0" class="t-mono">loc08</text><text x="412.0" y="312.0" class="t-small">geo-core (h3, geohash)</text><rect x="610" y="274" width="118" height="50" rx="8" class="f-warn-soft s-warn" stroke-width="1.5"/><text x="622.0" y="294.0" class="t-mono">loc09</text><text x="622.0" y="312.0" class="t-small">driver-store</text><rect x="740" y="274" width="120" height="50" rx="8" class="f-surface s-line" stroke-width="1.5"/><text x="752.0" y="294.0" class="t-mono">loc10</text><text x="752.0" y="312.0" class="t-small">road-graph, geo-core</text><text x="20.0" y="352.0" class="t-small">Test chạy bằng cargo test --workspace; kiểm tra toàn bộ bằng verify-p01.sh.</text></svg>
 </div>
 <figcaption>Hình 1. Cargo workspace của P01: <code>road-graph</code> (bài 06, 07) và <code>driver-store</code> (bài 09) đều chỉ dựa vào <code>geo-core</code>. Mỗi lab <code>locNN</code> chạy trên crate nó cần.</figcaption>
 </figure>
@@ -64,7 +64,7 @@ Một quyết định lặp lại xuyên suốt: mọi phép đổi thứ tự t
 
 ## Kiểm thử thuộc tính: điều kiện nào luôn đúng
 
-Test theo ví dụ («từ Bến Thành tới Landmark 81 là bấy nhiêu mét») chỉ chứng minh vài điểm. Hình học có những **tính chất** phải đúng với mọi đầu vào: khoảng cách đối xứng, bất đẳng thức tam giác, chiếu một điểm lên đoạn thì chân chiếu nằm trên đoạn. `proptest` sinh đầu vào ngẫu nhiên có kiểm soát, kiểm tính chất, và khi tìm ra phản ví dụ thì thu nhỏ nó về dạng nhỏ nhất. Lab có 16 thuộc tính, mỗi thuộc tính 2.000 ca, sinh điểm trên toàn lãnh thổ Việt Nam (lat 8–24, lng 102–110) hoặc trong bbox TP.HCM.
+Test theo ví dụ («từ Bến Thành tới Landmark 81 là bấy nhiêu mét») chỉ chứng minh vài điểm. Hình học có những **tính chất** phải đúng với mọi đầu vào: khoảng cách đối xứng, bất đẳng thức tam giác, chiếu một điểm lên đoạn thì chân chiếu nằm trên đoạn. `proptest` sinh đầu vào ngẫu nhiên có kiểm soát, kiểm tra tính chất, và khi tìm ra phản ví dụ thì thu nhỏ phản ví dụ đó về dạng nhỏ nhất. Lab có 16 thuộc tính, mỗi thuộc tính 2.000 test case, sinh điểm trên toàn lãnh thổ Việt Nam (lat 8–24, lng 102–110) hoặc trong bbox TP.HCM.
 
 `examples/toi-noi-location/rust/crates/geo-core/tests/properties.rs`
 
@@ -89,7 +89,7 @@ Test theo ví dụ («từ Bến Thành tới Landmark 81 là bấy nhiêu mét�
     }
 ```
 
-Chú ý chỗ khác nhau: haversine là khoảng cách thật trên mặt cầu nên đòi đúng (chỉ trừ sai số làm tròn 1 µm). Equirect thì mỗi cặp điểm dùng một cos vĩ độ riêng, nên ba cạnh của tam giác không nằm trên cùng một mặt phẳng, và tính chất chỉ đúng **trong sai số**, với dung sai 0,1% cộng 1 cm. Dung sai không được chọn tuỳ tiện: nó phải khớp sai số đã biết của phép xấp xỉ.
+Chú ý điểm khác nhau: haversine là khoảng cách thật trên mặt cầu nên đòi đúng (chỉ trừ sai số làm tròn 1 µm). Equirect thì mỗi cặp điểm dùng một cos vĩ độ riêng, nên ba cạnh của tam giác không nằm trên cùng một mặt phẳng, và tính chất chỉ đúng **trong sai số**, với dung sai 0,1% cộng 1 cm. Dung sai không được chọn tuỳ tiện: nó phải khớp sai số đã biết của phép xấp xỉ.
 
 `examples/toi-noi-location/rust/crates/geo-core/tests/properties.rs`
 
@@ -112,9 +112,9 @@ Chú ý chỗ khác nhau: haversine là khoảng cách thật trên mặt cầu 
     }
 ```
 
-Thuộc tính chiếu đoạn này **từng thất bại**. Phiên bản đầu kiểm «chân chiếu không xa hơn đầu mút» với dung sai tuyệt đối 1 cm, thất bại khi điểm hỏi cách đầu mút hàng chục km: mặt phẳng cục bộ gốc tại điểm hỏi lệch tới 0,1% ở khoảng cách đó. Sửa là dùng sai số tương đối 0,1% cộng 1 cm. Từ đó suy ra: chiếu điểm chỉ nên dùng gần đoạn, như khi snap, và đúng với cách `road-graph` dùng nó.
+Thuộc tính chiếu lên đoạn này **từng thất bại**. Phiên bản đầu kiểm tra «chân chiếu không xa hơn đầu mút» với dung sai tuyệt đối 1 cm, thất bại khi điểm hỏi cách đầu mút hàng chục km: mặt phẳng cục bộ có gốc tại điểm hỏi bị lệch tới 0,1% ở khoảng cách đó. Cách sửa là dùng sai số tương đối 0,1% cộng 1 cm. Từ đó suy ra: chiếu điểm chỉ nên dùng gần đoạn, như khi snap, và đó đúng là cách `road-graph` dùng nó.
 
-Cùng tính chất, lab còn chạy một đợt quét 200.000 ca bằng `loc10_tong_hop` (seed 20261106) và in **con số lớn nhất** thay vì chỉ đạt hay không:
+Cùng tính chất, lab còn chạy một đợt quét 200.000 test case bằng `loc10_tong_hop` (seed 20261106) và in **con số lớn nhất** thay vì chỉ đạt hay không:
 
 | Tính chất | Lớn nhất đo được |
 |---|---|
@@ -129,11 +129,11 @@ Cùng tính chất, lab còn chạy một đợt quét 200.000 ca bằng `loc10_
 | chân chiếu lệch khỏi đoạn, hoặc xa hơn hai đầu mút | 0,0000 m, 0 ca |
 | bearing sau `destination` rồi `bearing_deg` (100–5.000 m) | lệch 0,0000° |
 
-Những con số này là **số đo, không phải thời gian**, nên tái lập từng chữ số với cùng seed, không phụ thuộc máy đang tải. Hai điều cần đọc đúng. Một: precision 5 của polyline sai tới 0,78 m, E7 sai 7,8 mm, tức đủ cho hiển thị và lưu trữ nhưng không phải đủ cho mọi việc; chọn precision theo việc. Hai: thuộc tính chỉ kiểm tính chất **toán học** của công thức trên các mẫu đã sinh, không chứng minh công thức khớp mặt đất. Thuộc tính «đảo lat/lng luôn bị từ chối» (`swapped_lat_lng_always_rejected_in_vietnam`) đúng trong Việt Nam vì khi đảo, kinh độ 102–110 thành «vĩ độ» vượt khoảng cho phép; ở nơi như Abuja (lat 9,07; lng 7,40) đảo thứ tự vẫn ra toạ độ hợp lệ, khoảng giá trị không bắt được, và chỉ kiểu `LatLng` mới chặn.
+Những con số này là **số đo, không phải thời gian**, nên tái lập từng chữ số với cùng seed, không phụ thuộc máy đang tải. Hai điều cần đọc đúng. Một: precision 5 của polyline sai tới 0,78 m, E7 sai 7,8 mm, tức đủ cho hiển thị và lưu trữ nhưng không đủ cho mọi việc; chọn precision theo việc. Hai: thuộc tính chỉ kiểm tính chất **toán học** của công thức trên các mẫu đã sinh, không chứng minh công thức khớp mặt đất. Thuộc tính «đảo lat/lng luôn bị từ chối» (`swapped_lat_lng_always_rejected_in_vietnam`) đúng trong Việt Nam vì khi đảo, kinh độ 102–110 thành «vĩ độ» vượt khoảng cho phép; ở nơi như Abuja (lat 9,07; lng 7,40) đảo thứ tự vẫn ra toạ độ hợp lệ, khoảng giá trị không bắt được, và chỉ kiểu `LatLng` mới chặn.
 
 ## Đồ thị tổng hợp cho CI
 
-CI không thể phụ thuộc file PBF 332 MB và mạng. Lab có `fixtures/khu-mau.json`, một đồ thị tổng hợp do `gen_khu_mau` sinh có seed: lưới 16 cột × 13 hàng, bước 100 m, lệch ngẫu nhiên theo seed. File JSON có dạng OSM thu nhỏ (nút, way kèm thẻ, quan hệ cấm rẽ, cổng) và **đi qua đúng đường biên dịch của bản đồ thật** (`compile`), nên test chạy trên khu mẫu kiểm chính mã chạy trên HCM. Nó phải sinh lại được từng byte, và lab kiểm điều đó:
+CI không thể phụ thuộc file PBF 332 MB và mạng. Lab có `fixtures/khu-mau.json`, một đồ thị tổng hợp do `gen_khu_mau` sinh có seed: lưới 16 cột × 13 hàng, bước 100 m, lệch ngẫu nhiên theo seed. File JSON có dạng OSM thu nhỏ (nút, way kèm thẻ, quan hệ cấm rẽ, cổng) và **đi qua đúng quy trình biên dịch của bản đồ thật** (`compile`), nên test chạy trên khu mẫu kiểm tra đúng mã đang chạy trên HCM. File này phải sinh lại được từng byte, và lab kiểm tra điều đó:
 
 `examples/toi-noi-location/rust/labs/src/bin/loc10_tong_hop.rs`
 
@@ -153,7 +153,7 @@ CI không thể phụ thuộc file PBF 332 MB và mạng. Lab có `fixtures/khu-
 
 Kết quả: file 50.678 byte, sinh lại từ seed 20261106 cho đúng 50.678 byte, trùng từng byte. File có 1.041 nút OSM-mini, 48 way, 3 quan hệ cấm rẽ, 3 cổng; biên dịch ra 234 nút giao, 840 cạnh có hướng, 806 điểm hình dạng, với 2 thành phần liên thông trước khi lọc. Khu mẫu được thiết kế **chứa sẵn các tình huống khó** để bài sau có chỗ thử:
 
-| Tình huống | Có trong khu mẫu (đếm từ output) |
+| Tình huống | Có trong khu mẫu (đếm từ kết quả chạy) |
 |---|---|
 | Cầu ô tô được đi, cầu chỉ cho người đi bộ | 2 cạnh, 2 cạnh |
 | Hẻm xe máy và đi bộ vào được, ô tô không (cả hai chiều) | 4 cạnh (hẻm `width=2.2` và hẻm `motor_vehicle=no`) |
@@ -163,7 +163,7 @@ Kết quả: file 50.678 byte, sinh lại từ seed 20261106 cho đúng 50.678 b
 | Quan hệ cấm rẽ giải được thành cạnh vào và ra | 3 |
 | Mọi profile: SCC lớn nhất phủ bao nhiêu nút | 100,0% cả ba profile |
 
-Hình 2 vẽ đại lộ có dải phân cách từ chính `results/geojson/loc10-khu-mau-dai-lo.geojson`. Mỗi chiều xe là một way một chiều, cách nhau cỡ 20 m, chỉ cho cắt ngang ở cột 0, 5, 10, 15.
+Hình 2 vẽ đại lộ có dải phân cách từ dữ liệu của chính file `results/geojson/loc10-khu-mau-dai-lo.geojson`. Mỗi chiều xe chạy là một way một chiều; hai way cách nhau cỡ 20 m và chỉ cho cắt ngang ở cột 0, 5, 10, 15.
 
 <figure class="tkh-fig">
 <div class="tkh-fig-box">
@@ -172,17 +172,17 @@ Hình 2 vẽ đại lộ có dải phân cách từ chính `results/geojson/loc1
 <figcaption>Hình 2. Hai khách ghim hai phía đại lộ trong khu mẫu tổng hợp: cạnh gần nhất của khách phía bắc là chiều tây (hướng 266°, cách 17,4 m), của khách phía nam là chiều đông (hướng 88°, cách 17,5 m). Vẽ từ <code>loc10-khu-mau-dai-lo.geojson</code>; dữ liệu tổng hợp, không phải OSM.</figcaption>
 </figure>
 
-Khoảng cách hai ghim là 56,0 m, nhưng ô tô đi từ nút cuối cạnh phía bắc tới nút cuối cạnh phía nam mất 305,5 m, còn chiều ngược lại và người đi bộ đều 114,8 m (305,5 − 114,8 = 190,7 m dài hơn). Lab không in ra tuyến cụ thể, nên bài chỉ nói đúng điều đo được: vì mỗi chiều đại lộ là một chiều và chỉ cắt ngang ở vài cột, **đường chim bay không nói gì về quãng đường thật**. Số đo là giữa hai nút cuối của cạnh snap, xấp xỉ, chưa tính phần cạnh còn lại tới chân snap.
+Khoảng cách hai ghim là 56,0 m, nhưng ô tô đi từ nút cuối cạnh phía bắc tới nút cuối cạnh phía nam phải chạy 305,5 m, còn chiều ngược lại và người đi bộ đều 114,8 m (dài hơn 305,5 − 114,8 = 190,7 m). Lab không in ra tuyến cụ thể, nên bài chỉ nói đúng điều đo được: vì mỗi chiều đại lộ là một chiều và chỉ cắt ngang ở vài cột, **đường chim bay không nói gì về quãng đường thật**. Số đo tính giữa hai nút cuối của cạnh snap, ở dạng xấp xỉ, chưa tính phần cạnh còn lại tới chân snap.
 
-## Kiểm tra toàn phần và cái nó cố ý bỏ qua
+## Kiểm tra toàn bộ và những gì script cố ý bỏ qua
 
-`verify-p01.sh` chạy tuần tự: `cargo fmt --check`; `cargo clippy` với `-D warnings` trên mọi target; `cargo test` trên cả workspace; sinh lại fixture và so mã băm với file đã commit; rồi chạy mọi lab không cần PBF lẫn Redis (`loc03`, `loc04 --fixture`, `loc05`, `loc06 --fixture`, `loc07 --fixture`, `loc08`, `loc09 --no-redis`, `loc10`). In `PASS` nếu tất cả qua. Tổng số test của lần chạy cuối: `geo-core` 28 test đơn vị và 16 thuộc tính, `road-graph` 32, `driver-store` 6, cộng doctest `compile_fail` của `geo-core` kiểm đảo lat/lng; test cần Redis thật chạy riêng và có 1 test qua.
+`verify-p01.sh` chạy tuần tự: `cargo fmt --check`; `cargo clippy` với `-D warnings` trên mọi target; `cargo test` trên cả workspace; sinh lại fixture và so mã băm với file đã commit; rồi chạy mọi lab không cần PBF lẫn Redis (`loc03`, `loc04 --fixture`, `loc05`, `loc06 --fixture`, `loc07 --fixture`, `loc08`, `loc09 --no-redis`, `loc10`). Script in `PASS` nếu tất cả đều qua. Tổng số test của lần chạy cuối: `geo-core` 28 test đơn vị và 16 thuộc tính, `road-graph` 32, `driver-store` 6, cộng doctest `compile_fail` của `geo-core` kiểm tra việc đảo lat/lng; test cần Redis thật chạy riêng và có 1 test qua.
 
-Cái script **cố ý không chạy** cũng quan trọng không kém: `loc06` trên PBF thật, `loc04` và `loc07` trên đồ thị HCM, `loc09` với Redis, và `cargo bench`. Các kết quả của chúng nằm trong `results/p01.md` và được nêu trong bài tương ứng. Nguyên tắc chung của lab: mọi lab dùng dữ liệu thiếu mà không có cờ tường minh thì thoát mã 2 kèm thông báo, không bao giờ bỏ qua âm thầm.
+Những gì script **cố ý không chạy** cũng quan trọng không kém: `loc06` trên PBF thật, `loc04` và `loc07` trên đồ thị HCM, `loc09` với Redis, và `cargo bench`. Các kết quả của chúng nằm trong `results/p01.md` và được nêu trong bài tương ứng. Nguyên tắc chung của lab: mọi lab thiếu dữ liệu mà không có cờ chủ động cho phép bỏ qua thì thoát với mã 2 kèm thông báo, không bao giờ lặng lẽ bỏ qua.
 
 ## Chạy ví dụ và kiểm chứng
 
-Không cần PBF, Redis hay mạng. Từ gốc repo:
+Không cần PBF, Redis hay mạng. Từ thư mục gốc của repo:
 
 ```bash
 export PATH="$HOME/.rustup/toolchains/stable-aarch64-apple-darwin/bin:$PATH"
@@ -191,7 +191,7 @@ cargo test --manifest-path examples/toi-noi-location/rust/Cargo.toml --workspace
 bash examples/toi-noi-location/verify-p01.sh
 ```
 
-Cấu hình: `--release` cho lab, `debug` cho test; seed 20261106; `proptest` 2.000 ca mỗi thuộc tính, `failure_persistence` tắt để không sinh file. Lab còn ghi `results/geojson/loc10-khu-mau-dai-lo.geojson`. Output rút gọn:
+Cấu hình: `--release` cho lab, `debug` cho test; seed 20261106; `proptest` 2.000 test case mỗi thuộc tính, `failure_persistence` tắt để không sinh file. Lab còn ghi `results/geojson/loc10-khu-mau-dai-lo.geojson`. Kết quả chạy rút gọn:
 
 ```text
   file 50678 byte; sinh lại từ seed 20261106 cho 50678 byte; trùng từng byte: true
@@ -208,33 +208,33 @@ Mọi số ở đây là số hình học và số đếm, tái lập từng ch�
 ## Giới hạn của ví dụ: những gì P01 chưa có
 
 - **Định tuyến.** Chỉ có Dijkstra tối giản trong `road_graph::sp`, dùng để đo hệ số vòng; không A*, không Contraction Hierarchies, không chi phí rẽ. Phần định tuyến bắt đầu ở LOC-21.
-- **Cấm rẽ mới đọc, chưa dùng.** 270 relation có `via` là way chưa giải; 784 cấm theo giờ giữ thô (LOC-23).
-- **Cổng toà nhà (`entrance=*`)** mới lưu thô, chưa gắn vào đồ thị; chưa có hệ toạ độ trong nhà, nơi GPS vô dụng (LOC-37).
-- **Bám đường, lọc Kalman, tốc độ theo giờ** thuộc P02 và P03. Snap hiện tại là snap từng điểm.
+- **Cấm rẽ mới được đọc vào, chưa được dùng.** 270 relation có `via` là way chưa giải; 784 lệnh cấm theo giờ được giữ ở dạng thô (LOC-23).
+- **Cổng toà nhà (`entrance=*`)** mới được lưu ở dạng thô, chưa gắn vào đồ thị; chưa có hệ toạ độ trong nhà, nơi GPS vô dụng (LOC-37).
+- **Bám đường, lọc Kalman, tốc độ theo giờ** thuộc P02 và P03. Hiện tại snap làm riêng cho từng điểm.
 - **Hệ toạ độ và hình học.** Chỉ WGS84; VN-2000 chưa hỗ trợ. Khoảng cách dùng mặt cầu bán kính 6.371.008,8 m, lệch tới 0,526% so với ellipsoid WGS84 ở vĩ độ 10,77 (bài 04); `geo-core` chưa có hàm trắc địa. Geohash và mặt phẳng cục bộ chỉ kiểm cho vùng quanh Việt Nam. `geo-core` cũng chưa có phép toán trên đa giác (vùng cấm đón, geofence).
 - **Hạ tầng.** Redis GEO chỉ đo qua Docker loopback; PostGIS không chạy.
 - **Không có GPS người thật.** Mọi vị trí tài xế, nhiễu GPS đều do lab sinh.
 - **Số thời gian.** Hầu hết số thời gian của P01 đo khi máy tải nặng, và chưa có lần đo trên máy rảnh được lưu đầy đủ; chỉ nên đọc tỉ lệ trong cùng một lần chạy.
-- **Chưa tách riêng:** tỉ lệ «snap sai» của bài 07 đếm theo mã way nên là cận trên. Ca R-tree và quét chọn khác cạnh ở 1/1.000 truy vấn đã kiểm: hoà đúng nghĩa ở nút giao (bài 07), nhưng `nearest` chưa có quy tắc phá hoà.
+- **Chưa tách riêng:** tỉ lệ «snap sai» của bài 07 đếm theo mã way nên là cận trên. Trường hợp R-tree và quét chọn khác cạnh, xảy ra ở 1/1.000 truy vấn đã kiểm tra: hoà đúng nghĩa ở nút giao (bài 07), nhưng `nearest` chưa có quy tắc chọn khi hai ứng viên cách bằng nhau.
 
 ## Bài tập
 
 **Bài 1.** Vì sao `haversine_triangle_inequality` chỉ cho dung sai 1e-6 m, còn bản equirect cần 0,1% cộng 1 cm?
 
 <details><summary>Lời giải bài 1</summary>
-<p>Haversine là khoảng cách thật trên mặt cầu nên đúng bất đẳng thức tam giác, và 1e-6 m chỉ bù sai số làm tròn số thực. Equirect là xấp xỉ trên mặt phẳng nên có thể vượt một chút (lab đo tối đa 0,0007 m, 4,64·10⁻⁸ của <code>d(a, c)</code>). Dung sai 0,1% khớp mức sai số của mặt phẳng cục bộ trong bbox thành phố, còn 1 cm lo các khoảng cách rất ngắn.</p>
+<p>Haversine là khoảng cách thật trên mặt cầu nên đúng bất đẳng thức tam giác, và 1e-6 m chỉ bù sai số làm tròn số thực. Equirect là xấp xỉ trên mặt phẳng nên có thể vượt một chút (lab đo tối đa 0,0007 m, 4,64·10⁻⁸ của <code>d(a, c)</code>). Dung sai 0,1% khớp mức sai số của mặt phẳng cục bộ trong bbox thành phố, còn 1 cm dành cho các khoảng cách rất ngắn.</p>
 </details>
 
 **Bài 2.** Fixture sinh lại phải trùng từng byte với file đã commit. Việc đó bảo vệ điều gì mà chỉ commit file thì không?
 
 <details><summary>Lời giải bài 2</summary>
-<p>Nó buộc generator tất định: cùng seed ra cùng byte, không phụ thuộc thứ tự duyệt bảng băm hay thời gian. Nó cũng phát hiện sửa tay file JSON mà không sửa generator, hay ngược lại. Nhờ đó test và các bài sau có thể trích số từ khu mẫu mà người đọc chạy lại ra đúng số.</p>
+<p>Việc này buộc generator phải tất định: cùng seed ra cùng byte, không phụ thuộc thứ tự duyệt bảng băm hay thời gian. Cách này cũng phát hiện được việc sửa tay file JSON mà không sửa generator, hay ngược lại. Nhờ đó test và các bài sau có thể trích số từ khu mẫu mà người đọc chạy lại ra đúng số.</p>
 </details>
 
 **Bài 3.** Từ ví dụ đại lộ, vì sao hàm chọn điểm đón không thể xếp hạng ứng viên theo khoảng cách chim bay giữa khách và điểm đón?
 
 <details><summary>Lời giải bài 3</summary>
-<p>Hai ghim chỉ cách nhau 56,0 m nhưng ô tô đi 305,5 m một chiều và 114,8 m chiều kia; điểm đón ở phía nào của dải phân cách làm quãng đường chênh gấp 2,7 lần (305,5 chia 114,8). Khoảng cách chim bay không biết dải phân cách, một chiều và nút chặn. Đây là số đo trên một khu mẫu tổng hợp, nên chỉ minh hoạ cơ chế; mức độ ngoài đời phải đo bằng engine định tuyến và simulator ở các phần sau.</p>
+<p>Hai ghim chỉ cách nhau 56,0 m nhưng ô tô đi 305,5 m một chiều và 114,8 m chiều kia; tuỳ điểm đón ở phía nào của dải phân cách mà quãng đường chênh nhau gấp 2,7 lần (305,5 chia 114,8). Khoảng cách chim bay không tính đến dải phân cách, đường một chiều và nút chặn. Đây là số đo trên một khu mẫu tổng hợp, nên chỉ minh hoạ cơ chế; mức độ ngoài đời phải đo bằng engine định tuyến và simulator ở các phần sau.</p>
 </details>
 
 Bài trước: [bài 09](/articles/location-tim-tai-xe-gan-nhat-bon-cach-co-so-do). Bài tiếp: [bài 11](/articles/location-go-goroutine-channel-nhap-mon-cho-ingest).

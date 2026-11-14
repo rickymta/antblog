@@ -1,0 +1,161 @@
+{
+ "file": "location-h3-geohash-chi-muc-luoi-k-ring.md",
+ "edits": [
+  {
+   "old": "biết khi nào lưới hơn cây",
+   "new": "biết khi nào lưới tốt hơn cây",
+   "reason": "«Lưới hơn cây» cụt, thiếu tính từ so sánh",
+   "severity": "medium"
+  },
+  {
+   "old": "cái H3 đổi được là cách quét láng giềng đều hơn, và nó cũng có điều kiện sử dụng",
+   "new": "điều H3 cải thiện được là cách quét láng giềng đều hơn, và H3 cũng có giới hạn khi áp dụng",
+   "reason": "Giọng nói, «có điều kiện sử dụng» gượng, «nó» chỉ sự vật",
+   "severity": "medium"
+  },
+  {
+   "old": "Mọi con số trong bài là trên dữ liệu mô phỏng",
+   "new": "Mọi con số trong bài là kết quả đo trên dữ liệu mô phỏng",
+   "reason": "Thiếu động từ/danh từ chính",
+   "severity": "medium"
+  },
+  {
+   "old": "Tìm bằng «cùng tiền tố 6 ký tự» có thấy nhau không?",
+   "new": "Nếu tìm bằng «cùng tiền tố 6 ký tự» thì hai điểm có thấy nhau không?",
+   "reason": "Câu cụt, thiếu chủ ngữ",
+   "severity": "medium"
+  },
+  {
+   "old": "Đó là cái hay (tiền tố làm khoá, làm chỉ mục theo văn bản) và cũng là cái dở:",
+   "new": "Đó là ưu điểm (tiền tố làm khoá, làm chỉ mục theo văn bản) và cũng là nhược điểm:",
+   "reason": "Giọng nói, thống nhất văn phong kỹ thuật",
+   "severity": "low"
+  },
+  {
+   "old": "Tức là 47 lần hai điểm cách nhau",
+   "new": "Tức là có 47 lần hai điểm cách nhau",
+   "reason": "Thiếu động từ",
+   "severity": "low"
+  },
+  {
+   "old": "Nhưng chín ô cũng chưa đủ khi",
+   "new": "Chín ô cũng chưa đủ khi",
+   "reason": "Lặp «nhưng» liên tiếp",
+   "severity": "low"
+  },
+  {
+   "old": "từ chính file GeoJSON lab xuất ra",
+   "new": "từ chính file GeoJSON mà lab xuất ra",
+   "reason": "Thiếu quan hệ từ",
+   "severity": "low"
+  },
+  {
+   "old": "bằng cách bốc 200.000 cặp (điểm hỏi, đích)",
+   "new": "bằng cách lấy ngẫu nhiên 200.000 cặp (điểm hỏi, đích)",
+   "reason": "«Bốc» là khẩu ngữ",
+   "severity": "low"
+  },
+  {
+   "old": "đích cách điểm hỏi một khoảng đều trong [0, r]",
+   "new": "đích cách điểm hỏi một khoảng cách phân bố đều trong [0, r]",
+   "reason": "Cụm «một khoảng đều» cụt",
+   "severity": "medium"
+  },
+  {
+   "old": "Số từ output của <code>loc08_h3</code>.",
+   "new": "Số liệu lấy từ kết quả chạy của <code>loc08_h3</code>.",
+   "reason": "Từ tiếng Anh thông thường trong văn xuôi",
+   "severity": "low"
+  },
+  {
+   "old": "Geohash 7 (ô 150 m) chín ô vẫn bỏ sót",
+   "new": "Geohash 7 (ô 150 m) quét chín ô vẫn bỏ sót",
+   "reason": "Thiếu động từ",
+   "severity": "medium"
+  },
+  {
+   "old": "cho đúng mọi dòng của bảng",
+   "new": "khớp đúng với mọi dòng của bảng",
+   "reason": "Cách nói gượng",
+   "severity": "low"
+  },
+  {
+   "old": "có cạnh ô cỡ bán kính hay dùng.",
+   "new": "có cạnh ô cỡ bán kính tìm kiếm thường dùng.",
+   "reason": "«Bán kính hay dùng» thiếu danh từ, vòng vo",
+   "severity": "medium"
+  },
+  {
+   "old": "Chỉ kết luận được là cả hai cùng cỡ vài trăm ns.",
+   "new": "Chỉ có thể kết luận rằng cả hai cùng cỡ vài trăm ns.",
+   "reason": "Câu cụt",
+   "severity": "low"
+  },
+  {
+   "old": "Khi nào lưới hơn cây?",
+   "new": "Khi nào lưới tốt hơn cây?",
+   "reason": "Thống nhất cách nói so sánh",
+   "severity": "low"
+  },
+  {
+   "old": "và khi nào lưới hơn cây",
+   "new": "và khi nào lưới tốt hơn cây",
+   "reason": "Thống nhất cách nói so sánh",
+   "severity": "low"
+  },
+  {
+   "old": "đổi ô là chuyển giỏ, và chỉ khoảng 7,1–7,4% lần cập nhật ở res 9",
+   "new": "đổi ô nghĩa là chuyển tài xế sang giỏ của ô mới, và chỉ khoảng 7,1–7,4% số lần cập nhật ở res 9",
+   "reason": "«Chuyển giỏ» tự ghép, cụt; thiếu «số»",
+   "severity": "medium"
+  },
+  {
+   "old": "Tóm lại: lưới hơn cây khi",
+   "new": "Tóm lại: lưới tốt hơn cây khi",
+   "reason": "Thống nhất cách nói so sánh",
+   "severity": "low"
+  },
+  {
+   "old": "Cây hơn lưới khi phần tử",
+   "new": "Cây tốt hơn lưới khi phần tử",
+   "reason": "Thống nhất cách nói so sánh",
+   "severity": "low"
+  },
+  {
+   "old": "Output rút gọn:",
+   "new": "Kết quả in ra, rút gọn:",
+   "reason": "Từ tiếng Anh thông thường trong văn xuôi",
+   "severity": "low"
+  },
+  {
+   "old": "Chỉ phần chi phí tính ô là số thời gian.",
+   "new": "Chỉ phần chi phí tính ô là số đo thời gian.",
+   "reason": "«Số thời gian» tự ghép",
+   "severity": "low"
+  },
+  {
+   "old": "(kiểm 1, 7, 19 ô)",
+   "new": "(kiểm tra 1, 7, 19 ô)",
+   "reason": "«Kiểm» đứng một mình cụt",
+   "severity": "low"
+  },
+  {
+   "old": "test của `driver-store` kiểm H3 res 8 và 9",
+   "new": "test của `driver-store` kiểm tra H3 res 8 và 9",
+   "reason": "«Kiểm» đứng một mình cụt",
+   "severity": "low"
+  },
+  {
+   "old": "dùng cách phụ (đĩa trừ đĩa)",
+   "new": "dùng cách dự phòng (đĩa trừ đĩa)",
+   "reason": "«Cách phụ» cụt",
+   "severity": "low"
+  },
+  {
+   "old": "**Chưa phủ đa giác.**",
+   "new": "**Chưa phủ vùng đa giác bằng H3.**",
+   "reason": "Thuật ngữ dịch gượng, thiếu danh từ",
+   "severity": "medium"
+  }
+ ]
+}

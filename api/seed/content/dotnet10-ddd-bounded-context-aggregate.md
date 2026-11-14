@@ -1,14 +1,14 @@
 ---
 slug: dotnet10-ddd-bounded-context-aggregate
 title: "DDD: bounded context, aggregate và invariant của chuyến Tới Nơi"
-summary: "Bài 30: bắt đầu mô hình domain có hành vi, phân biệt bounded context với folder/service, dùng Money value object và phát domain event sau chuyển trạng thái hợp lệ."
+summary: "Bài 30: bắt đầu từ một mô hình domain có hành vi, phân biệt bounded context với folder/service, dùng Money value object và phát domain event sau khi chuyển trạng thái hợp lệ."
 category: csharp-advanced
 level: advanced
 tags: [csharp, dotnet, dotnet-10, toi-noi]
 language: vi
 ---
 
-Đây là **bài 30** trong loạt **C# và .NET 10 qua [Tới Nơi](/articles/du-an-mau-toi-noi)**. Các ví dụ target `net10.0`, dùng dữ liệu giả và cùng code đã chạy kiểm chứng trong repository.
+Đây là **bài 30** trong loạt **C# và .NET 10 qua [Tới Nơi](/articles/du-an-mau-toi-noi)**. Các ví dụ nhắm tới `net10.0`, dùng dữ liệu giả và cùng code đã được chạy kiểm chứng trong repository.
 
 <div class="tkh-callout tkh-callout--example">
 <span class="tkh-callout-title">Thử trước khi đọc</span>
@@ -16,21 +16,21 @@ language: vi
 <details><summary>Xem đáp án</summary><p>Không. Bounded context là ranh giới mô hình/ngôn ngữ và quyền sở hữu nghiệp vụ; bảng hoặc folder chỉ là chi tiết hiện thực.</p></details>
 </div>
 
-## Một từ chuyến có thể mang nhiều ý nghĩa
+## Từ “chuyến” có thể mang nhiều ý nghĩa
 
-Trong context đặt chuyến, Trip quan tâm ai yêu cầu, ai nhận và trạng thái thực hiện. Context tài chính quan tâm khoản phải thu, bút toán và đối soát; fraud quan tâm đặc trưng và điểm rủi ro. Chia sẻ cùng một tên nghiệp vụ không có nghĩa mọi nơi phải dùng cùng một class hoặc cùng bảng.
+Trong context đặt chuyến, Trip quan tâm ai yêu cầu, ai nhận và trạng thái thực hiện. Context tài chính quan tâm khoản phải thu, bút toán và đối soát; fraud quan tâm đặc trưng và điểm rủi ro. Dùng chung một tên nghiệp vụ không có nghĩa là mọi nơi phải dùng cùng một class hoặc cùng bảng.
 
-Định hướng Tới Nơi là backend nghiệp vụ chính dùng C#/.NET với DDD/Clean/CQRS/Mediator/Repository/UoW; Python cho fraud/OCR, Rust cho tài chính/thành phần đặc thù và Go cho các luồng concurrency phù hợp. Bounded context phải dựa vào mô hình và đội sở hữu, không tách service chỉ vì muốn có đủ bốn ngôn ngữ.
+Định hướng của Tới Nơi là backend nghiệp vụ chính dùng C#/.NET với DDD/Clean/CQRS/Mediator/Repository/UoW; Python cho fraud/OCR, Rust cho tài chính/thành phần đặc thù và Go cho các luồng concurrency phù hợp. Bounded context phải dựa vào mô hình và đội sở hữu, không tách service chỉ vì muốn có đủ bốn ngôn ngữ.
 
-Một context có thể khởi đầu là module rõ ranh giới trước khi được deploy riêng. Code bài này tập trung domain thuần; Clean Architecture và handler orchestration sẽ được nối ở bài sau, không coi một project library đơn lẻ là toàn kiến trúc đã xong.
+Một context có thể khởi đầu là một module có ranh giới rõ ràng trước khi được deploy riêng. Code bài này tập trung vào domain thuần; Clean Architecture và handler orchestration sẽ được nối ở bài sau, và không coi một project library đơn lẻ là toàn bộ kiến trúc đã hoàn tất.
 
 ## Entity, value object và aggregate
 
-Trip là entity vì identity và vòng đời quan trọng. Money là value object vì Amount/Currency quyết định equality trong phạm vi demo. Aggregate là ranh giới giữ invariant và thay đổi nhất quán; root là cửa vào thay đổi các thành phần bên trong.
+Trip là entity vì identity và vòng đời quan trọng. Money là value object vì Amount/Currency quyết định equality trong phạm vi demo. Aggregate là ranh giới giữ invariant và giữ cho các thay đổi nhất quán; root là cửa vào thay đổi các thành phần bên trong.
 
-Lab dùng một root Trip nhỏ, chưa có collection con lớn hoặc mọi service nhúng bên trong nó. Tài xế được tham chiếu bằng ID, không kéo nguyên hồ sơ tài xế/giấy tờ OCR vào graph rồi commit chung. Ranh giới aggregate không được chọn bằng việc một màn hình cần hiển thị bao nhiêu dữ liệu.
+Lab dùng một root Trip nhỏ, chưa có collection con lớn hoặc mọi service nhúng bên trong nó. Tài xế được tham chiếu bằng ID, không kéo nguyên hồ sơ tài xế/giấy tờ OCR vào graph rồi commit chung. Ranh giới aggregate không được chọn theo lượng dữ liệu mà một màn hình cần hiển thị.
 
-Money chỉ nhận VND và số không âm, property get-only. Nếu mở hoàn tiền/đa tiền tệ, hợp đồng phải được thiết kế lại theo ngôn ngữ của context; không ép mọi bút toán tài chính Rust thành “fare chuyến” cho tiện tái sử dụng.
+Money chỉ nhận VND và số không âm, property get-only. Nếu mở rộng sang hoàn tiền hoặc đa tiền tệ, hợp đồng phải được thiết kế lại theo ngôn ngữ của context; không ép mọi bút toán của context tài chính (Rust) thành “fare chuyến” cho tiện tái sử dụng.
 
 <figure class="tkh-fig">
 <div class="tkh-fig-box">
@@ -41,19 +41,19 @@ Money chỉ nhận VND và số không âm, property get-only. Nếu mở hoàn 
 
 ## Hành vi bảo vệ invariant trước khi phát event
 
-Trip.Request kiểm ID và Fare. Accept yêu cầu driver khác Guid.Empty, trạng thái còn Requested; sau đó gán driver, đổi status, tăng Version và thêm TripAccepted. Nếu kiểm tra thất bại, trạng thái và tập event không đổi.
+Trip.Request kiểm ID và Fare. Accept yêu cầu driver khác Guid.Empty và trạng thái vẫn là Requested; sau đó gán driver, đổi status, tăng Version và thêm TripAccepted. Nếu kiểm tra thất bại, trạng thái và tập event không đổi.
 
-Version int trong domain demo biểu diễn thứ tự thay đổi của root; nó không tự là token Guid của persistence lab bài 23. Adapter lưu trữ sau này phải mapping/chọn chiến lược concurrency có chủ đích. Không đồng nhất mọi field tên Version giữa các mô hình.
+Version kiểu int trong domain demo biểu diễn thứ tự thay đổi của root; nó không đồng nghĩa với token Guid của persistence lab ở bài 23. Adapter lưu trữ sau này phải ánh xạ (mapping) và chọn chiến lược concurrency một cách có chủ đích. Không đánh đồng mọi trường tên Version giữa các mô hình.
 
-Domain không biết EF, HttpContext hoặc message broker. Caller không set Status trực tiếp. Tuy vậy object giữ luật không tự ngăn hai process cùng tải trạng thái cũ; concurrency ở persistence vẫn cần được phối hợp trong application use case.
+Domain không biết EF, HttpContext hoặc message broker. Caller không set Status trực tiếp. Tuy vậy, object giữ luật không tự ngăn hai process cùng nạp một trạng thái cũ; concurrency ở persistence vẫn cần được phối hợp trong application use case.
 
-## Domain event không phải một lần publish đã bảo đảm
+## Domain event không phải là một lần publish đã được bảo đảm
 
-TripAccepted là một sự việc đã xảy ra trong mô hình sau khi hành vi thành công. EventId giúp nhận diện; test kiểm nội dung và số event, không đoán giá trị Guid mới. Events trả snapshot để caller không thay được list riêng của root.
+TripAccepted là một sự việc đã xảy ra trong mô hình sau khi hành vi thành công. EventId giúp nhận diện sự kiện; test kiểm tra nội dung và số lượng event, và không đoán giá trị Guid mới. Events trả về snapshot để caller không sửa được list nội bộ của root.
 
-Event trong memory không tự sống qua crash, không tự là integration event công khai. Khi application commit, cần thiết kế cách đưa thông điệp phù hợp vào Outbox cùng transaction như bài 26. Không gọi broker trực tiếp trong Accept rồi giữ root chờ mạng.
+Event nằm trong memory không tự tồn tại qua một lần crash, và cũng không tự trở thành integration event công khai. Khi application commit, cần thiết kế cách đưa thông điệp phù hợp vào Outbox cùng transaction như bài 26. Không gọi broker trực tiếp trong Accept rồi giữ root chờ mạng.
 
-Snapshot Events tạo allocation nhỏ có chủ đích. Nếu sau này cần tối ưu cách đọc/clear event, đo và giữ hợp đồng ownership trước. Không mở List mutable công khai chỉ để giảm một bản sao khi chưa có bằng chứng chi phí đáng kể.
+Snapshot Events tạo allocation nhỏ có chủ đích. Nếu sau này cần tối ưu cách đọc/clear event, hãy đo và giữ hợp đồng ownership trước. Không mở List mutable công khai chỉ để tiết kiệm một bản sao khi chưa có bằng chứng về chi phí đáng kể.
 
 <figure class="tkh-fig">
 <div class="tkh-fig-box">
@@ -62,15 +62,15 @@ Snapshot Events tạo allocation nhỏ có chủ đích. Nếu sau này cần t�
 <figcaption>Hình 2. Root giữ tính đúng nghiệp vụ; application và infrastructure bổ sung commit, concurrency và giao tiếp bền.</figcaption>
 </figure>
 
-## Bốn test và bước nối tiếp
+## Bốn test case và bước tiếp theo
 
-Test kiểm value equality/validation Money, một lần Accept và snapshot event, driver lỗi không làm đổi root, cùng điều kiện bắt buộc khi tạo. Vòng đời được rút xuống Requested → Accepted để học invariant, chưa mô tả đầy đủ cancel/arriving/completed của hồ sơ Tới Nơi.
+Các test case kiểm tra value equality và validation của Money, một lần Accept cùng snapshot event, trường hợp driver lỗi không làm đổi root, và điều kiện bắt buộc khi tạo. Vòng đời được rút gọn thành Requested → Accepted để học invariant, chưa mô tả đầy đủ các trạng thái cancel, arriving, completed trong hồ sơ Tới Nơi.
 
 **Bài tập:** đặt thao tác gửi email trong Accept có làm domain phụ thuộc hạ tầng không? Một khách đổi tên có nên khiến Money hoặc TripId đổi equality theo cùng cách không?
 
-<details><summary>Xem đáp án</summary><p>Gửi email là tác động hạ tầng nên cần được điều phối ngoài domain theo sự kiện/use case. Entity giữ identity qua thay đổi thuộc tính; value object được so theo giá trị và hợp đồng của nó, không áp một quy tắc equality cho mọi kiểu.</p></details>
+<details><summary>Xem đáp án</summary><p>Gửi email là tác động hạ tầng nên cần được điều phối ngoài domain theo sự kiện hoặc use case. Entity giữ identity qua thay đổi thuộc tính; value object được so theo giá trị và hợp đồng của nó, không áp một quy tắc equality cho mọi kiểu.</p></details>
 
-Từ mô hình này, bài 31 sẽ tách Domain/Application/Infrastructure/API; các bài tiếp theo đưa CQRS/Mediator và Repository/UoW vào một use case cụ thể. Mỗi lớp phải có trách nhiệm chứng minh được, không chỉ thêm folder theo tên pattern.
+Từ mô hình này, bài 31 sẽ tách Domain/Application/Infrastructure/API; các bài tiếp theo đưa CQRS/Mediator và Repository/UoW vào một use case cụ thể. Mỗi lớp phải có trách nhiệm có thể chứng minh được, chứ không chỉ thêm folder theo tên pattern.
 
 ## Chạy ví dụ và kiểm chứng
 

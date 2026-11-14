@@ -1,18 +1,18 @@
 ---
 slug: location-nhieu-diem-dung-chen-2-opt-doi-chieu-ortools
 title: "Nhiều điểm dừng: chèn và 2-opt trong Rust, đối chiếu OR-Tools, tổng hợp P05"
-summary: "Bài 50: một người giao hàng, n cặp lấy trước giao sau; chèn rẻ nhất và 2-opt/Or-opt trong Rust cách OR-Tools 0,39 đến 2,77% ở cực tiểu cục bộ. Thời gian, ngân sách, giới hạn của mốc so sánh và tổng hợp P05."
+summary: "Bài 50: một người giao hàng, n cặp lấy trước giao sau; chèn rẻ nhất và 2-opt/Or-opt trong Rust dừng ở cực tiểu cục bộ, kém OR-Tools 0,39 đến 2,77%. Thời gian, ngân sách, giới hạn của mốc so sánh và tổng hợp P05."
 category: location-routing
 level: advanced
 tags: [toi-noi, location, rust, python, ortools, 2-opt, insertion, pickup-delivery, vrp]
 language: vi
 ---
 
-Một tài xế giao hàng nhận bốn gói trong cùng một lượt. Mỗi gói có điểm lấy và điểm giao, và gói nào cũng phải **lấy trước rồi mới giao**. Chín điểm cần sắp thứ tự, kể cả điểm xuất phát. Với bốn gói, thử hết các thứ tự hợp lệ còn làm được; với ba mươi gói thì không. Loạt bài này cần một thứ trung gian: đủ nhanh để chạy trên đường nóng khi tài xế vừa nhận thêm gói, đủ tốt để không bỏ phí quãng đường, và có một mốc để biết «đủ tốt» là bao nhiêu.
+Một tài xế giao hàng nhận bốn gói trong cùng một lượt. Mỗi gói có điểm lấy và điểm giao, và gói nào cũng phải **lấy trước rồi mới giao**. Chín điểm cần sắp thứ tự, kể cả điểm xuất phát. Với bốn gói, liệt kê hết các thứ tự hợp lệ vẫn làm được; với ba mươi gói thì không. Loạt bài này cần một thứ trung gian: đủ nhanh để chạy trên đường nóng khi tài xế vừa nhận thêm gói, đủ tốt để không bỏ phí quãng đường, và có một mốc để biết «đủ tốt» là bao nhiêu.
 
 Bài này dựng thứ trung gian đó trong Rust (chèn rẻ nhất, rồi 2-opt, Or-opt và dời cặp), đặt cạnh nó hai mốc: quy hoạch động chính xác cho cỡ nhỏ, và OR-Tools chạy offline bằng Python cho mọi cỡ. Đây cũng là bài chốt phần P05, nên cuối bài có bảng tổng hợp cả mười bài.
 
-Đây là bài 50 của lộ trình **Tối ưu quãng đường hai phía** qua [Tới Nơi](/articles/du-an-mau-toi-noi). Bài dùng ma trận ETA bất đối xứng của [bài 26](/articles/location-ma-tran-many-to-many-bucket-ch) và các điểm lấy, giao do simulator của [bài 30](/articles/location-tong-hop-mo-phong-su-kien-roi-rac-seed) sinh ra, nên mọi số là **trên dữ liệu mô phỏng**: đồ thị HCM (126.699 nút, 319.074 cạnh, © OpenStreetMap contributors), seed 50001…50020. Cách so sánh có cặp ở đây khác bài 41 một chút: cặp là **instance**, và gap tính trên từng instance.
+Đây là bài 50 của lộ trình **Tối ưu quãng đường hai phía** qua [Tới Nơi](/articles/du-an-mau-toi-noi). Bài dùng ma trận ETA bất đối xứng của [bài 26](/articles/location-ma-tran-many-to-many-bucket-ch) và các điểm lấy, giao do simulator của [bài 30](/articles/location-tong-hop-mo-phong-su-kien-roi-rac-seed) sinh ra, nên mọi số đều **lấy trên dữ liệu mô phỏng**: đồ thị HCM (126.699 nút, 319.074 cạnh, © OpenStreetMap contributors), seed 50001…50020. Cách so sánh có cặp ở đây khác bài 41 một chút: cặp là **instance**, và gap tính trên từng instance.
 
 <div class="tkh-callout tkh-callout--example">
 <span class="tkh-callout-title">Thử trước khi đọc</span>
@@ -22,13 +22,13 @@ Bài này dựng thứ trung gian đó trong Rust (chèn rẻ nhất, rồi 2-op
 
 ## Bài toán và ma trận chi phí
 
-Một người giao hàng, `n` cặp (lấy → giao), lấy trước giao, **tuyến mở** (không về điểm xuất phát), tối thiểu tổng thời gian chạy ô tô. Lab **không** có tải trọng, khung giờ hay nhiều xe: chỉ có ràng buộc thứ tự. Đỉnh 0 là điểm xuất phát, đỉnh `1 + 2k` là điểm lấy của cặp `k`, đỉnh `2 + 2k` là điểm giao.
+Một người giao hàng, `n` cặp (lấy → giao), lấy trước giao, **tuyến mở** (không về điểm xuất phát), mục tiêu là tối thiểu hoá tổng thời gian chạy ô tô. Lab **không** có tải trọng, khung giờ hay nhiều xe: chỉ có ràng buộc thứ tự. Đỉnh 0 là điểm xuất phát, đỉnh `1 + 2k` là điểm lấy của cặp `k`, đỉnh `2 + 2k` là điểm giao.
 
-Ma trận chi phí `(2n + 1)²` lấy từ CH (bài 26), tính bằng mili giây nguyên, và **bất đối xứng** vì có đường một chiều (ma trận CH không có chi phí rẽ). Điều này quan trọng cho 2-opt ở dưới. Instance sinh từ thế giới mô phỏng của từng seed: điểm lấy và giao là ghim và điểm trả của `n` khách đầu tiên, điểm xuất phát là tài xế số 0. Năm cỡ n ∈ {4, 8, 12, 20, 30}, 20 instance mỗi cỡ, tổng 100 instance; sinh cả 100 instance cùng ma trận mất 1,5 s.
+Ma trận chi phí `(2n + 1)²` lấy từ CH (bài 26), tính bằng mili giây nguyên, và **bất đối xứng** vì có đường một chiều (ma trận CH không có chi phí rẽ). Điều này quan trọng với 2-opt ở phần dưới. Instance sinh từ thế giới mô phỏng của từng seed: điểm lấy và điểm giao lần lượt là ghim và điểm trả của `n` khách đầu tiên, điểm xuất phát là tài xế số 0. Năm cỡ n ∈ {4, 8, 12, 20, 30}, 20 instance mỗi cỡ, tổng 100 instance; sinh cả 100 instance cùng ma trận mất 1,5 s.
 
 ## Chèn rẻ nhất
 
-Heuristic chèn đi từ tuyến chỉ có điểm xuất phát. Mỗi bước, với mỗi cặp chưa vào tuyến, thử **mọi vị trí lấy rồi mọi vị trí giao sau nó** và tính chi phí tăng thêm; chọn cặp rẻ nhất rồi chèn đúng chỗ đó. Chi phí tăng khi chèn đỉnh `x` giữa `a` và `b` là `c(a,x) + c(x,b) − c(a,b)`, tính trong O(1):
+Heuristic chèn bắt đầu từ tuyến chỉ có điểm xuất phát. Mỗi bước, với mỗi cặp chưa vào tuyến, thử **mọi vị trí lấy rồi mọi vị trí giao sau nó** và tính chi phí tăng thêm; chọn cặp rẻ nhất rồi chèn đúng chỗ đó. Chi phí tăng khi chèn đỉnh `x` giữa `a` và `b` là `c(a,x) + c(x,b) − c(a,b)`, tính trong O(1):
 
 `examples/toi-noi-location/rust/crates/matcher/src/multistop.rs`
 
@@ -62,11 +62,11 @@ fn best_pair_insertion(inst: &Instance, route: &[usize], k: usize) -> (i64, usiz
 }
 ```
 
-Độ phức tạp là `O(n² · L²)` với `L = 2n + 1`, và mọi tuyến sinh ra đều hợp lệ vì điểm giao luôn chèn sau điểm lấy. Chèn rất rẻ nhưng tham lam: quyết định ở bước đầu không bao giờ được xét lại.
+Độ phức tạp là `O(n² · L²)` với `L = 2n + 1`, và mọi tuyến sinh ra đều hợp lệ vì điểm giao luôn chèn sau điểm lấy. Chèn chạy rất nhanh nhưng tham lam: quyết định ở bước đầu không bao giờ được xét lại.
 
 ## 2-opt, Or-opt và dời cặp dưới ràng buộc thứ tự
 
-Tìm kiếm cục bộ sửa những quyết định tham lam đó, nhưng ràng buộc thứ tự làm các phép dời quen thuộc phải cẩn thận. 2-opt đảo một đoạn `route[i..=j]`. **Đảo đoạn lật thứ tự mọi cặp nằm trọn trong đoạn**, nên đoạn chứa cả điểm lấy lẫn điểm giao của một cặp là không hợp lệ. Vì ma trận bất đối xứng, đảo đoạn còn đổi chi phí từng cạnh bên trong; code giữ hai tổng chạy (`fwd` theo chiều cũ, `bwd` theo chiều đảo) để mỗi `j` tính delta trong O(1):
+Tìm kiếm cục bộ sửa những quyết định tham lam đó, nhưng ràng buộc thứ tự buộc các phép dời quen thuộc phải được áp dụng cẩn thận. 2-opt đảo một đoạn `route[i..=j]`. **Đảo đoạn lật thứ tự mọi cặp nằm trọn trong đoạn**, nên đoạn chứa cả điểm lấy lẫn điểm giao của một cặp là không hợp lệ. Vì ma trận bất đối xứng, đảo đoạn còn đổi chi phí từng cạnh bên trong; code giữ hai tổng chạy (`fwd` theo chiều cũ, `bwd` theo chiều đảo) để mỗi `j` tính delta trong O(1):
 
 `examples/toi-noi-location/rust/crates/matcher/src/multistop.rs`
 
@@ -135,22 +135,22 @@ pub fn local_search(
 }
 ```
 
-Mọi bước chỉ được nhận khi **giảm** tổng chi phí, nên vòng lặp luôn dừng. Điểm dừng là một cực tiểu cục bộ, và hình dưới là một ví dụ thật của nó.
+Mọi bước chỉ được nhận khi **giảm** tổng chi phí, nên vòng lặp luôn dừng. Điểm dừng là một cực tiểu cục bộ, và hình dưới là một ví dụ thật về cực tiểu cục bộ.
 
 <figure class="tkh-fig">
 <div class="tkh-fig-box">
-<svg viewBox="0 0 880 270" role="img" aria-label="Hình 1. Instance n04-00 (seed 50001). Chèn rẻ nhất cho tuyến ở hàng trên và tìm kiếm cục bộ không cải thiện thêm được; tuyến tối ưu (DP, trùng OR-Tools) ở hàng dưới gom L2 L3 trước. Chênh lệch +4,27%. Chi phí lấy nguyên văn từ output của lab."><rect x="10" y="10" width="860" height="250" rx="10" class="f-bg s-line" stroke-width="1.5"/><text x="30" y="38" class="t-b">Instance n04-00 (seed 50001): L = lấy, G = giao, S = xuất phát, tuyến mở</text><text x="30" y="82">chèn rẻ nhất,</text><text x="30" y="98" class="t-small">cả khi thêm LS</text><rect x="200" y="70" width="56" height="30" rx="6" class="f-surface s-muted" stroke-width="1.5"/><text x="228.0" y="90" class="t-mono" text-anchor="middle">S</text><rect x="262" y="70" width="56" height="30" rx="6" class="f-pk-soft s-pk" stroke-width="1.5"/><text x="290.0" y="90" class="t-mono" text-anchor="middle">L0</text><rect x="324" y="70" width="56" height="30" rx="6" class="f-warn-soft s-warn" stroke-width="1.5"/><text x="352.0" y="90" class="t-mono" text-anchor="middle">G0</text><rect x="386" y="70" width="56" height="30" rx="6" class="f-pk-soft s-pk" stroke-width="1.5"/><text x="414.0" y="90" class="t-mono" text-anchor="middle">L1</text><rect x="448" y="70" width="56" height="30" rx="6" class="f-warn-soft s-warn" stroke-width="1.5"/><text x="476.0" y="90" class="t-mono" text-anchor="middle">G1</text><rect x="510" y="70" width="56" height="30" rx="6" class="f-pk-soft s-pk" stroke-width="1.5"/><text x="538.0" y="90" class="t-mono" text-anchor="middle">L2</text><rect x="572" y="70" width="56" height="30" rx="6" class="f-pk-soft s-pk" stroke-width="1.5"/><text x="600.0" y="90" class="t-mono" text-anchor="middle">L3</text><rect x="634" y="70" width="56" height="30" rx="6" class="f-warn-soft s-warn" stroke-width="1.5"/><text x="662.0" y="90" class="t-mono" text-anchor="middle">G3</text><rect x="696" y="70" width="56" height="30" rx="6" class="f-warn-soft s-warn" stroke-width="1.5"/><text x="724.0" y="90" class="t-mono" text-anchor="middle">G2</text><text x="775" y="90" class="t-mono">4.948.489 ms</text><text x="30" y="152">DP tối ưu,</text><text x="30" y="168" class="t-small">OR-Tools trùng</text><rect x="200" y="140" width="56" height="30" rx="6" class="f-surface s-muted" stroke-width="1.5"/><text x="228.0" y="160" class="t-mono" text-anchor="middle">S</text><rect x="262" y="140" width="56" height="30" rx="6" class="f-pk-soft s-pk" stroke-width="1.5"/><text x="290.0" y="160" class="t-mono" text-anchor="middle">L2</text><rect x="324" y="140" width="56" height="30" rx="6" class="f-pk-soft s-pk" stroke-width="1.5"/><text x="352.0" y="160" class="t-mono" text-anchor="middle">L3</text><rect x="386" y="140" width="56" height="30" rx="6" class="f-warn-soft s-warn" stroke-width="1.5"/><text x="414.0" y="160" class="t-mono" text-anchor="middle">G2</text><rect x="448" y="140" width="56" height="30" rx="6" class="f-warn-soft s-warn" stroke-width="1.5"/><text x="476.0" y="160" class="t-mono" text-anchor="middle">G3</text><rect x="510" y="140" width="56" height="30" rx="6" class="f-pk-soft s-pk" stroke-width="1.5"/><text x="538.0" y="160" class="t-mono" text-anchor="middle">L0</text><rect x="572" y="140" width="56" height="30" rx="6" class="f-warn-soft s-warn" stroke-width="1.5"/><text x="600.0" y="160" class="t-mono" text-anchor="middle">G0</text><rect x="634" y="140" width="56" height="30" rx="6" class="f-pk-soft s-pk" stroke-width="1.5"/><text x="662.0" y="160" class="t-mono" text-anchor="middle">L1</text><rect x="696" y="140" width="56" height="30" rx="6" class="f-warn-soft s-warn" stroke-width="1.5"/><text x="724.0" y="160" class="t-mono" text-anchor="middle">G1</text><text x="775" y="160" class="t-mono">4.745.839 ms</text><text x="30" y="226" class="t-small">Chèn ra tuyến đi lần lượt từng cặp rồi gom bốn điểm cuối; không phép 2-opt, Or-opt hay dời cặp nào làm giảm chi phí,</text><text x="30" y="244" class="t-small">nên đây là cực tiểu cục bộ. Tuyến tối ưu gom L2 L3 trước rồi mới giao; tuyến hàng trên đắt hơn nó +4,27%.</text></svg>
+<svg viewBox="0 0 880 270" role="img" aria-label="Hình 1. Instance n04-00 (seed 50001). Chèn rẻ nhất cho ra tuyến ở hàng trên và tìm kiếm cục bộ không cải thiện thêm được; tuyến tối ưu (DP, trùng OR-Tools) ở hàng dưới gom L2 L3 trước. Chênh lệch +4,27%. Chi phí lấy nguyên văn từ output của lab."><rect x="10" y="10" width="860" height="250" rx="10" class="f-bg s-line" stroke-width="1.5"/><text x="30" y="38" class="t-b">Instance n04-00 (seed 50001): L = lấy, G = giao, S = xuất phát, tuyến mở</text><text x="30" y="82">chèn rẻ nhất,</text><text x="30" y="98" class="t-small">cả khi thêm LS</text><rect x="200" y="70" width="56" height="30" rx="6" class="f-surface s-muted" stroke-width="1.5"/><text x="228.0" y="90" class="t-mono" text-anchor="middle">S</text><rect x="262" y="70" width="56" height="30" rx="6" class="f-pk-soft s-pk" stroke-width="1.5"/><text x="290.0" y="90" class="t-mono" text-anchor="middle">L0</text><rect x="324" y="70" width="56" height="30" rx="6" class="f-warn-soft s-warn" stroke-width="1.5"/><text x="352.0" y="90" class="t-mono" text-anchor="middle">G0</text><rect x="386" y="70" width="56" height="30" rx="6" class="f-pk-soft s-pk" stroke-width="1.5"/><text x="414.0" y="90" class="t-mono" text-anchor="middle">L1</text><rect x="448" y="70" width="56" height="30" rx="6" class="f-warn-soft s-warn" stroke-width="1.5"/><text x="476.0" y="90" class="t-mono" text-anchor="middle">G1</text><rect x="510" y="70" width="56" height="30" rx="6" class="f-pk-soft s-pk" stroke-width="1.5"/><text x="538.0" y="90" class="t-mono" text-anchor="middle">L2</text><rect x="572" y="70" width="56" height="30" rx="6" class="f-pk-soft s-pk" stroke-width="1.5"/><text x="600.0" y="90" class="t-mono" text-anchor="middle">L3</text><rect x="634" y="70" width="56" height="30" rx="6" class="f-warn-soft s-warn" stroke-width="1.5"/><text x="662.0" y="90" class="t-mono" text-anchor="middle">G3</text><rect x="696" y="70" width="56" height="30" rx="6" class="f-warn-soft s-warn" stroke-width="1.5"/><text x="724.0" y="90" class="t-mono" text-anchor="middle">G2</text><text x="775" y="90" class="t-mono">4.948.489 ms</text><text x="30" y="152">DP tối ưu,</text><text x="30" y="168" class="t-small">OR-Tools trùng</text><rect x="200" y="140" width="56" height="30" rx="6" class="f-surface s-muted" stroke-width="1.5"/><text x="228.0" y="160" class="t-mono" text-anchor="middle">S</text><rect x="262" y="140" width="56" height="30" rx="6" class="f-pk-soft s-pk" stroke-width="1.5"/><text x="290.0" y="160" class="t-mono" text-anchor="middle">L2</text><rect x="324" y="140" width="56" height="30" rx="6" class="f-pk-soft s-pk" stroke-width="1.5"/><text x="352.0" y="160" class="t-mono" text-anchor="middle">L3</text><rect x="386" y="140" width="56" height="30" rx="6" class="f-warn-soft s-warn" stroke-width="1.5"/><text x="414.0" y="160" class="t-mono" text-anchor="middle">G2</text><rect x="448" y="140" width="56" height="30" rx="6" class="f-warn-soft s-warn" stroke-width="1.5"/><text x="476.0" y="160" class="t-mono" text-anchor="middle">G3</text><rect x="510" y="140" width="56" height="30" rx="6" class="f-pk-soft s-pk" stroke-width="1.5"/><text x="538.0" y="160" class="t-mono" text-anchor="middle">L0</text><rect x="572" y="140" width="56" height="30" rx="6" class="f-warn-soft s-warn" stroke-width="1.5"/><text x="600.0" y="160" class="t-mono" text-anchor="middle">G0</text><rect x="634" y="140" width="56" height="30" rx="6" class="f-pk-soft s-pk" stroke-width="1.5"/><text x="662.0" y="160" class="t-mono" text-anchor="middle">L1</text><rect x="696" y="140" width="56" height="30" rx="6" class="f-warn-soft s-warn" stroke-width="1.5"/><text x="724.0" y="160" class="t-mono" text-anchor="middle">G1</text><text x="775" y="160" class="t-mono">4.745.839 ms</text><text x="30" y="226" class="t-small">Phép chèn cho ra tuyến đi lần lượt từng cặp rồi gom bốn điểm cuối; không phép 2-opt, Or-opt hay dời cặp nào làm giảm chi phí,</text><text x="30" y="244" class="t-small">nên đây là cực tiểu cục bộ. Tuyến tối ưu gom L2 L3 trước rồi mới giao; tuyến hàng trên đắt hơn nó +4,27%.</text></svg>
 </div>
-<figcaption>Hình 1. Instance n04-00 (seed 50001). Chèn rẻ nhất cho tuyến ở hàng trên và tìm kiếm cục bộ không cải thiện thêm được; tuyến tối ưu (DP, trùng OR-Tools) ở hàng dưới gom L2 L3 trước. Chênh lệch +4,27%. Chi phí lấy nguyên văn từ output của lab.</figcaption>
+<figcaption>Hình 1. Instance n04-00 (seed 50001). Chèn rẻ nhất cho ra tuyến ở hàng trên và tìm kiếm cục bộ không cải thiện thêm được; tuyến tối ưu (DP, trùng OR-Tools) ở hàng dưới gom L2 L3 trước. Chênh lệch +4,27%. Chi phí lấy nguyên văn từ output của lab.</figcaption>
 </figure>
 
 ## Mốc so sánh: DP chính xác và OR-Tools offline
 
 Nói «Rust kém bao nhiêu» cần một mốc. Lab dùng hai.
 
-**Quy hoạch động chính xác** theo tập đỉnh đã đi, `O(2^(2n) · (2n)²)` thời gian và `2^(2n) · 2n` ô bộ nhớ, nên chỉ chạy với n ≤ 9 và chỉ chạy ở lab cho n = 4 và 8. Đây là mốc duy nhất **chứng minh được** tối ưu. Công thức là cận trên: code chỉ mở rộng các trạng thái thoả lấy trước giao, nên số trạng thái thật đi qua ít hơn nhiều, dù bảng vẫn cấp phát đủ ô.
+**Quy hoạch động chính xác** theo tập đỉnh đã đi, `O(2^(2n) · (2n)²)` thời gian và `2^(2n) · 2n` ô bộ nhớ, nên chỉ chạy được với n ≤ 9, và trong lab chỉ chạy cho n = 4 và 8. Đây là mốc duy nhất **chứng minh được** tối ưu. Công thức là cận trên: code chỉ mở rộng các trạng thái thoả ràng buộc lấy trước giao, nên số trạng thái thật đi qua ít hơn nhiều, dù bảng vẫn cấp phát đủ ô.
 
-**OR-Tools** (Python 3.13, `ortools` 9.15.6755) chạy offline, một lần, ghi vào `fixtures/loc50/ortools-results.json`; lab Rust đọc file đó. Mô hình khớp bài toán Rust: tuyến mở bằng một đỉnh kết thúc giả có chi phí 0 từ mọi đỉnh, lấy trước giao bằng `AddPickupAndDelivery`, cùng xe, thời điểm tích luỹ của lấy không muộn hơn của giao:
+**OR-Tools** (Python 3.13, `ortools` 9.15.6755) chạy offline, một lần, ghi vào `fixtures/loc50/ortools-results.json`; lab Rust đọc file đó. Mô hình khớp bài toán Rust: tuyến mở bằng một đỉnh kết thúc giả có chi phí 0 từ mọi đỉnh, ràng buộc lấy trước giao bằng `AddPickupAndDelivery`, cùng một xe, và thời điểm tích luỹ của điểm lấy không muộn hơn của điểm giao:
 
 `examples/toi-noi-location/python/loc50/loc50_ortools.py`
 
@@ -166,15 +166,15 @@ Nói «Rust kém bao nhiêu» cần một mốc. Lab dùng hai.
     params.time_limit.FromMilliseconds(int(limit_s * 1000))
 ```
 
-Điều cần nói thẳng về mốc này: **OR-Tools là mốc tham chiếu trong giới hạn thời gian của nó, không phải tối ưu đã chứng minh**, trừ khi solver tự nói vậy. Trạng thái `SUCCESS` của routing chỉ có nghĩa là tìm được một lời giải, không có nghĩa tối ưu. Guided Local Search còn không có điều kiện dừng nào khác ngoài giới hạn thời gian (2 s, 2 s, 3 s, 5 s, 8 s theo cỡ n); trong lab mọi instance đều dùng gần đúng hết giới hạn đó, dù có còn cải thiện hay không. Chỉ ở n = 4 và 8, nơi DP kiểm được, ta biết OR-Tools đạt đúng tối ưu (gap 0,00% ở cả 40 instance). Ở n ≥ 12, tối ưu thật không đắt hơn lời giải của OR-Tools, nên «gap so với OR-Tools» chỉ là **cận dưới** của «gap so với tối ưu»: Rust có thể kém tối ưu nhiều hơn con số trong bảng, không thể ít hơn. Instance n = 20 mà Rust thắng OR-Tools cho thấy OR-Tools không phải lúc nào cũng tối ưu ở cỡ đó. Ngoài ra OR-Tools chỉ chạy một lần, không lặp nhiều seed của solver.
+Điều cần nói thẳng về mốc này: **OR-Tools là mốc tham chiếu trong giới hạn thời gian của nó, không phải tối ưu đã chứng minh**, trừ khi solver tự nói vậy. Trạng thái `SUCCESS` của routing chỉ có nghĩa là tìm được một lời giải, không có nghĩa tối ưu. Guided Local Search còn không có điều kiện dừng nào khác ngoài giới hạn thời gian (2 s, 2 s, 3 s, 5 s, 8 s theo cỡ n); trong lab mọi instance đều dùng gần hết giới hạn đó, dù có còn cải thiện hay không. Chỉ ở n = 4 và 8, nơi DP kiểm được, ta biết OR-Tools đạt đúng tối ưu (gap 0,00% ở cả 40 instance). Ở n ≥ 12, tối ưu thật không đắt hơn lời giải của OR-Tools, nên «gap so với OR-Tools» chỉ là **cận dưới** của «gap so với tối ưu»: Rust có thể kém tối ưu nhiều hơn con số trong bảng, không thể ít hơn. Instance n = 20 mà Rust thắng OR-Tools cho thấy OR-Tools không phải lúc nào cũng tối ưu ở cỡ đó. Ngoài ra OR-Tools chỉ chạy một lần, không lặp nhiều seed của solver.
 
-Kiểm chéo: mọi tuyến OR-Tools hợp lệ (lấy trước giao) và chi phí Python bằng chi phí Rust tính lại trên cùng ma trận: 0 instance sai, 0 kết quả ứng với ma trận khác (băm FNV).
+Kiểm chéo cho thấy mọi tuyến OR-Tools đều hợp lệ (lấy trước giao) và chi phí Python bằng chi phí Rust tính lại trên cùng ma trận: 0 instance sai, 0 kết quả ứng với ma trận khác (băm FNV).
 
 ## Kết quả: gap theo cỡ n
 
 Gap = (chi phí Rust − chi phí mốc) / chi phí mốc, ghép cặp theo instance; KTC 95% theo phân phối t trên các instance cùng cỡ. Trên dữ liệu mô phỏng, 20 instance mỗi cỡ, seed 50001…50020:
 
-| n (cặp) | Chỉ chèn: gap TB | Chèn + LS: gap TB [KTC] | Chèn + LS so với OR-Tools: tốt hơn / bằng / kém | Gap lớn nhất | Rust chèn + LS, thời gian | OR-Tools, thời gian tường |
+| n (cặp) | Chỉ chèn: gap TB | Chèn + LS: gap TB [KTC] | Chèn + LS so với OR-Tools: tốt hơn / bằng / kém | Gap lớn nhất | Rust chèn + LS, thời gian | OR-Tools, thời gian thực tế |
 |---:|---|---|---|---|---:|---:|
 | 4 | +2,38% | +0,39% [−0,10; +0,89] | 0 / 15 / 5 | +4,27% | 2 µs | 2,006 s (giới hạn 2 s) |
 | 8 | +6,41% | +2,77% [+1,27; +4,27] | 0 / 6 / 14 | +13,06% | 8 µs | 2,005 s (giới hạn 2 s) |
@@ -189,7 +189,7 @@ Gap = (chi phí Rust − chi phí mốc) / chi phí mốc, ghép cặp theo inst
 <figcaption>Hình 2. Gap so với OR-Tools theo số cặp n. Tìm kiếm cục bộ kéo gap từ 2,38–7,50% (chỉ chèn) xuống 0,39–2,77%; vạch là KTC 95% của cột chèn + LS. Cỡ n = 4 có KTC chứa 0, các cỡ còn lại thì không. Ở n = 4 gap thật không thể âm (mốc là tối ưu), nên cận dưới −0,10 chỉ là hệ quả của công thức t trên mẫu nhỏ.</figcaption>
 </figure>
 
-Một đoạn output nguyên văn cho n = 8, nơi cả hai mốc cùng có mặt, và cho n = 30:
+Kết quả in ra nguyên văn cho n = 8 (nơi cả hai mốc cùng có mặt) và cho n = 30:
 
 ```text
   n = 8 cặp (17 đỉnh), 20 instance; chi phí trung bình sau +LS 9171.5 s, số bước cải thiện trung bình 2.2
@@ -214,15 +214,15 @@ Một đoạn output nguyên văn cho n = 8, nơi cả hai mốc cùng có mặt
     trạng thái OR-Tools: {"SUCCESS": 20}
 ```
 
-Đọc ra ba điều. Một, **chèn rẻ nhất + tìm kiếm cục bộ kém OR-Tools khoảng 0,4 đến 2,8%** (gap trung bình +0,39% đến +2,77% tuỳ cỡ), và chỉ chèn thì kém 2,4 đến 7,5%. Trên cả 100 instance, Rust tốt hơn OR-Tools 1 lần, bằng 29 lần, kém hơn 70 lần. Hai, với n nhỏ, gap so với OR-Tools cũng là gap so với tối ưu thật (OR-Tools bằng DP): +0,39% ở n = 4 và +2,77% ở n = 8, tệ nhất +13,06% ở một instance n = 8. Ba, gap không tăng đều theo n; ở n = 30 là +2,13%, thấp hơn n = 8. Lab không giải thích được điều này; với 20 instance mỗi cỡ, các KTC chồng lên nhau nên chưa nói được gap đổi theo cỡ.
+Đọc ra ba điều. Một, **chèn rẻ nhất + tìm kiếm cục bộ kém OR-Tools khoảng 0,4 đến 2,8%** (gap trung bình +0,39% đến +2,77% tuỳ cỡ), và chỉ chèn thì kém 2,4 đến 7,5%. Trên cả 100 instance, Rust tốt hơn OR-Tools 1 lần, bằng 29 lần, kém hơn 70 lần. Hai, với n nhỏ, gap so với OR-Tools cũng là gap so với tối ưu thật (OR-Tools bằng DP): +0,39% ở n = 4 và +2,77% ở n = 8, tệ nhất +13,06% ở một instance n = 8. Ba, gap không tăng đều theo n; ở n = 30 là +2,13%, thấp hơn n = 8. Lab không giải thích được điều này; với 20 instance mỗi cỡ, các KTC chồng lên nhau nên chưa nói được gap có đổi theo cỡ hay không.
 
 Phần gap còn lại có thể đến từ việc Rust không có xáo trộn hay khởi động lại ngẫu nhiên, trong khi Guided Local Search có cơ chế thoát cực tiểu cục bộ. Đó là giả thuyết, **chưa thử** (thêm xáo trộn sẽ là bước tiếp theo, không phải kết quả của bài).
 
 ## Thời gian, và đường nóng có ngân sách
 
-Rust chạy chèn + tìm kiếm cục bộ mất 2 µs ở n = 4 đến 646 µs ở n = 30; DP chính xác mất 8 µs ở n = 4 và khoảng 10 ms ở n = 8. Mỗi số là trung vị các lần đo lặp của một instance, rồi lấy trung bình qua 20 instance (đúng cách lab in); cả Rust lẫn OR-Tools đều không tính thời gian dựng ma trận. OR-Tools dùng hết giới hạn thời gian 2 đến 8 s. **Tất cả đo khi máy đang chịu tải nặng** (load average khoảng 121 trên 10 lõi), nên chỉ đọc tương đối. Có một cái bẫy khi đọc tỉ lệ: ở n = 30 OR-Tools tốn gấp khoảng 12.400 lần, nhưng đó là giới hạn thời gian ta *đặt* cho nó, vì GLS không dừng sớm. Con số này **không** nói OR-Tools cần 8 s để đạt lời giải của nó, và cũng không nói Rust «nhanh gấp 12.400 lần» ở cùng chất lượng, vì chất lượng thấp hơn khoảng 2%.
+Rust chạy chèn + tìm kiếm cục bộ mất từ 2 µs ở n = 4 đến 646 µs ở n = 30; DP chính xác mất 8 µs ở n = 4 và khoảng 10 ms ở n = 8. Mỗi số là trung vị các lần đo lặp của một instance, rồi lấy trung bình qua 20 instance (đúng cách lab in); cả Rust lẫn OR-Tools đều không tính thời gian dựng ma trận. OR-Tools dùng hết giới hạn thời gian 2 đến 8 s. **Tất cả đo khi máy đang chịu tải nặng** (load average khoảng 121 trên 10 lõi), nên chỉ đọc tương đối. Có một cái bẫy khi đọc tỉ lệ: ở n = 30 OR-Tools tốn gấp khoảng 12.400 lần, nhưng đó là giới hạn thời gian ta *đặt* cho nó, vì GLS không dừng sớm. Con số này **không** nói OR-Tools cần 8 s để đạt lời giải của nó, và cũng không nói Rust «nhanh gấp 12.400 lần» ở cùng chất lượng, vì chất lượng của Rust thấp hơn khoảng 2%.
 
-Điều thực dụng cho đường nóng là **ngân sách thời gian**: `solve` nhận một hạn, và khi hết hạn nó vẫn trả tuyến hợp lệ (phần chưa chèn được nối vào cuối theo kiểu lấy rồi giao). Lab đo ở cỡ lớn nhất:
+Điều thực dụng cho đường nóng là **ngân sách thời gian**: `solve` nhận một thời hạn, và khi hết hạn hàm này vẫn trả tuyến hợp lệ (phần chưa chèn được nối vào cuối theo kiểu lấy rồi giao). Lab đo ở cỡ lớn nhất:
 
 ```text
     ngân sách     0 µs: hết hạn 20/20, chi phí chênh trung bình +125.79% (lớn nhất +146.22%)
@@ -243,22 +243,22 @@ Ngân sách 1 ms đã đủ cho 17/20 instance cỡ 30 chạy tới cực tiểu
 
 ## Tổng hợp P05: cái gì đáng làm trước
 
-Các bài dùng simulator của P05 cùng một thước: so với baseline P03 (`NearestStraightLine`, ghép ngay) hoặc bước trước, 20 seed đánh giá, có cặp, **trên dữ liệu mô phỏng**; «không phân biệt được» nghĩa là KTC 95% chứa 0. Bảng dưới là các dòng tổng hợp trong `results/p05.md`:
+Các bài dùng simulator của P05 cùng một thước đo: so với baseline P03 (`NearestStraightLine`, ghép ngay) hoặc bước trước, 20 seed đánh giá, có cặp, **trên dữ liệu mô phỏng**; «không phân biệt được» nghĩa là KTC 95% chứa 0. Bảng dưới là các dòng tổng hợp trong `results/p05.md`:
 
-| Bài | Can thiệp, kết quả chính (mật độ «thường» nếu không ghi) | Ai lợi | Ai chịu thiệt | Kết quả rỗng hoặc xấu |
+| Bài | Can thiệp, kết quả chính (mật độ «thường» nếu không ghi) | Ai lợi | Ai chịu thiệt | Kết quả không phân biệt được hoặc xấu |
 |---|---|---|---|---|
 | [41](/articles/location-gan-nhat-sai-o-dau-do-bang-mo-phong) | Gần nhất theo ETA thay chim bay: `deadhead_m` TB −66,2 m, p95 −533,0 m, max −3.703,1 m, ETA −12,9 s, huỷ −0,0093 | Khách ngoại vi, khách ở đuôi | Không rõ: +145,3 m ở trung tâm không lặp lại trên 40 seed mới (+32,6 m, khoảng chứa 0) | p50 `deadhead_m` và km rỗng tổng không phân biệt được; «thưa xe», «cao điểm» cũng vậy ở `deadhead_m` |
 | [42](/articles/location-ghep-theo-lo-hungarian-kuhn-munkres-rust) | Hungarian trên lô: rẻ hơn tham lam 9,5–14,7% trên cùng ma trận; trong sim chỉ có lợi khi lô từ 2 khách (cao điểm: `deadhead_m` −911,7 m) | Khách gần xe, tài xế (km rỗng tổng −632,1 m ở cao điểm) | Khách xa xe (hết kiên nhẫn 0,0149 → 0,0717 ở cao điểm; cả 659 khách đều từng bị khách đặt sau vượt) | «thường»: không phân biệt được |
 | [43](/articles/location-cua-so-lo-do-tre-doi-chat-luong-ghep) | Cửa sổ lô: cao điểm, cửa sổ 30 s giảm cả chờ (−13,7 s) lẫn `deadhead_m` (−327,9 m) | Khách và tài xế khi cầu dày | Khách khi cầu thường (+6,6…+30,7 s chờ) | «thường»: cửa sổ chỉ thêm chờ; thích ứng không thắng cố định |
 | [44](/articles/location-cat-tia-ung-vien-h3-ma-tran-thua) | Cắt tỉa H3 và ma trận thưa: xe gấp 4 lần khách, +2,43…+4,58% ETA, thường nhanh hơn (1,9–18,3 lần, số rất nhiễu) | Độ trễ máy chủ | Chất lượng ghép 1–13% | Xe bằng khách: mất khách; ở 3.000×3.000 một vùng khổng lồ, bộ giải đặc nên không rút được khâu giải; cắt tỉa + lượt bù đắt hơn tối ưu 14,9% trên một lô |
-| [45](/articles/location-chi-phi-ghep-cong-bang-tai-xe-rui-ro-huy) | Chi phí có công bằng, giới hạn đón xa, rủi ro huỷ: `v1-idle` Gini −0,039; `v1-limit` ETA −18,5 s | Tài xế rảnh lâu; khách gần | Khách ngoại vi (hoàn thành −0,027…−0,031), tài xế ở «thưa xe» (rảnh dài nhất +1.904 s) | `v1-risk`, `v1-age` khi ghép ngay chưa được thử (y hệt `v0-eta` do hình dạng lô); trong lô 10 s ở cao điểm không có hiệu đáng kể |
+| [45](/articles/location-chi-phi-ghep-cong-bang-tai-xe-rui-ro-huy) | Chi phí có công bằng, giới hạn đón xa, rủi ro huỷ: `v1-idle` Gini −0,039; `v1-limit` ETA −18,5 s | Tài xế rảnh lâu; khách gần | Khách ngoại vi (hoàn thành −0,027…−0,031), tài xế ở «thưa xe» (rảnh dài nhất +1.904 s) | `v1-risk`, `v1-age` khi ghép ngay chưa được thử (y hệt `v0-eta` do hình dạng lô); trong lô 10 s ở cao điểm không có chênh lệch đáng kể |
 | [46](/articles/location-goi-y-sang-dispatch-csharp-grpc-lease-idempotency) | `SuggestMatch` gRPC và stub Dispatch: 23/23 kiểm tra hợp đồng qua | Ranh giới Rust/C# rõ | Một vòng gọi thêm; gợi ý cũ bị bỏ phí (chưa đo tần suất) | Stub trong bộ nhớ: không chứng minh Dispatch thật |
 | [47](/articles/location-chain-dispatch-tai-xe-sap-tra-khach) | Chain (xe sắp trả khách): «thưa xe» +3,2 chuyến, hết kiên nhẫn 0,0733 → 0,0415 | Khách suýt bị bỏ rơi | Khách còn lại (`wait_s` +26,9 s) | Chuyến trước kéo dài (σ 0,3): p95 +82,7 s, không phân biệt được với mức σ 0,1 (+69,7 s); `risk_k = 1` không thấy giúp |
-| [48](/articles/location-lech-tuyen-dinh-tuyen-lai-ghep-lai) | Phát hiện lệch tuyến, hysteresis, ghép lại: phát hiện 95,2%, báo nhầm 2,5%; khách nhận 5/279 cập nhật | Khách (ít thông báo vô nghĩa) | Tài xế bị rút chuyến (17 ca đổi đều mất ≥ 1 km đã chạy) | Nhiễu thô: 80,5% báo nhầm; lợi của ghép lại bị thổi lên vì tài xế trong lab không được chọn bằng ghép |
+| [48](/articles/location-lech-tuyen-dinh-tuyen-lai-ghep-lai) | Phát hiện lệch tuyến, hysteresis, ghép lại: phát hiện 95,2%, báo nhầm 2,5%; khách nhận 5/279 cập nhật | Khách (ít thông báo vô nghĩa) | Tài xế bị rút chuyến (17 ca đổi đều mất ≥ 1 km đã chạy) | Nhiễu thô: 80,5% báo nhầm; lợi của ghép lại bị phóng đại vì tài xế trong lab không được chọn bằng ghép |
 | [49](/articles/location-tai-xe-ranh-di-dau-dieu-huong-theo-nhu-cau) | Gợi ý di chuyển theo nhu cầu H3: `pickup_eta_s` −36,1 s | Khách trung tâm và vành trong | Tài xế: km rỗng tổng +1.428,9 m mỗi khách | Ngoại vi không đổi; bầy đàn làm xấu đi («dày xe» +15,5 s) |
 | 50 | Chèn + 2-opt/Or-opt so với OR-Tools: gap +0,39…+2,77% | Đường nóng (thời gian 2–646 µs, máy chịu tải) | Chất lượng khoảng 2% | Rust tốt hơn OR-Tools 1 trong 100 instance |
 
-Bài 46, 48 và 50 không chạy trong simulator (lab độc lập), nên ba dòng đó không so được với baseline của bài 30. Việc nên thử trước theo các số này, chỉ trong mô phỏng: **một**, ETA thay chim bay là bước đơn giản nhất, cắt đuôi rõ ở `thường` và `dày xe`, lặp lại trên seed mới, tuy chi phí dựng ma trận chưa được cân ở bài 41; **hai**, ghép lô chỉ thấy lợi khi cầu dày hơn cung, và cái giá hết kiên nhẫn vẫn chưa có lời giải: thưởng chờ lâu 0,5 không chữa được, giới hạn đón xa làm nặng thêm (bài 45); **ba**, giới hạn đón xa và công bằng cho tài xế phải đo theo vùng, vì con số toàn cục che mất ai chịu thiệt; **bốn**, gợi ý di chuyển cho tài xế rảnh đổi 36,1 s chờ lấy 1.428,9 m rỗng mỗi khách, hai đơn vị không so trực tiếp được, nên trước hết phải trả lời ai trả cho quãng đó.
+Bài 46, 48 và 50 không chạy trong simulator (lab độc lập), nên ba dòng đó không so được với baseline của bài 30. Nên thử trước những việc sau theo các số này, chỉ trong mô phỏng: **một**, ETA thay chim bay là bước đơn giản nhất, cắt đuôi rõ ở `thường` và `dày xe`, lặp lại trên seed mới, tuy chi phí dựng ma trận chưa được cân ở bài 41; **hai**, ghép lô chỉ thấy lợi khi cầu dày hơn cung, và cái giá hết kiên nhẫn vẫn chưa có lời giải: thưởng chờ lâu 0,5 không chữa được, giới hạn đón xa làm nặng thêm (bài 45); **ba**, giới hạn đón xa và công bằng cho tài xế phải đo theo vùng, vì con số toàn cục che mất ai chịu thiệt; **bốn**, gợi ý di chuyển cho tài xế rảnh đổi 36,1 s chờ lấy 1.428,9 m rỗng mỗi khách, hai đơn vị không so trực tiếp được, nên trước hết phải trả lời ai trả cho quãng đó.
 
 ## Chạy ví dụ và kiểm chứng
 
@@ -271,27 +271,27 @@ cd examples/toi-noi-location/python/loc50 && uv sync --python 3.13 && uv run pyt
 cd - && cargo run -q --release --manifest-path examples/toi-noi-location/rust/Cargo.toml -p labs --bin loc50_nhieu_diem_dung
 ```
 
-Lệnh thứ nhất sinh `fixtures/loc50/instances.json`, lệnh thứ hai chạy OR-Tools (cần `uv` và mạng lần đầu để tải gói), lệnh thứ ba chạy so sánh. Output, đầu file (nguyên văn từ `results/p05.md`), kèm dòng kiểm chéo:
+Lệnh thứ nhất sinh `fixtures/loc50/instances.json`, lệnh thứ hai chạy OR-Tools (cần `uv` và mạng lần đầu để tải gói), lệnh thứ ba chạy so sánh. Kết quả in ra, phần đầu tệp (nguyên văn từ `results/p05.md`), kèm dòng kiểm chéo:
 
 ```text
 OR-Tools: đọc fixtures/loc50/ortools-results.json (100 kết quả), ortools 9.15.6755; first_solution = PARALLEL_CHEAPEST_INSERTION, metaheuristic = GUIDED_LOCAL_SEARCH, giới hạn thời gian theo cỡ n = {"12":3.0,"20":5.0,"30":8.0,"4":2.0,"8":2.0}, Python 3.13.15
   kiểm tra chéo: tuyến OR-Tools hợp lệ (lấy trước giao) và chi phí Python = chi phí Rust tính lại: 0 instance sai; kết quả OR-Tools ứng với ma trận khác (băm FNV lệch): 0
 ```
 
-`bash examples/toi-noi-location/verify-p05.sh` chạy lab với `--fixture` trên đồ thị tổng hợp (không có OR-Tools), và chỉ kiểm rằng `ortools` nạp được ngoại tuyến; nó **không** giải lại OR-Tools. Các số trong bài đến từ lần chạy đầy đủ trên HCM ghi ở `results/p05.md`.
+`bash examples/toi-noi-location/verify-p05.sh` chạy lab với `--fixture` trên đồ thị tổng hợp (không có OR-Tools), và chỉ kiểm tra rằng `ortools` nạp được ngoại tuyến; lệnh này **không** giải lại OR-Tools. Các số trong bài đến từ lần chạy đầy đủ trên HCM ghi ở `results/p05.md`.
 
 ## Giới hạn của ví dụ
 
 - **Bài toán rút gọn**: một người giao hàng, không tải trọng, không khung giờ, không nhiều xe. Giao hàng thật có thêm cả ba; kết quả ở đây không tự mang sang được.
 - **Instance mô phỏng**: điểm lấy và giao rải khắp bản đồ, không phải bưu kiện cùng một quận, nên các cạnh dài hơn giao hàng đô thị thật. Chi phí là thời gian chạy từ CH, không có chi phí rẽ.
-- **OR-Tools bị chặn bởi giới hạn thời gian**, chạy một lần, một cấu hình (`PARALLEL_CHEAPEST_INSERTION` + `GUIDED_LOCAL_SEARCH`). Chất lượng của nó phụ thuộc giới hạn đó và tải máy; nó là mốc tham chiếu, không phải tối ưu, trừ n = 4 và 8.
+- **OR-Tools bị chặn bởi giới hạn thời gian**, chạy một lần, một cấu hình (`PARALLEL_CHEAPEST_INSERTION` + `GUIDED_LOCAL_SEARCH`). Chất lượng của nó phụ thuộc giới hạn đó và tải máy; nó là mốc tham chiếu chứ không phải tối ưu, trừ n = 4 và 8.
 - **Rust không có xáo trộn hay khởi động lại ngẫu nhiên**, và chỉ có ba loại phép dời. Gap khoảng 2% là của cấu hình này.
 - **Thời gian đo khi máy chịu tải nặng.** Đừng kết luận gì về thời gian tuyệt đối; đọc tỉ lệ trong cùng một lần chạy.
 - **Tổng hợp P05 gom kết quả của các bài trước**, mỗi bài chạy hai đến bốn bộ giả định; các bộ còn lại chưa chạy (ghi ở từng bài). Mười bài cộng lại là hàng trăm phép so sánh, nên một dấu sao đơn lẻ ở bất kỳ bài nào cũng cần được chạy lại trước khi tin, như bài 41 đã làm. Chưa thử tải cao hơn «cao điểm», chưa so với dispatch thật của một công ty (không có dữ liệu), chưa tích hợp dự báo thật cho bài 49.
 
 ## Bài tập
 
-**Bài 1.** Kiểm lại gap +4,27% của instance n04-00 từ hai chi phí trong output.
+**Bài 1.** Kiểm lại gap +4,27% của instance n04-00 từ hai chi phí trong kết quả in ra.
 
 <details><summary>Lời giải bài 1</summary>
 <p>(4.948.489 − 4.745.839) / 4.745.839 = 202.650 / 4.745.839 ≈ 0,0427, tức +4,27%. Trùng với «gap lớn nhất» của cỡ n = 4 trong output, nên đó chính là instance tệ nhất cỡ này.</p>
@@ -300,7 +300,7 @@ OR-Tools: đọc fixtures/loc50/ortools-results.json (100 kết quả), ortools 
 **Bài 2.** Vì sao 2-opt thông thường không được đảo một đoạn chứa cả điểm lấy lẫn điểm giao của cùng một cặp? Và vì sao với ma trận bất đối xứng, code phải giữ hai tổng `fwd` và `bwd`?
 
 <details><summary>Lời giải bài 2</summary>
-<p>Đảo đoạn đảo thứ tự các đỉnh trong đoạn, nên nếu cả L<sub>k</sub> và G<sub>k</sub> nằm trong đoạn thì sau khi đảo G<sub>k</sub> đứng trước L<sub>k</sub>, vi phạm lấy trước giao. Với ma trận bất đối xứng, <code>c(a,b)</code> khác <code>c(b,a)</code>: đảo đoạn làm mỗi cạnh trong đoạn chạy theo chiều ngược lại, nên chi phí đoạn sau khi đảo là tổng <code>c(v, trước)</code> (<code>bwd</code>) chứ không phải tổng <code>c(trước, v)</code> (<code>fwd</code>). Giữ hai tổng chạy cho phép tính delta mỗi <code>j</code> trong O(1).</p>
+<p>Đảo đoạn làm đảo thứ tự các đỉnh trong đoạn, nên nếu cả L<sub>k</sub> và G<sub>k</sub> nằm trong đoạn thì sau khi đảo G<sub>k</sub> đứng trước L<sub>k</sub>, vi phạm lấy trước giao. Với ma trận bất đối xứng, <code>c(a,b)</code> khác <code>c(b,a)</code>: đảo đoạn làm mỗi cạnh trong đoạn chạy theo chiều ngược lại, nên chi phí đoạn sau khi đảo là tổng <code>c(v, trước)</code> (<code>bwd</code>) chứ không phải tổng <code>c(trước, v)</code> (<code>fwd</code>). Giữ hai tổng chạy cho phép tính delta mỗi <code>j</code> trong O(1).</p>
 </details>
 
 **Bài 3.** Ở n = 12, chèn + LS kém OR-Tools +1,60% trung bình, 17/20 instance kém hơn. Có thể kết luận Rust kém tối ưu thật +1,60% không? Vì sao?
@@ -313,8 +313,8 @@ Bài trước: [bài 49](/articles/location-tai-xe-ranh-di-dau-dieu-huong-theo-n
 
 ## Tài liệu gốc
 
-- [OR-Tools: Vehicle Routing with Pickups and Deliveries](https://developers.google.com/optimization/routing/pickup_delivery): cách mô hình lấy trước giao bằng `AddPickupAndDelivery` và ràng buộc thời điểm tích luỹ.
-- [OR-Tools: Routing Options](https://developers.google.com/optimization/routing/routing_options): chiến lược lời giải đầu, metaheuristic (Guided Local Search) và giới hạn thời gian.
+- [OR-Tools: Vehicle Routing with Pickups and Deliveries](https://developers.google.com/optimization/routing/pickup_delivery): cách mô hình hoá ràng buộc lấy trước giao bằng `AddPickupAndDelivery` và ràng buộc thời điểm tích luỹ.
+- [OR-Tools: Routing Options](https://developers.google.com/optimization/routing/routing_options): chiến lược tạo lời giải ban đầu, metaheuristic (Guided Local Search) và giới hạn thời gian.
 - [2-opt (Wikipedia)](https://en.wikipedia.org/wiki/2-opt): phép đảo đoạn cơ bản của tìm kiếm cục bộ.
 - [Held–Karp algorithm (Wikipedia)](https://en.wikipedia.org/wiki/Held%E2%80%93Karp_algorithm): quy hoạch động theo tập đỉnh, nền của mốc chính xác cho cỡ nhỏ.
 - [Guided local search (Wikipedia)](https://en.wikipedia.org/wiki/Guided_local_search): metaheuristic mà OR-Tools dùng trong lab này.

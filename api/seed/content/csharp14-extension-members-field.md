@@ -8,7 +8,7 @@ tags: [csharp, dotnet, dotnet-10, toi-noi]
 language: vi
 ---
 
-Đây là **bài 29** trong loạt **C# và .NET 10 qua [Tới Nơi](/articles/du-an-mau-toi-noi)**. Các ví dụ target `net10.0`, dùng dữ liệu giả và cùng code đã chạy kiểm chứng trong repository.
+Đây là **bài 29** trong loạt **C# và .NET 10 qua [Tới Nơi](/articles/du-an-mau-toi-noi)**. Các ví dụ nhắm tới `net10.0`, dùng dữ liệu giả và cùng code đã được chạy kiểm chứng trong repository.
 
 <div class="tkh-callout tkh-callout--example">
 <span class="tkh-callout-title">Thử trước khi đọc</span>
@@ -16,21 +16,21 @@ language: vi
 <details><summary>Xem đáp án</summary><p>Không. Nó cung cấp member được phân giải theo cơ chế extension; không thay layout hoặc tự chèn state vào instance kiểu gốc.</p></details>
 </div>
 
-## Cú pháp mới chỉ có ích khi giữ ý nghĩa rõ
+## Cú pháp mới chỉ có ích khi ý nghĩa vẫn rõ ràng
 
 C# 14 đi cùng SDK .NET 10, không cần bật preview cho các tính năng dùng trong bài. Ta lấy một QuoteView để hiển thị và một DisplayLabel để chuẩn hoá nhãn, không viết lại toàn bộ domain chỉ để đưa từ khoá mới vào.
 
-Ba thí nghiệm là extension property IsHighFare, setter dùng field do compiler hỗ trợ và phép gán `receiver?.Property = value`. Chúng giúp code ngắn hơn ở một số nơi, nhưng không làm validation, ownership hay persistence tự xuất hiện.
+Ba thí nghiệm là extension property IsHighFare, setter dùng field do compiler hỗ trợ và phép gán `receiver?.Property = value`. Chúng giúp code ngắn hơn ở một số nơi, nhưng không tự mang lại validation, ownership hay persistence.
 
-DisplayLabel là kiểu phục vụ hiển thị, không phải identity bất biến của tài xế/chuyến. Ví dụ không thay quy tắc Money hay ranh giới domain đã thống nhất trong loạt bài.
+DisplayLabel là kiểu phục vụ hiển thị, không phải định danh bất biến của tài xế hay của chuyến. Ví dụ này không thay thế quy tắc Money hay ranh giới domain đã thống nhất trong loạt bài.
 
 ## Extension block nhóm các member quanh receiver
 
 Trong static class QuoteExtensions, `extension(QuoteView quote)` khai báo receiver cho một nhóm extension. IsHighFare là property tính từ Fare >= 100000; IsExpiredAt là method nhận thời điểm để so với ExpiresAt.
 
-Đưa now vào tham số làm hành vi kiểm chứng được, không đọc DateTime.Now kín bên trong. Property không giữ state mới trên QuoteView và không phải override một member ảo. Member instance thật được ưu tiên theo quy tắc phân giải; import namespace và xung đột extension vẫn cần được quản lý.
+Đưa now vào tham số giúp hành vi kiểm chứng được, thay vì đọc DateTime.Now ngầm bên trong. Property không giữ state mới trên QuoteView và không phải override một member ảo. Member instance thật được ưu tiên theo quy tắc phân giải; việc import namespace và xung đột giữa các extension vẫn cần được quản lý.
 
-Tên IsHighFare thể hiện một ngưỡng minh hoạ của view. Nếu đó là rule quyết định tiền/phê duyệt quan trọng, nó cần sống trong nơi sở hữu nghiệp vụ phù hợp, có version/chính sách chứ không rải extension helper ở mọi module.
+Tên IsHighFare thể hiện một ngưỡng minh hoạ của view. Nếu đó là rule quyết định tiền/phê duyệt quan trọng, nó cần nằm ở nơi sở hữu nghiệp vụ phù hợp, có phiên bản và chính sách, chứ không rải extension helper khắp mọi module.
 
 <figure class="tkh-fig">
 <div class="tkh-fig-box">
@@ -41,19 +41,19 @@ Tên IsHighFare thể hiện một ngưỡng minh hoạ của view. Nếu đó l
 
 ## Field-backed property giữ validation ở setter
 
-DisplayLabel.Text có get tự động và set kiểm string trắng trước khi gán `field = value.Trim()`. field ở đây trỏ tới backing field do compiler sinh cho property, nên không cần tự khai báo một `_text` chỉ để giữ giá trị.
+DisplayLabel.Text có get tự động và set kiểm tra chuỗi trắng trước khi gán `field = value.Trim()`. field ở đây trỏ tới backing field do compiler sinh cho property, nên không cần tự khai báo một `_text` chỉ để giữ giá trị.
 
-Giá trị khởi tạo “Tới Nơi” là dữ liệu hợp lệ. Nếu setter từ chối input trắng, property phải giữ giá trị cũ; test kiểm điều đó. Tính năng không tự validation initializer hoặc mọi đường deserialize theo mọi framework: phải hiểu đường tạo object thực tế khi dùng ở biên hệ thống.
+Giá trị khởi tạo “Tới Nơi” là dữ liệu hợp lệ. Nếu setter từ chối input trắng, property phải giữ giá trị cũ; test kiểm tra điều đó. Tính năng này không tự validate giá trị khởi tạo hay mọi đường deserialize của mọi framework; phải hiểu đường tạo object thực tế khi dùng ở ranh giới hệ thống.
 
-Không dùng một property Text có side effect lớn như gửi mạng hoặc commit database. Cú pháp ngắn không thay hợp đồng của accessor; người đọc vẫn kỳ vọng đọc property không bất ngờ khởi động một use case đắt tiền.
+Không dùng một property Text có side effect lớn như gọi qua mạng hoặc commit database. Cú pháp ngắn không thay đổi hợp đồng của accessor; người đọc vẫn kỳ vọng việc đọc property không bất ngờ kích hoạt một use case tốn kém.
 
 ## Null-conditional assignment có short-circuit
 
-`missing?.Text = ComputeLabel()` không đánh giá ComputeLabel khi receiver null. Lab dùng biến đếm để nhìn điều đó; khi receiver tồn tại, RHS được tính một lần và setter thực hiện.
+`missing?.Text = ComputeLabel()` không đánh giá ComputeLabel khi receiver null. Lab dùng biến đếm để quan sát điều đó; khi receiver tồn tại, RHS được tính một lần và setter được gọi.
 
-Đừng dùng phép gán này để lặng lẽ bỏ một thay đổi bắt buộc. Nếu không tìm thấy chuyến là lỗi của command, return lỗi rõ thay vì `trip?.Accept(...)` rồi báo thành công. Short-circuit phù hợp nơi thiếu receiver là một trường hợp được chấp nhận.
+Đừng dùng phép gán này để lặng lẽ bỏ một thay đổi bắt buộc. Nếu không tìm thấy chuyến là lỗi của command, hãy trả về lỗi rõ ràng thay vì `trip?.Accept(...)` rồi báo thành công. Short-circuit phù hợp ở nơi việc thiếu receiver là một trường hợp được chấp nhận.
 
-Các cải tiến span/overload resolution của C# 14 có thể làm lựa chọn overload cần được xem lại khi nâng SDK; bài chỉ kiểm các feature cụ thể đang chạy, không xem danh sách “what’s new” là bằng chứng ứng dụng đã tương thích mọi thay đổi.
+Các cải tiến span/overload resolution của C# 14 có thể buộc ta xem lại việc chọn overload khi nâng SDK; bài chỉ kiểm tra các feature cụ thể đang chạy, và không xem danh sách “what’s new” là bằng chứng ứng dụng đã tương thích với mọi thay đổi.
 
 <figure class="tkh-fig">
 <div class="tkh-fig-box">
@@ -62,13 +62,13 @@ Các cải tiến span/overload resolution của C# 14 có thể làm lựa ch�
 <figcaption>Hình 2. Null-conditional assignment thay đổi cả việc có đánh giá RHS hay không; side effect phải được hiểu rõ.</figcaption>
 </figure>
 
-## Bảy kiểm tra và bài tập
+## Bảy test case và bài tập
 
-Bộ kiểm tra chuẩn hoá nhãn, từ chối whitespace, giữ giá trị cũ, ngưỡng extension property, biên hết hạn và hai nhánh receiver null/không null. Không assert Guid hoặc thời gian hệ thống ngẫu nhiên.
+Bộ test case kiểm tra việc chuẩn hoá nhãn, từ chối whitespace, giữ giá trị cũ, ngưỡng của extension property, ranh giới hết hạn và hai nhánh receiver null/không null. Không assert giá trị Guid hoặc thời gian hệ thống ngẫu nhiên.
 
 **Bài tập:** QuoteView hết hạn đúng tại ExpiresAt có được xem là expired theo code không? Nếu ComputeLabel có thao tác trừ tiền, việc nó bị short-circuit có còn là chi tiết cú pháp vô hại không?
 
-<details><summary>Xem đáp án</summary><p>Đúng, phương thức dùng >=. Một thao tác nghiệp vụ như trừ tiền phải có luồng/hợp đồng rõ ràng; không giấu trong RHS của một phép gán nhãn có thể không chạy.</p></details>
+<details><summary>Xem đáp án</summary><p>Đúng, phương thức dùng >=. Một thao tác nghiệp vụ như trừ tiền phải có luồng và hợp đồng rõ ràng; không giấu trong RHS của một phép gán nhãn có thể không chạy.</p></details>
 
 ## Chạy ví dụ và kiểm chứng
 

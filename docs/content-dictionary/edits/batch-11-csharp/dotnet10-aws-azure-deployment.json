@@ -1,0 +1,155 @@
+{
+ "file": "dotnet10-aws-azure-deployment.md",
+ "edits": [
+  {
+   "old": "phân biệt workload/user identity và đi qua",
+   "new": "phân biệt workload identity với user identity và đi qua",
+   "reason": "Gạch chéo ghép hai danh từ, khó hiểu",
+   "severity": "medium"
+  },
+  {
+   "old": "không là yêu cầu deploy đồng thời",
+   "new": "không phải là yêu cầu deploy đồng thời",
+   "reason": "Thiếu chữ \"phải\"",
+   "severity": "high"
+  },
+  {
+   "old": "chưa có tài nguyên được tạo ở một account/subscription",
+   "new": "chưa có tài nguyên nào được tạo ở một account hoặc subscription",
+   "reason": "Gạch chéo, câu cụt",
+   "severity": "medium"
+  },
+  {
+   "old": "chưa có phép thử network/identity trên cloud thật.",
+   "new": "chưa có phép thử network và identity trên cloud thật.",
+   "reason": "Gạch chéo",
+   "severity": "low"
+  },
+  {
+   "old": "chỉ là điểm bắt đầu lab.",
+   "new": "chỉ là điểm bắt đầu cho lab.",
+   "reason": "Thiếu từ nối",
+   "severity": "low"
+  },
+  {
+   "old": "trước khi định capacity hoặc autoscale.",
+   "new": "trước khi chốt capacity hoặc autoscale.",
+   "reason": "\"định capacity\" gượng",
+   "severity": "low"
+  },
+  {
+   "old": "Không lấy kết quả microbenchmark parser ở bài 28 để sizing Fargate.",
+   "new": "Không dùng kết quả microbenchmark của parser ở bài 28 để chọn cỡ tài nguyên cho Fargate.",
+   "reason": "Lược mất \"của\"; \"sizing\" có từ Việt",
+   "severity": "medium"
+  },
+  {
+   "old": "Execution role cho agent pull image, gửi log và lấy secret cần lúc task khởi động.",
+   "new": "Execution role cho phép agent pull image, gửi log và lấy secret cần thiết lúc task khởi động.",
+   "reason": "Thiếu động từ \"cho phép\", \"cần lúc\" cụt",
+   "severity": "medium"
+  },
+  {
+   "old": "có thể khiến cấu hình chạy không được hoặc cấp quyền quá rộng.",
+   "new": "có thể khiến cấu hình không chạy được hoặc cấp quyền quá rộng.",
+   "reason": "Trật tự từ kiểu tiếng Anh",
+   "severity": "medium"
+  },
+  {
+   "old": "Secret phải là full connection string hợp lệ",
+   "new": "Secret phải là connection string đầy đủ và hợp lệ",
+   "reason": "Dùng từ Việt cho \"full\"",
+   "severity": "low"
+  },
+  {
+   "old": "là prerequisites ngoài file task definition.",
+   "new": "là điều kiện tiên quyết nằm ngoài file task definition.",
+   "reason": "Từ Việt quen dùng cho \"prerequisites\"",
+   "severity": "medium"
+  },
+  {
+   "old": "Dùng path /health/ready cho kiểm khả năng nhận traffic, không mở RDS ra Internet để chữa lỗi private networking.",
+   "new": "Dùng path /health/ready để kiểm tra khả năng nhận traffic; không mở RDS ra Internet để xử lý lỗi private networking.",
+   "reason": "\"cho kiểm\" cụt; \"chữa lỗi\" gượng",
+   "severity": "medium"
+  },
+  {
+   "old": "Identity dùng pull image và đọc đúng secret Key Vault được tham chiếu qua URI,",
+   "new": "Identity dùng để pull image và đọc đúng secret Key Vault mà URI tham chiếu tới,",
+   "reason": "Thiếu từ nối, bỏ bị động",
+   "severity": "medium"
+  },
+  {
+   "old": "không tự làm Npgsql dùng Entra authentication.",
+   "new": "không tự khiến Npgsql dùng xác thực Entra.",
+   "reason": "Thống nhất cách gọi, bớt tiếng Anh",
+   "severity": "medium"
+  },
+  {
+   "old": "muốn dùng token database cần thêm credential/token refresh và database role mapping đúng cơ chế.",
+   "new": "muốn dùng token cho database thì cần thêm credential, cơ chế làm mới token và ánh xạ database role đúng cách.",
+   "reason": "Trật tự từ kiểu tiếng Anh, gạch chéo",
+   "severity": "medium"
+  },
+  {
+   "old": "cần kiểm riêng. Compile Bicep",
+   "new": "cần kiểm tra riêng. Compile Bicep",
+   "reason": "Lược mất chữ \"tra\"",
+   "severity": "low"
+  },
+  {
+   "old": "Live chỉ chứng minh process có thể trả lời; readiness kiểm database cùng migration.",
+   "new": "Probe live chỉ chứng minh process có thể trả lời; readiness kiểm tra cả database lẫn migration.",
+   "reason": "Lược mất danh từ chính (probe)",
+   "severity": "medium"
+  },
+  {
+   "old": "Startup probe cho thời gian khởi động riêng.",
+   "new": "Startup probe cho ứng dụng một khoảng thời gian khởi động riêng.",
+   "reason": "Câu thiếu tân ngữ, cụt",
+   "severity": "medium"
+  },
+  {
+   "old": "Không dùng DB outage làm lý do restart mọi replica qua một liveness query DB.",
+   "new": "Không lấy sự cố DB làm lý do khởi động lại mọi replica thông qua một liveness query tới DB.",
+   "reason": "Tiếng Anh lẫn vào văn xuôi",
+   "severity": "medium"
+  },
+  {
+   "old": "Release nên review/chạy migration bằng role riêng, triển khai cùng image đã kiểm, đợi readiness, làm authenticated smoke và quan sát",
+   "new": "Release nên review và chạy migration bằng role riêng, triển khai cùng image đã kiểm tra, đợi readiness, chạy smoke test có xác thực và quan sát",
+   "reason": "\"làm authenticated smoke\" cụt, gạch chéo",
+   "severity": "medium"
+  },
+  {
+   "old": "để workload nhận giá trị; đừng mặc định toàn bộ cấu hình hot reload.",
+   "new": "để workload nhận được giá trị mới; đừng mặc định rằng mọi cấu hình đều được nạp lại khi đang chạy (hot reload).",
+   "reason": "Câu tối nghĩa, thiếu động từ",
+   "severity": "high"
+  },
+  {
+   "old": "readiness 503 trong khi live 200 có luôn",
+   "new": "readiness trả 503 trong khi live trả 200 có luôn",
+   "reason": "Thiếu động từ",
+   "severity": "low"
+  },
+  {
+   "old": "cần kế hoạch migration tương thích và phục hồi rõ.",
+   "new": "cần kế hoạch migration tương thích và kế hoạch phục hồi rõ ràng.",
+   "reason": "Thiếu danh từ chính",
+   "severity": "medium"
+  },
+  {
+   "old": "Test không tự skip khi thiếu PostgreSQL.",
+   "new": "Test không tự bỏ qua khi thiếu PostgreSQL.",
+   "reason": "Từ Việt quen dùng cho \"skip\"",
+   "severity": "medium"
+  },
+  {
+   "old": "phạm vi, prerequisites và phần chưa được triển khai thật.",
+   "new": "phạm vi, điều kiện tiên quyết và phần chưa triển khai thật.",
+   "reason": "Từ Việt quen dùng cho \"prerequisites\"",
+   "severity": "medium"
+  }
+ ]
+}

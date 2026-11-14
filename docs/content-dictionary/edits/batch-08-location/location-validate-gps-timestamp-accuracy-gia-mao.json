@@ -1,0 +1,161 @@
+{
+ "file": "location-validate-gps-timestamp-accuracy-gia-mao.md",
+ "edits": [
+  {
+   "old": "nhảy vị trí và cờ nghi giả mạo",
+   "new": "nhảy vị trí và cờ báo nghi giả mạo",
+   "reason": "«cờ nghi giả mạo» cụt, thiếu động từ",
+   "severity": "medium"
+  },
+  {
+   "old": "bộ test 16 ca điểm xấu",
+   "new": "bộ test gồm 16 test case điểm xấu",
+   "reason": "thống nhất «test case» theo bảng thuật ngữ",
+   "severity": "medium"
+  },
+  {
+   "old": "việc validate timestamp, accuracy, tốc độ và tần suất",
+   "new": "việc kiểm tra timestamp, accuracy, tốc độ và tần suất",
+   "reason": "từ tiếng Anh lọt vào văn xuôi, thống nhất với «kiểm tra» ở phần sau",
+   "severity": "medium"
+  },
+  {
+   "old": "Việc đó của Fraud service viết bằng Python.",
+   "new": "Việc đó thuộc về Fraud service, viết bằng Python.",
+   "reason": "câu thiếu động từ",
+   "severity": "medium"
+  },
+  {
+   "old": "State là biến cục bộ của goroutine giữ kết nối nên không cần khoá, và cũng vì vậy nó chỉ sống theo kết nối.",
+   "new": "Trạng thái này là biến cục bộ của goroutine giữ kết nối nên không cần khoá, và cũng vì vậy nó chỉ sống theo kết nối.",
+   "reason": "từ tiếng Anh «State» để trần ở đầu câu, nhắc lại bằng «trạng thái»",
+   "severity": "medium"
+  },
+  {
+   "old": "phần đó rơi xuống các lớp sau:",
+   "new": "phần đó do các lớp sau xử lý:",
+   "reason": "cách nói «rơi xuống» gượng, kiểu dịch máy",
+   "severity": "medium"
+  },
+  {
+   "old": "Thứ tự có ý nghĩa: kiểm toạ độ trước vì toạ độ sai",
+   "new": "Thứ tự này quan trọng: kiểm tra toạ độ trước, vì toạ độ sai",
+   "reason": "calque «có ý nghĩa», «kiểm» cụt",
+   "severity": "medium"
+  },
+  {
+   "old": "Lab có một ca test riêng cho điều này.",
+   "new": "Lab có một test case riêng cho điều này.",
+   "reason": "thống nhất «test case»",
+   "severity": "medium"
+  },
+  {
+   "old": "sẽ cho «tốc độ vô hạn» nếu chia thẳng. Sàn 1 giây giữ phép tính bền vững; ngược lại, nó cũng làm giảm",
+   "new": "sẽ cho «tốc độ vô hạn» nếu chia thẳng. Sàn 1 giây giữ phép tính ổn định; đổi lại, sàn này cũng làm giảm",
+   "reason": "«bền vững» là calque của robust; «nó» mơ hồ",
+   "severity": "medium"
+  },
+  {
+   "old": "Bộ test ghi ca «nhảy 200 m trong 1 s» đúng để",
+   "new": "Bộ test ghi test case «nhảy 200 m trong 1 s» đúng để",
+   "reason": "thống nhất «test case»",
+   "severity": "medium"
+  },
+  {
+   "old": "cùng ca đồng hồ nhanh:",
+   "new": "cùng test case đồng hồ nhanh:",
+   "reason": "thống nhất «test case»",
+   "severity": "low"
+  },
+  {
+   "old": "nên phía sau chỉ cần một phép `&` để kiểm.",
+   "new": "nên phía sau chỉ cần một phép `&` để kiểm tra.",
+   "reason": "«kiểm» đứng một mình cụt",
+   "severity": "medium"
+  },
+  {
+   "old": "vì chúng là thứ điều tra cần xem.",
+   "new": "vì đó là thứ cần xem khi điều tra.",
+   "reason": "thiếu danh từ «điều tra» làm chủ thể",
+   "severity": "medium"
+  },
+  {
+   "old": "theo kiến trúc nhận toàn bộ và mới là nơi kết luận;",
+   "new": "theo kiến trúc nhận toàn bộ điểm và mới là nơi đưa ra kết luận;",
+   "reason": "câu thiếu danh từ, «kết luận» cụt",
+   "severity": "medium"
+  },
+  {
+   "old": "quy tắc của loạt)",
+   "new": "quy tắc của cả loạt bài)",
+   "reason": "«loạt» đứng một mình cụt",
+   "severity": "low"
+  },
+  {
+   "old": "các ca test dùng độ lệch tính bằng mét",
+   "new": "các test case dùng độ lệch tính bằng mét",
+   "reason": "thống nhất «test case»",
+   "severity": "medium"
+  },
+  {
+   "old": "Output gồm 16 ca của `TestBangDiemXau`",
+   "new": "Output gồm 16 test case của `TestBangDiemXau`",
+   "reason": "thống nhất «test case»",
+   "severity": "medium"
+  },
+  {
+   "old": "Kết quả (chọn từ `/debug/stats`):",
+   "new": "Kết quả (trích từ `/debug/stats`):",
+   "reason": "«chọn từ» là calque",
+   "severity": "low"
+  },
+  {
+   "old": "Số bị loại gần ước lượng 552",
+   "new": "Số bị loại gần với ước lượng 552",
+   "reason": "thiếu giới từ",
+   "severity": "low"
+  },
+  {
+   "old": "32 cờ `TELEPORT` gần 0,2% × 16.572 ≈ 33; 163 cờ giả lập gần 1%; lệch đồng hồ 378 là mọi điểm",
+   "new": "32 cờ `TELEPORT` gần với 0,2% × 16.572 ≈ 33; 163 cờ giả lập gần với 1%; 378 cờ lệch đồng hồ là mọi điểm",
+   "reason": "câu liệt kê thiếu từ nối, số đặt sai chỗ",
+   "severity": "medium"
+  },
+  {
+   "old": "ở lần chạy 6.250 điểm/giây **không tiêm lỗi** nào của bài 12, 44 trên",
+   "new": "ở lần chạy 6.250 điểm/giây của bài 12, trong đó **không tiêm lỗi** nào, 44 trên",
+   "reason": "trật tự từ gượng, «nào» tách khỏi động từ",
+   "severity": "medium"
+  },
+  {
+   "old": "chưa kiểm hầm chui, cầu vượt,",
+   "new": "chưa kiểm tra hầm chui, cầu vượt,",
+   "reason": "«kiểm» đứng một mình cụt",
+   "severity": "medium"
+  },
+  {
+   "old": "Bên thứ nhất: tài xế vô tội, khi GPS nhảy thật",
+   "new": "Bên thứ nhất là tài xế vô tội: khi GPS nhảy thật",
+   "reason": "câu thiếu động từ «là»",
+   "severity": "medium"
+  },
+  {
+   "old": ") bị loại điểm, marker của khách thiếu cập nhật đúng lúc cần.",
+   "new": ") mà bị loại điểm thì marker của khách thiếu cập nhật đúng lúc cần.",
+   "reason": "câu thiếu liên từ, khó đọc",
+   "severity": "medium"
+  },
+  {
+   "old": "Bên thứ hai: Fraud service và điều tra tranh chấp, vì",
+   "new": "Bên thứ hai là Fraud service và khâu điều tra tranh chấp, vì",
+   "reason": "câu thiếu động từ «là»",
+   "severity": "medium"
+  },
+  {
+   "old": "schema version không phải tăng.",
+   "new": "phiên bản schema không phải tăng.",
+   "reason": "thống nhất «phiên bản» theo bảng thuật ngữ",
+   "severity": "medium"
+  }
+ ]
+}

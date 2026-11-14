@@ -1,7 +1,7 @@
 ---
 slug: dotnet10-repository-unit-of-work
 title: "Repository và Unit of Work với EF Core: aggregate, tracking và commit"
-summary: "Bài 33: repository theo Trip aggregate, read port riêng, mapping domain event vào Outbox và một điểm commit local; không bọc mọi API EF thành CRUD generic."
+summary: "Bài 33: repository theo Trip aggregate, read port riêng, ánh xạ domain event sang Outbox và một điểm commit local; không bọc mọi API EF thành CRUD generic."
 category: csharp-advanced
 level: advanced
 tags: [csharp, dotnet, dotnet-10, toi-noi, architecture]
@@ -18,19 +18,19 @@ language: vi
 
 ## Repository là port cho aggregate, không phải DbSet đổi tên
 
-ITripRepository chỉ có GetAsync và Add cho root Trip. Nó không trả IQueryable để caller tuỳ ý gắn EF query vào domain. ITripQueries dành cho DTO đọc; IBookingRequests giữ receipt của ý định request ở application boundary.
+ITripRepository chỉ có GetAsync và Add cho root Trip. Repository không trả IQueryable để bên gọi tuỳ ý gắn EF query vào domain. ITripQueries dành cho DTO đọc; IBookingRequests giữ receipt của ý định request ở application boundary.
 
-Một generic repository với hàng chục method phản chiếu toàn bộ EF có thể tăng lớp mà không giảm phụ thuộc. Port trong bài được chọn theo hành vi cần của service. Repository không gửi event ra mạng và Add chưa commit.
+Một generic repository với hàng chục method phản chiếu toàn bộ EF có thể thêm một tầng trung gian mà không giảm phụ thuộc. Bài này chọn port theo hành vi mà service cần. Repository không gửi event ra mạng và Add chưa commit.
 
-UoW là ranh giới flush cùng transaction local. EF DbContext đã có tracking và SaveChanges; abstraction của lab thêm việc đồng bộ aggregate/persistence row và đưa integration intent vào Outbox trước đúng commit đó.
+UoW là ranh giới của việc flush và của transaction local. EF DbContext đã có tracking và SaveChanges; lớp abstraction của lab bổ sung việc đồng bộ aggregate/persistence row và đưa integration intent vào Outbox trước đúng commit đó.
 
 ## Một aggregate instance trong một scope
 
-Repository giữ cặp aggregate/row theo ID. Đọc lại cùng ID trong scope trả aggregate đã có; row EF giữ original Version để optimistic concurrency hoạt động. Restore không làm tăng version hoặc phát TripRequested như tạo mới.
+Repository giữ cặp aggregate/row theo ID. Đọc lại cùng ID trong scope sẽ trả về aggregate đã có; row EF giữ original Version để optimistic concurrency hoạt động. Restore không làm tăng version hoặc phát TripRequested như khi tạo mới.
 
-Trong CommitAsync, UoW chép trạng thái hợp lệ từ aggregate vào row đang tracked, không attach một graph lạ rồi đánh dấu mọi field Modified. Money/Distance được dựng với rule của domain, không nhận setter tự do từ request body.
+Trong CommitAsync, UoW chép trạng thái hợp lệ từ aggregate vào row đang tracked, không attach một graph lạ rồi đánh dấu mọi field là Modified. Money/Distance được dựng theo rule của domain, không cho request body gán trực tiếp qua setter.
 
-Cache này chỉ sống trong scope, không dùng static dictionary toàn service. Nó không thay transaction isolation hay lock ở PostgreSQL; hai request khác scope vẫn có thể giữ hai phiên bản của cùng chuyến.
+Cache này chỉ sống trong scope, không dùng static dictionary toàn service. Cache này không thay được transaction isolation hay lock ở PostgreSQL; hai request khác scope vẫn có thể giữ hai phiên bản của cùng chuyến.
 
 <figure class="tkh-fig">
 <div class="tkh-fig-box">
@@ -41,19 +41,19 @@ Cache này chỉ sống trong scope, không dùng static dictionary toàn servic
 
 ## Gom event và dữ liệu trước SaveChanges
 
-UoW map TripRequested/TripAccepted sang envelope integration version v1 có payload tối thiểu. Domain event không serialize nguyên graph, request key hoặc token. Outbox row và dữ liệu Trip/request receipt được ghi trong cùng SaveChanges.
+UoW chuyển TripRequested/TripAccepted thành envelope integration phiên bản v1 có payload tối thiểu. Domain event không serialize nguyên graph, request key hoặc token. Outbox row và dữ liệu Trip/request receipt được ghi trong cùng SaveChanges.
 
-Sau commit thành công mới clear PendingEvents. Nếu commit lỗi, scope sẽ kết thúc với lỗi; không clear rồi giả vờ đã có intent bền. Nếu muốn retry cùng context sau một failure, cần thiết kế reset trạng thái tracker/outbox rõ; lab không tự retry commit tuỳ ý.
+Sau commit thành công mới clear PendingEvents. Nếu commit lỗi, scope sẽ kết thúc với lỗi; không clear rồi coi như intent đã được lưu bền. Nếu muốn retry cùng context sau một lần lỗi, cần thiết kế rõ cách reset trạng thái tracker/outbox; lab không tự retry commit tuỳ ý.
 
-Service này lưu intent, còn dispatcher/broker/Inbox ngoài process vẫn phải được ghép theo bài 26. Có Outbox table không đồng nghĩa mọi thông báo đã được gửi hay consumer đã hoàn tất.
+Service này lưu intent, còn dispatcher/broker/Inbox ngoài process vẫn phải ghép thêm theo bài 26. Có Outbox table không đồng nghĩa mọi thông báo đã được gửi hay consumer đã hoàn tất.
 
 ## Dịch lỗi provider ở adapter
 
-DbUpdateConcurrencyException được dịch thành ConcurrencyConflictException của application. Unique violation chỉ được coi là duplicate request khi SQLSTATE và constraint name pk_requests khớp; các lỗi khác không bị nuốt.
+Adapter dịch DbUpdateConcurrencyException thành ConcurrencyConflictException của application. Adapter chỉ coi unique violation là duplicate request khi SQLSTATE và constraint name pk_requests khớp; các lỗi khác không bị nuốt.
 
-Version int là concurrency token do ứng dụng cập nhật qua domain Accept. UPDATE dùng original Version; hai người cùng nhận chỉ một người có thể commit theo invariant. Không bật retry mù để dùng version mới ghi đè tài xế đã thắng.
+Version int là concurrency token do ứng dụng cập nhật qua domain Accept. UPDATE dùng original Version; khi hai người cùng nhận, chỉ một người commit được theo invariant. Không bật retry mù để dùng version mới ghi đè tài xế đã thắng.
 
-Transaction local không bao network. Nếu sau này thêm nhiều SaveChanges cho cùng một use case, phải xem lại ranh giới transaction và execution strategy, không mặc định tên UoW tự làm tất cả nguyên tử.
+Transaction local không bao trùm network. Nếu sau này thêm nhiều SaveChanges cho cùng một use case, phải xem lại ranh giới transaction và execution strategy, không mặc định rằng cứ có UoW là mọi thao tác tự nguyên tử.
 
 <figure class="tkh-fig">
 <div class="tkh-fig-box">
@@ -66,7 +66,7 @@ Transaction local không bao network. Nếu sau này thêm nhiều SaveChanges c
 
 **Bài tập:** nếu lắp ITripRepository và EfUnitOfWork với hai instance repository khác nhau, điều gì có thể mất? Vì sao query GetTrip không cần đi qua dictionary aggregate?
 
-<details><summary>Xem đáp án</summary><p>UoW có thể không nhìn thấy aggregate/event đã thay đổi để flush. Query chỉ đọc DTO, không thực hiện hành vi nên dùng projection có filter ownership riêng là phù hợp.</p></details>
+<details><summary>Xem đáp án</summary><p>UoW có thể không nhìn thấy aggregate/event đã thay đổi để flush. Query chỉ đọc DTO, không thực hiện hành vi, nên dùng projection kèm filter ownership riêng là phù hợp.</p></details>
 
 ## Code và kiểm chứng
 
@@ -76,7 +76,7 @@ Thiết lập `TOI_NOI_PG` cho database local riêng `toi_noi_dotnet_lab` theo R
 dotnet test examples/toi-noi-dotnet/31-38-trip-service/Tests
 ```
 
-Fixture dùng schema GUID riêng, không xoá database; JWT dùng khoá ngẫu nhiên trong test và vẫn đi qua handler xác thực thật. Test không tự skip khi thiếu PostgreSQL. Docker/CI/cloud spec xem README service và cloud/README.md để biết phạm vi, prerequisites và phần chưa được triển khai thật.
+Fixture dùng schema GUID riêng, không xoá database; JWT dùng khoá ngẫu nhiên trong test và vẫn đi qua handler xác thực thật. Test không tự bỏ qua khi thiếu PostgreSQL. Docker/CI/cloud spec xem README service và cloud/README.md để biết phạm vi, điều kiện tiên quyết và phần chưa triển khai thật.
 
 ### Persistence.cs — 31-38-trip-service/Infrastructure/Persistence.cs
 

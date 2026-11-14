@@ -1,7 +1,7 @@
 ---
 slug: location-geometry-crate-geo-chieu-diem-polyline-bearing
 title: "Hình học với crate geo: chiếu điểm, polyline, bearing và GeoJSON"
-summary: "Bài 05: chiếu điểm GPS lên đoạn và polyline, vị trí dọc tuyến, bearing, hệ độ so với hệ mét trong crate geo, mã hoá polyline và xuất GeoJSON để xem kết quả trên bản đồ như một thói quen debug."
+summary: "Bài 05: chiếu điểm GPS lên đoạn và polyline, vị trí dọc tuyến, bearing, hệ độ so với hệ mét trong crate geo, mã hoá polyline và xuất GeoJSON để xem kết quả trên bản đồ như một thói quen gỡ lỗi."
 category: location-routing
 level: intermediate
 tags: [toi-noi, location, rust, geo, polyline, bearing, geojson, projection]
@@ -14,7 +14,7 @@ Bài này làm bốn việc hình học nhỏ trên một đường gấp khúc 
 
 <div class="tkh-callout tkh-callout--example">
 <span class="tkh-callout-title">Thử trước khi đọc</span>
-<p>Crate <code>geo</code> có sẵn hàm tìm điểm gần nhất trên đường gấp khúc (<code>ClosestPoint</code>). Nếu đưa vào toạ độ lat/lng trực tiếp (coi độ như x, y phẳng), điểm nó trả về sai bao nhiêu mét so với chân đường vuông góc đo theo mét, ở TP.HCM và ở Hà Nội?</p>
+<p>Crate <code>geo</code> có sẵn hàm tìm điểm gần nhất trên đường gấp khúc (<code>ClosestPoint</code>). Nếu đưa vào toạ độ lat/lng trực tiếp (coi độ như x, y phẳng), điểm hàm này trả về sai bao nhiêu mét so với chân đường vuông góc đo theo mét, ở TP.HCM và ở Hà Nội?</p>
 <details><summary>Xem đáp án</summary><p>Lab đo 2.000 đoạn 200 m hướng ngẫu nhiên với điểm GPS cách trung điểm 30 m: ở TP.HCM chân lệch <b>trung bình 0,212 m, lớn nhất 0,533 m</b>; ở Hà Nội <b>trung bình 0,821 m, lớn nhất 2,069 m</b>. Lệch tăng theo vĩ độ vì 1° kinh độ chỉ dài bằng 1° vĩ độ nhân cos của vĩ độ. Chân lệch cỡ này làm sai <code>along_m</code> và marker dọc tuyến ngay cả khi vẫn chọn đúng đường.</p></details>
 </div>
 
@@ -63,7 +63,7 @@ pub fn project_to_segment(p: LatLng, a: LatLng, b: LatLng) -> SegmentProjection 
 }
 ```
 
-Chú ý `LocalProjection::new(p)`: gốc ở điểm hỏi nên khoảng cách quanh điểm hỏi gần như chính xác, và mặt phẳng này đã được đo ở bài trước (sai tương đối khoảng 0,027% trong bbox TP.HCM khi gốc ở tâm bbox, nhỏ hơn nữa khi gốc ở sát điểm hỏi). `dist_m` ở dòng cuối tính bằng `hypot` của chân trong mặt phẳng mét đó.
+Chú ý `LocalProjection::new(p)`: gốc ở điểm hỏi nên khoảng cách quanh điểm hỏi gần như chính xác, và bài trước đã đo mặt phẳng này (sai tương đối khoảng 0,027% trong bbox TP.HCM khi gốc ở tâm bbox, nhỏ hơn nữa khi gốc ở sát điểm hỏi). `dist_m` ở dòng cuối tính bằng `hypot` của toạ độ chân trong mặt phẳng mét đó.
 
 ## Chiếu lên polyline, và `along_m`
 
@@ -109,9 +109,9 @@ pub fn project_to_polyline(p: LatLng, points: &[LatLng]) -> Option<PolylineProje
 }
 ```
 
-`along_m` là đại lượng mà app khách cần để đặt marker dọc tuyến: nội suy theo `along_m` thay vì toạ độ thô thì marker chạy trên đường. Hợp đồng theo dõi chuyến của lab cũng có trường `route_offset_m` đúng với ý này: vị trí đã bám đường, tính bằng mét từ đầu route (lab hiện để trống, vì bám đường là việc của phần sau). Hàm ngược của nó, `point_at`, cho điểm cách đầu tuyến `along_m` mét.
+`along_m` là đại lượng mà app khách cần để đặt marker dọc tuyến: nếu nội suy theo `along_m` thay vì toạ độ thô thì marker chạy trên đường. Hợp đồng theo dõi chuyến của lab cũng có trường `route_offset_m` đúng với ý này: vị trí đã bám đường, tính bằng mét từ đầu route (lab hiện để trống, vì bám đường là việc của phần sau). Hàm ngược của nó, `point_at`, cho điểm cách đầu tuyến `along_m` mét.
 
-Lab thử trên một polyline minh hoạ bốn đỉnh nối ba địa danh ở trung tâm TP.HCM bằng toạ độ gần đúng; đây **không phải tuyến đường thật**. Lab dựng điểm GPS cách đoạn 1 đúng 25 m theo hướng vuông góc, tại 40% đoạn, rồi kiểm tra hàm tìm lại đúng vị trí đó (nguyên văn từ `results/p01.md`):
+Lab thử trên một polyline minh hoạ bốn đỉnh nối ba địa danh ở trung tâm TP.HCM bằng toạ độ gần đúng; đây **không phải tuyến đường thật**. Lab dựng điểm GPS cách đoạn 1 đúng 25 m theo hướng vuông góc, tại 40% đoạn, rồi kiểm tra xem hàm có tìm lại đúng vị trí đó không (nguyên văn từ `results/p01.md`):
 
 ```text
 -- 2. chiếu một điểm GPS lên polyline --
@@ -122,7 +122,7 @@ Lab thử trên một polyline minh hoạ bốn đỉnh nối ba địa danh ở
   chân đường vuông góc: 10.778640,106.697600
 ```
 
-Đoạn 1 dài 500,15 m và đoạn 0 dài 819,04 m, nên vị trí dọc tuyến kỳ vọng là 819,04 + 0,4 × 500,15 = 1.019,10 m, khớp với `along = 1019.101`. `dist` ra 25,001 m thay vì 25,000 m: chênh một mili mét do chiếu phẳng cục bộ. Hình 2 vẽ lại kết quả này từ file GeoJSON mà lab đã xuất.
+Đoạn 1 dài 500,15 m và đoạn 0 dài 819,04 m, nên vị trí dọc tuyến kỳ vọng là 819,04 + 0,4 × 500,15 = 1.019,10 m, khớp với `along = 1019.101`. `dist` cho ra 25,001 m thay vì 25,000 m: chênh một mili mét do chiếu phẳng cục bộ. Hình 2 vẽ lại kết quả này từ file GeoJSON mà lab đã xuất.
 
 <figure class="tkh-fig">
 <div class="tkh-fig-box">
@@ -162,11 +162,11 @@ pub fn bearing_diff_deg(a: f64, b: f64) -> f64 {
 | 1 | 500,15 | 229,85° | tây nam |
 | 2 | 888,48 | 135,51° | đông nam |
 
-Ở các bài sau bearing có hai việc. Thứ nhất, so hướng của tài xế (từ hai điểm GPS liên tiếp) với bearing của từng cạnh đường để loại cạnh đi ngược chiều: bài bám đường dùng cách đó, và `bearing_diff_deg` là thước đo. Thứ hai, quyết định điểm đón nằm bên nào của xe: cùng một toạ độ, xe đi hướng này thì khách ở lề phải, xe đi hướng ngược lại thì phải quay đầu. Phần đó là việc của các bài điểm đón ở P04, bài này chưa làm.
+Ở các bài sau, bearing dùng cho hai việc. Thứ nhất, so hướng của tài xế (từ hai điểm GPS liên tiếp) với bearing của từng cạnh đường để loại cạnh đi ngược chiều: bài bám đường dùng cách đó, và `bearing_diff_deg` là thước đo. Thứ hai, quyết định điểm đón nằm bên nào của xe: cùng một toạ độ, xe đi hướng này thì khách ở lề phải, xe đi hướng ngược lại thì phải quay đầu. Phần đó thuộc các bài về điểm đón ở P04; bài này chưa làm.
 
 ## Hệ độ hay hệ mét: chỗ crate `geo` cho kết quả khác
 
-Crate `geo` rất đầy đủ, nhưng nhiều thuật toán hình học của nó làm việc trong **mặt phẳng của dữ liệu đầu vào**, tức coi `x` và `y` là hai trục cùng đơn vị. Nếu bạn đưa vào lng làm `x` và lat làm `y` thì phép «gần nhất» đo trong mặt phẳng độ, nơi 1° kinh độ ngắn hơn 1° vĩ độ ở mọi nơi trừ xích đạo. Lab đo độ lệch bằng cách dựng đoạn 200 m hướng ngẫu nhiên, đặt điểm GPS cách trung điểm 30 m, rồi so chân do `geo::ClosestPoint` trả với chân của `project_to_polyline`:
+Crate `geo` rất đầy đủ, nhưng nhiều thuật toán hình học của nó làm việc trong **mặt phẳng của dữ liệu đầu vào**, tức coi `x` và `y` là hai trục cùng đơn vị. Nếu bạn đưa vào lng làm `x` và lat làm `y` thì phép «gần nhất» đo trong mặt phẳng độ, nơi 1° kinh độ ngắn hơn 1° vĩ độ ở mọi nơi trừ xích đạo. Lab đo độ lệch bằng cách dựng đoạn 200 m hướng ngẫu nhiên, đặt điểm GPS cách trung điểm 30 m, rồi so chân do `geo::ClosestPoint` trả về với chân của `project_to_polyline`:
 
 `examples/toi-noi-location/rust/labs/src/bin/loc05_hinh_hoc.rs`
 
@@ -196,11 +196,11 @@ Crate `geo` rất đầy đủ, nhưng nhiều thuật toán hình học của n
 | TP.HCM | 2.000 | 0,212 m | 0,533 m |
 | Hà Nội | 2.000 | 0,821 m | 2,069 m |
 
-Chân đường vuông góc ở hệ độ lệch dưới một mét ở TP.HCM, hơn hai mét ở Hà Nội. Lệch này chủ yếu nằm dọc theo đoạn, nên nó làm sai `along_m` nhiều hơn là làm sai khoảng cách tới đường. Nhưng nếu xếp hạng ứng viên bằng khoảng cách trong hệ độ thì lỗi còn đi xa hơn: cùng 30 m, hướng đông tây được tính dài hơn hướng bắc nam 1,8% ở TP.HCM và 7% ở Hà Nội (1 / cos của vĩ độ), đủ để đổi thứ tự hai cạnh gần như cách đều. Lab không đo số lần đổi thứ tự. Quy tắc của lab: **chiếu sang mét trước, hình học sau**.
+Khi tính trong hệ độ, chân đường vuông góc lệch dưới một mét ở TP.HCM và hơn hai mét ở Hà Nội. Lệch này chủ yếu nằm dọc theo đoạn, nên độ lệch này làm sai `along_m` nhiều hơn là làm sai khoảng cách tới đường. Nhưng nếu xếp hạng ứng viên bằng khoảng cách trong hệ độ thì lỗi còn nghiêm trọng hơn: cùng 30 m, hướng đông tây được tính dài hơn hướng bắc nam 1,8% ở TP.HCM và 7% ở Hà Nội (1 / cos của vĩ độ), đủ để đổi thứ tự hai cạnh gần như cách đều. Lab không đo số lần đổi thứ tự. Quy tắc của lab: **chiếu sang mét trước, hình học sau**.
 
 ## Mã hoá polyline: gửi gọn một tuyến
 
-Một tuyến 442 điểm viết bằng JSON `[lng, lat]` tốn hàng chục nghìn byte. Định dạng *Encoded Polyline* của Google nén bằng ba ý: nhân toạ độ với `10^precision` làm tròn thành số nguyên, lưu **hiệu** so với điểm trước (số nhỏ), rồi mã hoá hiệu kèm bit dấu thành các khối 5 bit, mỗi khối một ký tự in được.
+Một tuyến 442 điểm viết bằng JSON `[lng, lat]` tốn hàng chục nghìn byte. Định dạng *Encoded Polyline* của Google nén bằng ba ý: nhân toạ độ với `10^precision` rồi làm tròn thành số nguyên, lưu **hiệu** so với điểm trước (số nhỏ), rồi mã hoá hiệu kèm bit dấu thành các khối 5 bit, mỗi khối một ký tự in được.
 
 `examples/toi-noi-location/rust/crates/geo-core/src/polyline.rs`
 
@@ -222,7 +222,7 @@ pub fn encode(points: &[LatLng], precision: u32) -> String {
 }
 ```
 
-`precision` thường là 5 (khoảng 1 m, chuẩn của Google) hoặc 6 (khoảng 0,1 m). Lab dày hoá tuyến minh hoạ thành 442 điểm, mỗi khoảng 5 m, rồi thêm nhiễu 0–1 m (seed 20261106) và đo vòng mã hoá rồi giải mã:
+`precision` thường là 5 (khoảng 1 m, chuẩn của Google) hoặc 6 (khoảng 0,1 m). Lab làm dày tuyến minh hoạ thành 442 điểm, hai điểm liền nhau cách khoảng 5 m, rồi thêm nhiễu 0–1 m (seed 20261106) và đo sai số của vòng mã hoá rồi giải mã:
 
 | Cách lưu 442 điểm | Kích thước | Sai số lớn nhất sau vòng đi về |
 |---|---:|---:|
@@ -232,11 +232,11 @@ pub fn encode(points: &[LatLng], precision: u32) -> String {
 | Nhị phân `f64` thô | 7.072 byte | 0 |
 | JSON `[lng, lat]` | khoảng 17.511 byte | 0 |
 
-Chuỗi precision 5 nhỏ hơn JSON khoảng 20 lần, nhưng cái giá là sai số gần 0,76 m. Với việc **vẽ tuyến** trên app thì quá thừa; với việc **tính toán** (chiếu, bám đường) thì dùng dữ liệu gốc, đừng dùng bản đã mã hoá. Hàm của lab được kiểm bằng ví dụ có trong tài liệu của Google và so khớp từng ký tự với crate `polyline`.
+Chuỗi precision 5 nhỏ hơn JSON khoảng 20 lần, nhưng cái giá là sai số gần 0,76 m. Với việc **vẽ tuyến** trên app thì độ chính xác đó là dư; với việc **tính toán** (chiếu, bám đường) thì dùng dữ liệu gốc, đừng dùng bản đã mã hoá. Hàm của lab được kiểm bằng ví dụ có trong tài liệu của Google và so khớp từng ký tự với crate `polyline`.
 
 ## GeoJSON: nhìn thấy mới tin
 
-Các lab hình học của loạt đều xuất GeoJSON. Đó là thói quen debug đáng giữ nhất của cả phần: lỗi toạ độ hiếm khi lộ ra ở con số nhưng lộ ngay ở hình. Hàm xuất cũng đi qua `to_lnglat` của bài 03, nên thứ tự `[lng, lat]` chỉ được tạo ra ở một chỗ:
+Các lab hình học của loạt đều xuất GeoJSON. Đó là thói quen gỡ lỗi đáng giữ nhất của cả phần: lỗi toạ độ hiếm khi lộ ra ở con số nhưng lộ ngay ở hình. Hàm xuất cũng đi qua `to_lnglat` của bài 03, nên thứ tự `[lng, lat]` chỉ được tạo ra ở một chỗ:
 
 `examples/toi-noi-location/rust/crates/geo-core/src/geojson.rs`
 
@@ -266,7 +266,7 @@ export PATH="$HOME/.rustup/toolchains/stable-aarch64-apple-darwin/bin:$PATH"
 cargo run -q --release --manifest-path examples/toi-noi-location/rust/Cargo.toml -p labs --bin loc05_hinh_hoc
 ```
 
-Cấu hình: `--release`, seed 20261106, Apple M1 Max. Mọi con số trong bài là đại lượng hình học, độ dài và sai số, không phụ thuộc thời gian, nên không bị ảnh hưởng khi máy chịu tải nặng lúc chạy lô đo. Output, nguyên văn từ `results/p01.md`:
+Cấu hình: `--release`, seed 20261106, Apple M1 Max. Mọi con số trong bài là đại lượng hình học, độ dài và sai số, không phụ thuộc thời gian, nên không bị ảnh hưởng khi máy chịu tải nặng lúc chạy lô đo. Kết quả in ra, nguyên văn từ `results/p01.md`:
 
 ```text
 -- 1. độ dài và bearing từng đoạn --
@@ -287,11 +287,11 @@ Cấu hình: `--release`, seed 20261106, Apple M1 Max. Mọi con số trong bài
   so sánh kích thước: JSON [lng,lat] f64 ≈ 17511 byte, nhị phân E7 = 3536 byte, f64 thô = 7072 byte
 ```
 
-Kiểm tra toàn phần `bash examples/toi-noi-location/verify-p01.sh` chạy các test của `geo-core` (chiếu, bearing, polyline theo ví dụ của Google, GeoJSON) và chạy lại lab; kết quả ghi `PASS`.
+Kiểm tra toàn bộ `bash examples/toi-noi-location/verify-p01.sh` chạy các test của `geo-core` (chiếu, bearing, polyline theo ví dụ của Google, GeoJSON) và chạy lại lab; kết quả ghi `PASS`.
 
 ## Giới hạn của ví dụ
 
-Đường gấp khúc minh hoạ dùng toạ độ gần đúng của ba địa danh, không phải tuyến đường thật, và không có dữ liệu đường OSM trong bài này. Phép chiếu chọn đoạn gần nhất rồi kết thúc: nếu tuyến tự cắt hoặc vòng lại (cầu vượt, vòng xoay), `along_m` của một điểm nằm giữa hai nhánh gần nhau có thể sai nhánh. Việc chọn đúng nhánh là bài toán bám đường (map matching) của phần sau. Bearing mới có hướng ban đầu của cung tròn lớn giữa hai điểm; chưa có quyết định trái hay phải. Lab chưa nội suy marker cho app khách và chưa tính VN-2000. Con số nhiễu 0–1 m dùng cho tuyến dày là nhiễu tổng hợp của lab, không phải số đo từ GPS thật.
+Đường gấp khúc minh hoạ dùng toạ độ gần đúng của ba địa danh, không phải tuyến đường thật, và không có dữ liệu đường OSM trong bài này. Phép chiếu chọn đoạn gần nhất rồi dừng lại: nếu tuyến tự cắt hoặc vòng lại (cầu vượt, vòng xoay), `along_m` của một điểm nằm giữa hai nhánh gần nhau có thể sai nhánh. Việc chọn đúng nhánh là bài toán bám đường (map matching) của phần sau. Bearing mới có hướng ban đầu của cung tròn lớn giữa hai điểm; chưa có quyết định trái hay phải. Lab chưa nội suy marker cho app khách và chưa tính VN-2000. Con số nhiễu 0–1 m dùng cho tuyến dày là nhiễu tổng hợp của lab, không phải số đo từ GPS thật.
 
 ## Bài tập
 
@@ -299,7 +299,7 @@ Kiểm tra toàn phần `bash examples/toi-noi-location/verify-p01.sh` chạy c�
 
 <details><summary>Lời giải</summary>
 
-Chân vuông góc của Q trên đường thẳng AB trùng chính Q, nên `t` thô lớn hơn 1 và `dist_m` thô bằng 0. Sau khi kẹp, `t = 1`, chân là B, `dist_m = 10`. Quên kẹp thì hàm báo Q nằm **trên** đoạn (`dist_m = 0`), điều sai: Q cách đoạn 10 m.
+Chân vuông góc của Q trên đường thẳng AB trùng chính Q, nên `t` thô lớn hơn 1 và `dist_m` thô bằng 0. Sau khi kẹp, `t = 1`, chân là B, `dist_m = 10`. Quên kẹp thì hàm báo Q nằm **trên** đoạn (`dist_m = 0`), kết quả này sai vì Q cách đoạn 10 m.
 
 </details>
 
@@ -315,7 +315,7 @@ Bearing hướng tây là 270°. Hai hướng 350° và 10° chênh nhau 20°, k
 
 <details><summary>Lời giải</summary>
 
-Để vẽ marker trên màn hình điện thoại thì chấp nhận được, vì nhiễu GPS vài mét lớn hơn nhiều và 0,76 m chỉ bằng vài điểm ảnh ở mức zoom đường phố. Làm đầu vào cho bám đường thì không nên: sai số cộng thêm vào nhiễu GPS, làm xấu việc xếp hạng đường song song. Quy tắc: tính toán dùng dữ liệu gốc (`f64` hoặc E7), chỉ mã hoá polyline ở khâu gửi cho giao diện.
+Để vẽ marker trên màn hình điện thoại thì chấp nhận được, vì nhiễu GPS vài mét lớn hơn nhiều và 0,76 m chỉ bằng vài điểm ảnh ở mức zoom đường phố. Làm đầu vào cho bám đường thì không nên: sai số cộng thêm vào nhiễu GPS, làm giảm chất lượng việc xếp hạng các đường song song. Quy tắc: tính toán dùng dữ liệu gốc (`f64` hoặc E7), chỉ mã hoá polyline ở khâu gửi cho giao diện.
 
 </details>
 

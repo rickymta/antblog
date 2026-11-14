@@ -1,0 +1,197 @@
+{
+ "file": "location-kho-vi-tri-moi-nhat-h3-redis-geo-kafka.md",
+ "edits": [
+  {
+   "old": "Kafka hoặc để nguội (đầy lại sau 4 giây), giảm mẫu sang lịch sử",
+   "new": "Kafka hoặc khởi động nguội (đầy lại sau 4 giây), giảm mẫu để ghi sang lịch sử",
+   "reason": "«để nguội» gượng, đối xứng với «khởi động nóng»; giảm mẫu thiếu động từ",
+   "severity": "medium"
+  },
+  {
+   "old": "hồ sơ tham chiếu ở bài 09 là 70",
+   "new": "tải tham chiếu ở bài 09 là 70 truy vấn mỗi giây",
+   "reason": "«hồ sơ» là calque của profile, thiếu đơn vị",
+   "severity": "medium"
+  },
+  {
+   "old": "Mọi số đo là **trên dữ liệu mô phỏng**",
+   "new": "Mọi số đo đều **thực hiện trên dữ liệu mô phỏng**",
+   "reason": "Câu thiếu động từ",
+   "severity": "medium"
+  },
+  {
+   "old": "chạy trên chính máy viết, không có mạng thật",
+   "new": "chạy ngay trên máy của người viết, không có mạng thật",
+   "reason": "«máy viết» là cụm tự ghép",
+   "severity": "medium"
+  },
+  {
+   "old": "Người dùng của kho là các bước phía sau:",
+   "new": "Các thành phần dùng kho nằm phía sau:",
+   "reason": "«Người dùng ... là các bước» dịch sát, lệch nghĩa",
+   "severity": "medium"
+  },
+  {
+   "old": "tức giờ ingest nhận lô theo **đồng hồ server**",
+   "new": "tức giờ mà ingest nhận lô, tính theo **đồng hồ server**",
+   "reason": "Câu cụt, thiếu động từ",
+   "severity": "medium"
+  },
+  {
+   "old": "hay còn tươi mãi",
+   "new": "hay mãi được coi là còn mới",
+   "reason": "«còn tươi» là calque của fresh",
+   "severity": "low"
+  },
+  {
+   "old": "(băng thông đọc nhân với số bản)",
+   "new": "(băng thông đọc nhân lên theo số bản)",
+   "reason": "«nhân với» gượng",
+   "severity": "low"
+  },
+  {
+   "old": "Kho trong bộ nhớ trước vì nó là đường nóng",
+   "new": "Kho trong bộ nhớ đi trước vì đây là đường nóng",
+   "reason": "Tránh «nó» chỉ vật trừu tượng",
+   "severity": "low"
+  },
+  {
+   "old": "và phát hiện điểm cũ đến sau là chính xác",
+   "new": "và việc phát hiện điểm cũ đến sau là chính xác",
+   "reason": "Thiếu danh từ «việc», câu cụt",
+   "severity": "medium"
+  },
+  {
+   "old": "quanh điểm hỏi và dừng khi",
+   "new": "quanh điểm truy vấn và dừng khi",
+   "reason": "«điểm hỏi» là calque của query point",
+   "severity": "medium"
+  },
+  {
+   "old": "nên tính đúng của nó phải kiểm bằng cách so với vét cạn",
+   "new": "nên tính đúng đắn của nó phải kiểm chứng bằng cách so với vét cạn",
+   "reason": "«tính đúng» và «kiểm» cụt",
+   "severity": "medium"
+  },
+  {
+   "old": "48 ca mỗi lần chạy",
+   "new": "48 test case mỗi lần chạy",
+   "reason": "Thống nhất «test case»",
+   "severity": "medium"
+  },
+  {
+   "old": "nên đừng trích tuyệt đối",
+   "new": "nên đừng trích số tuyệt đối",
+   "reason": "Thiếu danh từ",
+   "severity": "low"
+  },
+  {
+   "old": "thì khoá quyết định.",
+   "new": "thì khoá là yếu tố quyết định.",
+   "reason": "Câu cụt",
+   "severity": "medium"
+  },
+  {
+   "old": "Hai điều rút ra, và một điều không.",
+   "new": "Có hai điều rút ra được, và một điều chưa rút ra được.",
+   "reason": "Câu thiếu động từ, phải đoán ý",
+   "severity": "medium"
+  },
+  {
+   "old": "Chia mảnh làm tốc độ ghi **cao hơn",
+   "new": "Chia mảnh khiến tốc độ ghi **cao hơn",
+   "reason": "«làm ... cao hơn» giọng dịch máy",
+   "severity": "low"
+  },
+  {
+   "old": "nên các con số đồng thời nhiễu mạnh",
+   "new": "nên các số đo đồng thời dao động mạnh",
+   "reason": "«nhiễu mạnh» gượng cho số đo",
+   "severity": "medium"
+  },
+  {
+   "old": "Thời gian khác nhau nhiều giữa các lần chạy",
+   "new": "Thời gian chênh lệch nhiều giữa các lần chạy",
+   "reason": "«khác nhau nhiều» gượng",
+   "severity": "low"
+  },
+  {
+   "old": "Và ngay cả không nạp gì,",
+   "new": "Và ngay cả khi không nạp gì,",
+   "reason": "Thiếu từ nối",
+   "severity": "low"
+  },
+  {
+   "old": "matcher đang nhìn một kho thiếu",
+   "new": "matcher đang dùng một kho chưa đầy đủ",
+   "reason": "Ẩn dụ khó hiểu",
+   "severity": "medium"
+  },
+  {
+   "old": "phải chờ kho đủ ấm thay vì chỉ chờ tiến trình lên",
+   "new": "phải chờ kho nạp đủ dữ liệu thay vì chỉ chờ tiến trình khởi động xong",
+   "reason": "«đủ ấm», «tiến trình lên» cụt, khó hiểu",
+   "severity": "medium"
+  },
+  {
+   "old": "Nó có hai việc:",
+   "new": "Redis có hai việc:",
+   "reason": "Nhắc lại danh từ thay «Nó»",
+   "severity": "low"
+  },
+  {
+   "old": "của kho báo, nên nếu",
+   "new": "của kho thông báo, nên nếu",
+   "reason": "«báo» cụt",
+   "severity": "low"
+  },
+  {
+   "old": "giữ một điểm «còn sống» mỗi 60 giây",
+   "new": "giữ một điểm nhịp (heartbeat) mỗi 60 giây",
+   "reason": "Cách gọi thống nhất với «9 nhịp» và sơ đồ",
+   "severity": "medium"
+  },
+  {
+   "old": "60 điểm đầu, 9 nhịp, 0 cờ",
+   "new": "60 điểm đầu, 9 điểm nhịp, 0 điểm có cờ",
+   "reason": "Danh từ bị lược, đọc cụt",
+   "severity": "low"
+  },
+  {
+   "old": "Bài 20 báo 26,7%",
+   "new": "Bài 20 ghi nhận 26,7%",
+   "reason": "«báo» khẩu ngữ",
+   "severity": "low"
+  },
+  {
+   "old": "thì nhiễu mạnh theo tải máy",
+   "new": "thì dao động mạnh theo tải máy",
+   "reason": "«nhiễu mạnh» gượng cho số đo",
+   "severity": "low"
+  },
+  {
+   "old": "chứ không bỏ qua âm thầm",
+   "new": "chứ không bỏ qua mà không báo gì",
+   "reason": "«âm thầm» là calque",
+   "severity": "medium"
+  },
+  {
+   "old": "**Chưa chạy** Redis chết giữa lúc chạy",
+   "new": "**Chưa chạy** tình huống Redis gặp sự cố giữa lúc chạy",
+   "reason": "Câu thiếu danh từ, «chết» khẩu ngữ",
+   "severity": "medium"
+  },
+  {
+   "old": "(độ tươi vị trí p95 dưới 5–10 giây) còn dư rất xa",
+   "new": "(độ tươi vị trí ở p95 dưới 5–10 giây) còn dư rất nhiều",
+   "reason": "«độ tươi» là calque của freshness; «dư rất xa» gượng",
+   "severity": "medium"
+  },
+  {
+   "old": "6 trên 6 lần chạy liên tiếp qua.",
+   "new": "6 trên 6 lần chạy liên tiếp đều qua.",
+   "reason": "Câu cụt thiếu từ chỉ phạm vi",
+   "severity": "low"
+  }
+ ]
+}

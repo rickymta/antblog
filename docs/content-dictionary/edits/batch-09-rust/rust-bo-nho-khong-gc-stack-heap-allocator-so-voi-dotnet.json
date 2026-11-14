@@ -1,0 +1,185 @@
+{
+ "file": "rust-bo-nho-khong-gc-stack-heap-allocator-so-voi-dotnet.md",
+ "edits": [
+  {
+   "old": "Đây là số đếm, không phải số giờ, nên máy tải thế nào cũng ra đúng như vậy.",
+   "new": "Đây là số đếm, không phải số đo thời gian, nên máy tải nặng hay nhẹ thì kết quả vẫn y hệt.",
+   "reason": "Dịch máy: 'số giờ', 'ra đúng như vậy'",
+   "severity": "high"
+  },
+  {
+   "old": "theo thứ tự ngược khai báo, field theo thứ tự khai báo, `drop(x)` giải phóng sớm:",
+   "new": "theo thứ tự ngược với khai báo, field theo đúng thứ tự khai báo, còn `drop(x)` giải phóng sớm:",
+   "reason": "Câu liệt kê thiếu từ nối, khó đọc",
+   "severity": "medium"
+  },
+  {
+   "old": "Đặt lên `Drop` việc dọn tài nguyên cục bộ, không đặt tính đúng nghiệp vụ.",
+   "new": "Hãy giao cho `Drop` việc dọn tài nguyên cục bộ, đừng giao cho nó việc bảo đảm tính đúng đắn của nghiệp vụ.",
+   "reason": "Câu khó hiểu, dịch gượng",
+   "severity": "high"
+  },
+  {
+   "old": "và không đường ra nào quên rollback,",
+   "new": "và không có đường ra nào bỏ sót rollback,",
+   "reason": "Câu thiếu động từ",
+   "severity": "medium"
+  },
+  {
+   "old": "Ba ca: commit, trả lỗi sớm, panic giữa chừng.",
+   "new": "Ba tình huống: commit, trả lỗi sớm, panic giữa chừng.",
+   "reason": "Thuật ngữ 'ca' không rõ nghĩa",
+   "severity": "medium"
+  },
+  {
+   "old": "`using` giải cùng bài toán nhưng người gọi phải nhớ viết",
+   "new": "`using` giải quyết cùng bài toán nhưng người gọi phải nhớ viết",
+   "reason": "Thiếu 'giải quyết'",
+   "severity": "low"
+  },
+  {
+   "old": "26 block còn lại là `Vec` và `HashMap` của `Ledger` tự tăng.",
+   "new": "26 block còn lại là của `Vec` và `HashMap` trong `Ledger` khi chúng tự tăng dung lượng.",
+   "reason": "Câu cụt, khó hiểu",
+   "severity": "medium"
+  },
+  {
+   "old": "Đọc theo hướng: `mimalloc` nhanh nhất",
+   "new": "Đọc như một xu hướng: `mimalloc` nhanh nhất",
+   "reason": "Cụm cụt, dịch gượng",
+   "severity": "medium"
+  },
+  {
+   "old": "Lô kiểm lại lúc load khoảng 105 (5 lần) hẹp hơn hẳn và cùng thứ tự:",
+   "new": "Lô đo lại lúc load khoảng 105 (5 lần) có khoảng min–max hẹp hơn hẳn và cùng thứ tự:",
+   "reason": "Cụm 'lô kiểm lại' tự ghép; câu thiếu chủ ngữ",
+   "severity": "high"
+  },
+  {
+   "old": "`jemalloc` chậm hơn rõ: build release",
+   "new": "`jemalloc` chậm hơn rõ rệt: build release",
+   "reason": "Tự nhiên hơn",
+   "severity": "low"
+  },
+  {
+   "old": "Trước hết kiểm khối lượng: mỗi vòng Rust",
+   "new": "Trước hết, kiểm tra khối lượng: mỗi vòng Rust",
+   "reason": "Tự nhiên hơn",
+   "severity": "low"
+  },
+  {
+   "old": "Rust đếm byte xin allocator, C# gồm",
+   "new": "Rust đếm số byte đã xin allocator cấp, C# gồm",
+   "reason": "Câu thiếu từ nối",
+   "severity": "medium"
+  },
+  {
+   "old": "Chênh 3,5% chỉ nói «cùng cỡ»:",
+   "new": "Mức chênh 3,5% chỉ cho biết «cùng cỡ»:",
+   "reason": "Câu cụt",
+   "severity": "medium"
+  },
+  {
+   "old": "Bảng: 20 vòng một thread, trung vị 7 lần chạy xen kẽ, load khoảng 380.",
+   "new": "Bảng đo 20 vòng, một thread, lấy trung vị của 7 lần chạy xen kẽ, load khoảng 380.",
+   "reason": "Câu cụt",
+   "severity": "medium"
+  },
+  {
+   "old": "Bốn điều thấy được, và GC không phải điểm yếu mặc nhiên:",
+   "new": "Bốn điều rút ra được, và GC không mặc nhiên là điểm yếu:",
+   "reason": "Dịch gượng",
+   "severity": "low"
+  },
+  {
+   "old": "**Số lần GC là núm vặn.**",
+   "new": "**Số lần GC là thứ có thể điều chỉnh.**",
+   "reason": "Calque 'knob'",
+   "severity": "medium"
+  },
+  {
+   "old": "coi tiến trình là chủ đạo trên máy,",
+   "new": "coi tiến trình của mình là tiến trình chủ đạo trên máy,",
+   "reason": "Câu thiếu danh từ",
+   "severity": "medium"
+  },
+  {
+   "old": "Thêm `DOTNET_GCHeapCount=2` cho khoảng 100 MiB và 4 lần GC.",
+   "new": "Đặt thêm `DOTNET_GCHeapCount=2` thì ra khoảng 100 MiB và 4 lần GC.",
+   "reason": "Câu cụt",
+   "severity": "medium"
+  },
+  {
+   "old": "Thời gian chỉ đọc theo hướng.",
+   "new": "Chỉ nên đọc số thời gian như một xu hướng.",
+   "reason": "Câu dịch gượng",
+   "severity": "high"
+  },
+  {
+   "old": "Nên tôi không nêu «Rust nhanh gấp N lần»",
+   "new": "Vì vậy tôi không nêu «Rust nhanh gấp N lần»",
+   "reason": "Tự nhiên hơn",
+   "severity": "low"
+  },
+  {
+   "old": "không suy ra cho service đã warm up.",
+   "new": "nhưng không thể suy ra điều đó cho service đã warm up.",
+   "reason": "Câu thiếu chủ ngữ",
+   "severity": "medium"
+  },
+  {
+   "old": "Tổng pause GC đo được là thời gian tường trên máy quá tải,",
+   "new": "Tổng thời gian pause GC đo được là thời gian thực (wall-clock) trên máy quá tải,",
+   "reason": "'thời gian tường' dịch gượng wall-clock",
+   "severity": "high"
+  },
+  {
+   "old": "thì nó lấy chữ ký từ bound và biên dịch được.",
+   "new": "thì closure lấy chữ ký từ bound và biên dịch được.",
+   "reason": "Tránh 'nó' chỉ vật trừu tượng",
+   "severity": "low"
+  },
+  {
+   "old": "của cùng struct cho E0515 và E0505, vì",
+   "new": "của cùng struct gây ra lỗi E0515 và E0505, vì",
+   "reason": "Calque 'gives'",
+   "severity": "medium"
+  },
+  {
+   "old": "Rust cho đọc thời điểm trả bộ nhớ cho allocator ngay trong code và đếm từng block; .NET đếm được tổng byte và cho tinh chỉnh số lần thu gom.",
+   "new": "Rust cho phép đọc ra thời điểm trả bộ nhớ cho allocator ngay trong code và đếm từng block; .NET đếm được tổng byte và cho phép tinh chỉnh số lần thu gom.",
+   "reason": "Thiếu 'cho phép'",
+   "severity": "medium"
+  },
+  {
+   "old": "Tiến trình Rust nhỏ hơn cỡ một bậc về RSS đỉnh",
+   "new": "Tiến trình Rust nhỏ hơn cỡ một bậc độ lớn về RSS đỉnh",
+   "reason": "Cụm cụt",
+   "severity": "medium"
+  },
+  {
+   "old": "Lợi ích thật khi chạy nhiều bản nhỏ;",
+   "new": "Lợi ích này có thật khi chạy nhiều bản nhỏ;",
+   "reason": "Câu thiếu chủ ngữ và động từ",
+   "severity": "medium"
+  },
+  {
+   "old": "không nói .NET thiếu cho sổ cái",
+   "new": "không nói rằng .NET không đáp ứng được nhu cầu của sổ cái",
+   "reason": "'thiếu cho' gượng, thiếu chủ thể",
+   "severity": "medium"
+  },
+  {
+   "old": "Nói gọn: nó ủng hộ nửa bộ nhớ của tiêu chí,",
+   "new": "Nói gọn: số liệu ủng hộ nửa bộ nhớ của tiêu chí,",
+   "reason": "Tránh 'nó' chỉ vật trừu tượng",
+   "severity": "low"
+  },
+  {
+   "old": "Nêu ba việc để kết luận có nghĩa, và một kết luận không được rút từ một lần chạy.",
+   "new": "Nêu ba việc cần làm để kết luận có ý nghĩa, và một kết luận không được rút ra từ một lần chạy.",
+   "reason": "Câu thiếu từ",
+   "severity": "medium"
+  }
+ ]
+}

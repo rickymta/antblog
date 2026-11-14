@@ -1,0 +1,15 @@
+{"file":"da-count-sum-avg-group-by.md","edits":[
+{"old":"Đếm lý do thành số huỷ sẽ làm thấp tử số.","new":"Lấy số nhãn lý do làm số lượt huỷ sẽ khiến tử số bị thấp.","reason":"Cụm \"đếm lý do thành số huỷ\" gượng, khó hiểu.","severity":"high"},
+{"old":"Sau join, nó có thể giúp đếm lượt nhưng không tự sửa các phép SUM bị nhân.","new":"Sau khi nối bảng, hàm này có thể giúp đếm lượt nhưng không tự sửa các phép SUM bị nhân.","reason":"\"join\" lọt vào văn xuôi; \"nó\" mơ hồ.","severity":"medium"},
+{"old":"Tổng lại: tám lượt, tổng giá ghi trên các lượt **730.000 VND**.","new":"Tổng cộng có tám lượt, với tổng giá ghi trên các lượt là **730.000 VND**.","reason":"Câu thiếu động từ, cụt.","severity":"medium"},
+{"old":"nhắc người đọc đây là đại lượng giá trong fixture; DA-019 mới đối chiếu dòng tiền.","new":"nhắc người đọc rằng đây là con số giá trong fixture; đến DA-019 mới đối chiếu dòng tiền.","reason":"\"đại lượng giá\" gượng; thiếu từ nối.","severity":"low"},
+{"old":"Nếu đếm dòng bảng kết quả, bạn được ba trạng thái, không phải ba chuyến.","new":"Nếu đếm số dòng của bảng kết quả, bạn thu được ba trạng thái chứ không phải ba chuyến.","reason":"Cụm cụt, thiếu từ.","severity":"medium"},
+{"old":"Điều kiện HAVING được dùng trên kết quả tổng hợp nhóm; WHERE được dùng để chọn các dòng đầu vào.","new":"HAVING lọc dựa trên kết quả tổng hợp của từng nhóm, còn WHERE chọn các dòng đầu vào.","reason":"Câu bị động lặp, thiếu giới từ.","severity":"medium"},
+{"old":"tránh sửa mẫu số ngoài ý muốn","new":"tránh vô tình làm thay đổi mẫu số","reason":"\"sửa mẫu số ngoài ý muốn\" gượng.","severity":"medium"},
+{"old":"FILTER chọn những dòng đóng góp cho riêng phép đếm,","new":"FILTER chọn những dòng được tính vào riêng phép đếm đó,","reason":"\"đóng góp cho\" dịch sát tiếng Anh.","severity":"medium"},
+{"old":"Fixture còn T05 chưa biết kết quả trước đón.","new":"Trong fixture còn T05 chưa biết kết quả trước khi đón.","reason":"Thiếu giới từ và từ nối.","severity":"medium"},
+{"old":"nếu chỉ một kết quả này còn chưa biết","new":"nếu chỉ còn một kết quả này chưa biết","reason":"Trật tự từ kiểu tiếng Anh.","severity":"low"},
+{"old":"Tổng tỷ lệ phải dựa trên tổng tử và mẫu phù hợp;","new":"Tỷ lệ chung phải dựa trên tổng tử số và tổng mẫu số phù hợp;","reason":"\"Tổng tỷ lệ\", \"tử và mẫu\" cụt.","severity":"medium"},
+{"old":"giữ NULL/“không xác định”; 0% mang nghĩa có mẫu số và không có trường hợp xảy ra, khác không có lượt nào.","new":"giữ NULL hoặc “không xác định”; 0% nghĩa là có mẫu số nhưng không có trường hợp nào xảy ra, khác với trường hợp không có lượt nào.","reason":"Câu tối nghĩa, thiếu từ nối.","severity":"high"},
+{"old":"khác hợp đồng cohort tám lượt. Muốn dùng phải đặt tên và giải thích tập khác; không thay âm thầm M-01 hoặc coi T05 là không huỷ.","new":"khác với hợp đồng cohort tám lượt. Muốn dùng, phải đặt tên và giải thích tập dữ liệu khác này; không được đổi M-01 mà không nói rõ, cũng không coi T05 là không huỷ.","reason":"Calque \"âm thầm\"; \"tập khác\" cụt.","severity":"high"}
+]}

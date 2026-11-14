@@ -1,7 +1,7 @@
 ---
 slug: dotnet10-tong-hop-service-dat-chuyen
 title: "Bài tổng hợp: service đặt chuyến từ domain tới vận hành có kiểm chứng"
-summary: "Bài 38: tổng kết một lát cắt Tới Nơi có Clean Architecture, CQRS/Mediator, Repository/UoW và PostgreSQL; phân biệt điều đã test với phần cần ghép để thành sản phẩm."
+summary: "Bài 38: tổng kết một lát cắt của Tới Nơi dùng Clean Architecture, CQRS/Mediator, Repository/UoW và PostgreSQL; phân biệt điều đã test với phần cần ghép để thành sản phẩm."
 category: csharp-advanced
 level: advanced
 tags: [csharp, dotnet, dotnet-10, toi-noi, architecture]
@@ -12,25 +12,25 @@ language: vi
 
 <div class="tkh-callout tkh-callout--example">
 <span class="tkh-callout-title">Thử trước khi đọc</span>
-<p>Hoàn thành 38 bài có đồng nghĩa code lab đã là sản phẩm đặt xe production hoàn chỉnh không?</p>
-<details><summary>Xem đáp án</summary><p>Không. Loạt bài hoàn tất một lộ trình và service mẫu trong phạm vi đã nêu; nhiều yêu cầu sản phẩm/hạ tầng vẫn cần thiết kế và kiểm riêng.</p></details>
+<p>Hoàn thành 38 bài có đồng nghĩa với việc code lab đã là sản phẩm đặt xe production hoàn chỉnh không?</p>
+<details><summary>Xem đáp án</summary><p>Không. Loạt bài hoàn tất một lộ trình và service mẫu trong phạm vi đã nêu; nhiều yêu cầu về sản phẩm và hạ tầng vẫn cần được thiết kế và kiểm tra riêng.</p></details>
 </div>
 
 ## Quay lại câu hỏi đầu tiên: khách phải trả bao nhiêu?
 
 Bài đầu chỉ in giá 5 km trong terminal. Đến đây cùng quy tắc đi qua JSON, validation, identity, command handler, domain, repository, transaction và response có thể đọc lại. Ta đã thêm cách kiểm chứng từng ranh giới thay vì để một chuỗi class chỉ đẹp trên sơ đồ.
 
-Service hỗ trợ tạo chuyến theo key, đọc theo owner và nhận chuyến theo version. Cước, tiền tệ và thời gian có kiểu/hợp đồng. Hai driver không cùng thắng một lượt accept; request lặp không tạo nhiều Trip/Outbox; domain không biết HTTP/EF.
+Service hỗ trợ tạo chuyến theo key, đọc theo owner và nhận chuyến theo version. Cước, tiền tệ và thời gian có kiểu dữ liệu và hợp đồng. Hai tài xế không thể cùng thắng một lượt accept; request lặp không tạo nhiều Trip/Outbox; domain không biết HTTP/EF.
 
-Code cuối ở 31-38-trip-service là một lát cắt học tập, không phải tuyên bố đã dựng mọi luồng ride/food/parcel của Tới Nơi. Đọc README về phạm vi trước khi dùng nó làm nền cho một service thật.
+Code cuối ở 31-38-trip-service là một lát cắt học tập, không phải tuyên bố đã dựng mọi luồng dịch vụ ride, food và parcel của Tới Nơi. Đọc README về phạm vi trước khi dùng nó làm nền cho một service thật.
 
 ## Các trách nhiệm đã ghép vào đâu?
 
-Domain giữ invariant và event. Application có command/query, validator và port. Mediator nhỏ điều phối behavior/handler trong scope. Infrastructure map aggregate/row, giữ original version, query DTO và commit Outbox cùng dữ liệu. API xác thực principal và chuyển lỗi sang HTTP có cấu trúc.
+Domain giữ invariant và event. Application có command/query, validator và port. Mediator nhỏ điều phối các behavior và handler trong cùng scope. Infrastructure ánh xạ giữa aggregate và row, giữ original version, query DTO và commit Outbox cùng dữ liệu. API xác thực principal và chuyển lỗi sang HTTP có cấu trúc.
 
-Migration có executable riêng, readiness không tự áp schema, live không phụ thuộc DB. CI có PostgreSQL thật và artifact image; cloud spec nhận secret/identity từ môi trường. Telemetry nối request tới handler/commit và giữ metric dimensions hữu hạn.
+Migration có tệp thực thi riêng, readiness không tự áp schema, probe live không phụ thuộc DB. CI có PostgreSQL thật và artifact image; cloud spec nhận secret/identity từ môi trường. Telemetry nối request tới handler/commit và giữ dimension của metric ở mức hữu hạn.
 
-Không có một pattern nào thay thế tất cả phần còn lại. DDD không thay auth, UoW không thay broker, optimistic concurrency không thay idempotency và retry không tự tạo tính đúng của một khoản thanh toán.
+Không pattern nào thay thế được tất cả phần còn lại. DDD không thay auth, UoW không thay broker, optimistic concurrency không thay idempotency và retry không tự tạo tính đúng của một khoản thanh toán.
 
 <figure class="tkh-fig">
 <div class="tkh-fig-box">
@@ -41,23 +41,23 @@ Không có một pattern nào thay thế tất cả phần còn lại. DDD khôn
 
 ## Sổ bằng chứng thay vì một nhãn “done” chung
 
-Suite cuối có 20 test: HTTP/JWT đi với PostgreSQL, validation, duplicate, ownership, accept conflict, rehydrate, cancellation, health, dependency boundary và telemetry. OCI archive đã tạo bằng SDK; Bicep đã compile. Các bài trước còn có unit/integration lab chuyên sâu và report benchmark thật.
+Suite cuối có 20 test: HTTP/JWT chạy với PostgreSQL, validation, duplicate, ownership, accept conflict, rehydrate, cancellation, health, ranh giới dependency và telemetry. OCI archive đã tạo bằng SDK; Bicep đã compile. Các bài trước còn có bài thực hành unit/integration chuyên sâu và báo cáo benchmark thật.
 
-Chưa chạy GitHub Actions trên remote vì chưa push; chưa dựng Docker engine trên máy này; chưa deploy AWS/Azure. Không lấy compile template hoặc TestServer làm bằng chứng TLS/proxy/cloud role đã đúng. Không lấy hai lần publish fake ở bài 26 làm bằng chứng broker production đã cấu hình.
+Chưa chạy GitHub Actions trên remote vì chưa push; chưa dựng Docker engine trên máy này; chưa deploy AWS/Azure. Không lấy compile template hoặc TestServer làm bằng chứng TLS/proxy/cloud role đã đúng. Không lấy hai lần publish giả lập ở bài 26 làm bằng chứng broker production đã cấu hình.
 
-Tái chạy test là một phần quá trình thay đổi. Khi thêm field vào command hoặc đổi rule, cập nhật fingerprint/validation/domain/test/schema và hợp đồng response theo phạm vi, không sửa mỗi DTO rồi coi mọi ranh giới đã tự hiểu.
+Chạy lại test là một phần của quá trình thay đổi. Khi thêm trường vào command hoặc đổi rule, cập nhật fingerprint, validation, domain, test, schema và hợp đồng response theo phạm vi; không sửa mỗi DTO rồi coi mọi ranh giới đã tự hiểu.
 
 ## Bước tiếp theo để thành sản phẩm
 
-Cần bổ sung lifecycle đầy đủ, tài xế đủ điều kiện, định tuyến/giá theo vùng, huỷ/hoàn tiền, ledger và đối soát. Fraud/OCR Python, các thành phần Rust và Go sẽ chia sẻ hợp đồng integration theo context, không truy cập chéo bảng nghiệp vụ.
+Cần bổ sung vòng đời đầy đủ, tài xế đủ điều kiện, định tuyến và giá theo vùng, huỷ và hoàn tiền, ledger và đối soát. Các thành phần Python (fraud, OCR), Rust và Go sẽ chia sẻ hợp đồng integration theo context, không truy cập chéo bảng nghiệp vụ.
 
-Outbox hiện lưu intent; delivery worker có claim/lease, retry, broker confirm và consumer Inbox phải được ghép theo yêu cầu thật. Cần test crash/recovery, dữ liệu lớn, backup/restore, capacity, secret rotation, identity mapping và các trường hợp thất bại liên service.
+Outbox hiện lưu intent; phải ghép thêm delivery worker có claim/lease, retry, broker confirm và consumer Inbox theo yêu cầu thật. Cần test crash/recovery, dữ liệu lớn, backup/restore, capacity, secret rotation, identity mapping và các trường hợp thất bại liên service.
 
-PostgreSQL là nền đầu tiên, còn MySQL/MongoDB được đưa vào khi workload/mô hình dữ liệu có bằng chứng phù hợp. Giữ nguyên nguyên tắc đã nêu ở hồ sơ Tới Nơi: không có một ngưỡng concurrency chung bắt buộc đổi database chỉ vì vacuum.
+PostgreSQL là nền đầu tiên, còn MySQL/MongoDB được đưa vào khi workload hoặc mô hình dữ liệu có bằng chứng phù hợp. Giữ nguyên nguyên tắc đã nêu ở hồ sơ Tới Nơi: không có ngưỡng concurrency chung nào buộc phải đổi database chỉ vì vacuum.
 
-**Bài tập tổng hợp:** thêm loại dịch vụ parcel. Hãy liệt kê phần hợp đồng ảnh hưởng trước khi viết class. Khác biệt nào thuộc pricing domain, khác biệt nào thuộc query/UI, khác biệt nào làm thay fingerprint và integration schema?
+**Bài tập tổng hợp:** thêm loại dịch vụ giao bưu kiện (parcel). Hãy liệt kê các phần hợp đồng bị ảnh hưởng trước khi viết class. Khác biệt nào thuộc pricing domain, khác biệt nào thuộc query/UI, khác biệt nào làm thay đổi fingerprint và integration schema?
 
-<details><summary>Gợi ý tự đánh giá</summary><p>Bắt đầu từ yêu cầu và invariant, định nghĩa input/response/event version, cập nhật idempotency scope và rule giá, rồi chọn pattern như Strategy khi có nhu cầu thay thuật toán. Không sinh toàn bộ tầng/class trước khi biết hành vi cần bảo vệ.</p></details>
+<details><summary>Gợi ý tự đánh giá</summary><p>Bắt đầu từ yêu cầu và invariant, định nghĩa input, response và phiên bản event, cập nhật idempotency scope và rule giá, rồi chọn pattern như Strategy khi có nhu cầu thay thuật toán. Không sinh toàn bộ tầng/class trước khi biết hành vi cần bảo vệ.</p></details>
 
 <figure class="tkh-fig">
 <div class="tkh-fig-box">
@@ -74,7 +74,7 @@ Thiết lập `TOI_NOI_PG` cho database local riêng `toi_noi_dotnet_lab` theo R
 dotnet test examples/toi-noi-dotnet/31-38-trip-service/Tests
 ```
 
-Fixture dùng schema GUID riêng, không xoá database; JWT dùng khoá ngẫu nhiên trong test và vẫn đi qua handler xác thực thật. Test không tự skip khi thiếu PostgreSQL. Docker/CI/cloud spec xem README service và cloud/README.md để biết phạm vi, prerequisites và phần chưa được triển khai thật.
+Fixture dùng schema GUID riêng, không xoá database; JWT dùng khoá ngẫu nhiên trong test và vẫn đi qua handler xác thực thật. Test không tự bỏ qua khi thiếu PostgreSQL. Docker/CI/cloud spec xem README service và cloud/README.md để biết phạm vi, điều kiện tiên quyết và phần chưa triển khai thật.
 
 ### README.md — 31-38-trip-service/README.md
 

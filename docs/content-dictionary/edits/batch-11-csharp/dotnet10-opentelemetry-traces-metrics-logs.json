@@ -1,0 +1,161 @@
+{
+  "file": "dotnet10-opentelemetry-traces-metrics-logs.md",
+  "edits": [
+    {
+      "old": "Tag có số giá trị tăng theo dữ liệu làm cardinality bùng nổ; metric cần dimensions có giới hạn, trace/log có chính sách riêng.",
+      "new": "Tag có số giá trị tăng theo dữ liệu sẽ làm cardinality bùng nổ; metric cần dimension có giới hạn, còn trace/log có chính sách riêng.",
+      "reason": "Thiếu từ nối; thống nhất \"dimension\"",
+      "severity": "medium"
+    },
+    {
+      "old": "Log một câu “lỗi database” chưa cho biết",
+      "new": "Một dòng log “lỗi database” chưa cho biết",
+      "reason": "\"Log một câu\" gượng, trật tự từ kiểu tiếng Anh",
+      "severity": "medium"
+    },
+    {
+      "old": "metric cho biết phân bố/tần suất;",
+      "new": "metric cho biết phân bố và tần suất;",
+      "reason": "Gạch chéo",
+      "severity": "low"
+    },
+    {
+      "old": "không thay debugger hoặc test.",
+      "new": "không thay thế được debugger hoặc test.",
+      "reason": "Câu cụt",
+      "severity": "low"
+    },
+    {
+      "old": "Lab không có dependency Python/Rust/Go chạy thật",
+      "new": "Lab không có thành phần phụ thuộc Python/Rust/Go chạy thật",
+      "reason": "Từ Việt cho \"dependency\"",
+      "severity": "medium"
+    },
+    {
+      "old": "không phải ảnh dashboard cloud đã được thu từ production.",
+      "new": "không phải ảnh chụp dashboard cloud thu từ production.",
+      "reason": "Bỏ bị động, thiếu động từ \"chụp\"",
+      "severity": "medium"
+    },
+    {
+      "old": "## ActivitySource cần người nghe",
+      "new": "## ActivitySource cần listener",
+      "reason": "Thống nhất \"listener\" với văn xuôi; \"người nghe\" gượng",
+      "severity": "medium"
+    },
+    {
+      "old": "đăng ký source là một người nghe;",
+      "new": "đăng ký source chính là một listener;",
+      "reason": "\"người nghe\" dịch gượng của listener",
+      "severity": "medium"
+    },
+    {
+      "old": "duration db.commit bao đường SaveChanges của adapter, không tự là thời gian CPU thuần của PostgreSQL.",
+      "new": "duration db.commit bao trùm đường SaveChanges của adapter, không đồng nghĩa với thời gian CPU thuần của PostgreSQL.",
+      "reason": "\"bao đường\", \"không tự là\" cụt",
+      "severity": "medium"
+    },
+    {
+      "old": "Không bật SQL parameter/body/token logging",
+      "new": "Không bật việc log tham số SQL, body hay token",
+      "reason": "Gạch chéo, danh từ ghép kiểu tiếng Anh",
+      "severity": "medium"
+    },
+    {
+      "old": "chính sách thu thập, redaction và retention;",
+      "new": "chính sách thu thập, che giấu dữ liệu (redaction) và thời gian lưu giữ (retention);",
+      "reason": "Thuật ngữ không giải thích",
+      "severity": "medium"
+    },
+    {
+      "old": "aria-label=\"Hình 1. Propagation được test qua pipeline local; chưa là trace",
+      "new": "aria-label=\"Hình 1. Propagation được test qua pipeline local; chưa phải là trace",
+      "reason": "Thiếu \"phải\"",
+      "severity": "low"
+    },
+    {
+      "old": "<figcaption>Hình 1. Propagation được test qua pipeline local; chưa là trace",
+      "new": "<figcaption>Hình 1. Propagation được test qua pipeline local; chưa phải là trace",
+      "reason": "Thiếu \"phải\"",
+      "severity": "low"
+    },
+    {
+      "old": "trips.requests là counter số request application,",
+      "new": "trips.requests là counter đếm số request của application,",
+      "reason": "Danh từ ghép kiểu tiếng Anh, thiếu \"của\"",
+      "severity": "medium"
+    },
+    {
+      "old": "Counter có tính cả request bị validator từ chối theo thứ tự behavior hiện tại; không tự là số chuyến",
+      "new": "Với thứ tự behavior hiện tại, counter tính cả request bị validator từ chối, nên không phải là số chuyến",
+      "reason": "Câu cụt, quan hệ không rõ",
+      "severity": "medium"
+    },
+    {
+      "old": "đặt nó tại một mốc được định nghĩa khác và test theo semantics đó.",
+      "new": "đặt nó ở một mốc được định nghĩa riêng và test theo đúng ngữ nghĩa đó.",
+      "reason": "Bỏ tiếng Anh thừa, trật tự từ",
+      "severity": "medium"
+    },
+    {
+      "old": "Test MeterListener kiểm cả counter/duration và tên tag. Nó không chứng minh",
+      "new": "Test MeterListener kiểm tra cả counter, duration và tên tag. Test này không chứng minh",
+      "reason": "Nhắc lại danh từ thay cho \"Nó\"",
+      "severity": "medium"
+    },
+    {
+      "old": "Query/report ở hệ quan sát cần được review với đơn vị và aggregation tương ứng.",
+      "new": "Query và report ở hệ thống quan sát cần được review cùng đơn vị và phép gộp (aggregation) tương ứng.",
+      "reason": "\"hệ quan sát\" cụt; thuật ngữ không giải thích",
+      "severity": "high"
+    },
+    {
+      "old": "OTLP exporter dùng endpoint được cấu hình/trust trong môi trường.",
+      "new": "OTLP exporter dùng endpoint đã được cấu hình và tin cậy trong môi trường.",
+      "reason": "Gạch chéo, \"trust\" chưa dịch",
+      "severity": "medium"
+    },
+    {
+      "old": "Cùng resource service.name nối dữ liệu nhưng không tự đồng bộ thời gian hay chữa instrument thiếu.",
+      "new": "Việc dùng chung resource service.name giúp nối dữ liệu nhưng không tự đồng bộ thời gian hay bổ sung instrument còn thiếu.",
+      "reason": "Câu thiếu chủ ngữ; \"chữa\" gượng",
+      "severity": "high"
+    },
+    {
+      "old": "Thay đổi version dịch vụ/image nên được phản ánh trong metadata release theo quy ước đội.",
+      "new": "Khi đổi phiên bản dịch vụ hoặc image, nên phản ánh thay đổi đó trong metadata release theo quy ước của đội.",
+      "reason": "Bỏ bị động; thống nhất \"phiên bản\"",
+      "severity": "medium"
+    },
+    {
+      "old": "Không đủ chi tiết để quy nguyên nhân;",
+      "new": "Không đủ chi tiết để xác định nguyên nhân;",
+      "reason": "\"quy nguyên nhân\" gượng",
+      "severity": "high"
+    },
+    {
+      "old": "không dùng ID khách làm dimensions metric vô hạn.</figcaption>",
+      "new": "không dùng ID khách làm dimension của metric có số giá trị vô hạn.</figcaption>",
+      "reason": "Lược mất danh từ, thống nhất \"dimension\"",
+      "severity": "medium"
+    },
+    {
+      "old": "aria-label=\"Hình 2. Ba tín hiệu có hợp đồng riêng; không dùng ID khách làm dimensions metric vô hạn.",
+      "new": "aria-label=\"Hình 2. Ba tín hiệu có hợp đồng riêng; không dùng ID khách làm dimension của metric có số giá trị vô hạn.",
+      "reason": "Đồng bộ với chú thích hình",
+      "severity": "medium"
+    },
+    {
+      "old": "Test không tự skip khi thiếu PostgreSQL.",
+      "new": "Test không tự bỏ qua khi thiếu PostgreSQL.",
+      "reason": "Từ Việt quen dùng cho \"skip\"",
+      "severity": "medium"
+    },
+    {
+      "old": "phạm vi, prerequisites và phần chưa được triển khai thật.",
+      "new": "phạm vi, điều kiện tiên quyết và phần chưa triển khai thật.",
+      "reason": "Từ Việt quen dùng cho \"prerequisites\"",
+      "severity": "medium"
+    }
+  ]
+}

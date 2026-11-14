@@ -1,0 +1,149 @@
+{
+ "file": "dotnet10-container-ci-cd.md",
+ "edits": [
+  {
+   "old": "cần chạy container và kiểm cấu hình/network/probe ở môi trường đích.",
+   "new": "cần chạy container và kiểm tra cấu hình, network và probe ở môi trường đích.",
+   "reason": "Gạch chéo; thiếu \"tra\"",
+   "severity": "low"
+  },
+  {
+   "old": "Một release cần trace được source,",
+   "new": "Một release cần truy vết được source,",
+   "reason": "\"trace được\" nghe lai; có từ Việt",
+   "severity": "low"
+  },
+  {
+   "old": "rồi coi hai artifact là cùng thứ chỉ vì có cùng tag latest.",
+   "new": "rồi coi hai artifact là một chỉ vì có cùng tag latest.",
+   "reason": "\"cùng thứ\" khẩu ngữ, gượng",
+   "severity": "medium"
+  },
+  {
+   "old": "có thể được cập nhật patch.",
+   "new": "có thể nhận bản cập nhật patch.",
+   "reason": "Bỏ câu bị động, cụm \"cập nhật patch\" cụt",
+   "severity": "medium"
+  },
+  {
+   "old": "Chạy non-root giảm một nhóm rủi ro, không thay việc",
+   "new": "Chạy non-root giảm một loại rủi ro, không thay được việc",
+   "reason": "\"nhóm rủi ro\" gượng; thiếu \"được\"",
+   "severity": "medium"
+  },
+  {
+   "old": "kiểm cấu hình user/entrypoint cùng file Api.dll trong archive.",
+   "new": "kiểm tra cấu hình user/entrypoint cũng như file Api.dll trong archive.",
+   "reason": "Lược mất chữ \"tra\"; \"cùng\" dễ hiểu nhầm",
+   "severity": "low"
+  },
+  {
+   "old": "nó không được SDK âm thầm thực thi khi gọi PublishContainer.",
+   "new": "SDK không tự thực thi nó khi gọi PublishContainer.",
+   "reason": "Calque \"âm thầm\", bị động (style guide §4)",
+   "severity": "high"
+  },
+  {
+   "old": "nhưng không được dùng kết quả của cách này làm bằng chứng đã chạy cách kia.",
+   "new": "nhưng không được dùng kết quả của cách này làm bằng chứng rằng cách kia đã chạy.",
+   "reason": "Câu thiếu liên kết, phải đoán ý",
+   "severity": "medium"
+  },
+  {
+   "old": "Máy làm bài không chạy Docker engine,",
+   "new": "Máy dùng để làm bài này không chạy Docker engine,",
+   "reason": "\"Máy làm bài\" là cụm tự ghép, cụt",
+   "severity": "medium"
+  },
+  {
+   "old": "Bộ HTTP dùng TestServer vẫn có giá trị",
+   "new": "Bộ test HTTP dùng TestServer vẫn có giá trị",
+   "reason": "Lược mất danh từ chính",
+   "severity": "high"
+  },
+  {
+   "old": "còn smoke container cần được chạy ở CI/staging có runtime phù hợp.",
+   "new": "còn smoke test cho container cần chạy ở CI hoặc staging có runtime phù hợp.",
+   "reason": "Lược mất danh từ chính (smoke test); bỏ bị động",
+   "severity": "high"
+  },
+  {
+   "old": "Container smoke",
+   "new": "Smoke test container",
+   "reason": "Lược mất danh từ chính trong hình",
+   "severity": "low"
+  },
+  {
+   "old": "với dữ liệu/credential CI bỏ được,",
+   "new": "với dữ liệu và credential CI có thể vứt bỏ,",
+   "reason": "\"bỏ được\" cụt, gạch chéo",
+   "severity": "medium"
+  },
+  {
+   "old": "không phải mật khẩu database website.",
+   "new": "không phải mật khẩu database của website.",
+   "reason": "Thiếu từ nối \"của\"",
+   "severity": "high"
+  },
+  {
+   "old": "Một test bị skip vì thiếu DB",
+   "new": "Một test bị bỏ qua vì thiếu DB",
+   "reason": "Từ Việt quen dùng cho \"skip\"",
+   "severity": "medium"
+  },
+  {
+   "old": "Các tag action được ghi cụ thể theo release đã kiểm tra khi soạn.",
+   "new": "Bài ghi tag của các action theo đúng release đã kiểm tra lúc soạn.",
+   "reason": "Bỏ câu bị động, \"ghi cụ thể\" gượng",
+   "severity": "medium"
+  },
+  {
+   "old": "không bỏ kiểm tra dependency chỉ vì",
+   "new": "không bỏ qua việc kiểm tra dependency chỉ vì",
+   "reason": "Câu cụt, thiếu \"qua\"",
+   "severity": "low"
+  },
+  {
+   "old": "Migrator có executable riêng để chạy bằng role schema trong một bước kiểm soát,",
+   "new": "Migrator có tệp thực thi riêng để chạy bằng role có quyền thay đổi schema trong một bước kiểm soát,",
+   "reason": "\"role schema\" không rõ nghĩa",
+   "severity": "high"
+  },
+  {
+   "old": "để code cũ và mới cùng sống trong lúc rollout.",
+   "new": "để code cũ và mới cùng tồn tại trong lúc rollout.",
+   "reason": "\"cùng sống\" khẩu ngữ",
+   "severity": "low"
+  },
+  {
+   "old": "Không đặt Down phá dữ liệu vào lệnh rollback tự động mà chưa đánh giá.",
+   "new": "Không đưa bước Down có thể phá dữ liệu vào lệnh rollback tự động khi chưa đánh giá.",
+   "reason": "Câu thiếu động từ, \"Down phá dữ liệu\" cụt",
+   "severity": "high"
+  },
+  {
+   "old": "phải ngăn đưa vào image từ đầu.",
+   "new": "phải chặn không cho đưa vào image ngay từ đầu.",
+   "reason": "Câu thiếu chủ thể, cụt",
+   "severity": "low"
+  },
+  {
+   "old": "Test không tự skip khi thiếu PostgreSQL.",
+   "new": "Test không tự bỏ qua khi thiếu PostgreSQL.",
+   "reason": "Từ Việt quen dùng cho \"skip\"",
+   "severity": "medium"
+  },
+  {
+   "old": "phạm vi, prerequisites và phần chưa được triển khai thật.",
+   "new": "phạm vi, điều kiện tiên quyết và phần chưa triển khai thật.",
+   "reason": "Từ Việt quen dùng cho \"prerequisites\"",
+   "severity": "medium"
+  },
+  {
+   "old": "CI kiểm PostgreSQL thật rồi lưu artifact,",
+   "new": "CI kiểm tra với PostgreSQL thật rồi lưu artifact,",
+   "reason": "Lược mất chữ \"tra\"",
+   "severity": "low"
+  }
+ ]
+}

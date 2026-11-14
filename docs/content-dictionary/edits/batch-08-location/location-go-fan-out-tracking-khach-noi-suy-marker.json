@@ -1,0 +1,203 @@
+{
+ "file": "location-go-fan-out-tracking-khach-noi-suy-marker.md",
+ "edits": [
+  {
+   "old": "phía app có hợp đồng rõ để nội suy chuyển động giữa hai điểm",
+   "new": "phía app có hợp đồng rõ ràng về cách nội suy chuyển động giữa hai điểm",
+   "reason": "Câu cụt, thiếu danh từ",
+   "severity": "medium"
+  },
+  {
+   "old": "Bài dựng trên hàng đợi và cách coalesce của",
+   "new": "Bài này dựa trên hàng đợi và cách gộp điểm (coalesce) của",
+   "reason": "Thiếu chủ ngữ, thống nhất cách gọi gộp điểm",
+   "severity": "medium"
+  },
+  {
+   "old": "về bám đường online quyết định `route_offset_m`",
+   "new": "về bám đường online là bài quyết định `route_offset_m`",
+   "reason": "Câu thiếu vị ngữ nối",
+   "severity": "medium"
+  },
+  {
+   "old": "hub là bản đọc realtime, khởi động lại",
+   "new": "hub là bản đọc thời gian thực, khởi động lại",
+   "reason": "Từ Việt quen dùng",
+   "severity": "low"
+  },
+  {
+   "old": "Fraud quyết định sau",
+   "new": "dịch vụ Fraud quyết định sau",
+   "reason": "Thiếu danh từ chính",
+   "severity": "medium"
+  },
+  {
+   "old": "Quy tắc quyền riêng tư của loạt:",
+   "new": "Quy tắc quyền riêng tư của cả loạt bài:",
+   "reason": "Cụm cụt",
+   "severity": "low"
+  },
+  {
+   "old": "mà chờ assignment từ Dispatch (C#)",
+   "new": "mà chờ sự kiện gán chuyến từ Dispatch (C#)",
+   "reason": "Từ Anh thông thường lọt vào văn xuôi",
+   "severity": "medium"
+  },
+  {
+   "old": "Kiến trúc §10 nói rõ không cho client tự đoán channel ID rồi nghe dữ liệu người khác.",
+   "new": "Kiến trúc §10 nêu rõ: không cho client tự đoán channel ID để nghe dữ liệu của người khác.",
+   "reason": "Câu gượng, thiếu dấu hiệu tách ý",
+   "severity": "low"
+  },
+  {
+   "old": "kiểm: chưa gán bị từ chối",
+   "new": "kiểm tra các trường hợp: chưa gán bị từ chối",
+   "reason": "Động từ cụt",
+   "severity": "medium"
+  },
+  {
+   "old": "hàng đó phình ra và khi khách đọc lại thì phải xem hết khung cũ",
+   "new": "hàng đó phình ra và khi khách đọc tiếp thì phải xử lý hết khung cũ",
+   "reason": "Dùng từ không đúng nghĩa (xem/xử lý)",
+   "severity": "medium"
+  },
+  {
+   "old": "Nó không bao giờ thấy client chậm.",
+   "new": "Hub không bao giờ nhận ra client chậm.",
+   "reason": "Tránh Nó đầu câu chỉ sự vật trừu tượng",
+   "severity": "medium"
+  },
+  {
+   "old": "khi điện thoại khách đọc lại thì nó phải xem lần lượt từng khung cũ",
+   "new": "khi điện thoại khách đọc tiếp thì phải xử lý lần lượt từng khung cũ",
+   "reason": "Tránh Nó, dùng từ đúng nghĩa",
+   "severity": "medium"
+  },
+  {
+   "old": "giữ điểm mới nhất trong ô chờ, thay dần, và gửi ngay khi nhận ack",
+   "new": "giữ điểm mới nhất trong ô chờ, liên tục thay bằng điểm mới hơn, và gửi ngay khi nhận ack",
+   "reason": "'thay dần' mơ hồ",
+   "severity": "medium"
+  },
+  {
+   "old": "Client không ack 30 giây dù có điểm chờ",
+   "new": "Client không ack trong 30 giây dù có điểm chờ",
+   "reason": "Thiếu giới từ",
+   "severity": "low"
+  },
+  {
+   "old": "Bộ hẹn giờ chỉ được đặt khi client đang `blocked`, tức",
+   "new": "Hub chỉ đặt bộ hẹn giờ khi client đang bị nghẽn (`blocked`), tức",
+   "reason": "Câu bị động, thuật ngữ Anh giữa câu",
+   "severity": "medium"
+  },
+  {
+   "old": "Hai cảnh báo trung thực.",
+   "new": "Hai điều cần nói thẳng.",
+   "reason": "Calque của honest caveats",
+   "severity": "medium"
+  },
+  {
+   "old": "lần chạy lô 1 điểm cho khách chậm 104 khung",
+   "new": "lần chạy lô 1 điểm gửi cho khách chậm 104 khung",
+   "reason": "Thiếu động từ",
+   "severity": "low"
+  },
+  {
+   "old": "Hai điều lab **chưa có**. Một: không có code client",
+   "new": "Lab **chưa có** hai điều. Một: không có code client",
+   "reason": "Trật tự từ kiểu Anh",
+   "severity": "medium"
+  },
+  {
+   "old": "nên chạy «theo route» ở quy tắc 3 hiện chỉ là đường thẳng",
+   "new": "nên việc chạy «theo route» ở quy tắc 3 hiện chỉ là đường thẳng",
+   "reason": "Thiếu danh từ hoá",
+   "severity": "low"
+  },
+  {
+   "old": "Lưu ý bên chịu thiệt: khách luôn thấy",
+   "new": "Cần lưu ý bên nào chịu thiệt: khách luôn thấy",
+   "reason": "Câu cụt, thiếu động từ",
+   "severity": "medium"
+  },
+  {
+   "old": "Ingest, hub, loadgen và Kafka cùng một máy đang chịu tải nặng, nên coi thời gian là tương đối",
+   "new": "Ingest, hub, loadgen và Kafka cùng chạy trên một máy đang chịu tải nặng, nên coi số đo thời gian là tương đối",
+   "reason": "Thiếu động từ",
+   "severity": "medium"
+  },
+  {
+   "old": "Hub: ingest nhận → hub ghi, p95 / p99",
+   "new": "Hub: từ lúc nhận ở ingest → lúc hub ghi, p95 / p99",
+   "reason": "Cụm gượng lẫn Anh Việt",
+   "severity": "medium"
+  },
+  {
+   "old": "Khung gửi / điểm hub nhận cho chuyến có gán",
+   "new": "Khung gửi / điểm hub nhận cho chuyến đã gán",
+   "reason": "Thống nhất với phần trên",
+   "severity": "low"
+  },
+  {
+   "old": "lan truyền realtime p95",
+   "new": "lan truyền theo thời gian thực, p95",
+   "reason": "Từ Anh thông thường",
+   "severity": "low"
+  },
+  {
+   "old": "Nó chỉ cho biết phần xử lý",
+   "new": "Số liệu này chỉ cho biết phần xử lý",
+   "reason": "Tránh Nó đầu câu",
+   "severity": "medium"
+  },
+  {
+   "old": "cỡ 11 giây một khung",
+   "new": "khoảng 11 giây một khung",
+   "reason": "Từ khẩu ngữ",
+   "severity": "low"
+  },
+  {
+   "old": "cỡ 3,9 giây một khung",
+   "new": "khoảng 3,9 giây một khung",
+   "reason": "Từ khẩu ngữ",
+   "severity": "low"
+  },
+  {
+   "old": "vị trí khách đang giữ đã cũ cỡ khoảng đó",
+   "new": "vị trí khách đang giữ đã cũ khoảng thời gian đó",
+   "reason": "Cụm lủng củng",
+   "severity": "medium"
+  },
+  {
+   "old": "(từ gốc repository)",
+   "new": "(chạy từ thư mục gốc của repository)",
+   "reason": "Câu cụt",
+   "severity": "medium"
+  },
+  {
+   "old": "Output (rút gọn các dòng",
+   "new": "Kết quả chạy (rút gọn các dòng",
+   "reason": "Từ Anh thông thường",
+   "severity": "low"
+  },
+  {
+   "old": "Chạy lại sau khi mất kết nối (backoff có jitter ở phía app) chưa được chạy.",
+   "new": "Chưa chạy thử việc kết nối lại sau khi mất kết nối (backoff có jitter ở phía app).",
+   "reason": "Câu lặp và gượng",
+   "severity": "medium"
+  },
+  {
+   "old": "assignment đến qua <code>/lab/assign</code>, chưa phải",
+   "new": "việc gán chuyến đến qua <code>/lab/assign</code>, chưa phải",
+   "reason": "Từ Anh thông thường",
+   "severity": "medium"
+  },
+  {
+   "old": "hợp đồng để app nội suy marker",
+   "new": "hợp đồng nội suy marker cho app",
+   "reason": "Trật tự câu",
+   "severity": "low"
+  }
+ ]
+}

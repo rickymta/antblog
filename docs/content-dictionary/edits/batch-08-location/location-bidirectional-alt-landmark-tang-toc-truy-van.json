@@ -1,0 +1,119 @@
+{
+ "file": "location-bidirectional-alt-landmark-tang-toc-truy-van.md",
+ "edits": [
+  {
+   "old": "tiền xử lý đổi lấy số nút đã duyệt",
+   "new": "đánh đổi bằng chi phí tiền xử lý để có số nút duyệt ít hơn",
+   "reason": "Cụm cụt, thiếu chủ thể của phép đánh đổi",
+   "severity": "medium"
+  },
+  {
+   "old": "số thời gian đo khi máy đang chịu tải nặng nên",
+   "new": "số đo thời gian lấy khi máy đang chịu tải nặng nên",
+   "reason": "Cụm tự ghép 'số thời gian'",
+   "severity": "low"
+  },
+  {
+   "old": "tức phép tính thô hứa hẹn giảm khoảng 2 lần số nút",
+   "new": "tức phép tính thô cho thấy có thể giảm khoảng 2 lần số nút",
+   "reason": "Giọng dịch máy 'hứa hẹn'",
+   "severity": "low"
+  },
+  {
+   "old": "mỗi vòng lặp mở rộng bên có khoá nhỏ nhất ở đỉnh hàng đợi",
+   "new": "mỗi vòng lặp mở rộng bên nào có khoá nhỏ nhất ở đỉnh hàng đợi",
+   "reason": "Câu thiếu từ nối, khó hiểu",
+   "severity": "medium"
+  },
+  {
+   "old": "Điều này quan trọng vì điều kiện dừng đọc đúng hai khoá này.",
+   "new": "Điều này quan trọng vì điều kiện dừng dựa vào đúng hai khoá này.",
+   "reason": "Động từ 'đọc' dùng sai chỗ",
+   "severity": "medium"
+  },
+  {
+   "old": "Nó dừng và trả `6 + 7 = 13`",
+   "new": "Bản này dừng và trả `6 + 7 = 13`",
+   "reason": "Tránh 'Nó' chỉ sự vật trừu tượng; nêu rõ chủ ngữ",
+   "severity": "medium"
+  },
+  {
+   "old": "Đây chính là loại lỗi nguy hiểm: sai ít, ở khá nhiều truy vấn, và trung vị 0,20% đủ nhỏ để chẳng ai thấy khi chạy thử bằng mắt.",
+   "new": "Đây chính là loại lỗi nguy hiểm: sai ít, ở khá nhiều truy vấn, và trung vị 0,20% đủ nhỏ để không ai nhận ra khi chạy thử bằng mắt.",
+   "reason": "Văn nói 'chẳng ai thấy'",
+   "severity": "low"
+  },
+  {
+   "old": "Điều kiện đúng đọc: giữ",
+   "new": "Điều kiện đúng như sau: giữ",
+   "reason": "Cụm 'điều kiện đọc' gượng",
+   "severity": "medium"
+  },
+  {
+   "old": "không phải nút chạm nhau",
+   "new": "không phải nút gặp nhau",
+   "reason": "Thống nhất 'gặp nhau' với phần trước",
+   "severity": "low"
+  },
+  {
+   "old": "heuristic chim bay lỏng (A* giảm chỉ 1,43–2,15 lần số nút)",
+   "new": "heuristic chim bay quá lỏng (A* chỉ giảm 1,43–2,15 lần số nút)",
+   "reason": "Trật tự từ kiểu tiếng Anh 'giảm chỉ'",
+   "severity": "medium"
+  },
+  {
+   "old": "mà lớn nhất của các heuristic nhất quán vẫn nhất quán",
+   "new": "và giá trị lớn nhất của các heuristic nhất quán vẫn nhất quán",
+   "reason": "Câu thiếu danh từ 'giá trị'",
+   "severity": "low"
+  },
+  {
+   "old": "Landmark ở rìa thành phố hay nằm",
+   "new": "Landmark ở rìa thành phố thường nằm",
+   "reason": "'hay' là khẩu ngữ",
+   "severity": "medium"
+  },
+  {
+   "old": "xa nhất so với một nút hạt giống",
+   "new": "xa nhất so với một nút khởi đầu (seed)",
+   "reason": "'nút hạt giống' dịch gượng của seed",
+   "severity": "medium"
+  },
+  {
+   "old": "chưa kể một lần từ nút hạt giống",
+   "new": "chưa kể một lần chạy từ nút khởi đầu",
+   "reason": "Thống nhất với đoạn trước, thiếu động từ",
+   "severity": "medium"
+  },
+  {
+   "old": "Có hai điều bất ngờ nên nói rõ.",
+   "new": "Có hai điều bất ngờ cần nói rõ.",
+   "reason": "Diễn đạt tự nhiên hơn",
+   "severity": "low"
+  },
+  {
+   "old": "khi máy tải 1 phút 24,26)",
+   "new": "khi tải trung bình 1 phút của máy là 24,26)",
+   "reason": "Làm rõ 24,26 là chỉ số tải của máy",
+   "severity": "medium"
+  },
+  {
+   "old": "điều gì xảy ra tuỳ chiều thay đổi",
+   "new": "kết quả tuỳ thuộc chiều thay đổi",
+   "reason": "Câu hỏi thừa, không có người hỏi",
+   "severity": "low"
+  },
+  {
+   "old": "Kiểm tự động:",
+   "new": "Kiểm thử tự động:",
+   "reason": "'kiểm' cụt, thống nhất 'kiểm thử'",
+   "severity": "medium"
+  },
+  {
+   "old": "Nới cạnh a→b lúc chốt a thấy b đã có nhãn ngược",
+   "new": "Khi nới cạnh a→b lúc chốt a, thuật toán thấy b đã có nhãn ngược",
+   "reason": "Câu thiếu chủ ngữ và từ nối",
+   "severity": "medium"
+  }
+ ]
+}

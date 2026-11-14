@@ -1,0 +1,143 @@
+{
+ "file": "location-geometry-crate-geo-chieu-diem-polyline-bearing.md",
+ "edits": [
+  {
+   "old": "xem kết quả trên bản đồ như một thói quen debug.",
+   "new": "xem kết quả trên bản đồ như một thói quen gỡ lỗi.",
+   "reason": "Từ tiếng Anh thông thường trong văn xuôi, thống nhất «gỡ lỗi»",
+   "severity": "low"
+  },
+  {
+   "old": "điểm nó trả về sai bao nhiêu mét",
+   "new": "điểm hàm này trả về sai bao nhiêu mét",
+   "reason": "Tránh «nó» chỉ sự vật trừu tượng",
+   "severity": "low"
+  },
+  {
+   "old": "nội suy theo `along_m` thay vì toạ độ thô thì marker chạy trên đường",
+   "new": "nếu nội suy theo `along_m` thay vì toạ độ thô thì marker chạy trên đường",
+   "reason": "Cấu trúc «thay vì… thì» gãy, thiếu «nếu»",
+   "severity": "medium"
+  },
+  {
+   "old": "rồi kiểm tra hàm tìm lại đúng vị trí đó",
+   "new": "rồi kiểm tra xem hàm có tìm lại đúng vị trí đó không",
+   "reason": "Câu thiếu liên kết, đọc cụt",
+   "severity": "medium"
+  },
+  {
+   "old": "`dist` ra 25,001 m thay vì",
+   "new": "`dist` cho ra 25,001 m thay vì",
+   "reason": "Động từ «ra» cụt nghĩa",
+   "severity": "low"
+  },
+  {
+   "old": "và mặt phẳng này đã được đo ở bài trước",
+   "new": "và bài trước đã đo mặt phẳng này",
+   "reason": "Chuyển câu bị động sang chủ động",
+   "severity": "low"
+  },
+  {
+   "old": "tính bằng `hypot` của chân trong mặt phẳng mét đó",
+   "new": "tính bằng `hypot` của toạ độ chân trong mặt phẳng mét đó",
+   "reason": "Lược mất danh từ «toạ độ»",
+   "severity": "low"
+  },
+  {
+   "old": "Ở các bài sau bearing có hai việc.",
+   "new": "Ở các bài sau, bearing dùng cho hai việc.",
+   "reason": "Câu thiếu động từ rõ nghĩa",
+   "severity": "medium"
+  },
+  {
+   "old": "Phần đó là việc của các bài điểm đón ở P04, bài này chưa làm.",
+   "new": "Phần đó thuộc các bài về điểm đón ở P04; bài này chưa làm.",
+   "reason": "Cụm «các bài điểm đón» cụt, thiếu «về»",
+   "severity": "medium"
+  },
+  {
+   "old": "so chân do `geo::ClosestPoint` trả với chân của",
+   "new": "so chân do `geo::ClosestPoint` trả về với chân của",
+   "reason": "Thiếu «về» sau «trả»",
+   "severity": "medium"
+  },
+  {
+   "old": "Chân đường vuông góc ở hệ độ lệch dưới một mét ở TP.HCM, hơn hai mét ở Hà Nội.",
+   "new": "Khi tính trong hệ độ, chân đường vuông góc lệch dưới một mét ở TP.HCM và hơn hai mét ở Hà Nội.",
+   "reason": "Câu thiếu vị ngữ rõ, «ở hệ độ lệch» khó hiểu",
+   "severity": "high"
+  },
+  {
+   "old": "nên nó làm sai `along_m` nhiều hơn",
+   "new": "nên độ lệch này làm sai `along_m` nhiều hơn",
+   "reason": "Nhắc lại danh từ thay cho «nó»",
+   "severity": "low"
+  },
+  {
+   "old": "thì lỗi còn đi xa hơn:",
+   "new": "thì lỗi còn nghiêm trọng hơn:",
+   "reason": "Cách nói gượng, dịch từng chữ",
+   "severity": "medium"
+  },
+  {
+   "old": "nhân toạ độ với `10^precision` làm tròn thành số nguyên",
+   "new": "nhân toạ độ với `10^precision` rồi làm tròn thành số nguyên",
+   "reason": "Thiếu liên từ",
+   "severity": "low"
+  },
+  {
+   "old": "Lab dày hoá tuyến minh hoạ thành 442 điểm, mỗi khoảng 5 m,",
+   "new": "Lab làm dày tuyến minh hoạ thành 442 điểm, hai điểm liền nhau cách khoảng 5 m,",
+   "reason": "«Dày hoá» là từ ghép gượng; «mỗi khoảng 5 m» cụt",
+   "severity": "medium"
+  },
+  {
+   "old": "và đo vòng mã hoá rồi giải mã:",
+   "new": "và đo sai số của vòng mã hoá rồi giải mã:",
+   "reason": "Thiếu danh từ: đo cái gì",
+   "severity": "medium"
+  },
+  {
+   "old": "trên app thì quá thừa;",
+   "new": "trên app thì độ chính xác đó là dư;",
+   "reason": "«Quá thừa» gượng, thiếu chủ thể",
+   "severity": "medium"
+  },
+  {
+   "old": "Đó là thói quen debug đáng giữ nhất của cả phần",
+   "new": "Đó là thói quen gỡ lỗi đáng giữ nhất của cả phần",
+   "reason": "Từ tiếng Anh thông thường trong văn xuôi",
+   "severity": "low"
+  },
+  {
+   "old": "Output, nguyên văn từ `results/p01.md`:",
+   "new": "Kết quả in ra, nguyên văn từ `results/p01.md`:",
+   "reason": "Từ tiếng Anh thông thường trong văn xuôi",
+   "severity": "low"
+  },
+  {
+   "old": "Kiểm tra toàn phần",
+   "new": "Kiểm tra toàn bộ",
+   "reason": "«Toàn phần» gượng",
+   "severity": "low"
+  },
+  {
+   "old": "Phép chiếu chọn đoạn gần nhất rồi kết thúc:",
+   "new": "Phép chiếu chọn đoạn gần nhất rồi dừng lại:",
+   "reason": "«Kết thúc» dùng cụt nghĩa",
+   "severity": "medium"
+  },
+  {
+   "old": "điều sai: Q cách đoạn 10 m.",
+   "new": "kết quả này sai vì Q cách đoạn 10 m.",
+   "reason": "Câu cụt, thiếu chủ ngữ và liên từ",
+   "severity": "medium"
+  },
+  {
+   "old": "làm xấu việc xếp hạng đường song song",
+   "new": "làm giảm chất lượng việc xếp hạng các đường song song",
+   "reason": "«Làm xấu việc xếp hạng» gượng",
+   "severity": "medium"
+  }
+ ]
+}

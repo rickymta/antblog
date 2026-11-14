@@ -1,7 +1,7 @@
 ---
 slug: nhom-khoi-tao-creational
 title: "Nhóm Khởi tạo (Creational): Factory Method, Abstract Factory, Builder, Prototype, Singleton qua dự án Tới Nơi"
-summary: "Năm cách tạo đối tượng mà không trói code vào new: tạo chuyến theo dịch vụ, họ đối tượng thanh toán, dựng yêu cầu đặt chuyến, nhân bản chiến dịch cho 6 thành phố và vì sao Singleton nên nhường chỗ cho DI."
+summary: "Năm cách tạo đối tượng mà không trói code vào từ khoá new: tạo chuyến theo dịch vụ, họ đối tượng thanh toán, dựng yêu cầu đặt chuyến, nhân bản chiến dịch cho 6 thành phố và vì sao Singleton nên nhường chỗ cho DI."
 category: design-pattern
 level: intermediate
 tags: [design-pattern, typescript, creational, factory-method, abstract-factory, builder, prototype, singleton, dependency-injection]
@@ -24,13 +24,13 @@ Mọi đoạn code dưới đây là TypeScript 5 strict, đã qua `tsc --strict
 
 ## Nhóm này giải quyết vấn đề gì
 
-Mỗi lần viết `new RideTrip(...)`, đoạn code đó tự trói vào **một lớp cụ thể**, **một thứ tự tham số**, **một cách khởi tạo**. Khi Tới Nơi có thêm đồ ăn, bưu kiện, ba nhà cung cấp thanh toán, chiến dịch ở 6 thành phố, các câu `new` rải rác thành nơi sinh lỗi. Năm pattern của nhóm, mỗi cái trả lời một câu hỏi:
+Mỗi lần viết `new RideTrip(...)`, đoạn code đó tự trói vào **một lớp cụ thể**, **một thứ tự tham số**, **một cách khởi tạo**. Khi Tới Nơi có thêm đồ ăn, bưu kiện, ba nhà cung cấp thanh toán, chiến dịch ở 6 thành phố, các câu `new` rải rác trở thành chỗ sinh lỗi. Năm pattern của nhóm, mỗi cái trả lời một câu hỏi:
 
 | Câu hỏi | Pattern | Ở Tới Nơi |
 |---|---|---|
 | **Lớp nào?** — cùng quy trình, khác lớp sản phẩm | Factory Method | `RideBooking` tạo `RideTrip`, `FoodBooking` tạo `FoodTrip`… |
 | **Họ nào?** — nhiều đối tượng phải đi cùng nhau | Abstract Factory | `Charger` + `Refunder` + `WebhookVerifier` của cùng một nhà |
-| **Lắp thế nào?** — nhiều phần tuỳ chọn, có luật giữa chúng | Builder | yêu cầu đặt chuyến: đón, điểm dừng, đến, voucher, hẹn giờ… |
+| **Lắp thế nào?** — nhiều phần tuỳ chọn, có luật giữa chúng | Builder | yêu cầu đặt chuyến: điểm đón, điểm dừng, điểm đến, voucher, hẹn giờ… |
 | **Từ đâu?** — từ một đối tượng đang có | Prototype | mẫu chiến dịch × 6 thành phố, «Đặt lại chuyến cũ» |
 | **Bao nhiêu?** — chỉ một trong mỗi process | Singleton | cấu hình, connection pool, client feature-flag |
 
@@ -56,7 +56,7 @@ export function placeTrip(kind: TripKind, input: TripInput): AnyTrip {
 }
 ```
 
-Chỗ đau: khối `switch` bị chép ở mọi nơi tạo chuyến, thêm dịch vụ thứ tư là đi lùng từng bản; luật riêng (đồ ăn phải có quán) bị nén thành `merchantId!` nên trình biên dịch im lặng, lỗi chỉ lộ khi chuyến đã vào hàng đợi.
+Chỗ đau: khối `switch` bị chép ở mọi nơi tạo chuyến, thêm dịch vụ thứ tư là phải đi lùng từng bản sao; luật riêng (đồ ăn phải có quán) bị nén thành `merchantId!` nên trình biên dịch không báo gì, lỗi chỉ lộ khi chuyến đã vào hàng đợi.
 
 ### Lời giải
 
@@ -118,7 +118,7 @@ Dùng khi một **quy trình ổn định** cần tạo một sản phẩm mà *
 
 ### Cách viết gọn ở TypeScript hiện đại
 
-"Phương thức để lớp con ghi đè" thường thu gọn thành **một bảng hàm**. Kèm `satisfies`, trình biên dịch nhắc khi thiếu loại:
+"Phương thức để lớp con ghi đè" thường thu gọn thành **một bảng hàm**. Kèm `satisfies`, trình biên dịch nhắc khi thiếu một loại chuyến:
 
 ```ts
 type Creator = (i: TripInput) => Trip;
@@ -243,7 +243,7 @@ Chỉ VíXanh chấp nhận chữ ký VíXanh; chuyến tiền mặt không còn
 
 ### Khi nào dùng / khi nào không
 
-Dùng khi có **từ hai sản phẩm phải đi cùng nhau** và **nhiều họ** thay thế được (nhà cung cấp thanh toán, giao diện sáng/tối, driver database). Cái giá: **thêm loại sản phẩm mới rất đắt** — cần `PayoutSender` (chuyển tiền cho tài xế) là mọi factory phải thêm `createPayoutSender()`, kể cả `CashFactory`. Dễ mở rộng theo chiều "thêm họ", khó theo chiều "thêm sản phẩm".
+Dùng khi có **từ hai sản phẩm trở lên phải đi cùng nhau** và **nhiều họ** thay thế được (nhà cung cấp thanh toán, giao diện sáng/tối, driver database). Cái giá: **thêm loại sản phẩm mới rất đắt** — cần `PayoutSender` (chuyển tiền cho tài xế) là mọi factory phải thêm `createPayoutSender()`, kể cả `CashFactory`. Dễ mở rộng theo chiều "thêm họ", khó theo chiều "thêm sản phẩm".
 
 ### Cách viết gọn ở TypeScript hiện đại
 
@@ -323,7 +323,7 @@ Thiếu `NoInfer` (TypeScript 5.4+), trình biên dịch suy `P = 'vixanh' | 'ca
 
 ### Vấn đề ở Tới Nơi
 
-Một yêu cầu đặt chuyến có 11 trường: loại dịch vụ, điểm đón, điểm dừng thêm, điểm đến, loại xe, quán, khối lượng, ghi chú, voucher, phương thức thanh toán, giờ hẹn. Phần lớn tuỳ chọn, và có **luật giữa các trường**: đồ ăn bắt buộc có quán và chỉ giao bằng xe máy, bưu kiện bắt buộc khối lượng, hẹn giờ ít nhất 15 phút tới. Viết bằng constructor:
+Một yêu cầu đặt chuyến có 11 trường: loại dịch vụ, điểm đón, điểm dừng thêm, điểm đến, loại xe, quán, khối lượng, ghi chú, voucher, phương thức thanh toán, giờ hẹn. Phần lớn là tuỳ chọn, và có **luật giữa các trường**: đồ ăn bắt buộc có quán và chỉ giao bằng xe máy, bưu kiện bắt buộc khối lượng, hẹn giờ phải cách hiện tại ít nhất 15 phút. Viết bằng constructor:
 
 ```ts
 // Tham số thứ 6 là quán hay khối lượng? Đếm dấu phẩy mới biết.
@@ -418,7 +418,7 @@ Dùng khi đối tượng có **nhiều phần tuỳ chọn**, **luật giữa c
 
 ### Cách viết gọn ở TypeScript hiện đại
 
-Object literal của TypeScript **đã là tham số có tên**, nên lý do "11 tham số vị trí" gần như biến mất. Luật **cấu trúc** có thể đẩy lên kiểu bằng union phân biệt theo `kind`:
+Object literal của TypeScript **đã là tham số có tên**, nên lý do "11 tham số vị trí" gần như biến mất. Luật **cấu trúc** có thể chuyển vào hệ thống kiểu bằng union phân biệt theo `kind`:
 
 ```ts
 interface Base { dropoff: string; note?: string; voucher?: string; payment: 'vixanh' | 'card' | 'cash'; scheduledAt?: Date }
@@ -562,7 +562,7 @@ Nếu chép cả mã chuyến, trạng thái `completed` hay voucher đã dùng,
 
 <div class="tkh-callout tkh-callout--warn">
 <span class="tkh-callout-title">structuredClone chỉ chép dữ liệu</span>
-<p>Nó chép object thường, mảng, <code>Date</code>, <code>Map</code>, <code>Set</code>… Thể hiện của lớp tự viết bị biến thành object thường (mất phương thức), còn hàm làm nó ném lỗi. Chạy thử với lớp <code>Money</code> có <code>format()</code> và một object có hàm <code>onExpire</code>:</p>
+<p>Hàm này chép object thường, mảng, <code>Date</code>, <code>Map</code>, <code>Set</code>… Thể hiện của lớp tự viết bị biến thành object thường (mất phương thức), còn gặp hàm thì nó ném lỗi. Chạy thử với lớp <code>Money</code> có <code>format()</code> và một object có hàm <code>onExpire</code>:</p>
 <p><code>copy.fare instanceof Money: false | format: undefined</code><br><code>DataCloneError: () =&gt; 'hết hạn' could not be cloned.</code></p>
 <p>Vì thế mẫu nên là <b>dữ liệu thuần</b> (đúng thứ lưu trong DB). Mẫu là đối tượng có hành vi thì lớp đó phải tự viết <code>clone()</code> — chính là Prototype theo nghĩa gốc.</p>
 </div>
@@ -603,12 +603,12 @@ export function surgeMultiplier(hour: number): number {
 }
 ```
 
-Nó chạy, và đúng là chỉ có một `AppConfig`. Vấn đề nằm ở những thứ đi kèm:
+Đoạn code này chạy, và đúng là chỉ có một `AppConfig`. Vấn đề nằm ở những thứ đi kèm:
 
 <div class="tkh-callout tkh-callout--warn">
 <span class="tkh-callout-title">Vì sao Singleton cổ điển hay thành anti-pattern</span>
 <p><b>Phụ thuộc ẩn:</b> <code>surgeMultiplier(hour)</code> trông như chỉ cần giờ, thật ra đọc cấu hình toàn cục. <b>Khó test:</b> muốn thử "tắt phụ phí" phải sửa thể hiện toàn cục, trạng thái rò sang test sau. <b>Thứ tự khởi tạo mơ hồ:</b> module nạp sớm gọi <code>getInstance()</code> trước khi đọc biến môi trường ⇒ cả process chạy với cấu hình sai.</p>
-<p><b>"Duy nhất" sai phạm vi:</b> Singleton chỉ duy nhất <b>trong một process</b>. Tới Nơi chạy nhiều bản dịch vụ, mỗi bản một pool; thứ cần duy nhất toàn hệ thống (khoá chuyến, bộ đếm mã chuyến) phải nằm ở database hoặc dịch vụ chung.</p>
+<p><b>Phạm vi của "duy nhất" bị hiểu sai:</b> Singleton chỉ duy nhất <b>trong một process</b>. Tới Nơi chạy nhiều bản sao của dịch vụ, mỗi bản một pool; thứ cần duy nhất toàn hệ thống (khoá chuyến, bộ đếm mã chuyến) phải nằm ở database hoặc dịch vụ chung.</p>
 </div>
 
 Điều ta thật sự cần không phải "lớp tự cấm tạo thêm", mà là **"cả ứng dụng dùng chung một thể hiện"**. Điều thứ hai đạt được mà không cần Singleton.
@@ -657,7 +657,7 @@ Vẫn đúng một pool (`pool#1`), nhưng "duy nhất" là quyết định củ
 
 Mỗi module JavaScript chỉ nạp **một lần**, nên `export const pool = createPool(...)` đã là thể hiện duy nhất không cần lớp nào. Dùng ở composition root thì tốt; rải `import { pool }` khắp nơi thì chỉ là Singleton đổi áo.
 
-Khi khởi tạo **bất đồng bộ** (mở pool phải bắt tay TLS, xác thực), cách "khởi tạo lười" quen thuộc có lỗi tranh chấp:
+Khi khởi tạo **bất đồng bộ** (mở pool phải bắt tay TLS, xác thực), cách "khởi tạo lười" quen thuộc có lỗi race condition:
 
 ```ts
 let cachedPool: Pool | undefined;
@@ -679,7 +679,7 @@ nhớ kết quả: connect() gọi 3 lần, pool id = 1,2,3
 nhớ Promise: connect() gọi 1 lần, pool id = 1,1,1
 ```
 
-Bản sai mở **ba** pool, hai pool đầu bị bỏ rơi mà vẫn giữ kết nối. Ước lượng: pool 20 kết nối ⇒ đợt khởi động này chiếm 3 × 20 = 60 kết nối thay vì 20; vài bản dịch vụ khởi động cùng lúc là chạm `max_connections` mặc định 100 của PostgreSQL. Nhớ `Promise` là cách sửa một dòng.
+Bản sai mở **ba** pool, hai pool đầu bị bỏ rơi mà vẫn giữ kết nối. Ước lượng: pool 20 kết nối ⇒ đợt khởi động này chiếm 3 × 20 = 60 kết nối thay vì 20; vài bản sao dịch vụ khởi động cùng lúc là chạm `max_connections` mặc định 100 của PostgreSQL. Nhớ `Promise` là cách sửa một dòng.
 
 ### Các vai
 
@@ -729,9 +729,9 @@ Bản sai mở **ba** pool, hai pool đầu bị bỏ rơi mà vẫn giữ kết
 
 - Nhóm Khởi tạo tách **quyết định cách tạo** (lớp nào, họ nào, lắp ra sao, từ đâu, bao nhiêu) khỏi **chỗ dùng** đối tượng.
 - **Factory Method** để lớp con chọn lớp sản phẩm trong quy trình chung; ở TypeScript thường là bảng hàm có `satisfies` bắt thiếu loại.
-- **Abstract Factory** khoá cả họ lại — chọn nhà cung cấp một lần là không trộn được; `NoInfer` còn đưa ràng buộc lên kiểu.
+- **Abstract Factory** khoá cả họ lại — chọn nhà cung cấp một lần thì không trộn lẫn được; `NoInfer` còn chuyển ràng buộc vào hệ thống kiểu.
 - **Builder** đáng giá khi đối tượng được lắp từng bước và có luật giữa các trường; nếu không, union phân biệt + hàm kiểm tra gọn hơn.
-- **Prototype** là "sao chép rồi sửa" cho mẫu là dữ liệu; luôn trả lời: nông hay sâu, trường nào không được chép.
-- **Singleton** cổ điển đổi một thể hiện lấy phụ thuộc ẩn và test khó; giữ "một thể hiện" ở composition root, khởi tạo bất đồng bộ thì nhớ `Promise`.
+- **Prototype** là "sao chép rồi sửa" cho mẫu là dữ liệu; luôn phải trả lời: nông hay sâu, trường nào không được chép.
+- **Singleton** cổ điển đánh đổi bằng phụ thuộc ẩn và khó test để có một thể hiện duy nhất; giữ "một thể hiện" ở composition root, khởi tạo bất đồng bộ thì nhớ `Promise`.
 
 **Bài tiếp theo:** [Nhóm Cấu trúc (Structural)](/articles/nhom-cau-truc-structural) — đã có đối tượng rồi, ghép chúng thế nào: Adapter cho nhiều nhà cung cấp bản đồ, Decorator cho phụ phí cước, Proxy cho menu quán… và vì sao bốn pattern "bọc" trông giống hệt nhau mà lại khác nhau.

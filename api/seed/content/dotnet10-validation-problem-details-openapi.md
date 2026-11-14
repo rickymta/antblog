@@ -8,7 +8,7 @@ tags: [csharp, dotnet, dotnet-10, toi-noi, aspnet-core]
 language: vi
 ---
 
-Đây là **bài 17** trong loạt **C# và .NET 10 qua [Tới Nơi](/articles/du-an-mau-toi-noi)**. Các ví dụ target `net10.0`; code trong repository và các đoạn đầy đủ dưới đây dùng cùng implementation được chạy kiểm chứng.
+Đây là **bài 17** trong loạt **C# và .NET 10 qua [Tới Nơi](/articles/du-an-mau-toi-noi)**. Các ví dụ nhắm tới `net10.0`; code trong repository và các đoạn đầy đủ dưới đây dùng cùng một bản cài đặt đã được chạy kiểm chứng.
 
 <div class="tkh-callout tkh-callout--example">
 <span class="tkh-callout-title">Thử trước khi đọc</span>
@@ -18,19 +18,19 @@ language: vi
 
 ## Đừng để client đọc một chuỗi lỗi tự do
 
-Bản API 16 trả một object error đơn giản. Khi có nhiều field, client cần biết field nào lỗi và cùng một cấu trúc phản hồi ổn định. Ta chuyển kiểm tra đầu vào cơ bản sang validation của Minimal API .NET 10, rồi công bố hợp đồng qua OpenAPI.
+Bản API 16 trả một object error đơn giản. Khi có nhiều field, client cần biết field nào lỗi và cần cùng một cấu trúc phản hồi ổn định. Ta chuyển kiểm tra đầu vào cơ bản sang validation của Minimal API .NET 10, rồi công bố hợp đồng qua OpenAPI.
 
-Đây là tính năng của nhánh .NET 10 trong bài; không sao chép AddValidation sang một bài .NET cũ rồi mặc định hành vi giống nhau. Project dùng package và SDK đã được pin/kiểm thử. Các rule nghiệp vụ trong policy vẫn tồn tại vì người gọi ngoài HTTP cũng có thể dùng nó.
+Đây là tính năng của nhánh .NET 10 trong bài; đừng sao chép AddValidation sang một bài .NET cũ rồi mặc định hành vi giống nhau. Project dùng package và SDK đã được ghim phiên bản và kiểm thử. Các rule nghiệp vụ trong policy vẫn tồn tại vì người gọi ngoài HTTP cũng có thể dùng policy đó.
 
-Validation trả lời yêu cầu có đúng shape/miền đầu vào cơ bản không. Nó không thay auth, không kiểm tiền đã thanh toán hay quyền nhận chuyến. Không dùng một attribute cho mọi invariant liên quan dữ liệu đang thay đổi trong database.
+Validation trả lời câu hỏi đầu vào có đúng hình dạng và miền giá trị cơ bản hay không. Validation không thay thế xác thực và phân quyền, không kiểm tra tiền đã thanh toán hay quyền nhận chuyến. Đừng dùng một attribute để bảo vệ mọi invariant phụ thuộc vào dữ liệu đang thay đổi trong database.
 
 ## Required và Range giải hai câu hỏi khác nhau
 
-DistanceKm là decimal?, có Required và Range từ 0 tới 100. Required từ chối thiếu/null; Range kiểm giá trị khi có. Nếu bỏ Required thì một attribute range không có nghĩa field bắt buộc hiện diện.
+DistanceKm là decimal?, có Required và Range từ 0 tới 100. Required từ chối giá trị thiếu hoặc null; Range kiểm giá trị khi giá trị đó có mặt. Nếu bỏ Required thì attribute Range không bảo đảm field bắt buộc phải có mặt.
 
-Với positional record, prefix `property:` đặt attribute lên property được sinh, đúng nơi validation đọc trong lab. Các giới hạn dùng kiểu decimal để giữ đúng ý nghĩa, không ép khoảng cách lẻ thành int trước kiểm tra. Hai cận đều được chấp nhận.
+Với positional record, prefix `property:` đặt attribute lên property được sinh, đúng nơi validation đọc trong lab. Các giới hạn dùng kiểu decimal để giữ đúng ý nghĩa, không ép khoảng cách lẻ thành int trước kiểm tra. Cả hai giá trị cận đều được chấp nhận.
 
-AddValidation đăng ký cơ chế .NET 10, với phần khám phá/sinh hỗ trợ cho kiểu endpoint. Dấu ! và .Value trong handler là dựa vào ranh giới validation đã được kiểm tra; chúng không tự thực hiện validation. Nếu gọi logic đó ngoài pipeline, phải tự giữ hợp đồng và guard cần thiết.
+AddValidation đăng ký cơ chế .NET 10, với phần khám phá/sinh hỗ trợ cho kiểu endpoint. Dấu ! và .Value trong handler dựa vào việc ranh giới validation đã kiểm tra trước đó; chúng không tự thực hiện validation. Nếu gọi logic đó ngoài pipeline, phải tự bảo đảm hợp đồng và thêm các bước kiểm tra chặn (guard) cần thiết.
 
 <figure class="tkh-fig">
 <div class="tkh-fig-box">
@@ -41,19 +41,19 @@ AddValidation đăng ký cơ chế .NET 10, với phần khám phá/sinh hỗ tr
 
 ## Problem Details chuẩn hoá gì?
 
-Validation failure của lab trả 400 với application/problem+json, status và errors theo field. Client nên dùng cấu trúc/mã đã cam kết thay vì parse một câu tiếng Việt để ra quyết định. AddProblemDetails và UseExceptionHandler phục vụ đường lỗi tương ứng; đừng nghĩ gọi chúng sẽ tự chuẩn hoá mọi response tuỳ biến hoặc mọi body 400 ở mọi môi trường.
+Khi validation thất bại, lab trả 400 với application/problem+json, status và errors theo field. Client nên dùng cấu trúc/mã đã cam kết thay vì parse một câu tiếng Việt để ra quyết định. AddProblemDetails và UseExceptionHandler phục vụ đường lỗi tương ứng; đừng nghĩ rằng gọi chúng sẽ tự chuẩn hoá mọi response tuỳ biến hoặc mọi body 400 ở mọi môi trường.
 
-JSON hỏng có thể dừng ở binding trước validation. Bộ test riêng chỉ assert 400 cho ca đó, không áp một cấu trúc body chưa được hợp đồng hoá. Một lỗi bất ngờ trong server không nên bị gắn nhãn “distanceKm sai” chỉ để tất cả phản hồi giống nhau.
+JSON hỏng có thể dừng ở binding trước validation. Bộ test riêng chỉ assert 400 cho test case đó, không áp đặt một cấu trúc body chưa được hợp đồng hoá. Một lỗi bất ngờ trong server không nên bị gắn nhãn “distanceKm sai” chỉ để tất cả phản hồi giống nhau.
 
-Không gửi stack trace, connection string hay thông tin token trong Problem Details. Trace identifier giúp tra log nội bộ mà không cần đưa chi tiết thực thi cho client. Bài 18 sẽ bổ sung đường quan sát request.
+Không gửi stack trace, connection string hay thông tin token trong Problem Details. Mã truy vết (trace identifier) giúp tra log nội bộ mà không cần đưa chi tiết thực thi cho client. Bài 18 sẽ bổ sung đường quan sát request.
 
 ## OpenAPI mô tả, không thay thực thi
 
-AddOpenApi đăng ký sinh tài liệu. MapOpenApi mở endpoint `/openapi/v1.json` trong Development của lab. OpenAPI JSON không đồng nghĩa đã có một giao diện Swagger UI; project không cài UI riêng.
+AddOpenApi đăng ký sinh tài liệu. MapOpenApi mở endpoint `/openapi/v1.json` ở môi trường Development của lab. OpenAPI JSON không đồng nghĩa với việc đã có một giao diện Swagger UI; project không cài UI riêng.
 
-TypedResults giúp framework biết metadata của response; ProducesValidationProblem công bố đường 400 validation. Dù schema có mô tả đúng, code hoặc middleware vẫn có thể sai: test HTTP phải đối chiếu tài liệu với hành vi quan sát được. Không dùng một tệp schema đẹp làm bằng chứng kiểm tra request đã bật.
+TypedResults giúp framework biết metadata của response; ProducesValidationProblem công bố đường 400 validation. Dù schema có mô tả đúng, code hoặc middleware vẫn có thể sai: test HTTP phải đối chiếu tài liệu với hành vi quan sát được. Đừng coi một tệp schema đẹp là bằng chứng cho thấy việc kiểm tra request đã được bật.
 
-Project pin Microsoft.OpenApi 2.7.5 trên dòng 2.x thay cho dependency cũ có advisory. Đây là phiên bản kiểm chứng của lab; khi nâng package cần chạy lại test/schema, không đổi major tuỳ ý mà chỉ nhìn build thành công.
+Project ghim Microsoft.OpenApi 2.7.5 trên dòng 2.x, thay cho dependency cũ có cảnh báo bảo mật (advisory). Đây là phiên bản kiểm chứng của lab; khi nâng package cần chạy lại test/schema, không tuỳ ý đổi phiên bản major chỉ vì thấy build thành công.
 
 <figure class="tkh-fig">
 <div class="tkh-fig-box">
@@ -71,11 +71,11 @@ Project pin Microsoft.OpenApi 2.7.5 trên dòng 2.x thay cho dependency cũ có 
 | 0 hoặc 100 | 200, đúng giá cận |
 | JSON hỏng | 400 binding; handler không thành công |
 
-Chạy API cùng cách bài 16 ở port 5197. Muốn đọc OpenAPI, đặt environment Development bằng tuỳ chọn dòng lệnh `--environment Development` ở môi trường lab; ở Production route tài liệu không được map theo code. Đây là lựa chọn phạm vi xuất tài liệu, không phải biện pháp thay auth cho API.
+Chạy API cùng cách bài 16 ở port 5197. Muốn đọc OpenAPI, đặt environment Development bằng tuỳ chọn dòng lệnh `--environment Development` ở môi trường lab; ở Production route tài liệu không được map theo code. Đây là quyết định về phạm vi công bố tài liệu, không phải biện pháp thay thế xác thực và phân quyền cho API.
 
 **Bài tập:** bỏ Required nhưng giữ Range rồi gửi null. Test nào phải bắt thay đổi? Nếu schema có đường 400 mà endpoint vẫn trả 200 cho -1 km, tài liệu hay runtime quyết định dữ liệu có bị chặn?
 
-<details><summary>Xem đáp án</summary><p>Ca thiếu/null phải phát hiện lỗi hợp đồng. Runtime quyết định request có đi tiếp; metadata không thay thế enforcement. Khôi phục rule và kiểm cả hai thay vì sửa tài liệu để che lỗi.</p></details>
+<details><summary>Xem đáp án</summary><p>Test case thiếu/null phải phát hiện lỗi hợp đồng. Runtime quyết định request có đi tiếp; metadata không thay thế enforcement. Khôi phục rule và kiểm cả hai thay vì sửa tài liệu để che lỗi.</p></details>
 
 ## Chạy ví dụ và kiểm chứng
 
@@ -85,7 +85,7 @@ Từ thư mục gốc repository:
 dotnet run --project examples/toi-noi-dotnet/17-validation-openapi -- --urls http://127.0.0.1:5197 --environment Development
 ```
 
-Đây là host học trên localhost; dừng bằng Ctrl+C sau khi thử. Bộ test của bài 20 kiểm tra các bước API 16–19 bằng cùng source mà không cần mở các port này. Không triển khai ví dụ chưa có đầy đủ cấu hình service lên public endpoint.
+Đây là host học trên localhost; dừng bằng Ctrl+C sau khi thử. Bộ test của bài 20 kiểm tra các bước API 16–19 bằng cùng source mà không cần mở các port này. Đừng triển khai ví dụ này lên endpoint công khai khi service chưa có đầy đủ cấu hình.
 
 ### Program.cs — 17-validation-openapi/Program.cs
 

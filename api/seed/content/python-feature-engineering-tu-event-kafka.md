@@ -1,20 +1,20 @@
 ---
 slug: python-feature-engineering-tu-event-kafka
 title: "Feature engineering: từ event Kafka tới đặc trưng velocity, thiết bị, GPS"
-summary: "Bài 55: biến event Kafka thành đặc trưng gian lận: cửa sổ thời gian với polars rolling, đếm theo thiết bị/khách/tài xế, haversine và tốc độ phi lý, tái hiện leakage bằng số đo và tính online khớp tính theo lô."
+summary: "Bài 55: biến event Kafka thành đặc trưng gian lận: cửa sổ thời gian với polars rolling, đếm theo thiết bị/khách/tài xế, haversine và tốc độ phi lý, tái hiện leakage bằng số đo và cách tính online khớp với cách tính theo lô."
 category: python-advanced
 level: advanced
 tags: [python, toi-noi, fraud, polars, feature-engineering]
 language: vi
 ---
 
-Fraud-scoring của [Tới Nơi](/articles/du-an-mau-toi-noi) nhận ba loại event qua Kafka: `BookingCreated` lúc đặt, `TripCompleted` lúc kết thúc, `PaymentCaptured` lúc thu tiền. Một event riêng lẻ nói rất ít: chuyến 4,5 km giá 23.250 đồng là sạch hay không? Dấu vết gian lận nằm ở chỗ khác, ở bộ ba event nối với nhau và với lịch sử: chuyến thứ ba của cùng một điện thoại trong 40 phút, tài xế «bay» hơn 100 km giữa hai chuyến, năm tài khoản chung một thiết bị cùng ăn mã giảm một nửa. **Đặc trưng** (feature) là con số rút từ chuỗi event để luật và mô hình đọc được. Bài này dựng chúng, rồi chỉ ra lỗi đắt nhất khi dựng: dùng thông tin mà lúc chấm điểm thật chưa có, gọi là **leakage**.
+Fraud-scoring của [Tới Nơi](/articles/du-an-mau-toi-noi) nhận ba loại event qua Kafka: `BookingCreated` lúc đặt, `TripCompleted` lúc kết thúc, `PaymentCaptured` lúc thu tiền. Một event riêng lẻ nói rất ít: chuyến 4,5 km giá 23.250 đồng là sạch hay không? Dấu vết gian lận nằm ở chỗ khác, ở bộ ba event nối với nhau và với lịch sử: chuyến thứ ba của cùng một điện thoại trong 40 phút, tài xế «bay» hơn 100 km giữa hai chuyến, năm tài khoản chung một thiết bị cùng dùng mã giảm một nửa. **Đặc trưng** (feature) là con số rút từ chuỗi event để luật và mô hình đọc được. Bài này dựng chúng, rồi chỉ ra lỗi đắt nhất khi dựng: dùng thông tin mà lúc chấm điểm thật chưa có, gọi là **leakage**.
 
 Đây là bài 55 của lộ trình **Python nâng cao qua Tới Nơi**. Bạn cần bộ dữ liệu tổng hợp và nhãn trễ của [bài 54](/articles/python-fraud-toi-noi-bai-toan-nhan-du-lieu-metric), event Kafka ở [bài 38](/articles/python-kafka-aiokafka-producer-consumer-schema) và polars ở [bài 29](/articles/python-polars-pandas-parquet-phan-tich-chuyen). Dữ liệu là tổng hợp, số đo chỉ nói về bộ này; điểm rủi ro là đầu vào cho người duyệt, không phải quyết định khoá tài khoản.
 
 <div class="tkh-callout tkh-callout--example">
 <span class="tkh-callout-title">Thử trước khi đọc</span>
-<p>Một đặc trưng «số chuyến của thiết bị trong giờ đó» được tính bằng cách gom theo giờ lịch (<code>group_by_dynamic</code>, mỗi giờ một ô) rồi gắn tổng của ô vào từng chuyến. Nó có dùng thông tin tương lai không?</p>
+<p>Một đặc trưng «số chuyến của thiết bị trong giờ đó» được tính bằng cách gom theo giờ lịch (<code>group_by_dynamic</code>, mỗi giờ một ô) rồi gắn tổng của ô vào từng chuyến. Đặc trưng này có dùng thông tin tương lai không?</p>
 <details><summary>Xem đáp án</summary><p><b>Có.</b> Chuyến lúc 10:05 nhận tổng của cả giờ 10:00 đến 11:00, kể cả chuyến lúc 10:40 chưa xảy ra. Lab đo bằng phép thử cắt cụt: tính lại đặc trưng của một chuyến từ các event có sẵn đến lúc nó được thu tiền. Với 40 chuyến mẫu, đặc trưng gom theo giờ đổi giá trị ở 23 chuyến, đặc trưng cửa sổ trượt <code>[t - 1h, t)</code> không đổi ở chuyến nào.</p></details>
 </div>
 
@@ -52,7 +52,7 @@ Trong luồng thật có hai đồng hồ. **Event time** là `occurred_at`, lú
 
 ## Cửa sổ thời gian: đếm theo thiết bị, khách, tài xế
 
-Với bảng đã sắp theo `paid_at`, polars cho cửa sổ trượt theo thời gian ngay trong biểu thức: `Expr.rolling(index_column, period=..., closed=...)` kết hợp `.over(khóa)` để mỗi khoá có cửa sổ riêng. Có một cái bẫy: `rolling(...).over(khóa)` của polars 2.1.0 **không báo lỗi** khi bảng chưa sắp theo cột chỉ mục, nó trả giá trị sai âm thầm (còn `rolling` không có `over` ném `InvalidOperationError`, `group_by_dynamic` có `group_by` ném `ComputeError`). Vì vậy `add_features` tự kiểm `is_sorted` và ném `ValueError`; phần chạy bên dưới đo cái giá khi không có hàng rào. Hai hàm nhỏ của `add_features` phủ gần hết các đặc trưng cửa sổ:
+Với bảng đã sắp theo `paid_at`, polars cho cửa sổ trượt theo thời gian ngay trong biểu thức: `Expr.rolling(index_column, period=..., closed=...)` kết hợp `.over(khóa)` để mỗi khoá có cửa sổ riêng. Có một cái bẫy: `rolling(...).over(khóa)` của polars 2.1.0 **không báo lỗi** khi bảng chưa sắp theo cột chỉ mục, nó trả về giá trị sai mà không báo gì (còn `rolling` không có `over` ném `InvalidOperationError`, `group_by_dynamic` có `group_by` ném `ComputeError`). Vì vậy `add_features` tự kiểm `is_sorted` và ném `ValueError`; phần chạy bên dưới đo cái giá khi không có hàng rào. Hai hàm nhỏ của `add_features` phủ gần hết các đặc trưng cửa sổ:
 
 ```python
 def count(key: str | list[str], period: str) -> pl.Expr:
@@ -86,7 +86,7 @@ none                        0.023                0.192                1.015     
 promo_abuse                 0.025                0.118                3.062                0.000                2.062                0.000
 ```
 
-Các cột tách loại nhưng không sạch sẽ. Mỗi loại có một cột nổi trội: `ghost_trip` ở `dev_trips_1h` (0,545 so với 0,023 của chuyến sạch), `promo_abuse` ở `dev_customers_7d` (3,062 so với 1,015) và `dev_newuser_7d` (2,062 so với 0,018), `collusion` ở `pair_trips_7d` (1,085 so với 0,055), `gps_spoof` ở `drv_trips_1h` (0,944 so với 0,192). Nhưng các loại lấn nhau: `drv_trips_1h` của `gps_spoof` lớn hơn của `ghost_trip` (0,886), `pair_trips_7d` của `ghost_trip` (1,059) gần bằng `collusion`, `dev_customers_7d` của `collusion` (1,945) lớn hơn của `ghost_trip` (1,610). `cust_promo_share_30d` là tạo tác của bộ sinh: 0,000 ở `ghost_trip`, `promo_abuse`, `collusion` và 0,084 ở chuyến sạch, vì tài khoản gian lận không có chuyến khuyến mãi nào trước đó; `cust_promo_share_30d > 0` vì thế tố «sạch», điều sẽ không đúng với gian lận thật. Một thiết bị gian lận cụ thể, tám chuyến đầu (giờ Việt Nam): các chuyến cách nhau từ 7 đến 37 phút nên cửa sổ một giờ chỉ giữ vài chuyến gần nhất, số khách trên máy lên 2 ở chuyến thứ sáu, và `pair_trips_7d` tăng mỗi khi một khách gặp lại cùng tài xế:
+Các cột phân biệt được các loại gian lận nhưng chưa tách bạch hoàn toàn. Mỗi loại có một cột nổi trội: `ghost_trip` ở `dev_trips_1h` (0,545 so với 0,023 của chuyến sạch), `promo_abuse` ở `dev_customers_7d` (3,062 so với 1,015) và `dev_newuser_7d` (2,062 so với 0,018), `collusion` ở `pair_trips_7d` (1,085 so với 0,055), `gps_spoof` ở `drv_trips_1h` (0,944 so với 0,192). Nhưng các loại lấn nhau: `drv_trips_1h` của `gps_spoof` lớn hơn của `ghost_trip` (0,886), `pair_trips_7d` của `ghost_trip` (1,059) gần bằng `collusion`, `dev_customers_7d` của `collusion` (1,945) lớn hơn của `ghost_trip` (1,610). `cust_promo_share_30d` là tạo tác của bộ sinh: 0,000 ở `ghost_trip`, `promo_abuse`, `collusion` và 0,084 ở chuyến sạch, vì tài khoản gian lận không có chuyến khuyến mãi nào trước đó; `cust_promo_share_30d > 0` vì thế cho thấy chuyến đó có vẻ «sạch», điều sẽ không đúng với gian lận thật. Xét một thiết bị gian lận cụ thể, với tám chuyến đầu của nó (giờ Việt Nam): các chuyến cách nhau từ 7 đến 37 phút nên cửa sổ một giờ chỉ giữ vài chuyến gần nhất, số khách trên máy lên 2 ở chuyến thứ sáu, và `pair_trips_7d` tăng mỗi khi một khách gặp lại cùng tài xế:
 
 ```text
 trip_id                   paid_at  dev_trips_1h  dev_customers_24h  pair_trips_7d   fraud_type
@@ -110,7 +110,7 @@ TN-0076399         25/03 00:15:21             2                  2              
 
 ## Haversine, tốc độ phi lý và nhảy vị trí
 
-GPS giả để lại hai dấu vết hình học. Một là **trong chuyến**: điểm bắt đầu cách điểm kết thúc quá xa so với thời lượng, tức tốc độ trung bình `speed_kmh` phi lý. Hai là **giữa các chuyến**: điểm bắt đầu cách xa điểm kết thúc của chuyến trước của cùng tài xế mà khoảng cách thời gian không đủ để đi (`drv_jump_speed_kmh`). Cả hai cần khoảng cách giữa hai toạ độ. **Haversine** cho khoảng cách đường chim bay trên mặt cầu bán kính 6.371 km; viết bằng biểu thức polars thì chạy được trên cả cột:
+GPS giả để lại hai dấu vết hình học. Một là **trong chuyến**: điểm bắt đầu cách điểm kết thúc quá xa so với thời lượng, tức tốc độ trung bình `speed_kmh` phi lý. Hai là **giữa các chuyến**: điểm bắt đầu cách xa điểm kết thúc của chuyến trước của cùng tài xế mà khoảng thời gian giữa hai chuyến không đủ để đi (`drv_jump_speed_kmh`). Cả hai cần khoảng cách giữa hai toạ độ. **Haversine** cho khoảng cách đường chim bay trên mặt cầu bán kính 6.371 km; viết bằng biểu thức polars thì chạy được trên cả cột:
 
 ```python
 def haversine_expr(lat1: str, lng1: str, lat2: str, lng2: str) -> pl.Expr:
@@ -141,7 +141,7 @@ t = t.with_columns(
 )
 ```
 
-`drv_jump_speed_kmh` là `drv_jump_km` chia khoảng cách thời gian, và hai cờ `impossible_speed`, `impossible_jump` đặt ngưỡng 120 km/h. Chuyến đầu của mỗi tài xế không có chuyến trước nên các số nhảy bằng 0. Kết quả trên 200.000 chuyến:
+`drv_jump_speed_kmh` là `drv_jump_km` chia khoảng thời gian giữa hai chuyến, và hai cờ `impossible_speed`, `impossible_jump` đặt ngưỡng 120 km/h. Chuyến đầu của mỗi tài xế không có chuyến trước nên các giá trị nhảy vị trí bằng 0. Kết quả trên 200.000 chuyến:
 
 ```text
 loại           chuyến  speed_kmh>120  jump>120 km/h  một trong hai
@@ -153,13 +153,13 @@ collusion         600           0.0%           0.0%           0.0%
 chuyến sạch bị gắn cờ: 111 trên 196,000; gps_spoof bị gắn cờ: 313 trên 800
 ```
 
-Luật tốc độ gần như chỉ sáng ở `gps_spoof`, nhưng chỉ bắt 39,1 % (313 trong 800 chuyến). Bộ sinh dịch 60 % số chuyến `gps_spoof` chỉ vài km trong thành phố, nên chúng không tạo tốc độ phi lý; muốn bắt cần thêm khoảng cách giữa điểm đón khách khai báo và GPS tài xế (`start_pickup_gap_km`, đặc trưng theo từng chuyến). 111 chuyến sạch bị gắn cờ là những chuyến mà bộ sinh cố ý cho GPS lệch xa. Không đặc trưng nào hoàn hảo; mô hình ở bài 57 tồn tại để kết hợp chúng.
+Luật tốc độ gần như chỉ kích hoạt ở `gps_spoof`, nhưng chỉ bắt 39,1 % (313 trong 800 chuyến). Bộ sinh dịch 60 % số chuyến `gps_spoof` chỉ vài km trong thành phố, nên chúng không tạo tốc độ phi lý; muốn bắt cần thêm khoảng cách giữa điểm đón khách khai báo và GPS tài xế (`start_pickup_gap_km`, đặc trưng theo từng chuyến). 111 chuyến sạch bị gắn cờ là những chuyến mà bộ sinh cố ý cho GPS lệch xa. Không đặc trưng nào hoàn hảo; mô hình ở bài 57 tồn tại để kết hợp chúng.
 
 ## Leakage: tái hiện và tránh
 
 **Leakage** là đặc trưng chứa thông tin mà lúc chấm điểm thật chưa có. Lab tái hiện ba kiểu, mỗi kiểu một cách vi phạm cùng quy tắc «chỉ dùng thứ có trước `paid_at`».
 
-**Kiểu 1: cửa sổ nhìn về tương lai.** Chỉ cần đổi `offset` của `rolling` để cửa sổ bắt đầu sau `t` là đặc trưng nhìn trước. Biến thể hay gặp hơn là gom theo giờ lịch bằng `group_by_dynamic` rồi join ngược:
+**Kiểu 1: cửa sổ nhìn về tương lai.** Chỉ cần đổi `offset` của `rolling` để cửa sổ bắt đầu sau `t` là ta có đặc trưng nhìn trước. Biến thể hay gặp hơn là gom theo giờ lịch bằng `group_by_dynamic` rồi join ngược:
 
 ```python
 def add_future_window(t: pl.DataFrame) -> pl.DataFrame:
@@ -175,7 +175,7 @@ def add_hour_bucket(t: pl.DataFrame) -> pl.DataFrame:
     ...
 ```
 
-**Kiểu 2: tổng hợp cả bảng.** `n_unique().over("device_id")` không có cửa sổ thời gian đếm trên cả 60 ngày, gồm những chuyến chưa xảy ra: `dev_customers_total` và `pair_trips_total`. **Kiểu 3: nhãn biết trễ.** «Số chuyến gian lận trước đó trên cùng thiết bị» là đặc trưng rất tự nhiên, nhưng nếu đếm theo nhãn cuối cùng thì ta dùng thứ mà lúc chấm chưa ai biết (bài 54). Hàm có cờ `honest`; khác biệt chỉ nằm ở thời điểm nhãn «đến»:
+**Kiểu 2: tổng hợp cả bảng.** `n_unique().over("device_id")` vì không có cửa sổ thời gian nên đếm trên cả 60 ngày, gồm những chuyến chưa xảy ra: `dev_customers_total` và `pair_trips_total`. **Kiểu 3: nhãn biết trễ.** «Số chuyến gian lận trước đó trên cùng thiết bị» là đặc trưng rất tự nhiên, nhưng nếu đếm theo nhãn cuối cùng thì ta dùng thứ mà lúc chấm chưa ai biết (bài 54). Hàm có cờ `honest`; khác biệt chỉ nằm ở thời điểm nhãn «đến»:
 
 ```python
 arrival = pl.col("label_known_at") if honest else pl.col("paid_at")
@@ -187,7 +187,7 @@ arrivals = (
 # join_asof strategy="backward", allow_exact_matches=False: chỉ nhãn đã đến TRƯỚC t, không bao giờ tính chính dòng này
 ```
 
-Một cách phát hiện không phụ thuộc metric là nhìn **bất biến**: đặc trưng của một chuyến tính trên thông tin đến hết `paid_at` của nó phải bằng đặc trưng tính trên toàn bộ dữ liệu. Phép thử cắt cụt tính lại từng chuyến mẫu từ các event có `occurred_at <= paid_at` của chuyến đó. Giới hạn: chỉ cắt event thì mù với rò rỉ nhãn, vì nhãn nằm ngoài event; phải cắt cả nhãn theo `label_known_at`. Lab dùng 40 chuyến mà thiết bị còn chuyến sau trong một giờ, và 40 chuyến thuộc thiết bị đã có gian lận trước đó cho phần nhãn:
+Một cách phát hiện không phụ thuộc metric là kiểm tra **bất biến**: đặc trưng của một chuyến tính trên thông tin đến hết `paid_at` của nó phải bằng đặc trưng tính trên toàn bộ dữ liệu. Phép thử cắt cụt tính lại từng chuyến mẫu từ các event có `occurred_at <= paid_at` của chuyến đó. Giới hạn: chỉ cắt event thì mù với rò rỉ nhãn, vì nhãn nằm ngoài event; phải cắt cả nhãn theo `label_known_at`. Lab dùng 40 chuyến mà thiết bị còn chuyến sau trong một giờ, và 40 chuyến thuộc thiết bị đã có gian lận trước đó cho phần nhãn:
 
 ```text
 40 chuyến mà thiết bị còn chuyến sau trong vòng 1 giờ; mỗi chuyến tính lại từ event có occurred_at <= paid_at của nó
@@ -229,11 +229,11 @@ PR-AUC trên valid:                          13 đặc trưng theo từng chuy�
 <figcaption>Hình 2. PR-AUC trên valid với và không có rò rỉ. Thanh dưới là số hệ thống phục vụ thật sẽ đạt; thanh trên là số offline hứa.</figcaption>
 </figure>
 
-Có bốn điều đọc ra được. **Một**, đặc trưng sạch cho PR-AUC 0,886, so với 0,537 của bộ chấm bài 54. Bảng 2×2 tách hai nguồn: từ 13 đặc trưng theo từng chuyến lên đủ 30, PR-AUC tăng 0,603 lên 0,886 (cây tăng cường) và 0,508 lên 0,778 (hồi quy logistic); đổi mô hình chỉ thêm 0,095 (13 đặc trưng) và 0,108 (30 đặc trưng). Đặc trưng nhiều chuyến góp phần lớn hơn, nhưng mô hình không vô can. **Hai**, cửa sổ nhìn trước gần như vô hình trong metric: 0,888 offline, 0,879 phục vụ, và 0,879 nằm gần nhiễu của chính mô hình sạch khi đổi `random_state` (0,879 đến 0,887). Một PR-AUC không đẹp bất thường không chứng minh pipeline sạch; phép thử cắt cụt mới thấy. **Ba**, tổng hợp cả bảng cho khoảng chênh ảo 0,034 (0,924 và 0,890), nhưng bản phục vụ, đếm dồn trung thực, đạt 0,890, nhỉnh hơn mô hình sạch: đếm dồn có ích, chỉ khoảng chênh offline là ảo. **Bốn**, lịch sử gian lận tính nhãn ngay là tệ nhất: offline 0,940, phục vụ 0,835, thấp hơn mô hình không dùng nó. Không phải vì cột trống: 62,7 % chuyến gian lận ở valid có `dev_fraud_naive > 0`, nhưng chỉ 42,8 % có `dev_fraud_known > 0`; mô hình học trên bản đầy hơn rồi gặp bản nghèo hơn. Dùng cùng `dev_fraud_known` ở huấn luyện và phục vụ cho 0,914 ở cả hai nơi, cao hơn mô hình sạch. Ở top 1 % điểm cao nhất của valid, mô hình sạch bắt 69,9 % `ghost_trip`, 56,0 % `promo_abuse`, 49,5 % `gps_spoof` và 36,1 % `collusion`; mảnh còn thiếu là đồ thị (bài 58). Mọi số trên đo ở một seed (42).
+Có bốn điều đọc ra được. **Một**, đặc trưng sạch cho PR-AUC 0,886, so với 0,537 của bộ chấm bài 54. Bảng 2×2 tách hai nguồn: từ 13 đặc trưng theo từng chuyến lên đủ 30, PR-AUC tăng từ 0,603 lên 0,886 (cây tăng cường) và từ 0,508 lên 0,778 (hồi quy logistic); đổi mô hình chỉ thêm 0,095 (13 đặc trưng) và 0,108 (30 đặc trưng). Đặc trưng nhiều chuyến góp phần lớn hơn, nhưng mô hình không vô can. **Hai**, cửa sổ nhìn trước gần như vô hình trong metric: 0,888 offline, 0,879 phục vụ, và 0,879 nằm gần nhiễu của chính mô hình sạch khi đổi `random_state` (0,879 đến 0,887). Một PR-AUC không đẹp một cách bất thường cũng không chứng minh pipeline sạch; phép thử cắt cụt mới thấy. **Ba**, tổng hợp cả bảng cho khoảng chênh ảo 0,034 (0,924 và 0,890), nhưng bản phục vụ, đếm dồn trung thực, đạt 0,890, nhỉnh hơn mô hình sạch: đếm dồn có ích, chỉ khoảng chênh offline là ảo. **Bốn**, lịch sử gian lận tính nhãn ngay là tệ nhất: offline 0,940, phục vụ 0,835, thấp hơn mô hình không dùng nó. Không phải vì cột trống: 62,7 % chuyến gian lận ở valid có `dev_fraud_naive > 0`, nhưng chỉ 42,8 % có `dev_fraud_known > 0`; mô hình học trên bản đầy hơn rồi gặp bản nghèo hơn. Dùng cùng `dev_fraud_known` ở huấn luyện và phục vụ cho 0,914 ở cả hai nơi, cao hơn mô hình sạch. Ở top 1 % điểm cao nhất của valid, mô hình sạch bắt 69,9 % `ghost_trip`, 56,0 % `promo_abuse`, 49,5 % `gps_spoof` và 36,1 % `collusion`; mảnh còn thiếu là đồ thị (bài 58). Mọi số trên đo ở một seed (42).
 
 ## Cùng đặc trưng ở hai nơi: online từ envelope Kafka
 
-Huấn luyện chạy theo lô trên bảng, còn phục vụ nhận từng event. Hai đường code cho cùng một đặc trưng là nơi sinh **train/serve skew**: hai bản tính khác nhau ở những chuyến hiếm mà ta không để ý. Cách phòng là viết đường online theo đúng định nghĩa rồi kiểm bằng so sánh, trên cả 30 đặc trưng. `online.py` giữ cho mỗi khoá một danh sách thời điểm sắp xếp, chèn đúng chỗ bằng `bisect`, và chỉ ghi chuyến vào trạng thái sau khi đã đọc xong đặc trưng:
+Huấn luyện chạy theo lô trên bảng, còn phục vụ nhận từng event. Hai đường code cho cùng một đặc trưng là nơi sinh **train/serve skew**: hai bản tính khác nhau ở những chuyến hiếm mà ta không để ý. Cách phòng là viết đường online theo đúng định nghĩa rồi kiểm bằng so sánh, trên cả 30 đặc trưng. `online.py` giữ cho mỗi khoá một danh sách thời điểm đã sắp xếp, chèn đúng chỗ bằng `bisect`, và chỉ ghi chuyến vào trạng thái sau khi đã đọc xong đặc trưng:
 
 ```python
 def count_before(self, t: int, width: int) -> int:
@@ -281,7 +281,7 @@ phát lại xen kẽ cố định (lấy N bản ghi của mỗi topic theo vòn
 sắp lại theo occurred_at rồi xử lý: 0 chuyến lệch (33,331 chuyến)
 ```
 
-Kafka giao đủ 100.013 bản ghi, nhưng 32.503 trên 33.331 chuyến bị đọc `PaymentCaptured` trước `TripCompleted`, và 6.717 cặp chuyến đóng liên tiếp bị đảo thứ tự thanh toán. Xử lý đúng thứ tự đọc lần này làm 18 chuyến có đặc trưng khác bản theo lô, cả 18 là chuyến sạch; con số đó không đại diện, vì thứ tự đọc đổi theo từng lần chạy và cách consumer chia lô. Để đo được, lab phát lại xen kẽ cố định, lấy N bản ghi của mỗi topic theo vòng: lô 10 cho 99 chuyến lệch, lô 50 cho 55, lô 500 cho 10, lô 2.000 trở lên cho 0. Không có con số «đúng» chung; verify chỉ đòi lô nhỏ cho lệch lớn hơn 0. Sắp lại theo `occurred_at` rồi mới xử lý thì không còn chuyến nào lệch. Đó là «watermark vô hạn»: đọc hết rồi sắp, điều luồng thật không làm được. Production chọn một độ trễ cho phép (allowed lateness), đợi event đến muộn trong ngần ấy giây rồi chốt, và quyết định trước điều gì xảy ra với event đến sau.
+Kafka giao đủ 100.013 bản ghi, nhưng 32.503 trên 33.331 chuyến bị đọc `PaymentCaptured` trước `TripCompleted`, và 6.717 cặp chuyến đóng liên tiếp bị đảo thứ tự thanh toán. Xử lý đúng thứ tự đọc lần này làm 18 chuyến có đặc trưng khác bản theo lô, cả 18 là chuyến sạch; con số đó không đại diện, vì thứ tự đọc đổi theo từng lần chạy và cách consumer chia lô. Để đo được, lab phát lại xen kẽ cố định, lấy N bản ghi của mỗi topic theo vòng: lô 10 cho 99 chuyến lệch, lô 50 cho 55, lô 500 cho 10, lô 2.000 trở lên cho 0. Không có con số «đúng» chung; bước kiểm chứng chỉ đòi lô nhỏ cho số chuyến lệch lớn hơn 0. Sắp lại theo `occurred_at` rồi mới xử lý thì không còn chuyến nào lệch. Đó là «watermark vô hạn»: đọc hết rồi sắp, điều luồng thật không làm được. Production chọn một độ trễ cho phép (allowed lateness), đợi event đến muộn trong ngần ấy giây rồi chốt, và quyết định trước điều gì xảy ra với event đến sau.
 
 ## Chạy và kiểm chứng
 
@@ -302,7 +302,7 @@ out/features.parquet: 200,000 dòng x 32 cột, 12.2 MiB; đọc lại giống h
 Kiểm chứng: OK 40/40
 ```
 
-`--verify` in `OK 40/40`: đặc trưng sạch bất biến khi cắt event, đặc trưng nhìn trước thì không (và chỉ cắt event thì mù với nhãn), `add_features` từ chối bảng chưa sắp, online theo thứ tự thời gian khớp bản polars ở cả 30 đặc trưng, thứ tự đọc nhiều topic làm lệch, haversine của polars khớp numpy, mô hình có rò rỉ đẹp offline hơn phục vụ. Nó không kiểm số tuyệt đối hay tốc độ, và đạt ở seed 1 và 2 của bộ sinh.
+`--verify` in `OK 40/40`: đặc trưng sạch bất biến khi cắt event, đặc trưng nhìn trước thì không (và chỉ cắt event thì mù với nhãn), `add_features` từ chối bảng chưa sắp, online theo thứ tự thời gian khớp bản polars ở cả 30 đặc trưng, thứ tự đọc nhiều topic làm lệch, haversine của polars khớp numpy, mô hình có rò rỉ đẹp offline hơn phục vụ. Lệnh này không kiểm tra số tuyệt đối hay tốc độ, và đạt ở seed 1 và 2 của bộ sinh.
 
 | Hiện tượng | Kiểm tra trước |
 |---|---|
@@ -310,16 +310,16 @@ Kiểm chứng: OK 40/40
 | Đặc trưng online khác bản theo lô ở vài chuyến | Thứ tự event giữa các topic: sắp theo `occurred_at` hoặc dùng watermark |
 | `dev_trips_1h` của chuyến đầu tiên khác 0 | `closed="left"` có bị đổi thành `"right"` hoặc `"both"` không |
 | Cửa sổ trả số lạ, không có lỗi nào | `rolling().over()` không báo lỗi khi bảng chưa sắp theo cột chỉ mục; `join` không giữ thứ tự, nên `sort("paid_at")` lại |
-| Tốc độ hàng nghìn km/h giữa hai chuyến sát nhau | Chốt khoảng cách thời gian tối thiểu (lab dùng 60 giây) trước khi chia |
+| Tốc độ hàng nghìn km/h giữa hai chuyến sát nhau | Chốt khoảng thời gian tối thiểu (lab dùng 60 giây) trước khi chia |
 
 <div class="tkh-callout tkh-callout--warn">
 <span class="tkh-callout-title">Giới hạn của ví dụ so với production</span>
-<p>Dữ liệu là tổng hợp (200.000 chuyến trong 60 ngày), nên số PR-AUC chỉ nói về bộ này, đo ở một seed. Hai tạo tác của bộ sinh ảnh hưởng mọi con số: tỉ lệ chuyến sạch dùng <code>NEWUSER50</code> giảm từ 7,8 % xuống 0,9 % theo thời gian (bài 54), và tài khoản gian lận không dùng mã nào ngoài <code>NEWUSER50</code> của <code>promo_abuse</code>, nên <code>cust_promo_share_30d &gt; 0</code> tố «sạch». Lab chỉ đếm chuyến đã thu tiền; hệ thống thật còn phải xử lý chuyến đang chạy. Bộ tính online giữ trạng thái trong danh sách Python của một tiến trình: đủ để so với bản theo lô, không đủ cho nhiều worker hay khởi động lại; trạng thái dùng chung trên Redis là việc của bài 59. Kafka trong lab là một broker, ba topic một partition, một consumer, đọc hết rồi sắp lại; production dùng key và partition theo khách hay thiết bị, watermark và chính sách cho event đến muộn. 30 đặc trưng chọn tay, mô hình dùng siêu tham số mặc định. Đã chạy với Python 3.14.7, polars 2.1.0, numpy 2.5.4, scikit-learn 1.9.1, aiokafka 0.15.0 và Kafka 3.9 của hạ tầng dùng chung.</p>
+<p>Dữ liệu là tổng hợp (200.000 chuyến trong 60 ngày), nên số PR-AUC chỉ nói về bộ này, đo ở một seed. Hai tạo tác của bộ sinh ảnh hưởng mọi con số: tỉ lệ chuyến sạch dùng <code>NEWUSER50</code> giảm từ 7,8 % xuống 0,9 % theo thời gian (bài 54), và tài khoản gian lận không dùng mã nào ngoài <code>NEWUSER50</code> của <code>promo_abuse</code>, nên <code>cust_promo_share_30d &gt; 0</code> cho thấy chuyến đó có vẻ «sạch». Lab chỉ đếm chuyến đã thu tiền; hệ thống thật còn phải xử lý chuyến đang chạy. Bộ tính online giữ trạng thái trong danh sách Python của một tiến trình: đủ để so với bản theo lô, không đủ cho nhiều worker hay khởi động lại; trạng thái dùng chung trên Redis là việc của bài 59. Kafka trong lab là một broker, ba topic một partition, một consumer, đọc hết rồi sắp lại; production dùng key và partition theo khách hay thiết bị, watermark và chính sách cho event đến muộn. 30 đặc trưng chọn tay, mô hình dùng siêu tham số mặc định. Đã chạy với Python 3.14.7, polars 2.1.0, numpy 2.5.4, scikit-learn 1.9.1, aiokafka 0.15.0 và Kafka 3.9 của hạ tầng dùng chung.</p>
 </div>
 
 **Bài tập:** (1) Đổi `closed="left"` thành `closed="right"` trong hàm `count`. `dev_trips_1h` của chuyến đầu tiên của mỗi thiết bị thành bao nhiêu, và bản online (đọc cửa sổ rồi mới ghi chuyến) còn khớp bản theo lô không? (2) Tài xế kết thúc một chuyến ở Hà Nội lúc 10:00 và bắt đầu chuyến kế ở TP.HCM lúc 18:00. Cờ `impossible_jump` bật hay không? Nếu chuyến kế bắt đầu lúc 20:00 thì sao? Dùng khoảng cách 1.144 km của bài.
 
-<details><summary>Xem lời giải</summary><p>(1) Cửa sổ <code>(t - 1h, t]</code> gồm cả dòng hiện tại, nên mọi đếm tăng thêm 1 và chuyến đầu tiên của mỗi thiết bị có <code>dev_trips_1h = 1</code> thay vì 0 (lab có ca kiểm cho giá trị 0). Bản online đọc cửa sổ trước khi ghi chuyến nên vẫn trả 0, tức là lệch 1 ở mọi chuyến: một skew hệ thống, rất dễ bỏ sót vì cả hai bản đều «trông hợp lý». (2) Với 8 giờ, tốc độ là 1.144 / 8 = <b>143 km/h</b>, lớn hơn 120 nên cờ bật. Với 10 giờ là 1.144 / 10 = <b>114,4 km/h</b>, dưới ngưỡng nên cờ tắt: đường chim bay là chặn dưới của quãng đường thật, nên cờ chỉ bắt được kiểu «bay» rõ ràng và không bao giờ chứng minh ai đó thật sự ở đó.</p></details>
+<details><summary>Xem lời giải</summary><p>(1) Cửa sổ <code>(t - 1h, t]</code> gồm cả dòng hiện tại, nên mọi đếm tăng thêm 1 và chuyến đầu tiên của mỗi thiết bị có <code>dev_trips_1h = 1</code> thay vì 0 (lab có test case cho giá trị 0). Bản online đọc cửa sổ trước khi ghi chuyến nên vẫn trả 0, tức là lệch 1 ở mọi chuyến: một skew hệ thống, rất dễ bỏ sót vì cả hai bản đều «trông hợp lý». (2) Với 8 giờ, tốc độ là 1.144 / 8 = <b>143 km/h</b>, lớn hơn 120 nên cờ bật. Với 10 giờ là 1.144 / 10 = <b>114,4 km/h</b>, dưới ngưỡng nên cờ tắt: đường chim bay là chặn dưới của quãng đường thật, nên cờ chỉ bắt được kiểu «bay» rõ ràng và không bao giờ chứng minh ai đó thật sự ở đó.</p></details>
 
 Bài trước: [bài 54](/articles/python-fraud-toi-noi-bai-toan-nhan-du-lieu-metric). Bài tiếp: [bài 56](/articles/python-rule-engine-scoring-strategy-explainability).
 

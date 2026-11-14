@@ -1,0 +1,185 @@
+{
+  "file": "nhom-hanh-vi-giao-tiep-doi-tuong.md",
+  "edits": [
+    {
+      "old": "Ba pattern còn lại nói chuyện với",
+      "new": "Ba pattern còn lại thao tác trên",
+      "reason": "«nói chuyện với một cấu trúc» gượng; ý là thao tác trên một cấu trúc",
+      "severity": "medium"
+    },
+    {
+      "old": "Observer vẫn có chỗ: làm đường chở tin",
+      "new": "Observer vẫn có chỗ: làm đường truyền tin",
+      "reason": "«đường chở tin» là cụm tự ghép",
+      "severity": "low"
+    },
+    {
+      "old": "dùng Observer làm đường chở tin.",
+      "new": "dùng Observer làm đường truyền tin.",
+      "reason": "«đường chở tin» là cụm tự ghép",
+      "severity": "low"
+    },
+    {
+      "old": "dịch vụ điểm thưởng ném lỗi là đổi trạng thái hỏng theo;",
+      "new": "dịch vụ điểm thưởng ném lỗi thì việc đổi trạng thái cũng hỏng theo;",
+      "reason": "câu thiếu từ nối giữa vế điều kiện và vế kết quả",
+      "severity": "medium"
+    },
+    {
+      "old": "lỗi trả về cho người phát quyết định.",
+      "new": "lỗi được trả về để người phát quyết định.",
+      "reason": "câu cụt, thiếu từ nối chỉ mục đích",
+      "severity": "medium"
+    },
+    {
+      "old": "đổi vài dòng code lấy kiểu chặt.",
+      "new": "đánh đổi vài dòng code để có kiểu chặt.",
+      "reason": "giọng dịch máy",
+      "severity": "medium"
+    },
+    {
+      "old": "Cái giá: hub dễ phình thành «god object».",
+      "new": "Cái giá: hub dễ phình thành «god object», ôm hết mọi việc.",
+      "reason": "giải nghĩa thuật ngữ ở lần đầu",
+      "severity": "low"
+    },
+    {
+      "old": "phải kiểm: phiên còn hạn",
+      "new": "phải kiểm tra: phiên còn hạn",
+      "reason": "lược mất chữ «tra»",
+      "severity": "medium"
+    },
+    {
+      "old": "khâu rẻ, hay chặn đặt trước; khâu chống gian lận",
+      "new": "khâu rẻ và hay chặn thì đặt trước; khâu chống gian lận",
+      "reason": "câu cụt động từ và chủ ngữ",
+      "severity": "medium"
+    },
+    {
+      "old": "Tắt chống gian lận ở Nha Trang = dựng chuỗi khác cho thành phố đó",
+      "new": "Tắt chống gian lận ở Nha Trang nghĩa là dựng chuỗi khác cho thành phố đó",
+      "reason": "dấu «=» thay cho động từ trong văn xuôi",
+      "severity": "medium"
+    },
+    {
+      "old": "có thể không khâu nào xử lý, nên kết quả",
+      "new": "có thể không khâu nào nhận xử lý, nên kết quả",
+      "reason": "diễn đạt gượng",
+      "severity": "low"
+    },
+    {
+      "old": "và job xuất dữ liệu kế toán",
+      "new": "và tác vụ xuất dữ liệu kế toán",
+      "reason": "từ tiếng Anh thông thường lọt vào văn xuôi",
+      "severity": "medium"
+    },
+    {
+      "old": "Hệ số `correlation` của `customer_id` gần như bằng 0",
+      "new": "Hệ số tương quan (`correlation`) của `customer_id` gần như bằng 0",
+      "reason": "thuật ngữ tiếng Anh lọt vào văn xuôi, kèm giải nghĩa",
+      "severity": "medium"
+    },
+    {
+      "old": "mục index rồi vứt đi,",
+      "new": "mục index rồi bỏ đi,",
+      "reason": "«vứt» khẩu ngữ, thống nhất với «bị bỏ» ở Hình 2",
+      "severity": "low"
+    },
+    {
+      "old": "mỗi mục bị vứt cũng đã làm một lần ghé heap.",
+      "new": "mỗi mục bị bỏ cũng tốn một lần ghé heap.",
+      "reason": "câu tối nghĩa, không rõ chủ thể của «đã làm»",
+      "severity": "medium"
+    },
+    {
+      "old": "mỗi câu nhảy thẳng vào index",
+      "new": "mỗi câu truy vấn nhảy thẳng vào index",
+      "reason": "«câu» đứng một mình dễ hiểu nhầm",
+      "severity": "medium"
+    },
+    {
+      "old": "Iterator đã tan vào ngôn ngữ",
+      "new": "Iterator đã trở thành tính năng có sẵn của ngôn ngữ",
+      "reason": "calque của «dissolved into the language»",
+      "severity": "medium"
+    },
+    {
+      "old": "con trỏ gửi cho app nên mã hoá mờ",
+      "new": "con trỏ gửi cho app nên mã hoá thành chuỗi opaque",
+      "reason": "«mã hoá mờ» là calque của «opaque»",
+      "severity": "medium"
+    },
+    {
+      "old": "mỗi trang là một câu riêng,",
+      "new": "mỗi trang là một câu truy vấn riêng,",
+      "reason": "«câu» đứng một mình dễ hiểu nhầm",
+      "severity": "medium"
+    },
+    {
+      "old": "Visitor làm phép tính rẻ, làm loại mới đắt.",
+      "new": "Với Visitor, thêm phép tính thì rẻ, thêm loại chuyến mới thì đắt.",
+      "reason": "câu cụt, thiếu động từ và danh từ chính",
+      "severity": "medium"
+    },
+    {
+      "old": "Không dùng khi họ lớp còn hay đổi.",
+      "new": "Không dùng khi họ lớp còn thay đổi thường xuyên.",
+      "reason": "«còn hay đổi» nghe cụt",
+      "severity": "medium"
+    },
+    {
+      "old": "Viết thành code thì:",
+      "new": "Nếu viết thành code thì:",
+      "reason": "câu thiếu liên từ điều kiện",
+      "severity": "medium"
+    },
+    {
+      "old": "parser đệ quy xuống viết tay",
+      "new": "parser recursive descent viết tay",
+      "reason": "«đệ quy xuống» là dịch từng chữ; thuật ngữ quen dùng bằng tiếng Anh",
+      "severity": "high"
+    },
+    {
+      "old": "Đơn đồ ăn 90.000đ trượt V1",
+      "new": "Đơn đồ ăn 90.000đ không đạt V1",
+      "reason": "«trượt» là calque của fail",
+      "severity": "medium"
+    },
+    {
+      "old": "— và cho bất kỳ ai có quyền tạo voucher chạy code",
+      "new": "— và cho phép bất kỳ ai có quyền tạo voucher chạy code",
+      "reason": "thiếu động từ «cho phép»",
+      "severity": "medium"
+    },
+    {
+      "old": "Cùng một bảng «loại × phép tính» có trình biên dịch gác ô thiếu, cùng đắt khi thêm loại (Hình 3).",
+      "new": "Hai cách này cùng biểu diễn một bảng «loại × phép tính», cùng có trình biên dịch gác ô thiếu, cùng đắt khi thêm loại (Hình 3).",
+      "reason": "câu thiếu chủ ngữ",
+      "severity": "medium"
+    },
+    {
+      "old": "khâu rẻ, hay chặn đặt trước; luôn có dấu vết",
+      "new": "khâu rẻ và hay chặn thì đặt trước; luôn có dấu vết",
+      "reason": "câu cụt động từ và chủ ngữ",
+      "severity": "medium"
+    },
+    {
+      "old": "đổi lại tự quyết thứ tự, lỗi, và luôn trả hàm huỷ đăng ký",
+      "new": "đổi lại phải tự quyết thứ tự, cách xử lý lỗi, và luôn trả hàm huỷ đăng ký",
+      "reason": "thiếu chủ thể và động từ, khó đoán ý",
+      "severity": "medium"
+    },
+    {
+      "old": "khâu nào quyết thì dừng",
+      "new": "khâu nào quyết định thì dừng",
+      "reason": "«quyết» đứng một mình thiếu danh từ",
+      "severity": "low"
+    },
+    {
+      "old": "Kiểm tay: 85.000 × 20%",
+      "new": "Tính tay: 85.000 × 20%",
+      "reason": "Thống nhất 'Kiểm tay' → 'Tính tay' trong loạt",
+      "severity": "low"
+    }
+  ]
+}

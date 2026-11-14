@@ -8,9 +8,9 @@ tags: [toi-noi, location, rust, dispatch, matching, simulation, baseline, statis
 language: vi
 ---
 
-Trong 2.000 khách mà lab lấy mẫu, ca tệ nhất trông như sau. Khách ghim ở (10,71574; 106,62485). Trong 80 tài xế rảnh của lần rút đó, DR-079 cách điểm đón 1.315 m theo đường chim bay, còn DR-002 cách 3.169 m. Cách chọn «gần nhất» của baseline sẽ giao khách cho DR-079, và ETA đường bộ của DR-079 là 1.430 s. DR-002, xa gấp hơn hai lần trên bản đồ, tới sau 462 s. Chênh 968 s, tức 16,1 phút khách đứng chờ, vì tuyến thật của DR-079 dài 15.742 m cho 1.315 m chim bay. Một phần con số này do chính bản đồ của lab: DR-079 đứng cách mép cắt phía nam của đồ thị chừng 450 m, và trên đồ thị cắt rộng hơn cùng cặp điểm còn 11.280 m, 1.018 s. Đường vòng vẫn có thật, nhưng ca tệ nhất của một mẫu thường là ca mà giả định của phép đo yếu nhất.
+Trong 2.000 khách mà lab lấy mẫu, ca tệ nhất trông như sau. Khách ghim ở (10,71574; 106,62485). Trong 80 tài xế rảnh của lần rút đó, DR-079 cách điểm đón 1.315 m theo đường chim bay, còn DR-002 cách 3.169 m. Cách chọn «gần nhất» của baseline sẽ giao khách cho DR-079, và ETA đường bộ của DR-079 là 1.430 s. DR-002, xa gấp hơn hai lần trên bản đồ, tới sau 462 s. Chênh 968 s, tức 16,1 phút khách đứng chờ, vì tuyến thật của DR-079 dài 15.742 m cho 1.315 m chim bay. Một phần con số này là do chính bản đồ của lab gây ra: DR-079 đứng cách mép cắt phía nam của đồ thị chừng 450 m, và trên đồ thị cắt rộng hơn cùng cặp điểm còn 11.280 m, 1.018 s. Đường vòng vẫn có thật, nhưng ca tệ nhất của một mẫu thường là ca mà giả định của phép đo yếu nhất.
 
-Vậy có nên thay hết «gần nhất theo chim bay» bằng «gần nhất theo ETA» ngay không? Bài này không đưa ra một con số «giảm x%» cho câu hỏi đó. Nó dựng baseline cho cả phần P05 và trả lời bằng cách đo: sai ở đâu, sai bao nhiêu, ai được lợi, ai chịu thiệt, và mức nào là nhiễu. Kết quả có ích hơn một con số đẹp: lợi ích có thật, nhỏ ở trung bình, rõ ở đuôi; còn dấu hiệu «một nhóm tài xế trả giá» thì biến mất khi chạy lại trên seed mới, và đó là bài học thống kê của cả phần.
+Vậy có nên thay hết «gần nhất theo chim bay» bằng «gần nhất theo ETA» ngay không? Bài này không đưa ra một con số «giảm x%» cho câu hỏi đó. Thay vào đó, bài dựng baseline cho cả phần P05 và trả lời bằng cách đo: sai ở đâu, sai bao nhiêu, ai được lợi, ai chịu thiệt, và mức nào là nhiễu. Kết quả có ích hơn một con số đẹp: lợi ích có thật, nhỏ ở trung bình, rõ ở đuôi; còn dấu hiệu «một nhóm tài xế trả giá» thì biến mất khi chạy lại trên seed mới, và đó là bài học thống kê của cả phần.
 
 Đây là bài 41 của lộ trình **Tối ưu quãng đường hai phía** qua [Tới Nơi](/articles/du-an-mau-toi-noi), bài mở đầu phần ghép chuyến và giảm km rỗng. Bài dựng trên simulator của [bài 30](/articles/location-tong-hop-mo-phong-su-kien-roi-rac-seed), ma trận ETA của [bài 26](/articles/location-ma-tran-many-to-many-bucket-ch) và câu hỏi xuyên suốt của [bài 01](/articles/location-bai-toan-quang-duong-khach-va-tai-xe). Phần này luôn dùng `AtPin` (đón đúng điểm ghim) làm cách chọn điểm đón, nên chỉ thay cách chọn tài xế. Mọi số đo là **trên dữ liệu mô phỏng**: kịch bản `hcm-baseline`, đồ thị HCM (126.699 nút, 319.074 cạnh, © OpenStreetMap contributors), 20 seed đánh giá 20261106…20261125. Không có GPS người thật.
 
@@ -53,7 +53,7 @@ pub fn nearest_straight_line(pending: &[PendingView], idle: &[DriverView]) -> Ve
 }
 ```
 
-Cách thứ hai, `nearest-eta`, giữ nguyên vòng lặp «khách đặt trước chọn trước», nhưng thay khoảng cách chim bay bằng ETA đường bộ lấy từ ma trận CH của bài 26. Nó nằm trong crate `matcher` dưới tên `greedy_fifo`, chạy trên ma trận mà hàng là khách, cột là tài xế, ô là ETA tính bằng mili giây:
+Cách thứ hai, `nearest-eta`, giữ nguyên vòng lặp «khách đặt trước chọn trước», nhưng thay khoảng cách chim bay bằng ETA đường bộ lấy từ ma trận CH của bài 26. Cách này nằm trong crate `matcher` dưới tên `greedy_fifo`, chạy trên ma trận mà hàng là khách, cột là tài xế, ô là ETA tính bằng mili giây:
 
 `examples/toi-noi-location/rust/crates/matcher/src/assign.rs`
 
@@ -84,11 +84,11 @@ Hai điều cần nhớ khi đọc kết quả. Một, ma trận ETA tính theo 
 
 ## Cách đọc một so sánh có cặp (đọc một lần, dùng cho cả phần)
 
-[Bài 30](/articles/location-tong-hop-mo-phong-su-kien-roi-rac-seed) đo được baseline dao động `deadhead_m` p50 1.874,9 ± 286,6 m giữa các seed, nên một seed không chứng minh gì. Từ bài này, mọi khẳng định «tốt hơn» hay «xấu hơn» trong phần P05 đều theo đúng quy trình sau, và các bài 42–45 chỉ nhắc lại tên các cột.
+[Bài 30](/articles/location-tong-hop-mo-phong-su-kien-roi-rac-seed) đo được `deadhead_m` p50 của baseline dao động 1.874,9 ± 286,6 m giữa các seed, nên một seed không chứng minh gì. Từ bài này, mọi khẳng định «tốt hơn» hay «xấu hơn» trong phần P05 đều theo đúng quy trình sau, và các bài 42–45 chỉ nhắc lại tên các cột.
 
 1. **Cùng seed, hai chiến lược.** Với seed `s`, chạy baseline A và chiến lược B trên cùng dãy khách và vị trí tài xế ban đầu. Hiệu của seed đó là `Δ_s = B_s − A_s`.
-2. **20 seed đánh giá**: 20261106…20261125 (gồm 5 seed của bài 30). Tham số của chiến lược, nếu có, chỉ được chọn trên **dải seed chỉnh** 9001…9010, hai dải không giao nhau (có test `seed_ranges_do_not_overlap`). Các bài sau không báo cáo kết luận trên seed chỉnh.
-3. **Trung bình hiệu và khoảng tin cậy 95%** theo phân phối t Student trên 20 giá trị `Δ_s`: nửa khoảng bằng `t · sd / √20`, với `t = 2,093` cho 19 bậc tự do. Khoảng này nói về **hiệu trung bình** của kịch bản nếu rút seed mới. Nó không nói 95% số seed rơi trong khoảng. Vì sd tính trên từng cặp, nhiễu chung giữa các seed không làm khoảng rộng ra, đó là lợi của việc ghép cặp.
+2. **20 seed đánh giá**: 20261106…20261125 (gồm 5 seed của bài 30). Tham số của chiến lược, nếu có, chỉ được chọn trên **dải seed chỉnh tham số** 9001…9010, hai dải không giao nhau (có test `seed_ranges_do_not_overlap`). Các bài sau không báo cáo kết luận trên dải seed chỉnh.
+3. **Trung bình hiệu và khoảng tin cậy 95%** theo phân phối t Student trên 20 giá trị `Δ_s`: nửa khoảng bằng `t · sd / √20`, với `t = 2,093` cho 19 bậc tự do. Khoảng này nói về **hiệu trung bình** của kịch bản nếu rút seed mới. Điều đó không có nghĩa là 95% số seed nằm trong khoảng. Vì sd tính trên từng cặp, nhiễu chung giữa các seed không làm khoảng rộng ra, đó là lợi của việc ghép cặp.
 4. **Nhận xét chỉ có ba mức.** «TỐT HƠN» hoặc «XẤU HƠN» khi khoảng tin cậy **không chứa 0**; ngược lại là «không phân biệt được». Cột `B<A/B>A` đếm số seed mà B thấp hơn hoặc cao hơn A, để thấy hiệu có đều giữa các seed hay chỉ do vài seed.
 
 `examples/toi-noi-location/rust/crates/matcher/src/eval.rs`
@@ -114,15 +114,15 @@ Hai điều cần nhớ khi đọc kết quả. Một, ma trận ETA tính theo 
 
 Bốn lời cảnh báo đi kèm, vì quy trình này vẫn có thể bị đọc sai.
 
-- **«Không phân biệt được» không có nghĩa là «bằng nhau».** Nó nói rằng 20 seed không đủ để thấy hiệu; hiệu thật có thể nhỏ hơn độ phân giải của phép đo.
+- **«Không phân biệt được» không có nghĩa là «bằng nhau».** Điều này nghĩa là 20 seed không đủ để thấy hiệu; hiệu thật có thể nhỏ hơn độ phân giải của phép đo.
 - **«Khác 0» không có nghĩa là «lớn» hay «đáng làm».** `cancel_rate` −0,0093 có khoảng không chứa 0, nhưng trên 228,4 khách đặt mỗi seed chỉ là chừng 2 khách. Độ lớn phải đọc riêng.
-- **Mỗi bảng có 17 chỉ số.** Với mức tin cậy 95%, kể cả khi hai chiến lược hoàn toàn giống nhau, kỳ vọng vẫn có chừng một chỉ số «có ý nghĩa» do may rủi. Vì vậy hãy đọc **mẫu hình**: nhiều chỉ số liên quan cùng hướng (km rỗng trung bình, p95, max, ETA, chờ) đáng tin hơn một dấu sao đơn lẻ. Phần sau của bài có đúng một ví dụ.
+- **Mỗi bảng có 17 chỉ số.** Với mức tin cậy 95%, kể cả khi hai chiến lược hoàn toàn giống nhau, kỳ vọng vẫn có chừng một chỉ số «có ý nghĩa thống kê» do may rủi. Vì vậy hãy đọc **mẫu hình**: nhiều chỉ số liên quan cùng hướng (km rỗng trung bình, p95, max, ETA, chờ) đáng tin hơn một dấu sao đơn lẻ. Phần sau của bài có đúng một ví dụ.
 - **Cùng seed chỉ khử một phần nhiễu.** Dòng khách và vị trí tài xế ban đầu giống nhau, nhưng dòng huỷ chuyến và nhiễu tốc độ bị lệch khi hai chiến lược gán khác thứ tự (bài 30 đã nêu).
-- **Khoảng t giả định hiệu giữa các seed xấp xỉ phân phối chuẩn.** Với 20 seed, giả định này chưa được kiểm; đó là lý do các bài ghi thêm trung vị hai bên và số seed theo từng hướng.
+- **Khoảng t giả định rằng hiệu giữa các seed xấp xỉ phân phối chuẩn.** Với 20 seed, giả định này chưa được kiểm; đó là lý do các bài ghi thêm trung vị hai bên và số seed theo từng hướng.
 
 ## Chim bay sai ở đâu: mẫu 2.000 khách
 
-Mục 1 của lab bỏ simulator ra và hỏi một câu hẹp: với mỗi khách, nếu có 80 tài xế rảnh ngẫu nhiên (trong 120), chọn theo chim bay và chọn theo ETA có khác nhau không, và khác thì thiệt bao nhiêu giây? Mẫu 2.000 khách, seed 41001. «Thiệt hại» là ETA của lựa chọn chim bay trừ ETA nhỏ nhất.
+Mục 1 của lab không dùng simulator mà hỏi một câu hẹp: với mỗi khách, nếu có 80 tài xế rảnh ngẫu nhiên (trong 120), chọn theo chim bay và chọn theo ETA có khác nhau không, và khác thì thiệt bao nhiêu giây? Mẫu 2.000 khách, seed 41001. «Thiệt hại» là ETA của lựa chọn chim bay trừ ETA nhỏ nhất.
 
 | Đại lượng (giây, trên dữ liệu mô phỏng) | Giá trị |
 |---|---:|
@@ -133,7 +133,7 @@ Mục 1 của lab bỏ simulator ra và hỏi một câu hẹp: với mỗi khá
 | p99 | 430,9 |
 | lớn nhất | 967,9 |
 | Chỉ trên 689 khách bị khác: thiệt hại p50 / p95 | 41,1 / 348,7 |
-| ETA của lựa chọn chim bay so với ETA tốt nhất (trung vị, chỉ ca khác) | 1,23× |
+| ETA của lựa chọn chim bay so với ETA tốt nhất (trung vị, chỉ tính các khách bị khác) | 1,23× |
 
 Chim bay chọn khác ở hơn một phần ba khách, và **p50 của thiệt hại là 0**: 65,5% khách hai cách chọn cùng một tài xế; ở 689 ca còn lại chim bay đều tệ hơn. Cái hại nằm ở đuôi: p95 144,9 s, p99 430,9 s, ca tệ nhất 967,9 s. Các ETA này là ETA CH theo nút; với tuyến có hướng và chi phí rẽ như simulator đo, ca tệ nhất là 1.500 s so với 511 s.
 
@@ -158,11 +158,11 @@ Có hai điều cần đọc kỹ.
 
 **16,9% không phải tần suất trong vận hành.** Lô được dựng để có xung đột: hai khách gần nhau, chỉ ba xe. Trong simulator ở bộ `thường` với ghép ngay, hai khách chờ cùng lúc không xảy ra lần nào: bài 45 đếm 4.568 lô trên 20 seed, đều chỉ một khách. Đây là cách kiểm tra xem lỗi có tồn tại không, không phải ước lượng chuyện này xảy ra bao nhiêu lần trong một ngày.
 
-**Ai được lợi, ai thiệt.** Khách A đặt trước mất thêm 33 s; khách B đặt sau được giảm 287 s. Tổng lợi lớn, nhưng người thiệt là người đã chờ lâu hơn, nên quy tắc «đặt trước chọn trước» bảo vệ A bằng giá của B. Một chính sách phân công tối ưu không đương nhiên «công bằng»: bài 45 quay lại điểm này.
+**Ai được lợi, ai thiệt.** Khách A đặt trước mất thêm 33 s; khách B đặt sau được giảm 287 s. Tổng lợi lớn, nhưng người thiệt là người đã chờ lâu hơn, nên quy tắc «đặt trước chọn trước» bảo vệ A bằng cái giá B phải trả. Một chính sách phân công tối ưu không đương nhiên «công bằng»: bài 45 quay lại điểm này.
 
 ## Trong simulator: lợi nhỏ ở trung bình, rõ ở đuôi
 
-Mục 3 chạy hai chiến lược trên simulator, 20 seed ghép cặp 20261106…20261125, kịch bản `hcm-baseline`, bộ giả định `thường` (120 tài xế, 3,5 khách/phút), trên dữ liệu mô phỏng. Lab kiểm lại seed 20261106 của baseline: nhật ký chuyến 227 dòng, FNV-1a `100a862df76819aa`, khớp từng byte với con số bài 30 đã công bố. A là chim bay, B là ETA.
+Mục 3 chạy hai chiến lược trên simulator, 20 seed ghép cặp 20261106…20261125, kịch bản `hcm-baseline`, bộ giả định `thường` (120 tài xế, 3,5 khách/phút), trên dữ liệu mô phỏng. Lab đối chiếu lại seed 20261106 của baseline: nhật ký chuyến 227 dòng, FNV-1a `100a862df76819aa`, khớp từng byte với con số bài 30 đã công bố. A là chim bay, B là ETA.
 
 | Chỉ số | A | B | Hiệu B − A [KTC 95%] | B<A/B>A | Nhận xét |
 |---|---:|---:|---|:-:|---|
@@ -196,11 +196,11 @@ Khách được chia theo khoảng cách từ điểm ghim tới một tâm quy 
 |---|---:|---|---|---|
 | trung tâm | 53,6 | 0,871 → 0,878 | +7,4 [−3,1; 18,0] | **+145,3 [43,0; 247,6] XẤU HƠN** |
 | vành trong | 107,3 | 0,871 → 0,875 | −12,0 [−20,1; −3,9] | −76,7 [−145,7; −7,7] TỐT HƠN |
-| ngoại vi | 67,5 | 0,833 → 0,854 (có ý nghĩa) | −31,0 [−43,9; −18,2] | −221,2 [−319,2; −123,1] TỐT HƠN |
+| ngoại vi | 67,5 | 0,833 → 0,854 (có ý nghĩa thống kê) | −31,0 [−43,9; −18,2] | −221,2 [−319,2; −123,1] TỐT HƠN |
 
 Khách ngoại vi được lợi nhất: chờ ít hơn 31,0 s, tỉ lệ hoàn thành tăng 0,833 → 0,854. Chuyến đón khách ở trung tâm lại chạy rỗng **thêm 145,3 m** và khách ở đó không được chờ ít hơn (+7,4 s, khoảng chứa 0). Thật dễ viết câu «ETA chuyển lợi từ trung tâm ra ngoại vi».
 
-Nhưng đây là một dấu sao trong 26 phép so sánh (17 chỉ số và 9 ô theo vùng). Từ khoảng tin cậy suy ra t ≈ 145,3 / (102,3 / 2,093) ≈ 2,97; muốn giữ mức 5% cho cả 26 phép so sánh theo Bonferroni cần t khoảng 3,6. Dòng này không qua, trong khi p95 (4,6), max (6,9) và ngoại vi (4,7) qua. Cách kiểm tốt hơn là chạy lại, nên lab lặp thí nghiệm trên 40 seed chưa dùng, 20261126…20261165:
+Nhưng đây là một dấu sao trong 26 phép so sánh (17 chỉ số và 9 ô theo vùng). Từ khoảng tin cậy suy ra t ≈ 145,3 / (102,3 / 2,093) ≈ 2,97; muốn giữ mức 5% cho cả 26 phép so sánh theo Bonferroni cần t khoảng 3,6. Dòng này không vượt ngưỡng đó, trong khi p95 (4,6), max (6,9) và ngoại vi (4,7) đều vượt. Cách kiểm tra tốt hơn là chạy lại, nên lab lặp thí nghiệm trên 40 seed chưa dùng, 20261126…20261165:
 
 | Hiệu B − A (trên dữ liệu mô phỏng) | 20 seed đánh giá | 40 seed mới |
 |---|---|---|
@@ -228,9 +228,9 @@ Cùng so sánh, thử thêm các bộ giả định (20 seed, ghép cặp):
 | `huỷ nặng` | −13,4 [−54,5; 27,6] không phân biệt được | `deadhead_m` p50 +59,7 m XẤU HƠN; huỷ −0,0210, hoàn thành +4,8 TỐT HƠN |
 | `huỷ theo chờ` | cho đúng kết quả của `thường` | ghép ngay thì thời gian chờ chính là ETA, bộ này chưa thêm thông tin ở bài này |
 
-Hiệu rõ nhất khi dư xe. Khi xe quá ít hoặc cầu quá cao, ai cũng phải chạy xa, nên chọn xe nào gần hơn gần như không đổi gì; đó là cách đọc của lab, không phải kết luận đã kiểm riêng. Ở `cao điểm` có hai dòng XẤU HƠN với cận dưới sát 0 trong 17 chỉ số: có thể là may rủi, chưa được chạy lại. Bộ `huỷ theo chờ` giống hệt `thường` không phải vì cẩu thả: với ghép ngay, thời gian chờ tính từ lúc đặt bằng ETA tính từ lúc gán, nên hai mô hình huỷ trùng nhau. Nó chỉ có ý nghĩa khi có cửa sổ lô, ở bài 43.
+Hiệu rõ nhất khi dư xe. Khi xe quá ít hoặc cầu quá cao, ai cũng phải chạy xa, nên chọn xe nào gần hơn gần như không đổi gì; đó là cách đọc của lab, không phải kết luận đã kiểm riêng. Ở `cao điểm` có hai dòng XẤU HƠN với cận dưới sát 0 trong 17 chỉ số: có thể là may rủi, chưa được chạy lại. Bộ `huỷ theo chờ` giống hệt `thường` không phải vì cẩu thả: với ghép ngay, thời gian chờ tính từ lúc đặt bằng ETA tính từ lúc gán, nên hai mô hình huỷ trùng nhau. Bộ này chỉ có ý nghĩa khi có cửa sổ lô, như ở bài 43.
 
-Kết luận cho baseline của phần P05: **ở mật độ thường, ETA thay chim bay không làm chỉ số toàn hệ thống nào xấu đi một cách phân biệt được, và giá trị chính của nó là cắt đuôi.** Nó không phải thuốc chữa km rỗng trung bình. Cái giá về tính toán (ma trận ETA thay cho phép tính haversine) không đo ở bài này; [bài 44](/articles/location-cat-tia-ung-vien-h3-ma-tran-thua) đo chi phí dựng ma trận. Từ đây, mọi bài sau so với **`nearest-eta` ghép ngay** hoặc nêu rõ so với cái gì.
+Kết luận cho baseline của phần P05: **ở mật độ thường, ETA thay chim bay không làm chỉ số toàn hệ thống nào xấu đi một cách phân biệt được, và giá trị chính của nó là cắt đuôi.** ETA không phải thuốc chữa km rỗng trung bình. Cái giá về tính toán (ma trận ETA thay cho phép tính haversine) không đo ở bài này; [bài 44](/articles/location-cat-tia-ung-vien-h3-ma-tran-thua) đo chi phí dựng ma trận. Từ đây, mọi bài sau so với **`nearest-eta` ghép ngay** hoặc nêu rõ so với chiến lược nào.
 
 ## Chạy ví dụ và kiểm chứng
 
@@ -256,11 +256,11 @@ Tham số: `--seeds N` (mặc định 20), `--trials N` (mẫu cho mục 1–2, 
     chênh 255 s (102.9%): A mất +33 s, B được -287 s
 ```
 
-Lab chạy hai lần, lần đầu có năm bộ giả định, lần sau thêm bộ `huỷ theo chờ`; mọi số trừ thời gian giống nhau. `verify-p05.sh` chạy lab này trên fixture (`--seeds 2 --trials 100`) để kiểm bất biến, không tái lập các số trong bài; các số trên HCM với 20 seed mất vài phút đến hàng chục phút mỗi lab.
+Lab chạy hai lần, lần đầu có năm bộ giả định, lần sau thêm bộ `huỷ theo chờ`; mọi số trừ thời gian giống nhau. `verify-p05.sh` chạy lab này trên fixture (`--seeds 2 --trials 100`) để kiểm tra các bất biến, không tái lập các số trong bài; các số trên HCM với 20 seed mất vài phút đến hàng chục phút mỗi lab.
 
 ## Giới hạn của ví dụ
 
-- **Tất cả là mô phỏng.** Nhu cầu quanh tám điểm nóng đặt tay, mô hình huỷ là công thức chưa hiệu chuẩn, tài xế không từ chối chuyến, không rong ruổi. Bài này không nói một hệ thống thật nên có thay đổi nào.
+- **Tất cả là mô phỏng.** Nhu cầu quanh tám điểm nóng đặt tay, mô hình huỷ là công thức chưa hiệu chuẩn, tài xế không từ chối chuyến, không tự di chuyển đi tìm vùng có nhu cầu. Bài này không nói một hệ thống thật nên có thay đổi nào.
 - **ETA của matcher là ETA CH theo nút**, không có chi phí rẽ, và chưa thử với giao thông tổng hợp theo giờ: CH của matcher dùng tốc độ tự do.
 - **Mẫu 1 và 2 là mẫu dựng**, không phải phân phối của vận hành. Mẫu 2 cố tình tạo xung đột.
 - **Chỉ 20 seed** và khoảng t giả định gần chuẩn; chỉ bộ `thường` được chạy lại trên seed mới, các bộ khác chưa.

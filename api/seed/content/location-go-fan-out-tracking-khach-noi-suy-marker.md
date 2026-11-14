@@ -1,16 +1,16 @@
 ---
 slug: location-go-fan-out-tracking-khach-noi-suy-marker
 title: "Tracking cho khách: fan-out bằng Go, ô chờ, ack và nội suy marker"
-summary: "Bài 19: tracking-hub chỉ mở sau khi gán tài xế, mỗi client một ô chờ, cửa sổ hai khung với TrackingAck vì bộ đệm TCP nuốt khung cũ; p95 34 ms đo trên loopback; hợp đồng để app nội suy marker."
+summary: "Bài 19: tracking-hub chỉ mở sau khi gán tài xế, mỗi client một ô chờ, cửa sổ hai khung với TrackingAck vì bộ đệm TCP nuốt khung cũ; p95 34 ms đo trên loopback; hợp đồng nội suy marker cho app."
 category: location-routing
 level: intermediate
 tags: [toi-noi, location, go, websocket, fan-out, backpressure, tracking, interpolation]
 language: vi
 ---
 
-Khách đã đặt xe và tài xế đã nhận chuyến. Khách mở app và nhìn một chấm xanh trên bản đồ. Nếu chấm đó đứng yên rồi nhảy một đoạn mỗi 4 giây thì khách tưởng app hỏng; nếu nó chạy mượt thì khách tin chuyến đang đến. Để có điều đó cần hai thứ: phía server không đưa vị trí cũ cho khách, kể cả khi điện thoại khách đọc chậm; phía app có hợp đồng rõ để nội suy chuyển động giữa hai điểm.
+Khách đã đặt xe và tài xế đã nhận chuyến. Khách mở app và nhìn một chấm xanh trên bản đồ. Nếu chấm đó đứng yên rồi nhảy một đoạn mỗi 4 giây thì khách tưởng app hỏng; nếu nó chạy mượt thì khách tin chuyến đang đến. Để có điều đó cần hai thứ: phía server không đưa vị trí cũ cho khách, kể cả khi điện thoại khách đọc chậm; phía app có hợp đồng rõ ràng về cách nội suy chuyển động giữa hai điểm.
 
-Đây là bài 19 của lộ trình **Nền tảng định vị** qua [Tới Nơi](/articles/du-an-mau-toi-noi). Bài dựng trên hàng đợi và cách coalesce của [bài 13](/articles/location-go-backpressure-coalesce-drop-race-detector) và cờ của [bài 14](/articles/location-validate-gps-timestamp-accuracy-gia-mao). [Bài 17](/articles/location-map-matching-online-cua-so-cau-vuot-duong-song-song) về bám đường online quyết định `route_offset_m`; lab của bài này chưa có nó, và sẽ nói rõ ở chỗ cần.
+Đây là bài 19 của lộ trình **Nền tảng định vị** qua [Tới Nơi](/articles/du-an-mau-toi-noi). Bài này dựa trên hàng đợi và cách gộp điểm (coalesce) của [bài 13](/articles/location-go-backpressure-coalesce-drop-race-detector) và cờ của [bài 14](/articles/location-validate-gps-timestamp-accuracy-gia-mao). [Bài 17](/articles/location-map-matching-online-cua-so-cau-vuot-duong-song-song) về bám đường online là bài quyết định `route_offset_m`; lab của bài này chưa có nó, và sẽ nói rõ ở chỗ cần.
 
 <div class="tkh-callout tkh-callout--example">
 <span class="tkh-callout-title">Thử trước khi đọc</span>
@@ -20,7 +20,7 @@ Khách đã đặt xe và tài xế đã nhận chuyến. Khách mở app và nh
 
 ## Hub theo chuyến: 25.000 tài xế nhưng chỉ vài nghìn có người xem
 
-`tracking-hub` đọc topic `location.updates.v1` bằng consumer **không có nhóm**, bắt đầu từ cuối topic: hub là bản đọc realtime, khởi động lại thì vị trí cũ không còn ý nghĩa với marker đang chạy. Mỗi sự kiện đi qua `Dispatch`; trường hợp thường gặp nhất là tài xế chưa có chuyến, và đường đó chỉ là một lần tra map rồi bỏ:
+`tracking-hub` đọc topic `location.updates.v1` bằng consumer **không có nhóm**, bắt đầu từ cuối topic: hub là bản đọc thời gian thực, khởi động lại thì vị trí cũ không còn ý nghĩa với marker đang chạy. Mỗi sự kiện đi qua `Dispatch`; trường hợp thường gặp nhất là tài xế chưa có chuyến, và đường đó chỉ là một lần tra map rồi bỏ:
 
 Tệp `examples/toi-noi-location/go/internal/hub/hub.go` (dòng 86–110):
 
@@ -52,7 +52,7 @@ func (h *Hub) Dispatch(ev *pb.DriverLocationUpdated) {
 }
 ```
 
-Ba nhánh, ba bộ đếm. Điểm mang cờ nặng (`TELEPORT`, `SPEED_IMPLAUSIBLE`, `MOCK_REPORTED`) bị giữ lại, khách không thấy marker nhảy qua sông; Fraud quyết định sau. Tài xế chưa có chuyến thì bỏ. Còn lại cập nhật `t.last` (để khách vào muộn có vị trí ngay) và đẩy vào ô chờ của từng client đang nghe chuyến đó. Hình 1 vẽ toàn bộ đường đi.
+Ba nhánh, ba bộ đếm. Điểm mang cờ nặng (`TELEPORT`, `SPEED_IMPLAUSIBLE`, `MOCK_REPORTED`) bị giữ lại, khách không thấy marker nhảy qua sông; dịch vụ Fraud quyết định sau. Tài xế chưa có chuyến thì bỏ. Còn lại cập nhật `t.last` (để khách vào muộn có vị trí ngay) và đẩy vào ô chờ của từng client đang nghe chuyến đó. Hình 1 vẽ toàn bộ đường đi.
 
 <figure class="tkh-fig">
 <div class="tkh-fig-box">
@@ -66,7 +66,7 @@ Với tải của lab, 25.000 tài xế ở 6.250 điểm/giây nhưng chỉ 200
 
 ## Chỉ mở sau khi gán
 
-Quy tắc quyền riêng tư của loạt: khách chỉ thấy tài xế sau khi được gán và chỉ trong chuyến đó. Hub không tự quyết, mà chờ assignment từ Dispatch (C#). Trong lab, `POST /lab/assign` thay cho sự kiện `TripAssigned` đó và chỉ nhận token vai trò admin của lab.
+Quy tắc quyền riêng tư của cả loạt bài: khách chỉ thấy tài xế sau khi được gán và chỉ trong chuyến đó. Hub không tự quyết, mà chờ sự kiện gán chuyến từ Dispatch (C#). Trong lab, `POST /lab/assign` thay cho sự kiện `TripAssigned` đó và chỉ nhận token vai trò admin của lab.
 
 Tệp `examples/toi-noi-location/go/internal/hub/http.go` (dòng 24–48):
 
@@ -101,14 +101,14 @@ Tệp `examples/toi-noi-location/go/internal/hub/http.go` (dòng 24–48):
 Đọc kỹ ba mã trả về:
 
 - **401** khi token sai, hết hạn, sai vai trò, hoặc claim `trip` khác `?trip=` mà khách xin.
-- **403 chung cho ba trường hợp**: chuyến chưa gán, chuyến của người khác, chuyến không tồn tại. Nếu tách ba mã thì khách (hay kẻ đoán mã chuyến) dò ra được chuyến nào tồn tại. Kiến trúc §10 nói rõ không cho client tự đoán channel ID rồi nghe dữ liệu người khác.
+- **403 chung cho ba trường hợp**: chuyến chưa gán, chuyến của người khác, chuyến không tồn tại. Nếu tách ba mã thì khách (hay kẻ đoán mã chuyến) dò ra được chuyến nào tồn tại. Kiến trúc §10 nêu rõ: không cho client tự đoán channel ID để nghe dữ liệu của người khác.
 - **429** khi một chuyến đã có đủ 3 kết nối nghe.
 
-Khi chuyến kết thúc, `Unassign` đóng mọi kết nối nghe bằng mã `1000` «trip ended»; app thấy mã này thì ngừng nghe, không kết nối lại, và lần dò sau đó nhận 403. Các test của hub (`go test -race ./internal/hub`) kiểm: chưa gán bị từ chối, khách khác dùng token hợp lệ của mình vẫn bị từ chối, token của chuyến khác bị từ chối, điểm `TELEPORT` bị giữ lại, kết thúc chuyến đóng kết nối, `assign` chỉ cho admin, và client không ack bị ngắt.
+Khi chuyến kết thúc, `Unassign` đóng mọi kết nối nghe bằng mã `1000` «trip ended»; app thấy mã này thì ngừng nghe, không kết nối lại, và lần dò sau đó nhận 403. Các test của hub (`go test -race ./internal/hub`) kiểm tra các trường hợp: chưa gán bị từ chối, khách khác dùng token hợp lệ của mình vẫn bị từ chối, token của chuyến khác bị từ chối, điểm `TELEPORT` bị giữ lại, kết thúc chuyến đóng kết nối, `assign` chỉ cho admin, và client không ack bị ngắt.
 
 ## Một ô chờ cho mỗi client
 
-Giả sử một khách đọc chậm. Nếu hub xếp mọi khung vào hàng đợi riêng cho khách đó thì hàng đó phình ra và khi khách đọc lại thì phải xem hết khung cũ. Hub dùng cách khác: mỗi client chỉ có **một ô chờ**.
+Giả sử một khách đọc chậm. Nếu hub xếp mọi khung vào hàng đợi riêng cho khách đó thì hàng đó phình ra và khi khách đọc tiếp thì phải xử lý hết khung cũ. Hub dùng cách khác: mỗi client chỉ có **một ô chờ**.
 
 Tệp `examples/toi-noi-location/go/internal/hub/hub.go` (dòng 112–151):
 
@@ -161,12 +161,12 @@ func (s *sub) take() (u *pb.TrackingUpdate, ing int64, sk uint32, ok bool) {
 
 Phiên bản đầu của hub không có `TrackingAck` và `inflight`: nó chỉ có ô chờ và dựa vào việc `Write` bị chặn để biết một client đang chậm. Thử với cùng cấu hình (10 khách chậm, mỗi khung xử lý mất 6 giây) cho kết quả không như mong đợi:
 
-- Hub **gộp 0 điểm**. Nó không bao giờ thấy client chậm.
+- Hub **gộp 0 điểm**. Hub không bao giờ nhận ra client chậm.
 - Tuổi điểm lúc khách nhận: p50 10,06 giây, p99 20,09 giây.
 
-Nguyên nhân: một `TrackingUpdate` chỉ cỡ vài chục byte (ước tính từ các trường, chưa đo), nên bộ đệm gửi của hub cộng bộ đệm nhận của khách chứa được hàng nghìn khung. `Write` trả về thành công đều đặn; hub nghĩ khách theo kịp. Khung cứ chồng lên trong bộ đệm của hệ điều hành, và khi điện thoại khách đọc lại thì nó phải xem lần lượt từng khung cũ mới tới vị trí hiện tại. Chậm 6 giây mỗi khung nghĩa là tuổi điểm cứ tăng.
+Nguyên nhân: một `TrackingUpdate` chỉ cỡ vài chục byte (ước tính từ các trường, chưa đo), nên bộ đệm gửi của hub cộng bộ đệm nhận của khách chứa được hàng nghìn khung. `Write` trả về thành công đều đặn; hub nghĩ khách theo kịp. Khung cứ chồng lên trong bộ đệm của hệ điều hành, và khi điện thoại khách đọc tiếp thì phải xử lý lần lượt từng khung cũ mới tới vị trí hiện tại. Chậm 6 giây mỗi khung nghĩa là tuổi điểm cứ tăng.
 
-Cách sửa nằm ở tầng ứng dụng: app khách gửi `TrackingAck` sau **mỗi khung đã xử lý xong**, và hub chỉ cho tối đa 2 khung chưa ack đang bay. Đủ 2 thì hub giữ điểm mới nhất trong ô chờ, thay dần, và gửi ngay khi nhận ack. Client không ack 30 giây dù có điểm chờ thì hub ngắt kết nối bằng `1008 client too slow`.
+Cách sửa nằm ở tầng ứng dụng: app khách gửi `TrackingAck` sau **mỗi khung đã xử lý xong**, và hub chỉ cho tối đa 2 khung chưa ack đang bay. Đủ 2 thì hub giữ điểm mới nhất trong ô chờ, liên tục thay bằng điểm mới hơn, và gửi ngay khi nhận ack. Client không ack trong 30 giây dù có điểm chờ thì hub ngắt kết nối bằng `1008 client too slow`.
 
 Tệp `examples/toi-noi-location/go/internal/hub/http.go` (dòng 81–117):
 
@@ -210,7 +210,7 @@ Tệp `examples/toi-noi-location/go/internal/hub/http.go` (dòng 81–117):
 	}
 ```
 
-Đoạn trên là vòng ghi của một client: chờ một trong bốn việc (chuyến kết thúc, goroutine đọc ack chết, `StallTimeout` hết hạn khi bị giữ, hoặc tín hiệu có việc mới) rồi rút từng khung đang được phép gửi. Bộ hẹn giờ chỉ được đặt khi client đang `blocked`, tức có điểm chờ mà cửa sổ đã đầy; client rảnh không bao giờ bị ngắt vì «im lặng».
+Đoạn trên là vòng ghi của một client: chờ một trong bốn việc (chuyến kết thúc, goroutine đọc ack chết, `StallTimeout` hết hạn khi bị giữ, hoặc tín hiệu có việc mới) rồi rút từng khung đang được phép gửi. Hub chỉ đặt bộ hẹn giờ khi client đang bị nghẽn (`blocked`), tức có điểm chờ mà cửa sổ đã đầy; client rảnh không bao giờ bị ngắt vì «im lặng».
 
 <figure class="tkh-fig">
 <div class="tkh-fig-box">
@@ -220,7 +220,7 @@ Tệp `examples/toi-noi-location/go/internal/hub/http.go` (dòng 81–117):
 <figcaption>Hình 2. Tuổi điểm với 10 khách đọc chậm, trước và sau khi có ack. Cột nét đứt là số chép từ log phiên làm việc (output của lần chạy đầu đã bị ghi đè); cột nét liền lấy từ <code>loc19_b1.txt</code>.</figcaption>
 </figure>
 
-Sau khi có ack, lần chạy lô 1 điểm cho khách chậm 104 khung, hub gộp 30 điểm, tuổi điểm lúc nhận p50 6,14 giây và p99 10,06 giây: tuổi bị chặn ở cỡ một đến hai lần thời gian xử lý một khung của chính client đó, thay vì tăng mãi. Hai cảnh báo trung thực. Một: số «trước ack» là chép từ log, không còn output nào trong file để kiểm lại. Hai: hành vi hiện tại được test giữ lại, `TestClientChamBiCoalesce`: 2.001 điểm tới trong lúc client không ack, client nhận 3 khung, hub gộp 1.998 (3 + 1.998 = 2.001, không điểm nào bị đếm sai).
+Sau khi có ack, lần chạy lô 1 điểm gửi cho khách chậm 104 khung, hub gộp 30 điểm, tuổi điểm lúc nhận p50 6,14 giây và p99 10,06 giây: tuổi bị chặn ở cỡ một đến hai lần thời gian xử lý một khung của chính client đó, thay vì tăng mãi. Hai điều cần nói thẳng. Một: số «trước ack» là chép từ log, không còn output nào trong file để kiểm lại. Hai: hành vi hiện tại được test giữ lại, `TestClientChamBiCoalesce`: 2.001 điểm tới trong lúc client không ack, client nhận 3 khung, hub gộp 1.998 (3 + 1.998 = 2.001, không điểm nào bị đếm sai).
 
 Bài học vượt ra ngoài Go: **`Write` thành công không phải bằng chứng người nhận theo kịp**. Với WebSocket, chỉ TCP lo flow control, và TCP thì đệm rất nhiều (HTTP/2 có cửa sổ theo từng stream, nhưng bài 12 đã giải thích vì sao ta không dùng gRPC trực tiếp cho mobile). Muốn biết người nhận đã xử lý xong phải có xác nhận ở tầng ứng dụng, và muốn bỏ điểm cũ có chủ đích phải biết bao nhiêu điểm đang nằm trên đường đi.
 
@@ -270,38 +270,38 @@ Mục tiêu là **trễ có chủ đích** để luôn có hai điểm mà nội
 7. Quay biểu tượng theo `heading` theo cung ngắn nhất, làm mượt, và không quay khi `speed_dmps` bằng 0.
 ```
 
-Cốt lõi là câu «trễ có chủ đích»: app luôn chạy từ vị trí hiện tại của marker tới điểm mới `B` trong thời lượng `T`, nên marker đi sau thực tế cỡ `T` cộng tuổi điểm. Ví dụ tính tay, không phải số đo: điểm cách nhau 4 giây, xe máy chạy 8 m/s thì marker chậm khoảng 4 giây, tương đương 32 m, cộng với tuổi điểm lúc rời hub. Đổi lại marker không bao giờ nhảy, không chạy lùi, và khi mất tín hiệu quá 10 giây app hiện «đang tìm lại vị trí» thay vì đoán tiếp (xe có thể đã rẽ vào hẻm). Lưu ý bên chịu thiệt: khách luôn thấy tài xế hơi trễ so với thực tế; ta đổi một chút độ chính xác tức thời lấy sự tin tưởng.
+Cốt lõi là câu «trễ có chủ đích»: app luôn chạy từ vị trí hiện tại của marker tới điểm mới `B` trong thời lượng `T`, nên marker đi sau thực tế cỡ `T` cộng tuổi điểm. Ví dụ tính tay, không phải số đo: điểm cách nhau 4 giây, xe máy chạy 8 m/s thì marker chậm khoảng 4 giây, tương đương 32 m, cộng với tuổi điểm lúc rời hub. Đổi lại marker không bao giờ nhảy, không chạy lùi, và khi mất tín hiệu quá 10 giây app hiện «đang tìm lại vị trí» thay vì đoán tiếp (xe có thể đã rẽ vào hẻm). Cần lưu ý bên nào chịu thiệt: khách luôn thấy tài xế hơi trễ so với thực tế; ta đổi một chút độ chính xác tức thời lấy sự tin tưởng.
 
-Hai điều lab **chưa có**. Một: không có code client; nội suy chỉ là hợp đồng bằng chữ, nên `interp_delay` chưa được đo. Hai: `route_offset_m` luôn để trống, vì bám đường (LOC-16, LOC-17) chưa chạy trong lab này; nên chạy «theo route» ở quy tắc 3 hiện chỉ là đường thẳng. Khi map matching có mặt, `route_offset_m` sẽ cho vị trí dọc tuyến, và marker đi theo đường thay vì cắt góc qua dải phân cách.
+Lab **chưa có** hai điều. Một: không có code client; nội suy chỉ là hợp đồng bằng chữ, nên `interp_delay` chưa được đo. Hai: `route_offset_m` luôn để trống, vì bám đường (LOC-16, LOC-17) chưa chạy trong lab này; nên việc chạy «theo route» ở quy tắc 3 hiện chỉ là đường thẳng. Khi map matching có mặt, `route_offset_m` sẽ cho vị trí dọc tuyến, và marker đi theo đường thay vì cắt góc qua dải phân cách.
 
 ## Độ trễ đo được: loopback, không phải mạng di động
 
-Tải: 25.000 tài xế ở 6.250 điểm/giây qua ingest và Kafka thật, 200 khách xem (200 tài xế đầu tiên được gán chuyến), trong đó 10 khách đọc chậm, 60 giây đo; hai lần chạy chỉ khác kích thước lô. Ingest, hub, loadgen và Kafka cùng một máy đang chịu tải nặng, nên coi thời gian là tương đối, mỗi cột là một lần chạy. Hai độ trễ đầu cuối đo phía khách, cùng đồng hồ vì cùng một máy: `send_to_recv` từ lúc app gửi lô tới lúc khách nhận khung, `sample_to_recv` từ lúc lấy mẫu điểm (gồm thời gian điểm chờ trong lô ở app).
+Tải: 25.000 tài xế ở 6.250 điểm/giây qua ingest và Kafka thật, 200 khách xem (200 tài xế đầu tiên được gán chuyến), trong đó 10 khách đọc chậm, 60 giây đo; hai lần chạy chỉ khác kích thước lô. Ingest, hub, loadgen và Kafka cùng chạy trên một máy đang chịu tải nặng, nên coi số đo thời gian là tương đối, mỗi cột là một lần chạy. Hai độ trễ đầu cuối đo phía khách, cùng đồng hồ vì cùng một máy: `send_to_recv` từ lúc app gửi lô tới lúc khách nhận khung, `sample_to_recv` từ lúc lấy mẫu điểm (gồm thời gian điểm chờ trong lô ở app).
 
 | Đo (190 khách thường, loopback) | Lô 3 điểm | Lô 1 điểm |
 | --- | --- | --- |
 | Gửi → nhận, p50 / p95 / p99 | 10 / 33 / 59 ms | 10 / 34 / 62 ms |
 | Lấy mẫu → nhận, p95 / p99 / max | 34 / 72 / 8.015 ms | 34 / 62 / 114 ms |
-| Hub: ingest nhận → hub ghi, p95 / p99 (gồm cả 10 khách chậm) | 28 / 54 ms | 34 / 2.072 ms |
-| Khung gửi / điểm hub nhận cho chuyến có gán | 1.056 / 3.162 | 3.072 / 3.160 |
+| Hub: từ lúc nhận ở ingest → lúc hub ghi, p95 / p99 (gồm cả 10 khách chậm) | 28 / 54 ms | 34 / 2.072 ms |
+| Khung gửi / điểm hub nhận cho chuyến đã gán | 1.056 / 3.162 | 3.072 / 3.160 |
 
 Đọc cho đúng:
 
-- Độ trễ của riêng đường ống (app gửi, Kafka, hub, khách) có p95 cỡ 34 ms **trên loopback**. Con số này **không** gồm mạng di động thật, không có TLS, không có load balancer, và không phải bằng chứng cho SLO của kiến trúc §14.1 (lan truyền realtime p95 dưới 2 đến 3 giây). Nó chỉ cho biết phần xử lý trong ba tiến trình của ta chưa phải là chỗ ngốn thời gian ở quy mô này; phần mạng di động chưa đo.
+- Độ trễ của riêng đường ống (app gửi, Kafka, hub, khách) có p95 cỡ 34 ms **trên loopback**. Con số này **không** gồm mạng di động thật, không có TLS, không có load balancer, và không phải bằng chứng cho SLO của kiến trúc §14.1 (lan truyền theo thời gian thực, p95 dưới 2 đến 3 giây). Số liệu này chỉ cho biết phần xử lý trong ba tiến trình của ta chưa phải là chỗ ngốn thời gian ở quy mô này; phần mạng di động chưa đo.
 - Chia lô gần như không ảnh hưởng độ trễ đường ống (10/33/59 so với 10/34/62 ms). Với lô 3 điểm, ba điểm tới hub gần như cùng lúc nên ô chờ chỉ giữ điểm mới nhất: hub gộp 2.103 trong 3.162 điểm, khách nhận ít khung hơn (1.056 so với 3.072) nhưng khung nào cũng là điểm mới nhất. `max` 8.015 ms của `sample_to_recv` chính là điểm đầu lô, đã chờ ở app 8 giây trước khi gửi; điểm bị chọn ở hub là điểm cuối lô nên hiếm khi khách thấy nó.
-- Độ trễ đường ống không đo khoảng chờ giữa hai khung, và chỗ này lô 3 điểm thua rõ. 190 khách thường nhận 1.005 khung trong 60 giây, cỡ 11 giây một khung, khớp với việc lô đi mỗi 12 giây; lô 1 điểm cho 2.959 khung, cỡ 3,9 giây một khung (chia từ số khung, không phải số đo trực tiếp). Ngay trước khung sau, vị trí khách đang giữ đã cũ cỡ khoảng đó, nên với SLO độ tươi của kiến trúc, cách chia lô quan trọng hơn con số 34 ms.
+- Độ trễ đường ống không đo khoảng chờ giữa hai khung, và chỗ này lô 3 điểm thua rõ. 190 khách thường nhận 1.005 khung trong 60 giây, khoảng 11 giây một khung, khớp với việc lô đi mỗi 12 giây; lô 1 điểm cho 2.959 khung, khoảng 3,9 giây một khung (chia từ số khung, không phải số đo trực tiếp). Ngay trước khung sau, vị trí khách đang giữ đã cũ khoảng thời gian đó, nên với SLO độ tươi của kiến trúc, cách chia lô quan trọng hơn con số 34 ms.
 - Cột p99 2.072 ms ở lô 1 điểm là khung của 10 khách chậm đang chờ ack, không phải độ trễ của khách thường. Lần chạy đó còn ghi `write_errors: 1` trong thống kê hub; lab chưa điều tra lỗi ghi này.
 - Hub dùng ít tài nguyên ở quy mô này: RSS đỉnh 31,3 MB (lô 3) và 32,1 MB (lô 1), 13 goroutine ở cuối lần chạy. Đó là hub với 200 khách, không phải với số khách đồng thời của Tới Nơi.
 
 ## Chạy ví dụ và kiểm chứng
 
-Test của hub không cần Kafka (từ gốc repository):
+Test của hub không cần Kafka (chạy từ thư mục gốc của repository):
 
 ```bash
 go -C examples/toi-noi-location/go test -race -count=1 -v ./internal/hub
 ```
 
-Output (rút gọn các dòng `RUN`); dòng log của `TestClientChamBiCoalesce` ghi hành vi hiện tại:
+Kết quả chạy (rút gọn các dòng `RUN`); dòng log của `TestClientChamBiCoalesce` ghi hành vi hiện tại:
 
 ```text
 --- PASS: TestChiMoSauKhiGan (0.01s)
@@ -336,7 +336,7 @@ Số đếm (khung, điểm gộp, số chuyến) tái lập được tốt hơn
 
 <div class="tkh-callout tkh-callout--warn">
 <span class="tkh-callout-title">Giới hạn của ví dụ</span>
-<p>Độ trễ đo trên loopback, một máy đang chịu tải, mỗi cột một lần chạy; không có mạng di động, không TLS, không CDN, nên không so được với SLO §14.1. Chỉ 200 khách xem (trong 25.000 tài xế), không phải số chuyến đồng thời thật. Không có app khách thật: nội suy chỉ là hợp đồng bằng chữ, chưa có code, chưa đo <code>interp_delay</code>; <code>route_offset_m</code> để trống. Chạy lại sau khi mất kết nối (backoff có jitter ở phía app) chưa được chạy. Một hub đọc toàn bộ topic và bỏ khoảng 99% sự kiện; muốn chạy nhiều hub phải chia việc theo chuyến hoặc theo tài xế, và lab chưa làm. Số «trước ack» chép từ log, không còn trong file. Token là token HMAC của lab; assignment đến qua <code>/lab/assign</code>, chưa phải sự kiện thật từ Dispatch.</p>
+<p>Độ trễ đo trên loopback, một máy đang chịu tải, mỗi cột một lần chạy; không có mạng di động, không TLS, không CDN, nên không so được với SLO §14.1. Chỉ 200 khách xem (trong 25.000 tài xế), không phải số chuyến đồng thời thật. Không có app khách thật: nội suy chỉ là hợp đồng bằng chữ, chưa có code, chưa đo <code>interp_delay</code>; <code>route_offset_m</code> để trống. Chưa chạy thử việc kết nối lại sau khi mất kết nối (backoff có jitter ở phía app). Một hub đọc toàn bộ topic và bỏ khoảng 99% sự kiện; muốn chạy nhiều hub phải chia việc theo chuyến hoặc theo tài xế, và lab chưa làm. Số «trước ack» chép từ log, không còn trong file. Token là token HMAC của lab; việc gán chuyến đến qua <code>/lab/assign</code>, chưa phải sự kiện thật từ Dispatch.</p>
 </div>
 
 ## Bài tập

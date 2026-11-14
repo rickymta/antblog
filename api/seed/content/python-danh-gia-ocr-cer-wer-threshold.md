@@ -1,26 +1,26 @@
 ---
 slug: python-danh-gia-ocr-cer-wer-threshold
 title: "Đánh giá OCR: CER/WER, bộ test vàng và ngưỡng chấp nhận"
-summary: "Bài 45: đo OCR bằng CER/WER với jiwer trên bộ test vàng 50 thẻ giả, phân tích thay/xoá/chèn theo trường, chọn ngưỡng đưa người duyệt từ số liệu, và chặn regression bằng baseline.json. Có output thật."
+summary: "Bài 45: đo OCR bằng CER/WER với jiwer trên bộ test vàng 50 thẻ giả, phân tích lỗi thay/xoá/chèn theo trường, chọn ngưỡng chuyển cho người duyệt dựa trên số liệu, và chặn regression bằng baseline.json. Có kết quả chạy thật."
 category: python-advanced
 level: advanced
 tags: [python, toi-noi, ocr, jiwer, evaluation]
 language: vi
 ---
 
-Sau bài 44, `kyc-ocr` của [Tới Nơi](/articles/du-an-mau-toi-noi) trả về `FieldResult` cho từng trường của thẻ. Bộ phận vận hành hỏi một câu tưởng đơn giản: «OCR đủ tốt chưa?». Con số «đúng 85%» không trả lời được: đúng theo ký tự hay theo trường? Trường nào tự nhận, trường nào đưa người duyệt? Và nếu tuần sau ai đó nâng Tesseract hay sửa một regex, làm sao biết nó có tệ đi không? Bài này dựng thước đo cho ba việc: chất lượng chữ (CER, WER), chất lượng quyết định (cổng ngưỡng), và canh chừng thoái lui (regression).
+Sau bài 44, `kyc-ocr` của [Tới Nơi](/articles/du-an-mau-toi-noi) trả về `FieldResult` cho từng trường của thẻ. Bộ phận vận hành hỏi một câu tưởng đơn giản: «OCR đủ tốt chưa?». Con số «đúng 85%» không trả lời được: đúng theo ký tự hay theo trường? Trường nào tự nhận, trường nào đưa người duyệt? Và nếu tuần sau ai đó nâng Tesseract hay sửa một regex, làm sao biết nó có tệ đi không? Bài này dựng thước đo cho ba việc: chất lượng chữ (CER, WER), chất lượng quyết định (cổng ngưỡng), và canh chừng hồi quy (regression).
 
-Đây là bài 45 của lộ trình **Python nâng cao qua Tới Nơi**. Bạn cần pipeline của bài 44; lab mang theo bản copy `ocr.py`, `postprocess.py`, `synthetic_card.py` của lab 44 để tự chứa. Mọi thẻ là **dữ liệu giả** sinh bằng code. Cấu hình OCR là `-l vie+eng --psm 6` của bài 43, trên thẻ phẳng chưa qua bài 42. Các số ở đây không so được với bài 41 (CER gộp 0,217 với `vie --psm 4`, 0,281 với `vie+eng --psm 6`): khác bộ ảnh, khác phép chấm, khác bước tìm trường. Và kết quả OCR, kể cả khi vượt cổng ngưỡng, là đầu vào cho quy trình duyệt, không phải quyết định xác minh giấy tờ.
+Đây là bài 45 của lộ trình **Python nâng cao qua Tới Nơi**. Bạn cần pipeline của bài 44; lab mang theo bản sao `ocr.py`, `postprocess.py`, `synthetic_card.py` của lab 44 để chạy độc lập. Mọi thẻ là **dữ liệu giả** sinh bằng code. Cấu hình OCR là `-l vie+eng --psm 6` của bài 43, trên thẻ phẳng chưa qua bài 42. Các số ở đây không so sánh được với bài 41 (CER gộp 0,217 với `vie --psm 4`, 0,281 với `vie+eng --psm 6`): khác bộ ảnh, khác phép chấm, khác bước tìm trường. Và kết quả OCR, kể cả khi vượt cổng ngưỡng, là đầu vào cho quy trình duyệt, không phải quyết định xác minh giấy tờ.
 
 <div class="tkh-callout tkh-callout--example">
 <span class="tkh-callout-title">Thử trước khi đọc</span>
 <p>Trên bộ 25 số căn cước của lab (300 ký tự), OCR thô sai 4 ký tự: CER là 4/300, khoảng 1,3%. Sau khi bài 44 bỏ dấu cách thừa, có bao nhiêu số thẻ còn sai: 1, 4 hay 25?</p>
-<details><summary>Xem đáp án</summary><p><b>Chỉ 1.</b> CER không cho biết lỗi rải ra bao nhiêu trường, hay lỗi nào còn cứu được. Trong lab, 3 trong 4 ký tự lỗi là dấu cách chèn thừa mà bước hậu xử lý bỏ được (số thẻ thành đúng), và 1 ký tự là chữ số đầu bị đọc thành <code>9</code>, làm cả số thẻ sai. Bảng ở mục «CER theo trường» in đúng bốn ca đó. Vì vậy một thước đo không đủ: CER cho ta so hai cấu hình OCR, còn «bao nhiêu trường sai, bao nhiêu lọt qua cổng» cần thước đo khác.</p></details>
+<details><summary>Xem đáp án</summary><p><b>Chỉ 1.</b> CER không cho biết lỗi rải ra bao nhiêu trường, hay lỗi nào còn cứu được. Trong lab, 3 trong 4 ký tự lỗi là dấu cách chèn thừa mà bước hậu xử lý bỏ được (số thẻ thành đúng), và 1 ký tự là chữ số đầu bị đọc thành <code>9</code>, làm cả số thẻ sai. Bảng ở mục «CER theo trường» in đúng bốn ca đó. Vì vậy một thước đo không đủ: CER giúp ta so sánh hai cấu hình OCR, còn «bao nhiêu trường sai, bao nhiêu lọt qua cổng» cần thước đo khác.</p></details>
 </div>
 
 ## CER và WER: định nghĩa và hai cái bẫy
 
-**CER** (character error rate) là số phép sửa tối thiểu để biến chữ OCR thành đáp án, chia cho số ký tự của đáp án: `(S + D + I) / N`. S là số ký tự bị thay, D số bị xoá (đáp án có, OCR không có), I số bị chèn (OCR thừa), N là độ dài đáp án. **WER** y hệt nhưng đơn vị là từ. Phần cốt lõi là khoảng cách Levenshtein bằng quy hoạch động (`metrics.py`, trích):
+**CER** (character error rate) là số phép sửa tối thiểu để biến chữ OCR thành đáp án, chia cho số ký tự của đáp án: `(S + D + I) / N`. S là số ký tự bị thay, D số bị xoá (đáp án có, OCR không có), I số bị chèn (OCR thừa), N là độ dài đáp án. **WER** tính giống hệt nhưng đơn vị là từ. Phần cốt lõi là khoảng cách Levenshtein bằng quy hoạch động (`metrics.py`, trích):
 
 ```python
 def edit_distance(ref: Sequence[str], hyp: Sequence[str]) -> int:
@@ -35,7 +35,7 @@ def edit_distance(ref: Sequence[str], hyp: Sequence[str]) -> int:
     return previous[-1]
 ```
 
-Lab dùng `jiwer.process_characters` để đếm S/D/I và đối chiếu với bản tự viết trên 300 cặp chuỗi ngẫu nhiên; hai bên trùng nhau. Output thật:
+Lab dùng `jiwer.process_characters` để đếm S/D/I và đối chiếu với bản tự viết trên 300 cặp chuỗi ngẫu nhiên; hai bên trùng nhau. Kết quả chạy thật:
 
 ```text
 [1] CER và WER: định nghĩa trên ví dụ nhỏ
@@ -45,7 +45,7 @@ Lab dùng `jiwer.process_characters` để đếm S/D/I và đối chiếu với
   gộp 2 trường (12 ký tự đúng, 1 ký tự sai): CER corpus 0.077, trung bình hai CER 0.500
 ```
 
-Hai cái bẫy hiện ra ngay. **Bẫy thứ nhất là Unicode**: cùng một chữ, NFC so với NFD cho 5 phép sửa trên 12 ký tự, tức CER 41,7% cho một lỗi không có. `metrics.cer` chuẩn hoá NFC cả hai phía và một test giữ điều đó. **Bẫy thứ hai là cách gộp**: trường 12 ký tự đúng cộng trường 1 ký tự sai cho 1/13 khi gộp theo ký tự, nhưng 50% khi lấy trung bình hai CER riêng. Ta luôn gộp **corpus-level** (cộng S, D, I, N rồi chia một lần), vì trung bình các CER riêng để chuỗi ngắn lấn át chuỗi dài. Ví dụ mất dấu: CER 0,167 nhưng WER 0,667, vì hai trong ba từ sai.
+Hai cái bẫy hiện ra ngay. **Bẫy thứ nhất là Unicode**: cùng một chữ, NFC so với NFD cho 5 phép sửa trên 12 ký tự, tức CER 41,7% dù thực ra không có lỗi nào. `metrics.cer` chuẩn hoá NFC cả hai phía và một test giữ điều đó. **Bẫy thứ hai là cách gộp**: trường 12 ký tự đúng cộng trường 1 ký tự sai cho 1/13 khi gộp theo ký tự, nhưng 50% khi lấy trung bình hai CER riêng. Ta luôn gộp theo toàn tập (**corpus-level**: cộng S, D, I, N rồi chia một lần), vì trung bình các CER riêng khiến chuỗi ngắn lấn át chuỗi dài. Ví dụ mất dấu: CER 0,167 nhưng WER 0,667, vì hai trong ba từ sai.
 
 ## Bộ test vàng
 
@@ -58,7 +58,7 @@ Hai cái bẫy hiện ra ngay. **Bẫy thứ nhất là Unicode**: cùng một c
   tổng số trường: 250
 ```
 
-Seed bắt đầu từ 1000, còn luật hậu xử lý ở bài 44 được chỉnh khi nhìn seed 1 đến 8: tách hai dải seed để không đo trên đúng thứ đã chỉnh cho khớp. Bộ vẫn nhỏ: 25 số thẻ nghĩa là mỗi trường đúng hay sai làm tỉ lệ nhảy 4 điểm phần trăm, nên ta chỉ đọc khác biệt lớn.
+Seed bắt đầu từ 1000, còn luật hậu xử lý ở bài 44 ta chỉnh khi xem seed 1 đến 8: tách hai dải seed để không đo trên đúng thứ đã chỉnh cho khớp. Bộ vẫn nhỏ: 25 số thẻ nghĩa là mỗi trường đúng hay sai làm tỉ lệ nhảy 4 điểm phần trăm, nên ta chỉ đọc khác biệt lớn.
 
 ## CER theo trường và theo chất lượng ảnh
 
@@ -69,7 +69,7 @@ Lab chạy Tesseract và hậu xử lý trên 50 ảnh rồi đo **CER chữ c�
 | `normalize_text` | NFC, gộp ký tự «giống nhau» (nháy cong, gạch ngang) và khoảng trắng | mọi trường, trước khi đo |
 | `fold` | bỏ dấu và hạ chữ thường | chỉ tên (đo và so khớp) |
 
-Vì tên đo không dấu còn các trường khác giữ dấu, CER toàn bộ 0,0943 là số trộn; baseline giữ thêm CER tên **có dấu** (`full_name_diacritics`) để mất dấu hàng loạt không bị che. Phép đo cũng phụ thuộc bước tìm trường (trường không tìm được tính là xoá hết), nên baseline có thêm **độ phủ trang** (`page_recall`): đáp án có nằm đâu đó trong chữ cả trang không. Đó là cận trên chưa kiểm vị trí, không phải CER toàn trang (ta không có đáp án cho chữ ngoài các trường). Output thật:
+Vì tên đo không dấu còn các trường khác giữ dấu, CER toàn bộ 0,0943 là số hỗn hợp; baseline giữ thêm CER tên **có dấu** (`full_name_diacritics`) để mất dấu hàng loạt không bị che. Phép đo cũng phụ thuộc bước tìm trường (trường không tìm được tính là xoá hết), nên baseline có thêm **độ phủ trang** (`page_recall`): đáp án có nằm đâu đó trong chữ của cả trang không. Đó là cận trên chưa kiểm vị trí, không phải CER toàn trang (ta không có đáp án cho chữ ngoài các trường). Kết quả chạy thật:
 
 ```text
 [3] Theo trường (CER của chữ OCR thô của trường; 'đúng' là sau hậu xử lý, tên xét không dấu)
@@ -98,13 +98,13 @@ Bốn điều rút ra.
 
 **Lỗi chủ yếu là xoá, và phần lớn nằm ở bước tìm trường.** Trong 200 lỗi ký tự, 165 là xoá, chỉ 17 là thay. 21 trường không lấy được chữ nào gây 154 trong 165 ký tự xoá, và trong 21 trường đó, 19 có đáp án nằm sẵn trong chữ của trang: Tesseract thường đã đọc được, bước tìm trường mới là chỗ hụt.
 
-**CER sau hậu xử lý cao hơn CER thô** (0,0971 so với 0,0943), dù hậu xử lý cứu thêm trường đúng (bài 44 đã đếm): 27 trường để `value None` (188 ký tự đáp án) bị tính là xoá hết. Trường trống tốn CER bằng cả độ dài nhưng về nghiệp vụ là kết quả an toàn, nên baseline đo CER chữ thô, còn kết quả sau hậu xử lý đo bằng số trường đúng.
+**CER sau hậu xử lý cao hơn CER thô** (0,0971 so với 0,0943), dù hậu xử lý cứu thêm trường đúng (bài 44 đã đếm): 27 trường để `value None` (188 ký tự đáp án) bị tính là xoá hết. Trường trống bị tính CER bằng cả độ dài nhưng về nghiệp vụ là kết quả an toàn, nên baseline đo CER chữ thô, còn kết quả sau hậu xử lý đo bằng số trường đúng.
 
 **CER không thay được «trường đúng hay sai».** `id_number` có CER 0,0133 nhưng WER 0,2800: với trường một từ, WER chính là tỉ lệ trường sai chữ thô (7/25: 3 trường trống, 4 trường lệch). Bốn dòng `id_number` ở trên giải đáp câu hỏi đầu bài: ba dấu cách thừa được bỏ, một số thẻ sai thật, và `999178815360` bị chặn vì mã tỉnh `999` không nằm trong danh sách chấp nhận và `confidence` chỉ 0,71. 
 
-**Mất dấu làm tên đắt.** Tên có dấu cho CER 0,2408 và WER 0,4533, không dấu 0,1612 và 0,2267: chấp nhận tên mất dấu hay không là quyết định nghiệp vụ, số này cho biết cái giá.
+**Mất dấu làm CER của tên tăng rõ rệt.** Tên có dấu cho CER 0,2408 và WER 0,4533, không dấu 0,1612 và 0,2267: chấp nhận tên mất dấu hay không là quyết định nghiệp vụ, số này cho biết cái giá.
 
-Theo chất lượng ảnh: ảnh sạch gần như không lỗi, ảnh tối tệ nhất.
+Theo chất lượng ảnh: ảnh sạch gần như không lỗi, ảnh tối cho kết quả tệ nhất.
 
 ```text
 [4] Theo chất lượng ảnh
@@ -150,12 +150,12 @@ Có hai đơn vị. Cổng quyết định theo **trường**, nhưng một **th
 <div class="tkh-fig-box">
 <svg viewBox="0 0 880 300" role="img" aria-label="Hai biểu đồ cột theo sáu ngưỡng confidence: tỉ lệ thẻ vào hàng chờ tăng từ 36 lên 100 phần trăm, còn số trường sai vẫn được tự nhận giảm từ 7 xuống 0."><text x="70" y="26" class="t-b">Thẻ vào hàng chờ (%)</text><text x="500" y="26" class="t-b">Trường sai vẫn được tự nhận</text><path d="M60 240 L430 240" class="f-none s-line"/><path d="M490 240 L860 240" class="f-none s-line"/><rect x="70" y="186" width="36" height="54" class="f-warn-soft s-warn"/><text x="88" y="180" text-anchor="middle" class="t-mono">36</text><rect x="130" y="186" width="36" height="54" class="f-warn-soft s-warn"/><text x="148" y="180" text-anchor="middle" class="t-mono">36</text><rect x="190" y="180" width="36" height="60" class="f-warn-soft s-warn"/><text x="208" y="174" text-anchor="middle" class="t-mono">40</text><rect x="250" y="180" width="36" height="60" class="f-warn-soft s-warn"/><text x="268" y="174" text-anchor="middle" class="t-mono">40</text><rect x="310" y="156" width="36" height="84" class="f-warn-soft s-warn"/><text x="328" y="150" text-anchor="middle" class="t-mono">56</text><rect x="370" y="90" width="36" height="150" class="f-warn-soft s-warn"/><text x="388" y="84" text-anchor="middle" class="t-mono">100</text><rect x="500" y="90" width="36" height="150" class="f-pk-soft s-pk"/><text x="518" y="84" text-anchor="middle" class="t-mono">7</text><rect x="560" y="133" width="36" height="107" class="f-pk-soft s-pk"/><text x="578" y="127" text-anchor="middle" class="t-mono">5</text><rect x="620" y="154" width="36" height="86" class="f-pk-soft s-pk"/><text x="638" y="148" text-anchor="middle" class="t-mono">4</text><rect x="680" y="154" width="36" height="86" class="f-pk-soft s-pk"/><text x="698" y="148" text-anchor="middle" class="t-mono">4</text><rect x="740" y="197" width="36" height="43" class="f-pk-soft s-pk"/><text x="758" y="191" text-anchor="middle" class="t-mono">2</text><rect x="800" y="239" width="36" height="1" class="f-pk-soft s-pk"/><text x="818" y="233" text-anchor="middle" class="t-mono">0</text><text x="88" y="258" text-anchor="middle" class="t-small">0,00</text><text x="148" y="258" text-anchor="middle" class="t-small">0,50</text><text x="208" y="258" text-anchor="middle" class="t-small">0,70</text><text x="268" y="258" text-anchor="middle" class="t-small">0,80</text><text x="328" y="258" text-anchor="middle" class="t-small">0,90</text><text x="388" y="258" text-anchor="middle" class="t-small">0,95</text><text x="518" y="258" text-anchor="middle" class="t-small">0,00</text><text x="578" y="258" text-anchor="middle" class="t-small">0,50</text><text x="638" y="258" text-anchor="middle" class="t-small">0,70</text><text x="698" y="258" text-anchor="middle" class="t-small">0,80</text><text x="758" y="258" text-anchor="middle" class="t-small">0,90</text><text x="818" y="258" text-anchor="middle" class="t-small">0,95</text><text x="245" y="284" text-anchor="middle" class="t-small">ngưỡng confidence</text><text x="675" y="284" text-anchor="middle" class="t-small">ngưỡng confidence</text></svg>
 </div>
-<figcaption>Hình 2. Một đường đổi chác: nâng ngưỡng làm ít trường sai lọt hơn nhưng kéo thêm thẻ vào hàng chờ, cho tới khi ở 0,95 không thẻ nào còn được tự nhận.</figcaption>
+<figcaption>Hình 2. Một đường đánh đổi: nâng ngưỡng làm ít trường sai lọt hơn nhưng kéo thêm thẻ vào hàng chờ, cho tới khi ở 0,95 không thẻ nào còn được tự nhận.</figcaption>
 </figure>
 
-Đọc bảng. **Không có ngưỡng nào cho vừa «không lọt» vừa «ít người duyệt».** Ở 0,95 không trường sai nào lọt, nhưng không thẻ nào còn được tự nhận (0/0). Từ 0,70 lên 0,80 gần như không đổi gì (thêm đúng 1 trường vào hàng chờ, sai lọt vẫn 4); từ 0,80 lên 0,90 tốn thêm 16 điểm phần trăm thẻ (8 trong 50 thẻ) để chặn thêm 2 trường sai. Chọn 0,80 là điểm xuất phát hợp lý, không phải tối ưu: con số đúng phụ thuộc chi phí một lượt duyệt so với một trường sai lọt. Ngưỡng chọn và đo trên cùng bộ vàng nên số này lạc quan; làm thật thì chọn trên một bộ, kiểm trên bộ khác.
+Đọc bảng. **Không có ngưỡng nào cho vừa «không lọt» vừa «ít người duyệt».** Ở 0,95 không trường sai nào lọt, nhưng không thẻ nào còn được tự nhận (0/0). Từ 0,70 lên 0,80 gần như không đổi gì (thêm đúng 1 trường vào hàng chờ, sai lọt vẫn 4); từ 0,80 lên 0,90 tốn thêm 16 điểm phần trăm thẻ (8 trong 50 thẻ) để chặn thêm 2 trường sai. Chọn 0,80 là điểm xuất phát hợp lý, không phải tối ưu: con số đúng phụ thuộc chi phí một lượt duyệt so với một trường sai lọt. Ngưỡng chọn và đo trên cùng bộ vàng nên con số này lạc quan; khi làm thật thì chọn ngưỡng trên một bộ, kiểm trên bộ khác.
 
-**Tỉ lệ thẻ vào hàng chờ (40%) gần như không do ngưỡng.** Ngay ở ngưỡng 0 đã có 36%. Lab chia theo ảnh và lý do:
+**Tỉ lệ thẻ vào hàng chờ (40%) gần như không phụ thuộc vào ngưỡng.** Ngay ở ngưỡng 0 đã có 36%. Lab chia theo ảnh và lý do:
 
 ```text
   Thẻ vào hàng chờ ở ngưỡng 0.8 theo ảnh: clean 1/14, blur 1/12, rotate 8/12, dark 10/12
@@ -176,7 +176,7 @@ Cuối cùng là các trường lọt qua ngưỡng 0,80:
   Trong 4 trường sai lọt, 3 thuộc thẻ đã vào hàng chờ vì trường khác; chỉ 1 thẻ lọt hẳn qua cổng mà có trường sai
 ```
 
-Tính theo trường là 4 lọt, tính theo thẻ chỉ 1 lọt hẳn (cột «thẻ tự nhận có sai» là 1/30), vì ba trường kia nằm trong thẻ mà người duyệt sẽ mở. Ba trường là tên có hai từ dính nhau (`THIB`, `VANE`), một là ngày hết hạn đọc `03` thành `02`, một ngày hợp lệ nên không kiểm tra nào bắt được; cả bốn có `confidence` 0,88 đến 0,93. **Ngưỡng `confidence` là bộ lọc cho lỗi mà OCR tự biết, không phải bảo hiểm cho lỗi nó không biết.** Phần còn lại phải đến từ nguồn thứ hai: thông tin tài xế nhập tay, mặt sau thẻ, hoặc lấy mẫu hồ sơ tự nhận cho người xem lại. Tự nhận chỉ nghĩa là «không cần người đọc lại chữ», không phải «giấy tờ đã được xác minh».
+Tính theo trường là 4 lọt, tính theo thẻ chỉ 1 lọt hẳn (cột «thẻ tự nhận có sai» là 1/30), vì ba trường kia nằm trong thẻ mà người duyệt sẽ mở. Ba trường là tên có hai từ dính nhau (`THIB`, `VANE`), một là ngày hết hạn đọc `03` thành `02`, ngày bị đọc sai vẫn hợp lệ nên không kiểm tra nào bắt được; cả bốn có `confidence` 0,88 đến 0,93. **Ngưỡng `confidence` là bộ lọc cho lỗi mà OCR tự biết, không phải bảo hiểm cho lỗi nó không biết.** Phần còn lại phải nhờ một nguồn kiểm tra thứ hai: thông tin tài xế nhập tay, mặt sau thẻ, hoặc lấy mẫu hồ sơ tự nhận cho người xem lại. Tự nhận chỉ nghĩa là «không cần người đọc lại chữ», không phải «giấy tờ đã được xác minh».
 
 ## Regression test với baseline.json
 
@@ -198,12 +198,12 @@ Sáu luật trong `check_regression`, mỗi luật canh một loại thoái lui:
 
 1. CER chữ thô của một trường (kể cả tên có dấu) tăng quá 0,02: OCR xấu đi.
 2. Độ phủ trang giảm quá 0,02: chữ cả trang xấu đi, không phụ thuộc bước tìm trường.
-3. Số trường **đúng sau hậu xử lý** giảm, dù chỉ một: lỗi ở bước tìm trường, sửa hoặc kiểm tra.
+3. Số trường **đúng sau hậu xử lý** giảm, dù chỉ một: lỗi ở bước tìm trường, sửa ký tự hoặc kiểm tra.
 4. Số trường sai mà vẫn tự nhận tăng.
 5. Số thẻ lọt hẳn qua cổng mà có trường sai tăng.
 6. Tỉ lệ thẻ vào hàng chờ tăng quá 0,10: hệ thống kém hữu ích đi.
 
-Riêng **môi trường** được kiểm tách bằng `check_environment`: phiên bản Tesseract, hash file `vie.traineddata` và `eng.traineddata`, hash font vẽ thẻ. Lệch một trong ba thì số khác có thể do môi trường chứ không do code, nên báo lỗi riêng; hash mô hình cũng nằm trong khoá cache OCR, để đổi mô hình không dùng nhầm kết quả cũ. Lab chạy lại trên cùng bộ ảnh rồi thử phá hai kiểu:
+Riêng **môi trường** được kiểm tra riêng bằng `check_environment`: phiên bản Tesseract, hash file `vie.traineddata` và `eng.traineddata`, hash font vẽ thẻ. Lệch một trong ba thì số khác có thể do môi trường chứ không do code, nên báo lỗi riêng; hash mô hình cũng nằm trong khoá cache OCR, để đổi mô hình không dùng nhầm kết quả cũ. Lab chạy lại trên cùng bộ ảnh rồi thử phá hai kiểu:
 
 ```text
 [6] Regression so với baseline.json
@@ -220,9 +220,9 @@ Riêng **môi trường** được kiểm tách bằng `check_environment`: phi�
     FAIL: số trường đúng sau hậu xử lý giảm 213 -> 149 (trên 250)
 ```
 
-(Trích; thử phá 1 còn sáu dòng `FAIL: CER ...` cho các trường khác.) Hai ca cho hai bài học. Ở **thử phá 1**, số trường sai lọt giảm từ 4 xuống 3: nhìn riêng chỉ số an toàn thì bản thu nhỏ ảnh trông như tốt hơn, vì cổng chặn gần hết (96% thẻ vào hàng chờ); chỉ khi nhìn CER, độ phủ và tỉ lệ hàng chờ mới thấy hệ thống đã hỏng. Ở **thử phá 2**, một regex sửa sai làm hậu xử lý trả `None`, nhưng chỉ ở các thẻ vốn đã vào hàng chờ: OCR, tỉ lệ hàng chờ và CER thô không đổi, số trường sai lọt còn giảm, nên chỉ luật số 3 (trường đúng 213 xuống 149) bắt được. Baseline chỉ đo OCR sẽ không thấy lỗi hậu xử lý.
+(Trích; thử phá 1 còn sáu dòng `FAIL: CER ...` cho các trường khác.) Hai lần thử này cho hai bài học. Ở **thử phá 1**, số trường sai lọt giảm từ 4 xuống 3: nhìn riêng chỉ số an toàn thì bản thu nhỏ ảnh trông như tốt hơn, vì cổng chặn gần hết (96% thẻ vào hàng chờ); chỉ khi nhìn CER, độ phủ và tỉ lệ hàng chờ mới thấy hệ thống đã hỏng. Ở **thử phá 2**, một regex sửa sai làm hậu xử lý trả `None`, nhưng chỉ ở các thẻ vốn đã vào hàng chờ: OCR, tỉ lệ hàng chờ và CER thô không đổi, số trường sai lọt còn giảm, nên chỉ luật số 3 (trường đúng 213 xuống 149) bắt được. Baseline chỉ đo OCR sẽ không thấy lỗi hậu xử lý.
 
-Với cùng môi trường, bộ ảnh và seed, số đo lặp lại y hệt: ta xoá `out/`, chạy lại với cache OCR trống và nhận đúng các số trong baseline, nên dung sai 0,02 dành cho thay đổi hợp pháp, không phải cho nhiễu. Môi trường đổi thì chạy `--update-baseline`, đọc lại số rồi mới commit; không cập nhật baseline chỉ để cho test xanh.
+Với cùng môi trường, bộ ảnh và seed, số đo lặp lại giống hệt: ta xoá `out/`, chạy lại với cache OCR trống và nhận đúng các số trong baseline, nên dung sai 0,02 dành cho thay đổi chính đáng, không phải cho nhiễu. Môi trường đổi thì chạy `--update-baseline`, đọc lại số rồi mới commit; không cập nhật baseline chỉ để cho test xanh.
 
 ## Chạy và kiểm chứng
 
@@ -234,7 +234,7 @@ uv run --project examples/toi-noi-python/45-danh-gia-ocr-cer-wer examples/toi-no
 uv run --project examples/toi-noi-python/45-danh-gia-ocr-cer-wer pytest examples/toi-noi-python/45-danh-gia-ocr-cer-wer -q
 ```
 
-Môi trường: MacBook Pro M1 Max, macOS 26.6.2, Python 3.14.7, Tesseract 5.5.4, `jiwer` 4.0.0, `rapidfuzz` 3.14.6 (máy rất tải lúc chạy, thời gian pytest không có giá trị tham khảo). `--verify` kiểm 33 điều và pytest chạy 31 test:
+Môi trường: MacBook Pro M1 Max, macOS 26.6.2, Python 3.14.7, Tesseract 5.5.4, `jiwer` 4.0.0, `rapidfuzz` 3.14.6 (máy đang chịu tải nặng lúc chạy, thời gian pytest không có giá trị tham khảo). `--verify` kiểm 33 điều kiện và pytest chạy 31 test:
 
 ```text
 OK 33/33
@@ -245,7 +245,7 @@ OK 33/33
 31 passed in 63.10s (0:01:03)
 ```
 
-Test chia bốn nhóm: định nghĩa metric (bản tay trùng `jiwer`, NFC so với NFD, gộp corpus, CER vượt 1), cổng và regression (biên ngưỡng 0,80, dung sai 0,02 đúng biên, trường đúng giảm một thì fail), môi trường (lệch hash mô hình hoặc font báo riêng), và bộ test vàng thật (không regression, hai bản thử phá **phải** fail). Thiếu Tesseract thì test **fail chứ không skip**, vì regression test bị bỏ qua lặng lẽ thì không bảo vệ được gì.
+Các test chia thành bốn nhóm: định nghĩa metric (bản tay trùng `jiwer`, NFC so với NFD, gộp corpus, CER vượt 1), cổng và regression (biên ngưỡng 0,80, dung sai 0,02 đúng biên, trường đúng giảm một thì fail), môi trường (lệch hash mô hình hoặc font báo riêng), và bộ test vàng thật (không regression, hai bản thử phá **phải** fail). Thiếu Tesseract thì test **fail chứ không skip**, vì regression test bị bỏ qua mà không báo gì thì không bảo vệ được gì.
 
 | Hiện tượng | Kiểm tra trước |
 | --- | --- |

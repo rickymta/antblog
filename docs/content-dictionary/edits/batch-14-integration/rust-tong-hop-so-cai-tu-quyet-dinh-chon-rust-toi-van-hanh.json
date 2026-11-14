@@ -1,0 +1,17 @@
+{
+  "file": "rust-tong-hop-so-cai-tu-quyet-dinh-chon-rust-toi-van-hanh.md",
+  "edits": [
+    {
+      "old": "không chặn cuộc đua giữa",
+      "new": "không chặn race condition giữa",
+      "reason": "Theo terminology.json (race-condition) và lựa chọn của rust-r3, rust-r4: «cuộc đua» thành «race condition»; các chỗ này còn sót sau vòng 2.",
+      "severity": "low"
+    },
+    {
+      "old": "Cuộc đua giữa hai transaction",
+      "new": "Race condition giữa hai transaction",
+      "reason": "Theo terminology.json (race-condition) và lựa chọn của rust-r3, rust-r4: «cuộc đua» thành «race condition»; các chỗ này còn sót sau vòng 2. Chữ trong Hình 1, khớp với dòng R3 của bảng.",
+      "severity": "low"
+    }
+  ]
+}

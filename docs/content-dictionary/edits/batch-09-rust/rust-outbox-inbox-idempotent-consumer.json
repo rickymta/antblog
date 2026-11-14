@@ -1,0 +1,20 @@
+{"file":"rust-outbox-inbox-idempotent-consumer.md","edits":[
+{"old":"tái hiện dual-write mất và sinh sự kiện bằng tiến trình con thoát giữa hai bước","new":"tái hiện lỗi dual-write làm mất hoặc sinh thừa sự kiện, bằng cách cho một tiến trình con thoát giữa hai bước","reason":"Mệnh đề lộn xộn, thiếu chủ ngữ và động từ","severity":"high"},
+{"old":"người nhận thấy bút toán sổ không có","new":"người nhận thấy bút toán mà sổ không có","reason":"Thiếu từ nối, khớp với văn xuôi","severity":"low"},
+{"old":"Hàm ghi nhận `&mut PgConnection` nên","new":"Hàm nhận tham chiếu `&mut PgConnection` nên","reason":"'Ghi nhận' sai nghĩa; ý là hàm nhận tham chiếu","severity":"high"},
+{"old":"Lần lỗi không để lại gì","new":"Lần ghi lỗi không để lại gì","reason":"Cụm 'lần lỗi' cụt","severity":"medium"},
+{"old":"bút toán chèn dở rollback","new":"bút toán chèn dở bị rollback","reason":"Thiếu từ nối, câu cụt","severity":"low"},
+{"old":"Điều kiện `md5` dùng ở mục thứ tự; `$2 = 0` là không chia.","new":"Điều kiện `md5` dùng ở mục về thứ tự bên dưới; `$2 = 0` nghĩa là không chia.","reason":"Câu cụt, khó đoán ý","severity":"medium"},
+{"old":"mỗi relay một lượt 5 dòng. A nhận xong thì đứng lại, B bắt đầu đúng lúc đó, B gửi xong A mới đi tiếp.","new":"mỗi relay chạy một lượt 5 dòng. A nhận xong thì đứng lại, B bắt đầu đúng lúc đó, B gửi xong thì A mới đi tiếp.","reason":"Câu cụt, thiếu động từ và từ nối","severity":"low"},
+{"old":"thì server chưa hay gì","new":"thì server chưa biết gì","reason":"Văn nói","severity":"medium"},
+{"old":"im lặng bỏ qua các dòng ấy","new":"bỏ qua các dòng ấy mà không báo gì","reason":"'Im lặng' là calque của silently","severity":"medium"},
+{"old":"nên lab này mang nó trong header","new":"nên lab này đặt nó trong header","reason":"'Mang' là calque của carry","severity":"low"},
+{"old":"Ba điều làm cách này đúng.","new":"Ba điều khiến cách này đúng.","reason":"Dịch gượng","severity":"medium"},
+{"old":"Đi DLQ cũng là chấp nhận mất thứ tự","new":"Gửi vào DLQ cũng là chấp nhận mất thứ tự","reason":"Dịch gượng, khẩu ngữ","severity":"medium"},
+{"old":"thông điệp sau cùng key vẫn chạy tiếp","new":"thông điệp đứng sau và cùng key vẫn chạy tiếp","reason":"'sau cùng key' mơ hồ, dễ hiểu nhầm là 'cuối cùng'","severity":"medium"},
+{"old":"Có một lỗ lab không đo","new":"Có một lỗ hổng mà lab không đo","reason":"Cụm 'lỗ' cụt, thiếu danh từ","severity":"medium"},
+{"old":"batch gửi xong trước tới trước","new":"batch nào gửi xong trước thì tới trước","reason":"Câu cụt, thiếu liên kết","severity":"medium"},
+{"old":"Đảo xảy ra cả trong một key","new":"Thứ tự bị đảo cả trong một key","reason":"Câu thiếu chủ ngữ","severity":"medium"},
+{"old":"Điều kiện kèm theo, lab không tự kiểm: mỗi phần chỉ một worker tại một thời điểm và số phần không đổi lúc chạy.","new":"Có hai điều kiện đi kèm mà lab không tự kiểm: mỗi phần chỉ có một worker tại một thời điểm và số phần không đổi lúc chạy.","reason":"Câu cụt, thiếu động từ","severity":"medium"},
+{"old":"ghi trong memory","new":"ghi vào bộ nhớ","reason":"Từ Anh thông thường có từ Việt quen dùng","severity":"low"}
+]}

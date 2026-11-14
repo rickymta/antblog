@@ -1,0 +1,71 @@
+{
+ "file": "rust-bai-toan-so-cai-chart-of-accounts-dong-tien-chuyen.md",
+ "edits": [
+  {
+   "old": "nên không tồn tại khi lệch",
+   "new": "nên không tạo được khi lệch",
+   "reason": "Tồn tại là calque",
+   "severity": "medium"
+  },
+  {
+   "old": "tiền nằm đó, không ai nhìn",
+   "new": "tiền nằm đó, không ai để ý",
+   "reason": "Cách nói gượng",
+   "severity": "low"
+  },
+  {
+   "old": "Phép ánh xạ chỉ có nghĩa trên số dư",
+   "new": "Phép ánh xạ chỉ có ý nghĩa với số dư",
+   "reason": "Cách nói gượng",
+   "severity": "low"
+  },
+  {
+   "old": "Thời gian vào qua tham số",
+   "new": "Mốc thời gian được truyền vào qua tham số",
+   "reason": "Thời gian vào không rõ nghĩa",
+   "severity": "medium"
+  },
+  {
+   "old": "`LEFT JOIN` ở truy vấn đầu để bút toán",
+   "new": "`LEFT JOIN` ở truy vấn đầu giúp bút toán",
+   "reason": "Câu thiếu động từ",
+   "severity": "medium"
+  },
+  {
+   "old": "không có posting nào cũng hiện ra",
+   "new": "không có posting nào vẫn hiện ra",
+   "reason": "Cho rõ nghĩa",
+   "severity": "low"
+  },
+  {
+   "old": "Rồi lab cài ba sự cố",
+   "new": "Rồi lab gài ba sự cố",
+   "reason": "Cài sai nghĩa; ở đây là gài có chủ đích",
+   "severity": "medium"
+  },
+  {
+   "old": "Đây là cài lỗi có chủ đích",
+   "new": "Đây là việc gài lỗi có chủ đích",
+   "reason": "Cài lỗi sai nghĩa",
+   "severity": "medium"
+  },
+  {
+   "old": "Mỗi sự cố bị đúng một metric nói tên",
+   "new": "Mỗi sự cố bị đúng một metric chỉ ra",
+   "reason": "Nói tên là khẩu ngữ gượng",
+   "severity": "medium"
+  },
+  {
+   "old": "số âm nghĩa là nền tảng đã trả tiền chưa có",
+   "new": "số âm nghĩa là nền tảng đã trả ra khoản tiền mà ví chưa có",
+   "reason": "Thiếu danh từ, khó hiểu",
+   "severity": "medium"
+  },
+  {
+   "old": "Mô hình nạp ví đổi biên: ví khách phải không âm nên tắt cờ",
+   "new": "Mô hình nạp ví đổi tài khoản biên: ví khách phải không âm nên ta tắt cờ",
+   "reason": "Đổi biên không rõ nghĩa",
+   "severity": "medium"
+  }
+ ]
+}

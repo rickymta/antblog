@@ -1,0 +1,21 @@
+{"file":"rust-double-entry-journal-entry-posting.md","edits":[
+{"old":"dựng JournalEntry chỉ tồn tại khi cân","new":"dựng JournalEntry chỉ tạo được khi cân","reason":"'Tồn tại' dùng sai nghĩa; ý là chỉ tạo được","severity":"medium"},
+{"old":"Đó là bất biến duy nhất cả bài bảo vệ.","new":"Đó là bất biến duy nhất mà cả bài này bảo vệ.","reason":"Câu thiếu từ nối, đọc cụt","severity":"medium"},
+{"old":"Chart of accounts là danh sách tài khoản và loại của chúng.","new":"Chart of accounts (hệ thống tài khoản) là danh sách tài khoản kèm loại của từng tài khoản.","reason":"Thuật ngữ kế toán chưa có chú thích tiếng Việt","severity":"medium"},
+{"old":"bất biến chỉ nhìn số tiền có dấu","new":"bất biến chỉ xét số tiền có dấu","reason":"'Nhìn' dùng cho vật vô tri, gượng","severity":"low"},
+{"old":"và `reverses` đều private","new":"và `reverses`, cả ba đều private","reason":"Câu liệt kê thiếu chủ ngữ rõ ràng","severity":"medium"},
+{"old":"Ba cửa vào, một hàm kiểm.","new":"Ba cửa vào, một hàm kiểm tra.","reason":"'Kiểm' viết cụt","severity":"low"},
+{"old":"rồi kiểm một lần:","new":"rồi kiểm tra một lần:","reason":"'Kiểm' viết cụt","severity":"low"},
+{"old":"Builder **không kiểm giữa chừng** vì","new":"Builder **không kiểm tra giữa chừng** vì","reason":"'Kiểm' viết cụt","severity":"low"},
+{"old":"nó cũng không có luật riêng","new":"builder cũng không có luật riêng","reason":"Đại từ 'nó' mơ hồ","severity":"low"},
+{"old":"kiểm đúng điều này","new":"kiểm tra đúng điều này","reason":"'Kiểm' viết cụt","severity":"low"},
+{"old":"Sổ cái append-only:","new":"Sổ cái chỉ được thêm vào (append-only):","reason":"Thuật ngữ tiếng Anh chưa giải thích","severity":"medium"},
+{"old":"Có ba điểm cần nhìn.","new":"Có ba điểm cần lưu ý.","reason":"'Cần nhìn' gượng","severity":"low"},
+{"old":"mã không có trong sổ thành `UnknownEntry` thay vì panic","new":"mã không có trong sổ thì cho ra `UnknownEntry` thay vì panic","reason":"'Thành' thiếu động từ, câu cụt","severity":"medium"},
+{"old":"nhưng đưa vào ba rủi ro","new":"nhưng kéo theo ba rủi ro","reason":"'Đưa vào ba rủi ro' dịch gượng","severity":"high"},
+{"old":"Hai nguồn sự thật; sai một chỗ không biết bên nào đúng","new":"Hai nguồn dữ liệu gốc; sai một chỗ thì không biết bên nào đúng","reason":"'Nguồn sự thật' là calque theo terminology","severity":"medium"},
+{"old":"Production có thể giữ bảng số dư làm cache","new":"Môi trường thật có thể giữ bảng số dư làm cache","reason":"Từ Anh thông thường lọt vào văn xuôi","severity":"medium"},
+{"old":"kiểm sai thì in","new":"kiểm tra mà sai thì in","reason":"'Kiểm' viết cụt, câu thiếu từ nối","severity":"medium"},
+{"old":"chưa có ngày giờ, đồng thời, phân quyền","new":"chưa có ngày giờ, xử lý đồng thời, phân quyền","reason":"'Đồng thời' lược mất danh từ chính","severity":"medium"},
+{"old":"không phải service chạy được trên production","new":"không phải service chạy được trong môi trường thật","reason":"Từ Anh thông thường lọt vào văn xuôi","severity":"medium"}
+]}

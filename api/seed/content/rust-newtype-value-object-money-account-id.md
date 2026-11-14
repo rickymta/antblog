@@ -1,7 +1,7 @@
 ---
 slug: rust-newtype-value-object-money-account-id
 title: "Newtype và value object: Money, AccountId, EntryId không nhầm được"
-summary: "Bài 12: bọc i64 và chuỗi thành Money, AccountId, EntryId bằng newtype; dựng từ chuỗi bằng FromStr/TryFrom, chọn derive đúng, cộng trừ tiền trả Result và chặn cộng khác loại tiền bằng phantom type."
+summary: "Bài 12: bọc i64 và chuỗi thành Money, AccountId, EntryId bằng newtype; dựng từ chuỗi bằng FromStr/TryFrom, chọn derive phù hợp; phép cộng, trừ tiền trả về Result; chặn cộng tiền khác loại bằng phantom type."
 category: rust-beginner
 level: beginner
 tags: [rust, toi-noi, ledger, newtype, value-object, traits]
@@ -15,7 +15,7 @@ Trong sổ cái, nhiều thứ khác nhau lại chung một kiểu thô: số ti
 <div class="tkh-callout tkh-callout--example">
 <span class="tkh-callout-title">Thử trước khi đọc</span>
 <p>Cộng <code>Money&lt;Vnd&gt;</code> với <code>Money&lt;Usd&gt;</code> thì lỗi xảy ra lúc nào, và <code>Money&lt;Usd&gt;</code> tốn thêm bao nhiêu byte so với <code>i64</code>?</p>
-<details><summary>Xem đáp án</summary><p>Lỗi xảy ra lúc <b>biên dịch</b> (E0308, <code>mismatched types</code>), chương trình không hề chạy. Loại tiền chỉ nằm ở kiểu nên không tốn byte nào: <code>size_of::&lt;Money&lt;Usd&gt;&gt;()</code> bằng <code>size_of::&lt;i64&gt;()</code>, test trong lab kiểm điều này.</p></details>
+<details><summary>Xem đáp án</summary><p>Lỗi xảy ra lúc <b>biên dịch</b> (E0308, <code>mismatched types</code>), chương trình không hề chạy. Loại tiền chỉ nằm ở kiểu nên không tốn byte nào: <code>size_of::&lt;Money&lt;Usd&gt;&gt;()</code> bằng <code>size_of::&lt;i64&gt;()</code>, test trong lab kiểm tra điều này.</p></details>
 </div>
 
 ## Newtype là gì, và vì sao `Money` khác `i64`?
@@ -44,7 +44,7 @@ error[E0308]: mismatched types
   |             ------------------------   ^^^^^^^^^^ expected `Money`, found `Km`
 ```
 
-Cộng `Money` với `i64` trần hay với `EntryId` cũng cho E0308; gán `EntryId` vào chỗ cần `AccountId` cũng vậy. Lab giữ bốn ca thành doc test `compile_fail,E0308`: `Money + Km`, `Money + i64`, `Money<Vnd> + Money<Usd>` và gán `EntryId` vào `AccountId`. Trên stable, rustdoc chỉ kiểm đoạn code không biên dịch được, không đối chiếu mã lỗi (đổi thành `compile_fail,E0599` vẫn pass); mã E0308 trong bài lấy từ thông điệp thật của rustc trong crate nháp.
+Cộng `Money` với `i64` trần hay với `EntryId` cũng cho E0308; gán `EntryId` vào chỗ cần `AccountId` cũng vậy. Lab giữ bốn test case thành doc test `compile_fail,E0308`: `Money + Km`, `Money + i64`, `Money<Vnd> + Money<Usd>` và gán `EntryId` vào `AccountId`. Trên stable, rustdoc chỉ kiểm tra rằng đoạn code không biên dịch được, không đối chiếu mã lỗi (đổi thành `compile_fail,E0599` vẫn pass); mã E0308 trong bài lấy từ thông điệp thật của rustc trong crate nháp.
 
 <figure class="tkh-fig">
 <div class="tkh-fig-box">
@@ -65,7 +65,7 @@ Quy tắc chọn: `From` khi mọi đầu vào đều hợp lệ; `TryFrom` khi 
 | `AccountId` → `String` | `From` | Bỏ lớp bọc không bao giờ lỗi |
 | `i64` → `Money` | cố ý không có | `5_i64.into()` che mất đơn vị; dùng `Money::from_dong(5)` |
 
-`AccountId` kiểm bốn điều: không rỗng, không quá 64 ký tự, chỉ gồm `A-Z a-z 0-9 - :`, và có dạng `kind:tên` với mọi đoạn không rỗng. Lab từ chối khoảng trắng thừa thay vì cắt đi như lab bài 10: hai chuỗi khác nhau cùng cho ra một mã sẽ che lỗi của bên gọi.
+`AccountId` kiểm tra bốn điều: không rỗng, không quá 64 ký tự, chỉ gồm `A-Z a-z 0-9 - :`, và có dạng `kind:tên` với mọi đoạn không rỗng. Lab từ chối khoảng trắng thừa thay vì cắt đi như lab bài 10: hai chuỗi khác nhau cùng cho ra một mã sẽ che lỗi của bên gọi.
 
 ```rust
 // src/account.rs (rút gọn: bỏ hai nhánh Empty và TooLong)
@@ -110,7 +110,7 @@ Lưu `u64` thay vì chuỗi cũng cho thứ tự đúng: so sánh số thì `JE-
 
 `Eq` được vì không có `f64`, nên không có NaN phá quan hệ bằng nhau. `Hash` đi cùng `Eq`: hai giá trị bằng nhau phải cho cùng hash, nên `AccountId` làm khoá `HashMap` được. `Ord` cho phép `BTreeMap<AccountId, Money>` (`Ledger::balances` trả số dư xếp theo mã tài khoản) và sắp xếp `EntryId`.
 
-`Copy` nên dành cho kiểu nhỏ, không sở hữu tài nguyên, sao chép bằng vài byte: `Money` và `EntryId` được. `AccountId` giữ `String` trên heap nên chỉ `Clone`; thử dùng sau khi move thì gặp đúng lỗi của bài 04 (rút gọn):
+`Copy` nên dành cho kiểu nhỏ, không sở hữu tài nguyên, sao chép bằng vài byte: `Money` và `EntryId` thoả điều kiện đó. `AccountId` giữ `String` trên heap nên chỉ `Clone`; thử dùng sau khi move thì gặp đúng lỗi của bài 04 (rút gọn):
 
 ```text
 error[E0382]: borrow of moved value: `id`
@@ -120,13 +120,13 @@ error[E0382]: borrow of moved value: `id`
   |                 -- value moved here
 ```
 
-Đừng derive `Copy` cho đủ bộ: gỡ nó đi sau này làm vỡ mọi chỗ đã dùng bản sao ngầm. Hai chi tiết riêng của `Money<C>`: `derive` chỉ sinh impl khi `C` cũng có trait đó, nên `Vnd` và `Usd` phải derive đủ bộ; và `Debug` viết tay để in `Money(25500 VND)` thay vì cả `PhantomData<…>`.
+Đừng derive `Copy` cho đủ bộ: sau này gỡ nó đi sẽ làm hỏng mọi chỗ đang dựa vào việc sao chép ngầm. Hai chi tiết riêng của `Money<C>`: `derive` chỉ sinh impl khi `C` cũng có trait đó, nên `Vnd` và `Usd` phải derive đủ bộ; và `Debug` viết tay để in `Money(25500 VND)` thay vì cả `PhantomData<…>`.
 
 ## `Add` và `Sub`: panic, `Option` hay `Result`?
 
-Viết `Add` ngây thơ (`Money(self.0 + rhs.0)`) là cách ngắn nhất, và sai nhất với sổ cái. Trong một crate nháp, `Money(i64::MAX) + Money(1)` ở debug panic `attempt to add with overflow`; ở release âm thầm quay vòng ra `Money(-9223372036854775808)`. Panic dừng luồng xử lý giữa chừng một bút toán; quay vòng ghi sai tiền mà không ai biết.
+Viết `Add` ngây thơ (`Money(self.0 + rhs.0)`) là cách ngắn nhất, và sai nhất với sổ cái. Trong một crate nháp, `Money(i64::MAX) + Money(1)` ở debug panic `attempt to add with overflow`; ở release thì quay vòng mà không báo lỗi, ra `Money(-9223372036854775808)`. Panic dừng luồng xử lý ngay giữa lúc đang ghi một bút toán; quay vòng ghi sai tiền mà không ai biết.
 
-Lab chọn: `Add` và `Sub` có `Output = Result<Money<C>, MoneyError>`, cài bằng `checked_add`/`checked_sub`. `Option` bị loại vì không nói lý do; hàm `checked_*` trả `Option` vẫn có, như thư viện chuẩn.
+Lab chọn: `Add` và `Sub` có `Output = Result<Money<C>, MoneyError>`, cài bằng `checked_add`/`checked_sub`. `Option` bị loại vì không cho biết nguyên nhân thất bại; hàm `checked_*` trả `Option` vẫn có, như thư viện chuẩn.
 
 ```rust
 // src/money.rs
@@ -139,7 +139,7 @@ impl<C: Currency> Add for Money<C> {
 }
 ```
 
-Giá phải trả là `a + b + c` không biên dịch, vì `Result<Money, _>` không biết cộng với `Money` (E0369: cannot add `Money` to `Result<Money, MoneyError>`). Cũng không có `+=` (`AddAssign`) vì nó không báo lỗi được. Cộng nhiều số thì viết từng bước với `?`, như hàm `total` của sổ cái:
+Giá phải trả là `a + b + c` không biên dịch, vì `Result<Money, _>` không biết cộng với `Money` (E0369: cannot add `Money` to `Result<Money, MoneyError>`). Cũng không có `+=` (`AddAssign`) vì toán tử này không báo lỗi được. Cộng nhiều số thì viết từng bước với `?`, như hàm `total` của sổ cái:
 
 ```rust
 // src/entry.rs (rút gọn)
@@ -148,7 +148,7 @@ for p in postings {
 }
 ```
 
-`?` ở đây đổi `MoneyError` thành `LedgerError` nhờ `impl From<MoneyError> for LedgerError` (bài 17 dùng `thiserror` thay cho các `impl Display` và `Error` viết tay). Một số thư viện chỉ cung cấp `checked_add`, không impl `Add`; hướng đó cũng ổn, điều cần tránh là panic hoặc quay vòng.
+`?` ở đây đổi `MoneyError` thành `LedgerError` nhờ `impl From<MoneyError> for LedgerError` (bài 17 dùng `thiserror` thay cho các `impl Display` và `Error` viết tay). Một số thư viện chỉ cung cấp `checked_add`, không cài đặt `Add`; hướng đó cũng ổn, điều cần tránh là panic hoặc quay vòng.
 
 <figure class="tkh-fig">
 <div class="tkh-fig-box">
@@ -159,7 +159,7 @@ for p in postings {
 
 ## Phantom type: loại tiền nằm ở kiểu
 
-`Money<Vnd>` và `Money<Usd>` là hai kiểu khác nhau. Tham số `C` chỉ là nhãn: `Vnd` và `Usd` là `enum` rỗng (không bao giờ tạo được giá trị) và `PhantomData<C>` là trường không chiếm byte nào để báo cho compiler rằng struct "dùng" `C`. Nói chặt, `Money<C>` có hai trường có tên nên không còn là struct tuple, nhưng lúc chạy vẫn chỉ là một `i64`.
+`Money<Vnd>` và `Money<Usd>` là hai kiểu khác nhau. Tham số `C` chỉ là nhãn: `Vnd` và `Usd` là `enum` rỗng (không bao giờ tạo được giá trị) và `PhantomData<C>` là trường không chiếm byte nào để báo cho compiler rằng struct "dùng" `C`. Nói chính xác, `Money<C>` có hai trường có tên nên không còn là struct tuple, nhưng lúc chạy vẫn chỉ là một `i64`.
 
 ```rust
 // src/money.rs (rút gọn)
@@ -177,7 +177,7 @@ pub struct Money<C: Currency = Vnd> {
 }
 ```
 
-Một: ràng buộc `C: Currency` ngay trên struct nên `Money<String>` bị E0277 (the trait bound `String: Currency` is not satisfied). Hai: tham số mặc định `= Vnd` giữ nguyên các chữ ký cũ: `Posting { amount: Money }` vẫn nghĩa là VND, và `Money::from_dong` chỉ có trong `impl Money<Vnd>`. Ba: `Add` được cài cho `Money<C>` với cùng `C` ở cả hai vế, nên `vnd + usd` ra E0308 (rút gọn):
+Thứ nhất: ràng buộc `C: Currency` ngay trên struct nên `Money<String>` bị E0277 (the trait bound `String: Currency` is not satisfied). Thứ hai: tham số mặc định `= Vnd` giữ nguyên các chữ ký cũ: `Posting { amount: Money }` vẫn nghĩa là VND, và `Money::from_dong` chỉ có trong `impl Money<Vnd>`. Thứ ba: `Add` được cài cho `Money<C>` với cùng `C` ở cả hai vế, nên `vnd + usd` ra E0308 (rút gọn):
 
 ```text
 error[E0308]: mismatched types
@@ -189,7 +189,7 @@ error[E0308]: mismatched types
 
 So sánh `vnd < usd` cũng vậy, vì `derive(PartialOrd)` chỉ sinh `PartialOrd` giữa hai `Money<C>` cùng `C`.
 
-Cái giá là thêm tham số generic trong chữ ký. Nếu hệ thống chỉ có VND, một `Money` không generic đã đủ; phantom type đáng dùng khi loại tiền thật sự có nguy cơ lẫn nhau.
+Cái giá phải trả là phải thêm tham số generic vào chữ ký. Nếu hệ thống chỉ có VND, một `Money` không generic đã đủ; phantom type đáng dùng khi loại tiền thật sự có nguy cơ lẫn nhau.
 
 ## Lab này đổi gì so với lab 10, và các bài sau giữ gì?
 
@@ -202,7 +202,7 @@ Mỗi lab là một crate độc lập. Bốn thay đổi dưới đây là lự
 | `Money` | Không generic | `Money<C>`, mặc định `Vnd` | Không generic, chỉ VND |
 | Cộng trừ tiền | `checked_add` trả `Option` | Thêm `Add`, `Sub` trả `Result` | `checked_*` trả `Option`, không có `Add` |
 
-[Bài 13](/articles/rust-double-entry-journal-entry-posting) và [bài 20](/articles/rust-tong-hop-ledger-core-cargo-doc-workspace) giữ dạng gọn vì lõi sổ cái chỉ có VND, nên phantom type không đáng cái giá của nó. `EntryId` là thứ đi tiếp.
+[Bài 13](/articles/rust-double-entry-journal-entry-posting) và [bài 20](/articles/rust-tong-hop-ledger-core-cargo-doc-workspace) giữ dạng gọn vì lõi sổ cái chỉ có VND, nên phantom type không đáng cái giá của nó. `EntryId` là kiểu được giữ lại cho các bài sau.
 
 ## Với người từ C#: `record Money` và newtype
 
@@ -260,11 +260,11 @@ Lệnh đầu in:
   Tổng toàn sổ: 0 VND
 ```
 
-`-- --verify` kiểm các giá trị trên cùng các ca lỗi và in `VERIFY OK` với exit code 0. `cargo test` báo 30 unit test, 4 integration test và 5 doc test (một ví dụ chạy được, bốn `compile_fail`) đều pass; clippy (`--all-targets -- -D warnings`) và `cargo fmt --check` sạch.
+`-- --verify` kiểm tra các giá trị trên cùng các trường hợp lỗi và in `VERIFY OK` với exit code 0. `cargo test` báo 30 unit test, 4 integration test và 5 doc test (một ví dụ chạy được, bốn `compile_fail`) đều pass; clippy (`--all-targets -- -D warnings`) và `cargo fmt --check` sạch.
 
 <div class="tkh-callout tkh-callout--warn">
 <span class="tkh-callout-title">Giới hạn của ví dụ</span>
-<p>Sổ cái vẫn nằm trong bộ nhớ. <code>Money</code> chỉ có cộng trừ: chưa có nhân chia (phí 20% dùng <code>rust_decimal</code>, xem bài 03 và bài 11), chưa có đổi tiền theo tỷ giá, và <code>Usd</code> chỉ để minh hoạ kỹ thuật: số trong <code>Money&lt;Usd&gt;</code> là cent mà <code>Display</code> chưa biết. Quy tắc <code>AccountId</code> chỉ kiểm hình dạng, chưa kiểm loại tài khoản có tồn tại. <code>Add</code> trả <code>Result</code> là lựa chọn của lab, không phải chuẩn của hệ sinh thái.</p>
+<p>Sổ cái vẫn nằm trong bộ nhớ. <code>Money</code> chỉ có cộng trừ: chưa có nhân chia (phí 20% dùng <code>rust_decimal</code>, xem bài 03 và bài 11), chưa có đổi tiền theo tỷ giá, và <code>Usd</code> chỉ để minh hoạ kỹ thuật: số trong <code>Money&lt;Usd&gt;</code> là cent mà <code>Display</code> chưa biết. Quy tắc <code>AccountId</code> chỉ kiểm tra hình dạng, chưa kiểm tra loại tài khoản có tồn tại hay không. <code>Add</code> trả <code>Result</code> là lựa chọn của lab, không phải chuẩn của hệ sinh thái.</p>
 </div>
 
 **Bài tập:** viết `checked_neg` cho `Money<C>` (lab 11 có bản cho `Money` không generic) để dựng bút toán đảo ở bài sau. Vì sao `Money::from_dong(i64::MIN)` không phủ định được, và kiểu trả về phải là gì?

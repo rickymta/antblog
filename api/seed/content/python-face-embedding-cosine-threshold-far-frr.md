@@ -1,26 +1,26 @@
 ---
 slug: python-face-embedding-cosine-threshold-far-frr
 title: "Embedding và so khớp: cosine, ngưỡng, FAR/FRR và ROC"
-summary: "Bài 49: embedding khuôn mặt bằng SFace (ONNX), cosine bằng numpy, ROC, FAR/FRR, EER tự tính trên Olivetti; báo riêng ảnh không lấy được mặt, chọn ngưỡng theo chi phí và kiểm trên nhiều cách chia người. Có số đo thật."
+summary: "Bài 49: embedding khuôn mặt bằng SFace (ONNX), cosine bằng numpy, ROC, FAR/FRR, EER tự tính trên Olivetti; báo riêng ảnh không lấy được mặt, chọn ngưỡng theo chi phí và kiểm trên nhiều cách chia theo người. Có số liệu đo thật."
 category: python-advanced
 level: advanced
 tags: [python, toi-noi, face-embedding, onnx, far-frr]
 language: vi
 ---
 
-Hồ sơ KYC của một tài xế [Tới Nơi](/articles/du-an-mau-toi-noi) đã qua bước chuẩn bị ở bài 48: ảnh có đúng một mặt, đã căn chỉnh về khung 112 × 112. Giờ `kyc-face` so ảnh thẻ với selfie và ra một con số, giả sử 0,52. Khớp hay không? Nghĩa của con số đến từ **ngưỡng**, và ngưỡng đến từ dữ liệu: bao nhiêu cặp cùng người bị từ chối, bao nhiêu cặp khác người bị chấp nhận nhầm, mỗi loại nhầm tốn bao nhiêu, và bao nhiêu ảnh không lấy được mặt. Bài này đi từ embedding, cosine, FAR/FRR, ROC đến chọn ngưỡng, rồi kiểm ngưỡng với người chưa từng thấy.
+Hồ sơ KYC của một tài xế [Tới Nơi](/articles/du-an-mau-toi-noi) đã qua bước chuẩn bị ở bài 48: ảnh có đúng một mặt, đã căn chỉnh về khung 112 × 112. Giờ `kyc-face` so ảnh thẻ với selfie rồi cho ra một con số, giả sử 0,52. Khớp hay không? Nghĩa của con số đến từ **ngưỡng**, và ngưỡng đến từ dữ liệu: bao nhiêu cặp cùng người bị từ chối, bao nhiêu cặp khác người bị chấp nhận nhầm, mỗi loại nhầm tốn bao nhiêu, và bao nhiêu ảnh không lấy được mặt. Bài này đi từ embedding, cosine, FAR/FRR, ROC đến chọn ngưỡng, rồi kiểm tra ngưỡng với những người mô hình chưa từng thấy.
 
 Đây là bài 49 của lộ trình **Python nâng cao qua Tới Nơi**. Bạn cần bài 48 ([face detection và landmarks](/articles/python-face-detection-landmarks-mediapipe-opencv)) vì ta dùng lại bước căn chỉnh của nó.
 
 <div class="tkh-callout tkh-callout--example">
 <span class="tkh-callout-title">Thử trước khi đọc</span>
 <p>Nhiều ví dụ trên mạng đặt ngưỡng cosine cố định ở 0,3 hoặc 0,5. Với SFace trên Olivetti sạch, FAR ở hai ngưỡng đó xấp xỉ bao nhiêu?</p>
-<details><summary>Xem đáp án</summary><p>Ở 0,3 FAR là <b>27,85%</b>: hơn một phần tư cặp khác người bị chấp nhận. Ở 0,5 FAR là 0,61%, cũng gấp sáu lần mục tiêu 0,1%. Ngưỡng đo được ở FAR 0,1% là 0,567. Ngưỡng phải đo trên dữ liệu và riêng cho từng mô hình.</p></details>
+<details><summary>Xem đáp án</summary><p>Ở 0,3 FAR là <b>27,85%</b>: hơn một phần tư cặp khác người bị chấp nhận. Ở 0,5 FAR là 0,61%, cũng gấp sáu lần mục tiêu 0,1%. Ngưỡng đo được ở FAR 0,1% là 0,567. Ngưỡng phải đo trên dữ liệu, và đo riêng cho từng mô hình.</p></details>
 </div>
 
 ## Từ ảnh mặt đến vector
 
-**Embedding** là vector số mà mô hình gán cho một khuôn mặt sao cho mặt của cùng một người nằm gần nhau, mặt người khác nằm xa nhau. Mặc định lab `49-face-embedding-cosine-threshold` dùng **SFace** (OpenCV Zoo, 128 chiều, chạy offline qua ONNX bằng `cv2.FaceRecognizerSF`) và **YuNet** để dò mặt. Cờ `--with-arcface` thêm **ArcFace R50** của InsightFace (512 chiều, onnxruntime) làm hàng so sánh; vì sao nó không phải mặc định thì đoạn giấy phép bên dưới nói rõ.
+**Embedding** là vector số mà mô hình gán cho một khuôn mặt sao cho mặt của cùng một người nằm gần nhau, mặt người khác nằm xa nhau. Mặc định lab `49-face-embedding-cosine-threshold` dùng **SFace** (OpenCV Zoo, 128 chiều, chạy offline qua ONNX bằng `cv2.FaceRecognizerSF`) và **YuNet** để dò mặt. Cờ `--with-arcface` thêm **ArcFace R50** của InsightFace (512 chiều, onnxruntime) làm mô hình so sánh; lý do nó không phải mặc định được nêu ở đoạn giấy phép bên dưới.
 
 ```python
 # embedders.py (trích)
@@ -37,7 +37,7 @@ class SFace:
         return l2_normalize(np.asarray(vectors, dtype=np.float32))
 ```
 
-Vector ra luôn được **chuẩn hoá L2** (độ dài 1), nên cosine similarity chỉ còn là tích vô hướng: `a @ b.T` cho cả ma trận cosine của hai tập. Với ArcFace, lab nạp thẳng file ONNX bằng onnxruntime (`CPUExecutionProvider` cố định để số đo lặp lại; GPU hay CoreML đổi qua `providers`, bài 52) thay vì dùng gói `insightface`, vì gói đó (bản 2.1) kéo thêm một bản OpenCV đè lên thư mục `cv2`. Lab 49 dùng `opencv-python-headless` 5.0.0 và ngưỡng điểm YuNet 0,6, khác lab 48 (`opencv-contrib-python` 4.14 và 0,7).
+Vector ra luôn được **chuẩn hoá L2** (độ dài 1), nên cosine similarity chỉ còn là tích vô hướng: `a @ b.T` cho cả ma trận cosine của hai tập. Với ArcFace, lab nạp thẳng file ONNX bằng onnxruntime (`CPUExecutionProvider` cố định để kết quả đo lặp lại được; muốn dùng GPU hay CoreML thì đổi qua `providers`, bài 52) thay vì dùng gói `insightface`, vì gói đó (bản 2.1) kéo thêm một bản OpenCV đè lên thư mục `cv2`. Lab 49 dùng `opencv-python-headless` 5.0.0 và ngưỡng điểm YuNet 0,6, khác lab 48 (`opencv-contrib-python` 4.14 và 0,7).
 
 **Giấy phép cần đọc trước khi chạy.** Mã nguồn InsightFace theo MIT, nhưng README của họ ghi các mô hình huấn luyện sẵn, trong đó có gói `buffalo_l` (file `w600k_r50.onnx`), chỉ dùng cho nghiên cứu phi thương mại; muốn dùng khác phải liên hệ InsightFace để xin giấy phép. Repository này không chứa file mô hình: cờ `--with-arcface` tải trực tiếp từ trang phát hành của họ về máy bạn, và bài chỉ dùng nó để so thang điểm giữa hai mô hình. Nếu bạn chạy trong công ty hoặc dự án có thu phí, hãy hỏi người phụ trách pháp lý trước, hoặc chỉ chạy SFace (OpenCV Zoo ghi Apache 2.0; YuNet ghi MIT). Giấy phép của file mô hình không tự trả lời câu hỏi về dữ liệu đã dùng để huấn luyện. Đoạn này không phải tư vấn pháp lý.
 
@@ -49,7 +49,7 @@ Dữ liệu là Olivetti: 400 ảnh xám 64 × 64, 40 người, mỗi người 1
   (với --with-arcface thêm w600k_r50.onnx 174,383,860 byte, trong gói buffalo_l.zip 288,621,354 byte từ github.com/deepinsight/insightface/releases)
 ```
 
-Mỗi ảnh 64 × 64 được phóng lên 192 px, đệm viền lặp 64 px mỗi phía, YuNet dò 5 landmark rồi phép đồng dạng của bài 48 đưa chúng về mẫu ArcFace 112 × 112. Vì Olivetti đã cắt sát mặt, bước này chủ yếu đưa mặt về **đúng tỉ lệ của mẫu**: nếu chỉ resize 64 lên 112 (không dò, không landmark), hai mắt cách nhau 52,8 px trong khi mẫu chỉ 35,2 px (mặt to hơn mẫu 1,50 lần); còn crop căn chỉnh có trung vị 49,6% điểm ảnh nằm ngoài ảnh gốc, tức viền lặp mà mẫu chừa lề.
+Mỗi ảnh 64 × 64 được phóng lên 192 px, đệm viền lặp 64 px mỗi phía, YuNet dò 5 landmark rồi phép biến đổi đồng dạng của bài 48 đưa chúng về mẫu ArcFace 112 × 112. Vì Olivetti đã cắt sát mặt, bước này chủ yếu đưa mặt về **đúng tỉ lệ của mẫu**: nếu chỉ resize 64 lên 112 (không dò, không landmark), hai mắt cách nhau 52,8 px trong khi mẫu chỉ 35,2 px (mặt to hơn mẫu 1,50 lần); còn crop căn chỉnh có trung vị 49,6% điểm ảnh nằm ngoài ảnh gốc, tức là phần viền lặp, vì mẫu chừa lề.
 
 <figure class="tkh-fig">
 <div class="tkh-fig-box">
@@ -60,7 +60,7 @@ Mỗi ảnh 64 × 64 được phóng lên 192 px, đệm viền lặp 64 px mỗ
 
 ## Cosine, FAR, FRR và ROC bằng numpy
 
-Quy ước: điểm càng cao càng giống, `score >= t` là «khớp». **FAR** (False Accept Rate) là tỉ lệ cặp khác người có điểm từ `t` trở lên: chấp nhận nhầm. **FRR** (False Reject Rate) là tỉ lệ cặp cùng người có điểm dưới `t`: từ chối nhầm. Lab đo trên từng cặp ảnh nên đúng hơn là FMR/FNMR, tên bạn sẽ gặp ở báo cáo NIST; FAR/FRR của cả hệ thống còn tính ảnh không lấy được mặt. **ROC** là đường **TAR = 1 − FRR** theo FAR khi quét `t` (FAR theo FRR là đường DET). **EER** là điểm FAR bằng FRR; **AUC** là xác suất một điểm cùng người ngẫu nhiên cao hơn một điểm khác người ngẫu nhiên. Lab tự tính chúng bằng numpy:
+Quy ước: điểm càng cao càng giống, `score >= t` là «khớp». **FAR** (False Accept Rate) là tỉ lệ cặp khác người có điểm từ `t` trở lên: chấp nhận nhầm. **FRR** (False Reject Rate) là tỉ lệ cặp cùng người có điểm dưới `t`: từ chối nhầm. Lab đo trên từng cặp ảnh nên gọi là FMR/FNMR mới đúng hơn, tên bạn sẽ gặp ở báo cáo NIST; FAR/FRR của cả hệ thống còn tính cả ảnh không lấy được mặt. **ROC** là đường **TAR = 1 − FRR** theo FAR khi quét `t` (FAR theo FRR là đường DET). **EER** là điểm FAR bằng FRR; **AUC** là xác suất một điểm cùng người ngẫu nhiên cao hơn một điểm khác người ngẫu nhiên. Lab tự tính chúng bằng numpy:
 
 ```python
 # metrics.py (trích)
@@ -85,11 +85,11 @@ def threshold_at_far(impostor, target_far):
     return float(np.nextafter(desc[allowed], np.inf))
 ```
 
-`split_scores` **bỏ cặp ảnh với chính nó** (điểm 1,0 sẽ làm genuine đẹp giả). Hàng NaN là ảnh không lấy được mặt, tức không có embedding: hàm từ chối chúng trừ khi người gọi báo riêng số ảnh đó rồi truyền `allow_missing=True`. `far_frr` sắp xếp một lần rồi dùng `searchsorted`; `side="left"` làm đúng quy ước `>=`. FAR được tính bằng cách đếm số nguyên rồi mới chia (bảng lỗi bên dưới nói vì sao). Có 15 test pytest cho phần toán này.
+`split_scores` **bỏ cặp ảnh với chính nó** (điểm 1,0 sẽ làm điểm genuine đẹp một cách giả tạo). Hàng NaN là ảnh không lấy được mặt, tức không có embedding: hàm từ chối chúng trừ khi người gọi báo riêng số ảnh đó rồi truyền `allow_missing=True`. `far_frr` sắp xếp một lần rồi dùng `searchsorted`; `side="left"` làm đúng quy ước `>=`. FAR được tính bằng cách đếm số nguyên rồi mới chia (bảng lỗi bên dưới nói vì sao). Có 15 test pytest cho phần toán này.
 
 ## Phân bố genuine và impostor trên Olivetti
 
-Bảng phân vị trên Olivetti sạch (mọi cặp không thứ tự), rồi ROC với ngưỡng ở FAR không quá 0,1% trên chính các cặp impostor này:
+Bảng phân vị trên Olivetti sạch (mọi cặp, không phân biệt thứ tự), rồi ROC với ngưỡng ở FAR không quá 0,1% trên chính các cặp impostor này:
 
 ```text
   mô hình     nhóm        số cặp     min     p05     p50     p95     max
@@ -104,9 +104,9 @@ Bảng phân vị trên Olivetti sạch (mọi cặp không thứ tự), rồi R
   sface       78 cặp ảnh vượt ngưỡng 0.567, thuộc 9/780 cặp người
 ```
 
-SFace tách tốt hai nhóm trên bộ này (AUC 0,99982) nhưng vẫn chồng nhau: cặp cùng người thấp nhất là 0,413 trong khi cặp khác người cao nhất là 0,637. Căn chỉnh có giá trị đo được: TAR ở FAR 0,1% từ 0,4772 (chỉ resize) lên 0,9706, EER từ 0,1271 xuống 0,0072; phần lớn mức cải thiện đến từ việc đưa mặt về đúng tỉ lệ mẫu. Hai điều cần dè chừng. **Một**, 78.000 cặp không phải 78.000 mẫu độc lập: 78 cặp ảnh vượt ngưỡng chỉ thuộc 9 trong 780 cặp người, vì các cặp ảnh của cùng hai người tương quan mạnh. Mức bất định của FAR vì thế lớn hơn nhiều so với việc đếm 78 trên 78.000; các mục sau đo nó. **Hai**, FAR 0,001% không đo nổi với 78.000 cặp, và «FRR 0» trên 1.800 cặp không phải «không bao giờ từ chối nhầm».
+SFace tách tốt hai nhóm trên bộ này (AUC 0,99982) nhưng vẫn chồng nhau: cặp cùng người thấp nhất là 0,413 trong khi cặp khác người cao nhất là 0,637. Căn chỉnh có giá trị đo được: TAR ở FAR 0,1% từ 0,4772 (chỉ resize) lên 0,9706, EER từ 0,1271 xuống 0,0072; phần lớn mức cải thiện đến từ việc đưa mặt về đúng tỉ lệ mẫu. Hai điều cần dè chừng. **Một**, 78.000 cặp không phải 78.000 mẫu độc lập: 78 cặp ảnh vượt ngưỡng chỉ thuộc 9 trong 780 cặp người, vì các cặp ảnh của cùng hai người tương quan mạnh. Vì thế mức bất định của FAR lớn hơn nhiều so với con số đếm 78 trên 78.000 gợi ra; các mục sau sẽ đo mức bất định này. **Hai**, FAR 0,001% không đo nổi với 78.000 cặp, và «FRR 0» trên 1.800 cặp không phải «không bao giờ từ chối nhầm».
 
-Với ArcFace (cờ `--with-arcface`, chỉ để so thang điểm), EER sạch là 0,0005 và ngưỡng ở FAR 0,1% là 0,311, so với 0,567 của SFace: ngưỡng của hai mô hình không dùng chung được. Sau khi bỏ 59 ảnh không lấy được mặt, ArcFace chịu ảnh xuống cấp tốt hơn SFace nhiều trên các ảnh còn lại, nhưng FRR hệ thống vẫn bị ảnh hụt kéo lên, và ngưỡng chọn trên một nhóm người vẫn vượt mục tiêu ở nhóm khác (trích từ lần chạy có cờ):
+Với ArcFace (cờ `--with-arcface`, chỉ để so thang điểm), EER sạch là 0,0005 và ngưỡng ở FAR 0,1% là 0,311, so với 0,567 của SFace: ngưỡng của hai mô hình không thể dùng chung. Sau khi bỏ 59 ảnh không lấy được mặt, ArcFace chịu ảnh xuống cấp tốt hơn SFace nhiều trên các ảnh còn lại, nhưng FRR hệ thống vẫn bị ảnh hụt kéo lên, và ngưỡng chọn trên một nhóm người vẫn vượt mục tiêu ở nhóm khác (trích từ lần chạy có cờ):
 
 ```text
   arcface_r50 nặng             59    3,069   132,990  0.99986  0.0061  0.9974    0.9746   0.329        0.1692
@@ -114,13 +114,13 @@ Với ArcFace (cờ `--with-arcface`, chỉ để so thang điểm), EER sạch 
   arcface_r50 300 cách chia: FAR nhóm chưa thấy p05 0.00012, trung vị 0.00091, p95 0.00303; vượt 0.001 ở 44% số lần
 ```
 
-Bộ này dễ vì Olivetti là 40 người chụp trong cùng một phòng, nên mục sau mô phỏng ảnh thẻ in và quét kém.
+Bộ này dễ vì Olivetti là 40 người chụp trong cùng một phòng, nên mục sau mô phỏng ảnh thẻ được in ra rồi quét chất lượng kém.
 
 ## Thẻ với selfie: ảnh xuống cấp, ảnh không lấy được mặt
 
 Trong KYC, hai ảnh so với nhau không cùng điều kiện: ảnh thẻ là ảnh in nhỏ rồi quét, selfie thì sạch hơn. `degrade.py` mô phỏng ảnh thẻ bằng mờ Gauss, đổi gamma (tối), nhiễu hạt và nén JPEG ở hai mức. **Probe** là ảnh xuống cấp, **reference** là ảnh sạch, so mọi cặp có thứ tự i ≠ j.
 
-Bản đầu của lab xử lý sai một điểm: khi ảnh xuống cấp, YuNet đôi khi không lấy được mặt, và bản đầu lùi âm thầm sang «chỉ resize» rồi vẫn nhúng ảnh, làm số liệu trộn hai nhóm khác hẳn nhau. Lab giờ không lùi: ảnh không lấy được mặt **không được nhúng**, bị đếm riêng và chuyển `needs_review`, còn FAR/FRR/EER tính trên ảnh lấy được mặt. Số ảnh hụt không nhỏ:
+Bản đầu của lab xử lý sai một điểm: khi ảnh xuống cấp, YuNet đôi khi không lấy được mặt, và bản đầu lùi sang «chỉ resize» mà không báo gì rồi vẫn tạo embedding cho ảnh, làm số liệu trộn hai nhóm khác hẳn nhau. Lab giờ không lùi: ảnh không lấy được mặt **không được tạo embedding**, bị đếm riêng và chuyển `needs_review`, còn FAR/FRR/EER tính trên ảnh lấy được mặt. Số ảnh hụt không nhỏ:
 
 ```text
   mức sạch : YuNet không lấy được mặt ở 0/400 ảnh (0.0%); những ảnh này chuyển needs_review và không có embedding; 19.7 ms/ảnh (gồm dò mặt)
@@ -138,7 +138,7 @@ Bản đầu của lab xử lý sai một điểm: khi ảnh xuống cấp, YuNe
   (AUC, EER, TAR, ngưỡng: chỉ trên ảnh lấy được mặt. FRR hệ thống = FRR ở FAR <= 1e-3 cộng thêm các ảnh không lấy được mặt)
 ```
 
-Cột «FRR hệ thống» là con số đáng nhìn. Ở mức nặng, EER trên ảnh lấy được mặt là 0,0577, nhưng 14,8% ảnh không qua nổi bước dò mặt, nên tỉ lệ người thật không qua được hệ thống là 41,33% (FRR 31,18% ở ảnh lấy được mặt, cộng phần ảnh hụt). Chỉ báo EER trên ảnh lấy được mặt là giấu 59 ảnh khó nhất, những ảnh mà bài 48 phải bắt bằng chất lượng và chuyển người duyệt.
+Cột «FRR hệ thống» là con số đáng chú ý nhất. Ở mức nặng, EER trên ảnh lấy được mặt là 0,0577, nhưng 14,8% ảnh không qua nổi bước dò mặt, nên tỉ lệ người thật không qua được hệ thống là 41,33% (FRR 31,18% ở ảnh lấy được mặt, cộng phần ảnh hụt). Nếu chỉ báo EER trên ảnh lấy được mặt thì ta đã giấu đi 59 ảnh khó nhất, những ảnh mà bài 48 phải chặn lại theo chất lượng ảnh rồi chuyển cho người duyệt.
 
 Nếu ta chọn ngưỡng trên dữ liệu sạch rồi dùng nguyên cho ảnh thẻ nặng thì sao (chỉ ảnh lấy được mặt):
 
@@ -146,11 +146,11 @@ Nếu ta chọn ngưỡng trên dữ liệu sạch rồi dùng nguyên cho ảnh
   sface       ngưỡng 0.567: FAR 0.00024, FRR 0.4236
 ```
 
-FAR vẫn dưới mục tiêu nhưng FRR là 42,36%: ngưỡng chọn ở điều kiện này không mang nguyên sang điều kiện khác.
+FAR vẫn dưới mục tiêu nhưng FRR là 42,36%: ngưỡng chọn ở điều kiện này không thể mang nguyên sang điều kiện khác.
 
 ## Chọn ngưỡng: chi phí, ba vùng và người chưa thấy
 
-Có ba cách chọn ngưỡng, cho ba con số khác nhau. **Theo mục tiêu FAR** (ví dụ 0,1%): đơn giản, nhưng bỏ qua cái giá của FRR. **Theo EER**: tiện để so mô hình, hiếm khi là điều vận hành muốn. **Theo chi phí**: chi phí kỳ vọng mỗi lượt là p × C_FA × FAR + (1 − p) × C_FR × FRR, với p là tỉ lệ lượt mạo danh; lấy ngưỡng làm nó nhỏ nhất. Lab dùng giả định minh hoạ p = 2%, nhầm nhận tốn 100 đơn vị, nhầm từ chối tốn 1; dịch vụ thật phải thay bằng số của vận hành.
+Có ba cách chọn ngưỡng, cho ba con số khác nhau. **Theo mục tiêu FAR** (ví dụ 0,1%): đơn giản, nhưng bỏ qua cái giá của FRR. **Theo EER**: tiện để so mô hình, hiếm khi là điều bộ phận vận hành cần. **Theo chi phí**: chi phí kỳ vọng mỗi lượt là p × C_FA × FAR + (1 − p) × C_FR × FRR, với p là tỉ lệ lượt mạo danh; chọn ngưỡng sao cho chi phí này nhỏ nhất. Lab dùng giả định minh hoạ p = 2%, mỗi lần nhận nhầm tốn 100 đơn vị, mỗi lần từ chối nhầm tốn 1; dịch vụ thật phải thay bằng số liệu của bộ phận vận hành.
 
 ```python
 # metrics.py (trích)
@@ -174,7 +174,7 @@ def best_threshold_by_cost(genuine, impostor, *, c_fa, c_fr, p_impostor):
   sface       nặng      FAR <= 1e-3          0.533   0.00099  0.3118       0.30758
 ```
 
-Trên ảnh nặng, ngưỡng tối thiểu chi phí là 0,438, **thấp hơn** ngưỡng ở FAR 0,1% (0,533): nó chấp nhận FAR 2,10% để đổi lấy FRR 9,94% thay vì 31,18%, vì với giả định này trọng số hiệu dụng của FAR là 0,02 × 100 = 2 còn của FRR là 0,98. Kết quả phụ thuộc mạnh vào giả định (nhầm nhận đắt hơn hoặc p cao hơn thì ngưỡng bị đẩy lên).
+Trên ảnh nặng, ngưỡng tối thiểu chi phí là 0,438, **thấp hơn** ngưỡng ở FAR 0,1% (0,533): ngưỡng này chấp nhận FAR 2,10% để đổi lấy FRR 9,94% thay vì 31,18%, vì với giả định này trọng số hiệu dụng của FAR là 0,02 × 100 = 2 còn của FRR là 0,98. Kết quả phụ thuộc mạnh vào giả định (nhận nhầm đắt hơn hoặc p cao hơn thì ngưỡng sẽ tăng lên).
 
 Vì máy chỉ **gợi ý** cho người duyệt, ta dùng hai ngưỡng: `t_high` (FAR ≤ 0,1%) và `t_low` (FRR ≤ 1%), chia điểm thành ba vùng (Hình 2, SFace trên ảnh thẻ nặng, ảnh lấy được mặt).
 
@@ -182,7 +182,7 @@ Vì máy chỉ **gợi ý** cho người duyệt, ta dùng hai ngưỡng: `t_hig
 <div class="tkh-fig-box">
 <svg viewBox="0 0 880 250" role="img" aria-label="Trục điểm cosine của SFace trên kịch bản thẻ nặng, chỉ tính ảnh lấy được mặt, chia ba vùng bởi hai ngưỡng 0,241 và 0,533. Cặp cùng người rơi 0,98 phần trăm vào vùng không khớp, 30,21 vào vùng chưa rõ, 68,82 vào vùng khớp; cặp khác người rơi 51,99, 47,92 và 0,10."><defs></defs><rect x="90.0" y="50" width="271.9" height="70" class="f-warn-soft s-warn"/><rect x="361.9" y="50" width="180.1" height="70" class="f-surface s-line dash"/><rect x="542.0" y="50" width="288.0" height="70" class="f-phys-soft s-phys"/><text x="98.0" y="74" class="t-mono">likely_mismatch</text><text x="369.9" y="74" class="t-mono">unclear</text><text x="550.0" y="74" class="t-mono">likely_match</text><text x="98.0" y="98" class="t-small">cùng người 0,98%</text><text x="369.9" y="98" class="t-small">cùng người 30,21%</text><text x="550.0" y="98" class="t-small">cùng người 68,82%</text><text x="98.0" y="114" class="t-small">khác người 51,99%</text><text x="369.9" y="114" class="t-small">khác người 47,92%</text><text x="550.0" y="114" class="t-small">khác người 0,10%</text><path d="M361.9 120 L361.9 150" class="f-none s-warn dash" stroke-width="2"/><path d="M542.0 120 L542.0 150" class="f-none s-warn dash" stroke-width="2"/><text x="321.9" y="170" class="t-small">t_low = 0,241</text><text x="512.0" y="170" class="t-small">t_high = 0,533</text><path d="M90.0 196 L830.0 196" class="f-none s-line" stroke-width="2"/><path d="M213.3 196 L213.3 202" class="f-none s-line" stroke-width="2"/><text x="207.3" y="220" class="t-small">0</text><path d="M521.7 196 L521.7 202" class="f-none s-line" stroke-width="2"/><text x="515.7" y="220" class="t-small">0,5</text><path d="M830.0 196 L830.0 202" class="f-none s-line" stroke-width="2"/><text x="824.0" y="220" class="t-small">1,0</text><text x="470" y="240" class="t-small">điểm cosine của SFace, thẻ nặng so với selfie sạch</text></svg>
 </div>
-<figcaption>Hình 2. Hai ngưỡng chia điểm thành ba vùng gợi ý. Cả ba vùng đều dẫn tới người duyệt; vùng chỉ quyết định thứ tự ưu tiên và mức nghi ngờ ghi kèm.</figcaption>
+<figcaption>Hình 2. Hai ngưỡng chia điểm thành ba vùng gợi ý. Cả ba vùng đều dẫn tới người duyệt; mỗi vùng chỉ quyết định thứ tự ưu tiên và mức nghi ngờ ghi kèm.</figcaption>
 </figure>
 
 ```text
@@ -194,7 +194,7 @@ Vì máy chỉ **gợi ý** cho người duyệt, ta dùng hai ngưỡng: `t_hig
 
 Ở mức ảnh nặng, khoảng 40,80% lượt vào hàng người duyệt, gồm cả 59/400 ảnh không lấy được mặt. Không vùng nào tự duyệt hay tự từ chối hồ sơ.
 
-Ngưỡng có tổng quát hoá sang người chưa thấy không? Một cách chia 20/20 theo chỉ số cho một con số, đảo chiều cho con số khác, nên lab in cả hai chiều, rồi 300 cách chia ngẫu nhiên rời người (chọn ngưỡng ở FAR 0,1% trên nhóm A, đo trên nhóm B), và bootstrap theo người (bốc lại 40 người có hoàn lại, 200 lần):
+Ngưỡng có tổng quát hoá sang người chưa thấy không? Một cách chia 20/20 theo chỉ số cho ra một con số, đảo chiều lại cho ra con số khác, nên lab in cả hai chiều, rồi 300 cách chia ngẫu nhiên rời người (chọn ngưỡng ở FAR 0,1% trên nhóm A, đo trên nhóm B), và bootstrap theo người (bốc lại 40 người có hoàn lại, 200 lần):
 
 ```text
   sface       người 0-19 -> 20-39: ngưỡng 0.533; nhóm chọn FAR 0.00098 FRR 0.2690 | nhóm chưa thấy FAR 0.00063 FRR 0.3615
@@ -205,7 +205,7 @@ Ngưỡng có tổng quát hoá sang người chưa thấy không? Một cách c
     giữ ngưỡng cố định 0.533: FAR 0.00026 / 0.00090 / 0.00206; FRR 0.2543 / 0.3097 / 0.3833
 ```
 
-Hai chiều của cách chia đầu cho kết luận ngược nhau: chiều đi, FAR trên nhóm chưa thấy (0,063%) dưới mục tiêu; chiều về, 0,161% vượt mục tiêu; FRR cũng đảo (36,15% so với 23,13%). Không nên kết luận từ một lần chia. Qua 300 cách chia, FAR trên nhóm chưa thấy có trung vị 0,106%, vượt 0,1% ở 52% số lần, p95 là 0,370%: ngưỡng chọn ở FAR 0,1% trên một nhóm người **không bảo đảm** FAR 0,1% với nhóm khác. Bootstrap cho thấy tương tự: giữ nguyên ngưỡng thì FAR dao động từ 0,026% đến 0,206%. Khi chọn lại ngưỡng trong từng lần bốc, FAR luôn ở mục tiêu theo cách xây dựng, nên số đáng đọc là FRR (22,62% đến 38,30%). Chỉ có 40 người, nên các khoảng này là **ít nhất** mức bất định thật; bài 53 quay lại theo nhóm người.
+Hai chiều của cách chia đầu cho kết luận ngược nhau: chiều đi, FAR trên nhóm chưa thấy (0,063%) dưới mục tiêu; chiều về, 0,161% vượt mục tiêu; FRR cũng đảo (36,15% so với 23,13%). Không nên kết luận từ một lần chia. Qua 300 cách chia, FAR trên nhóm chưa thấy có trung vị 0,106%, vượt 0,1% ở 52% số lần, p95 là 0,370%: ngưỡng chọn ở FAR 0,1% trên một nhóm người **không bảo đảm** FAR 0,1% với nhóm khác. Bootstrap cho thấy tương tự: giữ nguyên ngưỡng thì FAR dao động từ 0,026% đến 0,206%. Khi chọn lại ngưỡng trong từng lần bốc, FAR luôn đạt mục tiêu do cách dựng thí nghiệm, nên số đáng đọc là FRR (22,62% đến 38,30%). Chỉ có 40 người, nên mức bất định thật **ít nhất** cũng lớn bằng các khoảng này; bài 53 quay lại theo nhóm người.
 
 ## Chạy và kiểm chứng
 
@@ -217,9 +217,9 @@ uv run --project examples/toi-noi-python/49-face-embedding-cosine-threshold exam
 uv run --project examples/toi-noi-python/49-face-embedding-cosine-threshold pytest examples/toi-noi-python/49-face-embedding-cosine-threshold -q
 ```
 
-Thêm `--with-arcface` vào hai lệnh đầu để so với ArcFace R50: lab in cảnh báo giấy phép rồi tải gói 288.621.354 byte, và chạy lâu hơn nhiều trên CPU vì ArcFace phải qua 1.600 ảnh. `--verify` kiểm các bất biến đã in: số cặp (đúng 9 genuine và 390 impostor cho mỗi ảnh lấy được mặt), vector có độ dài 1, căn chỉnh tốt hơn chỉ resize, số ảnh hụt tăng theo mức xuống cấp, `split_scores` từ chối hàng NaN, FAR đo được không vượt mục tiêu, EER tăng đúng thứ tự, ngưỡng tối thiểu chi phí không đắt hơn hai cách chọn còn lại, mọi cách chia rời người, p95 FAR trên người chưa thấy vượt mục tiêu. Ca bất thường: ảnh so với chính nó bị loại khỏi genuine; ảnh đen và nhiễu trắng không lấy được mặt nên không có embedding.
+Thêm `--with-arcface` vào hai lệnh đầu để so với ArcFace R50: lab in cảnh báo giấy phép rồi tải gói 288.621.354 byte, và chạy lâu hơn nhiều trên CPU vì ArcFace phải qua 1.600 ảnh. `--verify` kiểm các bất biến đã in: số cặp (đúng 9 genuine và 390 impostor cho mỗi ảnh lấy được mặt), vector có độ dài 1, căn chỉnh tốt hơn chỉ resize, số ảnh hụt tăng theo mức xuống cấp, `split_scores` từ chối hàng NaN, FAR đo được không vượt mục tiêu, EER tăng đúng thứ tự, ngưỡng tối thiểu chi phí không đắt hơn hai cách chọn còn lại, mọi cách chia rời người, p95 FAR trên người chưa thấy vượt mục tiêu. Trường hợp bất thường: ảnh so với chính nó bị loại khỏi genuine; ảnh đen và nhiễu trắng không lấy được mặt nên không có embedding.
 
-Dòng cuối của lần chạy `--verify` mặc định mới nhất (SFace), kết quả pytest, và dòng cuối khi thêm `--with-arcface` (49 ca vì có thêm các ca của ArcFace):
+Dòng cuối của lần chạy `--verify` mặc định mới nhất (SFace), kết quả pytest, và dòng cuối khi thêm `--with-arcface` (49 test case vì có thêm các test case của ArcFace):
 
 ```text
 OK 32/32
@@ -227,7 +227,7 @@ OK 32/32
 OK 49/49
 ```
 
-Thời gian một ảnh SFace là 14,2 ms (trung vị 15 lần, load average 117,6; dò mặt và căn chỉnh YuNet là 19,7 ms mỗi ảnh sạch): chỉ đọc thứ bậc lớn vì máy rất bận. Embedding lưu ở `out/embeddings_sface.npy` và `labels.npy` là **dữ liệu sinh trắc học**: đã gitignore, và bài 53 bàn về thời hạn lưu, đồng ý và quyền xoá.
+Thời gian một ảnh SFace là 14,2 ms (trung vị 15 lần, load average 117,6; dò mặt và căn chỉnh YuNet là 19,7 ms mỗi ảnh sạch): chỉ nên đọc bậc độ lớn vì máy rất bận. Embedding lưu ở `out/embeddings_sface.npy` và `labels.npy` là **dữ liệu sinh trắc học**: đã gitignore, và bài 53 bàn về thời hạn lưu, sự đồng ý và quyền xoá.
 
 | Hiện tượng | Kiểm tra trước |
 | --- | --- |
@@ -239,7 +239,7 @@ Thời gian một ảnh SFace là 14,2 ms (trung vị 15 lần, load average 117
 
 <div class="tkh-callout tkh-callout--warn">
 <span class="tkh-callout-title">Giới hạn của ví dụ so với production</span>
-<p>Olivetti chỉ có 40 người chụp trong phòng thí nghiệm, ảnh xám 64 × 64; ảnh «thẻ» là ảnh xuống cấp bằng code, không phải ảnh in thật. Các số FAR, FRR, EER ở trên cho thấy cách đo, không phải mức lỗi ngoài đời, và số ảnh không lấy được mặt (14,8% ở mức nặng) cũng chỉ đúng cho kiểu xuống cấp này. Chi phí 100 và 1 và tỉ lệ mạo danh 2% là giả định minh hoạ. Ta chưa đánh giá theo nhóm tuổi, giới hay màu da và không được suy ra mô hình công bằng với mọi nhóm (bài 53). Điểm so khớp là đầu vào cho người duyệt hồ sơ (người duyệt `RV-001` trong từ điển miền), không phải quyết định xác minh.</p>
+<p>Olivetti chỉ có 40 người chụp trong phòng thí nghiệm, ảnh xám 64 × 64; ảnh «thẻ» là ảnh xuống cấp bằng code, không phải ảnh in thật. Các số FAR, FRR, EER ở trên cho thấy cách đo, không phải mức lỗi ngoài đời, và số ảnh không lấy được mặt (14,8% ở mức nặng) cũng chỉ đúng cho kiểu xuống cấp này. Chi phí 100 và 1 và tỉ lệ mạo danh 2% là giả định minh hoạ. Ta chưa đánh giá theo nhóm tuổi, giới hay màu da và vì vậy không được suy ra rằng mô hình công bằng với mọi nhóm (bài 53). Điểm so khớp là đầu vào cho người duyệt hồ sơ (người duyệt `RV-001` trong từ điển miền), không phải quyết định xác minh.</p>
 </div>
 
 **Bài tập 1:** Với 78.000 cặp khác người, ngưỡng FAR ≤ 0,1% cho phép tối đa bao nhiêu cặp khác người nằm trên ngưỡng?

@@ -1,0 +1,11 @@
+{
+  "file": "python-redis-cache-rate-limit-geo.md",
+  "edits": [
+    {
+      "old": "Nguồn sự thật",
+      "new": "Nguồn dữ liệu gốc",
+      "reason": "Theo terminology.json (source-of-truth): «nguồn sự thật» thành «nguồn dữ liệu gốc», như các bài khác trong loạt. Chữ trong Hình; văn xuôi của bài đã dùng «nguồn dữ liệu gốc».",
+      "severity": "medium"
+    }
+  ]
+}

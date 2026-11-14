@@ -1,14 +1,14 @@
 ---
 slug: rust-cargo-mutants-fuzz-insta-kiem-thu-nang-cao
 title: "Kiểm thử nâng cao: mutation, fuzz, snapshot và test tất định"
-summary: "Bài 57: cargo-mutants chỉ ra chỗ test còn hở, cargo-fuzz tìm panic ở parser sao kê, insta snapshot có redaction, clock giả và seed cố định chặn test flaky, kèm ngân sách test trong CI với số đo thật."
+summary: "Bài 57: cargo-mutants chỉ ra chỗ test còn hở, cargo-fuzz tìm panic ở parser sao kê, insta snapshot có redaction, đồng hồ giả và seed cố định chặn test flaky, kèm ngân sách test trong CI với số đo thật."
 category: rust-advanced
 level: advanced
 tags: [rust, toi-noi, ledger, testing, fuzzing, mutation]
 language: vi
 ---
 
-Module chia tiền của ledger có ba test, cả ba xanh: chuyến `TN-0001` ra phí 5.100 và tài xế 20.400, cước âm bị từ chối, phần trăm 150 bị từ chối. Nhưng chưa test nào chạy qua dòng làm tròn nửa đồng, nên ai sửa dòng ấy cũng không làm test nào đỏ. Loạt bài đã có `proptest` ([bài 19](/articles/rust-proptest-property-test-bat-bien-so-cai)) và test tích hợp trên PostgreSQL thật ([bài 27](/articles/rust-integration-test-postgresql-schema-rieng-ci)); bài này thêm bốn công cụ để trả lời «test có đủ chặt không» bằng chạy thật.
+Module chia tiền của ledger có ba test, cả ba xanh: chuyến `TN-0001` ra phí 5.100 và tài xế 20.400, cước âm bị từ chối, phần trăm 150 bị từ chối. Nhưng chưa test nào chạy qua dòng làm tròn nửa đồng, nên ai sửa dòng ấy cũng không làm test nào đỏ. Loạt bài đã có `proptest` ([bài 19](/articles/rust-proptest-property-test-bat-bien-so-cai)) và test tích hợp trên PostgreSQL thật ([bài 27](/articles/rust-integration-test-postgresql-schema-rieng-ci)); bài này thêm bốn công cụ để trả lời «test có đủ chặt không» bằng cách chạy thật.
 
 Đây là bài 57 của lộ trình **Rust nâng cao qua [Tới Nơi](/articles/du-an-mau-toi-noi)**. Lab `examples/toi-noi-rust/57-advanced-testing/` tự chứa: module chia tiền là bản sao tối thiểu, parser sao kê là bản nhỏ của [bài 47](/articles/rust-doi-soat-psp-sao-ke-csv-khop-lech-bao-cao).
 
@@ -76,7 +76,7 @@ Ba mutant sống chỉ ra hai lỗ hổng. Thứ nhất, `fare < 0` thành `fare
 +        fee -= /* ~ changed by cargo-mutants ~ */ 1; // nửa đồng trở lên thì làm tròn lên
 ```
 
-Test thêm, trong `tests/split_boundary.rs`, nhắm đúng ba chỗ đó:
+Các test thêm vào, nằm trong `tests/split_boundary.rs`, nhắm đúng ba chỗ đó:
 
 ```rust
 // tests/split_boundary.rs (rút gọn: bỏ ba test biên phụ)
@@ -105,13 +105,13 @@ fn below_half_rounds_down() {
 24 mutants tested in 77s: 23 caught, 1 unviable
 ```
 
-Lần chạy trên parser (`src/statement.rs`) cho 67 mutant, 7 sống. Ba nằm ở `parse_amount_v1`, bản có lỗi cố ý ở mục fuzz; `.cargo/mutants.toml` loại hai hàm v1 bằng `exclude_re`, vì đột biến code đã biết là sai không cho thông tin gì. Bốn còn lại là biên độ dài `external_ref` (64 byte), ký tự cấm trong ref ngắn và `format_amount(0)`. Sau ba test trong `tests/parser_boundary.rs`: 55 mutant, 53 diệt, 2 unviable.
+Lần chạy trên parser (`src/statement.rs`) cho 67 mutant, 7 sống. Ba nằm ở `parse_amount_v1`, bản có lỗi cố ý ở mục fuzz; `.cargo/mutants.toml` loại hai hàm v1 bằng `exclude_re`, vì mutant của đoạn code đã biết là sai không cho thông tin gì. Bốn còn lại là ranh giới độ dài `external_ref` (64 byte), ký tự cấm trong ref ngắn và `format_amount(0)`. Sau ba test trong `tests/parser_boundary.rs`: 55 mutant, 53 diệt, 2 unviable.
 
-Hai giới hạn. Mutation không chứng minh đúng, chỉ cho biết test phân biệt được code gốc với biến thể nhỏ của nó. Và mutant tương đương hành vi thì không test nào diệt được (ví dụ ở bài tập cuối bài): đọc diff, xác nhận rồi loại bằng `exclude_re`, đừng viết test giả để ép con số về 0.
+Hai giới hạn. Mutation không chứng minh code đúng, chỉ cho biết test phân biệt được code gốc với biến thể nhỏ của nó. Và mutant tương đương về hành vi thì không test nào diệt được (ví dụ ở bài tập cuối bài): đọc diff, xác nhận rồi loại bằng `exclude_re`, đừng viết test giả để ép con số về 0.
 
 ## Fuzz parser sao kê: tìm đầu vào bạn không nghĩ ra
 
-Test viết tay phản ánh trí tưởng tượng của người viết. **Fuzzing** để máy sinh đầu vào: `cargo-fuzz` chạy libFuzzer, đột biến byte của các mẫu có sẵn, giữ đầu vào đi vào nhánh code mới và dừng ở đầu vào đầu tiên làm target panic.
+Test viết tay phản ánh trí tưởng tượng của người viết. **Fuzzing** để máy sinh đầu vào: `cargo-fuzz` chạy libFuzzer, đột biến byte của các mẫu có sẵn, giữ lại những đầu vào đi vào nhánh code mới và dừng ở đầu vào đầu tiên làm target panic.
 
 Quy ước của loạt là Rust stable. Fuzz là ngoại lệ có giới hạn: `cargo-fuzz` biên dịch với sanitizer (`-Zsanitizer=address`), chỉ nightly có. Lab cài `nightly --profile minimal` bằng `rustup`, chỉ dùng cho thư mục `fuzz/`; đây là workspace riêng nên `cargo build`, `cargo test` và `--verify` ở gốc lab không cần nightly. Phiên bản đã chạy: `cargo-fuzz 0.13.2`, nightly 1.101.0 (2026-11-05), `cargo-mutants 27.1.0`.
 
@@ -155,7 +155,7 @@ start byte index 1 is not a char boundary; it is inside 'Ώ' (bytes 0..2 of stri
 Failing input: fuzz/artifacts/parse_line_v1/crash-6eb291285e6c50a54d29703a0baccaf19669e7ea
 ```
 
-(Rút gọn: bỏ stack trace và các dòng `NEW`.) Fuzzer tìm ra sau khoảng 111.000 lần chạy, chưa đầy 7 giây; biên dịch lần đầu mất 55 giây. `-max_total_time=120` chỉ là trần.
+(Rút gọn: bỏ stack trace và các dòng `NEW`.) Fuzzer tìm ra lỗi sau khoảng 111.000 lần chạy, chưa đầy 7 giây; biên dịch lần đầu mất 55 giây. `-max_total_time=120` chỉ là trần.
 
 <figure class="tkh-fig">
 <div class="tkh-fig-box">
@@ -180,7 +180,7 @@ Output of `std::fmt::Debug`:
 
 Bảy byte, tức dòng `_,Ώ _,`. Cột số tiền là `Ώ _`: `Ώ` chiếm hai byte, cộng dấu cách và `_` thành bốn byte. Code lấy `raw.len() - 3 = 1`, đúng giữa hai byte của `Ώ`, nên cắt chuỗi panic. File sao kê từ bên ngoài có thể chứa ký tự mà người viết test không nghĩ tới.
 
-Bản sửa làm việc trên byte; ba byte cuối khớp `VND` là ASCII nên điểm cắt luôn đúng ranh giới ký tự:
+Bản sửa thao tác trên byte; ba byte cuối khớp `VND` là ASCII nên điểm cắt luôn đúng ranh giới ký tự:
 
 ```rust
 // src/statement.rs, parse_amount (rút gọn: chỉ đoạn bỏ hậu tố)
@@ -191,7 +191,7 @@ let rest = if rest.len() >= 3 && rest[rest.len() - 3..].eq_ignore_ascii_case(b"V
 };
 ```
 
-Bảy byte được chép vào `tests/data/crash_v1_char_boundary.bin` (commit) và thành test chạy trên stable. Test thứ hai giữ bằng chứng rằng input này **thật sự** làm bản v1 panic; test hồi quy chưa từng đỏ thì khó tin:
+Bảy byte được chép vào `tests/data/crash_v1_char_boundary.bin` (commit) và thành test chạy trên stable. Test thứ hai giữ bằng chứng rằng đầu vào này **thật sự** làm bản v1 panic; test hồi quy chưa từng đỏ thì khó tin:
 
 ```rust
 // tests/fuzz_regression.rs (rút gọn)
@@ -228,11 +228,11 @@ Done 6962603 runs in 61 second(s)
 stat::average_exec_per_sec:     114141
 ```
 
-Gần 7 triệu lần chạy trong 61 giây, không panic, không vi phạm round-trip. Không chứng minh parser đúng, chỉ cho biết nhiều đầu vào kỳ quặc không phá được hai tiêu chí đã viết. `fuzz/corpus` và `fuzz/artifacts` nằm trong `.gitignore`; chỉ commit hạt giống và một crash tối thiểu có chủ đích.
+Gần 7 triệu lần chạy trong 61 giây, không panic, không vi phạm round-trip. Kết quả này không chứng minh parser đúng, chỉ cho biết nhiều đầu vào kỳ quặc không phá được hai tiêu chí đã viết. `fuzz/corpus` và `fuzz/artifacts` nằm trong `.gitignore`; chỉ commit hạt giống và một crash tối thiểu có chủ đích.
 
 ## Snapshot báo cáo đối soát: insta và trường đổi mỗi lần chạy
 
-Báo cáo đối soát cho Finance là văn bản dài; `assert_eq!` từng trường thì không ai đọc nổi. **Snapshot test** lưu đầu ra mong đợi vào file được commit (`tests/snapshots/*.snap`), so đầu ra mới với file, và khi khác thì in diff để người review quyết định đổi code hay đổi snapshot. `insta` làm việc này. Báo cáo có ba trường đổi mỗi lần chạy: `run_id` (UUID), `generated_at` và `duration_ms`. Hai cách xử lý, cả hai trong `tests/report_snapshot.rs`:
+Báo cáo đối soát gửi bộ phận tài chính là văn bản dài; `assert_eq!` từng trường thì không ai đọc nổi. **Snapshot test** lưu đầu ra mong đợi vào file được commit (`tests/snapshots/*.snap`), so đầu ra mới với file, và khi khác thì in diff để người review quyết định đổi code hay đổi snapshot. `insta` làm việc này. Báo cáo có ba trường đổi mỗi lần chạy: `run_id` (UUID), `generated_at` và `duration_ms`. Hai cách xử lý, cả hai trong `tests/report_snapshot.rs`:
 
 ```rust
 // tests/report_snapshot.rs (rút gọn)
@@ -269,7 +269,7 @@ khớp 2 | lệch 3 | dòng hỏng 3
   dòng 9: số cột sai: có 2, cần 3
 ```
 
-Nên ưu tiên cách đầu: truyền đồng hồ vào thì kiểm được giá trị cụ thể (`250 ms`). Redaction dành cho thứ không inject được, như UUID do thư viện sinh; nó giữ cấu trúc nhưng thôi kiểm giá trị bị che. Rủi ro lớn nhất của snapshot là chấp nhận bừa bằng `cargo insta accept`: giữ snapshot nhỏ và bắt buộc đọc diff trong PR. Snapshot lệch làm test đỏ ở mọi môi trường; khác biệt là ở máy dev `insta` ghi thêm file `.snap.new` chờ duyệt, còn khi có biến `CI` thì không ghi gì (đã thử cả hai).
+Nên ưu tiên cách đầu: truyền đồng hồ vào thì kiểm được giá trị cụ thể (`250 ms`). Redaction dành cho thứ không inject được, như UUID do thư viện sinh; nó giữ cấu trúc nhưng thôi kiểm giá trị bị che. Rủi ro lớn nhất của snapshot là chấp nhận bừa bằng `cargo insta accept`: giữ snapshot nhỏ và bắt buộc đọc diff trong PR. Snapshot lệch làm test đỏ ở mọi môi trường; chỗ khác nhau là ở máy dev `insta` ghi thêm file `.snap.new` chờ duyệt, còn khi có biến `CI` thì không ghi gì (đã thử cả hai).
 
 ## Test flaky: HashMap, đồng hồ và seed
 
@@ -283,7 +283,7 @@ Bản đầu của `compare` duyệt thẳng `HashMap` rồi trả danh sách l�
 
 Cách sửa là sắp theo `external_ref` trước khi trả (`BTreeMap` cũng được). Lab giữ bản chưa sắp (`compare_unordered`) để một test chứng minh lỗi có thật: 30 map, mỗi map 8 ref, phải thấy nhiều hơn một thứ tự; bản đã sắp luôn đúng một thứ tự.
 
-Thời gian giải bằng cùng nguyên tắc: không đọc đồng hồ giữa code nghiệp vụ, truyền vào. `StepClock` tiến một khoảng cố định mỗi lần gọi `now()`:
+Vấn đề thời gian được giải bằng cùng nguyên tắc: không đọc đồng hồ giữa code nghiệp vụ, truyền vào. `StepClock` tiến một khoảng cố định mỗi lần gọi `now()`:
 
 ```rust
 // src/clock.rs (rút gọn: bỏ chú thích tài liệu)
@@ -296,7 +296,7 @@ impl Clock for StepClock {
 }
 ```
 
-Báo cáo gọi `now()` hai lần, nên với bước 250 ms thì `duration_ms` luôn bằng 250, không `sleep`. Dữ liệu ngẫu nhiên dùng SplitMix64 8 dòng với seed cố định `20261105`, không thêm crate. Test `synthetic_counts_match_report_for_many_seeds` chạy 20 seed, mỗi seed 300 giao dịch với số lệch cài sẵn rồi đòi báo cáo đếm đúng. Mọi assert in `seed={seed}`; đặt `LEDGER_TEST_SEED=<n>` để chạy lại đúng ca hỏng.
+Báo cáo gọi `now()` hai lần, nên với bước 250 ms thì `duration_ms` luôn bằng 250, không `sleep`. Dữ liệu ngẫu nhiên dùng SplitMix64 8 dòng với seed cố định `20261105`, không thêm crate. Test `synthetic_counts_match_report_for_many_seeds` chạy 20 seed, mỗi seed 300 giao dịch với số lệch cài sẵn rồi đòi báo cáo đếm đúng. Mọi assert đều in `seed={seed}`; đặt `LEDGER_TEST_SEED=<n>` để chạy lại đúng test case hỏng.
 
 ## Ngân sách test trong CI: tầng nào chạy khi nào?
 
@@ -311,7 +311,7 @@ Mỗi công cụ đắt rẻ khác nhau. Bảng dưới là số đo thật trê
 | Mutation parser | `cargo mutants --file src/statement.rs` | 3 phút 29 s cho 55 mutant |
 | Fuzz có giới hạn | `cargo fuzz run parse_line ... -- -max_total_time=60` | 55 s biên dịch lần đầu, rồi đúng 60 s |
 
-Thời gian mutation xấp xỉ số mutant nhân với build cộng test một lần. Crate 2.000 mutant sẽ không chạy nổi mỗi push. Đề xuất xếp tầng (chính sách, không phải số đo):
+Thời gian chạy mutation xấp xỉ số mutant nhân với thời gian build cộng test của một lần chạy. Crate có 2.000 mutant sẽ không chạy nổi trên mỗi push. Đề xuất xếp tầng (chính sách, không phải số đo):
 
 - **Mỗi push, chặn merge**: định dạng, lint, `cargo test`, gồm cả hồi quy từ fuzz và snapshot.
 - **Mỗi PR chạm code tiền hoặc parser**: `git diff` ra file rồi `cargo mutants --in-diff <file>` chỉ đột biến phần đổi; chia nhỏ bằng `--shard`. Lab chưa chạy hai cờ này nên không có số đo.
@@ -329,7 +329,7 @@ cargo run  --manifest-path examples/toi-noi-rust/57-advanced-testing/Cargo.toml 
 cargo test --manifest-path examples/toi-noi-rust/57-advanced-testing/Cargo.toml
 ```
 
-`--verify` kiểm các giá trị kỳ vọng: chia `TN-0001`, điểm giữa nửa đồng, input hồi quy, thứ tự `HashMap`, báo cáo lặp lại giống hệt từng byte với đồng hồ giả, seed cố định; kết thúc bằng `VERIFY OK`. Phần ngoài cargo, chạy từ thư mục lab (chỉ lệnh có `+nightly` cần nightly):
+`--verify` kiểm các giá trị kỳ vọng: chia `TN-0001`, điểm giữa nửa đồng, đầu vào hồi quy, thứ tự `HashMap`, báo cáo lặp lại giống hệt từng byte với đồng hồ giả, seed cố định; kết thúc bằng `VERIFY OK`. Phần ngoài cargo, chạy từ thư mục lab (chỉ lệnh có `+nightly` cần nightly):
 
 ```bash
 cargo install cargo-mutants cargo-fuzz

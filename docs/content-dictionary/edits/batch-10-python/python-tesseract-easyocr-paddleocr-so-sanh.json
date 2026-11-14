@@ -1,0 +1,161 @@
+{
+ "file": "python-tesseract-easyocr-paddleocr-so-sanh.md",
+ "edits": [
+  {
+   "old": "đưa bounding box và confidence về một dạng,",
+   "new": "đưa bounding box và confidence về cùng một dạng,",
+   "reason": "Cách nói tự nhiên hơn",
+   "severity": "low"
+  },
+  {
+   "old": "PaddleOCR chỉ có wheel đến Python 3.13. Có output thật.",
+   "new": "PaddleOCR chỉ có wheel tới Python 3.13. Kèm output chạy thật.",
+   "reason": "Câu cụt",
+   "severity": "low"
+  },
+  {
+   "old": "không tự động là quyết định xác minh.",
+   "new": "không tự thành quyết định xác minh.",
+   "reason": "Giọng dịch máy",
+   "severity": "low"
+  },
+  {
+   "old": "Ta thử cài cả ba trên Python 3.14.7 trước.",
+   "new": "Trước hết, ta thử cài cả ba trên Python 3.14.7.",
+   "reason": "Trật tự từ kiểu tiếng Anh",
+   "severity": "low"
+  },
+  {
+   "old": "nhưng cho hạ xuống 3.13 khi",
+   "new": "nhưng cho phép hạ xuống 3.13 khi",
+   "reason": "Câu thiếu động từ",
+   "severity": "medium"
+  },
+  {
+   "old": "để xem kết quả có phụ thuộc đời mô hình không.",
+   "new": "để xem kết quả có phụ thuộc vào thế hệ mô hình hay không.",
+   "reason": "Cụm 'đời mô hình' gượng",
+   "severity": "medium"
+  },
+  {
+   "old": "Ba engine còn trả lời theo ba kiểu khác nhau (Hình 1).",
+   "new": "Ba engine còn trả kết quả theo ba kiểu khác nhau (Hình 1).",
+   "reason": "Cách nói gượng",
+   "severity": "low"
+  },
+  {
+   "old": "để cả ba cùng điều kiện.",
+   "new": "để cả ba chạy cùng điều kiện.",
+   "reason": "Câu thiếu động từ",
+   "severity": "medium"
+  },
+  {
+   "old": "dòng đó có hộp bắt đầu từ x = 108",
+   "new": "dòng đó có box bắt đầu từ x = 108",
+   "reason": "Dịch ép thuật ngữ box",
+   "severity": "medium"
+  },
+  {
+   "old": "Cặp hai con số sau tách lỗi dấu khỏi lỗi chữ.",
+   "new": "Hai con số sau giúp tách lỗi dấu khỏi lỗi chữ.",
+   "reason": "Câu cụt",
+   "severity": "medium"
+  },
+  {
+   "old": "nên khi engine hụt hẳn CER vẫn chỉ khoảng 0,50.",
+   "new": "nên khi engine đọc sai hoàn toàn, CER vẫn chỉ khoảng 0,50.",
+   "reason": "Cụm 'hụt hẳn' gượng",
+   "severity": "medium"
+  },
+  {
+   "old": "Gói `vie` là thứ quyết định: chỉ `eng` cho CER 0,143 ở `--psm 6`, thêm `vie` còn 0,024 hoặc 0,035.",
+   "new": "Gói `vie` là yếu tố quyết định: chỉ dùng `eng` thì CER là 0,143 ở `--psm 6`, thêm `vie` thì còn 0,024 hoặc 0,035.",
+   "reason": "Câu cụt",
+   "severity": "medium"
+  },
+  {
+   "old": "Còn `--psm` đổi kết quả mạnh nhất ở ảnh mờ:",
+   "new": "Còn `--psm` làm kết quả thay đổi mạnh nhất ở ảnh mờ:",
+   "reason": "Giọng dịch máy",
+   "severity": "low"
+  },
+  {
+   "old": "cho thấy không có `--psm` tốt nhất chung.",
+   "new": "cho thấy không có giá trị `--psm` nào tốt nhất cho mọi bộ.",
+   "reason": "Cụm tự ghép nghe cụt",
+   "severity": "medium"
+  },
+  {
+   "old": "Nguyên nhân sụp ta chưa tìm ra.",
+   "new": "Ta chưa tìm ra nguyên nhân của sự sụt giảm này.",
+   "reason": "Cụm cụt, thiếu danh từ",
+   "severity": "high"
+  },
+  {
+   "old": "Mỗi engine chạy một lần khởi động không tính giờ, rồi 24 ảnh, mỗi ảnh một lần.",
+   "new": "Mỗi engine chạy một lượt khởi động (không tính giờ), rồi chạy 24 ảnh, mỗi ảnh một lần.",
+   "reason": "Câu thiếu động từ",
+   "severity": "medium"
+  },
+  {
+   "old": "chỉ nên đọc ở mức bậc độ lớn.",
+   "new": "chỉ nên đọc để biết bậc độ lớn.",
+   "reason": "Cách nói gượng",
+   "severity": "medium"
+  },
+  {
+   "old": "không nạp theo từng request.",
+   "new": "không nạp theo từng yêu cầu.",
+   "reason": "Từ tiếng Anh thông thường lọt vào văn xuôi",
+   "severity": "low"
+  },
+  {
+   "old": "Nó tệ nhất ở ảnh mờ: 0,159 so với 0,026 của Tesseract, và có hai kiểu lỗi riêng:",
+   "new": "EasyOCR tệ nhất ở ảnh mờ: 0,159 so với 0,026 của Tesseract, và mắc hai kiểu lỗi riêng:",
+   "reason": "Dùng 'Nó' đầu câu chỉ sự vật",
+   "severity": "medium"
+  },
+  {
+   "old": "rồi đuối ở chữ Việt:",
+   "new": "nhưng yếu hẳn ở chữ Việt:",
+   "reason": "Khẩu ngữ gượng",
+   "severity": "medium"
+  },
+  {
+   "old": "Ba engine cho confidence ở ba dạng:",
+   "new": "Ba engine trả confidence theo ba dạng:",
+   "reason": "Cách nói gượng",
+   "severity": "low"
+  },
+  {
+   "old": "khá ổn định qua mờ, nghiêng, tối ở 24 thẻ phẳng",
+   "new": "khá ổn định khi ảnh mờ, nghiêng hay tối ở 24 thẻ phẳng",
+   "reason": "Giọng dịch máy",
+   "severity": "medium"
+  },
+  {
+   "old": "chưa đủ cho họ tên và quê quán tiếng Việt.",
+   "new": "chưa đủ tốt cho họ tên và quê quán tiếng Việt.",
+   "reason": "Câu cụt",
+   "severity": "medium"
+  },
+  {
+   "old": "và kiểm 31 điều, không điều nào",
+   "new": "và kiểm tra 31 điều, không điều nào",
+   "reason": "Động từ cụt",
+   "severity": "low"
+  },
+  {
+   "old": "Các ca gồm: dữ liệu (24 ảnh, cùng seed cùng ảnh)",
+   "new": "Các test case gồm: dữ liệu (24 ảnh, cùng seed thì cùng ảnh)",
+   "reason": "Thống nhất thuật ngữ test case",
+   "severity": "medium"
+  },
+  {
+   "old": "giảm lỗi lọt phải trả bằng thêm hồ sơ chuyển cho người duyệt",
+   "new": "giảm lỗi lọt phải đánh đổi bằng việc chuyển thêm hồ sơ cho người duyệt",
+   "reason": "Câu cụt",
+   "severity": "medium"
+  }
+ ]
+}

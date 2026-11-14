@@ -1,39 +1,39 @@
 ---
 slug: location-tai-xe-ranh-di-dau-dieu-huong-theo-nhu-cau
 title: "Tài xế rảnh nên đi đâu: gợi ý theo nhu cầu, và ai trả cho km rỗng"
-summary: "Bài 49: gợi ý di chuyển cho tài xế rảnh theo bảng nhu cầu H3, chống bầy đàn, chỉ gợi ý không ép. Trên dữ liệu mô phỏng khách chờ đón ít hơn 36,1 s nhưng km rỗng tổng tăng 1.428,9 m mỗi khách đặt: tài xế gánh chi phí."
+summary: "Bài 49: gợi ý di chuyển cho tài xế rảnh theo bảng nhu cầu H3, chống bầy đàn, chỉ gợi ý chứ không ép. Trên dữ liệu mô phỏng, khách chờ đón ít hơn 36,1 s nhưng km rỗng tổng tăng 1.428,9 m mỗi khách đặt, và tài xế gánh chi phí đó."
 category: location-routing
 level: advanced
 tags: [toi-noi, location, rust, h3, reposition, demand, herding, simulation]
 language: vi
 ---
 
-Tài xế `DR-052` vừa trả khách xong ở một khu vắng. Hệ thống biết có một ô cách đó ba phút xe chạy đang có nhiều khách đặt hơn hẳn. Gợi ý «đi sang đó» nghe hiển nhiên, cho tới khi hai mươi tài xế rảnh khác nhận cùng một gợi ý, kéo nhau về cùng một ô, và ô vừa nóng lại thừa xe trong khi khu họ rời đi thành trống.
+Tài xế `DR-052` vừa trả khách xong ở một khu vắng. Hệ thống biết có một ô cách đó ba phút xe chạy đang có nhiều khách đặt hơn hẳn. Gợi ý «đi sang đó» nghe hiển nhiên, cho tới khi hai mươi tài xế rảnh khác nhận cùng một gợi ý, kéo nhau về cùng một ô, và ô vừa nóng lại thừa xe trong khi khu họ vừa rời đi trở nên trống.
 
 Hai việc phải làm đúng cùng lúc. Một là gợi ý **đúng chỗ**, tức dựa trên nhu cầu. Hai là gợi ý **không dồn một chỗ**, tức tự phân bổ. Và có một câu hỏi mà bài này không né: tài xế chạy theo gợi ý là chạy không, tốn xăng và thời gian. Khách chờ ít hơn, nhưng **ai trả cho những km đó**?
 
-Đây là bài 49 của lộ trình **Tối ưu quãng đường hai phía** qua [Tới Nơi](/articles/du-an-mau-toi-noi). Bài dùng chỉ mục H3 của [bài 08](/articles/location-h3-geohash-chi-muc-luoi-k-ring) lẫn [bài 44](/articles/location-cat-tia-ung-vien-h3-ma-tran-thua), và simulator của [bài 30](/articles/location-tong-hop-mo-phong-su-kien-roi-rac-seed). **Mọi số trong bài là trên dữ liệu mô phỏng**: đồ thị HCM (126.699 nút, 319.074 cạnh, © OpenStreetMap contributors), 20 seed đánh giá 20261106…20261125, so sánh có cặp theo seed như đã giải thích ở [bài 41](/articles/location-gan-nhat-sai-o-dau-do-bang-mo-phong).
+Đây là bài 49 của lộ trình **Tối ưu quãng đường hai phía** qua [Tới Nơi](/articles/du-an-mau-toi-noi). Bài này dùng chỉ mục H3 của [bài 08](/articles/location-h3-geohash-chi-muc-luoi-k-ring) lẫn [bài 44](/articles/location-cat-tia-ung-vien-h3-ma-tran-thua), và simulator của [bài 30](/articles/location-tong-hop-mo-phong-su-kien-roi-rac-seed). **Mọi số trong bài đều lấy trên dữ liệu mô phỏng**: đồ thị HCM (126.699 nút, 319.074 cạnh, © OpenStreetMap contributors), 20 seed đánh giá 20261106…20261125, so sánh có cặp theo seed như đã giải thích ở [bài 41](/articles/location-gan-nhat-sai-o-dau-do-bang-mo-phong).
 
 <div class="tkh-callout tkh-callout--example">
 <span class="tkh-callout-title">Thử trước khi đọc</span>
-<p>Bộ «thường» (120 xe, 3,5 chuyến mỗi phút), tài xế rảnh nghe theo gợi ý theo nhu cầu với xác suất 70%. Thời gian chờ đón trung bình giảm 36,1 s. Theo bạn <b>km rỗng tổng mỗi khách đặt</b> (km chạy không của chuyến hoàn thành, của chuyến huỷ sau khi gán, và quãng chạy theo gợi ý) giảm, tăng hay không đổi?</p>
-<details><summary>Xem đáp án</summary><p>Tăng, và tăng mạnh: <b>+1.428,9 m</b> mỗi khách đặt (KTC 95% [1.285,5; 1.572,3], tăng ở cả 20/20 seed). Quãng chạy theo gợi ý là 1.595,6 m mỗi khách, lớn hơn nhiều phần km đón tiết kiệm được. Khách được lợi, tài xế chịu chi phí. So với baseline là Hungarian ghép ngay, không gợi ý.</p></details>
+<p>Bộ «thường» (120 xe, 3,5 chuyến mỗi phút), tài xế rảnh nghe theo gợi ý dựa trên nhu cầu với xác suất 70%. Thời gian chờ đón trung bình giảm 36,1 s. Theo bạn <b>km rỗng tổng mỗi khách đặt</b> (km chạy không của chuyến hoàn thành, của chuyến huỷ sau khi gán, và quãng chạy theo gợi ý) giảm, tăng hay không đổi?</p>
+<details><summary>Xem đáp án</summary><p>Tăng, và tăng mạnh: <b>+1.428,9 m</b> mỗi khách đặt (KTC 95% [1.285,5; 1.572,3], tăng ở cả 20/20 seed). Quãng chạy theo gợi ý là 1.595,6 m mỗi khách, lớn hơn nhiều phần km đón tiết kiệm được. Khách được lợi, tài xế chịu chi phí. Các số trên so với baseline là Hungarian ghép ngay, không gợi ý.</p></details>
 </div>
 
 ## Bảng nhu cầu cố định theo ô H3
 
-Gợi ý theo nhu cầu cần một bản đồ nhu cầu. Lab dựng một **bảng cố định**: H3 độ phân giải 8 (cạnh ô khoảng 531 m), mỗi ô giữ số yêu cầu kỳ vọng mỗi giờ, lấy từ 10 seed **chỉnh** 9001…9010, không dùng seed đánh giá. Kết quả là 326 ô có nhu cầu (có đường ô tô gần tâm ô), tổng 217,9 yêu cầu mỗi giờ, và 10 ô đầu chiếm 18,9%.
+Gợi ý theo nhu cầu cần một bản đồ nhu cầu. Lab dựng một **bảng cố định**: H3 độ phân giải 8 (cạnh ô khoảng 531 m), mỗi ô giữ số yêu cầu kỳ vọng mỗi giờ, lấy từ 10 seed **chỉnh tham số** 9001…9010, không dùng seed đánh giá. Kết quả là 326 ô có nhu cầu (có đường ô tô gần tâm ô), tổng 217,9 yêu cầu mỗi giờ, và 10 ô đầu chiếm 18,9%.
 
 ```text
   326 ô có nhu cầu (có đường ô tô gần tâm ô); tổng 217.9 yêu cầu/giờ; 10 ô đầu chiếm 18.9%; cạnh ô H3 độ phân giải 8 ≈ 531 m
   độ khớp của bảng với số khách thực theo ô trên 10 seed đánh giá đầu: Pearson trung bình 0.726 (từng seed 0.684…0.797). Bảng là MỘT DỰ BÁO LÝ TƯỞNG vì cùng phân bố sinh khách với simulator; dự báo thật (LOC-55) sẽ kém hơn.
 ```
 
-Hai điều cần ghi nhớ về bảng này. **Nó là một dự báo lý tưởng**, vì dựng từ cùng phân bố sinh khách với simulator; hệ số Pearson giữa bảng và số khách thực theo ô chỉ 0,726 ngay cả khi vậy, có lẽ vì ô nào cũng chỉ có vài khách trong một giờ nên số đếm của một seed rất nhiễu. Dự báo thật sẽ kém hơn, và bảng được thay bằng dự báo ở LOC-55, bài chưa viết của loạt. Và **nhu cầu chỉ phụ thuộc vị trí, không theo giờ trong ngày**, nên bài không nói gì về ngày thường so với cao điểm hay giờ khuya.
+Hai điều cần ghi nhớ về bảng này. **Bảng này là một dự báo lý tưởng**, vì dựng từ cùng phân bố sinh khách với simulator; hệ số Pearson giữa bảng và số khách thực theo ô chỉ đạt 0,726 dù vậy, có lẽ vì ô nào cũng chỉ có vài khách trong một giờ nên số đếm của một seed rất nhiễu. Dự báo thật sẽ kém hơn, và bảng được thay bằng dự báo ở LOC-55, bài chưa viết của loạt. Và **nhu cầu chỉ phụ thuộc vị trí, không theo giờ trong ngày**, nên bài không nói gì về ngày thường so với cao điểm hay giờ khuya.
 
 ## Luật gợi ý: lợi kỳ vọng giảm dần theo số xe đã về ô
 
-Để không kéo mọi người về một ô, luật không dùng hạn ngạch cứng. Nó dùng một ước lượng thời gian chờ khách của một tài xế rảnh trong ô `c`: `3600 / (λ_c / số_xe_rảnh_c)` giây, với λ là số yêu cầu mỗi giờ. Mỗi tài xế thêm vào ô làm số này tăng lên, tức lợi của ô giảm. Hàm ước lượng, cùng trần 3 giờ:
+Để không kéo mọi người về một ô, luật không dùng hạn ngạch cứng mà dùng một ước lượng thời gian chờ khách của một tài xế rảnh trong ô `c`: `3600 / (λ_c / số_xe_rảnh_c)` giây, với λ là số yêu cầu mỗi giờ. Mỗi tài xế thêm vào ô làm số này tăng lên, tức lợi của ô giảm. Hàm ước lượng cùng trần 3 giờ như sau:
 
 `examples/toi-noi-location/rust/crates/matcher/src/reposition.rs`
 
@@ -47,7 +47,7 @@ fn wait_s(per_hour: f64, supply: f64) -> f64 {
     (3600.0 * supply.max(1.0) / per_hour).min(WAIT_CAP_S)
 ```
 
-Gọi mỗi 120 giây, xét 40 ô nhu cầu cao nhất, tài xế chỉ đi nếu ETA tới ô đích không quá 420 s và lợi ròng đạt lề 60 s. Phần quyết định:
+Luật được gọi mỗi 120 giây, xét 40 ô nhu cầu cao nhất, và tài xế chỉ đi nếu ETA tới ô đích không quá 420 s và lợi ròng đạt biên 60 s. Phần quyết định:
 
 `examples/toi-noi-location/rust/crates/matcher/src/reposition.rs`
 
@@ -87,13 +87,13 @@ Gọi mỗi 120 giây, xét 40 ô nhu cầu cao nhất, tài xế chỉ đi nế
             }
 ```
 
-Có ba chi tiết trung thực cần nêu. Một, `wait_s` ở đây là **thước xếp hạng**, không phải ETA thật: các giá trị lên hàng nghìn giây chỉ để so ô này với ô kia. Hai, tài xế đứng ngoài mọi ô trong bảng được coi là chờ tối đa 3 giờ (`WAIT_CAP_S`), nên luôn có động cơ đi. Ba, `supply[c] + 1.0` ở dòng `wait_there` là chỗ chống bầy đàn: lợi của ô đích được tính **sau khi thêm chính tài xế này**, và các tài xế đã được gợi ý về ô trong 420 s gần nhất vẫn được đếm là «đang về».
+Có ba chi tiết cần nói thẳng. Một, `wait_s` ở đây là **thước đo xếp hạng**, không phải ETA thật: các giá trị lên hàng nghìn giây chỉ để so ô này với ô kia. Hai, tài xế đứng ngoài mọi ô trong bảng được coi là chờ tối đa 3 giờ (`WAIT_CAP_S`), nên luôn có động cơ đi. Ba, `supply[c] + 1.0` ở dòng `wait_there` là chỗ chống bầy đàn: lợi của ô đích được tính **sau khi thêm chính tài xế này**, và các tài xế đã được gợi ý về ô trong 420 s gần nhất vẫn được đếm là «đang về».
 
 Điểm đích là điểm trên đường ô tô gần tâm ô, không xét chỗ đỗ hợp lệ; chưa có kiểm tra về việc có chỗ dừng đợi khách tại đó.
 
 ## Thử bầy đàn: mọi xe về ô nóng nhất
 
-Muốn biết chống bầy đàn có đáng không, lab có sẵn bản đối chứng `HerdToTop`: mọi tài xế trong tầm với (ETA không quá 420 s) đều được gợi ý về ô nhu cầu cao nhất. Đo bằng chỉ số Herfindahl (HHI) của đích đến, trong đó 1 nghĩa là mọi xe về một ô, và số xe lớn nhất về cùng ô trong một lần gọi:
+Muốn biết chống bầy đàn có đáng làm hay không, lab có sẵn bản đối chứng `HerdToTop`: mọi tài xế trong tầm với (ETA không quá 420 s) đều được gợi ý về ô nhu cầu cao nhất. Lab đo bằng chỉ số Herfindahl (HHI) của đích đến, trong đó 1 nghĩa là mọi xe về một ô, kèm số xe lớn nhất về cùng ô trong một lần gọi:
 
 ```text
   cấu hình                                       HHI đích đến phần gợi ý về ô nhiều nhất số xe về cùng ô/lần gọi (max)
@@ -108,7 +108,7 @@ Muốn biết chống bầy đàn có đáng không, lab có sẵn bản đối 
 <figcaption>Hình 1. Ai được gì, ai trả gì ở bộ thường (nghe 70%, trên dữ liệu mô phỏng). Ba hàng trên là phần lợi: khách chờ ít hơn, km đón ngắn hơn, nhiều chuyến hoàn thành hơn. Hàng dưới là chi phí: km rỗng tổng mỗi khách đặt tăng 1.428,9 m.</figcaption>
 </figure>
 
-Luật chống bầy đàn có HHI 0,033, tức tương đương khoảng 30 ô «có hiệu lực» trong 40 ô ứng viên (1/HHI), và nhiều nhất 5 xe về cùng ô một lần. Bản đối chứng có HHI 1,000 và tới 33 xe về cùng ô. Hệ quả đo được: ở «thường», bầy đàn làm `pickup_eta_s` +1,4 s (không phân biệt được) và km rỗng tổng +272,6 m; ở «dày xe» (240 xe), nó làm `pickup_eta_s` **tăng +15,5 s** (KTC [12,5; 18,5]) và `deadhead_m` +147,2 m, tức xấu hơn rõ so với không gợi ý gì.
+Luật chống bầy đàn có HHI 0,033, tức tương đương khoảng 30 ô «có hiệu lực» trong 40 ô ứng viên (1/HHI), và nhiều nhất 5 xe về cùng ô một lần. Bản đối chứng có HHI 1,000 và tới 33 xe về cùng ô. Hệ quả đo được: ở «thường», bầy đàn làm `pickup_eta_s` +1,4 s (không phân biệt được) và km rỗng tổng +272,6 m; ở «dày xe» (240 xe), nó làm `pickup_eta_s` **tăng +15,5 s** (KTC [12,5; 18,5]) và `deadhead_m` +147,2 m, tức là xấu hơn rõ so với khi không có gợi ý nào.
 
 <figure class="tkh-fig">
 <div class="tkh-fig-box">
@@ -131,7 +131,7 @@ Tài xế là người, không phải robot: họ có thể từ chối. Phía s
             }
 ```
 
-Quãng chạy theo gợi ý được tính vào km rỗng. Thử nghe theo 30%, 70% (mặc định) và 100%, trên dữ liệu mô phỏng, bộ «thường», hiệu so với Hungarian ghép ngay không gợi ý, KTC 95% trong ngoặc, `*` khi không chứa 0:
+Quãng chạy theo gợi ý được tính vào km rỗng. Ta thử mức nghe theo 30%, 70% (mặc định) và 100%, trên dữ liệu mô phỏng, bộ «thường», hiệu so với Hungarian ghép ngay không gợi ý, KTC 95% trong ngoặc, `*` khi không chứa 0:
 
 | Tài xế nghe theo | Chạy theo gợi ý mỗi khách (m) | `pickup_eta_s` TB (s) | `deadhead_m` TB (m) | km rỗng tổng mỗi khách (m) | Hoàn thành |
 |---|---:|---|---|---|---|
@@ -139,7 +139,7 @@ Quãng chạy theo gợi ý được tính vào km rỗng. Thử nghe theo 30%, 
 | 70% | 1.595,6 | −36,1 [−41,1; −31,1]* | −255,4 [−304,4; −206,4]* | +1.428,9 [1.285,5; 1.572,3]* | +6,5 [4,5; 8,4]* |
 | 100% | 1.977,9 | −45,2 [−51,1; −39,2]* | −317,9 [−371,7; −264,2]* | +1.762,6 [1.585,3; 1.940,0]* | +7,2 [5,9; 8,5]* |
 
-Lợi và chi phí cùng tăng theo mức nghe theo. Chia thô km rỗng tổng thêm cho số giây chờ đón giảm được cho khoảng 29 m, 40 m và 39 m mỗi giây ở ba mức (tỉ số thô, hai mẫu số khác nhau: chuyến hoàn thành và khách đặt). Hai kiểm tra nữa trên cùng bộ, nghe 70%: với bảng nhiễu σ = 1 (dự báo sai có chủ đích) `pickup_eta_s` vẫn giảm 22,0 s, km rỗng tổng +1.713,0 m; với **bảng đều** (không có thông tin nhu cầu), `pickup_eta_s` +1,6 s [−0,1; 3,4] không phân biệt được với 0, còn km rỗng tổng +115,4 m, và chỉ có 15,1 gợi ý mỗi seed. Dự báo sai vẫn có lợi, nên lab chưa tách được phần lợi nào đến từ thông tin nhu cầu, phần nào đến từ việc xe rảnh được dàn về vùng đông nói chung.
+Lợi và chi phí cùng tăng theo mức nghe theo. Chia thô km rỗng tổng thêm cho số giây chờ đón giảm được thì ra khoảng 29 m, 40 m và 39 m cho mỗi giây ở ba mức (tỉ số thô, hai mẫu số khác nhau: chuyến hoàn thành và khách đặt). Hai kiểm tra nữa trên cùng bộ, nghe 70%: với bảng nhiễu σ = 1 (dự báo sai có chủ đích) `pickup_eta_s` vẫn giảm 22,0 s, km rỗng tổng +1.713,0 m; với **bảng đều** (không có thông tin nhu cầu), `pickup_eta_s` +1,6 s [−0,1; 3,4] không phân biệt được với 0, còn km rỗng tổng +115,4 m, và chỉ có 15,1 gợi ý mỗi seed. Dự báo sai vẫn có lợi, nên lab chưa tách được phần lợi nào đến từ thông tin nhu cầu, phần nào đến từ việc xe rảnh được dàn về vùng đông nói chung.
 
 ## Ai trả cho km rỗng?
 
@@ -151,11 +151,11 @@ Lợi và chi phí cùng tăng theo mức nghe theo. Chia thô km rỗng tổng 
 | «thưa xe»: 60 xe | 88,1 | −12,5 [−27,8; 2,7] | +385,8 [264,0; 507,7]* |
 | «dày xe»: 240 xe | 450,4 | −16,8 [−20,9; −12,7]* | +3.139,7 [2.962,6; 3.316,8]* |
 
-Xe càng nhiều thì càng nhiều gợi ý và càng nhiều quãng chạy không. Lợi cho khách thì không đi theo: lớn nhất ở «thường», ở «dày xe» khách chờ ít hơn 16,8 s trong khi km rỗng tổng mỗi khách tăng 3.139,7 m. Ở «thưa xe», lợi cho khách không phân biệt được với 0, còn chi phí vẫn có thật (+385,8 m).
+Xe càng nhiều thì càng nhiều gợi ý và càng nhiều quãng chạy không. Lợi ích cho khách thì không tăng theo: lớn nhất ở «thường», còn ở «dày xe» khách chờ ít hơn 16,8 s trong khi km rỗng tổng mỗi khách tăng 3.139,7 m. Ở «thưa xe», lợi cho khách không phân biệt được với 0, còn chi phí vẫn có thật (+385,8 m).
 
-Ai trả? Quy về cả đội ở bộ «thường» (tính từ các số trên, mỗi seed là một giờ mô phỏng): 228,4 khách × 1.428,9 m là khoảng 326 km rỗng thêm, tức 2,7 km mỗi xe. Đổi lại, 204,7 chuyến hoàn thành × 36,1 s là khoảng 2,05 giờ khách đỡ chờ, cộng 6,5 chuyến thêm cho cả đội 120 xe. Phần tăng thêm là 1.595,6 m chạy theo gợi ý trừ 166,7 m km đón tiết kiệm được mỗi khách đặt. Trong **mô hình này tài xế không có phần thưởng nào cho quãng chạy theo gợi ý**: nhiên liệu, hao mòn và thời gian không chở khách do tài xế gánh, phần lớn lợi do khách hưởng. Lab không có đơn vị chung để nói 326 km có đáng 2,05 giờ không; đó là quyết định chính sách, và nó phải đi cùng câu hỏi ai trả tiền. Nói «gợi ý theo nhu cầu giảm thời gian chờ» mà bỏ phần này là kể nửa câu chuyện.
+Ai trả? Quy về cả đội ở bộ «thường» (tính từ các số trên, mỗi seed là một giờ mô phỏng): 228,4 khách × 1.428,9 m là khoảng 326 km rỗng thêm, tức là 2,7 km mỗi xe. Đổi lại, 204,7 chuyến hoàn thành × 36,1 s là khoảng 2,05 giờ khách đỡ chờ, cộng 6,5 chuyến thêm cho cả đội 120 xe. Phần tăng thêm là 1.595,6 m chạy theo gợi ý trừ 166,7 m quãng đón tiết kiệm được mỗi khách đặt. Trong **mô hình này tài xế không có phần thưởng nào cho quãng chạy theo gợi ý**: nhiên liệu, hao mòn và thời gian không chở khách đều do tài xế gánh, còn phần lớn lợi ích do khách hưởng. Lab không có đơn vị chung để nói 326 km có đáng đổi lấy 2,05 giờ hay không; đó là quyết định chính sách, và quyết định đó phải đi cùng câu hỏi ai trả tiền. Nói «gợi ý theo nhu cầu giảm thời gian chờ» mà bỏ phần này là kể nửa câu chuyện.
 
-Theo vùng (khoảng cách từ ghim của khách tới một tâm quy chiếu cố định của lab), «thường», nghe 70%:
+Chia theo vùng (khoảng cách từ ghim của khách tới một tâm quy chiếu cố định của lab), ở bộ «thường», nghe 70%:
 
 | Vùng | Hoàn thành, không gợi ý → có gợi ý | `wait_s` TB hiệu (s) |
 |---|---|---|
@@ -163,9 +163,9 @@ Theo vùng (khoảng cách từ ghim của khách tới một tâm quy chiếu c
 | Vành trong (3–6 km) | 0,875 → 0,911* | −41,3 [−49,1; −33,5]* |
 | Ngoại vi (từ 6 km) | 0,854 → 0,859 | +0,1 [−7,9; 8,1] |
 
-Lợi dồn về trung tâm và vành trong, nơi nhu cầu dày, còn **ngoại vi gần như không đổi**: không bị làm xấu đi, nhưng cũng không được giúp. Ở «dày xe» có dấu hiệu ngoại vi xấu đi: hoàn thành 0,938 → 0,926 (KTC không chứa 0) và `deadhead_m` +50,8 m [4,9; 96,8]; hai dấu sao sát 0 trong một bảng lớn, nên cần kiểm thêm. Một chính sách «điều hướng theo nhu cầu» đi theo nơi đông khách thì có cơ chế để rời khu ít khách, và đó là lý do phải giữ chỉ số theo vùng. Điều này đụng thẳng tới quy tắc của loạt: không tối ưu cho một vùng bằng cách bỏ rơi vùng khác.
+Lợi dồn về trung tâm và vành trong, nơi nhu cầu dày, còn **ngoại vi gần như không đổi**: không bị làm xấu đi, nhưng cũng không được giúp. Ở «dày xe» có dấu hiệu ngoại vi xấu đi: hoàn thành 0,938 → 0,926 (KTC không chứa 0) và `deadhead_m` +50,8 m [4,9; 96,8]; hai dấu sao sát 0 trong một bảng lớn, nên cần kiểm tra thêm. Một chính sách «điều hướng theo nhu cầu» đi theo nơi đông khách thì về cơ chế có thể khiến xe rời khu ít khách, và đó là lý do phải giữ chỉ số theo vùng. Điều này đụng thẳng tới quy tắc của loạt: không tối ưu cho một vùng bằng cách bỏ rơi vùng khác.
 
-Vài hướng chia sẻ chi phí có thể thử, **chưa chạy** trong lab: thưởng theo km chạy theo gợi ý; giới hạn số gợi ý mỗi tài xế mỗi giờ; nâng lề lợi ròng (hiện cố định 60 s) hoặc hạ trần ETA (420 s) để chỉ gợi ý khi chắc có lợi. Các tham số `margin_s`, `max_move_s`, chu kỳ 120 s và số ô xét 40 chưa được quét; kết quả ở trên chỉ là một điểm trong không gian đó.
+Vài hướng chia sẻ chi phí có thể thử, **chưa chạy** trong lab: thưởng theo km chạy theo gợi ý; giới hạn số gợi ý mỗi tài xế mỗi giờ; nâng biên lợi ròng (hiện cố định 60 s) hoặc hạ trần ETA (420 s) để chỉ gợi ý khi chắc có lợi. Các tham số `margin_s`, `max_move_s`, chu kỳ 120 s và số ô xét 40 chưa được quét; kết quả ở trên chỉ là một điểm trong không gian tham số đó.
 
 ## Chạy ví dụ và kiểm chứng
 
@@ -176,7 +176,7 @@ export PATH="$HOME/.rustup/toolchains/stable-aarch64-apple-darwin/bin:$PATH"
 cargo run -q --release --manifest-path examples/toi-noi-location/rust/Cargo.toml -p labs --bin loc49_tai_xe_ranh_di_dau
 ```
 
-Tham số: `--seeds N` (mặc định 20), `--jobs N`, `--fixture`. Lab chạy khoảng 18 phút khi máy chịu tải nặng (load average trên 400); số đếm, tỉ lệ và hiệu có cặp tái lập được, thời gian chạy thì không. Output cho bộ «thường» (nguyên văn từ `results/p05.md`):
+Tham số: `--seeds N` (mặc định 20), `--jobs N`, `--fixture`. Lab chạy khoảng 18 phút khi máy chịu tải nặng (load average trên 400); số đếm, tỉ lệ và hiệu có cặp tái lập được, thời gian chạy thì không. Kết quả chạy cho bộ «thường» (nguyên văn từ `results/p05.md`):
 
 ```text
   cấu hình                                     gợi ý/seed  nghe/seed chạy theo gợi ý/khách (m)      pickup_eta_s TB            wait_s TB          deadhead_m TB km rỗng TỔNG/khách (m)       hoàn thành
@@ -192,23 +192,23 @@ Tham số: `--seeds N` (mặc định 20), `--jobs N`, `--fixture`. Lab chạy k
 - **Chưa chạy hết các bộ giả định.** «Cao điểm» không chạy cho bài này; nghe 30%, 100%, bảng nhiễu σ = 1 và bảng đều chỉ chạy ở «thường»; «thưa xe» và «dày xe» chỉ có luật chống bầy đàn và bản bầy đàn ở nghe 70%.
 - **Tài xế nghe theo với xác suất cố định, độc lập**; nhu cầu không theo giờ; tài xế không có phần thưởng, không rong ruổi tự do, không rời ca.
 - **Đích gợi ý là điểm trên đường gần tâm ô**, không xét chỗ đỗ hợp lệ hay tắc đường theo giờ.
-- **Chưa quét tham số** của luật (lề, trần ETA, chu kỳ, số ô xét).
+- **Chưa quét tham số** của luật (biên, trần ETA, chu kỳ, số ô xét).
 
 ## Bài tập
 
-**Bài 1.** Ô A có λ = 4,4 yêu cầu mỗi giờ. Tính ước lượng thời gian chờ `wait_s` khi ô có 1, 2 và 3 xe rảnh. Một tài xế đang ở ô B (λ = 2,0, có 3 xe rảnh kể cả anh ta) cân nhắc đi sang A (đang có 1 xe) với ETA 300 s: lợi ròng là bao nhiêu, và ràng buộc nào chặn gợi ý trước khi lề 60 s kịp chặn?
+**Bài 1.** Ô A có λ = 4,4 yêu cầu mỗi giờ. Tính ước lượng thời gian chờ `wait_s` khi ô có 1, 2 và 3 xe rảnh. Một tài xế đang ở ô B (λ = 2,0, có 3 xe rảnh kể cả anh ta) cân nhắc đi sang A (đang có 1 xe) với ETA 300 s: lợi ròng là bao nhiêu, và ràng buộc nào chặn gợi ý trước khi biên 60 s kịp chặn?
 
 <details><summary>Lời giải bài 1</summary>
-<p>3600 × s / 4,4 cho s = 1, 2, 3 là 818,2 s, 1.636,4 s và 2.454,5 s. Ở B, <code>wait_here</code> = 3600 × 3 / 2,0 = 5.400 s. Ở A sau khi thêm anh ta, supply = 2 nên <code>wait_there</code> = 1.636,4 s. Lợi ròng = 5.400 − 1.636,4 − 300 = 3.463,6 s, lớn hơn lề 60 s nhiều, nên đi. Lề 60 s chỉ chặn khi ETA đạt khoảng 3.703 s; nhưng trần <code>max_move_s</code> = 420 s chặn từ xa trước đó. Trong luật này trần ETA mới là ràng buộc thực tế, không phải lề. (Tính tay từ công thức, không phải số đo của lab.)</p>
+<p>3600 × s / 4,4 cho s = 1, 2, 3 là 818,2 s, 1.636,4 s và 2.454,5 s. Ở B, <code>wait_here</code> = 3600 × 3 / 2,0 = 5.400 s. Ở A sau khi thêm anh ta, supply = 2 nên <code>wait_there</code> = 1.636,4 s. Lợi ròng = 5.400 − 1.636,4 − 300 = 3.463,6 s, lớn hơn biên 60 s nhiều, nên đi. Biên 60 s chỉ chặn khi ETA đạt khoảng 3.703 s; nhưng trần <code>max_move_s</code> = 420 s chặn từ xa trước đó. Trong luật này trần ETA mới là ràng buộc thực tế, không phải biên. (Tính tay từ công thức, không phải số đo của lab.)</p>
 </details>
 
 **Bài 2.** `deadhead_m` trung bình giảm 255,4 m mà km rỗng tổng mỗi khách đặt lại tăng 1.428,9 m. Giải thích vì sao hai số không mâu thuẫn.
 
 <details><summary>Lời giải bài 2</summary>
-<p><code>deadhead_m</code> chỉ đo quãng xe chạy không tới điểm đón, trên chuyến hoàn thành. Km rỗng tổng cộng thêm quãng chạy theo gợi ý (1.595,6 m mỗi khách đặt) và quãng chạy không của chuyến huỷ sau khi gán, rồi chia cho số khách đặt. Quãng đón ngắn đi nhưng quãng di chuyển dọn chỗ lớn hơn nhiều, nên tổng tăng. Đây là lý do bài báo cáo cả hai, không chọn một.</p>
+<p><code>deadhead_m</code> chỉ đo quãng xe chạy không tới điểm đón, trên chuyến hoàn thành. Km rỗng tổng cộng thêm quãng chạy theo gợi ý (1.595,6 m mỗi khách đặt) và quãng chạy không của chuyến huỷ sau khi gán, rồi chia cho số khách đặt. Quãng đón ngắn đi nhưng quãng di chuyển theo gợi ý lớn hơn nhiều, nên tổng tăng. Đây là lý do bài báo cáo cả hai, không chọn một.</p>
 </details>
 
-**Bài 3.** Đề xuất một cách chia sẻ chi phí km rỗng cho tài xế và hai chỉ số cần đo thêm để biết nó có làm mất lợi của khách không.
+**Bài 3.** Đề xuất một cách chia sẻ chi phí km rỗng với tài xế và hai chỉ số cần đo thêm để biết cách đó có làm mất lợi ích của khách hay không.
 
 <details><summary>Lời giải bài 3</summary>
 <p>Gợi ý, chưa thử trong lab: thưởng cho tài xế theo số km chạy theo gợi ý (bù một phần nhiên liệu), hoặc giới hạn số gợi ý mỗi giờ. Chỉ số cần đo thêm: (1) `pickup_eta_s` và hoàn thành theo vùng, để xem lợi của khách còn bao nhiêu khi gợi ý ít đi; (2) km rỗng tổng mỗi khách đặt và phần thưởng đã chi, để thấy phần thưởng có lớn hơn lợi không. Cần chạy lại lab với từng mức giới hạn, và chọn tham số trên dải seed chỉnh, báo cáo trên dải seed đánh giá.</p>

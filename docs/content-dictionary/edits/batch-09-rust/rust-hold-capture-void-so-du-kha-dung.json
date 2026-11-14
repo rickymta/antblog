@@ -1,0 +1,65 @@
+{
+ "file": "rust-hold-capture-void-so-du-kha-dung.md",
+ "edits": [
+  {
+   "old": "chỉ cho hold trong ví do sổ cái Tới Nơi quản lý",
+   "new": "chỉ áp dụng cho hold trong ví do sổ cái Tới Nơi quản lý",
+   "reason": "Câu cụt, thiếu động từ",
+   "severity": "medium"
+  },
+  {
+   "old": "và biên là 14.500",
+   "new": "và ranh giới là 14.500",
+   "reason": "Biên dễ nhầm với tài khoản biên",
+   "severity": "medium"
+  },
+  {
+   "old": "ta sở hữu con số `available`, tự quyết hạn",
+   "new": "ta tự quản lý con số `available`, tự quyết hạn",
+   "reason": "Sở hữu là calque của own",
+   "severity": "medium"
+  },
+  {
+   "old": "Lab dựng cuộc đua bằng",
+   "new": "Lab dựng race condition bằng",
+   "reason": "Thống nhất thuật ngữ",
+   "severity": "low"
+  },
+  {
+   "old": "nên không gọi mạng bên trong transaction này",
+   "new": "nên ta không gọi mạng bên trong transaction này",
+   "reason": "Thiếu chủ ngữ",
+   "severity": "low"
+  },
+  {
+   "old": "hợp lý cho job lặp lại, không hợp khi cần ảnh chụp đầy đủ",
+   "new": "hợp lý với job chạy lặp lại, nhưng không phù hợp khi cần ảnh chụp đầy đủ",
+   "reason": "Câu cụt",
+   "severity": "low"
+  },
+  {
+   "old": "Ranh giới hạn dùng hai vế đối nhau của cùng một thời điểm",
+   "new": "Ranh giới hạn dùng hai vế đối nhau, cùng so với một thời điểm",
+   "reason": "Câu khó hiểu",
+   "severity": "medium"
+  },
+  {
+   "old": "Ai thắng do khoá dòng và trạng thái đọc dưới khoá quyết định.",
+   "new": "Khoá dòng và trạng thái đọc dưới khoá quyết định bên nào thắng.",
+   "reason": "Câu đảo ngữ khó đọc",
+   "severity": "medium"
+  },
+  {
+   "old": "Ở **biên DB** là",
+   "new": "Ở **ranh giới với DB** là",
+   "reason": "Biên DB là cụm tự ghép",
+   "severity": "low"
+  },
+  {
+   "old": "Kiểu chặn được capture mà chưa kiểm hold ACTIVE, và capture hai lần trên cùng một bằng chứng.",
+   "new": "Kiểu này chặn được việc capture khi chưa kiểm hold ACTIVE, và việc capture hai lần trên cùng một bằng chứng.",
+   "reason": "Câu thiếu chủ ngữ và tân ngữ",
+   "severity": "high"
+  }
+ ]
+}

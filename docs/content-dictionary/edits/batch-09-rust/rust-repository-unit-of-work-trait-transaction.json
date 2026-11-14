@@ -1,0 +1,209 @@
+{
+ "file": "rust-repository-unit-of-work-trait-transaction.md",
+ "edits": [
+  {
+   "old": "cùng key chỉ ra một bút toán",
+   "new": "cùng key chỉ tạo ra một bút toán",
+   "reason": "'chỉ ra' sai nghĩa, ý là tạo ra",
+   "severity": "high"
+  },
+  {
+   "old": "hai cách lưu (bộ nhớ và PostgreSQL) cư xử như nhau.",
+   "new": "hai cách lưu (bộ nhớ và PostgreSQL) hành xử như nhau.",
+   "reason": "'cư xử' dành cho người, dùng 'hành xử'",
+   "severity": "low"
+  },
+  {
+   "old": "Còn <code>tokio::spawn</code> nó thì sao?",
+   "new": "Còn khi <code>tokio::spawn</code> service đó thì sao?",
+   "reason": "'nó' mơ hồ, câu gượng",
+   "severity": "medium"
+  },
+  {
+   "old": "nên adapter gói lỗi sqlx vào hộp.",
+   "new": "nên adapter gói lỗi sqlx vào một Box.",
+   "reason": "'hộp' là dịch từng chữ của Box",
+   "severity": "medium"
+  },
+  {
+   "old": "Cái này biên dịch và test",
+   "new": "Đoạn này biên dịch được và test",
+   "reason": "'Cái này' khẩu ngữ; thiếu 'được'",
+   "severity": "low"
+  },
+  {
+   "old": "Hai giới hạn dưới đây có thông điệp chép từ rustc",
+   "new": "Hai giới hạn dưới đây có thông báo lỗi chép từ rustc",
+   "reason": "'thông điệp' dùng cho lỗi trình biên dịch nghe lạ",
+   "severity": "low"
+  },
+  {
+   "old": "Generic `R` nên trình biên dịch không nhìn được vào bên trong:",
+   "new": "Vì `R` là generic nên trình biên dịch không nhìn được vào bên trong:",
+   "reason": "Câu thiếu vị ngữ, phải đoán ý",
+   "severity": "high"
+  },
+  {
+   "old": "không phải ở nơi spawn xa tít.",
+   "new": "chứ không phải ở nơi spawn ở xa.",
+   "reason": "'xa tít' khẩu ngữ, câu cụt",
+   "severity": "low"
+  },
+  {
+   "old": "Quy tắc thứ ba kiểu không ép được, mỗi adapter tự giữ và hợp đồng kiểm:",
+   "new": "Quy tắc thứ ba thì hệ thống kiểu không ép buộc được; mỗi adapter tự giữ và bộ hợp đồng kiểm tra:",
+   "reason": "Câu cụt, chủ ngữ mơ hồ",
+   "severity": "high"
+  },
+  {
+   "old": "nên không hai chỗ cùng ghi vào một giao dịch;",
+   "new": "nên không thể có hai chỗ cùng ghi vào một giao dịch;",
+   "reason": "Câu cụt, thiếu động từ",
+   "severity": "medium"
+  },
+  {
+   "old": "Nhánh thất bại không có dòng code nào, vì nó là <code>Drop</code>.",
+   "new": "Nhánh thất bại không có dòng code nào, vì đó là hành vi của <code>Drop</code>.",
+   "reason": "'nó là' sai logic, câu thiếu ý",
+   "severity": "low"
+  },
+  {
+   "old": "nó giữ một kết nối lấy từ pool",
+   "new": "transaction này giữ một kết nối lấy từ pool",
+   "reason": "'nó' mơ hồ",
+   "severity": "low"
+  },
+  {
+   "old": "Hình thức `Transaction<'c, Postgres>` với lifetime cụ thể xuất hiện khi",
+   "new": "Dạng `Transaction<'c, Postgres>` có lifetime cụ thể xuất hiện khi",
+   "reason": "'Hình thức' là calque của 'form'",
+   "severity": "medium"
+  },
+  {
+   "old": "luôn khoá hàng cùng thứ tự.",
+   "new": "luôn khoá các dòng theo cùng một thứ tự.",
+   "reason": "'khoá hàng cùng thứ tự' cụt",
+   "severity": "medium"
+  },
+  {
+   "old": "hai UoW nhiều `post` vẫn có thể kẹt nhau",
+   "new": "hai UoW mà mỗi bên có nhiều `post` vẫn có thể kẹt nhau",
+   "reason": "Cụm 'UoW nhiều post' cụt",
+   "severity": "medium"
+  },
+  {
+   "old": "Lab dùng `sqlx::query` kiểm lúc chạy, không dùng `query!`, vì bài bàn về hình dạng trait.",
+   "new": "Lab dùng `sqlx::query` (kiểm tra lúc chạy), không dùng `query!`, vì bài bàn về hình dạng của trait.",
+   "reason": "'kiểm lúc chạy' cụt",
+   "severity": "low"
+  },
+  {
+   "old": "rút gọn một ca):",
+   "new": "rút gọn, chỉ giữ một test case):",
+   "reason": "Câu cụt; thống nhất 'test case'",
+   "severity": "medium"
+  },
+  {
+   "old": "có bảy ca, `run_concurrent` thêm ca thứ tám;",
+   "new": "có bảy test case, `run_concurrent` thêm test case thứ tám;",
+   "reason": "Thống nhất 'test case' theo bảng thuật ngữ",
+   "severity": "medium"
+  },
+  {
+   "old": "Sau mỗi ca, `expect_totals` kiểm số dư từng tài khoản",
+   "new": "Sau mỗi test case, `expect_totals` kiểm tra số dư từng tài khoản",
+   "reason": "Thống nhất 'test case'; lược chữ 'tra'",
+   "severity": "medium"
+  },
+  {
+   "old": "Ca thứ tám là nơi `+ Send` được dùng thật",
+   "new": "Test case thứ tám là nơi `+ Send` được dùng thật",
+   "reason": "Thống nhất 'test case'",
+   "severity": "medium"
+  },
+  {
+   "old": "(hợp đồng có ca này)",
+   "new": "(hợp đồng có test case này)",
+   "reason": "Thống nhất 'test case'",
+   "severity": "low"
+  },
+  {
+   "old": "Mã có lỗ hổng không sai (chỉ cần duy nhất)",
+   "new": "Mã có khoảng trống không sai (chỉ cần duy nhất)",
+   "reason": "'lỗ hổng' sai nghĩa, dễ hiểu thành lỗ hổng bảo mật",
+   "severity": "high"
+  },
+  {
+   "old": "Rollback cũng đốt số.",
+   "new": "Rollback cũng làm mất số.",
+   "reason": "'đốt số' khẩu ngữ",
+   "severity": "low"
+  },
+  {
+   "old": "UoW ở đây chỉ là ranh giới giao dịch cộng bảo đảm dùng một lần lúc biên dịch.",
+   "new": "UoW ở đây chỉ là ranh giới giao dịch, cộng thêm bảo đảm về việc dùng một lần do trình biên dịch kiểm tra.",
+   "reason": "'bảo đảm dùng một lần lúc biên dịch' gượng, thiếu chủ thể kiểm tra",
+   "severity": "medium"
+  },
+  {
+   "old": "vì nghiệp vụ sổ cái cần test không có database và có hơn một adapter.",
+   "new": "vì nghiệp vụ sổ cái cần test không phụ thuộc database và có hơn một adapter.",
+   "reason": "'test không có database' gượng",
+   "severity": "low"
+  },
+  {
+   "old": "Test double chỉ chứng minh rằng mock trả đúng thứ mình hứa nếu không có hợp đồng chạy trên adapter thật giữ nó trung thực",
+   "new": "Nếu không có hợp đồng chạy trên adapter thật để giữ cho test double trung thực, test double chỉ chứng minh được rằng mock trả đúng thứ mình đã hứa",
+   "reason": "Câu lủng củng, đảo logic nên khó hiểu",
+   "severity": "high"
+  },
+  {
+   "old": "in tám ca hợp đồng của mỗi adapter:",
+   "new": "in tám test case hợp đồng của mỗi adapter:",
+   "reason": "Thống nhất 'test case'",
+   "severity": "medium"
+  },
+  {
+   "old": "qua cùng danh sách tám ca,",
+   "new": "qua cùng danh sách tám test case,",
+   "reason": "Thống nhất 'test case'",
+   "severity": "medium"
+  },
+  {
+   "old": "hợp đồng và lỗ hổng mã; một test chỉ bộ nhớ)",
+   "new": "hợp đồng và khoảng trống trong mã; một test chỉ dùng bộ nhớ)",
+   "reason": "'lỗ hổng mã' sai nghĩa, câu cụt",
+   "severity": "high"
+  },
+  {
+   "old": "giữ một khoá suốt đời UoW",
+   "new": "giữ một khoá suốt vòng đời của UoW",
+   "reason": "'suốt đời UoW' gượng",
+   "severity": "low"
+  },
+  {
+   "old": "Hợp đồng không chứng minh gì về mức cô lập, <code>SERIALIZABLE</code> hay thử lại lỗi <code>40001</code>.",
+   "new": "Hợp đồng không chứng minh gì về mức cô lập, về <code>SERIALIZABLE</code> hay về việc thử lại lỗi <code>40001</code>.",
+   "reason": "Câu liệt kê thiếu giới từ, nghe cụt",
+   "severity": "medium"
+  },
+  {
+   "old": "Lab cũng chưa có đọc lịch sử, phân trang,",
+   "new": "Lab cũng chưa có chức năng đọc lịch sử, phân trang,",
+   "reason": "'chưa có đọc lịch sử' cụt, thiếu danh từ",
+   "severity": "medium"
+  },
+  {
+   "old": "hợp đồng cần thêm ca nào?",
+   "new": "hợp đồng cần thêm test case nào?",
+   "reason": "Thống nhất 'test case'",
+   "severity": "low"
+  },
+  {
+   "old": "Ca hợp đồng đáng thêm: 0 ở sổ mới;",
+   "new": "Test case đáng thêm vào hợp đồng: 0 ở sổ mới;",
+   "reason": "Thống nhất 'test case'",
+   "severity": "low"
+  }
+ ]
+}

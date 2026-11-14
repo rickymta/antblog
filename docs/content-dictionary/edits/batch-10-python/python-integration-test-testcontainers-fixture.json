@@ -1,0 +1,293 @@
+{
+  "file": "python-integration-test-testcontainers-fixture.md",
+  "edits": [
+    {
+      "old": "schema riêng mỗi ca, SKIP LOCKED",
+      "new": "schema riêng cho mỗi test case, SKIP LOCKED",
+      "reason": "Thống nhất test case",
+      "severity": "medium"
+    },
+    {
+      "old": "lab 19 ca chạy được",
+      "new": "lab 19 test case chạy được",
+      "reason": "Thống nhất test case",
+      "severity": "medium"
+    },
+    {
+      "old": "mà không kiểm trạng thái của chuyến;",
+      "new": "mà không kiểm tra trạng thái của chuyến;",
+      "reason": "Thiếu chữ «tra»",
+      "severity": "low"
+    },
+    {
+      "old": "xanh cả 100 ca. Điều đó",
+      "new": "xanh cả 100 test case. Điều đó",
+      "reason": "Thống nhất test case",
+      "severity": "medium"
+    },
+    {
+      "old": "Đây không phải chê SQLite, một database",
+      "new": "Đây không phải lời chê SQLite, một database",
+      "reason": "Câu cụt, thiếu danh từ",
+      "severity": "low"
+    },
+    {
+      "old": "Vấn đề là test dùng nó thay PostgreSQL trả lời câu hỏi «code chạy được với SQLite không», trong khi production hỏi câu khác.",
+      "new": "Vấn đề là khi test dùng SQLite thay PostgreSQL, nó trả lời câu hỏi «code chạy được với SQLite không», trong khi production hỏi câu khác.",
+      "reason": "Câu thiếu chủ ngữ rõ, trật tự kiểu tiếng Anh",
+      "severity": "medium"
+    },
+    {
+      "old": "lab kiểm điều đó. Nhưng",
+      "new": "lab có kiểm tra điều đó. Nhưng",
+      "reason": "Dùng từ đủ nghĩa",
+      "severity": "low"
+    },
+    {
+      "old": "hai lần chạy song song (hai nhánh CI, hai người cùng máy) không đụng cổng.",
+      "new": "hai lần chạy song song (hai nhánh CI, hai người cùng máy) không trùng cổng.",
+      "reason": "Từ tự nhiên hơn",
+      "severity": "low"
+    },
+    {
+      "old": "và vì mỗi ca có schema riêng (mục sau)",
+      "new": "và vì mỗi test case có schema riêng (mục sau)",
+      "reason": "Thống nhất test case",
+      "severity": "medium"
+    },
+    {
+      "old": "nên `session`. Schema chỉ là một câu `CREATE SCHEMA`, nên dựng mới cho từng ca (",
+      "new": "nên chọn scope `session`. Schema chỉ là một câu `CREATE SCHEMA`, nên dựng mới cho từng test case (",
+      "reason": "Thiếu động từ; thống nhất test case",
+      "severity": "medium"
+    },
+    {
+      "old": "Ca cần hai phiên (khoá dòng) gọi",
+      "new": "Test case cần hai phiên (khoá dòng) gọi",
+      "reason": "Thống nhất test case",
+      "severity": "medium"
+    },
+    {
+      "old": "và ca nào cũng có thể dùng mã `TN-0001` mà không đụng nhau.",
+      "new": "và test case nào cũng có thể dùng mã `TN-0001` mà không đụng nhau.",
+      "reason": "Thống nhất test case",
+      "severity": "medium"
+    },
+    {
+      "old": "Với MongoDB, mỗi ca dùng một database",
+      "new": "Với MongoDB, mỗi test case dùng một database",
+      "reason": "Thống nhất test case",
+      "severity": "medium"
+    },
+    {
+      "old": "bên dưới ba ca test, mỗi ca tạo một schema riêng",
+      "new": "bên dưới ba test case, mỗi test case tạo một schema riêng",
+      "reason": "Thống nhất test case",
+      "severity": "medium"
+    },
+    {
+      "old": "Tầng trên dùng chung giữa mọi ca; tầng dưới tách dữ liệu từng ca, nên",
+      "new": "Tầng trên dùng chung giữa mọi test case; tầng dưới tách dữ liệu từng test case, nên",
+      "reason": "Thống nhất test case",
+      "severity": "medium"
+    },
+    {
+      "old": "Lab cho đo chính xác giá của việc chọn sai scope.",
+      "new": "Lab cho phép đo chính xác cái giá của việc chọn sai scope.",
+      "reason": "Câu cụt, thiếu động từ",
+      "severity": "medium"
+    },
+    {
+      "old": "Cùng 19 ca, container dựng một lần",
+      "new": "Cùng 19 test case, container dựng một lần",
+      "reason": "Thống nhất test case",
+      "severity": "medium"
+    },
+    {
+      "old": "Container dựng lại cho từng ca: từ 39",
+      "new": "Container dựng lại cho từng test case: từ 39",
+      "reason": "Thống nhất test case",
+      "severity": "medium"
+    },
+    {
+      "old": "cho phép test kiểm đúng các ràng buộc mà schema đang gánh.",
+      "new": "cho phép test kiểm tra đúng các ràng buộc mà schema đang đảm nhiệm.",
+      "reason": "Dịch gượng",
+      "severity": "medium"
+    },
+    {
+      "old": "Nó biến quy tắc «tài xế bận không được nhận thêm chuyến» thành điều database tự đảm bảo ngay cả khi hai tiến trình của dịch vụ cùng gán lúc đó.",
+      "new": "Chỉ mục này biến quy tắc «tài xế bận không được nhận thêm chuyến» thành điều database tự đảm bảo ngay cả khi hai tiến trình của dịch vụ gán chuyến cùng lúc.",
+      "reason": "Tránh «Nó»; câu thiếu tân ngữ",
+      "severity": "medium"
+    },
+    {
+      "old": "Test kiểm cả hai phía của quy tắc,",
+      "new": "Test kiểm tra cả hai phía của quy tắc,",
+      "reason": "Từ cụt",
+      "severity": "low"
+    },
+    {
+      "old": "Lỗi mở bài nằm ở chỗ khác:",
+      "new": "Lỗi nêu ở đầu bài nằm ở chỗ khác:",
+      "reason": "«Mở bài» dùng sai nghĩa",
+      "severity": "high"
+    },
+    {
+      "old": "ghi đè lên chuyến đã nhận mà không báo gì. Bản sửa đưa trạng thái xuất phát vào `WHERE` và kiểm số dòng",
+      "new": "ghi đè lên chuyến đã nhận mà không báo lỗi. Bản sửa đưa trạng thái xuất phát vào `WHERE` và kiểm tra số dòng",
+      "reason": "Tự nhiên hơn",
+      "severity": "low"
+    },
+    {
+      "old": "Ca `test_second_driver_cannot_overwrite_an_accepted_trip` tái hiện",
+      "new": "Test case `test_second_driver_cannot_overwrite_an_accepted_trip` tái hiện",
+      "reason": "Thống nhất test case",
+      "severity": "medium"
+    },
+    {
+      "old": "kiểm trạng thái `requested` chưa được gán. Lab chỉ cài luồng rút gọn",
+      "new": "kiểm tra trạng thái `requested` chưa được gán. Lab chỉ cài đặt luồng rút gọn",
+      "reason": "Thiếu chữ, dùng từ đủ nghĩa",
+      "severity": "low"
+    },
+    {
+      "old": "Đủ 8 trạng thái và mọi chuyển hợp lệ là việc của dịch vụ thật.",
+      "new": "Việc cài đủ 8 trạng thái và mọi bước chuyển hợp lệ thuộc về dịch vụ thật.",
+      "reason": "Câu thiếu động từ, dịch cụt",
+      "severity": "medium"
+    },
+    {
+      "old": "Test kế tiếp trong lab là phản chứng:",
+      "new": "Test kế tiếp trong lab là test phản chứng:",
+      "reason": "Câu cụt",
+      "severity": "low"
+    },
+    {
+      "old": "và ca này xanh. Một kho giả",
+      "new": "và test case này xanh. Một kho giả",
+      "reason": "Thống nhất test case",
+      "severity": "medium"
+    },
+    {
+      "old": "kiểm `DuplicateKeyError` với mã 11000 do chỉ mục unique",
+      "new": "kiểm tra `DuplicateKeyError` với mã 11000 do chỉ mục unique",
+      "reason": "Từ cụt",
+      "severity": "low"
+    },
+    {
+      "old": "kéo image `pgvector/pgvector:pg17`, `mongo:8` và ảnh Ryuk.",
+      "new": "kéo image `pgvector/pgvector:pg17`, `mongo:8` và image Ryuk.",
+      "reason": "Một khái niệm một tên",
+      "severity": "medium"
+    },
+    {
+      "old": "Hai ca đầu tiên của mỗi database gánh chi phí dựng container; các ca sau có setup",
+      "new": "Hai test case đầu tiên của mỗi database gánh chi phí dựng container; các test case sau có setup",
+      "reason": "Thống nhất test case",
+      "severity": "medium"
+    },
+    {
+      "old": "nên chỉ nên đọc thứ bậc lớn:",
+      "new": "vì vậy chỉ nên đọc theo bậc độ lớn:",
+      "reason": "Dịch gượng",
+      "severity": "medium"
+    },
+    {
+      "old": "Đúng một ca đỏ, đúng ca kiểm «tài xế",
+      "new": "Đúng một test case đỏ, đúng test case kiểm «tài xế",
+      "reason": "Thống nhất test case",
+      "severity": "medium"
+    },
+    {
+      "old": "Ca `test_driver_cannot_hold_two_active_trips` vẫn xanh",
+      "new": "Test case `test_driver_cannot_hold_two_active_trips` vẫn xanh",
+      "reason": "Thống nhất test case",
+      "severity": "medium"
+    },
+    {
+      "old": "Hình dạng của nó đơn giản vì",
+      "new": "Cấu hình của nó đơn giản vì",
+      "reason": "«Hình dạng» là calque của shape",
+      "severity": "medium"
+    },
+    {
+      "old": "phiên bản action kiểm lần cuối ngày",
+      "new": "phiên bản action kiểm tra lần cuối ngày",
+      "reason": "Từ cụt",
+      "severity": "low"
+    },
+    {
+      "old": "Thử `docker pull testcontainers/ryuk:0.8.1`; nếu lệnh kẹt thì kiểm credential helper của Docker. Lối thoát: đặt",
+      "new": "Thử `docker pull testcontainers/ryuk:0.8.1`; nếu lệnh kẹt thì kiểm tra credential helper của Docker. Cách xử lý tạm: đặt",
+      "reason": "«Lối thoát» là calque của workaround",
+      "severity": "medium"
+    },
+    {
+      "old": "đừng xoá container của phiên đang chạy khác",
+      "new": "đừng xoá container của phiên khác đang chạy",
+      "reason": "Trật tự từ",
+      "severity": "low"
+    },
+    {
+      "old": "Lỗi nối Docker ngay khi chạy",
+      "new": "Không kết nối được tới Docker ngay khi chạy",
+      "reason": "Cụm tự ghép, nghe cụt",
+      "severity": "medium"
+    },
+    {
+      "old": "Ca bị giết giữa chừng trước khi",
+      "new": "Test case bị giết giữa chừng trước khi",
+      "reason": "Thống nhất test case",
+      "severity": "medium"
+    },
+    {
+      "old": "<p>19 ca chỉ chạm các câu lệnh ta chọn,",
+      "new": "<p>19 test case chỉ chạm các câu lệnh ta chọn,",
+      "reason": "Thống nhất test case",
+      "severity": "medium"
+    },
+    {
+      "old": "schema riêng mỗi ca là điều kiện cần,",
+      "new": "schema riêng cho mỗi test case là điều kiện cần,",
+      "reason": "Thống nhất test case",
+      "severity": "medium"
+    },
+    {
+      "old": "Các số thời gian là một máy cụ thể, lần chạy sau ảnh đã nằm",
+      "new": "Các số thời gian đo trên một máy cụ thể, và ở lần chạy sau image đã nằm",
+      "reason": "Câu thiếu động từ; thống nhất image",
+      "severity": "medium"
+    },
+    {
+      "old": "Viết một ca chứng minh rằng",
+      "new": "Viết một test case chứng minh rằng",
+      "reason": "Thống nhất test case",
+      "severity": "medium"
+    },
+    {
+      "old": "đang giữ khoá nó, tài xế",
+      "new": "đang giữ khoá chuyến đó, tài xế",
+      "reason": "Đại từ mơ hồ",
+      "severity": "low"
+    },
+    {
+      "old": "<p>Ca này đã chạy:",
+      "new": "<p>Test case này đã chạy:",
+      "reason": "Thống nhất test case",
+      "severity": "medium"
+    },
+    {
+      "old": "kết nối của ca còn giữ giao dịch dở",
+      "new": "kết nối của test case còn giữ giao dịch dở",
+      "reason": "Thống nhất test case",
+      "severity": "medium"
+    },
+    {
+      "old": "mỗi ca còn rò thêm kết nối",
+      "new": "mỗi test case còn rò thêm kết nối",
+      "reason": "Thống nhất test case",
+      "severity": "medium"
+    }
+  ]
+}

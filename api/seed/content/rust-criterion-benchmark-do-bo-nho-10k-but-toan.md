@@ -1,7 +1,7 @@
 ---
 slug: rust-criterion-benchmark-do-bo-nho-10k-but-toan
-title: "criterion và đo bộ nhớ: sổ cái có ghi nổi 10.000 bút toán/giây không?"
-summary: "Bài 30: đo thay vì đoán. criterion với black_box, debug so với release, dhat đếm allocation, rồi ghi 10.000 bút toán vào PostgreSQL thật: trên máy viết bài, chỉ gộp lô bằng unnest vượt 10.000 bút toán/giây."
+title: "criterion và đo bộ nhớ: sổ cái có ghi kịp 10.000 bút toán/giây không?"
+summary: "Bài 30: đo thay vì đoán. criterion với black_box, debug so với release, dhat đếm allocation, rồi ghi 10.000 bút toán vào PostgreSQL thật: trên máy viết bài, chỉ cách gộp lô bằng unnest mới vượt được 10.000 bút toán/giây."
 category: rust-intermediate
 level: intermediate
 tags: [rust, toi-noi, ledger, benchmark, criterion, dhat]
@@ -20,7 +20,7 @@ Nhóm Payment hỏi: sổ cái ghi được 10.000 bút toán mỗi giây không
 
 ## Đo cái gì, trên máy nào, để trả lời câu hỏi nào?
 
-Hình 1 đi từ giả thuyết qua ba tầng đo. `criterion` đo thời gian một thao tác trong một process; `dhat` đếm số lần cấp phát và số byte, không đo giờ; tầng cuối ghi vào PostgreSQL thật để biết thông lượng trọn đường đi. Ghi hàng triệu bút toán mỗi giây trong bộ nhớ không nói gì về PostgreSQL.
+Hình 1 đi từ giả thuyết qua ba tầng đo. `criterion` đo thời gian một thao tác trong một process; `dhat` đếm số lần cấp phát và số byte, không đo giờ; tầng cuối ghi vào PostgreSQL thật để biết thông lượng trọn đường đi. Việc ghi hàng triệu bút toán mỗi giây trong bộ nhớ không cho biết gì về PostgreSQL.
 
 <figure class="tkh-fig">
 <div class="tkh-fig-box">
@@ -38,13 +38,13 @@ Mọi số trong bài là số đo trên máy viết bài, không phải SLA.
 | PostgreSQL | 18.6 trong Docker Desktop 4.86 (Engine 29.7.2, VM Linux 10 CPU, 8 GB), `fsync = on`, `synchronous_commit = on` |
 
 <div class="tkh-callout tkh-callout--warn">
-<span class="tkh-callout-title">Số PostgreSQL chỉ nói về cấu hình này</span>
-<p>Trên macOS, PostgreSQL chạy trong VM Linux của Docker Desktop, qua mạng ảo và đĩa ảo, nên độ trễ thường cao và dao động hơn server thật. Một round trip <code>select 1</code> đo được 440 đến 727 µs.</p>
+<span class="tkh-callout-title">Số đo PostgreSQL chỉ có giá trị với cấu hình này</span>
+<p>Trên macOS, PostgreSQL chạy trong VM Linux của Docker Desktop, qua mạng ảo và đĩa ảo, nên độ trễ thường cao hơn và dao động nhiều hơn server thật. Một round trip <code>select 1</code> đo được 440 đến 727 µs.</p>
 </div>
 
 ## Vì sao benchmark nào cũng cần black_box?
 
-Hàm không có tác dụng phụ mà kết quả không ai dùng thì compiler được phép xoá lời gọi, và benchmark đo cái không tồn tại. `std::hint::black_box` gợi ý compiler giả định giá trị có thể bị dùng theo mọi cách hợp lệ. Tài liệu ghi rõ đây là best-effort, nhưng dùng được cho benchmark, thường bọc ở đầu vào. `Bencher::iter` của criterion tự `black_box` giá trị trả về, nên cách sai điển hình là bỏ kết quả bằng dấu chấm phẩy.
+Hàm không có tác dụng phụ mà kết quả không ai dùng thì compiler được phép xoá lời gọi, và benchmark đo cái không tồn tại. `std::hint::black_box` gợi ý compiler giả định giá trị có thể bị dùng theo mọi cách hợp lệ. Tài liệu ghi rõ đây là best-effort, nhưng vẫn dùng được cho benchmark, và ta thường bọc ở đầu vào. `Bencher::iter` của criterion tự `black_box` giá trị trả về, nên cách sai điển hình là bỏ kết quả bằng dấu chấm phẩy.
 
 ```rust
 // benches/black_box_demo.rs (rút gọn)
@@ -68,9 +68,9 @@ group.bench_function("dung_black_box_dau_vao", |b| {
 
 `cargo bench --bench black_box_demo` trên `AMOUNTS`, mảng 1.000 số tiền sinh lúc biên dịch, cho `SAI_bo_ket_qua` 345 ps, `tra_ket_qua_dau_vao_hang` 74,5 ns, `dung_black_box_dau_vao` 71,9 ns.
 
-Bản sai nhanh hơn bản đúng khoảng 200 lần: code đã bị xoá. Bản đầu vào hằng ngang bản đúng: ở bản build này LLVM không tính sẵn tổng của mảng hằng 1.000 phần tử, nhưng không gì bảo đảm điều đó, nên `black_box` ở đầu vào là bảo hiểm. Quy tắc dùng được: nghi ngờ mọi con số nhỏ hơn mức phần cứng có thể đạt.
+Bản sai nhanh hơn bản đúng khoảng 200 lần: code đã bị xoá. Bản đầu vào hằng ngang bản đúng: ở bản build này LLVM không tính sẵn tổng của mảng hằng 1.000 phần tử, nhưng không gì bảo đảm điều đó, nên `black_box` ở đầu vào là bảo hiểm. Quy tắc rút ra: nghi ngờ mọi con số nhỏ hơn mức phần cứng có thể đạt.
 
-BenchmarkDotNet tiêu thụ giá trị method `[Benchmark]` trả về, và với cấu hình mặc định, `JitOptimizationsValidator` báo validation error rồi không chạy benchmark nếu assembly build không tối ưu ([bài 28 loạt C#](/articles/dotnet10-benchmarkdotnet-span-profiling)). Với Rust, `cargo bench` mặc định đã tối ưu vì profile `bench` kế thừa `release`.
+BenchmarkDotNet dùng giá trị trả về của method `[Benchmark]`, và với cấu hình mặc định, `JitOptimizationsValidator` báo validation error rồi không chạy benchmark nếu assembly build không tối ưu ([bài 28 loạt C#](/articles/dotnet10-benchmarkdotnet-span-profiling)). Với Rust, `cargo bench` mặc định đã tối ưu vì profile `bench` kế thừa `release`.
 
 ## criterion đo ledger thế nào, và đọc kết quả ra sao?
 
@@ -105,7 +105,7 @@ for n in [1_000u64, 10_000, 100_000] {
 | `balance` quét toàn sổ | 5,75 µs | 61,5 µs | 703 µs |
 | `balance` tra `HashMap` cộng dồn | 14,7 ns | 15,4 ns | 15,6 ns |
 
-Tạo một `JournalEntry` mất 309 ns. Cộng với `post`, 10.000 bút toán/giây trong bộ nhớ chỉ tốn khoảng 0,4% một core; tốc độ sụt ở 100.000 thì tôi chưa tách nguyên nhân. `Ledger::balance` tuyến tính: n tăng 10 lần thì thời gian tăng khoảng 10 lần (Hình 2). `IndexedLedger` giữ thêm `HashMap<AccountId, Money>` cập nhật lúc `post`, nên tra số dư gần như không đổi theo n, đổi lại tốn bộ nhớ và phải giữ hai thứ nhất quán ([bài 9](/articles/rust-vec-hashmap-btreemap-lifetime-so-cai-bo-nho) có nền tảng về `HashMap`).
+Tạo một `JournalEntry` mất 309 ns. Cộng với `post`, 10.000 bút toán/giây trong bộ nhớ chỉ tốn khoảng 0,4% một core; tốc độ sụt ở 100.000 thì tôi chưa xác định được nguyên nhân. `Ledger::balance` tuyến tính: n tăng 10 lần thì thời gian tăng khoảng 10 lần (Hình 2). `IndexedLedger` giữ thêm `HashMap<AccountId, Money>` cập nhật lúc `post`, nên tra số dư gần như không đổi theo n, đổi lại tốn bộ nhớ và phải giữ hai thứ nhất quán ([bài 9](/articles/rust-vec-hashmap-btreemap-lifetime-so-cai-bo-nho) có nền tảng về `HashMap`).
 
 <figure class="tkh-fig">
 <div class="tkh-fig-box">
@@ -116,7 +116,7 @@ Tạo một `JournalEntry` mất 309 ns. Cộng với `post`, 10.000 bút toán/
 
 ## Release, LTO và codegen-units đổi được bao nhiêu?
 
-`cargo bench` đã tối ưu, nhưng `cargo run` hằng ngày là debug. Chế độ `--timing` đo một lượt bằng `Instant` (không thống kê, không thay criterion): tạo và ghi 100.000 bút toán rồi quét số dư 20 lần. Mỗi dòng là trung vị của 5 lượt.
+`cargo bench` đã tối ưu, nhưng `cargo run` hằng ngày là debug. Chế độ `--timing` đo một lượt bằng `Instant` (không thống kê, không thay thế criterion): tạo và ghi 100.000 bút toán rồi quét số dư 20 lần. Mỗi dòng là trung vị của 5 lượt.
 
 ```toml
 # Cargo.toml
@@ -142,7 +142,7 @@ CARGO_PROFILE_RELEASE_LTO=off CARGO_PROFILE_RELEASE_CODEGEN_UNITS=16 \
 | release, `lto = "off"`, `codegen-units = 16` | 51 ms | 1,00 ms |
 | release, `lto = "fat"`, `codegen-units = 1` | 44 ms | 0,66 ms |
 
-Từ debug sang release là bước lớn: khoảng 4,5 lần khi ghi và 10 lần khi quét. LTO cộng thêm khoảng 14% khi ghi và 34% khi quét; có thể nhờ inline xuyên crate sang `ledger-core`, nhưng tôi không kiểm bằng assembly. Cái giá là build lại sau khi sửa một dòng: khoảng 5 giây khi tắt LTO, 16 giây với `fat`. `strip = "none"` không phải tinh chỉnh tốc độ, nó chỉ tránh cảnh báo của toolchain trên máy viết bài.
+Từ debug sang release là bước lớn: khoảng 4,5 lần khi ghi và 10 lần khi quét. LTO cộng thêm khoảng 14% khi ghi và 34% khi quét; có thể nhờ inline xuyên crate sang `ledger-core`, nhưng tôi không kiểm bằng assembly. Cái giá là mỗi lần build lại sau khi sửa một dòng mất khoảng 5 giây khi tắt LTO, 16 giây với `fat`. `strip = "none"` không phải tinh chỉnh tốc độ, nó chỉ tránh cảnh báo của toolchain trên máy viết bài.
 
 ## Vec::with_capacity giảm bao nhiêu allocation, và có nhanh hơn không?
 
@@ -175,15 +175,15 @@ Vec::with_capacity     : 1 block, 240000 byte, len 30000
 ALLOC OK
 ```
 
-`Vec` hiện tăng gấp đôi, nên thu 30.000 con trỏ cần 14 lần cấp phát (kể cả cấp phát lại), tổng 524.256 byte, gấp 2,2 lần 240.000 byte mà `with_capacity` xin một lần. Nhưng tạo 10.000 bút toán tốn 90.026 block, 9 block mỗi bút toán, gần hết là chuỗi (khoá idempotency, `AccountId`, `format!`). Muốn bớt cấp phát thật thì nhìn vào chuỗi, không phải `Vec`. Bỏ `.testing()` thì dhat ghi `dhat-heap.json` cho `dh_view`.
+`Vec` hiện tăng gấp đôi, nên gom 30.000 con trỏ cần 14 lần cấp phát (kể cả cấp phát lại), tổng 524.256 byte, gấp 2,2 lần 240.000 byte mà `with_capacity` xin một lần. Nhưng tạo 10.000 bút toán tốn 90.026 block, 9 block mỗi bút toán, gần hết là chuỗi (khoá idempotency, `AccountId`, `format!`). Muốn bớt cấp phát thật thì nhìn vào chuỗi, không phải `Vec`. Bỏ `.testing()` thì dhat ghi `dhat-heap.json` cho `dh_view`.
 
-Còn thời gian? Ít cấp phát hơn 14 lần không thành nhanh hơn 14 lần. Ở 10.000 bút toán, criterion đo `Vec::new` + `push` 31,2 µs, `with_capacity` biết trước dung lượng 24,8 µs, còn bản tự đếm trước 35,4 µs vì thêm một lượt duyệt sổ. Ở 100.000, chênh lệch giữa bản biết trước và `push` (347 so với 327 µs) nằm trong nhiễu. Số cấp phát ổn định giữa các lần đo, còn thời gian thì không, nên cần cả hai công cụ. Bên C#, `MemoryDiagnoser` báo byte cấp phát kèm số lần GC ([bài về allocation và GC](/articles/dotnet10-allocation-gc-disposal)); Rust không có GC nên dhat không có cột đó.
+Còn thời gian? Ít cấp phát hơn 14 lần không có nghĩa là nhanh hơn 14 lần. Ở 10.000 bút toán, criterion đo `Vec::new` + `push` 31,2 µs, `with_capacity` biết trước dung lượng 24,8 µs, còn bản tự đếm trước 35,4 µs vì thêm một lượt duyệt sổ. Ở 100.000, chênh lệch giữa bản biết trước và `push` (347 so với 327 µs) nằm trong nhiễu. Số cấp phát ổn định giữa các lần đo, còn thời gian thì không, nên cần cả hai công cụ. Bên C#, `MemoryDiagnoser` báo byte cấp phát kèm số lần GC ([bài về allocation và GC](/articles/dotnet10-allocation-gc-disposal)); Rust không có GC nên dhat không có cột đó.
 
-## PostgreSQL thật có ghi nổi 10.000 bút toán/giây không?
+## PostgreSQL thật có ghi kịp 10.000 bút toán/giây không?
 
-Mỗi bút toán là một dòng `journal_entries` và ba dòng `postings` theo schema chuẩn của loạt ([bài 25](/articles/rust-schema-so-cai-accounts-journal-postings-partition)), trong schema riêng `lab_<uuid>`. Câu lệnh ghi dùng `sqlx::query` kiểm lúc chạy ([bài 23](/articles/rust-sqlx-postgresql-pool-migration-query)) vì bảng chỉ có sau khi lab tạo schema.
+Mỗi bút toán là một dòng `journal_entries` và ba dòng `postings` theo schema chuẩn của loạt ([bài 25](/articles/rust-schema-so-cai-accounts-journal-postings-partition)), trong schema riêng `lab_<uuid>`. Câu lệnh ghi dùng `sqlx::query` kiểm tra lúc chạy ([bài 23](/articles/rust-sqlx-postgresql-pool-migration-query)) vì bảng chỉ có sau khi lab tạo schema.
 
-Ba cách ghi cùng một dữ liệu, thêm hai thí nghiệm giải thích. Cách thứ ba gửi cả lô bằng mảng:
+Có ba cách ghi cùng một dữ liệu, kèm hai thí nghiệm để giải thích. Cách thứ ba gửi cả lô bằng mảng:
 
 ```rust
 // src/pg.rs (rút gọn): một transaction, đúng 2 câu lệnh cho cả lô
@@ -216,7 +216,7 @@ Mỗi cách chạy 3 lượt trên 10.000 bút toán (`--pg-bench`). Cột giữ
 | Thêm: cách 1 trên 16 kết nối | 1.188 | 1.188 đến 2.168 |
 | Thêm: cách 1 với `synchronous_commit = off` | 294 | 294 đến 371 |
 
-Trả lời thẳng: trên máy này chỉ cách 3, gộp lô bằng `unnest`, vượt 10.000 bút toán/giây, ở cả ba lần chạy. Các cách còn lại đều không; 16 kết nối song song cho cách 1 tăng khoảng 3,5 đến 5 lần và vẫn dưới đích. Lý do là round trip: cách 1 cần bốn mỗi bút toán (`BEGIN`, hai `INSERT`, `COMMIT`), mỗi cái 440 đến 727 µs, nên trần khoảng 340 đến 570 bút toán/giây, sát số đo. Cách 2 gộp transaction nhưng vẫn hai câu lệnh mỗi bút toán, chỉ nhanh gấp khoảng hai. Cách 3 gom cả lô vào hai câu lệnh: 80 round trip thay cho 40.000 (Hình 3). Số của nó chưa gồm `account_balances` và kiểm tra idempotency, nên chưa phải đáp án cho service thật.
+Trả lời thẳng: trên máy này chỉ cách 3, gộp lô bằng `unnest`, vượt 10.000 bút toán/giây, ở cả ba lần chạy. Các cách còn lại đều không đạt; 16 kết nối song song cho cách 1 tăng khoảng 3,5 đến 5 lần và vẫn dưới đích. Lý do là round trip: cách 1 cần bốn round trip mỗi bút toán (`BEGIN`, hai `INSERT`, `COMMIT`), mỗi cái 440 đến 727 µs, nên trần khoảng 340 đến 570 bút toán/giây, sát số đo. Cách 2 gộp transaction nhưng vẫn hai câu lệnh mỗi bút toán, chỉ nhanh hơn khoảng hai lần. Cách 3 gom cả lô vào hai câu lệnh: 80 round trip thay cho 40.000 (Hình 3). Số đo của cách này chưa gồm `account_balances` và kiểm tra idempotency, nên chưa phải đáp án cho service thật.
 
 <figure class="tkh-fig">
 <div class="tkh-fig-box">
@@ -225,7 +225,7 @@ Trả lời thẳng: trên máy này chỉ cách 3, gộp lô bằng `unnest`, v
 <figcaption>Hình 3. Cùng 10.000 bút toán: 40.000 round trip khi mỗi bút toán một transaction, 80 khi gộp lô 500 bằng unnest.</figcaption>
 </figure>
 
-Còn `fsync`? Ở cấu hình này, `synchronous_commit = off` không làm cách 1 nhanh hơn (294 đến 371 so với 324 đến 422), tức thời gian chờ flush WAL nhỏ so với round trip. Kết luận đó chỉ đúng cho Docker Desktop với round trip cỡ này: đĩa ảo có thể flush rẻ hơn đĩa thật, và trên server có round trip ngắn, fsync có thể thành phần lớn; tôi chưa đo ở đó. `synchronous_commit = off` có thể mất các transaction vừa commit khi server sập, nên không dùng cho sổ cái.
+Còn `fsync`? Ở cấu hình này, `synchronous_commit = off` không làm cách 1 nhanh hơn (294 đến 371 so với 324 đến 422), tức thời gian chờ flush WAL nhỏ so với round trip. Kết luận đó chỉ đúng cho Docker Desktop với round trip cỡ này: đĩa ảo có thể flush rẻ hơn đĩa thật, và trên server có round trip ngắn, fsync có thể chiếm phần lớn thời gian; tôi chưa đo ở đó. `synchronous_commit = off` có thể mất các transaction vừa commit khi server sập, nên không dùng cho sổ cái.
 
 Gộp lô có giá riêng. Request đến từng cái một không tự thành lô: ta phải chờ đủ 500 hoặc hết thời gian chờ, tức đổi độ trễ lấy thông lượng. Một khoá trùng làm cả lô rollback, nên idempotency của [bài 24](/articles/rust-transaction-isolation-append-only-idempotency-key) phải xử lý trước hoặc bằng `ON CONFLICT`.
 
@@ -252,7 +252,7 @@ Cộng dồn     : driver:DR-001 = 1.020.000 VND
 VERIFY OK
 ```
 
-`--verify` không kiểm số đo tuyệt đối vì chúng đổi theo máy và theo lượt. Nó kiểm ba posting của `TN-0001`, số dư hai cách, tổng toàn sổ bằng 0, replay, và bốn chiến lược ghi PostgreSQL cho cùng kết quả. `cargo test` chạy 10 ca (5 trong bộ nhớ, 5 với PostgreSQL). Thiếu `TOI_NOI_PG_URL`, lab thoát mã 1, không bỏ qua:
+`--verify` không kiểm tra số đo tuyệt đối vì chúng đổi theo máy và theo lượt. Nó kiểm ba posting của `TN-0001`, số dư hai cách, tổng toàn sổ bằng 0, replay, và bốn chiến lược ghi PostgreSQL cho cùng kết quả. `cargo test` chạy 10 test case (5 trong bộ nhớ, 5 với PostgreSQL). Thiếu `TOI_NOI_PG_URL`, lab thoát mã 1, không bỏ qua:
 
 ```text
 LỖI: thiếu TOI_NOI_PG_URL. Bật hạ tầng: docker compose -f examples/toi-noi-rust/infra/docker-compose.yml up -d --wait, rồi export TOI_NOI_PG_URL như trong infra/README.md
@@ -262,12 +262,12 @@ LỖI: thiếu TOI_NOI_PG_URL. Bật hạ tầng: docker compose -f examples/toi
 
 <div class="tkh-callout tkh-callout--warn">
 <span class="tkh-callout-title">Giới hạn của ví dụ</span>
-<p>Máy dùng chung với việc khác (load average 14 đến 32), mỗi nhóm criterion chỉ lấy 20 đến 30 mẫu, số PostgreSQL đo qua Docker Desktop với client và server cùng máy, không TLS. Workload hư cấu, bảng bắt đầu rỗng nên chỉ mục còn nhỏ. Chưa có <code>account_balances</code> trong transaction, chưa có truy vấn đọc xen kẽ, chỉ đo thông lượng trung bình, không đo p99.</p>
+<p>Máy dùng chung với việc khác (load average 14 đến 32), mỗi nhóm criterion chỉ lấy 20 đến 30 mẫu, số PostgreSQL đo qua Docker Desktop với client và server cùng máy, không TLS. Khối lượng công việc hư cấu, bảng bắt đầu rỗng nên chỉ mục còn nhỏ. Chưa có <code>account_balances</code> trong transaction, chưa có truy vấn đọc xen kẽ, chỉ đo thông lượng trung bình, không đo p99.</p>
 </div>
 
 **Bài tập:** sổ có 100.000 bút toán, quét số dư mất khoảng 0,7 ms. Nếu Admin BFF hỏi số dư cùng một tài khoản 1.000 lần mỗi giây, quét toàn sổ tốn khoảng bao nhiêu phần một core? Bảng cộng dồn tốn gì và ta mất gì khi dùng nó?
 
-<details><summary>Xem lời giải</summary><p>Quét: 1.000 × 0,7 ms = 0,7 giây CPU mỗi giây, khoảng 70% một core. Tra bảng: 1.000 × 15 ns = 15 µs mỗi giây, cỡ 0,002% một core. Cái giá là bộ nhớ, việc <code>post</code> phải cập nhật thêm, và nguy cơ bảng lệch khỏi bút toán, nên trong PostgreSQL <code>account_balances</code> phải cập nhật cùng transaction. Hai nguồn lệch thì tin các bút toán.</p></details>
+<details><summary>Xem lời giải</summary><p>Quét: 1.000 × 0,7 ms = 0,7 giây CPU mỗi giây, khoảng 70% một core. Tra bảng: 1.000 × 15 ns = 15 µs mỗi giây, cỡ 0,002% một core. Cái giá là bộ nhớ, việc <code>post</code> phải cập nhật thêm, và nguy cơ bảng lệch khỏi bút toán, nên trong PostgreSQL <code>account_balances</code> phải cập nhật cùng transaction. Khi bảng cộng dồn và các bút toán lệch nhau thì tin các bút toán.</p></details>
 
 Bài trước: [bài 29](/articles/rust-config-secrets-tracing-structured-logging). Bài tiếp: [bài 31](/articles/rust-axum-http-endpoint-ghi-but-toan-tra-so-du).
 

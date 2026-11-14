@@ -1,26 +1,26 @@
 ---
 slug: python-hau-xu-ly-ocr-regex-parse-truong-checksum
 title: "Hậu xử lý OCR: regex, tách trường CCCD/GPLX, checksum và fuzzy matching"
-summary: "Bài 44: biến chữ OCR thô thành trường có kiểu: chuẩn hoá Unicode, regex có tên, sửa ký tự theo ngữ cảnh, kiểm cấu trúc số, rapidfuzz, confidence là min các từ. Có output thật và lab chạy được."
+summary: "Bài 44: biến chữ OCR thô thành trường có kiểu: chuẩn hoá Unicode, regex có tên, sửa ký tự theo ngữ cảnh, kiểm cấu trúc số, rapidfuzz, confidence lấy giá trị nhỏ nhất trong các từ. Có kết quả chạy thật và lab chạy được."
 category: python-advanced
 level: advanced
 tags: [python, toi-noi, ocr, regex, rapidfuzz]
 language: vi
 ---
 
-Tài xế mới của [Tới Nơi](/articles/du-an-mau-toi-noi) chụp căn cước, ảnh đi vào `kyc-ocr`, và Tesseract trả về những thứ như `'0990901 59083'` cho số thẻ, `'43/03/1 990'` cho ngày sinh, `'can Tho'` cho quê quán. Đó là chữ, chưa phải dữ liệu: các service sau cần `id_number` đúng 12 chữ số, `date_of_birth` là ngày có thật, thành phố nằm trong danh sách. Quãng đường từ chữ đến dữ liệu là **hậu xử lý**, và nó sai được theo hai hướng: từ chối oan vì một dấu cách thừa, hoặc để lọt số sai vì «sửa» quá tay. Bài này dựng hậu xử lý cho thẻ căn cước và giấy phép lái xe giả, rồi đo từng bước thực sự làm được gì trên 64 ảnh.
+Tài xế mới của [Tới Nơi](/articles/du-an-mau-toi-noi) chụp căn cước, ảnh đi vào `kyc-ocr`, và Tesseract trả về những thứ như `'0990901 59083'` cho số thẻ, `'43/03/1 990'` cho ngày sinh, `'can Tho'` cho quê quán. Đó là chữ, chưa phải dữ liệu: các service sau cần `id_number` đúng 12 chữ số, `date_of_birth` là ngày có thật, thành phố nằm trong danh sách. Quãng đường từ chữ đến dữ liệu là **hậu xử lý**, và bước này có thể sai theo hai hướng: từ chối oan vì một dấu cách thừa, hoặc để lọt số sai vì «sửa» quá tay. Bài này dựng hậu xử lý cho thẻ căn cước và giấy phép lái xe giả, rồi đo xem từng bước thực sự giúp được gì trên 64 ảnh.
 
-Đây là bài 44 của lộ trình **Python nâng cao qua Tới Nơi**. Bạn cần biết chạy Tesseract (bài 43). Ảnh nghiêng được xử lý ở [bài 42](/articles/python-opencv-phat-hien-canh-perspective-deskew), nhưng lab này cố tình đưa ảnh nghiêng vào thẳng để thấy hậu xử lý chịu được đến đâu. Mọi thẻ trong bài là **dữ liệu giả** sinh bằng Pillow: số `099...`, GPLX `99...`, tên mẫu, ô «ảnh» chỉ là hình chữ nhật xám.
+Đây là bài 44 của lộ trình **Python nâng cao qua Tới Nơi**. Bạn cần biết cách chạy Tesseract (bài 43). Ảnh nghiêng được xử lý ở [bài 42](/articles/python-opencv-phat-hien-canh-perspective-deskew), nhưng lab này cố tình đưa thẳng ảnh nghiêng vào để thấy hậu xử lý chịu được đến đâu. Mọi thẻ trong bài là **dữ liệu giả** sinh bằng Pillow: số `099...`, GPLX `99...`, tên mẫu, ô «ảnh» chỉ là hình chữ nhật xám.
 
 <div class="tkh-callout tkh-callout--example">
 <span class="tkh-callout-title">Thử trước khi đọc</span>
 <p>Trên 64 ảnh thẻ giả (sạch, mờ, nghiêng, tối), loại sửa lỗi nào cứu được nhiều trường sai nhất: (a) đổi chữ <code>O</code> thành số <code>0</code> trong trường số, (b) bỏ dấu cách OCR chèn giữa dãy số hoặc ngày, (c) so khớp mờ tên thành phố với danh sách?</p>
-<details><summary>Xem đáp án</summary><p><b>(b).</b> Trong 14 trường mà chữ OCR thô sai còn bản hậu xử lý đúng, 9 trường chỉ cần bỏ dấu cách chèn thừa, 3 trường nhờ so khớp mờ thành phố, 2 trường nhờ đổi <code>l</code> thành <code>1</code> ở hạng bằng. Bảng sửa chưa lần nào phải đổi <code>O</code> thành <code>0</code> trên bộ này, dù ta vẫn nên có nó.</p></details>
+<details><summary>Xem đáp án</summary><p><b>(b).</b> Trong 14 trường mà chữ OCR thô sai nhưng bản hậu xử lý đúng, 9 trường chỉ cần bỏ dấu cách chèn thừa, 3 trường nhờ so khớp mờ thành phố, 2 trường nhờ đổi <code>l</code> thành <code>1</code> ở hạng bằng. Bảng sửa chưa lần nào phải đổi <code>O</code> thành <code>0</code> trên bộ này, dù ta vẫn nên có nó.</p></details>
 </div>
 
 ## Từ chữ OCR đến trường có kiểu
 
-Với đuôi `tsv`, Tesseract trả từng từ kèm khung chữ nhật và độ tin cậy (`conf`, từ 0 đến 100). Lab gọi lệnh sau, và `ocr.py` đọc mỗi từ thành `Word(text, conf, left, top, width, height, line)`. Output thật của thẻ seed 7 sạch (trích):
+Với đuôi `tsv`, Tesseract trả từng từ kèm khung chữ nhật và độ tin cậy (`conf`, từ 0 đến 100). Lab gọi lệnh sau, và `ocr.py` đọc mỗi từ thành `Word(text, conf, left, top, width, height, line)`. Kết quả chạy thật của thẻ seed 7 sạch (trích):
 
 ```bash
 tesseract stdin stdout -l vie+eng --psm 6 tsv
@@ -59,7 +59,7 @@ class FieldResult:
 
 Khung chữ của ảnh mờ hay nghiêng chồng lên nhau theo chiều dọc (đã gặp), nên `value_words` chọn dòng giá trị theo **thứ tự đọc** (dòng kế tiếp có chữ ở cột giá trị, gặp nhãn khác thì dừng) thay vì so `top` với `bottom`. Vệt chữ vô nghĩa từ ô ảnh chân dung bị loại bằng chiều cao (dưới 8 điểm ảnh) và vị trí (lệch trái hơn mép nhãn). Cả hai dựa trên **bố cục cố định** của thẻ giả.
 
-Thẻ seed 7 bị nghiêng cho ra kết quả từ đầu đến cuối như sau (output thật, `confidence` làm tròn hai chữ số):
+Với thẻ seed 7 bị nghiêng, kết quả từ đầu đến cuối như sau (kết quả chạy thật, `confidence` làm tròn hai chữ số):
 
 ```text
 [1] Một thẻ từ đầu đến cuối: cccd-7-rotate
@@ -70,11 +70,11 @@ Thẻ seed 7 bị nghiêng cho ra kết quả từ đầu đến cuối như sau
   hometown_city  thô 'can Tho'        -> 'Cần Thơ'        confidence 0.96  sửa=['fuzzy:can Tho->Cần Thơ@100'] vấn đề=[]
 ```
 
-Dấu cách trong số thẻ được bỏ, thành phố về dạng chuẩn có dấu, ngày `43/03/1990` bị cờ vì không có ngày 43, và tên có `confidence` thấp nhất thẻ (0,62).
+Dấu cách trong số thẻ được bỏ, thành phố được đưa về dạng chuẩn có dấu, ngày `43/03/1990` bị cờ vì không có ngày 43, và tên có `confidence` thấp nhất trong thẻ (0,62).
 
 ## Chuẩn hoá Unicode trước khi so khớp
 
-Cùng một chữ «Ễ» có hai cách mã hoá: một mã dựng sẵn (NFC) hoặc chữ `E` cộng hai dấu rời (NFD). Mắt người không thấy khác, `==` và regex thì có:
+Cùng một chữ «Ễ» có hai cách mã hoá: một mã dựng sẵn (NFC) hoặc chữ `E` cộng hai dấu rời (NFD). Mắt người không thấy khác, còn `==` và regex thì thấy khác:
 
 ```python
 def normalize_text(text: str) -> str:
@@ -89,7 +89,7 @@ def fold(text: str) -> str:
     return "".join(ch for ch in decomposed if not unicodedata.combining(ch)).casefold()
 ```
 
-`_CONFUSABLE` đổi nháy cong về nháy thẳng, các loại gạch ngang về `-`, khoảng trắng không ngắt về dấu cách và xoá ký tự rộng bằng 0. Tác động:
+`_CONFUSABLE` đổi nháy cong về nháy thẳng, các loại gạch ngang về `-`, khoảng trắng không ngắt về dấu cách và xoá ký tự có độ rộng bằng 0. Tác động:
 
 ```text
 [2] Unicode: cùng một chữ, hai dãy mã
@@ -99,7 +99,7 @@ def fold(text: str) -> str:
   fold('Đà Nẵng') -> 'da nang'
 ```
 
-Regex tên `[^\W\d_]+(?: [^\W\d_]+){1,5}` (hai đến sáu từ toàn chữ cái) khớp chuỗi NFC nhưng trượt chuỗi NFD, vì dấu rời không phải chữ cái. Không có lỗi nào được ném, chỉ có tên «không hợp lệ» khó hiểu. Quy tắc: `normalize_text` ngay sau khi nhận chữ, trước mọi so sánh hay regex.
+Regex tên `[^\W\d_]+(?: [^\W\d_]+){1,5}` (hai đến sáu từ toàn chữ cái) khớp chuỗi NFC nhưng không khớp chuỗi NFD, vì dấu rời không phải chữ cái. Không có lỗi nào được ném, chỉ có tên «không hợp lệ» khó hiểu. Quy tắc: `normalize_text` ngay sau khi nhận chữ, trước mọi so sánh hay regex.
 
 `fold` phục vụ một thực tế: trên bộ 64 ảnh, chỉ 6 tên được đọc **đúng nguyên văn có dấu**; phần còn lại mất dấu (`NGUYEN VAN A` thay vì `NGUYỄN VĂN A`). Không có danh sách để tra thì không «khôi phục» được dấu của tên người, nên lab so tên **không dấu** và giữ chữ OCR cho người duyệt. Thành phố thì khác: danh sách đóng cho phép trả về dạng chuẩn có dấu (mục fuzzy).
 
@@ -145,7 +145,7 @@ Tóm lại, trên bộ 64 ảnh bảng sửa chưa lần nào phải đổi `O` 
 
 ## Kiểm cấu trúc, và chuyện checksum
 
-Số căn cước giả của loạt bài có 12 chữ số theo quy ước dữ liệu giả: mã tỉnh `099` (không tồn tại), 1 chữ số giới tính cộng thế kỷ sinh (thế kỷ 20: nam 0, nữ 1; thế kỷ 21: nam 2, nữ 3), 2 chữ số cuối của năm sinh, 6 chữ số ngẫu nhiên. Hai nhóm (thế kỷ cộng giới tính, và năm sinh) **trùng với thông tin in ở chỗ khác trên thẻ** nên đối chiếu được; mã tỉnh thì chỉ so với một danh sách cho phép. Hàm dưới đây không tính chữ số kiểm tra nào, nó kiểm sự nhất quán:
+Số căn cước giả của loạt bài có 12 chữ số theo quy ước dữ liệu giả: mã tỉnh `099` (không tồn tại), 1 chữ số giới tính cộng thế kỷ sinh (thế kỷ 20: nam 0, nữ 1; thế kỷ 21: nam 2, nữ 3), 2 chữ số cuối của năm sinh, 6 chữ số ngẫu nhiên. Hai nhóm (thế kỷ cộng giới tính, và năm sinh) **trùng với thông tin in ở chỗ khác trên thẻ** nên đối chiếu được; mã tỉnh thì chỉ so với một danh sách cho phép. Hàm dưới đây không tính chữ số kiểm tra nào, mà kiểm tra sự nhất quán:
 
 ```python
 def check_id_structure(id_number: str, birth_date: str | None, sex: str | None) -> list[str]:
@@ -166,7 +166,7 @@ def check_id_structure(id_number: str, birth_date: str | None, sex: str | None) 
     return issues
 ```
 
-(`ACCEPTED_PREFIXES` chỉ chứa `099`; hệ thống thật phải nạp bảng mã tỉnh từ văn bản chính thức của cơ quan cấp.) Thử trên một số hợp lệ, đổi từng thông tin, rồi đo năng lực phát hiện bằng cách thay **mỗi** chữ số bằng 9 chữ số khác (12 vị trí × 9 = 108 phép sai):
+(`ACCEPTED_PREFIXES` chỉ chứa `099`; hệ thống thật phải nạp bảng mã tỉnh từ văn bản chính thức của cơ quan cấp.) Thử trên một số hợp lệ, đổi từng thông tin, rồi đo khả năng phát hiện bằng cách thay **mỗi** chữ số bằng 9 chữ số khác (12 vị trí × 9 = 108 phép sai):
 
 ```text
 [4] Kiểm cấu trúc số CCCD giả (không phải checksum)
@@ -186,11 +186,11 @@ def check_id_structure(id_number: str, birth_date: str | None, sex: str | None) 
 <figcaption>Hình 2. Kiểm cấu trúc bắt được 54 trên 108 phép sai một chữ số: 27 nhờ danh sách mã tỉnh, 27 nhờ đối chiếu với thẻ, không phép nào ở sáu chữ số cuối.</figcaption>
 </figure>
 
-Con số 54 chia đôi: 27 phép bắt nhờ hằng `ACCEPTED_PREFIXES = {099}` (chỉ đúng cho dữ liệu giả), 27 nhờ đối chiếu, và 27 này giả định ngày sinh với giới tính đã đọc đúng. Nói thẳng về checksum. **Ta không biết nguồn công khai nào mô tả chữ số kiểm tra của số CCCD**, nên lab không bịa thuật toán và không gọi phép kiểm trên là «checksum». Nó chỉ bắt được sai ở nửa đầu của số, và chỉ khi thông tin đối chiếu đọc đúng (hình 2). Số có checksum thật thì khác: Luhn (ISO/IEC 7812) của số thẻ thanh toán bắt mọi sai sót một chữ số, như ví dụ cuối của output. Chỉ dùng checksum khi **tổ chức phát hành công bố thuật toán**; còn không, phần số không kiểm được phải dựa vào `confidence` và người duyệt. Với GPLX giả, lab chỉ kiểm dạng `99` cộng 10 chữ số và không khẳng định cấu trúc số giấy phép thật.
+Con số 54 chia đôi: 27 phép bắt nhờ hằng `ACCEPTED_PREFIXES = {099}` (chỉ đúng cho dữ liệu giả), 27 nhờ đối chiếu, và 27 này giả định ngày sinh với giới tính đã đọc đúng. Nói thẳng về checksum. **Ta không biết nguồn công khai nào mô tả chữ số kiểm tra của số CCCD**, nên lab không bịa thuật toán và không gọi phép kiểm trên là «checksum». Phép kiểm này chỉ bắt được sai sót ở nửa đầu của số, và chỉ khi thông tin đối chiếu đọc đúng (hình 2). Số có checksum thật thì khác: Luhn (ISO/IEC 7812) của số thẻ thanh toán bắt mọi sai sót một chữ số, như ví dụ cuối của output. Chỉ dùng checksum khi **tổ chức phát hành công bố thuật toán**; nếu không, phần số không kiểm được phải dựa vào `confidence` và người duyệt. Với GPLX giả, lab chỉ kiểm dạng `99` cộng 10 chữ số và không khẳng định cấu trúc số giấy phép thật.
 
 ## Fuzzy matching với danh sách đóng
 
-Giới tính, hạng bằng và (ở lab này) quê quán chỉ nhận giá trị trong danh sách cho trước; quê quán là 6 thành phố của Tới Nơi. Ta so khớp mờ bằng `rapidfuzz` trên chuỗi đã `fold`, và chỉ nhận ứng viên đầu khi nó **đủ cao và hơn hạng nhì đủ xa**.
+Giới tính, hạng bằng và (ở lab này) quê quán chỉ nhận giá trị trong danh sách cho trước; quê quán là 6 thành phố của Tới Nơi. Ta so khớp mờ bằng `rapidfuzz` trên chuỗi đã `fold`, và chỉ nhận ứng viên đứng đầu khi điểm của nó **đủ cao và hơn hạng nhì đủ xa**.
 
 ```python
 FUZZY_CITY_MIN = 80.0  # điểm tối thiểu của ứng viên tốt nhất
@@ -205,7 +205,7 @@ def match_city(text: str) -> tuple[str | None, float, float]:
     return None, best_score, second_score
 ```
 
-Giá trị trả về là khoá của từ điển, tức dạng chuẩn có dấu, nên so khớp mờ vừa sửa chính tả vừa khôi phục dấu. Output thật:
+Giá trị trả về là khoá của từ điển, tức dạng chuẩn có dấu, nên so khớp mờ vừa sửa chính tả vừa khôi phục dấu. Kết quả chạy thật:
 
 ```text
 [5] rapidfuzz với danh sách đóng (tối thiểu 80 điểm, hơn hạng nhì 10 điểm)
@@ -221,13 +221,13 @@ Giá trị trả về là khoá của từ điển, tức dạng chuẩn có d�
   tên OCR 'TRAN THI B' so với hồ sơ 'Lê Văn Cường': 27.3
 ```
 
-Hai dòng đáng đọc kỹ. `Ha Nam` là một địa danh nhưng không thuộc 6 thành phố; chọn ứng viên cao nhất mà không có ngưỡng thì nó thành `Hà Nội` (66,7 điểm). Ngưỡng 80 và biên 10 điểm từ chối nó. Ngược lại `Ho Chi Minh` bị từ chối dù người đọc hiểu ngay, vì bảng không có tên gọi khác: **so khớp mờ sửa chính tả, không sửa được thiếu từ điển**.
+Hai dòng đáng đọc kỹ. `Ha Nam` là một địa danh nhưng không thuộc 6 thành phố; chọn ứng viên cao nhất mà không có ngưỡng thì nó thành `Hà Nội` (66,7 điểm). Ngưỡng 80 và biên 10 điểm từ chối nó. Ngược lại `Ho Chi Minh` bị từ chối dù người đọc hiểu ngay, vì bảng không có tên gọi khác: **so khớp mờ sửa chính tả, không sửa được việc từ điển bị thiếu mục**.
 
 `rapidfuzz` còn làm hai việc. Một là tìm nhãn: `label_score` so đầu dòng với nhãn đã bỏ dấu nên `S6/No.:` vẫn nhận ra «Số / No.:», `gay sinh:` vẫn nhận ra «Ngày sinh:». Ta dùng `fuzz.ratio` trên đoạn đầu dòng, không dùng `partial_ratio`: nó căn chuỗi ngắn vào chuỗi dài nên dòng chỉ có chữ `D` được 100 điểm với nhãn «Có giá trị đến:». Hai là so tên OCR với tên đã nhập trong hồ sơ (ba dòng cuối của output), vẫn chỉ là đầu vào cho người duyệt.
 
 ## Confidence của trường là nhỏ nhất của các từ
 
-Mỗi từ có `conf` riêng. Lab đặt `confidence` của trường bằng `min(w.conf for w in picked)`: trường chỉ đáng tin bằng mắt xích yếu nhất của nó. Ca chênh lớn nhất trong bộ:
+Mỗi từ có `conf` riêng. Lab đặt `confidence` của trường bằng `min(w.conf for w in picked)`: trường chỉ đáng tin bằng mắt xích yếu nhất của nó. Ca có độ chênh lớn nhất trong bộ:
 
 ```text
 [7] Confidence của trường = nhỏ nhất của các từ
@@ -247,7 +247,7 @@ uv run --project examples/toi-noi-python/44-hau-xu-ly-ocr-regex-checksum example
 uv run --project examples/toi-noi-python/44-hau-xu-ly-ocr-regex-checksum examples/toi-noi-python/44-hau-xu-ly-ocr-regex-checksum/main.py --verify
 ```
 
-Bộ ảnh này khác bộ của bài 41 và 42 (GPLX cùng seed là người khác, tham số làm mờ, nghiêng, tối khác), nên số liệu chỉ so được trong cùng một bài. Lab dùng `-l vie+eng --psm 6` (cấu hình bài 43) trên thẻ phẳng chưa qua bài 42. Đo riêng ngoài lab trên đúng 64 ảnh này, số trường đúng trên 320 là 257 (`vie --psm 4`), 277 (`vie --psm 6`), 251 (`vie+eng --psm 4`), 266 (`vie+eng --psm 6`); bài không đổi cấu hình cho số khớp bài khác. Môi trường: MacBook Pro M1 Max, macOS 26.6.2, Python 3.14.7, Tesseract 5.5.4, `rapidfuzz` 3.14.6, `pillow` 13.0.0 (bài không dùng số đo thời gian). Phần cuối của `main.py` chạy cả bộ: 8 seed × 2 loại giấy tờ × 4 biến thể (sạch, mờ, nghiêng 3 đến 6 độ, tối kèm nhiễu) = 64 ảnh, 320 trường; đáp án là chính các chuỗi hàm sinh thẻ đã vẽ. Output (trích):
+Bộ ảnh này khác bộ của bài 41 và 42 (GPLX cùng seed là người khác, tham số làm mờ, nghiêng, tối khác), nên số liệu chỉ so được trong cùng một bài. Lab dùng `-l vie+eng --psm 6` (cấu hình bài 43) trên thẻ phẳng chưa qua bài 42. Đo riêng ngoài lab trên đúng 64 ảnh này, số trường đúng trên 320 là 257 (`vie --psm 4`), 277 (`vie --psm 6`), 251 (`vie+eng --psm 4`), 266 (`vie+eng --psm 6`); bài không đổi cấu hình để số liệu khớp với các bài khác. Môi trường: MacBook Pro M1 Max, macOS 26.6.2, Python 3.14.7, Tesseract 5.5.4, `rapidfuzz` 3.14.6, `pillow` 13.0.0 (bài không dùng số đo thời gian). Phần cuối của `main.py` chạy cả bộ: 8 seed × 2 loại giấy tờ × 4 biến thể (sạch, mờ, nghiêng 3 đến 6 độ, tối kèm nhiễu) = 64 ảnh, 320 trường; đáp án là chính các chuỗi mà hàm sinh thẻ đã vẽ lên ảnh. Output (trích):
 
 ```text
 [6] Cả bộ: 64 ảnh = 8 seed x 2 loại giấy tờ x 4 biến thể
@@ -264,7 +264,7 @@ Bộ ảnh này khác bộ của bài 41 và 42 (GPLX cùng seed là người kh
   sai không cờ theo trường: {'full_name': 9}
 ```
 
-Cột «chỉ nối từ OCR» vẫn dùng bước tìm nhãn và dòng giá trị, chỉ bỏ chuẩn hoá, sửa và kiểm tra. Bước quét cả trang tìm số 12 chữ số khi mất nhãn (`scan_for_number`, dòng cuối của khối trên) nằm ở cả hai cột nên không hiện ở bảng. Ảnh sạch gần như không cần hậu xử lý (hai trường sai đều là hạng bằng `Cc`, bị từ chối), ảnh nghiêng hưởng nhiều nhất (48 lên 58), và hậu xử lý không làm hỏng trường nào đã đúng. **Lỗi nguy hiểm nhất là lỗi không bị từ chối**: 45 trường sai đều có cờ hoặc bị bỏ trống, nhưng 9 trường sai không có cờ nào, toàn là tên:
+Cột «chỉ nối từ OCR» vẫn dùng bước tìm nhãn và dòng giá trị, chỉ bỏ chuẩn hoá, sửa và kiểm tra. Bước quét cả trang tìm số 12 chữ số khi mất nhãn (`scan_for_number`, dòng cuối của khối trên) nằm ở cả hai cột nên không hiện ở bảng. Ảnh sạch gần như không cần hậu xử lý (hai trường sai đều là hạng bằng `Cc`, bị từ chối), ảnh nghiêng được lợi nhiều nhất (48 lên 58), và hậu xử lý không làm hỏng trường nào đã đúng. **Lỗi nguy hiểm nhất là lỗi không bị từ chối**: 45 trường sai đều có cờ hoặc bị bỏ trống, nhưng 9 trường sai không có cờ nào, toàn là tên:
 
 ```text
     cccd-1-dark    full_name  đúng 'LÊ VĂN C'     đọc 'A LE VAN C'     confidence 0.00
@@ -279,17 +279,17 @@ Cột «chỉ nối từ OCR» vẫn dùng bước tìm nhãn và dòng giá tr�
   trong số đó confidence < 0,80: 5/9
 ```
 
-Năm ca `confidence` dưới 0,80 sẽ bị chặn bởi ngưỡng ở bài sau. Bốn ca còn lại (`TRAN THIB`, `TRAN TH IB`, `VŨ THIF`) vẫn là tên hợp lệ về hình dạng với `confidence` 0,88 đến 0,91; regex không phân biệt được `THIB` với một tên thật. Bài 45 đo xem ngưỡng `confidence` chặn được bao nhiêu và lọt bao nhiêu. Kết thúc kiểm chứng:
+Ngưỡng ở bài sau sẽ chặn năm ca có `confidence` dưới 0,80. Bốn ca còn lại (`TRAN THIB`, `TRAN TH IB`, `VŨ THIF`) vẫn là tên hợp lệ về hình dạng với `confidence` 0,88 đến 0,91; regex không phân biệt được `THIB` với một tên thật. Bài 45 đo xem ngưỡng `confidence` chặn được bao nhiêu và lọt bao nhiêu. Kết thúc kiểm chứng:
 
 ```text
 OK 40/40
 ```
 
-`--verify` kiểm 40 điều: các ca Unicode, mười ca sửa theo ngữ cảnh (kể cả `VAN5` phải ra `digit_in_name`), cấu trúc số (đúng 54/108, chia 27 và 27), Luhn, các ca fuzzy, và các bất biến của cả bộ ảnh (hậu xử lý không làm tụt hay làm hỏng trường nào, số trường theo phân loại cộng đủ 320). Nó không kiểm số tuyệt đối của OCR (252, 266...), vì các số đó phụ thuộc phiên bản Tesseract, gói ngôn ngữ và font hệ thống.
+`--verify` kiểm tra 40 điều: các test case Unicode, mười test case sửa theo ngữ cảnh (kể cả `VAN5` phải ra `digit_in_name`), cấu trúc số (đúng 54/108, chia 27 và 27), Luhn, các test case fuzzy, và các bất biến của cả bộ ảnh (hậu xử lý không làm tụt hay làm hỏng trường nào, số trường theo phân loại cộng đủ 320). Lệnh này không kiểm tra số tuyệt đối của OCR (252, 266...), vì các số đó phụ thuộc phiên bản Tesseract, gói ngôn ngữ và font hệ thống.
 
 | Hiện tượng | Kiểm tra trước |
 | --- | --- |
-| `fullmatch` trượt dù chuỗi trông đúng | In `repr(text)`: có thể là NFD hoặc ký tự rộng bằng 0; gọi `normalize_text` |
+| `fullmatch` không khớp dù chuỗi trông đúng | In `repr(text)`: có thể là NFD hoặc ký tự có độ rộng bằng 0; gọi `normalize_text` |
 | Tên đúng nhưng mất dấu | So bằng `fold`, giữ chữ OCR cho người duyệt; không «khôi phục» dấu khi không có danh sách |
 | Thành phố bị gán nhầm | In điểm và điểm hạng nhì; xem ngưỡng, biên và độ đầy đủ của danh sách |
 | Số đủ 12 chữ số mà vẫn sai | Kiểm cấu trúc không bắt được sáu số cuối; xem `word_confs`, chuyển người duyệt |
@@ -297,12 +297,12 @@ OK 40/40
 
 <div class="tkh-callout tkh-callout--warn">
 <span class="tkh-callout-title">Giới hạn của ví dụ so với production</span>
-<p>Thẻ là ảnh vẽ bằng code với nhãn và giá trị cố định, nên «tìm nhãn rồi lấy dòng kế tiếp» đủ dùng; thẻ thật có chip, mã QR, hai mặt và bố cục đổi theo đợt phát hành. Danh sách 6 thành phố nhỏ hơn nhiều so với quê quán thật; mã tỉnh <code>099</code> và «GPLX bắt đầu 99» là quy ước dữ liệu giả. Các số 252, 266, 14, 9 là của 64 thẻ giả này với Tesseract 5.5.4, đừng suy ra tỉ lệ cho ảnh chụp thật. Kết quả chỉ là đầu vào cho người duyệt, không phải quyết định xác minh giấy tờ; số giấy tờ là dữ liệu cá nhân, không in nguyên văn vào log (bài 47 nói về mặt nạ PII).</p>
+<p>Thẻ là ảnh vẽ bằng code với nhãn và giá trị cố định, nên «tìm nhãn rồi lấy dòng kế tiếp» đủ dùng; thẻ thật có chip, mã QR, hai mặt và bố cục đổi theo đợt phát hành. Danh sách 6 thành phố ngắn hơn nhiều so với danh sách quê quán thật; mã tỉnh <code>099</code> và «GPLX bắt đầu 99» là quy ước dữ liệu giả. Các số 252, 266, 14, 9 là của 64 thẻ giả này với Tesseract 5.5.4, đừng suy ra tỉ lệ cho ảnh chụp thật. Kết quả chỉ là đầu vào cho người duyệt, không phải quyết định xác minh giấy tờ; số giấy tờ là dữ liệu cá nhân, không in nguyên văn vào log (bài 47 nói về mặt nạ PII).</p>
 </div>
 
 **Bài tập 1:** Hạ `FUZZY_CITY_MIN` xuống 60 và giữ biên 10 điểm. `match_city("Ha Nam")` trả gì? Sau đó đặt biên bằng 0 thì sao? Kết luận gì về hai tham số?
 
-**Bài tập 2:** `TRAN THIB` với `confidence` 0,88 lọt qua mọi kiểm tra. Hồ sơ tài xế đã có tên người nhập. Đề xuất một kiểm tra rẻ dựa trên số từ, và nói nó bỏ sót ca nào trong danh sách chín tên sai ở trên.
+**Bài tập 2:** `TRAN THIB` với `confidence` 0,88 lọt qua mọi kiểm tra. Hồ sơ tài xế đã có tên người nhập. Đề xuất một phép kiểm tra rẻ dựa trên số từ, và cho biết phép này bỏ sót ca nào trong danh sách chín tên sai ở trên.
 
 <details><summary>Xem lời giải</summary><p>(1) Với min 60 và biên 10: <code>Ha Nam</code> được 66,7 điểm, hạng nhì (<code>Đà Nẵng</code>) 61,5, chênh 5,2 &lt; 10 nên <b>vẫn bị từ chối</b>. Đặt biên bằng 0 thì nhận <code>Hà Nội</code>, tức gán nhầm: biên chặn hai ứng viên sát nhau, ngưỡng chặn ứng viên còn quá xa. (2) Lệch số từ giữa tên OCR và tên đã nhập (sau <code>fold</code>, tách theo dấu cách) thì đưa vào hàng chờ: <code>TRAN THIB</code> và <code>VŨ THIF</code> có hai từ, tên thật ba từ. Cách này bắt ba trong bốn tên có <code>confidence</code> cao (gplx-1-blur, gplx-4-rotate, gplx-5-dark), <b>bỏ sót</b> <code>TRAN TH IB</code> vì chữ tách sai mà vẫn ba từ, và cần hồ sơ có sẵn tên nhập tay.</p></details>
 

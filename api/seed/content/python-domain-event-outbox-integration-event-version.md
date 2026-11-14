@@ -8,21 +8,21 @@ tags: [python, toi-noi, outbox, kafka, domain-event]
 language: vi
 ---
 
-Khi hồ sơ tài xế của [Tới Nơi](/articles/du-an-mau-toi-noi) vào hàng chờ duyệt, một dịch vụ phía C# muốn thống kê hồ sơ đã chấm điểm theo lý do, và một service phân tích muốn đếm chúng theo ngày. (Chưa đủ để dựng bảng hàng chờ: sự kiện chỉ có cho hồ sơ đã chấm điểm đủ và không có sự kiện khi người duyệt quyết định, nên bảng dựng từ đây thiếu hồ sơ chưa có điểm và không bao giờ xoá dòng.) Bài 70 đã để lại domain event `KycApplicationScored`, nhưng nó chỉ đi vào bộ nhớ và có thể thành «sự kiện ma» khi COMMIT lỗi. Muốn sự kiện rời service đáng tin cậy, ta cần outbox của bài 39 đặt đúng chỗ trong Unit of Work của bài 69.
+Khi hồ sơ tài xế của [Tới Nơi](/articles/du-an-mau-toi-noi) vào hàng chờ duyệt, một service phía C# muốn thống kê hồ sơ đã chấm điểm theo lý do, và một service phân tích muốn đếm chúng theo ngày. (Các sự kiện này chưa đủ để dựng bảng hàng chờ: sự kiện chỉ có cho hồ sơ đã chấm điểm đủ và không có sự kiện khi người duyệt quyết định, nên bảng dựng từ đây thiếu hồ sơ chưa có điểm và không bao giờ xoá được dòng nào.) Bài 70 đã để lại domain event `KycApplicationScored`, nhưng nó chỉ đi vào bộ nhớ và có thể thành «sự kiện ma» khi COMMIT lỗi. Muốn sự kiện rời service đáng tin cậy, ta cần outbox của bài 39 đặt đúng chỗ trong Unit of Work của bài 69.
 
-Việc khó hơn kỹ thuật: sự kiện là **hợp đồng** với đội viết C#, đọc JSON bằng thư viện của họ chứ không đọc mã Python của ta. Tên trường, cách nâng version và thứ tự nâng để consumer cũ không gãy đều phải được chốt và kiểm chứng. Bài làm cả hai: outbox trong transaction, và hợp đồng có version, kiểm trên PostgreSQL, Kafka và một consumer C# chạy thật.
+Việc khó hơn kỹ thuật: sự kiện là **hợp đồng** với đội viết C#, đọc JSON bằng thư viện của họ chứ không đọc mã Python của ta. Tên trường, cách nâng version và thứ tự nâng để consumer cũ không gãy đều phải chốt và kiểm chứng. Bài này làm cả hai: outbox trong transaction, và hợp đồng có version, kiểm trên PostgreSQL, Kafka và một consumer C# chạy thật.
 
 Đây là bài 71 của lộ trình **Python nâng cao qua Tới Nơi**. Bạn cần đã đọc [bài 70](/articles/python-use-case-ho-so-tai-xe-end-to-end), outbox và inbox ở [bài 39](/articles/python-outbox-inbox-idempotent-consumer) và envelope có version ở [bài 38](/articles/python-kafka-aiokafka-producer-consumer-schema). Phía C# có [Outbox và Inbox bằng .NET 10](/articles/dotnet10-outbox-inbox-idempotent-consumer) và [Aggregate, domain event](/articles/dotnet10-ddd-bounded-context-aggregate); bài outbox C# ghi payload bằng `JsonSerializer` mặc định (tên PascalCase) vì phía đọc cũng là C#, còn ở đây phía đọc khác ngôn ngữ nên quy ước tên phải thành hợp đồng.
 
 <div class="tkh-callout tkh-callout--example">
 <span class="tkh-callout-title">Thử trước khi đọc</span>
-<p>Ta thêm hai trường tuỳ chọn <code>face_score</code> và <code>ocr_min_confidence</code> vào payload và tăng <code>version</code> từ 1 lên 2. Consumer Python chưa nâng cấp kiểm <code>version in {1}</code> trước khi đọc payload (như bài 38). Nên triển khai producer trước hay consumer trước?</p>
+<p>Ta thêm hai trường tuỳ chọn <code>face_score</code> và <code>ocr_min_confidence</code> vào payload và tăng <code>version</code> từ 1 lên 2. Consumer Python chưa nâng cấp kiểm tra <code>version in {1}</code> trước khi đọc payload (như bài 38). Nên triển khai producer trước hay consumer trước?</p>
 <details><summary>Xem đáp án</summary><p><b>Consumer trước.</b> Thêm trường tuỳ chọn là tương thích về <i>cấu trúc</i>, nhưng consumer kiểm version trước khi đọc payload nên một consumer chỉ hiểu <code>{1}</code> từ chối mọi thông điệp version 2 (<code>unsupported_version</code>). Producer chỉ được phát v2 sau khi mọi consumer đã hiểu <code>{1, 2}</code>. Bài chạy cả hai consumer trên cùng một topic để xem kết quả.</p></details>
 </div>
 
 ## Domain event và integration event là hai thứ khác nhau
 
-**Domain event** thuộc về miền của service: `KycApplicationScored` là một dataclass Python, mang `ReviewReason` (enum), `datetime`, tên trường theo ý aggregate. Nó đổi tự do khi ta refactor miền. **Integration event** là thứ đi ra ngoài: một envelope JSON với tên trường, kiểu và `version` mà bên khác đã dựa vào. Hai thứ trông giống nhau hôm nay nhưng đổi vì lý do khác nhau, nên lab tách chúng và đặt một hàm duy nhất giữa hai bên:
+**Domain event** thuộc về miền của service: `KycApplicationScored` là một dataclass Python, mang `ReviewReason` (enum), `datetime`, tên trường theo ý aggregate. Domain event này đổi tự do khi ta refactor miền. **Integration event** là thứ đi ra ngoài: một envelope JSON với tên trường, kiểu và `version` mà bên khác đã dựa vào. Hai thứ trông giống nhau hôm nay nhưng đổi vì lý do khác nhau, nên lab tách chúng và đặt một hàm duy nhất giữa hai bên:
 
 ```python
 # src/kyc_service/application/integration_events.py (trích)
@@ -50,7 +50,7 @@ def scored_envelope(
     }
 ```
 
-Hàm này là chỗ **duy nhất** biết cả domain event lẫn hợp đồng ngoài. Đổi tên `risk_score` trong domain chỉ làm hàm này sửa một dòng, còn JSON trên dây không đổi; ngược lại, thêm trường ra ngoài là thay đổi có version, không phải chuyện refactor. Phần demo in cả hai dạng của cùng một sự kiện:
+Hàm này là chỗ **duy nhất** biết cả domain event lẫn hợp đồng ngoài. Đổi tên `risk_score` trong domain chỉ khiến hàm này phải sửa một dòng, còn JSON trên dây không đổi; ngược lại, thêm trường ra ngoài là thay đổi có version, không phải chuyện refactor. Phần demo in cả hai dạng của cùng một sự kiện:
 
 ```text
 == 1. Domain event và integration event: hai thứ khác nhau
@@ -90,7 +90,7 @@ Envelope giữ đúng dạng của từ điển miền (bài 38 và 39): `event_
 
 ## Outbox trong Unit of Work
 
-Adapter `OutboxEventPublisher` hiện thực port `EventPublisher` của bài 70, nhưng thay vì cất event trong bộ nhớ, nó ghi một dòng `outbox` bằng **Session của Unit of Work đang mở**:
+Adapter `OutboxEventPublisher` triển khai port `EventPublisher` của bài 70, nhưng thay vì cất event trong bộ nhớ, nó ghi một dòng `outbox` bằng **Session của Unit of Work đang mở**:
 
 ```python
 # src/kyc_service/infrastructure/sql/outbox.py (trích)
@@ -110,7 +110,7 @@ Adapter `OutboxEventPublisher` hiện thực port `EventPublisher` của bài 70
         session.flush()
 ```
 
-Vì dùng chung Session, dòng outbox commit hoặc rollback cùng hồ sơ. Điều đáng chú ý là `handlers.py` của bài 71 **giống hệt** bài 70 từng dòng: handler vẫn gọi `self._events.publish(application.pull_events())`, và chỉ composition root đổi adapter. Đó là phần thưởng của việc để port ở lớp application. `event_id` được sinh một lần, lúc ghi, qua port `IdGenerator`, và lưu cùng dòng; không nơi nào sinh lại nó khi phát lại. Bảng `outbox` giống bài 39: `seq` cho thứ tự, `event_id` duy nhất, `published_at` rỗng nghĩa là chưa phát, `lease_until` và `attempts` cho dispatcher.
+Vì dùng chung Session, dòng outbox commit hoặc rollback cùng hồ sơ. Điều đáng chú ý là `handlers.py` của bài 71 **giống hệt** bài 70 từng dòng: handler vẫn gọi `self._events.publish(application.pull_events())`, và chỉ composition root đổi adapter. Đó là lợi ích của việc để port ở lớp application. `event_id` được sinh một lần, lúc ghi, qua port `IdGenerator`, và lưu cùng dòng; không nơi nào sinh lại nó khi phát lại. Bảng `outbox` giống bài 39: `seq` cho thứ tự, `event_id` duy nhất, `published_at` rỗng nghĩa là chưa phát, `lease_until` và `attempts` cho dispatcher.
 
 ```python
 # src/kyc_service/infrastructure/sql/tables.py (trích)
@@ -146,11 +146,11 @@ Hai kết quả chạy: sau khi nộp có một hồ sơ và một dòng outbox;
   sau COMMIT lỗi: hồ sơ=0, outbox=0 (bài 70 để lại 1 sự kiện ma)
 ```
 
-Hồ sơ chưa chấm điểm đủ (không đồng ý khuôn mặt, hoặc một service tắt) không có domain event nên không có dòng outbox; `ResumeScreening` chỉ ghi dòng khi chấm điểm xong (cả ba ca có test).
+Hồ sơ chưa chấm điểm đủ (không đồng ý khuôn mặt, hoặc một service tắt) không có domain event nên không có dòng outbox; `ResumeScreening` chỉ ghi dòng khi chấm điểm xong (cả ba trường hợp đều có test).
 
 ## Dispatcher: phát ngoài transaction và vì sao có thông điệp trùng
 
-Dispatcher (cơ chế đã nói ở bài 39) làm ba bước mỗi vòng: thuê dòng chưa phát bằng một câu `UPDATE` dùng `FOR UPDATE SKIP LOCKED` và commit ngay, phát từng dòng ra Kafka, rồi đánh dấu `published_at`. Không giữ khoá hay transaction nào trong lúc gọi Kafka.
+Dispatcher (cơ chế đã nói ở bài 39) làm ba bước mỗi vòng: giữ tạm (lease) dòng chưa phát bằng một câu `UPDATE` dùng `FOR UPDATE SKIP LOCKED` và commit ngay, phát từng dòng ra Kafka, rồi đánh dấu `published_at`. Không giữ khoá hay transaction nào trong lúc gọi Kafka.
 
 ```python
 # src/kyc_service/infrastructure/kafka/dispatcher.py (trích)
@@ -176,7 +176,7 @@ Dispatcher (cơ chế đã nói ở bài 39) làm ba bước mỗi vòng: thuê 
         return DispatchReport(claimed=len(claimed), published=len(published))
 ```
 
-Khoá Kafka là mã hồ sơ, nên các thông điệp của một hồ sơ vào cùng partition. Kafka chỉ giữ thứ tự **gửi** trong một partition, không giữ thứ tự tạo: hai dispatcher cùng chạy có thể gửi ngược, và dispatcher chết trước khi đánh dấu có thể gửi lại (kiểu 1, 2, 1, 2). Muốn có thứ tự thì chỉ một dispatcher cho mỗi khoá, hoặc consumer tự kiểm bằng `version` và `occurred_at`; lab có một sự kiện mỗi hồ sơ nên chưa cần. JSONB không giữ thứ tự khoá, nên thứ tự trường trên dây không thuộc hợp đồng. Chạy hai vòng liên tiếp cho ba hồ sơ, rồi mô phỏng dispatcher chết sau khi phát một thông điệp và trước khi đánh dấu:
+Khoá Kafka là mã hồ sơ, nên các thông điệp của một hồ sơ vào cùng partition. Kafka chỉ giữ thứ tự **gửi** trong một partition, không giữ thứ tự tạo: hai dispatcher cùng chạy có thể gửi ngược, và dispatcher chết trước khi đánh dấu có thể gửi lại (kiểu 1, 2, 1, 2). Muốn có thứ tự thì chỉ được có một dispatcher cho mỗi khoá, hoặc consumer tự kiểm bằng `version` và `occurred_at`; lab có một sự kiện mỗi hồ sơ nên chưa cần. JSONB không giữ thứ tự khoá, nên thứ tự trường trên dây không thuộc hợp đồng. Chạy hai vòng liên tiếp cho ba hồ sơ, rồi mô phỏng dispatcher chết sau khi phát một thông điệp và trước khi đánh dấu:
 
 ```text
 == 3. Dispatcher đẩy outbox ra Kafka, ngoài transaction
@@ -194,7 +194,7 @@ Khoá Kafka là mã hồ sơ, nên các thông điệp của một hồ sơ vào
   trên topic: 3 thông điệp, 2 event_id khác nhau
 ```
 
-Vòng hai không có gì để phát: dòng đã được đánh dấu. Trong ca chết giữa chừng, `lease_until` chặn mọi dispatcher khác trong 30 giây; khi đồng hồ mô phỏng (`ManualClock`, không chờ thật) nhích 31 giây, lease hết hạn và dòng chưa đánh dấu được phát lại: **3 thông điệp trên topic nhưng chỉ 2 `event_id`**. Đó là at-least-once, cái giá của việc không có transaction chung giữa PostgreSQL và Kafka. `enable_idempotence` của producer không giúp: nó chỉ khử trùng lặp khi chính producer thử lại một gói tin, còn hai vòng dispatcher là hai lần `send` khác nhau trong mắt nó. Khử trùng lặp thuộc về **consumer** bằng `event_id` (inbox, bài 39).
+Vòng hai không có gì để phát: dòng đã được đánh dấu. Trong trường hợp chết giữa chừng, `lease_until` chặn mọi dispatcher khác trong 30 giây; khi đồng hồ mô phỏng (`ManualClock`, không chờ thật) nhích 31 giây, lease hết hạn và dòng chưa đánh dấu được phát lại: **3 thông điệp trên topic nhưng chỉ 2 `event_id`**. Đó là at-least-once, cái giá của việc không có transaction chung giữa PostgreSQL và Kafka. `enable_idempotence` của producer không giúp: nó chỉ khử trùng lặp khi chính producer thử lại một gói tin, còn hai vòng dispatcher là hai lần `send` khác nhau trong mắt nó. Khử trùng lặp thuộc về **consumer** bằng `event_id` (inbox, bài 39).
 
 <figure class="tkh-fig">
 <div class="tkh-fig-box">
@@ -205,7 +205,7 @@ Vòng hai không có gì để phát: dòng đã được đánh dấu. Trong ca
 
 ## Version hợp đồng: v1 sang v2
 
-Hợp đồng có hai phiên bản. Version 1 gồm `application_id`, `driver_id`, `risk_score`, `review_reasons`. Version 2 thêm hai trường **tuỳ chọn** `face_score` và `ocr_min_confidence`. Quy tắc của lab, giống bài 38, gồm ba ý: `version` là số nguyên chỉ tăng; thêm trường tuỳ chọn là thay đổi tương thích (consumer bỏ qua trường lạ, trường vắng là `None`); đổi tên, xoá trường hoặc đổi nghĩa là thay đổi vỡ và phải mở topic mới với hậu tố `.v2`. Hậu tố của topic là «thế hệ tương thích», còn `version` trong envelope là bản sửa trong thế hệ đó; vì vậy ở hình 2, bước 3 phát song song hai topic. Quy tắc này do lab chọn: hệ có Schema Registry kiểm tính tương thích bằng máy, còn ở đây hợp đồng được giữ bằng golden file và test. Phiên bản producer phát (`emit_version`) là cấu hình triển khai **bắt buộc**, không có mặc định: quên đặt thì lỗi chứ không âm thầm phát bản cũ hay mới. Hai golden file `scored.v1.json` và `scored.v2.json` viết tay và được so với đầu ra của `scored_envelope`; test kiểm v2 chỉ **thêm** hai trường:
+Hợp đồng có hai phiên bản. Version 1 gồm `application_id`, `driver_id`, `risk_score`, `review_reasons`. Version 2 thêm hai trường **tuỳ chọn** `face_score` và `ocr_min_confidence`. Quy tắc của lab, giống bài 38, gồm ba ý: `version` là số nguyên chỉ tăng; thêm trường tuỳ chọn là thay đổi tương thích (consumer bỏ qua trường lạ, trường vắng là `None`); đổi tên, xoá trường hoặc đổi nghĩa là thay đổi vỡ và phải mở topic mới với hậu tố `.v2`. Hậu tố của topic là «thế hệ tương thích», còn `version` trong envelope là bản sửa trong thế hệ đó; vì vậy ở hình 2, bước 3 phát song song hai topic. Quy tắc này do lab chọn: hệ thống có Schema Registry thì kiểm tính tương thích bằng máy, còn ở đây hợp đồng được giữ bằng golden file và test. Phiên bản producer phát (`emit_version`) là cấu hình triển khai **bắt buộc**, không có mặc định: quên đặt thì lỗi chứ không lặng lẽ phát bản cũ hay mới. Hai golden file `scored.v1.json` và `scored.v2.json` viết tay và được so với đầu ra của `scored_envelope`; test kiểm v2 chỉ **thêm** hai trường:
 
 ```python
 # tests/test_contract.py (trích)
@@ -244,7 +244,7 @@ Consumer cũ chỉ hiểu `{1}` nên từ chối cả v2 lẫn v3; consumer mớ
 
 ## Quy ước tên trường: snake_case, và consumer C# phải nói rõ
 
-Hợp đồng cần một quyết định mà không bên nào tự nhiên đúng: tên trường là `snake_case` hay `camelCase`? Lab chọn **snake_case**, ở cả envelope lẫn payload. Lý do thứ nhất: envelope trong từ điển miền và các sự kiện từ bài 38, 39 (`event_id`, `occurred_at`) đã là snake_case; đổi tên trường trên dây là thay đổi vỡ với mọi consumer hiện có. Lý do thứ hai: chi phí chuyển sang đầu C#, nơi nó rẻ và được kiểm: một dòng cấu hình `JsonNamingPolicy.SnakeCaseLower`. Loạt Rust của Tới Nơi chọn camelCase cho payload sổ cái giữa Rust và C#; đó là hợp đồng khác, và không có quy ước đúng chung. Điều bắt buộc là mỗi hợp đồng ghi rõ quy ước và có test từ phía consumer.
+Hợp đồng cần một quyết định mà không bên nào tự nhiên đúng: tên trường là `snake_case` hay `camelCase`? Lab chọn **snake_case**, ở cả envelope lẫn payload. Lý do thứ nhất: envelope trong từ điển miền và các sự kiện từ bài 38, 39 (`event_id`, `occurred_at`) đã là snake_case; đổi tên trường trên dây là thay đổi vỡ với mọi consumer hiện có. Lý do thứ hai: chi phí chuyển sang đầu C#, nơi chi phí đó rẻ và được kiểm tra: một dòng cấu hình `JsonNamingPolicy.SnakeCaseLower`. Loạt Rust của Tới Nơi chọn camelCase cho payload sổ cái giữa Rust và C#; đó là hợp đồng khác, và không có quy ước đúng chung. Điều bắt buộc là mỗi hợp đồng ghi rõ quy ước và có test từ phía consumer.
 
 Consumer C# của lab là một chương trình nhỏ, không có gói NuGet ngoài, đọc các thông điệp mà lab Python ghi ra và in kết quả. Cấu hình và kiểu đọc (hai dòng `Respect...` chống nhận thông điệp thiếu trường mà không báo, xem bên dưới):
 
@@ -275,7 +275,7 @@ record ScoredPayload(
     double? OcrMinConfidence = null);
 ```
 
-`ScoredPayload` dùng `string[]` cho lý do. Hai trường của v2 mặc định `null`, nên vắng ở v1 là hợp lệ; mọi tham số còn lại **bắt buộc** nhờ `RespectRequiredConstructorParameters`, và `RespectNullableAnnotations` biến `null` vào kiểu không-nullable thành lỗi. Chương trình còn kiểm `event_type` và bắt `JsonException` thành `invalid_payload`. Không có các chốt đó, bản đầu nhận thông điệp thiếu `risk_score` với giá trị 0, nhận cả `event_type` khác, và nổ `NullReferenceException` khi thiếu `payload`. Các thông điệp đã đi qua Kafka được đưa cho chương trình; sau đó nó thử đọc lại **không** đặt naming policy:
+`ScoredPayload` dùng `string[]` cho lý do. Hai trường của v2 mặc định `null`, nên vắng ở v1 là hợp lệ; mọi tham số còn lại **bắt buộc** nhờ `RespectRequiredConstructorParameters`, và `RespectNullableAnnotations` biến `null` vào kiểu không-nullable thành lỗi. Chương trình còn kiểm `event_type` và bắt `JsonException` thành `invalid_payload`. Không có các chốt đó, bản đầu nhận thông điệp thiếu `risk_score` với giá trị 0, nhận cả `event_type` khác, và ném `NullReferenceException` khi thiếu `payload`. Ta đưa cho chương trình các thông điệp đã đi qua Kafka; sau đó chương trình thử đọc lại khi **không** đặt naming policy:
 
 ```text
 == 6. Consumer C# đọc cùng các thông điệp bằng System.Text.Json
@@ -285,7 +285,7 @@ record ScoredPayload(
   không đặt naming policy: event_id = 00000000-0000-0000-0000-000000000000, payload null = True
 ```
 
-Dòng cuối là điều đáng sợ nhất: không đặt `SnakeCaseLower`, `JsonSerializer` **không báo lỗi**. Nó khớp tên theo nguyên văn, `event_id` không khớp `EventId`, nên mọi thành viên vắng trong JSON nhận giá trị mặc định (`Guid` rỗng, `Payload` null) và consumer âm thầm xử lý một sự kiện trống. Test C# giữ cả ca này. Năm thông điệp hỏng (thiếu `risk_score`, sai `event_type`, thiếu `payload`, `payload` null, `application_id` null) bị C# và consumer Python từ chối cùng lý do:
+Dòng cuối là điều đáng sợ nhất: không đặt `SnakeCaseLower`, `JsonSerializer` **không báo lỗi**. Nó khớp tên theo nguyên văn, `event_id` không khớp `EventId`, nên mọi thành viên vắng trong JSON nhận giá trị mặc định (`Guid` rỗng, `Payload` null) và consumer lặng lẽ xử lý một sự kiện trống. Test C# giữ cả trường hợp này. Năm thông điệp hỏng (thiếu `risk_score`, sai `event_type`, thiếu `payload`, `payload` null, `application_id` null) bị C# và consumer Python từ chối cùng lý do:
 
 ```text
 == 7. Thông điệp hỏng: C# và Python từ chối cùng lý do
@@ -297,7 +297,7 @@ Dòng cuối là điều đáng sợ nhất: không đặt `SnakeCaseLower`, `Js
   application_id null   invalid_payload     invalid_payload
 ```
 
-Verify còn so từng trường C# đọc được với consumer Python trên cùng thông điệp. Điểm đi dưới dạng số thực JSON vì không phải tiền; số tiền đi dưới dạng chuỗi như bài 39.
+Phần verify còn so từng trường C# đọc được với consumer Python trên cùng thông điệp. Điểm đi dưới dạng số thực JSON vì không phải tiền; số tiền đi dưới dạng chuỗi như bài 39.
 
 ## Chạy và kiểm chứng
 
@@ -307,7 +307,7 @@ Cần uv, Python 3.14, hạ tầng chung (PostgreSQL và Kafka, `docker compose 
 uv run --project examples/toi-noi-python/71-domain-event-outbox-version examples/toi-noi-python/71-domain-event-outbox-version/main.py
 ```
 
-(trích: sáu đoạn demo đã in ở các mục trên, theo đúng thứ tự `1` đến `6`; lần đầu `dotnet run` build project C# nên chậm hơn.) Schema `lab71` và các topic `lab71.*` bị xoá khi chạy xong. Kiểm các kết quả trên:
+(trích: sáu đoạn demo đã in ở các mục trên, theo đúng thứ tự `1` đến `6`; lần đầu `dotnet run` build project C# nên chậm hơn.) Lab xoá schema `lab71` và các topic `lab71.*` khi chạy xong. Kiểm tra các kết quả trên:
 
 ```bash
 uv run --project examples/toi-noi-python/71-domain-event-outbox-version examples/toi-noi-python/71-domain-event-outbox-version/main.py --verify
@@ -317,7 +317,7 @@ uv run --project examples/toi-noi-python/71-domain-event-outbox-version examples
 OK 21/21
 ```
 
-21 ca: outbox, hợp đồng (golden file, v2 chỉ thêm trường, consumer từ chối thông điệp sai), dispatcher và Kafka (phát, chết giữa chừng, hai dispatcher, thuê dòng, thứ tự nâng version), một ca HTTP và ba ca C# (đọc đúng, từ chối thông điệp hỏng, mặc định âm thầm khi thiếu naming policy). Chuỗi đầy đủ gồm ruff, mypy `--strict`, import-linter với năm hợp đồng (mới so với bài 69: lõi không import `aiokafka`), pytest và `--verify`:
+21 test case: outbox, hợp đồng (golden file, v2 chỉ thêm trường, consumer từ chối thông điệp sai), dispatcher và Kafka (phát, chết giữa chừng, hai dispatcher, giữ tạm dòng, thứ tự nâng version), một test case HTTP và ba test case C# (đọc đúng, từ chối thông điệp hỏng, mặc định lặng lẽ khi thiếu naming policy). Chuỗi đầy đủ gồm ruff, mypy `--strict`, import-linter với năm hợp đồng (mới so với bài 69: lõi không import `aiokafka`), pytest và `--verify`:
 
 ```bash
 sh examples/toi-noi-python/71-domain-event-outbox-version/verify.sh
@@ -353,7 +353,7 @@ OK 21/21
 OK 6/6
 ```
 
-(trích: bỏ phần hình ASCII in đầu của import-linter.) Python 3.14.7, SQLAlchemy 2.1.8, psycopg 3.3.8, aiokafka 0.15.0, PostgreSQL 17.11, Kafka 3.9.0, .NET SDK 10.0.401, import-linter 2.16, mypy 2.4.1, pytest 9.2.0, ruff 0.17.4 (theo `uv.lock`). Output do một lần chạy chung với nhiều tác vụ khác của máy (load average đo bằng `uptime` sau loạt chạy cuối: 336,90; 334,81; 362,57) nên số giây của pytest chỉ để tham khảo. Không có `dotnet` thì `--verify` dừng với lý do rõ ràng; thêm `--no-csharp` để bỏ ba ca C# (khi đó kết quả là `OK 18/18`), và `pytest -m "not csharp"` bỏ các test C#.
+(trích: bỏ phần hình ASCII in đầu của import-linter.) Python 3.14.7, SQLAlchemy 2.1.8, psycopg 3.3.8, aiokafka 0.15.0, PostgreSQL 17.11, Kafka 3.9.0, .NET SDK 10.0.401, import-linter 2.16, mypy 2.4.1, pytest 9.2.0, ruff 0.17.4 (theo `uv.lock`). Output này đến từ một lần chạy cùng lúc với nhiều tác vụ khác trên máy (load average đo bằng `uptime` sau loạt chạy cuối: 336,90; 334,81; 362,57) nên số giây của pytest chỉ để tham khảo. Không có `dotnet` thì `--verify` dừng với lý do rõ ràng; thêm `--no-csharp` để bỏ ba test case C# (khi đó kết quả là `OK 18/18`), và `pytest -m "not csharp"` bỏ các test C#.
 
 | Hiện tượng | Kiểm tra trước |
 | --- | --- |
@@ -368,7 +368,7 @@ OK 6/6
 <p>Dispatcher chạy một vòng mỗi lần gọi (không vòng lặp nền, backoff hay dead-letter) và gọi SQLAlchemy đồng bộ trong coroutine nên chặn event loop. Bảng outbox chỉ tăng: production cần dọn dòng đã phát. Không có inbox (xem bài 39) và không có Schema Registry; consumer C# chỉ được kiểm với các hình dạng thông điệp ở đây. Sự kiện chưa đủ để dựng hàng chờ (xem đoạn mở bài). Payload không có số giấy tờ hay họ tên, nhưng điểm khuôn mặt và rủi ro vẫn nhạy cảm, nên quyền đọc topic cần kiểm soát; điểm và lý do chỉ là đầu vào cho người duyệt. Mọi dữ liệu là dữ liệu tổng hợp.</p>
 </div>
 
-**Bài tập:** (1) Ta muốn thêm trường `driver_city` mà producer luôn gửi. Nó là version 3 hay vẫn là 2, consumer được phép coi nó bắt buộc từ lúc nào, và vì sao consumer vẫn phải đọc được thông điệp cũ không có nó? (2) Dispatcher chết sau khi phát và trước khi đánh dấu, consumer C# nhận cùng `event_id` hai lần. Khử trùng lặp nằm ở đâu, và vì sao `enable_idempotence` của producer không làm việc đó?
+**Bài tập:** (1) Ta muốn thêm trường `driver_city` mà producer luôn gửi. Thay đổi đó là version 3 hay vẫn là 2, consumer được phép coi nó bắt buộc từ lúc nào, và vì sao consumer vẫn phải đọc được thông điệp cũ không có nó? (2) Dispatcher chết sau khi phát và trước khi đánh dấu, consumer C# nhận cùng `event_id` hai lần. Khử trùng lặp nằm ở đâu, và vì sao `enable_idempotence` của producer không làm việc đó?
 
 <details><summary>Xem lời giải</summary><p>(1) Thêm trường là thay đổi payload nên nâng <code>version</code> (thành 3); chỉ gọi nó «bắt buộc» với thông điệp từ version 3 trở đi: consumer đòi <code>driver_city</code> khi <code>version &gt;= 3</code>, còn v1 và v2 vắng trường vẫn hợp lệ. Consumer phải đọc được thông điệp cũ vì trên topic còn v1 và v2 chưa tiêu thụ hoặc chưa hết thời gian lưu, và consumer mới có thể phải đọc lại từ đầu. Đòi trường cho mọi version là thay đổi vỡ. (2) Ở <b>consumer</b>, bằng bảng inbox khoá (consumer, <code>event_id</code>) ghi cùng transaction với hiệu ứng (bài 39). <code>enable_idempotence</code> chỉ khử trùng lặp khi chính producer thử lại một gói tin; hai vòng dispatcher là hai lần <code>send</code> độc lập, với producer là hai thông điệp khác nhau. Cái giữ danh tính là <code>event_id</code>, sinh một lần lúc ghi outbox.</p></details>
 

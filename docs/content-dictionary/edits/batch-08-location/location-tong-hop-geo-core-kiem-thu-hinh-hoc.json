@@ -1,0 +1,269 @@
+{
+ "file": "location-tong-hop-geo-core-kiem-thu-hinh-hoc.md",
+ "edits": [
+  {
+   "old": "danh sách việc chưa làm hoặc chưa tra của P01",
+   "new": "danh sách việc chưa làm hoặc chưa kiểm chứng của P01",
+   "reason": "«Chưa tra» là cụm cụt",
+   "severity": "medium"
+  },
+  {
+   "old": "đi từ cạnh đường gần khách phía bắc sang cạnh gần khách phía nam mất **305,5 m**",
+   "new": "đi từ cạnh đường gần khách phía bắc sang cạnh gần khách phía nam phải chạy **305,5 m**",
+   "reason": "«Mất» đi với quãng đường là gượng",
+   "severity": "low"
+  },
+  {
+   "old": "thu nhỏ vào vài trăm nút giao mà chạy được trong CI không cần mạng.",
+   "new": "thu nhỏ vào vài trăm nút giao, đủ nhẹ để chạy trong CI mà không cần mạng.",
+   "reason": "Mệnh đề quan hệ vụng",
+   "severity": "medium"
+  },
+  {
+   "old": "Nó đóng sổ: crate",
+   "new": "Bài này đóng sổ: crate",
+   "reason": "Tránh «Nó» chỉ sự vật trừu tượng đầu câu",
+   "severity": "medium"
+  },
+  {
+   "old": "cách kiểm các phép hình học bằng",
+   "new": "cách kiểm tra các phép hình học bằng",
+   "reason": "«Kiểm» cụt",
+   "severity": "low"
+  },
+  {
+   "old": "những gì P01 **chưa** làm hoặc chưa tra được.",
+   "new": "những gì P01 **chưa** làm hoặc chưa kiểm chứng được.",
+   "reason": "«Chưa tra được» cụt",
+   "severity": "medium"
+  },
+  {
+   "old": "Mọi crate khác dựa vào nó, và nó không biết gì về bản đồ hay mạng.",
+   "new": "Mọi crate khác dựa vào crate này, và crate này không biết gì về bản đồ hay mạng.",
+   "reason": "Tránh lặp «nó» chỉ sự vật",
+   "severity": "low"
+  },
+  {
+   "old": "kiểm tính chất, và khi tìm ra phản ví dụ thì thu nhỏ nó về dạng nhỏ nhất",
+   "new": "kiểm tra tính chất, và khi tìm ra phản ví dụ thì thu nhỏ phản ví dụ đó về dạng nhỏ nhất",
+   "reason": "«Kiểm» cụt; «nó» mơ hồ",
+   "severity": "medium"
+  },
+  {
+   "old": "mỗi thuộc tính 2.000 ca, sinh điểm",
+   "new": "mỗi thuộc tính 2.000 test case, sinh điểm",
+   "reason": "Thống nhất «test case»",
+   "severity": "medium"
+  },
+  {
+   "old": "Chú ý chỗ khác nhau:",
+   "new": "Chú ý điểm khác nhau:",
+   "reason": "Cách nói gượng",
+   "severity": "low"
+  },
+  {
+   "old": "Thuộc tính chiếu đoạn này **từng thất bại**.",
+   "new": "Thuộc tính chiếu lên đoạn này **từng thất bại**.",
+   "reason": "Thiếu giới từ",
+   "severity": "low"
+  },
+  {
+   "old": "Phiên bản đầu kiểm «chân chiếu",
+   "new": "Phiên bản đầu kiểm tra «chân chiếu",
+   "reason": "«Kiểm» cụt",
+   "severity": "low"
+  },
+  {
+   "old": "thất bại khi điểm hỏi cách đầu mút hàng chục km: mặt phẳng cục bộ gốc tại điểm hỏi lệch tới 0,1% ở khoảng cách đó. Sửa là dùng",
+   "new": "thất bại khi điểm hỏi cách đầu mút hàng chục km: mặt phẳng cục bộ có gốc tại điểm hỏi bị lệch tới 0,1% ở khoảng cách đó. Cách sửa là dùng",
+   "reason": "Câu thiếu động từ",
+   "severity": "medium"
+  },
+  {
+   "old": "như khi snap, và đúng với cách",
+   "new": "như khi snap, và đó đúng là cách",
+   "reason": "Câu lủng củng, khó hiểu",
+   "severity": "medium"
+  },
+  {
+   "old": "một đợt quét 200.000 ca bằng",
+   "new": "một đợt quét 200.000 test case bằng",
+   "reason": "Thống nhất «test case»",
+   "severity": "medium"
+  },
+  {
+   "old": "tức đủ cho hiển thị và lưu trữ nhưng không phải đủ cho mọi việc",
+   "new": "tức đủ cho hiển thị và lưu trữ nhưng không đủ cho mọi việc",
+   "reason": "Câu gượng, kiểu dịch",
+   "severity": "medium"
+  },
+  {
+   "old": "đi qua đúng đường biên dịch của bản đồ thật",
+   "new": "đi qua đúng quy trình biên dịch của bản đồ thật",
+   "reason": "«Đường biên dịch» là dịch gượng của compile pipeline",
+   "severity": "medium"
+  },
+  {
+   "old": "kiểm chính mã chạy trên HCM. Nó phải sinh lại được từng byte, và lab kiểm điều đó:",
+   "new": "kiểm tra đúng mã đang chạy trên HCM. File này phải sinh lại được từng byte, và lab kiểm tra điều đó:",
+   "reason": "«Kiểm» cụt; «nó» mơ hồ",
+   "severity": "medium"
+  },
+  {
+   "old": "(đếm từ output)",
+   "new": "(đếm từ kết quả chạy)",
+   "reason": "Từ tiếng Anh lọt vào văn xuôi",
+   "severity": "low"
+  },
+  {
+   "old": "Hình 2 vẽ đại lộ có dải phân cách từ chính",
+   "new": "Hình 2 vẽ đại lộ có dải phân cách từ dữ liệu của chính file",
+   "reason": "Câu thiếu danh từ",
+   "severity": "medium"
+  },
+  {
+   "old": "Mỗi chiều xe là một way một chiều, cách nhau cỡ 20 m, chỉ cho cắt ngang ở cột",
+   "new": "Mỗi chiều xe chạy là một way một chiều; hai way cách nhau cỡ 20 m và chỉ cho cắt ngang ở cột",
+   "reason": "Thiếu chủ ngữ cho vế sau",
+   "severity": "medium"
+  },
+  {
+   "old": "tới nút cuối cạnh phía nam mất 305,5 m",
+   "new": "tới nút cuối cạnh phía nam phải chạy 305,5 m",
+   "reason": "«Mất» đi với quãng đường là gượng",
+   "severity": "low"
+  },
+  {
+   "old": "(305,5 − 114,8 = 190,7 m dài hơn)",
+   "new": "(dài hơn 305,5 − 114,8 = 190,7 m)",
+   "reason": "Câu cụt, thiếu chủ ngữ",
+   "severity": "medium"
+  },
+  {
+   "old": "Số đo là giữa hai nút cuối của cạnh snap, xấp xỉ, chưa tính",
+   "new": "Số đo tính giữa hai nút cuối của cạnh snap, ở dạng xấp xỉ, chưa tính",
+   "reason": "Trật tự kiểu tiếng Anh",
+   "severity": "low"
+  },
+  {
+   "old": "Kiểm tra toàn phần và cái nó cố ý bỏ qua",
+   "new": "Kiểm tra toàn bộ và những gì script cố ý bỏ qua",
+   "reason": "«Toàn phần» gượng; «cái nó» cụt",
+   "severity": "medium"
+  },
+  {
+   "old": "kiểm tra toàn phần bằng",
+   "new": "kiểm tra toàn bộ bằng",
+   "reason": "«Toàn phần» gượng",
+   "severity": "low"
+  },
+  {
+   "old": "`loc10`). In `PASS` nếu tất cả qua.",
+   "new": "`loc10`). Script in `PASS` nếu tất cả đều qua.",
+   "reason": "Câu thiếu chủ ngữ",
+   "severity": "medium"
+  },
+  {
+   "old": "kiểm đảo lat/lng; test cần Redis",
+   "new": "kiểm tra việc đảo lat/lng; test cần Redis",
+   "reason": "«Kiểm» cụt",
+   "severity": "low"
+  },
+  {
+   "old": "Cái script **cố ý không chạy** cũng quan trọng",
+   "new": "Những gì script **cố ý không chạy** cũng quan trọng",
+   "reason": "«Cái script» cụt",
+   "severity": "medium"
+  },
+  {
+   "old": "mọi lab dùng dữ liệu thiếu mà không có cờ tường minh thì thoát mã 2 kèm thông báo, không bao giờ bỏ qua âm thầm.",
+   "new": "mọi lab thiếu dữ liệu mà không có cờ chủ động cho phép bỏ qua thì thoát với mã 2 kèm thông báo, không bao giờ lặng lẽ bỏ qua.",
+   "reason": "Calque «tường minh», «âm thầm»; câu mơ hồ",
+   "severity": "medium"
+  },
+  {
+   "old": "Từ gốc repo:",
+   "new": "Từ thư mục gốc của repo:",
+   "reason": "Cụm cụt",
+   "severity": "low"
+  },
+  {
+   "old": "Output rút gọn:",
+   "new": "Kết quả chạy rút gọn:",
+   "reason": "Từ tiếng Anh lọt vào văn xuôi",
+   "severity": "low"
+  },
+  {
+   "old": "2.000 ca mỗi thuộc tính",
+   "new": "2.000 test case mỗi thuộc tính",
+   "reason": "Thống nhất «test case»",
+   "severity": "medium"
+  },
+  {
+   "old": "**Cấm rẽ mới đọc, chưa dùng.**",
+   "new": "**Cấm rẽ mới được đọc vào, chưa được dùng.**",
+   "reason": "Cụm cụt",
+   "severity": "medium"
+  },
+  {
+   "old": "784 cấm theo giờ giữ thô",
+   "new": "784 lệnh cấm theo giờ được giữ ở dạng thô",
+   "reason": "Thiếu danh từ chính",
+   "severity": "medium"
+  },
+  {
+   "old": "mới lưu thô, chưa gắn vào đồ thị",
+   "new": "mới được lưu ở dạng thô, chưa gắn vào đồ thị",
+   "reason": "Cụm cụt",
+   "severity": "low"
+  },
+  {
+   "old": "Snap hiện tại là snap từng điểm.",
+   "new": "Hiện tại snap làm riêng cho từng điểm.",
+   "reason": "Lặp từ, câu cụt",
+   "severity": "medium"
+  },
+  {
+   "old": "Ca R-tree và quét chọn khác cạnh ở 1/1.000 truy vấn đã kiểm:",
+   "new": "Trường hợp R-tree và quét chọn khác cạnh, xảy ra ở 1/1.000 truy vấn đã kiểm tra:",
+   "reason": "«Ca» và «kiểm» gượng",
+   "severity": "medium"
+  },
+  {
+   "old": "chưa có quy tắc phá hoà",
+   "new": "chưa có quy tắc chọn khi hai ứng viên cách bằng nhau",
+   "reason": "«Phá hoà» là dịch gượng của tie-break",
+   "severity": "medium"
+  },
+  {
+   "old": "còn 1 cm lo các khoảng cách rất ngắn",
+   "new": "còn 1 cm dành cho các khoảng cách rất ngắn",
+   "reason": "Cách nói thiếu tự nhiên",
+   "severity": "low"
+  },
+  {
+   "old": "Nó buộc generator tất định",
+   "new": "Việc này buộc generator phải tất định",
+   "reason": "Tránh «Nó» chỉ sự vật trừu tượng đầu câu",
+   "severity": "medium"
+  },
+  {
+   "old": "Nó cũng phát hiện sửa tay file JSON",
+   "new": "Cách này cũng phát hiện được việc sửa tay file JSON",
+   "reason": "Câu thiếu danh từ, «nó» mơ hồ",
+   "severity": "medium"
+  },
+  {
+   "old": "điểm đón ở phía nào của dải phân cách làm quãng đường chênh gấp 2,7 lần",
+   "new": "tuỳ điểm đón ở phía nào của dải phân cách mà quãng đường chênh nhau gấp 2,7 lần",
+   "reason": "Cấu trúc kiểu tiếng Anh",
+   "severity": "medium"
+  },
+  {
+   "old": "không biết dải phân cách, một chiều và nút chặn",
+   "new": "không tính đến dải phân cách, đường một chiều và nút chặn",
+   "reason": "Nhân hoá gượng",
+   "severity": "low"
+  }
+ ]
+}

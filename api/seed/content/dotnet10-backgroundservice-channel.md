@@ -8,7 +8,7 @@ tags: [csharp, dotnet, dotnet-10, toi-noi]
 language: vi
 ---
 
-Đây là **bài 24** trong loạt **C# và .NET 10 qua [Tới Nơi](/articles/du-an-mau-toi-noi)**. Các ví dụ target `net10.0`, dùng dữ liệu giả và cùng code đã chạy kiểm chứng trong repository.
+Đây là **bài 24** trong loạt **C# và .NET 10 qua [Tới Nơi](/articles/du-an-mau-toi-noi)**. Các ví dụ nhắm tới `net10.0`, dùng dữ liệu giả và cùng code đã được chạy kiểm chứng trong repository.
 
 <div class="tkh-callout tkh-callout--example">
 <span class="tkh-callout-title">Thử trước khi đọc</span>
@@ -18,19 +18,19 @@ language: vi
 
 ## Không kéo mọi công việc vào request
 
-Sau đặt chuyến có thể cần chuẩn bị một tác vụ phụ. Đưa cả việc chậm vào request làm tăng latency; nhưng ném Task.Run rồi quên cũng khiến lỗi mất người quan sát và dependency scoped sống không đúng phạm vi.
+Sau đặt chuyến có thể cần chuẩn bị một tác vụ phụ. Đưa cả việc chậm vào request làm tăng latency; nhưng ném Task.Run rồi quên cũng khiến lỗi xảy ra mà không ai theo dõi, và dependency scoped sống không đúng phạm vi.
 
-BackgroundService chạy theo lifetime host. Channel nối producer/consumer trong process. Hai cơ chế này giúp tổ chức tác vụ, không tự tạo đảm bảo giao hàng của broker. Lab dùng job ID giả, không gửi email thật hoặc gọi thanh toán.
+BackgroundService chạy theo lifetime host. Channel nối producer/consumer trong process. Hai cơ chế này giúp tổ chức tác vụ, không tự tạo ra bảo đảm giao thông điệp như một broker. Lab dùng job ID giả, không gửi email thật hoặc gọi thanh toán.
 
-Trong .NET 10, cần đọc đúng semantics khởi chạy của BackgroundService, tránh dựa vào đoạn đầu ExecuteAsync sẽ chặn startup như ở một số suy luận từ phiên bản cũ. Host readiness cần tín hiệu được thiết kế rõ; test chờ kết quả job chứ không Sleep rồi đoán worker đã sẵn sàng.
+Trong .NET 10, cần đọc đúng semantics khởi chạy của BackgroundService, tránh dựa vào giả định rằng đoạn đầu của ExecuteAsync sẽ chặn startup, như một số suy luận từ phiên bản cũ. Trạng thái sẵn sàng của host (readiness) cần một tín hiệu được thiết kế rõ ràng; test chờ kết quả job chứ không Sleep rồi đoán worker đã sẵn sàng.
 
 ## Bounded queue thể hiện backpressure
 
 JobQueue có sức chứa 2 và FullMode.Wait. Khi đầy, WriteAsync chờ chỗ trống thay vì tiếp tục nhận không giới hạn. Producer phải có token/thời hạn và chính sách phản hồi nếu không thể đẩy việc vào queue.
 
-Test riêng dùng capacity 1: ghi phần tử đầu, lần ghi thứ hai chưa hoàn tất; huỷ token làm lời ghi chờ kết thúc, phần tử đầu vẫn còn. Đây là kiểm tra backpressure, không đo số request mỗi giây.
+Test riêng dùng capacity 1: ghi phần tử đầu, lần ghi thứ hai chưa hoàn tất; huỷ token khiến lần ghi đang chờ kết thúc, phần tử đầu vẫn còn. Đây là kiểm tra backpressure, không đo số request mỗi giây.
 
-QueueLimit ở một limiter HTTP và capacity Channel là hai hàng khác nhau; không chồng vô hạn hàng chờ rồi gọi đó là resilience. Hợp đồng overload nên rõ: chờ có giới hạn, từ chối hay chuyển sang một hạ tầng bền.
+QueueLimit của một limiter HTTP và capacity của Channel là hai hàng chờ khác nhau; đừng chồng vô hạn các hàng chờ rồi gọi đó là resilience. Hợp đồng overload nên rõ: chờ có giới hạn, từ chối hay chuyển sang một hạ tầng bền.
 
 <figure class="tkh-fig">
 <div class="tkh-fig-box">
@@ -41,19 +41,19 @@ QueueLimit ở một limiter HTTP và capacity Channel là hai hàng khác nhau;
 
 ## Mỗi job có scope riêng
 
-Hosted worker sống lâu; JobHandler lại scoped. Worker nhận IServiceScopeFactory, tạo async scope cho từng job rồi resolve handler từ scope đó. Không inject một DbContext scoped vào constructor worker và giữ nó cho mọi job.
+Hosted worker sống lâu; JobHandler lại scoped. Worker nhận IServiceScopeFactory, tạo async scope cho từng job rồi resolve handler từ scope đó. Đừng inject một DbContext scoped vào constructor của worker rồi giữ lại dùng cho mọi job.
 
-Hai job trong test xử lý FIFO với single reader, có ScopeId khác nhau và handler đều được dispose. TaskCompletionSource chỉ là ack quan sát trong lab; caller chờ có watchdog để lỗi không làm test treo vô hạn.
+Hai job trong test được xử lý theo FIFO với single reader, có ScopeId khác nhau và handler của cả hai đều được dispose. TaskCompletionSource chỉ là ack quan sát trong lab; caller chờ có watchdog để lỗi không làm test treo vô hạn.
 
-Hoàn thành writer cho phép reader đọc hết rồi kết thúc bình thường. Khi stoppingToken bị huỷ, vòng đọc và handler hợp tác dừng. Đừng mặc định mọi job đang trong queue sẽ tự có phản hồi lỗi sau shutdown; lifecycle ack/persistence cần thiết kế nếu đó là yêu cầu sản phẩm.
+Khi writer hoàn thành, reader có thể đọc hết rồi kết thúc bình thường. Khi stoppingToken bị huỷ, vòng đọc và handler dừng theo cơ chế hợp tác. Đừng mặc định mọi job đang trong queue sẽ tự có phản hồi lỗi sau shutdown; lifecycle ack/persistence cần được thiết kế nếu đó là yêu cầu sản phẩm.
 
 ## Chọn chính sách khi worker lỗi
 
-Lab ném lỗi bất ngờ lên host sau khi đánh dấu job.Completed lỗi; nó không catch rồi âm thầm bỏ job. Đây là policy minh hoạ “fail visible”, chưa có retry, dead-letter hoặc poison-message routing.
+Lab ném lỗi bất ngờ lên host sau khi đánh dấu job.Completed ở trạng thái lỗi; lab không catch rồi bỏ qua job mà không báo lỗi. Đây là policy minh hoạ “fail visible”, chưa có retry, dead-letter hoặc poison-message routing.
 
-Nếu job đã gây hiệu ứng ngoài rồi process dừng trước ack, chạy lại có thể lặp hiệu ứng. Scoped handler và FIFO không giải idempotency. Bài Outbox tiếp theo sẽ đưa intent và nhận diện thông điệp vào database để quan sát khoảng trống đó.
+Nếu job đã gây hiệu ứng ngoài rồi process dừng trước ack, chạy lại có thể lặp hiệu ứng. Scoped handler và FIFO không giải quyết được idempotency. Bài Outbox tiếp theo sẽ đưa intent và định danh thông điệp vào database để quan sát khoảng trống đó.
 
-FIFO ở một reader cũng không có nghĩa mọi tác vụ nền nhiều worker sẽ hoàn thành theo thứ tự nhận. Nếu tăng parallelism, phải định nghĩa ordering key, ranh giới độc lập và giới hạn tài nguyên trước.
+FIFO ở một reader cũng không có nghĩa là mọi tác vụ nền chạy bằng nhiều worker sẽ hoàn thành theo thứ tự nhận. Nếu tăng parallelism, phải định nghĩa ordering key, ranh giới độc lập và giới hạn tài nguyên trước.
 
 <figure class="tkh-fig">
 <div class="tkh-fig-box">
@@ -68,7 +68,7 @@ FIFO ở một reader cũng không có nghĩa mọi tác vụ nền nhiều work
 
 <details><summary>Xem đáp án</summary><p>Không có bảo đảm thứ tự hoàn thành khi xử lý song song. Tăng RAM queue không tạo durability; cần lưu intent bền cùng transaction nghiệp vụ và cơ chế chuyển giao như Outbox/broker theo hợp đồng.</p></details>
 
-Hai test hiện tại kiểm scoped disposal/FIFO và huỷ lần ghi bị backpressure. Chúng không chứng minh shutdown drain mọi job hoặc phục hồi sau process crash; đó là các yêu cầu cần test riêng.
+Hai test hiện tại kiểm tra scoped disposal/FIFO và việc huỷ lần ghi đang bị backpressure giữ lại. Chúng không chứng minh shutdown drain mọi job hoặc phục hồi sau process crash; đó là các yêu cầu cần test riêng.
 
 ## Chạy ví dụ và kiểm chứng
 

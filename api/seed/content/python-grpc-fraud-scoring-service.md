@@ -8,9 +8,9 @@ tags: [python, toi-noi, grpc, protobuf, fraud-scoring]
 language: vi
 ---
 
-Mỗi lần khách bấm đặt chuyến, Dispatch của [Tới Nơi](/articles/du-an-mau-toi-noi) muốn biết một điều trước khi ghép tài xế: chuyến này có đáng để người duyệt xem lại không. Câu trả lời đến từ service fraud-scoring viết bằng Python, vì đặc trưng và mô hình nằm ở đó. Ở giờ cao điểm (khoảng 70 chuyến mỗi giây) lời gọi này nằm ngay trên đường đặt chuyến, nên nó cần ba thứ mà một endpoint JSON ghép vội không cho sẵn: hợp đồng kiểu chặt dùng chung giữa C# và Python, giới hạn chờ rõ ràng, và mã lỗi phân biệt «đầu vào sai» với «service đang tắc».
+Mỗi lần khách bấm đặt chuyến, Dispatch của [Tới Nơi](/articles/du-an-mau-toi-noi) muốn biết một điều trước khi ghép tài xế: chuyến này có đáng để người duyệt xem lại không. Câu trả lời đến từ service fraud-scoring viết bằng Python, vì đặc trưng và mô hình nằm ở đó. Vào giờ cao điểm (khoảng 70 chuyến mỗi giây) lời gọi này nằm ngay trên đường đặt chuyến, nên nó cần ba thứ mà một endpoint JSON ghép vội không cho sẵn: hợp đồng kiểu chặt dùng chung giữa C# và Python, giới hạn chờ rõ ràng, và mã lỗi phân biệt «đầu vào sai» với «service đang tắc».
 
-Đây là bài 37 của lộ trình **Python trung bình qua Tới Nơi**. Bài 31 đến 33 dựng service HTTP bằng FastAPI; bài này làm đường gọi nội bộ bằng gRPC rồi so hai cách. Bạn cần quen `async`/`await` và huỷ task ([bài 21](/articles/python-asyncio-coroutine-task-timeout-cancellation)), cùng `Semaphore` ([bài 23](/articles/python-concurrency-lock-queue-semaphore)). Điểm trả về là đầu vào cho người duyệt, không phải quyết định hay kết luận gian lận: Dispatch không từ chối khách chỉ vì một con số.
+Đây là bài 37 của lộ trình **Python trung bình qua Tới Nơi**. Bài 31 đến 33 dựng service HTTP bằng FastAPI; bài này làm đường gọi nội bộ bằng gRPC rồi so hai cách. Bạn cần quen `async`/`await` và huỷ task ([bài 21](/articles/python-asyncio-coroutine-task-timeout-cancellation)), cùng `Semaphore` ([bài 23](/articles/python-concurrency-lock-queue-semaphore)). Điểm số mà service trả về là đầu vào cho người duyệt, không phải quyết định hay kết luận gian lận: Dispatch không từ chối khách chỉ vì một con số.
 
 <div class="tkh-callout tkh-callout--example">
 <span class="tkh-callout-title">Thử trước khi đọc</span>
@@ -35,10 +35,10 @@ gRPC là framework gọi hàm từ xa chạy trên HTTP/2, dùng Protocol Buffer
 | --- | --- | --- |
 | Hợp đồng | OpenAPI sinh từ code hoặc viết tay | `.proto` viết trước, sinh mã hai đầu |
 | Dây dẫn | JSON dạng chữ, tên field lặp mỗi bản ghi | nhị phân, field gọi bằng số hiệu |
-| Giới hạn chờ | tự đặt timeout từng client | deadline mặc định không có, đặt tường minh và truyền sang server |
+| Giới hạn chờ | tự đặt timeout từng client | mặc định không có deadline, client đặt rõ ràng và deadline truyền sang server |
 | Công cụ | trình duyệt, `curl`, cache HTTP | cần client gRPC; trình duyệt không gọi trực tiếp |
 
-Dispatch gọi fraud-scoring từ bên trong hệ thống, nhiều lời gọi, hai ngôn ngữ, cần deadline: hợp với gRPC. API công khai cho ứng dụng khách, nơi người ta muốn `curl` và cache: giữ REST.
+Dispatch gọi fraud-scoring từ bên trong hệ thống, nhiều lời gọi, hai ngôn ngữ, cần deadline: hợp với gRPC. Còn API công khai cho ứng dụng khách, nơi người ta muốn dùng `curl` và cache, thì giữ REST.
 
 ## Hợp đồng protobuf và việc sinh mã
 
@@ -91,7 +91,7 @@ driver_id chưa gán: HasField=False; gán chuỗi rỗng: HasField=True
 thêm field số 15 lạ vào cuối: vẫn đọc được, trip_id=TN-0001, 42 byte
 ```
 
-Mỗi field là một cặp (số hiệu và kiểu, độ dài) rồi nội dung: `0a 07` là «field 1, dài 7 byte», theo sau là `TN-0001`. JSON gọn của cùng dữ liệu là 108 byte vì lặp tên field mỗi bản ghi; ở khoảng 70 chuyến mỗi giây (hơn 250.000 mỗi giờ) khoảng chênh này có nghĩa, nhưng đừng kỳ vọng thần kỳ: nội dung chuỗi chiếm phần lớn cả hai. Dòng cuối là điểm mạnh về tiến hoá: bên gửi phiên bản mới thêm field số 15, bên nhận cũ vẫn đọc được phần nó biết, và còn giữ field lạ khi ghi lại.
+Mỗi field là một cặp (số hiệu và kiểu, độ dài) rồi nội dung: `0a 07` là «field 1, dài 7 byte», theo sau là `TN-0001`. JSON gọn của cùng dữ liệu là 108 byte vì lặp tên field mỗi bản ghi; ở khoảng 70 chuyến mỗi giây (hơn 250.000 mỗi giờ) khoảng chênh này đáng kể, nhưng đừng kỳ vọng quá cao: nội dung chuỗi chiếm phần lớn cả hai. Dòng cuối là điểm mạnh về tiến hoá: bên gửi dùng phiên bản mới thêm field số 15, bên nhận cũ vẫn đọc được phần nó biết, và còn giữ field lạ khi ghi lại.
 
 ## Server grpc.aio
 
@@ -114,7 +114,7 @@ def score_trip(request, distance, store):
     return round(min(score, 1.0), 2), reasons
 ```
 
-`reasons` là mã ổn định cho máy và cho người duyệt đọc, không phải câu văn. `FeatureStore` là dict giả; ở hệ thống thật, đặc trưng đến từ Redis hoặc PostgreSQL như bài 24 và bài 27. Servicer là một lớp kế thừa khung sinh ra, và `async def` là đủ để chạy trên `grpc.aio`:
+`reasons` là mã ổn định cho máy và cho người duyệt đọc, không phải câu văn. `FeatureStore` là dict giả; ở hệ thống thật, đặc trưng đến từ Redis hoặc PostgreSQL như bài 24 và bài 27. Servicer là một lớp kế thừa khung do công cụ sinh ra, và `async def` là đủ để chạy trên `grpc.aio`:
 
 ```python
 class FraudScoringService(pb_grpc.FraudScoringServicer):
@@ -135,7 +135,7 @@ class FraudScoringService(pb_grpc.FraudScoringServicer):
         return pb.ScoreResponse(score=score, reasons=reasons, model_version=MODEL_VERSION)
 ```
 
-Kiểm đầu vào ở server dù client đã có kiểu: `distance_km` là chuỗi, và client nào cũng có thể gửi `"abc"`. `context.abort` ném một exception đặc biệt kết thúc lời gọi với mã và thông báo; lỗi nghiệp vụ của người gọi là `INVALID_ARGUMENT`, và thông báo giữ đúng chữ «khoảng cách ngoài miền 0..100 km» của loạt bài. Hai bộ đếm `completed` và `cancelled` chỉ để lab chứng minh điều ở câu hỏi đầu bài. Dựng server cũng gọn:
+Server vẫn kiểm tra đầu vào dù client đã có kiểu: `distance_km` là chuỗi, và client nào cũng có thể gửi `"abc"`. `context.abort` ném một exception đặc biệt kết thúc lời gọi với mã và thông báo; lỗi nghiệp vụ của người gọi là `INVALID_ARGUMENT`, và thông báo giữ đúng chữ «khoảng cách ngoài miền 0..100 km» của loạt bài. Hai bộ đếm `completed` và `cancelled` chỉ để lab chứng minh điều ở câu hỏi đầu bài. Dựng server cũng gọn:
 
 ```python
 async def start_server(store, address="127.0.0.1:0"):
@@ -147,7 +147,7 @@ async def start_server(store, address="127.0.0.1:0"):
     return server, port, log
 ```
 
-Cổng `0` để hệ điều hành chọn cổng trống, nên `--verify` chạy được cả khi máy đang dùng bất kỳ cổng nào. Kết quả năm ca gọi thường, trích output:
+Cổng `0` để hệ điều hành chọn cổng trống, nên `--verify` chạy được cả khi máy đang dùng bất kỳ cổng nào. Kết quả của năm ca gọi bình thường, trích output:
 
 ```text
 TN-0001 bình thường: score=0.0 reasons=[] model=rules-2026.11.1
@@ -187,20 +187,20 @@ deadline 3 giây: score=0.0, interceptor ghi OK sau 1003 ms
 <figcaption>Hình 2. Deadline chạy ở hai đầu. Client ngừng chờ ở 200 ms; handler ở server cũng bị huỷ quanh mốc đó nên không tốn tiếp 800 ms cho một kết quả không ai nhận.</figcaption>
 </figure>
 
-Ba điều rút ra. Một: cả hai đầu cùng đếm giờ. Client giữ đồng hồ riêng; server nhận `grpc-timeout` và tự huỷ handler khi hết hạn (tài liệu Deadlines, mục «Deadlines on the Server»), rồi tự gửi trạng thái `DEADLINE_EXCEEDED`. Handler không thấy mã đó, chỉ thấy `CancelledError`; nhãn `CANCELLED` trong nhật ký là quy ước của interceptor lab (nó gán khi bắt `CancelledError`), không phải mã nhận từ dây. Hai: việc huỷ chỉ dừng được code có điểm `await` (bài 21); nếu handler bận tính CPU hoặc gọi thư viện đồng bộ, nó chạy hết rồi mới biết. Ba: phương thức `context.time_remaining()` cho server biết còn bao nhiêu thời gian, để bỏ qua việc đắt tiền khi ngân sách đã quá ngắn.
+Ba điều rút ra. Một: cả hai đầu cùng đếm giờ. Client giữ đồng hồ riêng; server nhận `grpc-timeout` và tự huỷ handler khi hết hạn (tài liệu Deadlines, mục «Deadlines on the Server»), rồi tự gửi trạng thái `DEADLINE_EXCEEDED`. Handler không thấy mã đó, chỉ thấy `CancelledError`; nhãn `CANCELLED` trong nhật ký là quy ước của interceptor lab (nó gán khi bắt `CancelledError`), không phải mã nhận từ dây. Hai: việc huỷ chỉ dừng được code có điểm `await` (bài 21); nếu handler bận tính CPU hoặc gọi thư viện đồng bộ, nó chạy hết rồi mới biết. Ba: phương thức `context.time_remaining()` cho server biết còn bao nhiêu thời gian, để bỏ qua bước tốn kém khi thời gian còn lại đã quá ngắn.
 
 Mã trạng thái cho Dispatch biết nên làm gì tiếp, nên lab kiểm cả bốn nhóm thường gặp:
 
 | Mã | Nguyên nhân | Gọi lại y nguyên? |
 | --- | --- | --- |
 | `INVALID_ARGUMENT` | đầu vào sai (km ngoài miền, thiếu `trip_id`) | Không, vẫn sai |
-| `DEADLINE_EXCEEDED` | hết giờ chờ, server chậm hoặc quá tải | Có thể, nếu còn ngân sách và lời gọi idempotent |
+| `DEADLINE_EXCEEDED` | hết giờ chờ, server chậm hoặc quá tải | Có thể, nếu còn đủ thời gian và lời gọi idempotent |
 | `UNAVAILABLE` | không nối được (không ai nghe ở cổng) | Có thể, với lùi dần |
 | `CANCELLED` | một bên chủ động huỷ; server cũng trả khi hàng chờ quá tải | Tuỳ lý do huỷ; với quá tải thì chỉ sau khi giảm tải |
 
-`Score` không có tác dụng phụ nên gọi lại an toàn. gRPC có chính sách retry khai báo trong service config; lab không dùng, để ta thấy trọn từng mã. Còn một quan sát đo được, và nó nằm ở server chứ không phải client. Lõi gRPC của server giữ một hàng chờ cho các lời gọi chưa được giao cho handler: vượt ngưỡng mềm `grpc.server.max_pending_requests` (mặc định 1000) thì từ chối theo xác suất, chạm ngưỡng cứng `grpc.server.max_pending_requests_hard_limit` (mặc định 3000) thì từ chối hết. Lời gọi bị từ chối kết thúc `CANCELLED` ngay tại lõi gRPC, trước handler nên interceptor cũng không thấy. Bắn cùng lúc lên một channel, chạy trên máy này (grpcio 1.85.1): 1.000 lời gọi không mất cái nào, 1.500 mất 61, 2.000 mất 218, 3.000 mất 738. Đây là cơ chế bảo vệ server; mã nguồn gRPC ghi chú không nên đổi hai ngưỡng này nếu chưa hiểu hết hệ quả vận hành.
+`Score` không có tác dụng phụ nên gọi lại an toàn. gRPC có chính sách retry khai báo trong service config; lab không dùng, để ta thấy trọn từng mã. Còn một quan sát đo được, và nó nằm ở server chứ không phải client. Lõi gRPC của server giữ một hàng chờ cho các lời gọi chưa được giao cho handler: vượt ngưỡng mềm `grpc.server.max_pending_requests` (mặc định 1000) thì từ chối theo xác suất, chạm ngưỡng cứng `grpc.server.max_pending_requests_hard_limit` (mặc định 3000) thì từ chối hết. Lời gọi bị từ chối kết thúc `CANCELLED` ngay tại lõi gRPC, trước handler nên interceptor cũng không thấy. Bắn cùng lúc trên một channel, chạy trên máy này (grpcio 1.85.1): 1.000 lời gọi không mất cái nào, 1.500 mất 61, 2.000 mất 218, 3.000 mất 738. Đây là cơ chế bảo vệ server; mã nguồn gRPC ghi chú không nên đổi hai ngưỡng này nếu chưa hiểu hết hệ quả vận hành.
 
-`Semaphore` 200 ở client (`self._slots` ở trên) cứu được trong lab vì chỉ có một client, tổng lời gọi chờ luôn dưới 1.000. Nó không phải giải pháp chung: mười client như thế, mỗi client giới hạn 200, cùng bắn 4.000 lời gọi vào một server thì máy này vẫn mất 1.175 lời gọi, vì tổng cộng lại vượt ngưỡng của server. Nhiều bản Dispatch cộng lại sẽ dính đúng như vậy. Hướng xử lý nằm ở tầng hệ thống: giữ tổng lời gọi dưới sức server và coi `CANCELLED` do quá tải như một dạng từ chối cần lùi dần khi thử lại. Thí nghiệm không nằm trong `--verify` vì kết quả đổi theo máy.
+`Semaphore` 200 ở client (`self._slots` ở trên) giải quyết được vấn đề trong lab vì chỉ có một client, tổng lời gọi chờ luôn dưới 1.000. Nó không phải giải pháp chung: mười client như thế, mỗi client giới hạn 200, cùng bắn 4.000 lời gọi vào một server thì máy này vẫn mất 1.175 lời gọi, vì tổng cộng lại vượt ngưỡng của server. Nhiều bản Dispatch chạy cùng lúc sẽ gặp đúng tình huống này. Hướng xử lý nằm ở tầng hệ thống: giữ tổng lời gọi dưới sức server và coi `CANCELLED` do quá tải như một dạng từ chối cần lùi dần khi thử lại. Thí nghiệm không nằm trong `--verify` vì kết quả đổi theo máy.
 
 ## Interceptor: nhật ký và id yêu cầu
 
@@ -240,7 +240,7 @@ client gắn x-request-id=7fb63a4a2929; server ghi /toinoi.fraud.v1.FraudScoring
 tổng 13 lời gọi server đã ghi: {'CANCELLED': 1, 'INVALID_ARGUMENT': 5, 'OK': 7}
 ```
 
-Tổng 13 gồm 7 lời gọi thành công, 5 lời gọi bị từ chối vì đầu vào và 1 lời gọi bị huỷ do deadline: mọi kết cục đều để lại dấu vết, kể cả cái server không bao giờ trả lời.
+Tổng 13 gồm 7 lời gọi thành công, 5 lời gọi bị từ chối vì đầu vào và 1 lời gọi bị huỷ do deadline: mọi kết cục đều để lại dấu vết, kể cả lời gọi mà server không bao giờ trả lời.
 
 ## Chạy và kiểm chứng
 
@@ -254,7 +254,7 @@ uv run --project examples/toi-noi-python/37-grpc-fraud-scoring examples/toi-noi-
 OK 41/41
 ```
 
-41 ca gồm: 9 kiểm về dữ liệu trên dây và file sinh; 15 kiểm trên 5 ca điểm; 6 ca lỗi; 5 kiểm về deadline; 3 kiểm về interceptor; 3 kiểm về lời gọi đồng thời. Phần đo thời gian của lần chạy thường (máy Apple M1 Max, macOS, loopback; lab tự in tải máy, ở lần chạy này load average 1 phút là 64.1 do nhiều tác vụ khác đang chạy, nên chỉ đọc theo bậc độ lớn):
+41 ca gồm: 9 kiểm về dữ liệu trên dây và file sinh; 15 kiểm trên 5 ca điểm; 6 ca lỗi; 5 kiểm về deadline; 3 kiểm về interceptor; 3 kiểm về lời gọi đồng thời. Phần đo thời gian của lần chạy bình thường (máy Apple M1 Max, macOS, loopback; lab tự in tải máy, ở lần chạy này load average 1 phút là 64.1 do nhiều tác vụ khác đang chạy, nên chỉ đọc theo bậc độ lớn):
 
 ```text
 == 6. Đồng thời ==
@@ -264,7 +264,7 @@ tuần tự 500 lời gọi: p50=0.67 ms, p99=6.13 ms
 100 lời gọi, mỗi lời chờ I/O 100 ms: tổng 139 ms (tuần tự sẽ là 10000 ms)
 ```
 
-Dòng cuối là lợi ích của `grpc.aio`: 100 lời gọi, mỗi lời chờ I/O 100 ms, xong sau chưa tới 150 ms vì chờ chồng nhau trên một event loop. `--verify` chỉ kiểm bất biến này (dưới 5 giây), không kiểm con số tuyệt đối. Thí nghiệm bắn 2.000 lời gọi cùng lúc, ba cấu hình (cùng lần chạy, cùng tải máy):
+Dòng cuối là lợi ích của `grpc.aio`: 100 lời gọi, mỗi lời chờ I/O 100 ms, xong sau chưa tới 150 ms vì chờ chồng nhau trên một event loop. `--verify` chỉ kiểm bất biến này (dưới 5 giây), không kiểm con số tuyệt đối. Thí nghiệm bắn 2.000 lời gọi cùng lúc với ba cấu hình (cùng lần chạy, cùng tải máy):
 
 ```bash
 uv run --project examples/toi-noi-python/37-grpc-fraud-scoring examples/toi-noi-python/37-grpc-fraud-scoring/main.py --burst 2000
@@ -295,14 +295,14 @@ Hai file `_pb2` lệch, file `_pb2_grpc` không đổi vì service không đổi
 
 <div class="tkh-callout tkh-callout--warn">
 <span class="tkh-callout-title">Giới hạn của ví dụ so với production</span>
-<p>Kênh không mã hoá (<code>insecure</code>): production dùng TLS hoặc mTLS và xác thực qua metadata (bài 34 nói về token). Bộ luật và <code>FeatureStore</code> là đồ chơi để minh hoạ hợp đồng; mô hình thật, đặc trưng online và việc đo độ chính xác nằm ở các bài sau. gRPC giữ kết nối HTTP/2 lâu dài, nên bộ cân bằng tải tầng 4 có thể dồn mọi lời gọi của một client vào một pod; cần cân bằng phía client hoặc proxy hiểu HTTP/2. Lab thiếu health check, reflection và retry khai báo (bài 52 sẽ thêm health). Thời gian đo trên một máy đang bận, chỉ để thấy bậc độ lớn.</p>
+<p>Kênh không mã hoá (<code>insecure</code>): production dùng TLS hoặc mTLS và xác thực qua metadata (bài 34 nói về token). Bộ luật và <code>FeatureStore</code> là đồ chơi để minh hoạ hợp đồng; mô hình thật, đặc trưng online và việc đo độ chính xác nằm ở các bài sau. gRPC giữ kết nối HTTP/2 lâu dài, nên bộ cân bằng tải tầng 4 có thể dồn mọi lời gọi của một client vào một pod; cần cân bằng phía client hoặc proxy hiểu HTTP/2. Lab chưa có health check, reflection và retry khai báo (bài 52 sẽ thêm health). Thời gian đo trên một máy đang bận, chỉ để thấy bậc độ lớn.</p>
 </div>
 
 **Bài tập 1:** Thêm `string service = 6;` (ride, food hoặc parcel) vào `ScoreRequest`. Cần làm gì với mã sinh? Một client cũ chưa biết field 6 gọi server mới thì `request.service` bằng gì, và server nên xử lý ra sao?
 
 **Bài tập 2:** Dispatch gọi `Score` với deadline 300 ms và nhận `DEADLINE_EXCEEDED` hoặc `UNAVAILABLE`. Đặt chuyến nên tiếp tục hay dừng?
 
-<details><summary>Xem lời giải</summary><p>(1) Phải sinh lại ba file (lệnh ở mục «Hợp đồng protobuf»), nếu không <code>--verify</code> đỏ <code>FAIL 40/41</code> như thí nghiệm trên. Với client cũ, field 6 vắng mặt trên dây nên <code>request.service</code> là chuỗi rỗng, giá trị mặc định của proto3. Server mới phải coi rỗng là «chưa biết» (dùng mặc định hoặc bỏ qua luật theo dịch vụ), không trả <code>INVALID_ARGUMENT</code>, vì thêm field là thay đổi tương thích và client cũ không có lỗi gì. Không được dùng lại số 5 hay đổi kiểu field đang có. (2) <b>Tiếp tục.</b> Điểm gian lận là đầu vào cho người duyệt, không phải điều kiện để cho khách đặt xe. Dispatch ghi chuyến là «chưa chấm điểm» để một hàng đợi chấm lại hoặc cho người duyệt xem, và có thể thử lại một lần với <code>UNAVAILABLE</code> nếu còn ngân sách thời gian. Chặn đặt chuyến mỗi khi service điểm chậm là biến lỗi của một dịch vụ phụ thành sự cố của việc đặt xe.</p></details>
+<details><summary>Xem lời giải</summary><p>(1) Phải sinh lại ba file (lệnh ở mục «Hợp đồng protobuf»), nếu không <code>--verify</code> đỏ <code>FAIL 40/41</code> như thí nghiệm trên. Với client cũ, field 6 vắng mặt trên dây nên <code>request.service</code> là chuỗi rỗng, giá trị mặc định của proto3. Server mới phải coi rỗng là «chưa biết» (dùng mặc định hoặc bỏ qua luật theo dịch vụ), không trả <code>INVALID_ARGUMENT</code>, vì thêm field là thay đổi tương thích và client cũ không có lỗi gì. Không được dùng lại số 5 hay đổi kiểu field đang có. (2) <b>Tiếp tục.</b> Điểm gian lận là đầu vào cho người duyệt, không phải điều kiện để cho khách đặt xe. Dispatch ghi chuyến là «chưa chấm điểm» để một hàng đợi chấm lại hoặc cho người duyệt xem, và có thể thử lại một lần với <code>UNAVAILABLE</code> nếu còn đủ thời gian. Chặn đặt chuyến mỗi khi service điểm chậm là biến lỗi của một dịch vụ phụ thành sự cố của việc đặt xe.</p></details>
 
 Bài trước: [bài 36](/articles/python-fastapi-api-test-httpx). Bài tiếp: [bài 38](/articles/python-kafka-aiokafka-producer-consumer-schema).
 

@@ -20,7 +20,7 @@ Khi Payment báo `PaymentCaptured` cho chuyến `TN-0001`, service sổ cái ph�
 
 ## `Vec<T>` truy cập thế nào, và slice là gì?
 
-`Vec<T>` là mảng cấp phát trên heap, tự lớn khi `push`. Truy cập theo chỉ số là O(1); tìm theo giá trị phải quét, O(n). Đoạn dưới (rút gọn từ `src/main.rs`) chạy cả những thao tác hay dùng:
+`Vec<T>` là mảng cấp phát trên heap, tự mở rộng khi `push`. Truy cập theo chỉ số là O(1); tìm theo giá trị phải quét, O(n). Đoạn dưới (rút gọn từ `src/main.rs`) chạy cả những thao tác hay dùng:
 
 ```rust
 let mut amounts: Vec<i64> = Vec::with_capacity(8); // cấp sẵn chỗ cho 8 phần tử
@@ -57,7 +57,7 @@ fn flip_signs(postings: &mut [Posting]) {
 
 ## `HashMap` và `entry`: số dư theo tài khoản
 
-Số dư cần tra theo tên tài khoản, không theo vị trí. `HashMap<K, V>` băm khoá để nhảy thẳng tới ô chứa giá trị: tra và chèn O(1) trung bình. Khoá phải implement `Eq + Hash`; `String` thoả cả hai. Thứ tự duyệt **không xác định** và có thể khác giữa hai lần chạy, nên lab sắp khoá trước khi in:
+Số dư cần tra theo tên tài khoản, không theo vị trí. `HashMap<K, V>` băm khoá để nhảy thẳng tới ô chứa giá trị: tra và chèn O(1) trung bình. Khoá phải cài đặt `Eq + Hash`; `String` thoả cả hai. Thứ tự duyệt **không xác định** và có thể khác giữa hai lần chạy, nên lab sắp khoá trước khi in:
 
 ```rust
 let mut rows: Vec<(&String, &i64)> = ledger.balances.iter().collect();
@@ -70,11 +70,11 @@ Cập nhật số dư là mẫu «có thì cộng, chưa có thì tạo từ 0»
 *self.balances.entry(p.account.clone()).or_insert(0) += p.amount;
 ```
 
-`entry(key)` trả một ô có thể trống hoặc đầy; `or_insert(0)` điền 0 nếu trống rồi trả `&mut i64`; dấu `*` giải tham chiếu để cộng. Viết `if contains_key { get_mut } else { insert }` thì băm hai ba lần và dài hơn.
+`entry(key)` trả một ô có thể trống hoặc đầy; `or_insert(0)` điền 0 nếu trống rồi trả `&mut i64`; dấu `*` giải tham chiếu để cộng. Viết `if contains_key { get_mut } else { insert }` thì băm hai đến ba lần và dài hơn.
 
 ## `BTreeMap`, `HashSet` và `VecDeque` dùng khi nào?
 
-`BTreeMap<K, V>` giữ khoá luôn được sắp, nên duyệt theo thứ tự và hỏi theo khoảng được. Giá phải trả là tra O(log n). Lab đặt bút toán vào `BTreeMap<String, JournalEntry>` với khoá `JE-000001`, `JE-000002`…:
+`BTreeMap<K, V>` giữ khoá luôn ở trạng thái đã sắp xếp, nên duyệt theo thứ tự và truy vấn theo khoảng được. Giá phải trả là tra O(log n). Lab đặt bút toán vào `BTreeMap<String, JournalEntry>` với khoá `JE-000001`, `JE-000002`…:
 
 ```rust
 fn entries_from<'a>(&'a self, from: &str) -> impl Iterator<Item = &'a JournalEntry> + 'a {
@@ -83,9 +83,9 @@ fn entries_from<'a>(&'a self, from: &str) -> impl Iterator<Item = &'a JournalEnt
 }
 ```
 
-Viết thẳng `range(from..)` với `from: &str` thì compiler suy ra kiểu cận là `&str` và báo `E0277: the trait bound String: Borrow<&str> is not satisfied`. Ép kiểu cận thành `str` bằng `range::<str, _>(from..)` thì gặp một E0277 khác, `the size for values of type str cannot be known at compilation time`, vì impl `RangeBounds<T> for RangeFrom<&T>` chỉ áp dụng cho `T` có kích thước biết trước. Tạo một `String` làm cận dưới là cách ngắn nhất. Còn `+ 'a` ở kiểu trả về nói iterator chỉ mượn `self`; bỏ đi thì edition 2024 coi iterator mượn cả `from`, và caller phải giữ chuỗi `from` sống đến khi dùng xong iterator. Một điểm cần nhớ: khoá `String` được so theo thứ tự chữ cái, nên `JE-9` đứng sau `JE-10`; phải đệm số 0 (`JE-{seq:06}`) thì thứ tự chữ cái mới trùng thứ tự thời gian.
+Viết thẳng `range(from..)` với `from: &str` thì compiler suy ra kiểu cận là `&str` và báo `E0277: the trait bound String: Borrow<&str> is not satisfied`. Chỉ định kiểu cận là `str` bằng `range::<str, _>(from..)` thì gặp một E0277 khác, `the size for values of type str cannot be known at compilation time`, vì impl `RangeBounds<T> for RangeFrom<&T>` chỉ áp dụng cho `T` có kích thước biết trước. Tạo một `String` làm cận dưới là cách ngắn nhất. Còn `+ 'a` ở kiểu trả về cho biết iterator chỉ mượn `self`; bỏ đi thì edition 2024 coi iterator mượn cả `from`, và caller phải giữ chuỗi `from` sống đến khi dùng xong iterator. Một điểm cần nhớ: khoá `String` được so theo thứ tự chữ cái, nên `JE-9` đứng sau `JE-10`; phải đệm số 0 (`JE-{seq:06}`) thì thứ tự chữ cái mới trùng thứ tự thời gian.
 
-`HashSet<String>` là tập hợp không trùng. `insert` trả `false` khi phần tử đã có, nên một lệnh vừa kiểm tra vừa đánh dấu: đây là bộ nhớ idempotency key của sổ cái. `VecDeque<T>` là hàng đợi hai đầu (`push_back`, `pop_front` đều O(1)); lab dùng nó làm hàng bút toán chờ ghi, vào trước ra trước.
+`HashSet<String>` là tập hợp không chứa phần tử trùng. `insert` trả `false` khi phần tử đã có, nên một lệnh vừa kiểm tra vừa đánh dấu: đây là bộ nhớ idempotency key của sổ cái. `VecDeque<T>` là hàng đợi hai đầu (`push_back`, `pop_front` đều O(1)); lab dùng nó làm hàng bút toán chờ ghi, vào trước ra trước.
 
 <figure class="tkh-fig">
 <div class="tkh-fig-box">
@@ -125,11 +125,11 @@ fn post(&mut self, entry: JournalEntry) -> Result<(), PostError> {
 
 Thứ tự kiểm tra có chủ ý: kiểm tra cân bằng **trước** khi `insert` key. Nếu đảo lại, một bút toán lệch bị từ chối vẫn «đốt» key, và bản sửa đúng gửi lại sẽ bị coi là trùng.
 
-Trong bộ nhớ, `post` chạy trên `&mut self`, nên không ai thấy trạng thái nửa vời. Với database thì khác: ba thay đổi này là ba bảng hoặc ba câu lệnh, có thể thất bại ở giữa chừng. Khi đó phải gói trong một transaction; phần đó thuộc loạt trung bình (bài về PostgreSQL), còn lý do idempotency xem [bài giao dịch và idempotency của loạt .NET](/articles/dotnet10-transaction-concurrency-idempotency).
+Trong bộ nhớ, `post` chạy trên `&mut self`, nên không ai thấy trạng thái nửa vời. Với database thì khác: ba thay đổi này là ba bảng hoặc ba câu lệnh, có thể thất bại ở giữa chừng. Khi đó phải gói chúng trong một transaction; phần đó thuộc loạt trung bình (bài về PostgreSQL), còn lý do idempotency xem [bài giao dịch và idempotency của loạt .NET](/articles/dotnet10-transaction-concurrency-idempotency).
 
 ## Lifetime: vì sao `pick` cần `'a` còn `largest_posting` thì không?
 
-Mỗi tham chiếu trỏ vào dữ liệu có một chủ. Compiler phải chắc rằng tham chiếu không sống lâu hơn chủ. Phần lớn thời gian nó tự suy ra, gọi là lifetime elision. Với một tham chiếu vào và một tham chiếu ra, kết quả chỉ có thể mượn từ tham số đó:
+Mỗi tham chiếu trỏ vào dữ liệu có một chủ sở hữu. Compiler phải chắc rằng tham chiếu không sống lâu hơn chủ. Phần lớn trường hợp, compiler tự suy ra điều này; cơ chế đó gọi là lifetime elision (lược bỏ chú thích lifetime). Với một tham chiếu vào và một tham chiếu ra, kết quả chỉ có thể mượn từ tham số đó:
 
 ```rust
 fn largest_posting(entry: &JournalEntry) -> Option<&Posting> {
@@ -157,7 +157,7 @@ fn pick<'a>(a: &'a Posting, b: &'a Posting) -> &'a Posting {
 }
 ```
 
-`'a` không kéo dài sự sống của dữ liệu; nó chỉ **đặt tên** cho khoảng chung để compiler kiểm tra. Với phương thức có `&self`, kết quả mặc định mượn từ `self`, đó là lý do `balance(&self, account: &str) -> Option<&i64>` không cần `'a`.
+`'a` không làm dữ liệu sống lâu hơn; nó chỉ **đặt tên** cho khoảng chung để compiler kiểm tra. Với phương thức có `&self`, kết quả mặc định mượn từ `self`, đó là lý do `balance(&self, account: &str) -> Option<&i64>` không cần `'a`.
 
 <figure class="tkh-fig">
 <div class="tkh-fig-box">
@@ -166,7 +166,7 @@ fn pick<'a>(a: &'a Posting, b: &'a Posting) -> &'a Posting {
 <figcaption>Hình 2. Tham chiếu <code>r</code> vẫn được dùng sau khi chủ <code>p</code> bị drop: compiler báo E0597 ngay khi biên dịch, không đợi đến lúc chạy.</figcaption>
 </figure>
 
-Cùng quy tắc giải thích lỗi hay gặp nhất với collection: giữ tham chiếu vào map rồi sửa map.
+Cùng quy tắc này giải thích lỗi hay gặp nhất với collection: giữ tham chiếu vào map rồi sửa map.
 
 ```rust
 let driver = balances.get("driver:DR-001");
@@ -184,7 +184,7 @@ error[E0502]: cannot borrow `balances` as mutable because it is also borrowed as
   |                ------ immutable borrow later used here
 ```
 
-`get` trả `Option<&i64>`, trỏ thẳng vào ô trong bảng băm. `insert` có thể làm bảng cấp phát lại và dời ô, khi đó tham chiếu cũ treo lơ lửng. Rust chặn từ compile time. Cách sửa: sao chép giá trị ra (`.copied()`) trước khi `insert`, hoặc dùng xong tham chiếu rồi mới sửa. Các đoạn lỗi trên đã được tạo và chạy `rustc` thật, rồi bỏ khỏi lab để lab biên dịch được.
+`get` trả `Option<&i64>`, trỏ thẳng vào ô trong bảng băm. `insert` có thể làm bảng cấp phát lại và dời ô, khi đó tham chiếu cũ treo lơ lửng. Rust chặn ngay từ lúc biên dịch. Cách sửa: sao chép giá trị ra (`.copied()`) trước khi `insert`, hoặc dùng xong tham chiếu rồi mới sửa. Các đoạn mã lỗi trên đã được viết ra và chạy với `rustc` thật, rồi bỏ khỏi mã nguồn của lab để lab biên dịch được.
 
 ## Chọn cấu trúc nào, và C# có gì tương ứng?
 
@@ -230,11 +230,11 @@ lệch 1 đồng -> Err(Unbalanced(1)); sửa rồi ghi lại -> Ok(())
 VERIFY OK
 ```
 
-`--verify` kiểm các giá trị này bằng so sánh thật: tài xế 57.600 (20.400 + 9.600 + 27.600), nền tảng 14.400, tổng bằng 0, key trùng bị từ chối, `range` trả 2 bút toán, ba cấu trúc khớp nhau. Sai điều nào thì in `VERIFY FAIL` và thoát với mã 1.
+`--verify` kiểm tra các giá trị này bằng phép so sánh thật: tài xế 57.600 (20.400 + 9.600 + 27.600), nền tảng 14.400, tổng bằng 0, key trùng bị từ chối, `range` trả 2 bút toán, ba cấu trúc khớp nhau. Sai điều nào thì in `VERIFY FAIL` và thoát với mã 1.
 
 <div class="tkh-callout tkh-callout--warn">
 <span class="tkh-callout-title">Giới hạn của ví dụ</span>
-<p>Đây là sổ cái mất sạch khi tiến trình dừng: không có lưu trữ, không transaction, không khoá khi nhiều luồng cùng ghi. Phép cộng <code>+=</code> trên <code>i64</code> chưa dùng <code>checked_add</code> (xem bài 03), phí 20% là phép rút gọn <code>fare / 5</code>: chia nguyên cắt phần lẻ, chỉ đúng vì ba cước mẫu chia hết cho 5 (cước 25.503 sẽ bị cắt mất 0,6 đồng thay vì làm tròn theo quy tắc của bài 03), và <code>TooFewPostings</code>, <code>Unbalanced</code> mới là kiểm tra tối thiểu. Production cần database, <code>checked_*</code> và kiểm thử đồng thời.</p>
+<p>Đây là sổ cái mất sạch khi tiến trình dừng: không có lưu trữ, không transaction, không khoá khi nhiều luồng cùng ghi. Phép cộng <code>+=</code> trên <code>i64</code> chưa dùng <code>checked_add</code> (xem bài 03), phí 20% là phép rút gọn <code>fare / 5</code>: chia nguyên cắt phần lẻ, chỉ đúng vì ba cước mẫu chia hết cho 5 (cước 25.503 sẽ bị cắt mất 0,6 đồng thay vì làm tròn theo quy tắc của bài 03), và <code>TooFewPostings</code>, <code>Unbalanced</code> mới là kiểm tra tối thiểu. Môi trường thật cần database, <code>checked_*</code> và kiểm thử đồng thời.</p>
 </div>
 
 ## Bài tập
@@ -248,7 +248,7 @@ Thêm hàm `entries_between(&self, from: &str, to: &str)` trả `Vec<&JournalEnt
         .map(|(_, e)| e)
         .collect()
 }</code></pre>
-<p>Không cần ghi <code>'a</code>. Với phương thức có <code>&amp;self</code>, elision gán cho mọi tham chiếu trong kết quả lifetime của <code>self</code>, dù <code>from</code> và <code>to</code> cũng là tham chiếu. Điều này đúng ý ta: kết quả mượn từ sổ cái, không mượn từ hai chuỗi cận. Hàm có trong <code>src/main.rs</code> của lab, và <code>--verify</code> kiểm <code>entries_between("JE-000001", "JE-000002")</code> trả 2 bút toán.</p>
+<p>Không cần ghi <code>'a</code>. Với phương thức có <code>&amp;self</code>, elision gán lifetime của <code>self</code> cho mọi tham chiếu trong kết quả, dù <code>from</code> và <code>to</code> cũng là tham chiếu. Điều này đúng ý ta: kết quả mượn từ sổ cái, không mượn từ hai chuỗi cận. Hàm có trong <code>src/main.rs</code> của lab, và <code>--verify</code> kiểm <code>entries_between("JE-000001", "JE-000002")</code> trả 2 bút toán.</p>
 </details>
 
 Bài trước: [bài 08](/articles/rust-string-str-ngay-gio-dinh-dang-tien). Bài tiếp: [bài 10](/articles/rust-module-crate-cargo-test-clippy).

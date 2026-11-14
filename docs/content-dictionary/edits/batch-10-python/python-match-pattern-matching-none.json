@@ -1,0 +1,167 @@
+{
+ "file": "python-match-pattern-matching-none.md",
+ "edits": [
+  {
+   "old": "tách None, chuỗi rỗng và khoá vắng;",
+   "new": "tách None, chuỗi rỗng và khoá không có trong dict;",
+   "reason": "«khoá vắng» cụt, khó hiểu khi đứng riêng",
+   "severity": "medium"
+  },
+  {
+   "old": "nhưng nó che luôn một lỗi khác:",
+   "new": "nhưng bản sửa này che luôn một lỗi khác:",
+   "reason": "«nó» mơ hồ",
+   "severity": "medium"
+  },
+  {
+   "old": "và đưa vào `match/case` cùng cách đối xử với `None` để",
+   "new": "và giới thiệu `match/case` cùng cách xử lý `None` để",
+   "reason": "«đưa vào», «đối xử với» là calque",
+   "severity": "medium"
+  },
+  {
+   "old": "Bài sẽ chạy đúng ca này.",
+   "new": "Bài sẽ chạy đúng trường hợp này.",
+   "reason": "bỏ «ca»",
+   "severity": "low"
+  },
+  {
+   "old": "và khi khớp nó có thể gán luôn các phần của dữ liệu vào biến",
+   "new": "và khi khớp, pattern có thể gán luôn các phần của dữ liệu vào biến",
+   "reason": "«nó» mơ hồ",
+   "severity": "medium"
+  },
+  {
+   "old": "Nó thường đứng cuối để bắt «phần còn lại».",
+   "new": "Case này thường đứng cuối để bắt «phần còn lại».",
+   "reason": "«Nó» đầu câu mơ hồ",
+   "severity": "medium"
+  },
+  {
+   "old": "Python kiểm `isinstance(subject, Trip)` rồi đọc",
+   "new": "Python kiểm tra `isinstance(subject, Trip)` rồi đọc",
+   "reason": "«kiểm» đứng một mình",
+   "severity": "low"
+  },
+  {
+   "old": "(lab có ca kiểm điều này)",
+   "new": "(lab có test case kiểm tra điều này)",
+   "reason": "thống nhất «test case»",
+   "severity": "medium"
+  },
+  {
+   "old": "So với câu hỏi mở đầu, màn hình",
+   "new": "So với tình huống mở đầu, màn hình",
+   "reason": "đoạn mở đầu là tình huống, không phải câu hỏi",
+   "severity": "low"
+  },
+  {
+   "old": "nên không thể chuyển sai mà im lặng.",
+   "new": "nên không thể chuyển sai mà không báo lỗi.",
+   "reason": "«im lặng» là calque của silently",
+   "severity": "medium"
+  },
+  {
+   "old": "lab kiểm chuyến gốc không đổi.",
+   "new": "lab kiểm tra chuyến gốc không đổi.",
+   "reason": "«kiểm» đứng một mình",
+   "severity": "low"
+  },
+  {
+   "old": "và gây những khớp rất khó hiểu.",
+   "new": "và gây ra những lần khớp rất khó hiểu.",
+   "reason": "«những khớp» cụt, thiếu danh từ",
+   "severity": "medium"
+  },
+  {
+   "old": "mypy thấy đối số là `Never` và im lặng.",
+   "new": "mypy thấy đối số là `Never` và không báo gì.",
+   "reason": "«im lặng» là calque",
+   "severity": "medium"
+  },
+  {
+   "old": "mypy là nội dung của bài 12; `assert_never` được giới thiệu ngay ở bài này.",
+   "new": "bài 12 đã nói về mypy; còn `assert_never` được giới thiệu ngay ở bài này.",
+   "reason": "«là nội dung của» gượng, giọng dịch",
+   "severity": "medium"
+  },
+  {
+   "old": "Bẫy này nhắc đúng phạm vi của `match`:",
+   "new": "Bẫy này nhắc ta nhớ đúng phạm vi của `match`:",
+   "reason": "câu thiếu tân ngữ",
+   "severity": "low"
+  },
+  {
+   "old": "Với `driver_id` có bốn khả năng (Hình 2):",
+   "new": "`driver_id` có bốn khả năng (Hình 2):",
+   "reason": "«Với … có» là cấu trúc kiểu tiếng Anh",
+   "severity": "medium"
+  },
+  {
+   "old": "Cách viết truthiness quen thuộc sẽ gộp ba ô đầu:",
+   "new": "Cách viết dựa vào truthiness (giá trị đúng/sai của đối tượng trong điều kiện) quen thuộc sẽ gộp ba ô đầu:",
+   "reason": "thuật ngữ truthiness chưa có chú giải ở lần đầu",
+   "severity": "medium"
+  },
+  {
+   "old": "Vài điều về kiểu.",
+   "new": "Có vài điều về kiểu cần nói thêm.",
+   "reason": "câu cụt, thiếu vị ngữ",
+   "severity": "medium"
+  },
+  {
+   "old": "Còn so sánh với `None`, hãy viết `is None` thay `== None`:",
+   "new": "Còn khi so sánh với `None`, hãy viết `is None` thay vì `== None`:",
+   "reason": "thiếu từ nối, «thay» cụt",
+   "severity": "medium"
+  },
+  {
+   "old": "`is` kiểm đúng đối tượng duy nhất đó và không bị `__eq__` tự định nghĩa của lớp khác can thiệp.",
+   "new": "`is` kiểm tra đúng đối tượng duy nhất đó và không bị `__eq__` do lớp khác tự định nghĩa can thiệp.",
+   "reason": "trật tự từ gượng, «kiểm» đứng một mình",
+   "severity": "medium"
+  },
+  {
+   "old": "đó là **narrowing**.",
+   "new": "đó là việc **thu hẹp kiểu** (narrowing).",
+   "reason": "thống nhất với tiêu đề mục «Thu hẹp kiểu»",
+   "severity": "medium"
+  },
+  {
+   "old": "File này cũng chứa ca `trip.driver_id[0]` mà không kiểm `None`, mypy báo",
+   "new": "File này cũng chứa trường hợp `trip.driver_id[0]` mà không kiểm tra `None`, và mypy báo",
+   "reason": "bỏ «ca», thiếu từ nối",
+   "severity": "medium"
+  },
+  {
+   "old": "lỗi `TypeError` sẽ nổ ở runtime được bắt sớm lúc kiểm kiểu.",
+   "new": "lỗi `TypeError` vốn sẽ xảy ra ở runtime nay được bắt sớm lúc kiểm kiểu.",
+   "reason": "câu thiếu liên kết, hai vị ngữ chồng nhau",
+   "severity": "medium"
+  },
+  {
+   "old": "chạy 56 ca (10 mô tả chuyến, đường đi bảy trạng thái, bốn ca huỷ hợp lệ, chín ca bị từ chối, tám envelope, rồi các ca về bẫy cú pháp,",
+   "new": "chạy 56 test case (10 mô tả chuyến, đường đi bảy trạng thái, bốn test case huỷ hợp lệ, chín test case bị từ chối, tám envelope, rồi các test case về bẫy cú pháp,",
+   "reason": "thống nhất «test case»",
+   "severity": "medium"
+  },
+  {
+   "old": "Nếu một ca của `--verify` lệch, nó in `SAI: <tên ca>`, rồi `FAIL n/m` (n là số ca đạt, m là tổng)",
+   "new": "Nếu một test case của `--verify` bị lệch, chương trình in `SAI: <tên ca>`, rồi `FAIL n/m` (n là số test case đạt, m là tổng)",
+   "reason": "thống nhất «test case», tránh «nó» mơ hồ",
+   "severity": "medium"
+  },
+  {
+   "old": "Với <code>describe</code>, nó vẫn rơi vào case tổng quát",
+   "new": "Với <code>describe</code>, chuyến mang trạng thái mới vẫn rơi vào case tổng quát",
+   "reason": "«nó» mơ hồ",
+   "severity": "medium"
+  },
+  {
+   "old": "<code>--verify</code> báo đúng ba ca đó đỏ.",
+   "new": "<code>--verify</code> báo đúng ba test case đó không đạt.",
+   "reason": "«đỏ» khẩu ngữ, bỏ «ca»",
+   "severity": "medium"
+  }
+ ]
+}

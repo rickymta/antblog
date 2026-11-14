@@ -8,19 +8,19 @@ tags: [rust, toi-noi, ledger, postgresql, event-sourcing, projection]
 language: vi
 ---
 
-Finance hỏi thu nhập theo ngày, CS hỏi số dư ví của khách: hai câu hỏi, cùng một nguồn là các bút toán đã ghi. [Bài 48](/articles/rust-so-du-theo-thoi-diem-snapshot-dong-ky) tính lại từ bút toán mỗi khi có người hỏi. Bài này giữ sẵn kết quả trong bảng đọc, cập nhật khi có bút toán mới, và chạy thật chỗ dễ sai nhất của cách đó.
+Bên tài chính hỏi thu nhập theo ngày, bên chăm sóc khách hàng hỏi số dư ví của khách: hai câu hỏi, cùng một nguồn là các bút toán đã ghi. [Bài 48](/articles/rust-so-du-theo-thoi-diem-snapshot-dong-ky) tính lại từ bút toán mỗi khi có người hỏi. Bài này giữ sẵn kết quả trong bảng đọc, cập nhật khi có bút toán mới, và chạy thật chỗ dễ sai nhất của cách đó.
 
 Đây là bài 49 của lộ trình **Rust nâng cao qua [Tới Nơi](/articles/du-an-mau-toi-noi)**. Lab dùng lại `ledger-core` của [bài 20](/articles/rust-tong-hop-ledger-core-cargo-doc-workspace) và schema append-only của [bài 24](/articles/rust-transaction-isolation-append-only-idempotency-key), trên PostgreSQL thật.
 
 <div class="tkh-callout tkh-callout--example">
 <span class="tkh-callout-title">Thử trước khi đọc</span>
 <p>Projection đọc log bằng <code>WHERE id &gt; last_id ORDER BY id</code>, với <code>id</code> là cột identity tăng dần. Có thể bỏ sót vĩnh viễn một bút toán đã commit không?</p>
-<details><summary>Xem đáp án</summary><p>Có. Identity cấp số lúc <code>INSERT</code>, không phải lúc <code>COMMIT</code>. Giao dịch nhận id nhỏ mà commit muộn sẽ hiện ra sau khi projection đã đi qua id lớn hơn, và truy vấn <code>id &gt; last_id</code> không bao giờ quay lại nhìn nó.</p></details>
+<details><summary>Xem đáp án</summary><p>Có. Identity cấp số lúc <code>INSERT</code>, không phải lúc <code>COMMIT</code>. Transaction nhận id nhỏ mà commit muộn sẽ hiện ra sau khi projection đã đi qua id lớn hơn, và truy vấn <code>id &gt; last_id</code> không bao giờ quay lại nhìn nó.</p></details>
 </div>
 
 ## Sổ cái đã là event log, vậy event sourcing thêm gì?
 
-Event sourcing là lưu chuỗi sự kiện bất biến làm nguồn sự thật, còn trạng thái hiện tại là kết quả gộp (fold) chuỗi đó. Sổ cái đã làm đúng điều ấy: `journal_entries` và `postings` chỉ thêm (trigger bài 24 chặn `UPDATE`, `DELETE`, `TRUNCATE`), số dư chỉ là tổng posting ([bài 13](/articles/rust-double-entry-journal-entry-posting)), sai thì sửa bằng bút toán đảo. Nên lab không tạo bảng sự kiện riêng: mỗi bút toán là một sự kiện.
+Event sourcing là lưu chuỗi sự kiện bất biến làm nguồn dữ liệu gốc, còn trạng thái hiện tại là kết quả gộp (fold) chuỗi đó. Sổ cái đã làm đúng điều ấy: `journal_entries` và `postings` chỉ thêm (trigger bài 24 chặn `UPDATE`, `DELETE`, `TRUNCATE`), số dư chỉ là tổng posting ([bài 13](/articles/rust-double-entry-journal-entry-posting)), sai thì sửa bằng bút toán đảo. Nên lab không tạo bảng sự kiện riêng: mỗi bút toán là một sự kiện.
 
 <figure class="tkh-fig">
 <div class="tkh-fig-box">
@@ -111,7 +111,7 @@ Không, và đây là lỗi thật của cách đọc log đơn giản nhất. P
 SELECT id, ... FROM journal_entries WHERE id > $1 ORDER BY id LIMIT $2
 ```
 
-Lab dựng cuộc đua bằng hai transaction trong một hàm, không cần `sleep`. A ghi bút toán chia tiền `TN-0001` (id 1), chưa commit. B ghi chia tiền `TN-0003` (id 2) rồi commit. Projection chạy một lô, thấy id 2, đặt checkpoint là 2. Sau đó A commit.
+Lab dựng race condition bằng hai transaction trong một hàm, không cần `sleep`. A ghi bút toán chia tiền `TN-0001` (id 1), chưa commit. B ghi chia tiền `TN-0003` (id 2) rồi commit. Projection chạy một lô, thấy id 2, đặt checkpoint là 2. Sau đó A commit.
 
 <figure class="tkh-fig">
 <div class="tkh-fig-box">
@@ -131,11 +131,11 @@ kịch bản A (INSERT trước, commit sau):
 
 Tài xế `DR-001` mất 20.400 đồng trong bảng đọc, sổ vẫn cân, không có lỗi nào báo, và «lag 0» cũng nói dối: projection tin là đã đuổi kịp.
 
-**Sửa bằng khoảng an toàn.** Tài liệu PostgreSQL định nghĩa `xmin` của snapshot là xid nhỏ nhất còn đang chạy: mọi xid nhỏ hơn đã commit hoặc rollback. Lab lưu xid của giao dịch ghi vào cột `tx_id` (mặc định `pg_current_xact_id()::text::bigint`) và chỉ đọc dòng có `tx_id` nhỏ hơn `pg_snapshot_xmin(pg_current_snapshot())`. Khi A còn mở, B có xid lớn hơn A nên bị giữ lại: lô áp dụng 0 sự kiện, lag là 1. A commit thì cả hai hiện đủ. Cái giá: projection chậm đúng bằng thời gian giao dịch chậm nhất còn mở.
+**Sửa bằng khoảng an toàn.** Tài liệu PostgreSQL định nghĩa `xmin` của snapshot là xid nhỏ nhất còn đang chạy: mọi xid nhỏ hơn đã commit hoặc rollback. Lab lưu xid của transaction ghi vào cột `tx_id` (mặc định `pg_current_xact_id()::text::bigint`) và chỉ đọc dòng có `tx_id` nhỏ hơn `pg_snapshot_xmin(pg_current_snapshot())`. Khi A còn mở, B có xid lớn hơn A nên bị giữ lại: lô áp dụng 0 sự kiện, lag là 1. A commit thì cả hai hiện đủ. Cái giá phải trả: projection chậm đúng bằng thời gian của transaction chậm nhất còn mở.
 
 Về cột `tx_id`: xid được cấp khi transaction ghi lần đầu, không phải lúc `BEGIN`, và trong savepoint hàm vẫn trả xid của transaction cha (test kiểm). Kiểu `xid8` 64 bit có cả epoch, theo tài liệu không quay vòng trong đời một cài đặt, khác `xid` 32 bit; nó không cast thẳng sang `bigint` nên phải qua `text`. Nhưng xid chỉ có nghĩa trong một cluster: restore sang cluster mới thì bộ đếm chạy lại, nhận qua logical replication thì `tx_id` mang số của nơi gửi, và con trỏ không còn so được với `xmin` tại chỗ. Lab không thử hai trường hợp này.
 
-Khoảng an toàn chưa đủ nếu con trỏ vẫn là `id`. Kịch bản B: giao dịch cũ lấy xid sớm (cập nhật trạng thái thanh toán trước khi ghi bút toán), giao dịch mới ghi id 1 chưa commit, giao dịch cũ ghi id 2 rồi commit. Xid nhỏ hơn mà id lớn hơn: id 2 qua khoảng an toàn trước, checkpoint nhảy lên 2, id 1 bị bỏ sót như trước. Con trỏ phải là cặp `(tx_id, id)`, cùng chiều với khoảng an toàn:
+Khoảng an toàn chưa đủ nếu con trỏ vẫn là `id`. Kịch bản B: transaction cũ lấy xid sớm (cập nhật trạng thái thanh toán trước khi ghi bút toán), transaction mới ghi id 1 chưa commit, transaction cũ ghi id 2 rồi commit. Xid nhỏ hơn mà id lớn hơn: id 2 qua khoảng an toàn trước, checkpoint nhảy lên 2, id 1 bị bỏ sót như trước. Con trỏ phải là cặp `(tx_id, id)`, cùng chiều với khoảng an toàn:
 
 ```sql
 -- src/log.rs, ReadMode::Safe
@@ -153,11 +153,11 @@ ORDER BY tx_id, id LIMIT $5
 | `xmin` + con trỏ `id` | đủ | mất dòng |
 | `xmin` + con trỏ `(tx_id, id)` | đủ | đủ |
 
-Logical decoding hay một khoá chung để id trùng thứ tự commit là hai hướng khác, lab không thử nên không kết luận. Điểm yếu cần theo dõi: transaction đã có xid mà treo, kể cả `idle in transaction`, giữ `xmin` lại, mọi projection đứng yên và lag chỉ tăng. Transaction chỉ đọc chưa có xid thì không giữ (test kiểm). Tài liệu nói xid cấp từ một bộ đếm chung của cả cluster, nên giao dịch ghi ở database khác cũng có thể giữ; lab không thử. Vì phiên lạ giữ được, `drain` của lab chờ theo trạng thái («`xmin` đã vượt đầu log»), không theo khoảng thời gian cố định.
+Logical decoding, hoặc một khoá chung để id cùng thứ tự với commit, là hai hướng khác, lab không thử nên không kết luận. Điểm yếu cần theo dõi: transaction đã có xid mà treo, kể cả `idle in transaction`, khiến `xmin` không tiến lên được, mọi projection đứng yên và lag chỉ tăng. Transaction chỉ đọc chưa có xid thì không giữ (test kiểm). Tài liệu nói xid cấp từ một bộ đếm chung của cả cluster, nên transaction ghi ở database khác cũng có thể giữ; lab không thử. Vì phiên lạ cũng có thể giữ như vậy, `drain` của lab chờ theo trạng thái («`xmin` đã vượt đầu log»), không theo khoảng thời gian cố định.
 
 ## Dựng lại từ đầu và đổi phiên bản mà không dừng sổ
 
-`IncomeByDay` v1 có lỗi nghiệp vụ: chia ngày theo UTC. Thanh toán `TN-0002` lúc 17:30 UTC là 00:30 ngày hôm sau giờ Việt Nam, nên v1 cho doanh thu ngày 03/11 là 8.400 và ngày 04/11 là 4.200, trong khi đúng phải là 5.100 và 7.500. Sửa logic là phiên bản 2 và dựng lại từ log.
+`IncomeByDay` v1 có lỗi nghiệp vụ: chia ngày theo UTC. Thanh toán `TN-0002` lúc 17:30 UTC là 00:30 ngày hôm sau giờ Việt Nam, nên v1 cho doanh thu ngày 03/11 là 8.400 và ngày 04/11 là 4.200, trong khi đúng phải là 5.100 và 7.500. Sửa logic thành phiên bản 2 rồi dựng lại từ log.
 
 Sổ vẫn nhận bút toán suốt quy trình bốn bước:
 
@@ -229,13 +229,13 @@ Lag giảm đúng một lô mỗi bước và `--verify` kiểm điều đó. Co
 
 | Khía cạnh | CQRS (bài C#) | Event sourcing có chừng mực (bài này) |
 | --- | --- | --- |
-| Quyết định | Tách đường ghi và đường đọc | Chuỗi sự kiện là nguồn sự thật |
+| Quyết định | Tách đường ghi và đường đọc | Chuỗi sự kiện là nguồn dữ liệu gốc |
 | Trạng thái hiện tại | Lưu trong bảng của aggregate | Kết quả gộp, dựng lại được |
 | Đường đọc | Query chọn thẳng từ bảng đó, cùng PostgreSQL | Bảng đọc riêng, lệch thì xoá và replay từ log |
 
 Chữ «projection» ở bài C# là phép chọn cột của query, không phải bảng đọc như ở đây. Hai thứ độc lập: CQRS không cần event sourcing (Trip ở C#), event sourcing không cần mediator. Giao sự kiện sang service khác là việc của outbox ở [bài 37](/articles/rust-outbox-inbox-idempotent-consumer).
 
-## Khi nào không nên event sourcing toàn hệ thống?
+## Khi nào không nên dùng event sourcing cho toàn hệ thống?
 
 Mặc định là không. Event sourcing trả giá bằng lag, replay, schema sự kiện phải tương thích mãi mãi và eventual consistency. Giá đó chỉ đáng khi lịch sử là chính dữ liệu. Với Tới Nơi:
 
@@ -250,7 +250,7 @@ Mặc định là không. Event sourcing trả giá bằng lag, replay, schema s
 
 <div class="tkh-callout tkh-callout--warn">
 <span class="tkh-callout-title">Giới hạn của ví dụ</span>
-<p>Một PostgreSQL local, log tối đa 5.000 bút toán, không có tải ghi liên tục lúc đo. Chưa có giám sát lag, chưa đặt <code>idle_in_transaction_session_timeout</code> để chặn giao dịch treo, chưa dọn bảng <code>_v1</code>, chưa thử logical decoding, chưa kiểm <code>xmin</code> trên replica, với nhiều database, hay sau restore. <code>NaiveId</code>, <code>HorizonId</code> và <code>apply_commit_without_checkpoint</code> chỉ để minh hoạ, đừng sao chép vào service thật.</p></div>
+<p>Một PostgreSQL local, log tối đa 5.000 bút toán, không có tải ghi liên tục lúc đo. Chưa có giám sát lag, chưa đặt <code>idle_in_transaction_session_timeout</code> để chặn transaction treo, chưa dọn bảng <code>_v1</code>, chưa thử logical decoding, chưa kiểm <code>xmin</code> trên replica, với nhiều database, hay sau restore. <code>NaiveId</code>, <code>HorizonId</code> và <code>apply_commit_without_checkpoint</code> chỉ để minh hoạ, đừng sao chép vào service thật.</p></div>
 
 ## Chạy ví dụ và kiểm chứng
 

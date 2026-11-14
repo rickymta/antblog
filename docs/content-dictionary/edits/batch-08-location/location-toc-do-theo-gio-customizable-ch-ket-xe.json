@@ -1,0 +1,233 @@
+{
+ "file": "location-toc-do-theo-gio-customizable-ch-ket-xe.md",
+ "edits": [
+  {
+   "old": "Số liệu ở trên là của hồ sơ kẹt xe",
+   "new": "Số liệu trên lấy từ hồ sơ kẹt xe",
+   "reason": "Câu gượng",
+   "severity": "medium"
+  },
+  {
+   "old": "Mọi số đo trên đồ thị HCM",
+   "new": "Mọi số đo đều lấy trên đồ thị HCM",
+   "reason": "Thiếu động từ",
+   "severity": "medium"
+  },
+  {
+   "old": "và chậm hơn bao nhiêu ở truy vấn.",
+   "new": "và chậm hơn bao nhiêu lần ở truy vấn.",
+   "reason": "Thiếu đơn vị so sánh",
+   "severity": "low"
+  },
+  {
+   "old": "Cái giá: truy vấn khoảng cách chậm hơn CH thường",
+   "new": "Cái giá là truy vấn khoảng cách chậm hơn CH thường",
+   "reason": "Câu cụt",
+   "severity": "low"
+  },
+  {
+   "old": "để có thứ mà thử thuật toán cập nhật trọng số",
+   "new": "để có dữ liệu mà thử thuật toán cập nhật trọng số",
+   "reason": "Dùng từ mơ hồ «thứ»",
+   "severity": "medium"
+  },
+  {
+   "old": "hệ số này là `1 − chỉ_số_kẹt(h) × độ_nặng`, kẹp tối thiểu 0,2.",
+   "new": "hệ số này là `1 − chỉ_số_kẹt(h) × độ_nặng`, nhưng không được dưới 0,2.",
+   "reason": "«kẹp» là thuật ngữ chưa quen với người đọc",
+   "severity": "medium"
+  },
+  {
+   "old": "Chỉ số kẹt có hai đỉnh sáng và chiều:",
+   "new": "Chỉ số kẹt có hai đỉnh, một vào buổi sáng và một vào buổi chiều:",
+   "reason": "Cụm tự ghép nghe cụt",
+   "severity": "medium"
+  },
+  {
+   "old": "đi từ 16,04 km/h lúc 1–4 giờ xuống",
+   "new": "giảm từ 16,04 km/h lúc 1–4 giờ xuống",
+   "reason": "Động từ không tự nhiên",
+   "severity": "low"
+  },
+  {
+   "old": "Giờ 8 và giờ 18 ra cùng số vì",
+   "new": "Giờ 8 và giờ 18 cho cùng một số vì",
+   "reason": "Cách nói khẩu ngữ",
+   "severity": "low"
+  },
+  {
+   "old": "thứ tự ưu tiên dùng số shortcut sinh ra.",
+   "new": "thứ tự ưu tiên dựa vào số shortcut sinh ra.",
+   "reason": "Câu gượng",
+   "severity": "medium"
+  },
+  {
+   "old": "nên 24 CH cỡ 205 MB",
+   "new": "nên 24 CH chiếm cỡ 205 MB",
+   "reason": "Câu thiếu động từ",
+   "severity": "medium"
+  },
+  {
+   "old": "Đó là chỗ Customizable CH muốn giải quyết.",
+   "new": "Đó là bài toán Customizable CH muốn giải quyết.",
+   "reason": "Diễn đạt gượng",
+   "severity": "low"
+  },
+  {
+   "old": "kiểu chia lồng nhau đơn giản.",
+   "new": "một dạng đơn giản của chia lồng nhau (nested dissection).",
+   "reason": "Giải thích thuật ngữ ở lần đầu",
+   "severity": "medium"
+  },
+  {
+   "old": "Pha 3 là vòng lặp ba tầng sau:",
+   "new": "Pha 3 là vòng lặp ba tầng như sau:",
+   "reason": "Thiếu chữ",
+   "severity": "medium"
+  },
+  {
+   "old": "mỗi cặp hàng xóm đi lên",
+   "new": "mỗi cặp láng giềng đi lên",
+   "reason": "Thống nhất «láng giềng» như bài 25",
+   "severity": "low"
+  },
+  {
+   "old": "khi tới `x` thì `w(y,x)` và `w(x,z)` đã nhận đủ cải thiện từ mọi nút thấp hơn",
+   "new": "khi tới `x` thì `w(y,x)` và `w(x,z)` đã được cải thiện hết mức qua mọi nút thấp hơn",
+   "reason": "Giọng dịch máy",
+   "severity": "medium"
+  },
+  {
+   "old": "Phần đắt được làm một lần:",
+   "new": "Phần tốn kém được làm một lần:",
+   "reason": "Từ thông tục",
+   "severity": "low"
+  },
+  {
+   "old": "Engine dùng nó thế nào:",
+   "new": "Engine dùng CCH thế nào:",
+   "reason": "Bỏ «nó»",
+   "severity": "medium"
+  },
+  {
+   "old": "CH cho đúng chi phí của Dijkstra trên trọng số giờ đó",
+   "new": "CH cho ra đúng chi phí mà Dijkstra tính trên trọng số giờ đó",
+   "reason": "Thiếu động từ, câu gượng",
+   "severity": "medium"
+  },
+  {
+   "old": "Đây là phần cần đọc thẳng, không làm đẹp.",
+   "new": "Đây là phần cần nói thẳng, không tô vẽ.",
+   "reason": "Diễn đạt gượng",
+   "severity": "low"
+  },
+  {
+   "old": "Thứ nhất, và không tránh được ở mọi CCH:",
+   "new": "Thứ nhất, nguyên nhân này không tránh được ở mọi CCH:",
+   "reason": "Câu thiếu chủ ngữ",
+   "severity": "medium"
+  },
+  {
+   "old": "thứ tự chia theo toạ độ không bằng các cách chia đồ thị tốt",
+   "new": "thứ tự chia theo toạ độ kém hơn các cách chia đồ thị tốt",
+   "reason": "Câu cụt",
+   "severity": "medium"
+  },
+  {
+   "old": "Lab không tách được phần nào đóng góp bao nhiêu.",
+   "new": "Lab không tách được mỗi nguyên nhân đóng góp bao nhiêu.",
+   "reason": "Câu gượng",
+   "severity": "medium"
+  },
+  {
+   "old": "Từ hai con số ở trên: chốt nhiều nút hơn 4,6 lần",
+   "new": "Hai con số ở trên cho thấy CCH chốt nhiều nút hơn 4,6 lần",
+   "reason": "Câu thiếu chủ ngữ",
+   "severity": "medium"
+  },
+  {
+   "old": "Dòng cuối là đúng cách simulator làm khi bật",
+   "new": "Dòng cuối chính là cách simulator làm khi bật",
+   "reason": "Giọng dịch máy",
+   "severity": "low"
+  },
+  {
+   "old": "chọn vector theo giờ mô phỏng.",
+   "new": "rồi chọn vector theo giờ mô phỏng.",
+   "reason": "Thiếu từ nối",
+   "severity": "low"
+  },
+  {
+   "old": "Tách theo khoảng cách chim bay ở giờ 8: dưới 2 km",
+   "new": "Tách theo khoảng cách chim bay ở giờ 8 (mỗi nhóm ghi mức thiếu của ETA rồi mức chậm hơn của tuyến): dưới 2 km",
+   "reason": "Hai tỉ lệ không có nhãn nên khó hiểu",
+   "severity": "medium"
+  },
+  {
+   "old": "ETA ghi vào hàm mục tiêu và vào lời hứa với khách phải dùng trọng số theo giờ;",
+   "new": "ETA dùng trong hàm mục tiêu và trong lời hứa với khách phải tính bằng trọng số theo giờ;",
+   "reason": "Câu ghép cụt, khó hiểu",
+   "severity": "high"
+  },
+  {
+   "old": "còn muốn chỉ so thứ hạng tuyến thì tốc độ tĩnh chưa tệ.",
+   "new": "còn nếu chỉ cần so thứ hạng các tuyến thì tốc độ tĩnh chưa tệ.",
+   "reason": "Trật tự từ gượng",
+   "severity": "medium"
+  },
+  {
+   "old": "(300 cặp đầu để kiểm đúng)",
+   "new": "(300 cặp đầu dùng để kiểm tra tính đúng)",
+   "reason": "Cụm cụt",
+   "severity": "medium"
+  },
+  {
+   "old": "`verify-p03.sh` chạy phần kiểm đúng trên đồ thị tổng hợp.",
+   "new": "`verify-p03.sh` chạy phần kiểm tra tính đúng trên đồ thị tổng hợp.",
+   "reason": "Cụm cụt",
+   "severity": "medium"
+  },
+  {
+   "old": "không có sự cố, mưa, sự kiện.",
+   "new": "không có sự cố, trời mưa hay sự kiện.",
+   "reason": "Cụm cụt",
+   "severity": "low"
+  },
+  {
+   "old": "**Khung giờ, chưa phụ thuộc thời gian.**",
+   "new": "**Chia theo khung giờ, chưa phụ thuộc thời gian.**",
+   "reason": "Cụm cụt, thiếu động từ",
+   "severity": "medium"
+  },
+  {
+   "old": "lab đo tải của bài 29 không bật.",
+   "new": "lab đo tải của bài 29 không bật cờ này.",
+   "reason": "Câu thiếu tân ngữ",
+   "severity": "medium"
+  },
+  {
+   "old": "Con số 2,67 gần hơn với điều nên trông đợi.",
+   "new": "Con số 2,67 sát hơn với mức nên trông đợi.",
+   "reason": "Giọng dịch máy",
+   "severity": "low"
+  },
+  {
+   "old": "và truy vấn là phần lớn tải,",
+   "new": "và truy vấn chiếm phần lớn tải,",
+   "reason": "Cách nói gượng",
+   "severity": "medium"
+  },
+  {
+   "old": "với tải truy vấn lớn chắc chắn vượt ngưỡng đó",
+   "new": "với lượng truy vấn lớn chắc chắn vượt ngưỡng đó",
+   "reason": "Cách nói chưa tự nhiên",
+   "severity": "low"
+  },
+  {
+   "old": "Tách thứ tự theo chia lồng nhau khỏi trọng số.",
+   "new": "Tách thứ tự theo kiểu chia lồng nhau khỏi trọng số.",
+   "reason": "Giải thích thuật ngữ",
+   "severity": "medium"
+  }
+ ]
+}

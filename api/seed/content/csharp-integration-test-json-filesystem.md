@@ -1,6 +1,6 @@
 ---
 slug: csharp-integration-test-json-filesystem
-title: "Integration test: kiểm chứng JSON và filesystem của báo giá C#"
+title: "Integration test: kiểm chứng JSON và filesystem cho báo giá trong C#"
 summary: "Bài 15: dùng rule thật, serializer thật và file tạm để kiểm tra round-trip báo giá; phân biệt lỗi I/O, JSON lỗi và giới hạn transaction của file demo."
 category: csharp-intermediate
 level: intermediate
@@ -8,7 +8,7 @@ tags: [csharp, dotnet, dotnet-10, toi-noi]
 language: vi
 ---
 
-Đây là **bài 15** trong loạt **C# và .NET 10 qua [Tới Nơi](/articles/du-an-mau-toi-noi)**. Các ví dụ target `net10.0`; code trong repository và các đoạn đầy đủ dưới đây dùng cùng implementation được chạy kiểm chứng.
+Đây là **bài 15** trong loạt **C# và .NET 10 qua [Tới Nơi](/articles/du-an-mau-toi-noi)**. Các ví dụ target `net10.0`; code trong repository và các đoạn đầy đủ dưới đây dùng cùng một bản cài đặt đã được chạy kiểm chứng.
 
 <div class="tkh-callout tkh-callout--example">
 <span class="tkh-callout-title">Thử trước khi đọc</span>
@@ -18,19 +18,19 @@ language: vi
 
 ## Rule đúng nhưng dữ liệu đọc lại khác
 
-Unit test chứng minh 2,501 km có cước 14.255 VND. Nhưng nếu cước bị serialize thành chuỗi theo culture rồi đọc sai, hoặc thời điểm mất offset, dữ liệu lưu trữ vẫn lỗi. Integration test ở đây ghép rule thật, System.Text.Json và filesystem thật trong thư mục tạm.
+Unit test chứng minh 2,501 km có cước 14.255 VND. Nhưng nếu cước bị serialize thành chuỗi theo culture rồi đọc sai, hoặc thời điểm bị mất offset, dữ liệu lưu trữ vẫn lỗi. Integration test ở đây ghép rule thật, System.Text.Json và filesystem thật trong thư mục tạm.
 
-Phạm vi được gọi tên cụ thể: đây là test tích hợp archive JSON/file, chưa phải PostgreSQL, chưa đo fsync/durability khi mất điện, chưa kiểm tra quyền của account production. Không dùng một nhãn integration để ngụ ý mọi hạ tầng đã được kiểm chứng.
+Ta gọi tên phạm vi một cách cụ thể: đây là test tích hợp archive JSON/file, chưa phải PostgreSQL, chưa đo độ bền dữ liệu (fsync/durability) khi mất điện, chưa kiểm tra quyền của account production. Đừng dùng một nhãn integration để ngụ ý rằng mọi hạ tầng đã được kiểm chứng.
 
-QuoteSnapshot có Id, Fare và IssuedAt. Ta ghi snapshot có cước từ StandardFarePolicy, sau đó tạo instance JsonQuoteArchive mới để đọc. Đọc qua object mới ngăn một implementation chỉ trả cache trong cùng object vượt test mà chưa thực sự lấy dữ liệu file.
+QuoteSnapshot có Id, Fare và IssuedAt. Ta ghi snapshot có cước từ StandardFarePolicy, sau đó tạo instance JsonQuoteArchive mới để đọc. Đọc qua object mới giúp ngăn một bản cài đặt chỉ trả về cache trong cùng object mà vẫn vượt qua test dù chưa thực sự lấy dữ liệu từ file.
 
-## Mỗi ca có thư mục riêng
+## Mỗi test case có thư mục riêng
 
 Test tạo thư mục trong Path.GetTempPath với tiền tố toi-noi và GUID. Tên file quote.json cố định bên trong thư mục đó; không nhận path từ dữ liệu khách. Khi test kết thúc, Dispose dọn đúng thư mục được test tạo.
 
-Mỗi instance test có state riêng; các ca chạy đồng thời không giẫm cùng một file. Không dùng một đường dẫn cố định trên desktop, không yêu cầu sửa file của người dùng và không đưa dữ liệu giấy tờ thật vào fixture.
+Mỗi instance test có state riêng; các test case chạy đồng thời không ghi đè lên cùng một file. Test không dùng một đường dẫn cố định trên desktop, không yêu cầu sửa file của người dùng và không đưa dữ liệu giấy tờ thật vào fixture.
 
-Cleanup là một phần thiết kế fixture. Nếu mở file mà không dispose, hệ điều hành có thể không cho dọn; lỗi dọn là dấu hiệu cần xem chứ không vội tắt test. Tính đúng nghiệp vụ và quản lý tài nguyên cần được quan sát cùng nhau.
+Cleanup là một phần thiết kế fixture. Nếu mở file mà không dispose, hệ điều hành có thể không cho dọn; lỗi khi dọn dẹp là dấu hiệu cần xem xét, đừng vội tắt test. Tính đúng nghiệp vụ và quản lý tài nguyên cần được kiểm tra cùng nhau.
 
 <figure class="tkh-fig">
 <div class="tkh-fig-box">
@@ -39,21 +39,21 @@ Cleanup là một phần thiết kế fixture. Nếu mở file mà không dispos
 <figcaption>Hình 1. Integration test đi qua serializer và file thật, khác unit test dùng storage giả.</figcaption>
 </figure>
 
-## Round-trip kiểm tra nhiều hơn “file có tồn tại”
+## Round-trip kiểm tra nhiều điều hơn là “file có tồn tại”
 
-SaveAsync serialize QuoteSnapshot bằng System.Text.Json rồi ghi text. ReadAsync đọc text và deserialize. Test so toàn bộ record, số tiền 14.255 và offset UTC. Chỉ assert File.Exists không phát hiện field mất, kiểu tiền đổi hoặc object đọc lại không cùng dữ liệu.
+SaveAsync serialize QuoteSnapshot bằng System.Text.Json rồi ghi text. ReadAsync đọc text và deserialize. Test so toàn bộ record, số tiền 14.255 và offset UTC. Chỉ assert File.Exists thì không phát hiện được field bị mất, kiểu tiền bị đổi hoặc object đọc lại không cùng dữ liệu.
 
-JSON null được chuyển thành InvalidDataException; JSON sai cú pháp tạo JsonException; thiếu file tạo FileNotFoundException. Ta không gom cả ba thành một báo giá 0 VND. CancellationToken được truyền vào API file để người gọi có thể huỷ phần việc còn hợp tác được.
+JSON null được chuyển thành InvalidDataException; JSON sai cú pháp tạo JsonException; thiếu file tạo FileNotFoundException. Ta không gom cả ba thành một báo giá 0 VND. CancellationToken được truyền vào API file để người gọi có thể huỷ những phần việc vẫn còn huỷ được theo cơ chế hợp tác.
 
-Bộ test có ca token huỷ từ trước khi ghi và kiểm tra byte cũ không đổi theo hành vi API được dùng. Kết quả đó không chứng minh một thao tác đang ghi dở có rollback an toàn. Cần phân biệt chính xác điểm huỷ được kiểm tra.
+Bộ test có test case dùng token đã huỷ từ trước khi ghi, và kiểm tra các byte cũ không đổi theo hành vi của API được dùng. Kết quả đó không chứng minh một thao tác đang ghi dở có rollback an toàn. Cần phân biệt chính xác điểm huỷ được kiểm tra.
 
-## Đây chưa là Repository/Unit of Work production
+## Đây chưa phải là Repository/Unit of Work dùng cho production
 
-WriteAllTextAsync ghi trực tiếp một file; nó không cung cấp transaction nhiều object, concurrency giữa process, atomic replace hoặc cơ chế phục hồi khi process chết giữa chừng. Trong bài không có nhiều writer cùng path. Đừng đặt tên class là UnitOfWork rồi suy ra đã có những đảm bảo đó.
+WriteAllTextAsync ghi trực tiếp một file; hàm này không cung cấp transaction cho nhiều object, kiểm soát concurrency giữa các process, atomic replace hoặc cơ chế phục hồi khi process chết giữa chừng. Trong bài không có nhiều writer cùng path. Đừng đặt tên class là UnitOfWork rồi suy ra đã có những đảm bảo đó.
 
-Khi tới EF Core/PostgreSQL, test sẽ chạy database thật có transaction, unique constraint, optimistic concurrency và migration. SQLite/in-memory provider cũng không tự chứng minh hành vi PostgreSQL. Mỗi công cụ chỉ có giá trị cho ranh giới mà nó thực thi.
+Khi đến phần EF Core/PostgreSQL, test sẽ chạy trên database thật có transaction, unique constraint, optimistic concurrency và migration. SQLite/in-memory provider cũng không tự chứng minh hành vi PostgreSQL. Mỗi công cụ chỉ có giá trị cho ranh giới mà nó thực thi.
 
-Ở kiến trúc đích Tới Nơi, abstraction lưu trữ đứng sau use case và implementation hạ tầng được test theo hợp đồng. Archive nhỏ hiện tại chỉ tạo nền để hiểu vì sao unit test và integration test bổ sung nhau.
+Trong kiến trúc đích của Tới Nơi, abstraction lưu trữ đứng sau use case và phần cài đặt hạ tầng được test theo hợp đồng. Archive nhỏ hiện tại chỉ làm nền để hiểu vì sao unit test và integration test bổ sung cho nhau.
 
 <figure class="tkh-fig">
 <div class="tkh-fig-box">
@@ -64,11 +64,11 @@ Khi tới EF Core/PostgreSQL, test sẽ chạy database thật có transaction, 
 
 ## Bốn tình huống và bài tập
 
-Bốn ca gồm round-trip thật, thiếu file, JSON hỏng và pre-cancelled write giữ dữ liệu đã có. Các assertion dựa vào đầu ra và exception theo hợp đồng, không kiểm private field của serializer.
+Bốn test case gồm round-trip thật, thiếu file, JSON hỏng và ghi với token đã huỷ từ trước mà vẫn giữ dữ liệu đã có. Các assertion dựa vào đầu ra và exception theo hợp đồng, không kiểm private field của serializer.
 
-**Bài tập:** nếu thay SaveAsync bằng chỉ gán một field trong memory, round-trip qua instance mới có qua không? Muốn bảo vệ trước process crash giữa lần ghi, cần thêm loại thí nghiệm nào?
+**Bài tập:** nếu thay SaveAsync bằng việc chỉ gán một field trong bộ nhớ, round-trip qua instance mới có vượt qua test không? Muốn phòng ngừa process crash giữa lúc ghi, cần thêm loại thí nghiệm nào?
 
-<details><summary>Xem đáp án</summary><p>Không, instance đọc mới không có dữ liệu và file mong đợi chưa được ghi. Crash consistency cần cơ chế ghi/commit phù hợp cùng test gián đoạn; không suy ra từ test happy path hoặc token đã huỷ trước khi mở file.</p></details>
+<details><summary>Xem đáp án</summary><p>Không, instance đọc mới không có dữ liệu và file mong đợi chưa được ghi. Muốn bảo đảm crash consistency cần cơ chế ghi/commit phù hợp cùng test gián đoạn; không thể suy ra điều đó từ test happy path hoặc token đã huỷ trước khi mở file.</p></details>
 
 ## Chạy ví dụ và kiểm chứng
 
@@ -78,7 +78,7 @@ Từ thư mục gốc repository:
 dotnet test examples/toi-noi-dotnet/15-integration-test/QuoteArchive.Tests
 ```
 
-Lần đầu cần restore các package test từ NuGet. Project được pin phiên bản trong .csproj; mỗi ca test có dữ liệu và tài nguyên riêng để chạy lại được.
+Lần đầu cần restore các package test từ NuGet. Project được pin phiên bản trong .csproj; mỗi test case có dữ liệu và tài nguyên riêng để chạy lại được.
 
 ### JsonQuoteArchive.cs — 15-integration-test/QuoteArchive/JsonQuoteArchive.cs
 

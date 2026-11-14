@@ -1,0 +1,185 @@
+{
+ "file": "python-pydantic-validation-settings.md",
+ "edits": [
+  {
+   "old": "dùng pydantic v2 kiểm hồ sơ tài xế ở biên hệ thống",
+   "new": "dùng pydantic v2 kiểm tra hồ sơ tài xế ở biên hệ thống",
+   "reason": "«kiểm» đứng một mình",
+   "severity": "low"
+  },
+  {
+   "old": "dữ liệu sai chui sâu sẽ gây lỗi",
+   "new": "dữ liệu sai đi sâu vào bên trong sẽ gây lỗi",
+   "reason": "«chui sâu» khẩu ngữ, gượng",
+   "severity": "low"
+  },
+  {
+   "old": "Bài này đưa vào **pydantic v2**, thư viện kiểm tra dữ liệu dựa trên type hints, rồi dùng nó để đọc cấu hình từ biến môi trường.",
+   "new": "Bài này giới thiệu **pydantic v2**, thư viện kiểm tra dữ liệu dựa trên type hints, rồi dùng chính thư viện đó để đọc cấu hình từ biến môi trường.",
+   "reason": "«đưa vào» là calque của introduce, «nó» mơ hồ",
+   "severity": "medium"
+  },
+  {
+   "old": "## Một cửa kiểm ở biên hệ thống",
+   "new": "## Một cửa kiểm tra ở biên hệ thống",
+   "reason": "«cửa kiểm» cụt",
+   "severity": "low"
+  },
+  {
+   "old": "nơi dữ liệu ngoài thành dữ liệu trong;",
+   "new": "nơi dữ liệu ngoài trở thành dữ liệu bên trong;",
+   "reason": "câu cụt, thiếu động từ",
+   "severity": "low"
+  },
+  {
+   "old": "Giới hạn của nó ở mục «Gán lại thuộc tính».",
+   "new": "Giới hạn của tuỳ chọn này nằm ở mục «Gán lại thuộc tính».",
+   "reason": "câu thiếu động từ, «nó» mơ hồ",
+   "severity": "medium"
+  },
+  {
+   "old": "Model chỉ kiểm **hình dạng** (12 chữ số), không kiểm số có thật hay không, việc đó cần nguồn dữ liệu chính thống chứ không phải một validator.",
+   "new": "Model chỉ kiểm tra **hình dạng** (12 chữ số), không kiểm tra số có thật hay không; việc đó cần nguồn dữ liệu chính thức chứ không phải một validator.",
+   "reason": "hai vế dính bằng dấu phẩy, «chính thống» gượng",
+   "severity": "medium"
+  },
+  {
+   "old": "Quy tắc phức tạp hơn regex dùng `@field_validator`, viết thành classmethod nhận giá trị đã qua kiểm kiểu:",
+   "new": "Quy tắc phức tạp hơn regex thì dùng `@field_validator`, viết thành classmethod nhận giá trị đã qua bước kiểm tra kiểu:",
+   "reason": "câu thiếu liên kết, «kiểm kiểu» cụt",
+   "severity": "medium"
+  },
+  {
+   "old": "Validator không chỉ kiểm mà còn **chuẩn hoá**:",
+   "new": "Validator không chỉ kiểm tra mà còn **chuẩn hoá**:",
+   "reason": "«kiểm» đứng một mình",
+   "severity": "low"
+  },
+  {
+   "old": "Quy tắc liên quan nhiều trường đặt ở",
+   "new": "Quy tắc liên quan tới nhiều trường đặt ở",
+   "reason": "thiếu giới từ",
+   "severity": "low"
+  },
+  {
+   "old": "chỉ chạy khi mọi trường đã qua, hồ sơ",
+   "new": "chỉ chạy khi mọi trường đã qua bước kiểm tra, hồ sơ",
+   "reason": "câu cụt, «đã qua» thiếu tân ngữ",
+   "severity": "medium"
+  },
+  {
+   "old": "**mà thuộc tính vẫn đã bị đổi**",
+   "new": "**mà thuộc tính vẫn bị đổi**",
+   "reason": "«vẫn đã» gượng",
+   "severity": "medium"
+  },
+  {
+   "old": "từ hồ sơ cũ cộng thay đổi qua `model_validate`",
+   "new": "từ hồ sơ cũ kèm thay đổi qua `model_validate`",
+   "reason": "«cộng» dịch máy từ plus",
+   "severity": "low"
+  },
+  {
+   "old": "bỏ đường link tài liệu và phần",
+   "new": "bỏ đường liên kết tới tài liệu và phần",
+   "reason": "từ tiếng Anh thông thường «link»",
+   "severity": "low"
+  },
+  {
+   "old": "`error_report` thành thân phản hồi 422 hoặc 400; ở consumer Kafka, nó là lý do đưa message vào kho cách ly.",
+   "new": "`error_report` trở thành thân phản hồi 422 hoặc 400; ở consumer Kafka, báo cáo đó là lý do đưa message vào kho cách ly.",
+   "reason": "«nó» mơ hồ, «thành» thiếu động từ",
+   "severity": "medium"
+  },
+  {
+   "old": "**lax**: nó chấp nhận một số phép chuyển an toàn",
+   "new": "**lax**: pydantic chấp nhận một số phép chuyển an toàn",
+   "reason": "tránh «nó» đầu mệnh đề",
+   "severity": "medium"
+  },
+  {
+   "old": "số `2.5` trong JSON được nhận lặng lẽ",
+   "new": "số `2.5` trong JSON được nhận mà không báo gì",
+   "reason": "«lặng lẽ» là calque của silently",
+   "severity": "medium"
+  },
+  {
+   "old": "không phải hợp đồng đã tài liệu hoá",
+   "new": "không phải hợp đồng được ghi trong tài liệu",
+   "reason": "«đã tài liệu hoá» gượng",
+   "severity": "low"
+  },
+  {
+   "old": "lax hợp với dữ liệu text từ ngoài.",
+   "new": "lax hợp với dữ liệu dạng văn bản từ ngoài.",
+   "reason": "từ tiếng Anh thông thường «text»",
+   "severity": "low"
+  },
+  {
+   "old": "Gói `pydantic-settings` cho `BaseSettings`, cùng cơ chế kiểm tra như",
+   "new": "Gói `pydantic-settings` cung cấp `BaseSettings`, dùng cùng cơ chế kiểm tra như",
+   "reason": "«cho» mơ hồ, thiếu động từ",
+   "severity": "medium"
+  },
+  {
+   "old": "`SecretStr` giữ chuỗi nối có mật khẩu khỏi `repr` và log;",
+   "new": "`SecretStr` giữ chuỗi kết nối có mật khẩu khỏi `repr` và log;",
+   "reason": "«chuỗi nối» là cụm tự ghép cụt",
+   "severity": "high"
+  },
+  {
+   "old": "cấu hình sai làm service dừng ngay",
+   "new": "cấu hình sai khiến service dừng ngay",
+   "reason": "«làm … dừng» gượng",
+   "severity": "low"
+  },
+  {
+   "old": "Cần kiểm, ép kiểu, báo lỗi có cấu trúc ngay biên",
+   "new": "Cần kiểm tra, ép kiểu, báo lỗi có cấu trúc ngay tại biên",
+   "reason": "câu cụt",
+   "severity": "low"
+  },
+  {
+   "old": "Quy tắc ngón tay cái:",
+   "new": "Quy tắc kinh nghiệm:",
+   "reason": "«ngón tay cái» là calque của rule of thumb",
+   "severity": "medium"
+  },
+  {
+   "old": "chạy 53 ca kiểm chứng và kết thúc bằng:",
+   "new": "chạy 53 test case kiểm chứng và kết thúc bằng:",
+   "reason": "thống nhất «test case»",
+   "severity": "medium"
+  },
+  {
+   "old": "Nếu một ca lệch, nó in `SAI: <tên ca>`, rồi `FAIL n/m` (n là số ca đạt, m là tổng)",
+   "new": "Nếu một test case bị lệch, chương trình in `SAI: <tên ca>`, rồi `FAIL n/m` (n là số test case đạt, m là tổng)",
+   "reason": "thống nhất «test case», tránh «nó» mơ hồ",
+   "severity": "medium"
+  },
+  {
+   "old": "<p>Validator chỉ kiểm hình dạng dữ liệu giả:",
+   "new": "<p>Validator chỉ kiểm tra hình dạng của dữ liệu giả:",
+   "reason": "«kiểm» đứng một mình",
+   "severity": "low"
+  },
+  {
+   "old": "Nó không biết số có thật,",
+   "new": "Validator không biết số có thật,",
+   "reason": "«Nó» đầu câu mơ hồ",
+   "severity": "medium"
+  },
+  {
+   "old": "chặn được ca này;",
+   "new": "chặn được trường hợp này;",
+   "reason": "bỏ «ca»",
+   "severity": "medium"
+  },
+  {
+   "old": "theo thứ tự khai báo trường;</p>",
+   "new": "theo thứ tự khai báo trường.</p>",
+   "reason": "câu kết thúc bằng dấu chấm phẩy, cụt",
+   "severity": "low"
+  }
+ ]
+}

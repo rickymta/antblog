@@ -1,7 +1,7 @@
 ---
 slug: rust-audit-append-only-hash-chain-phan-quyen-pii
 title: "Audit, bất biến dữ liệu và bảo mật sổ cái"
-summary: "Bài 50: REVOKE và trigger chặn sửa sổ nhưng chủ bảng vượt được; hash chain SHA-256 phát hiện dòng bị sửa, điểm neo ngoài database lộ cả chuỗi bị tính lại; phân quyền Finance/CS/Admin đo bằng role thật; PII tối thiểu."
+summary: "Bài 50: REVOKE và trigger chặn sửa sổ nhưng chủ bảng vượt được; hash chain SHA-256 phát hiện dòng bị sửa, điểm neo ngoài database cho thấy cả chuỗi đã bị tính lại; phân quyền Finance/CS/Admin được kiểm tra bằng role thật; PII tối thiểu."
 category: rust-advanced
 level: advanced
 tags: [rust, toi-noi, ledger, postgresql, security, audit]
@@ -18,9 +18,9 @@ Cuối tháng, Finance hỏi: dòng `driver:DR-001` của `JE-000002` ghi 20.400
 <details><summary>Xem đáp án</summary><p>Được: chủ bảng chạy <code>ALTER TABLE ... DISABLE TRIGGER</code>, sửa, bật lại. Hash chain không ngăn việc đó nhưng biến «sửa lặng lẽ» thành «sửa mà <code>verify_chain</code> chỉ ra đúng dòng». Kẻ tính lại cả chuỗi thì chỉ điểm neo ngoài database vạch trần.</p></details>
 </div>
 
-## Mỗi lớp chặn một loại kẻ, và bị loại kế tiếp vượt qua
+## Mỗi lớp chặn một loại kẻ tấn công, và bị loại kế tiếp vượt qua
 
-Role ứng dụng không có `UPDATE`, `DELETE`, `TRUNCATE` chặn bug và SQL nhầm, nhưng chủ bảng tự cấp lại quyền. Trigger chặn cả superuser, miễn là còn chạy: `DISABLE TRIGGER` tắt hẳn, còn superuser đặt `session_replication_role = replica` thì trigger vẫn bật mà không chạy, không cần DDL nào (test kiểm). Hash chain không chặn gì, nó để lại bằng chứng; điểm neo giữ bằng chứng ngoài tầm với của database.
+Role ứng dụng không có `UPDATE`, `DELETE`, `TRUNCATE` thì chặn được bug và SQL nhầm, nhưng chủ bảng tự cấp lại quyền. Trigger chặn cả superuser, miễn là còn chạy: `DISABLE TRIGGER` tắt hẳn, còn superuser đặt `session_replication_role = replica` thì trigger vẫn bật mà không chạy, không cần DDL nào (test kiểm). Hash chain không chặn gì, nó để lại bằng chứng; điểm neo giữ bằng chứng ngoài tầm với của database.
 
 <figure class="tkh-fig">
 <div class="tkh-fig-box">
@@ -31,7 +31,7 @@ Role ứng dụng không có `UPDATE`, `DELETE`, `TRUNCATE` chặn bug và SQL n
 
 ## REVOKE cho lỗi thật, nhưng chủ bảng vượt qua được
 
-Role là đối tượng của cả cluster, không nằm trong schema, nên mỗi ca tạo năm role mang tiền tố theo uuid của ca (`lab_<uuid>_owner`, `_writer`, `_cs`, `_finance`, `_admin`) và dọn bằng `DROP OWNED BY` rồi `DROP ROLE` cuối ca, kể cả khi thân ca lỗi. Role không có `LOGIN`; lab đổi vai bằng `SET ROLE` nên không có mật khẩu nào. Bảng thuộc `_owner` (role migration), service ledger chạy dưới `_writer`. Trích từ `sql/03_grants.sql` (`{p}` là tiền tố của ca):
+Role là đối tượng của cả cluster, không nằm trong schema, nên mỗi test case tạo năm role mang tiền tố theo uuid của test case (`lab_<uuid>_owner`, `_writer`, `_cs`, `_finance`, `_admin`) và dọn bằng `DROP OWNED BY` rồi `DROP ROLE` cuối test case, kể cả khi thân test case lỗi. Role không có `LOGIN`; lab đổi vai bằng `SET ROLE` nên không có mật khẩu nào. Bảng thuộc `_owner` (role migration), service ledger chạy dưới `_writer`. Trích từ `sql/03_grants.sql` (`{p}` là tiền tố của test case):
 
 ```sql
 -- Service ledger (danh tính của máy, không phải người): chỉ đọc và thêm.
@@ -58,9 +58,9 @@ Chủ bảng tự `REVOKE` rồi `GRANT` lại ngay; khi đó chỉ trigger còn
 
 ## Hash chain: hash cái gì, theo byte nào?
 
-Mỗi bút toán có một dòng trong `entry_chain`: `seq` tăng đều từ 1, `prev_hash`, `entry_hash`, với `entry_hash = SHA-256(prev_hash || canonical_bytes)`; dòng đầu có `prev_hash` là 32 byte 0. Sửa một byte trong bút toán đổi `entry_hash` của nó, còn dòng sau đã băm giá trị cũ.
+Mỗi bút toán có một dòng trong `entry_chain`: `seq` tăng đều từ 1, `prev_hash`, `entry_hash`, với `entry_hash = SHA-256(prev_hash || canonical_bytes)`; dòng đầu có `prev_hash` là 32 byte 0. Sửa một byte trong bút toán sẽ làm đổi `entry_hash` của nó, còn dòng sau đã băm giá trị cũ.
 
-Phần khó là `canonical_bytes`: mọi bên phải ra cùng byte từ cùng bút toán, mãi mãi. Không dùng JSON vì thứ tự khoá, khoảng trắng và cách viết số không cố định. Lab dùng dạng nhị phân có tiền tố phiên bản, số nguyên big-endian, chuỗi kèm độ dài `u32` (để `"ab"+"c"` không trùng `"a"+"bc"`), posting sắp theo `line_no`. Bảng theo đúng thứ tự byte, phủ đủ mọi cột của `journal_entries` và `postings`:
+Phần khó là `canonical_bytes`: mọi bên phải cho ra cùng dãy byte từ cùng một bút toán, mãi mãi. Không dùng JSON vì thứ tự khoá, khoảng trắng và cách viết số không cố định. Lab dùng dạng nhị phân có tiền tố phiên bản, số nguyên big-endian, chuỗi kèm độ dài `u32` (để `"ab"+"c"` không trùng `"a"+"bc"`), posting sắp theo `line_no`. Bảng dưới liệt kê theo đúng thứ tự byte và phủ đủ mọi cột của `journal_entries` và `postings`:
 
 | Trường | Mã hoá |
 |---|---|
@@ -106,7 +106,7 @@ pub fn entry_hash(prev_hash: &[u8; 32], canonical: &[u8]) -> [u8; 32] {
 }
 ```
 
-`posted_at` lấy bằng `extract(epoch ...)`, kiểu `numeric` nên không có sai số float. Với `JE-000001` của `TN-0001` (capture, `posted_at` cố định), lab in ra 130 byte và hash dưới đây; một đoạn Python dựng cùng byte rồi `shasum -a 256` cho cùng kết quả.
+`posted_at` lấy bằng `extract(epoch ...)`, kiểu `numeric` nên không có sai số float. Với `JE-000001` của `TN-0001` (capture, `posted_at` cố định), lab in ra 130 byte và hash dưới đây; một đoạn Python dựng cùng dãy byte rồi băm bằng `shasum -a 256` cho cùng kết quả.
 
 ```text
 JE-000001 canonical (130 byte): 544b482d4c45444745522d454e5452592d5631000000000000000100000014747269703a544e2d303030313a636170747572650000065fa22cba200000000002000000010000000f637573746f6d65723a43552d303031ffffffffffff9c6400000002000000137073703a766978616e683a636c656172696e67000000000000639c
@@ -156,7 +156,7 @@ sqlx::query(AssertSqlSafe(format!(
 .await?;
 ```
 
-Khoá advisory là của cả database, nên `LOCK_SQL` băm tên schema vào khoá để hai ca lab không chờ nhau. Ở `READ COMMITTED` mỗi câu lệnh có snapshot mới, nên sau khi có khoá ta thấy dòng transaction trước vừa commit; ở `REPEATABLE READ` ta đọc nhầm đầu chuỗi. Khoá được xin muộn nhất có thể, để đoạn xếp hàng chỉ từ lúc xin khoá tới `COMMIT`.
+Khoá advisory có phạm vi toàn database, nên `LOCK_SQL` băm tên schema vào khoá để hai test case của lab không chờ nhau. Ở `READ COMMITTED` mỗi câu lệnh có snapshot mới, nên sau khi có khoá ta thấy dòng transaction trước vừa commit; ở `REPEATABLE READ` ta đọc nhầm đầu chuỗi. Khoá được xin muộn nhất có thể, để đoạn phải xếp hàng chỉ kéo dài từ lúc xin khoá tới `COMMIT`.
 
 Cái giá là thông lượng. Bài C# [Transaction, optimistic concurrency và idempotency](/articles/dotnet10-transaction-concurrency-idempotency) dùng token phiên bản vì xung đột chỉ xảy ra trên cùng một chuyến; ở đây mọi bên nối vào cùng một đầu chuỗi nên phải xếp hàng. Số đo trên máy viết bài, không phải SLA, và máy đang rất tải (load 60–70): 100 bút toán, lần nhanh nhất trong 3 lần, ba lần chạy `--measure` (đơn vị: bút toán mỗi giây).
 
@@ -168,7 +168,7 @@ có chuỗi + khoá, 1 task      156     145      67
 có chuỗi + khoá, 8 task      238     297     182
 ```
 
-Số này nhiễu: cùng một ô lệch tới hơn hai lần, nên không rút ra con số tuyệt đối hay tỷ lệ chính xác. Chỉ kết luận về hướng: trong ba lần chạy, ở 8 task bản có chuỗi luôn thấp hơn rõ bản không chuỗi, vì đoạn cuối của mọi transaction xếp hàng, gồm cả chờ `COMMIT` ghi WAL (`synchronous_commit` đang `on`). Muốn giảm thì nối theo lô bởi một tiến trình, chia nhiều chuỗi (mỗi chuỗi một điểm neo) hoặc nối bất đồng bộ sau commit, đổi độ trễ phát hiện lấy thông lượng.
+Số này nhiễu: cùng một ô lệch tới hơn hai lần, nên không rút ra con số tuyệt đối hay tỷ lệ chính xác. Chỉ kết luận về hướng: trong ba lần chạy, ở 8 task bản có chuỗi luôn thấp hơn rõ bản không chuỗi, vì đoạn cuối của mọi transaction xếp hàng, gồm cả chờ `COMMIT` ghi WAL (`synchronous_commit` đang `on`). Muốn giảm thì nối theo lô bằng một tiến trình, chia nhiều chuỗi (mỗi chuỗi một điểm neo) hoặc nối bất đồng bộ sau commit, đánh đổi độ trễ phát hiện để lấy thông lượng.
 
 ## Kiểm tra chuỗi và neo ra ngoài
 
@@ -220,7 +220,7 @@ cắt đuôi chuỗi             : chuỗi nguyên vẹn, đã duyệt 4 dòng
 
 ## Phân quyền Finance, CS, Admin và bảng audit_log
 
-§11.2 tài liệu kiến trúc nêu: Customer Support xem thông tin cần thiết và không tự ý sửa ledger; Finance xem giao dịch, đối soát, refund theo approval workflow; Admin quản trị cấu hình và quyền, có MFA; Super Admin rất hạn chế. MFA và approval nằm ở tầng trên; role database chỉ là lớp cuối, nên Finance không có `INSERT` trực tiếp (refund đi qua service ledger sau khi duyệt) và Super Admin không phải role database. Mỗi ô dưới đây là một câu lệnh chạy dưới role đó (`SET ROLE`) trong transaction rồi rollback (`UPDATE ... WHERE false` kiểm quyền mà không đổi dữ liệu):
+§11.2 tài liệu kiến trúc nêu: Customer Support xem thông tin cần thiết và không tự ý sửa ledger; Finance xem giao dịch, đối soát, refund theo approval workflow; Admin quản trị cấu hình và quyền, có MFA; Super Admin rất hạn chế. MFA và bước phê duyệt nằm ở tầng trên; role database chỉ là lớp cuối, nên Finance không có `INSERT` trực tiếp (refund đi qua service ledger sau khi duyệt) và Super Admin không phải role database. Mỗi ô dưới đây là một câu lệnh chạy dưới role đó (`SET ROLE`) trong transaction rồi rollback (`UPDATE ... WHERE false` kiểm quyền mà không đổi dữ liệu):
 
 ```text
            đọc postings      đọc audit_log     ghi bút toán      UPDATE postings   DELETE audit_log  tắt trigger
@@ -233,7 +233,7 @@ owner      ok                ok                ok                ok             
 
 Tài liệu không quy định ở mức bảng, nên cả ma trận là cách lab diễn giải, trong đó hai chỗ là lựa chọn riêng của lab, không suy ra từ tài liệu: Admin không đọc tiền vì quản trị cấu hình và quyền không đòi xem số dư; CS không đọc `audit_log` vì audit chứa mã nhân viên và lý do nội bộ. Hàng `owner` cho thấy vì sao role đó không được chạy dịch vụ. Ô `UPDATE postings` của nó chỉ nói có quyền: `WHERE false` không có dòng nào nên trigger chưa chạy, có dòng thật thì vẫn `23001`.
 
-Câu hỏi «ai làm gì» thuộc về `audit_log`. Mỗi bút toán qua service ghi một dòng cùng transaction, nên bút toán thành công có dấu vết và bút toán lỗi không để lại dòng nào; ghi lách service thì không có, đó là lúc `verify_chain` báo `Unchained`:
+Câu hỏi «ai làm gì» thuộc về `audit_log`. Mỗi bút toán qua service ghi một dòng cùng transaction, nên bút toán thành công có dấu vết và bút toán lỗi không để lại dòng nào; ghi không qua service thì không có dòng nào, và đó là lúc `verify_chain` báo `Unchained`:
 
 | Cột | Ý nghĩa |
 |---|---|
@@ -283,13 +283,13 @@ cargo test --manifest-path examples/toi-noi-rust/50-audit-hash-chain/Cargo.toml
 cargo run  --release --manifest-path examples/toi-noi-rust/50-audit-hash-chain/Cargo.toml -- --measure
 ```
 
-`--verify` in các khối kết quả ở trên rồi kiểm từng giá trị; đạt thì in `VERIFY OK`. `cargo test` chạy 8 test đơn vị và 19 test tích hợp (cuộc đua dựng bằng `Barrier`, quét PII, dọn schema và năm role kể cả khi thân ca lỗi); không test nào assert thời gian. Lab dùng `sqlx` 0.9.0, `sha2` 0.11.1, `tracing-subscriber` 0.3.23.
+`--verify` in các khối kết quả ở trên rồi kiểm từng giá trị; đạt thì in `VERIFY OK`. `cargo test` chạy 8 test đơn vị và 19 test tích hợp (race condition dựng bằng `Barrier`, quét PII, dọn schema và năm role kể cả khi thân test case lỗi); không test nào assert thời gian. Lab dùng `sqlx` 0.9.0, `sha2` 0.11.1, `tracing-subscriber` 0.3.23.
 
 <div class="tkh-callout tkh-callout--warn">
 <span class="tkh-callout-title">Giới hạn của ví dụ</span>
 <p>Lab đổi vai bằng <code>SET ROLE</code> trên kết nối superuser nên chỉ đo quyền SQL của role: không kiểm được đăng nhập, <code>pg_hba.conf</code>, mật khẩu hay TLS, và <code>RESET ROLE</code> đưa phiên về superuser (test kiểm), nên đây không phải ranh giới bảo mật. Service thật phải đăng nhập bằng role riêng. Điểm neo chỉ là biến trong tiến trình. <code>verify_chain</code> nạp cả sổ vào bộ nhớ và đọc bằng hai câu riêng, nên chỉ đúng khi không có ghi đồng thời; production phải kiểm theo đoạn từ điểm neo gần nhất, trong một snapshot. Chưa có log DDL, row-level security, MFA, mã hoá lưu trữ; <code>accounts</code> và <code>audit_log</code> chưa nằm trong chuỗi. Lab không bàn thời hạn lưu hay quy định pháp lý.</p></div>
 
-**Bài tập:** trong ca «sửa bút toán 4», kẻ tấn công sửa luôn `entry_hash` của dòng 4 cho khớp nội dung mới nhưng không đụng dòng 5. `verify_chain` báo gì, ở đâu? Muốn qua mặt, hắn phải làm gì thêm, và còn gì để bắt hắn?
+**Bài tập:** trong kịch bản «sửa bút toán 4», kẻ tấn công sửa luôn `entry_hash` của dòng 4 cho khớp nội dung mới nhưng không đụng dòng 5. `verify_chain` báo gì, ở đâu? Muốn qua mặt, hắn phải làm gì thêm, và còn gì để bắt hắn?
 
 <details><summary>Xem lời giải</summary><p>Dòng 4 qua được (hash khớp nội dung mới), nhưng <code>prev_hash</code> của dòng 5 vẫn là hash cũ, nên báo <code>PrevMismatch</code> ở <code>seq = 5</code> sau khi đã duyệt 4 dòng; test <code>forging_one_row_hash_is_caught_at_the_next_row</code> kiểm đúng điều này. Muốn xanh, kẻ đó phải tính lại mọi dòng từ 4 tới cuối. Khi đó chỉ điểm neo còn lệch (<code>Mismatch</code>), và nếu hắn cắt đuôi thì <code>seq</code> của neo không còn tồn tại (<code>Missing</code>).</p></details>
 

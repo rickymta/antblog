@@ -1,14 +1,14 @@
 ---
 slug: rust-hexagonal-clean-workspace-crates-port-adapter
 title: "Hexagonal/Clean trong Rust: workspace crates domain, application, infrastructure, api"
-summary: "Bài 51: tách ledger-api thành bốn crate. Cargo cưỡng chế chiều phụ thuộc nhưng không cấm khai báo sai, nên cần test đọc cargo metadata. Port là trait, adapter bộ nhớ, sqlx và Kafka, feature kafka, khi nào chưa cần tách."
+summary: "Bài 51: tách ledger-api thành bốn crate. Cargo cưỡng chế chiều phụ thuộc nhưng không cấm khai báo sai, nên cần test đọc cargo metadata. Port là trait, adapter bộ nhớ, sqlx và Kafka, feature kafka và khi nào chưa cần tách."
 category: rust-advanced
 level: advanced
 tags: [rust, toi-noi, ledger, architecture, workspace, hexagonal]
 language: vi
 ---
 
-Sau [bài 40](/articles/rust-tong-hop-ledger-api-postgresql-kafka-end-to-end), `ledger-api` là một crate với mười ba module: `store.rs` nói chuyện với PostgreSQL, `kafka.rs` với broker, `http.rs` với axum. Ranh giới giữa chúng là thoả thuận miệng. Không gì ngăn một dòng `use sqlx::…` chen vào bất kỳ module nào, vì cùng một crate thì `use` nào cũng biên dịch. P05 vừa thêm hold, hoàn tiền và đối soát, nên càng nhiều người sửa thì thoả thuận đó càng dễ vỡ.
+Sau [bài 40](/articles/rust-tong-hop-ledger-api-postgresql-kafka-end-to-end), `ledger-api` là một crate với mười ba module: `store.rs` nói chuyện với PostgreSQL, `kafka.rs` với broker, `http.rs` với axum. Ranh giới giữa chúng là quy ước ngầm. Không gì ngăn một dòng `use sqlx::…` chen vào bất kỳ module nào, vì cùng một crate thì `use` nào cũng biên dịch. P05 vừa thêm hold, hoàn tiền và đối soát, nên càng nhiều người sửa thì quy ước đó càng dễ vỡ.
 
 Đây là bài 51 của lộ trình **Rust nâng cao qua [Tới Nơi](/articles/du-an-mau-toi-noi)**, bài mở đầu phần P06. Bài không dạy lại sqlx ([bài 23](/articles/rust-sqlx-postgresql-pool-migration-query)) hay Kafka ([bài 36](/articles/rust-kafka-rdkafka-consumer-producer-schema)). Câu hỏi là: ranh giới nào đáng để Cargo cưỡng chế, cưỡng chế được tới đâu, và trả giá gì. Lab dựng lại luồng chốt tiền chuyến `TN-0001` (capture rồi split, dạng hai bước của [bài 13](/articles/rust-double-entry-journal-entry-posting)) trong một workspace bốn crate.
 
@@ -29,14 +29,14 @@ Sau [bài 40](/articles/rust-tong-hop-ledger-api-postgresql-kafka-end-to-end), `
 
 <figure class="tkh-fig">
 <div class="tkh-fig-box">
-<svg viewBox="0 0 880 250" role="img" aria-label="Hình 1. Bốn crate xếp thành một chiều: api phụ thuộc infrastructure, infrastructure phụ thuộc application, application phụ thuộc domain. Mỗi mũi tên là một dòng trong Cargo.toml; không có mũi tên ngược."><defs><marker id="rust-hexagonal-clean-workspace-crates-port-adapter-0-a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10 z" class="f-phys"/></marker></defs><rect x="20" y="24" width="180" height="96" rx="10" class="f-phys-soft s-phys"/><text x="34" y="52" class="t-b">api</text><text x="34" y="76" class="t-small">axum, composition root</text><text x="34" y="96" class="t-small">thấy cả bốn crate</text><rect x="240" y="24" width="180" height="96" rx="10" class="f-phys-soft s-phys"/><text x="254" y="52" class="t-b">infrastructure</text><text x="254" y="76" class="t-small">sqlx, Kafka, bộ nhớ</text><text x="254" y="96" class="t-small">hiện thực các port</text><rect x="460" y="24" width="180" height="96" rx="10" class="f-pk-soft s-pk"/><text x="474" y="52" class="t-b">application</text><text x="474" y="76" class="t-small">use case + port (trait)</text><text x="474" y="96" class="t-small">không tokio, không sqlx</text><rect x="680" y="24" width="180" height="96" rx="10" class="f-pk-soft s-pk"/><text x="694" y="52" class="t-b">domain</text><text x="694" y="76" class="t-small">Trip, hai bút toán</text><text x="694" y="96" class="t-small">ledger-core, thiserror</text><path d="M200 72 L238 72" class="f-none s-phys" stroke-width="2" marker-end="url(#rust-hexagonal-clean-workspace-crates-port-adapter-0-a)"/><path d="M420 72 L458 72" class="f-none s-phys" stroke-width="2" marker-end="url(#rust-hexagonal-clean-workspace-crates-port-adapter-0-a)"/><path d="M640 72 L678 72" class="f-none s-phys" stroke-width="2" marker-end="url(#rust-hexagonal-clean-workspace-crates-port-adapter-0-a)"/><rect x="20" y="150" width="840" height="76" rx="10" class="f-pk-soft s-pk"/><text x="34" y="180" class="t-b">Mỗi mũi tên là một dòng trong Cargo.toml của crate ở đuôi mũi tên</text><text x="34" y="206" class="t-small">Không có mũi tên ngược: domain không gọi được application, application không gọi được sqlx</text></svg>
+<svg viewBox="0 0 880 250" role="img" aria-label="Hình 1. Bốn crate xếp thành một chiều: api phụ thuộc infrastructure, infrastructure phụ thuộc application, application phụ thuộc domain. Mỗi mũi tên là một dòng trong Cargo.toml; không có mũi tên ngược."><defs><marker id="rust-hexagonal-clean-workspace-crates-port-adapter-0-a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10 z" class="f-phys"/></marker></defs><rect x="20" y="24" width="180" height="96" rx="10" class="f-phys-soft s-phys"/><text x="34" y="52" class="t-b">api</text><text x="34" y="76" class="t-small">axum, composition root</text><text x="34" y="96" class="t-small">thấy cả bốn crate</text><rect x="240" y="24" width="180" height="96" rx="10" class="f-phys-soft s-phys"/><text x="254" y="52" class="t-b">infrastructure</text><text x="254" y="76" class="t-small">sqlx, Kafka, bộ nhớ</text><text x="254" y="96" class="t-small">cài đặt các port</text><rect x="460" y="24" width="180" height="96" rx="10" class="f-pk-soft s-pk"/><text x="474" y="52" class="t-b">application</text><text x="474" y="76" class="t-small">use case + port (trait)</text><text x="474" y="96" class="t-small">không tokio, không sqlx</text><rect x="680" y="24" width="180" height="96" rx="10" class="f-pk-soft s-pk"/><text x="694" y="52" class="t-b">domain</text><text x="694" y="76" class="t-small">Trip, hai bút toán</text><text x="694" y="96" class="t-small">ledger-core, thiserror</text><path d="M200 72 L238 72" class="f-none s-phys" stroke-width="2" marker-end="url(#rust-hexagonal-clean-workspace-crates-port-adapter-0-a)"/><path d="M420 72 L458 72" class="f-none s-phys" stroke-width="2" marker-end="url(#rust-hexagonal-clean-workspace-crates-port-adapter-0-a)"/><path d="M640 72 L678 72" class="f-none s-phys" stroke-width="2" marker-end="url(#rust-hexagonal-clean-workspace-crates-port-adapter-0-a)"/><rect x="20" y="150" width="840" height="76" rx="10" class="f-pk-soft s-pk"/><text x="34" y="180" class="t-b">Mỗi mũi tên là một dòng trong Cargo.toml của crate ở đuôi mũi tên</text><text x="34" y="206" class="t-small">Không có mũi tên ngược: domain không gọi được application, application không gọi được sqlx</text></svg>
 </div>
 <figcaption>Hình 1. Chiều phụ thuộc của lab 51. Lõi (domain, application) nằm bên phải và không biết gì về bên trái.</figcaption>
 </figure>
 
 Port nằm ở `application`, không ở `infrastructure`: bên cần dịch vụ là bên định nghĩa hình dạng của nó. [Bài 26](/articles/rust-repository-unit-of-work-trait-transaction) đặt port ở crate riêng `ledger-port`; ở đây port ở `application` vì use case là bên duy nhất gọi chúng. Một crate `ports` riêng chỉ đáng khi có hai crate use case dùng chung.
 
-**`domain` dùng `ledger-core` hay bọc lại?** Dùng thẳng. `Money`, `AccountId` và `JournalEntry` của [bài 20](/articles/rust-tong-hop-ledger-core-cargo-doc-workspace) mang bất biến «bút toán cân», và `Trip::settlement` chỉ dựng hai bút toán bằng builder của nó. Bọc lại sẽ có hai kiểu `Money` cùng bất biến cộng một lớp chuyển đổi, cho một thư viện ta không định thay. Cái giá: đổi `Money` là sửa cả bốn crate, và `domain` không phải «không phụ thuộc gì», vì `ledger-core` kéo theo `serde` và `rust_decimal`. Điều lab cấm là runtime và IO, không phải mọi crate.
+**`domain` dùng `ledger-core` hay bọc lại?** Dùng thẳng. `Money`, `AccountId` và `JournalEntry` của [bài 20](/articles/rust-tong-hop-ledger-core-cargo-doc-workspace) mang bất biến «bút toán cân», và `Trip::settlement` chỉ dựng hai bút toán bằng builder của nó. Bọc lại sẽ có hai kiểu `Money` cùng bất biến cộng thêm một lớp chuyển đổi, trong khi ta không định thay thư viện đó. Cái giá: đổi `Money` là sửa cả bốn crate, và `domain` không phải «không phụ thuộc gì», vì `ledger-core` kéo theo `serde` và `rust_decimal`. Điều lab cấm là runtime và IO, không phải mọi crate.
 
 ```rust
 // crates/domain/src/trip.rs (rút gọn)
@@ -102,7 +102,7 @@ package `application v0.1.0 (…)`
 <div class="tkh-fig-box">
 <svg viewBox="0 0 880 300" role="img" aria-label="Hình 2. Ba lần thử trên domain. Dùng sqlx chưa khai báo: rustc báo E0432. Khai báo sqlx trong domain: build xanh nhưng test kiến trúc đỏ. Khai báo application trong domain: cargo từ chối vì vòng phụ thuộc."><defs><marker id="rust-hexagonal-clean-workspace-crates-port-adapter-1-a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10 z" class="f-phys"/></marker></defs><rect x="20" y="24" width="270" height="76" rx="10" class="f-phys-soft s-phys"/><text x="34" y="54" class="t-b">1 · use sqlx::PgPool</text><text x="34" y="80" class="t-small">chưa khai báo trong Cargo.toml</text><rect x="305" y="24" width="270" height="76" rx="10" class="f-phys-soft s-phys"/><text x="319" y="54" class="t-b">2 · khai báo sqlx</text><text x="319" y="80" class="t-small">trong crates/domain/Cargo.toml</text><rect x="590" y="24" width="270" height="76" rx="10" class="f-phys-soft s-phys"/><text x="604" y="54" class="t-b">3 · khai báo application</text><text x="604" y="80" class="t-small">trong domain: tạo vòng phụ thuộc</text><path d="M155 100 L155 130" class="f-none s-phys" stroke-width="2" marker-end="url(#rust-hexagonal-clean-workspace-crates-port-adapter-1-a)"/><path d="M440 100 L440 130" class="f-none s-phys" stroke-width="2" marker-end="url(#rust-hexagonal-clean-workspace-crates-port-adapter-1-a)"/><path d="M725 100 L725 130" class="f-none s-phys" stroke-width="2" marker-end="url(#rust-hexagonal-clean-workspace-crates-port-adapter-1-a)"/><rect x="20" y="130" width="270" height="60" rx="10" class="f-warn-soft s-warn"/><text x="34" y="157" class="t-b">rustc E0432</text><text x="34" y="177" class="t-small">unresolved import `sqlx`</text><rect x="305" y="130" width="270" height="60" rx="10" class="f-pk-soft s-pk"/><text x="319" y="157" class="t-b">cargo build: xanh</text><text x="319" y="177" class="t-small">domain biên dịch cùng sqlx</text><rect x="590" y="130" width="270" height="60" rx="10" class="f-warn-soft s-warn"/><text x="604" y="157" class="t-b">cargo từ chối</text><text x="604" y="177" class="t-small">cyclic package dependency</text><path d="M440 190 L440 220" class="f-none s-warn" stroke-width="2" marker-end="url(#rust-hexagonal-clean-workspace-crates-port-adapter-1-a)"/><rect x="305" y="220" width="270" height="60" rx="10" class="f-warn-soft s-warn dash"/><text x="319" y="247" class="t-b">test kiến trúc: đỏ</text><text x="319" y="267" class="t-small">domain kéo tokio, sqlx, mio</text><text x="34" y="240" class="t-small">Chặn ở trình biên dịch,</text><text x="34" y="260" class="t-small">khi chưa khai báo.</text><text x="604" y="240" class="t-small">Chặn ở Cargo, trước cả</text><text x="604" y="260" class="t-small">khi biên dịch.</text></svg>
 </div>
-<figcaption>Hình 2. Cargo chặn thứ chưa khai báo và thứ tạo vòng. Khai báo sai chiều hợp lệ thì cần test hoặc review.</figcaption>
+<figcaption>Hình 2. Cargo chặn thứ chưa khai báo và thứ gây ra vòng phụ thuộc. Khai báo sai chiều nhưng vẫn hợp lệ thì cần test hoặc review.</figcaption>
 </figure>
 
 Test nằm ở `crates/api/tests/architecture.rs` và không đọc mã nguồn: nó chạy `cargo metadata`, dựng bao đóng phụ thuộc (kể cả gián tiếp) của từng crate rồi so với danh sách cấm:
@@ -133,7 +133,7 @@ Với dòng `sqlx` thêm vào `domain`, test đỏ và chỉ đúng nơi sửa; 
 `domain` kéo theo ["tokio", "sqlx", "mio"]; dependency trực tiếp: {"ledger-core", "sqlx", "thiserror"}
 ```
 
-Test thứ nhất cùng file ghim các cạnh của bảng ở trên. Với bốn crate này, cạnh ngược đã bị Cargo chặn bằng lỗi vòng, nên test đó có giá chủ yếu khi workspace thêm crate. Phần đối chứng giữ nguyên tắc của [bài 50](/articles/rust-audit-append-only-hash-chain-phan-quyen-pii): test xanh chỉ có nghĩa khi bộ quét chứng minh được nó nhìn thấy cái cần tìm.
+Test thứ nhất cùng file ghim các cạnh của bảng ở trên. Với bốn crate này, cạnh ngược đã bị Cargo chặn bằng lỗi vòng, nên test đó chủ yếu có giá trị khi workspace có thêm crate. Phần đối chứng giữ nguyên tắc của [bài 50](/articles/rust-audit-append-only-hash-chain-phan-quyen-pii): test xanh chỉ có nghĩa khi bộ quét chứng minh được nó nhìn thấy cái cần tìm.
 
 ## Port là trait, adapter cắm vào ở composition root
 
@@ -156,7 +156,7 @@ pub trait Clock: Send + Sync {
 }
 ```
 
-`StoreError` có biến thể `Storage(Box<dyn Error + Send + Sync>)` cho mọi lỗi hạ tầng, nên cổng không biết `sqlx::Error` tồn tại. `infrastructure` có ba loại adapter. `MemoryStore` và `MemoryPublisher` luôn được biên dịch. `PgStore` bao một `PgPool` và dùng `INSERT … ON CONFLICT (idempotency_key) DO NOTHING RETURNING id`, đọc lại và so nội dung khi trùng key, trên đúng schema và trigger cân bút toán của [bài 25](/articles/rust-schema-so-cai-accounts-journal-postings-partition). `KafkaPublisher` chỉ có một việc:
+`StoreError` có biến thể `Storage(Box<dyn Error + Send + Sync>)` cho mọi lỗi hạ tầng, nên port không biết `sqlx::Error` tồn tại. `infrastructure` có ba loại adapter. `MemoryStore` và `MemoryPublisher` luôn được biên dịch. `PgStore` bao một `PgPool` và dùng `INSERT … ON CONFLICT (idempotency_key) DO NOTHING RETURNING id`, đọc lại và so nội dung khi trùng key, trên đúng schema và trigger cân bút toán của [bài 25](/articles/rust-schema-so-cai-accounts-journal-postings-partition). `KafkaPublisher` chỉ có một việc:
 
 ```rust
 // crates/infrastructure/src/kafka.rs (gộp bớt dòng)
@@ -175,7 +175,7 @@ impl EventPublisher for KafkaPublisher {
 }
 ```
 
-JSON camelCase với `schemaVersion: 1` do `wire.rs` của `infrastructure` dựng, nên đổi tên trường JSON không chạm luật nghiệp vụ. Như bài 26, bộ test hợp đồng viết một lần và chạy cho từng adapter, nên `MemoryStore` không thể «dễ tính» hơn PostgreSQL một cách lặng lẽ:
+JSON camelCase với `schemaVersion: 1` do `wire.rs` của `infrastructure` dựng, nên đổi tên trường JSON không chạm luật nghiệp vụ. Như bài 26, bộ test hợp đồng viết một lần và chạy cho từng adapter, nên `MemoryStore` không thể «dễ tính» hơn PostgreSQL mà không bị phát hiện:
 
 ```rust
 // crates/api/tests/scenarios.rs (rút gọn)
@@ -258,7 +258,7 @@ $ cargo tree -p api --no-default-features -i rdkafka
 error: package ID specification `rdkafka` did not match any packages
 ```
 
-Test thứ ba trong `architecture.rs` kiểm cả hai chiều bằng `cargo metadata --no-default-features`: có `rdkafka` khi mặc định, không còn khi tắt, còn `sqlx` thì giữ. Build, `--verify` và `cargo test` với `--no-default-features` đều xanh; `--verify` ghi rõ «bỏ qua vì build không có feature `kafka`». Hai điều cần cẩn thận: feature của Cargo cộng dồn trong toàn đồ thị, chỉ cần một crate bật `infrastructure/kafka` là `rdkafka` vào build; và `cargo build -p infrastructure` dùng `default` của chính crate đó, tức có Kafka.
+Test thứ ba trong `architecture.rs` kiểm cả hai chiều bằng `cargo metadata --no-default-features`: có `rdkafka` khi mặc định, không còn khi tắt, còn `sqlx` thì giữ. Build, `--verify` và `cargo test` với `--no-default-features` đều xanh; `--verify` ghi rõ «bỏ qua vì build không có feature `kafka`». Hai điều cần cẩn thận: feature của Cargo cộng dồn trong toàn đồ thị, chỉ cần một crate bật `infrastructure/kafka` thì `rdkafka` sẽ vào build; và `cargo build -p infrastructure` dùng `default` của chính crate đó, tức có Kafka.
 
 Build nguội với thư mục `target` mới: `cargo build --no-default-features` biên dịch 153 crate, `cargo build` biên dịch 169. Mười sáu crate thêm là `rdkafka`, `rdkafka-sys`, `libz-sys`, `cc`, `pkg-config`, `num_enum` và các phụ thuộc của chúng. Bài không ghi thời gian build nguội: máy đang tải cao, và hai đợt đo cùng cấu hình lệch nhau gần gấp đôi.
 
@@ -281,7 +281,7 @@ crates/infrastructure/src/pg.rs        2              1,5 s
 crates/api/src/http.rs                 1              1,2 s
 ```
 
-Số crate là kết quả tất định; thời gian thì không. Thời gian tường dao động mạnh vì máy tải cao, nên bảng dùng CPU, chỉ lệch khoảng 0,1 s giữa hai đợt đo. Đây là số đo trên máy viết bài, không phải SLA. Sửa `domain` tốn xấp xỉ 1,4 lần sửa `api`, chênh lệch nhỏ vì cả bốn crate chỉ khoảng 1.900 dòng kể cả test. Cái lợi này chỉ lớn khi `infrastructure` và `api` nặng hơn nhiều so với lõi, và khi sửa đổi thường nằm ở phía ngoài. Lab không đo một crate duy nhất, nên không so được với đó.
+Số crate là kết quả tất định; thời gian thì không. Thời gian thực tế (wall-clock) dao động mạnh vì máy tải cao, nên bảng dùng CPU, chỉ lệch khoảng 0,1 s giữa hai đợt đo. Đây là số đo trên máy viết bài, không phải SLA. Sửa `domain` tốn xấp xỉ 1,4 lần sửa `api`, chênh lệch nhỏ vì cả bốn crate chỉ khoảng 1.900 dòng kể cả test. Cái lợi này chỉ lớn khi `infrastructure` và `api` nặng hơn nhiều so với lõi, và khi các lần sửa thường nằm ở phía ngoài. Lab không đo cách gộp thành một crate duy nhất, nên không so được với cách đó.
 
 ## So với Clean Architecture của loạt C#
 
@@ -314,11 +314,11 @@ Không có «friend crate», nên test của lõi sống trong chính crate (`#[
 
 ## Khi nào chưa cần tách crate, và đi từ bài 40 lên thế nào?
 
-Tách crate có giá cụ thể. Lab có năm file `Cargo.toml`, tổng 123 dòng. Mọi thứ dùng xuyên crate đều thành `pub`, nên bề mặt API tăng. Phải có re-export (`pub use ledger_core::…` ở `domain`), và mỗi phụ thuộc phải được nghĩ tới ở đúng crate. Đổi lại là ba thứ đã chứng minh ở trên: Cargo từ chối thứ chưa khai báo và vòng, test đọc được bao đóng phụ thuộc, `--no-default-features` bỏ hẳn một nhóm crate nặng.
+Tách crate có cái giá cụ thể. Lab có năm file `Cargo.toml`, tổng 123 dòng. Mọi thứ dùng xuyên crate đều thành `pub`, nên bề mặt API tăng. Phải có re-export (`pub use ledger_core::…` ở `domain`), và phải cân nhắc từng phụ thuộc nên đặt ở crate nào. Đổi lại là ba thứ đã chứng minh ở trên: Cargo từ chối thứ chưa khai báo và vòng, test đọc được bao đóng phụ thuộc, `--no-default-features` bỏ hẳn một nhóm crate nặng.
 
 Chưa cần tách khi: một binary, mỗi port chỉ có một adapter, một đội nhỏ review mọi PR, và chưa có lý do thứ hai. Khi đó module trong một crate cộng quy ước là đủ; bài 40 là ví dụ. Dấu hiệu nên tách: có binary thứ hai dùng lõi, build của adapter bắt đầu cản việc sửa lõi, có adapter thay được thật (bộ nhớ cho test, Kafka tắt được), hoặc đã có một lần `sqlx` lọt vào logic nghiệp vụ. [Bài 58](/articles/rust-tong-hop-kien-truc-ledger-service-workspace) đi tiếp bằng cách tách composition root thành binary riêng.
 
-Đường đi từ bài 40, rẻ trước (lab này dựng mới, nên đây là đề xuất, chưa được chạy thử):
+Đường đi từ bài 40, làm bước rẻ trước (lab này dựng mới, nên đây là đề xuất, chưa được chạy thử):
 
 1. Gom phần thuần (dựng bút toán, tính phí) khỏi `store.rs` và `consumer.rs` thành module không `use` crate IO.
 2. Rút các trait ra thành port và để use case generic trên chúng, như bài 26 đã làm.
@@ -343,7 +343,7 @@ cargo tree --manifest-path examples/toi-noi-rust/51-hexagonal-workspace/Cargo.to
 
 <div class="tkh-callout tkh-callout--warn">
 <span class="tkh-callout-title">Giới hạn của ví dụ</span>
-<p>Use case ghi bút toán rồi mới phát sự kiện, không qua outbox. Nếu <code>publish</code> lỗi sau khi bút toán đã ghi, lần chạy lại thấy <code>replayed = true</code> và không phát lại, tức sự kiện mất; bài toán này là của <a href="/articles/rust-outbox-inbox-idempotent-consumer">bài 37</a>. Adapter Kafka chỉ có producer; chưa có consumer, gRPC, xác thực hay hợp đồng lỗi đầy đủ của bài 32. Test kiến trúc chỉ biết tên crate, không thấy một <code>use</code> sai tầng trong cùng crate, và cần cache registry vì chạy <code>cargo metadata --offline</code>. Số đo CPU là một máy, profile dev, tải cao. <code>domain</code> mỏng vì <code>ledger-core</code> đã là lõi.</p></div>
+<p>Use case ghi bút toán rồi mới phát sự kiện, không qua outbox. Nếu <code>publish</code> lỗi sau khi bút toán đã ghi, lần chạy lại thấy <code>replayed = true</code> và không phát lại, tức là sự kiện bị mất; bài toán này là của <a href="/articles/rust-outbox-inbox-idempotent-consumer">bài 37</a>. Adapter Kafka chỉ có producer; chưa có consumer, gRPC, xác thực hay hợp đồng lỗi đầy đủ của bài 32. Test kiến trúc chỉ biết tên crate, không thấy một <code>use</code> sai tầng trong cùng crate, và cần cache registry vì chạy <code>cargo metadata --offline</code>. Số đo CPU là một máy, profile dev, tải cao. <code>domain</code> mỏng vì <code>ledger-core</code> đã là lõi.</p></div>
 
 **Bài tập:** thêm adapter gRPC `GetBalance` (bài 35) vào workspace. Crate nào phải sửa `Cargo.toml`, có cần port mới không, và test kiến trúc phải đổi gì nếu đặt adapter trong crate mới tên `grpc`?
 

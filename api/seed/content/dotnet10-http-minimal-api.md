@@ -1,6 +1,6 @@
 ---
 slug: dotnet10-http-minimal-api
-title: "HTTP và Minimal API: xuất bản endpoint báo giá bằng ASP.NET Core 10"
+title: "HTTP và Minimal API: cung cấp endpoint báo giá bằng ASP.NET Core 10"
 summary: "Bài 16: đưa policy đã kiểm thử lên POST /quotes, hiểu JSON binding, status code và DI; API tính báo giá chưa tạo tài nguyên hay lưu chuyến."
 category: csharp-intermediate
 level: intermediate
@@ -8,7 +8,7 @@ tags: [csharp, dotnet, dotnet-10, toi-noi, aspnet-core]
 language: vi
 ---
 
-Đây là **bài 16** trong loạt **C# và .NET 10 qua [Tới Nơi](/articles/du-an-mau-toi-noi)**. Các ví dụ target `net10.0`; code trong repository và các đoạn đầy đủ dưới đây dùng cùng implementation được chạy kiểm chứng.
+Đây là **bài 16** trong loạt **C# và .NET 10 qua [Tới Nơi](/articles/du-an-mau-toi-noi)**. Các ví dụ target `net10.0`; code trong repository và các đoạn đầy đủ dưới đây dùng cùng một bản cài đặt đã được chạy kiểm chứng.
 
 <div class="tkh-callout tkh-callout--example">
 <span class="tkh-callout-title">Thử trước khi đọc</span>
@@ -18,19 +18,19 @@ language: vi
 
 ## Đưa công thức lên một ranh giới mới
 
-Trước đây người đọc gọi policy trong console. Bây giờ client gửi JSON qua HTTP. Ta tiếp tục dùng StandardFarePolicy từ bài 14, không chép công thức vào endpoint. Tầng HTTP chịu nhận dữ liệu, kiểm tra yêu cầu và biểu diễn response; rule tính tiền vẫn ở thư viện riêng.
+Trước đây người đọc gọi policy trong console. Bây giờ client gửi JSON qua HTTP. Ta tiếp tục dùng StandardFarePolicy từ bài 14, không chép công thức vào endpoint. Tầng HTTP chịu trách nhiệm nhận dữ liệu, kiểm tra yêu cầu và biểu diễn response; rule tính tiền vẫn ở thư viện riêng.
 
-Minimal API giảm số cấu trúc cần viết cho endpoint, không có nghĩa ứng dụng được miễn tổ chức hay miễn kiểm thử. Bản này có một route để học binding và response; khi sang DDD/CQRS/Mediator, endpoint sẽ gửi use case thay vì chứa mọi thao tác nghiệp vụ.
+Minimal API giảm bớt phần khung phải viết cho endpoint, nhưng không có nghĩa là ứng dụng được miễn tổ chức hay miễn kiểm thử. Bản này có một route để học binding và response; khi sang DDD/CQRS/Mediator, endpoint sẽ chuyển yêu cầu tới use case thay vì chứa mọi thao tác nghiệp vụ.
 
 Ví dụ chỉ tính giá theo bảng giả, chưa tạo quote ID, chưa lưu dữ liệu hay cam kết hiệu lực báo giá. Đừng coi POST ở đây là đặt chuyến hoặc giữ tiền của khách.
 
 ## Request là phương thức, đường dẫn, header và body
 
-Hợp đồng: `POST /quotes`, Content-Type application/json, body có distanceKm dạng số. Ví dụ `{"distanceKm":5}` trả JSON chứa fare 25500 và currency VND. Số JSON dùng dấu chấm thập phân theo grammar JSON, không nhận chuỗi giao diện “5 km”.
+Hợp đồng: `POST /quotes`, Content-Type application/json, body có distanceKm dạng số. Ví dụ `{"distanceKm":5}` trả JSON chứa fare 25500 và currency VND. Số JSON dùng dấu chấm thập phân theo ngữ pháp của JSON, không nhận chuỗi hiển thị trên giao diện “5 km”.
 
-QuoteRequest.DistanceKm dùng decimal? để phân biệt thiếu/null với giá trị 0 hợp lệ. Nếu chỉ dùng decimal không nullable rồi dựa vào mặc định 0, field bị bỏ có thể không còn phân biệt với khách chủ động gửi 0. Đây là vấn đề hợp đồng, không phải chỉ mẹo tránh warning.
+QuoteRequest.DistanceKm dùng decimal? để phân biệt thiếu/null với giá trị 0 hợp lệ. Nếu chỉ dùng decimal không nullable rồi dựa vào mặc định 0, field bị bỏ có thể không còn phân biệt được với trường hợp khách chủ động gửi 0. Đây là vấn đề hợp đồng, không phải chỉ mẹo tránh warning.
 
-Giới hạn đầu vào vẫn là 0–100. JSON sai cú pháp hoặc sai kiểu có thể bị framework từ chối trước khi handler chạy. Không dùng một guard nghiệp vụ trong handler để kết luận mọi lỗi HTTP đều đi qua handler.
+Giới hạn đầu vào vẫn là 0–100. JSON sai cú pháp hoặc sai kiểu có thể bị framework từ chối trước khi handler chạy. Đừng dựa vào một guard nghiệp vụ trong handler để kết luận rằng mọi lỗi HTTP đều đi qua handler.
 
 <figure class="tkh-fig">
 <div class="tkh-fig-box">
@@ -41,11 +41,11 @@ Giới hạn đầu vào vẫn là 0–100. JSON sai cú pháp hoặc sai kiểu
 
 ## Đọc Program theo thứ tự khởi động
 
-CreateBuilder chuẩn bị cấu hình, logging và container. AddSingleton đăng ký IFarePolicy với StandardFarePolicy; policy không giữ state từng request nên dùng chung được trong lab. Build tạo ứng dụng. MapPost mô tả route, còn Run bắt đầu host xử lý yêu cầu.
+CreateBuilder chuẩn bị cấu hình, logging và container. AddSingleton đăng ký IFarePolicy với StandardFarePolicy; policy không giữ trạng thái theo từng request nên dùng chung được trong lab. Build tạo ứng dụng. MapPost mô tả route, còn Run bắt đầu host xử lý yêu cầu.
 
-Handler nhận QuoteRequest từ body và IFarePolicy từ DI. Parameter binding dựa vào kiểu và metadata của framework; nếu một kiểu không đăng ký DI hoặc không có nguồn binding rõ, lỗi có thể xuất hiện khi dựng endpoint. Không dựa vào tên biến policy để tự tìm service.
+Handler nhận QuoteRequest từ body và IFarePolicy từ DI. Parameter binding dựa vào kiểu và metadata của framework; nếu một kiểu không đăng ký DI hoặc không có nguồn binding rõ, lỗi có thể xuất hiện khi dựng endpoint. Đừng dựa vào tên biến policy để tự tìm service.
 
-Handler từ chối khi DistanceKm thiếu hoặc ngoài miền, trả 400; khi hợp lệ gọi policy và trả 200 với QuoteReply. Record response cố định currency để người đọc biết đơn vị. Không trả raw decimal thiếu ngữ cảnh rồi để client đoán đó là đồng hay nghìn đồng.
+Handler từ chối và trả 400 khi DistanceKm thiếu hoặc ngoài miền; khi hợp lệ thì gọi policy và trả 200 với QuoteReply. Record response cố định currency để người đọc biết đơn vị. Đừng trả raw decimal thiếu ngữ cảnh rồi để client tự đoán đó là đồng hay nghìn đồng.
 
 ## Status code là một phần hợp đồng
 
@@ -56,9 +56,9 @@ Handler từ chối khi DistanceKm thiếu hoặc ngoài miền, trả 400; khi 
 | Route không có | 404 |
 | Lỗi bất ngờ | Không được biến thành 200 với fare = 0 |
 
-Response 201 không được chọn vì không có tài nguyên mới lưu lại và không có Location. Nếu sau này quote được cấp ID, thời hạn và lưu bền, hợp đồng sẽ được thiết kế lại cùng vòng đời tài nguyên. Đừng giữ status cũ chỉ vì endpoint vẫn dùng POST.
+Không chọn response 201 vì không có tài nguyên mới được lưu lại và không có Location. Nếu sau này quote được cấp ID, thời hạn và lưu bền, hợp đồng sẽ được thiết kế lại cùng với vòng đời của tài nguyên. Đừng giữ status cũ chỉ vì endpoint vẫn dùng POST.
 
-API chưa bật xác thực; chỉ chạy localhost để học. Bài 19 thêm auth bằng handler thật. CORS không phải cơ chế xác thực, HTTPS không thay authorization, và việc đổi tên route không giấu được một API công khai.
+API chưa bật xác thực; chỉ chạy trên localhost để học. Bài 19 thêm auth bằng handler thật. CORS không phải cơ chế xác thực, HTTPS không thay thế phân quyền (authorization), và việc đổi tên route không giấu được một API công khai.
 
 <figure class="tkh-fig">
 <div class="tkh-fig-box">
@@ -69,17 +69,17 @@ API chưa bật xác thực; chỉ chạy localhost để học. Bài 19 thêm a
 
 ## Chạy một request có thể đối chiếu
 
-Chạy project với `--urls http://127.0.0.1:5196`. Giữ terminal đó mở, rồi dùng curl từ terminal khác. Trong PowerShell nên gọi curl.exe để tránh alias ở các phiên bản cũ. Ví dụ đọc JSON từ file giúp tránh khác biệt escaping giữa shell.
+Chạy project với `--urls http://127.0.0.1:5196`. Giữ terminal đó mở, rồi dùng curl từ terminal khác. Trong PowerShell nên gọi curl.exe để tránh alias ở các phiên bản cũ. Ví dụ đọc JSON từ file giúp tránh khác biệt về escaping giữa các shell.
 
 ```bash
 curl --json @examples/toi-noi-dotnet/16-minimal-api/request.json http://127.0.0.1:5196/quotes
 ```
 
-Kỳ vọng {"fare":25500,"currency":"VND"}; thứ tự/whitespace JSON không phải điều cần assert. Bài 20 chạy cùng endpoint trong host test và kiểm giá trị theo kiểu decimal.
+Kỳ vọng {"fare":25500,"currency":"VND"}; không cần assert thứ tự hay whitespace của JSON. Bài 20 chạy cùng endpoint trong host test và kiểm tra giá trị theo kiểu decimal.
 
-**Bài tập:** gửi `{}` rồi `{"distanceKm":0}`. Vì sao không nên cho cả hai tự thành một yêu cầu 0 km? Nếu handler trả 201 mà không tạo gì, client có thể hiểu sai điều nào?
+**Bài tập:** gửi `{}` rồi `{"distanceKm":0}`. Vì sao không nên coi cả hai mặc nhiên là yêu cầu 0 km? Nếu handler trả 201 mà không tạo gì, client có thể hiểu sai điều nào?
 
-<details><summary>Xem đáp án</summary><p>Thiếu dữ liệu và chủ động gửi cận dưới là hai ý định khác nhau. 201 có thể làm client tin tài nguyên đã được tạo; hợp đồng nên phản ánh đúng thao tác và có định danh/Location khi cần.</p></details>
+<details><summary>Xem đáp án</summary><p>Thiếu dữ liệu và chủ động gửi cận dưới là hai ý định khác nhau. 201 có thể làm client tin rằng tài nguyên đã được tạo; hợp đồng nên phản ánh đúng thao tác và có định danh/Location khi cần.</p></details>
 
 ## Chạy ví dụ và kiểm chứng
 
@@ -89,7 +89,7 @@ Từ thư mục gốc repository:
 dotnet run --project examples/toi-noi-dotnet/16-minimal-api -- --urls http://127.0.0.1:5196
 ```
 
-Đây là host học trên localhost; dừng bằng Ctrl+C sau khi thử. Bộ test của bài 20 kiểm tra các bước API 16–19 bằng cùng source mà không cần mở các port này. Không triển khai ví dụ chưa có đầy đủ cấu hình service lên public endpoint.
+Đây là host dùng để học, chạy trên localhost; dừng bằng Ctrl+C sau khi thử. Bộ test của bài 20 kiểm tra các bước API 16–19 bằng cùng source mà không cần mở các port này. Đừng triển khai ví dụ này lên endpoint công khai khi chưa có đầy đủ cấu hình cho service.
 
 ### Program.cs — 16-minimal-api/Program.cs
 

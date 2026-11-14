@@ -1,0 +1,167 @@
+{
+ "file": "location-xep-hang-diem-don-one-to-many-ngan-sach-do-tre.md",
+ "edits": [
+  {
+   "old": "Trước khi app hiện giá và điểm đón, service phải xếp hạng",
+   "new": "Trước khi app hiện giá và điểm đón, dịch vụ phải xếp hạng",
+   "reason": "Từ tiếng Anh thông thường trong văn xuôi",
+   "severity": "medium"
+  },
+  {
+   "old": "Quote có ngân sách p95 dưới 500 ms",
+   "new": "Bước quote có ngân sách p95 dưới 500 ms",
+   "reason": "Danh từ trần, thiếu từ chỉ loại",
+   "severity": "medium"
+  },
+  {
+   "old": "Bài này đặt cho riêng việc xếp hạng một ngân sách, đo nó, và kết luận thẳng thắn",
+   "new": "Bài này đặt một ngân sách riêng cho việc xếp hạng, đo ngân sách đó, rồi kết luận thẳng thắn",
+   "reason": "Trật tự từ kiểu tiếng Anh",
+   "severity": "medium"
+  },
+  {
+   "old": "Mọi số đo trên **dữ liệu mô phỏng**",
+   "new": "Mọi số đo đều lấy trên **dữ liệu mô phỏng**",
+   "reason": "Câu thiếu động từ",
+   "severity": "medium"
+  },
+  {
+   "old": "nên chúng nhiễu và phóng đại.",
+   "new": "nên chúng bị nhiễu và phóng đại.",
+   "reason": "Thiếu từ bị động cần thiết",
+   "severity": "low"
+  },
+  {
+   "old": "hay A* cho chỉ một ít ứng viên?",
+   "new": "hay A* chỉ chạy cho một ít ứng viên?",
+   "reason": "Trật tự từ kiểu tiếng Anh",
+   "severity": "low"
+  },
+  {
+   "old": "Kiểm #1 bằng tay",
+   "new": "Kiểm tra #1 bằng tay",
+   "reason": "'Kiểm' cụt",
+   "severity": "medium"
+  },
+  {
+   "old": "ý tưởng tối ưu hoá chung chung; nó là câu trả lời cho",
+   "new": "ý tưởng tối ưu hoá chung chung mà là câu trả lời cho",
+   "reason": "Bỏ 'nó' ở đầu vế sau",
+   "severity": "medium"
+  },
+  {
+   "old": "chỉ ma trận chỉ 5,5 ms",
+   "new": "chế độ chỉ ma trận chỉ tốn 5,5 ms",
+   "reason": "Câu thiếu chủ ngữ và động từ, lặp 'chỉ' khó đọc",
+   "severity": "medium"
+  },
+  {
+   "old": "Những gì kèm theo con số này, và làm nó khó nói chắc:",
+   "new": "Những điều đi kèm con số này và khiến khó kết luận chắc chắn:",
+   "reason": "Câu dịch máy",
+   "severity": "medium"
+  },
+  {
+   "old": "Tường p99 473 ms (hai tầng)",
+   "new": "p99 theo đồng hồ treo tường là 473 ms (hai tầng)",
+   "reason": "Cụm cụt, thiếu danh từ",
+   "severity": "medium"
+  },
+  {
+   "old": "Với 11,5 tuyến trung bình mỗi yêu cầu, p50 là",
+   "new": "Với trung bình 11,5 tuyến mỗi yêu cầu, p50 là",
+   "reason": "Trật tự từ",
+   "severity": "medium"
+  },
+  {
+   "old": "bài không hứa nó đạt ngân sách",
+   "new": "bài không hứa cách đó sẽ đạt ngân sách",
+   "reason": "'nó' mơ hồ",
+   "severity": "medium"
+  },
+  {
+   "old": "nhưng đổi lại: tầng 2 bị cắt",
+   "new": "nhưng phải đánh đổi: tầng 2 bị cắt",
+   "reason": "Cách nói gượng",
+   "severity": "low"
+  },
+  {
+   "old": "đổi bán kính 800, 1.500 hay 3.000 m chỉ làm kết quả đổi ít",
+   "new": "đổi bán kính 800, 1.500 hay 3.000 m chỉ làm kết quả thay đổi ít",
+   "reason": "Lặp từ 'đổi'",
+   "severity": "low"
+  },
+  {
+   "old": "J này không biết hướng tài xế thật tới",
+   "new": "J này không biết tài xế thật tới từ hướng nào",
+   "reason": "Cụm cụt, đảo trật tự",
+   "severity": "medium"
+  },
+  {
+   "old": "Nếu J bỏ hẳn số hạng tài xế, nó tối ưu cho",
+   "new": "Nếu J bỏ hẳn số hạng tài xế, J đó tối ưu cho",
+   "reason": "'nó' mơ hồ",
+   "severity": "low"
+  },
+  {
+   "old": "Test kiểm điều đó trên đồ thị fixture",
+   "new": "Test kiểm tra điều đó trên đồ thị fixture",
+   "reason": "'kiểm' cụt",
+   "severity": "medium"
+  },
+  {
+   "old": "40 ca mỗi thuộc tính",
+   "new": "40 test case mỗi thuộc tính",
+   "reason": "Thống nhất thuật ngữ test case",
+   "severity": "medium"
+  },
+  {
+   "old": "cùng bất biến được kiểm: J không giảm",
+   "new": "cùng bất biến được kiểm tra: J không giảm",
+   "reason": "'kiểm' cụt",
+   "severity": "low"
+  },
+  {
+   "old": "lab kiểm lại trên 150 yêu cầu",
+   "new": "lab kiểm tra lại trên 150 yêu cầu",
+   "reason": "'kiểm' cụt",
+   "severity": "low"
+  },
+  {
+   "old": "Nó nói «không tệ hơn theo `J`», và vì cách xây dựng nên hiển nhiên, nó là lưới an toàn",
+   "new": "Bất biến này nói «không tệ hơn theo `J`», và hiển nhiên đúng vì cách xây bộ xếp hạng; đây là lưới an toàn",
+   "reason": "Câu gượng, 'Nó' mơ hồ, dễ đọc thành nghĩa khác",
+   "severity": "high"
+  },
+  {
+   "old": "Bất biến không kiểm tra cái J không đo",
+   "new": "Bất biến không kiểm tra những gì J không đo",
+   "reason": "'cái' khẩu ngữ",
+   "severity": "low"
+  },
+  {
+   "old": "không kiểm thứ J không đo",
+   "new": "không kiểm tra những thứ J không đo",
+   "reason": "'kiểm' cụt",
+   "severity": "medium"
+  },
+  {
+   "old": "và kiểm số làm tròn.",
+   "new": "và kiểm tra số làm tròn.",
+   "reason": "'kiểm' cụt",
+   "severity": "medium"
+  },
+  {
+   "old": "con số nào của kết quả bạn vẫn không nên tin",
+   "new": "con số nào trong kết quả bạn vẫn không nên tin",
+   "reason": "Giới từ gượng",
+   "severity": "low"
+  },
+  {
+   "old": "Thiết kế một kiểm tra cho thấy",
+   "new": "Thiết kế một phép kiểm tra cho thấy",
+   "reason": "Danh từ hoá 'kiểm tra' gượng",
+   "severity": "medium"
+  }
+ ]
+}

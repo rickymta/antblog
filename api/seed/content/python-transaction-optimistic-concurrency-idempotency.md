@@ -8,7 +8,7 @@ tags: [python, toi-noi, postgresql, transaction, idempotency]
 language: vi
 ---
 
-Lúc cao điểm, [Tới Nơi](/articles/du-an-mau-toi-noi) tạo khoảng 70 chuyến mỗi giây và sửa bảng `trips` khoảng 560 lần mỗi giây. Hai chuyện xảy ra thường xuyên trong dòng đó. Một: hai tài xế bấm nhận cùng một chuyến trong cùng một giây, mà chỉ một người được nhận. Hai: ứng dụng khách gửi yêu cầu đặt chuyến, mạng đứt đúng lúc phản hồi đang bay về, ứng dụng gửi lại, và nếu server không nhận ra đây là cùng một ý định thì khách có hai chuyến. Bài 24 cho ta đọc và ghi PostgreSQL bằng SQLAlchemy; bài này làm cho việc ghi **đúng** khi có nhiều người ghi cùng lúc.
+Lúc cao điểm, [Tới Nơi](/articles/du-an-mau-toi-noi) tạo khoảng 70 chuyến mỗi giây và sửa bảng `trips` khoảng 560 lần mỗi giây. Hai chuyện xảy ra thường xuyên trong dòng đó. Một: hai tài xế bấm nhận cùng một chuyến trong cùng một giây, mà chỉ một người được nhận. Hai: ứng dụng khách gửi yêu cầu đặt chuyến, mạng đứt đúng lúc phản hồi đang bay về, ứng dụng gửi lại, và nếu server không nhận ra đây là cùng một ý định thì khách có hai chuyến. Bài 24 cho ta đọc và ghi PostgreSQL bằng SQLAlchemy; bài này bảo đảm việc ghi **đúng** khi có nhiều người ghi cùng lúc.
 
 Đây là bài 25 của lộ trình **Python trung bình qua Tới Nơi**. Bạn cần nắm `Session`, `select()` và mapping ở [bài 24](/articles/python-sqlalchemy-psycopg-postgresql-mapping-migration). Loạt C# có bài cùng chủ đề là [Transaction, optimistic concurrency và idempotency](/articles/dotnet10-transaction-concurrency-idempotency); bài này đi theo cách của SQLAlchemy.
 
@@ -33,7 +33,7 @@ Chỉ có transaction thì hai tài xế vẫn ghi đè nhau (mỗi người m�
 
 ## Transaction với Session.begin(): tất cả hoặc không gì cả
 
-Transaction gom nhiều thay đổi thành một đơn vị: hoặc tất cả được commit, hoặc không gì cả. Trong SQLAlchemy 2, `with Session(engine) as session, session.begin():` mở transaction, commit khi khối kết thúc êm và rollback khi có exception. Lab (`main.py`, trích) ghi một chuyến, cho một exception nổ ra, rồi hỏi database:
+Transaction gom nhiều thay đổi thành một đơn vị: hoặc tất cả được commit, hoặc không gì cả. Trong SQLAlchemy 2, `with Session(engine) as session, session.begin():` mở transaction, commit khi khối kết thúc không có lỗi và rollback khi có exception. Lab (`main.py`, trích) ghi một chuyến, cho phát sinh một exception, rồi hỏi database:
 
 ```python
 try:
@@ -52,7 +52,7 @@ except RuntimeError:
 Trong transaction thấy 1 chuyến; kết nối khác thấy 0; sau rollback còn 0
 ```
 
-Ba con số kể trọn câu chuyện. Trong transaction, dòng vừa ghi đã thấy được. Kết nối khác **không** thấy dữ liệu chưa commit (không có dirty read, kể cả ở mức mặc định). Sau rollback dòng biến mất. Transaction của ta là cục bộ trong một database: khi ghi chuyến xong ta phải gọi một service khác (thanh toán, chấm điểm), đừng giữ transaction mở trong lúc chờ; transaction dài giữ khoá và làm bảng `trips` nghẽn. Bài 39 giải quyết bài toán «ghi database và phát sự kiện» bằng outbox.
+Ba con số kể trọn câu chuyện. Trong transaction, dòng vừa ghi đã thấy được. Kết nối khác **không** thấy dữ liệu chưa commit (không có dirty read, kể cả ở mức mặc định). Sau rollback dòng biến mất. Transaction của ta là cục bộ trong một database: nếu sau khi ghi chuyến ta còn phải gọi một service khác (thanh toán, chấm điểm) thì đừng giữ transaction mở trong lúc chờ; transaction dài giữ khoá và làm bảng `trips` nghẽn. Bài 39 giải quyết bài toán «ghi database và phát sự kiện» bằng outbox.
 
 **Isolation level** quyết định một transaction thấy thay đổi của transaction khác thế nào. PostgreSQL mặc định `read committed`, lab xác nhận bằng `SHOW transaction_isolation`. Ở mức này mỗi *câu lệnh* thấy dữ liệu đã commit tại thời điểm câu đó bắt đầu, nên hai lần đọc trong cùng transaction có thể ra hai kết quả. Ta thử với cước của một chuyến, trong khi một session khác sửa nó giữa hai lần đọc:
 
@@ -61,7 +61,7 @@ READ COMMITTED : đọc lần 1 = 12000, đọc lần 2 = 14250 (non-repeatable 
 REPEATABLE READ: đọc lần 1 = 14250, đọc lần 2 = 14250, ghi chồng -> SQLSTATE 40001
 ```
 
-Mức `REPEATABLE READ` (đặt bằng `session.connection(execution_options={"isolation_level": "REPEATABLE READ"})` trước câu lệnh đầu tiên của transaction) chụp một snapshot: hai lần đọc giống nhau dù bên ngoài đã sửa thành 15.000. Cái giá nằm ở dòng thứ hai: khi transaction này cố ghi chồng lên dòng đã bị người khác sửa sau snapshot, PostgreSQL từ chối với SQLSTATE `40001` (`serialization_failure`, thông báo `could not serialize access due to concurrent update`, lab in đúng dòng đó từ `exc.orig.diag.message_primary`) thay vì lặng lẽ ghi đè. Tài liệu PostgreSQL nói rõ ứng dụng ở mức này phải sẵn sàng **thử lại toàn bộ transaction**. `booking.py` có sẵn khung đó:
+Mức `REPEATABLE READ` (đặt bằng `session.connection(execution_options={"isolation_level": "REPEATABLE READ"})` trước câu lệnh đầu tiên của transaction) chụp một snapshot: hai lần đọc giống nhau dù bên ngoài đã sửa thành 15.000. Cái giá nằm ở dòng thứ hai: khi transaction này cố ghi chồng lên dòng đã bị người khác sửa sau snapshot, PostgreSQL từ chối với SQLSTATE `40001` (`serialization_failure`, thông báo `could not serialize access due to concurrent update`, lab in đúng dòng đó từ `exc.orig.diag.message_primary`) thay vì ghi đè mà không báo gì. Tài liệu PostgreSQL nói rõ ứng dụng ở mức này phải sẵn sàng **thử lại toàn bộ transaction**. `booking.py` có sẵn khung đó:
 
 ```python
 for attempt in range(1, max_attempts + 1):
@@ -77,7 +77,7 @@ for attempt in range(1, max_attempts + 1):
             raise
 ```
 
-Chỉ hai mã được thử lại: `40001` và `40P01` (deadlock). Mọi lỗi khác nổi lên ngay, và số lần thử bị chặn, vì retry vô hạn chỉ chuyển một sự cố nhỏ thành sự cố lớn. Trong lab, lần thử đầu bị một session khác chen vào nên dính `40001`, lần hai đọc snapshot mới và thành công: `run_in_transaction thử lại toàn bộ khi 40001: dùng 2 lần, cước cuối = 16500`. Retry phải chạy lại **cả** `work`, kể cả bước đọc, vì quyết định của lần đầu dựa trên dữ liệu đã cũ.
+Ta chỉ thử lại với hai mã: `40001` và `40P01` (deadlock). Mọi lỗi khác nổi lên ngay, và số lần thử có giới hạn, vì retry vô hạn chỉ chuyển một sự cố nhỏ thành sự cố lớn. Trong lab, lần thử đầu bị một session khác chen vào nên dính `40001`, lần hai đọc snapshot mới và thành công: `run_in_transaction thử lại toàn bộ khi 40001: dùng 2 lần, cước cuối = 16500`. Retry phải chạy lại **cả** `work`, kể cả bước đọc, vì quyết định của lần đầu dựa trên dữ liệu đã cũ.
 
 ## Mất cập nhật: khi không ai báo lỗi
 
@@ -97,11 +97,11 @@ with Session(engine) as a, Session(engine) as b:
 Không version: DR-001 commit thành công, DR-002 commit thành công; driver cuối cùng = DR-002
 ```
 
-ORM chỉ phát `UPDATE trips SET driver_id=... WHERE trip_id=...`, điều kiện duy nhất là khoá chính, nên câu thứ hai đè lên câu thứ nhất mà không có gì để phản đối. Lỗi không nằm ở PostgreSQL mà ở chỗ kiểm tra «chưa có tài xế» diễn ra trước khi ghi, trên dữ liệu mà người khác có thể đã đổi. Đây là hình dạng check-then-act của bài [Lock, Queue, Semaphore](/articles/python-concurrency-lock-queue-semaphore), nhưng lock trong tiến trình không giúp được khi nhiều server ghi vào cùng một database.
+ORM chỉ phát `UPDATE trips SET driver_id=... WHERE trip_id=...`, điều kiện duy nhất là khoá chính, nên câu thứ hai đè lên câu thứ nhất mà không có gì ngăn lại. Lỗi không nằm ở PostgreSQL mà ở chỗ kiểm tra «chưa có tài xế» diễn ra trước khi ghi, trên dữ liệu mà người khác có thể đã đổi. Đây là mẫu check-then-act của bài [Lock, Queue, Semaphore](/articles/python-concurrency-lock-queue-semaphore), nhưng lock trong tiến trình không giúp được khi nhiều server ghi vào cùng một database.
 
 ## Optimistic concurrency: cột version
 
-Cách chữa là đưa phần «kiểm tra» vào chính câu `UPDATE`. Bảng `trips` có cột `version` (bắt đầu bằng 1). Người ghi nhớ version đã đọc và chỉ ghi nếu nó **chưa đổi**; mỗi lần ghi tăng version. Gọi là *optimistic* vì ta không khoá gì khi đọc, ta lạc quan rằng ít khi có ai chen vào, và chỉ trả giá (đọc lại) khi có. `booking.py` (`accept_trip`, trích):
+Cách chữa là đưa phần «kiểm tra» vào chính câu `UPDATE`. Bảng `trips` có cột `version` (bắt đầu bằng 1). Người ghi nhớ version đã đọc và chỉ ghi nếu nó **chưa đổi**; mỗi lần ghi tăng version. Gọi là *optimistic* vì ta không khoá gì khi đọc, ta lạc quan rằng ít khi có ai chen vào, và chỉ trả giá (đọc lại) khi có người chen vào. `booking.py` (`accept_trip`, trích):
 
 ```python
 for attempt in range(1, max_attempts + 1):
@@ -149,7 +149,7 @@ SQLAlchemy cũng làm hộ phần này nếu ta khai báo `version_id_col` trong
 
 ## Idempotency: khoá bền và UNIQUE
 
-Idempotent nghĩa là gửi cùng một ý định nhiều lần cho cùng một kết quả bền, không tạo thêm hiệu ứng. Với đặt chuyến, client sinh một **idempotency key** cho mỗi ý định (một giá trị ngẫu nhiên giữ nguyên khi gửi lại), server lưu key cùng kết quả trong database. Bảng `booking_requests` có ràng buộc `UNIQUE (customer_id, idempotency_key)` và hai cột `service`, `distance_km` để so khớp nội dung ý định. `fare` được tính bằng `calculate_fare(distance_km, service=service)` (miền 0 đến 100 km, như bài 03) ngay đầu hàm, nên khoảng cách ngoài miền bị từ chối trước khi tốn một số sequence nào. Quan trọng nhất là hai điều: chuyến và khoá được ghi trong **cùng một transaction** (không có «có khoá mà mất chuyến»), và quyết định cuối cùng thuộc về ràng buộc UNIQUE, không thuộc về câu `SELECT` kiểm tra trước. `book_trip` (trích):
+Idempotent nghĩa là gửi cùng một ý định nhiều lần cho ra cùng một kết quả đã lưu, không tạo thêm hiệu ứng phụ. Với đặt chuyến, client sinh một **idempotency key** cho mỗi ý định (một giá trị ngẫu nhiên giữ nguyên khi gửi lại), server lưu key cùng kết quả trong database. Bảng `booking_requests` có ràng buộc `UNIQUE (customer_id, idempotency_key)` và hai cột `service`, `distance_km` để so khớp nội dung ý định. `fare` được tính bằng `calculate_fare(distance_km, service=service)` (miền 0 đến 100 km, như bài 03) ngay đầu hàm, nên khoảng cách ngoài miền bị từ chối trước khi tốn một số sequence nào. Quan trọng nhất là hai điều: chuyến và khoá được ghi trong **cùng một transaction** (không có «có khoá mà mất chuyến»), và quyết định cuối cùng thuộc về ràng buộc UNIQUE, không thuộc về câu `SELECT` kiểm tra trước. `book_trip` (trích):
 
 ```python
 try:
@@ -170,9 +170,9 @@ except IntegrityError as exc:
     conflict = f"{orig.sqlstate}: {orig.diag.message_primary}"
 ```
 
-Câu `except` ở đây hẹp có chủ ý: chỉ nhận **đúng** SQLSTATE `23505` (`unique_violation`) của **đúng** ràng buộc khoá idempotency. `IntegrityError` bao trùm cả khoá ngoại sai, `NOT NULL` và những lỗi khác, và nuốt hết chúng sẽ che mất bug thật. `exc.orig` là exception gốc của psycopg, có `.sqlstate` và `.diag.constraint_name`. Khi đúng là 23505, transaction của ta đã rollback (kể cả chuyến ứng viên), người thắng đã commit, nên ta mở session mới đọc lại khoá của họ và trả đúng kết quả đó. Trước bước ghi, hàm còn có một lần `SELECT` đọc nhanh: nếu khoá đã có thì trả luôn; nhưng nó chỉ là tối ưu cho trường hợp thường gặp, còn tính đúng nằm ở UNIQUE.
+Câu `except` ở đây hẹp có chủ ý: chỉ nhận **đúng** SQLSTATE `23505` (`unique_violation`) của **đúng** ràng buộc khoá idempotency. `IntegrityError` bao trùm cả khoá ngoại sai, `NOT NULL` và những lỗi khác, và nuốt hết chúng sẽ che mất bug thật. `exc.orig` là exception gốc của psycopg, có `.sqlstate` và `.diag.constraint_name`. Khi đúng là 23505, transaction của ta đã rollback (kể cả chuyến ứng viên), người thắng đã commit, nên ta mở session mới đọc lại khoá của họ và trả đúng kết quả đó. Trước bước ghi, hàm còn có một lần `SELECT` đọc nhanh: nếu khoá đã có thì trả luôn; nhưng đó chỉ là bước tối ưu cho trường hợp thường gặp, còn tính đúng nằm ở UNIQUE.
 
-Kiểm bằng các ca sau. Gửi hai lần cùng khoá, rồi cùng khoá nhưng đổi nội dung, rồi một khoảng cách ngoài miền, rồi hai request chạy đồng thời. Với ca đồng thời, `threading.Barrier(2)` giữ cả hai thread **sau** bước kiểm tra «chưa có» và **trước** khi ghi, để cả hai chắc chắn cùng thấy khoá chưa tồn tại:
+Ta kiểm tra bằng các test case sau. Gửi hai lần cùng khoá, rồi cùng khoá nhưng đổi nội dung, rồi một khoảng cách ngoài miền, rồi hai request chạy đồng thời. Với test case đồng thời, `threading.Barrier(2)` giữ cả hai thread **sau** bước kiểm tra «chưa có» và **trước** khi ghi, để cả hai chắc chắn cùng thấy khoá chưa tồn tại:
 
 ```text
 Gửi req-1 hai lần: lần 1 replayed=False, lần 2 replayed=True, cùng chuyến: True
@@ -185,7 +185,7 @@ Trong database: 2 bản ghi khóa, 2 chuyến sinh bởi book_trip
 Sequence đã cấp tới số 102 nhưng chỉ có 2 chuyến: ca thua đã rollback chuyến ứng viên, số của nó không được dùng lại
 ```
 
-Ca «cùng khoá khác nội dung» bị từ chối bằng `IdempotencyConflict`: khoá đã dùng cho 5 km `ride` mà request mới đòi 6 km, hoặc đổi sang `food`, là lỗi của client, không được trả lại chuyến cũ như thể không có gì. Ca đồng thời: một thread tạo chuyến, thread kia bị 23505 rồi trả về chuyến của người thắng, cuối cùng chỉ có 2 chuyến cho 2 khoá. Dòng cuối là chi tiết hay bị quên: `sequence` của PostgreSQL không rollback, nên số `101` hoặc `102` của ca thua bị bỏ lại và mã chuyến có khoảng trống. Mã chuyến cần **duy nhất**, không cần **liên tục**; nếu nghiệp vụ đòi liên tục (hoá đơn chẳng hạn) thì phải thiết kế riêng.
+Test case «cùng khoá khác nội dung» bị từ chối bằng `IdempotencyConflict`: khoá đã dùng cho 5 km `ride` mà request mới đòi 6 km, hoặc đổi sang `food`, là lỗi của client, không được trả lại chuyến cũ như thể không có gì. Test case đồng thời: một thread tạo chuyến, thread kia bị 23505 rồi trả về chuyến của người thắng, cuối cùng chỉ có 2 chuyến cho 2 khoá. Dòng cuối là chi tiết hay bị quên: `sequence` của PostgreSQL không rollback, nên số `101` hoặc `102` của ca thua bị bỏ lại và mã chuyến có khoảng trống. Mã chuyến cần **duy nhất**, không cần **liên tục**; nếu nghiệp vụ đòi liên tục (hoá đơn chẳng hạn) thì phải thiết kế riêng.
 
 Cách khác là `INSERT ... ON CONFLICT DO NOTHING` rồi kiểm số hàng ảnh hưởng. Dù chọn cách nào, lớp quyết định phải là ràng buộc của database: `SELECT` rồi mới `INSERT` luôn có khe hở giữa hai bước.
 
@@ -221,7 +221,7 @@ Sequence đã cấp tới số 102 nhưng chỉ có 2 chuyến: ca thua đã rol
 OK 24/24
 ```
 
-`--verify` chạy 24 kiểm tra, in `OK 24/24` khi đạt; sai thì in tên ca, `FAIL n/m` (n là số ca đạt) và exit 1; chưa bật PostgreSQL thì in `FAIL: không nối được PostgreSQL tại <url> ...` và exit 1. Ta chạy lab nhiều lần liên tiếp và lần nào cũng `OK 24/24`: các ca xen kẽ được dựng bằng điểm chèn và `Barrier`, nên kết quả không phụ thuộc may rủi về thời gian. Phiên bản: Python 3.14.7, SQLAlchemy 2.1.8, psycopg 3.3.8, PostgreSQL 17.11.
+`--verify` chạy 24 kiểm tra, in `OK 24/24` khi đạt; sai thì in tên test case, `FAIL n/m` (n là số test case đạt) và exit 1; chưa bật PostgreSQL thì in `FAIL: không nối được PostgreSQL tại <url> ...` và exit 1. Ta chạy lab nhiều lần liên tiếp và lần nào cũng `OK 24/24`: các test case xen kẽ dựng bằng điểm chèn và `Barrier`, nên kết quả không phụ thuộc may rủi về thời gian. Phiên bản: Python 3.14.7, SQLAlchemy 2.1.8, psycopg 3.3.8, PostgreSQL 17.11.
 
 | Hiện tượng | Kiểm tra trước |
 | --- | --- |

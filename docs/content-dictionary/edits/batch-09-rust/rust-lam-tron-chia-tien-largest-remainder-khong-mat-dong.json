@@ -1,0 +1,215 @@
+{
+ "file": "rust-lam-tron-chia-tien-largest-remainder-khong-mat-dong.md",
+ "edits": [
+  {
+   "old": "Bài này biến nó thành thành phần dùng thật:",
+   "new": "Bài này biến nó thành một thành phần dùng được trong thực tế:",
+   "reason": "\"dùng thật\" cụt, lặp \"thành\".",
+   "severity": "medium"
+  },
+  {
+   "old": "Vì thế bug này hay lọt qua test:",
+   "new": "Vì thế lỗi này hay lọt qua test:",
+   "reason": "Dùng từ Việt quen dùng thay cho \"bug\" trong văn xuôi.",
+   "severity": "low"
+  },
+  {
+   "old": "Với hai bên, hai phần lẻ cộng lại đúng bằng 1 (hoặc 0): 0,8 và 0,2 làm tròn thành 1 và 0, bù nhau.",
+   "new": "Với hai bên, hai phần lẻ cộng lại đúng bằng 1 (hoặc 0): chẳng hạn 0,8 và 0,2 làm tròn thành 1 và 0, bù nhau.",
+   "reason": "Câu tối nghĩa, không nói rõ đang nói về phần lẻ nào.",
+   "severity": "high"
+  },
+  {
+   "old": "làm vỡ quy luật, như dòng 50/50.",
+   "new": "phá vỡ quy luật, như dòng 50/50.",
+   "reason": "\"làm vỡ\" gượng.",
+   "severity": "low"
+  },
+  {
+   "old": "`Decimal` không biểu diễn hết 1/3:",
+   "new": "`Decimal` không biểu diễn chính xác được 1/3:",
+   "reason": "\"biểu diễn hết\" gượng, không rõ nghĩa.",
+   "severity": "medium"
+  },
+  {
+   "old": "`ToZero` và `AwayFromZero` luôn cắt hoặc luôn đẩy;",
+   "new": "`ToZero` và `AwayFromZero` luôn cắt bớt hoặc luôn đẩy lên;",
+   "reason": "\"cắt\", \"đẩy\" thiếu bổ ngữ.",
+   "severity": "medium"
+  },
+  {
+   "old": "Không hàng nào có ba số 0 ở cột lệch.",
+   "new": "Không strategy nào cho độ lệch 0 ở cả ba cột.",
+   "reason": "Câu khó hiểu, diễn đạt lại theo ý bảng.",
+   "severity": "high"
+  },
+  {
+   "old": "Phần lõi của `allocate`, cài trong `src/allocate.rs`:",
+   "new": "Phần lõi của `allocate`, được cài đặt trong `src/allocate.rs`:",
+   "reason": "\"cài trong\" cụt.",
+   "severity": "medium"
+  },
+  {
+   "old": "Ba chi tiết đáng dừng lại.",
+   "new": "Ba chi tiết đáng chú ý.",
+   "reason": "\"đáng dừng lại\" dịch từng chữ.",
+   "severity": "medium"
+  },
+  {
+   "old": "**Số nguyên rộng.**",
+   "new": "**Số nguyên đủ rộng.**",
+   "reason": "\"số nguyên rộng\" là calque của wide integer, thiếu bổ ngữ.",
+   "severity": "low"
+  },
+  {
+   "old": "nên `allocate(-t)` là đối xứng từng đồng của `allocate(t)`:",
+   "new": "nên `allocate(-t)` đối xứng từng đồng với `allocate(t)`:",
+   "reason": "\"là đối xứng ... của\" gượng.",
+   "severity": "medium"
+  },
+  {
+   "old": "nên thứ tự là toàn phần và kết quả chỉ phụ thuộc (key, trọng số, tổng):",
+   "new": "nên thứ tự là toàn phần và kết quả chỉ phụ thuộc vào (key, trọng số, tổng):",
+   "reason": "Thiếu \"vào\".",
+   "severity": "low"
+  },
+  {
+   "old": "là bug thật: mỗi `HashMap`",
+   "new": "là lỗi thật: mỗi `HashMap`",
+   "reason": "Dùng từ Việt quen dùng thay \"bug\".",
+   "severity": "low"
+  },
+  {
+   "old": "qua 200 lần thử lab thấy nhiều hơn một bên nhận đồng lẻ,",
+   "new": "qua 200 lần thử, lab thấy đồng lẻ rơi vào nhiều hơn một bên,",
+   "reason": "Câu thiếu rõ nghĩa, giọng dịch.",
+   "severity": "medium"
+  },
+  {
+   "old": "Các biên đều có test:",
+   "new": "Các trường hợp biên đều có test:",
+   "reason": "\"biên\" cụt, thiếu danh từ chính.",
+   "severity": "medium"
+  },
+  {
+   "old": "Largest remainder giữ mỗi bên dưới 1 đồng,",
+   "new": "Largest remainder giữ độ lệch của mỗi bên dưới 1 đồng so với phần chính xác,",
+   "reason": "Thiếu danh từ chính (độ lệch) và mốc so sánh.",
+   "severity": "medium"
+  },
+  {
+   "old": "Các posting theo thứ tự khách, nền tảng, tài xế:",
+   "new": "Các posting xếp theo thứ tự khách, nền tảng, tài xế:",
+   "reason": "Thiếu động từ.",
+   "severity": "low"
+  },
+  {
+   "old": "nên cùng quyết định cho cùng chuỗi dù đầu vào xếp thế nào:",
+   "new": "nên cùng quyết định cho ra cùng chuỗi, dù đầu vào xếp thế nào:",
+   "reason": "Thiếu từ, câu cụt.",
+   "severity": "low"
+  },
+  {
+   "old": "`distribute_entry` thêm một dòng `pool` bằng âm tổng các phần nên bút toán luôn cân.",
+   "new": "`distribute_entry` thêm một dòng `pool` có giá trị bằng âm của tổng các phần, nên bút toán luôn cân.",
+   "reason": "Câu cụt, khó đọc.",
+   "severity": "medium"
+  },
+  {
+   "old": "Ba khách `TN-0012` ra `JE-000002: -8.501 VND, -8.500 VND, -8.500 VND`;",
+   "new": "Ba khách của `TN-0012` cho ra bút toán `JE-000002: -8.501 VND, -8.500 VND, -8.500 VND`;",
+   "reason": "\"ra\" cụt, thiếu danh từ chính.",
+   "severity": "medium"
+  },
+  {
+   "old": "ghi lại cùng quy tắc trả `replayed = true`.",
+   "new": "ghi lại với cùng quy tắc thì trả `replayed = true`.",
+   "reason": "Thiếu từ nối điều kiện.",
+   "severity": "low"
+  },
+  {
+   "old": "`allocate(+25.501)` cho đúng các posting của bút toán đảo mà `Ledger::reverse` tạo.",
+   "new": "`allocate(+25.501)` cho ra đúng các posting của bút toán đảo do `Ledger::reverse` tạo.",
+   "reason": "Câu cụt, \"mà ... tạo\" gượng.",
+   "severity": "low"
+  },
+  {
+   "old": "**làm tròn đúng một lần, ở biên, trên tổng gốc, bằng thuật toán bảo toàn tổng**",
+   "new": "**làm tròn đúng một lần, ở ranh giới, trên tổng gốc, bằng thuật toán bảo toàn tổng**",
+   "reason": "\"ở biên\" là calque, khó hiểu.",
+   "severity": "medium"
+  },
+  {
+   "old": "mỗi property chạy 1.000 ca, tổng sinh đến cả `i64::MIN` và `i64::MAX`",
+   "new": "mỗi property chạy 1.000 test case, với tổng được sinh trải đến cả `i64::MIN` và `i64::MAX`",
+   "reason": "Thống nhất \"test case\"; \"tổng sinh đến\" cụt.",
+   "severity": "medium"
+  },
+  {
+   "old": "Không chứng minh được, vì sai:",
+   "new": "Không thể chứng minh, vì nó sai:",
+   "reason": "Câu cụt, đảo ngữ gượng.",
+   "severity": "medium"
+  },
+  {
+   "old": "Với RNG cố định, nó bị bắt ở ca đầu `(20, [2, 2, 1, 3])`, sau shrinking còn",
+   "new": "Với RNG cố định, bản ngây thơ bị bắt ở test case đầu tiên `(20, [2, 2, 1, 3])`, sau shrinking còn",
+   "reason": "\"nó\" mơ hồ; thống nhất \"test case\".",
+   "severity": "medium"
+  },
+  {
+   "old": "Chưa phải ca nhỏ nhất:",
+   "new": "Chưa phải test case nhỏ nhất:",
+   "reason": "Thống nhất \"test case\".",
+   "severity": "low"
+  },
+  {
+   "old": "Về strategy: thử sửa tiêu chí phá hoà",
+   "new": "Về strategy của proptest: hãy thử sửa tiêu chí phá hoà",
+   "reason": "\"strategy\" dễ lẫn với RoundingStrategy; thiếu từ nối.",
+   "severity": "medium"
+  },
+  {
+   "old": "Property chỉ mạnh bằng strategy;",
+   "new": "Property chỉ mạnh ngang với strategy sinh dữ liệu của nó;",
+   "reason": "Calque của \"only as strong as\".",
+   "severity": "medium"
+  },
+  {
+   "old": "(bỏ dòng kiểm gọi lại cùng đầu vào)",
+   "new": "(bỏ dòng kiểm tra việc gọi lại với cùng đầu vào)",
+   "reason": "\"kiểm gọi lại\" cụt.",
+   "severity": "medium"
+  },
+  {
+   "old": "mọi số trong bài lấy từ đó.",
+   "new": "mọi số trong bài đều lấy từ đó.",
+   "reason": "Câu cụt.",
+   "severity": "low"
+  },
+  {
+   "old": "kiểm các giá trị này, chạy thêm 1.000 ca cho hai bất biến,",
+   "new": "kiểm tra các giá trị này, chạy thêm 1.000 test case cho hai bất biến,",
+   "reason": "\"kiểm\" cụt; thống nhất \"test case\".",
+   "severity": "medium"
+  },
+  {
+   "old": "Khi một property fail, proptest ghi",
+   "new": "Khi một property không đạt, proptest ghi",
+   "reason": "\"fail\" là từ tiếng Anh thông thường.",
+   "severity": "medium"
+  },
+  {
+   "old": "là số liệu chọn để thấy hiện tượng,",
+   "new": "là số liệu được chọn để thấy rõ hiện tượng,",
+   "reason": "Thiếu \"được\".",
+   "severity": "low"
+  },
+  {
+   "old": "hiệu luỹ kế có thể âm ở ca hiếm;",
+   "new": "hiệu luỹ kế có thể âm ở trường hợp hiếm;",
+   "reason": "\"ca\" mơ hồ.",
+   "severity": "low"
+  }
+ ]
+}

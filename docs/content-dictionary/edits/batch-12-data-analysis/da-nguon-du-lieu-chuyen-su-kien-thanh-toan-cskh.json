@@ -1,0 +1,19 @@
+{"file":"da-nguon-du-lieu-chuyen-su-kien-thanh-toan-cskh.md","edits":[
+{"old":"dataset minh hoạ có thể không ghi đầy đủ","new":"bộ dữ liệu minh hoạ có thể không ghi đầy đủ","reason":"thống nhất \"bộ dữ liệu\" thay dataset","severity":"medium"},
+{"old":"Bài phân tích schema và dữ liệu mẫu trong source, không tuyên bố","new":"Bài này phân tích schema và dữ liệu mẫu trong mã nguồn, không tuyên bố","reason":"câu thiếu chủ ngữ; \"source\" là từ tiếng Anh thông thường","severity":"medium"},
+{"old":"Hai bộ này khác mục đích, không ghép số của chúng","new":"Hai bộ này có mục đích khác nhau, nên không ghép số của chúng","reason":"câu thiếu liên từ, đọc cụt","severity":"medium"},
+{"old":"Đã đọc source; chưa kiểm tra một instance đang chạy","new":"Đã đọc mã nguồn; chưa kiểm tra một instance đang chạy","reason":"từ tiếng Anh thông thường lọt vào văn xuôi","severity":"low"},
+{"old":"Export thanh toán cho phân tích này","new":"Bản xuất dữ liệu thanh toán cho phân tích này","reason":"\"Export\" là từ tiếng Anh thông thường, cụm cụt","severity":"medium"},
+{"old":"Export CSKH có liên kết lượt","new":"Bản xuất dữ liệu CSKH có liên kết với lượt","reason":"\"Export\" tiếng Anh; thiếu giới từ","severity":"medium"},
+{"old":"Nó chỉ xác định bằng chứng hiện đang có cho bài phân tích này.","new":"Nhãn này chỉ xác định bằng chứng hiện đang có cho bài phân tích này.","reason":"tránh \"Nó\" chỉ sự vật trừu tượng ở đầu câu","severity":"medium"},
+{"old":"A chưa có mapping thành phố/vùng cụ thể","new":"A chưa được ánh xạ tới thành phố hoặc vùng cụ thể","reason":"mapping lọt vào văn xuôi; câu cụt","severity":"medium"},
+{"old":"không dùng `updated_at` thay tất cả mốc nghiệp vụ","new":"không dùng `updated_at` để thay cho mọi mốc nghiệp vụ","reason":"thiếu \"để … cho\", câu cụt","severity":"low"},
+{"old":"có ingest trễ không, có retry tạo bản sao không,","new":"có nạp dữ liệu (ingest) trễ không, có thử lại (retry) tạo ra bản sao không,","reason":"ingest và retry chưa được giải nghĩa cho người mới","severity":"medium"},
+{"old":"Backend/chủ dịch vụ; cần gán người cụ thể","new":"Backend/chủ dịch vụ; cần chỉ định người cụ thể","reason":"\"gán người\" không tự nhiên","severity":"low"},
+{"old":"Ý nghĩa occurred_at; timezone; cơ chế xử lý trễ cần xác minh","new":"Ý nghĩa occurred_at; múi giờ; cơ chế xử lý trễ cần xác minh","reason":"từ tiếng Anh thông thường; thống nhất \"múi giờ\"","severity":"low"},
+{"old":"Version | Schema, tập trích, thời điểm lấy và người tạo","new":"Phiên bản | Schema, tập trích, thời điểm lấy và người tạo","reason":"thống nhất \"phiên bản\" trong nhãn bảng","severity":"low"},
+{"old":"Sau join, đối chiếu số lượt duy nhất, số dòng và tổng đại lượng nhạy với nhân bản.","new":"Sau khi join, đối chiếu số lượt duy nhất, số dòng và các tổng bị sai lệch khi dòng bị nhân bản.","reason":"\"đại lượng nhạy với nhân bản\" là cụm tự ghép, tối nghĩa","severity":"high"},
+{"old":"chọn các ca nghiệp vụ để review với chủ nguồn:","new":"chọn các ca nghiệp vụ để cùng rà soát với chủ nguồn:","reason":"từ tiếng Anh thông thường lọt vào văn xuôi","severity":"low"},
+{"old":"thời điểm chốt và quyền sở hữu thông tin; chỉ định nguồn tham chiếu","new":"thời điểm chốt và người chịu trách nhiệm về thông tin; chỉ định nguồn tham chiếu","reason":"\"quyền sở hữu thông tin\" là calque của ownership","severity":"medium"},
+{"old":"mỗi lượt có hai payment attempt và ba ticket.","new":"mỗi lượt có hai lần thử thanh toán và ba ticket.","reason":"thống nhất \"lần thử thanh toán\" với mục 4","severity":"medium"}
+]}

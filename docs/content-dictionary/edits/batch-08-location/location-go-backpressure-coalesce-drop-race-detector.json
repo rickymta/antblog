@@ -1,0 +1,215 @@
+{
+ "file": "location-go-backpressure-coalesce-drop-race-detector.md",
+ "edits": [
+  {
+   "old": "Phía trước nó, 25.000 tài xế vẫn gửi vị trí",
+   "new": "Phía trước Kafka, 25.000 tài xế vẫn gửi vị trí",
+   "reason": "«nó» mơ hồ, nhắc lại danh từ",
+   "severity": "medium"
+  },
+  {
+   "old": "nhưng bỏ cái nào mới là câu hỏi.",
+   "new": "nhưng bỏ điểm nào mới là câu hỏi.",
+   "reason": "«cái nào» mơ hồ, nêu rõ đối tượng",
+   "severity": "medium"
+  },
+  {
+   "old": "Sink chỉ nhận được 1.000 điểm/giây trong khi 6.250 điểm/giây đến, kéo dài 40 giây.",
+   "new": "Sink chỉ nhận được 1.000 điểm/giây trong khi có 6.250 điểm/giây đến, tình huống này kéo dài 40 giây.",
+   "reason": "câu thiếu chủ ngữ cho vế «kéo dài»",
+   "severity": "medium"
+  },
+  {
+   "old": "drop-newest giao đúng những điểm cũ nhất (p99 tuổi điểm lúc giao khoảng 30,6 giây)",
+   "new": "drop-newest giao đúng những điểm cũ nhất (p99 của tuổi điểm lúc giao khoảng 30,6 giây)",
+   "reason": "trật tự từ kiểu tiếng Anh",
+   "severity": "low"
+  },
+  {
+   "old": "Nó chỉ giữ mutex trong chốc lát rồi trả về.",
+   "new": "Hàm này chỉ giữ mutex trong chốc lát rồi trả về.",
+   "reason": "tránh «Nó» chỉ sự vật trừu tượng đầu câu",
+   "severity": "medium"
+  },
+  {
+   "old": "phần còn lại của bài đo xem nó có đúng trong lab không.",
+   "new": "phần còn lại của bài đo xem lập luận đó có đúng trong lab không.",
+   "reason": "tránh «nó» mơ hồ",
+   "severity": "medium"
+  },
+  {
+   "old": "`Queue` là cấu trúc dữ liệu giới hạn, an toàn",
+   "new": "`Queue` là cấu trúc dữ liệu có giới hạn kích thước, an toàn",
+   "reason": "«cấu trúc dữ liệu giới hạn» cụt",
+   "severity": "medium"
+  },
+  {
+   "old": "thì điểm mới của một tài xế đã có điểm chờ mới thay vào đó thay vì xếp thêm",
+   "new": "thì điểm mới của một tài xế đã có điểm chờ sẽ thay chính điểm chờ đó, không xếp thêm",
+   "reason": "câu ghép chồng chữ «mới», «thay vào đó thay vì», khó đọc",
+   "severity": "high"
+  },
+  {
+   "old": "chặn điểm đến sau: nếu điểm vừa tới",
+   "new": "chặn điểm đến muộn: nếu điểm vừa tới",
+   "reason": "«điểm đến sau» gượng",
+   "severity": "low"
+  },
+  {
+   "old": "StaleIgnore (bỏ điểm đến sau)",
+   "new": "StaleIgnore (bỏ điểm đến muộn)",
+   "reason": "thống nhất với phần văn xuôi",
+   "severity": "low"
+  },
+  {
+   "old": "`ready` là channel đệm 1 làm tín hiệu",
+   "new": "`ready` là channel có bộ đệm cỡ 1 làm tín hiệu",
+   "reason": "cụm tự ghép «channel đệm 1» cụt",
+   "severity": "medium"
+  },
+  {
+   "old": "| Bộ nhớ sống đỉnh |",
+   "new": "| Đỉnh bộ nhớ sống |",
+   "reason": "cụm «bộ nhớ sống đỉnh» cụt",
+   "severity": "low"
+  },
+  {
+   "old": "Khác nhau là **điểm nào**:",
+   "new": "Chỗ khác nhau là **điểm nào được giao**:",
+   "reason": "câu thiếu chủ ngữ",
+   "severity": "medium"
+  },
+  {
+   "old": "Ngược với điều khách cần, và 88,3% điểm giao đi đã lỗi thời.",
+   "new": "Điều này ngược với điều khách cần, và 88,3% điểm giao đi đã lỗi thời.",
+   "reason": "câu thiếu chủ ngữ",
+   "severity": "high"
+  },
+  {
+   "old": "Nó chỉ khá lên khi hàng cạn ở pha hồi phục.",
+   "new": "Chính sách này chỉ khá lên khi hàng cạn ở pha hồi phục.",
+   "reason": "tránh «Nó» đầu câu",
+   "severity": "medium"
+  },
+  {
+   "old": "Tuổi bị chặn ở cỡ khoảng cách giữa hai lần báo của chính tài xế",
+   "new": "Tuổi điểm bị giới hạn ở cỡ khoảng thời gian giữa hai lần báo của chính tài xế",
+   "reason": "chủ ngữ cụt, «khoảng cách» dễ hiểu nhầm là quãng đường",
+   "severity": "high"
+  },
+  {
+   "old": "Nó đổi lịch sử đầy đủ lấy độ tươi.",
+   "new": "Coalesce đổi lịch sử đầy đủ lấy độ tươi.",
+   "reason": "tránh «Nó» đầu câu",
+   "severity": "medium"
+  },
+  {
+   "old": "Số đo này của sink giả trên simulator. Nó chứng minh cơ chế",
+   "new": "Đây là số đo của sink giả trên simulator. Số đo này chứng minh cơ chế",
+   "reason": "câu thiếu động từ",
+   "severity": "high"
+  },
+  {
+   "old": "số xả được dao động theo đồng hồ thật",
+   "new": "số điểm xả được dao động theo đồng hồ thật",
+   "reason": "thiếu danh từ, dễ đọc nhầm «được dao động»",
+   "severity": "medium"
+  },
+  {
+   "old": "Số lô bị huỷ dở là một lô cho mỗi worker nên là chi phí không tránh được của",
+   "new": "Mỗi worker bị huỷ dở một lô, nên đây là chi phí không tránh được của",
+   "reason": "câu thiếu chủ ngữ",
+   "severity": "medium"
+  },
+  {
+   "old": "ở đây chỉ có một worker, nên 100 điểm.",
+   "new": "ở đây chỉ có một worker, nên số điểm mất là 100.",
+   "reason": "câu thiếu vị ngữ",
+   "severity": "medium"
+  },
+  {
+   "old": "không tăng giữa mốc giây 25 và 30 mà độ sâu ở mốc 25 vẫn 0",
+   "new": "không tăng giữa mốc giây 25 và 30, trong khi độ sâu ở mốc 25 vẫn là 0",
+   "reason": "liên từ «mà» gượng",
+   "severity": "low"
+  },
+  {
+   "old": "Đây là hai chuyện tách nhau.",
+   "new": "Đây là hai chuyện riêng biệt.",
+   "reason": "diễn đạt gượng",
+   "severity": "low"
+  },
+  {
+   "old": "là bản ghi đang bay, không phải bản ghi mất",
+   "new": "là các bản ghi đang trên đường đi (in-flight), không phải bản ghi mất",
+   "reason": "«đang bay» là ẩn dụ chưa giải thích",
+   "severity": "medium"
+  },
+  {
+   "old": "Để phân biệt «đang bay» với «mất» hoặc «đếm sai»",
+   "new": "Để phân biệt «đang trên đường đi» với «mất» hoặc «đếm sai»",
+   "reason": "thống nhất với chỗ trên",
+   "severity": "medium"
+  },
+  {
+   "old": "Một: vì sao cùng hạn, cùng thời gian dừng",
+   "new": "Thứ nhất: vì sao cùng hạn, cùng thời gian dừng",
+   "reason": "liệt kê gượng",
+   "severity": "low"
+  },
+  {
+   "old": "Hai: lần coalesce gốc lỗi",
+   "new": "Thứ hai: lần coalesce gốc lỗi",
+   "reason": "liệt kê gượng",
+   "severity": "low"
+  },
+  {
+   "old": "lúc máy rất nặng không ghi)",
+   "new": "lúc máy rất nặng không được ghi lại)",
+   "reason": "câu cụt thiếu thành phần",
+   "severity": "medium"
+  },
+  {
+   "old": "Vậy ở vùng 30 đến 34 giây, cùng cấu hình mà lúc lỗi lúc không; gọi đó là một cuộc đua thời gian bên trong client mới là đặt tên cho hiện tượng, chưa phải lời giải thích.",
+   "new": "Vậy ở vùng 30 đến 34 giây, cùng cấu hình mà lúc lỗi lúc không. Gọi đó là một race condition về thời gian bên trong client thì mới là đặt tên cho hiện tượng, chưa phải lời giải thích.",
+   "reason": "câu dài, chủ ngữ bị treo; tách thành hai câu",
+   "severity": "medium"
+  },
+  {
+   "old": "kiểm một bất biến",
+   "new": "kiểm tra một bất biến",
+   "reason": "«kiểm» đứng một mình cụt",
+   "severity": "medium"
+  },
+  {
+   "old": "Các test khác kiểm coalesce chỉ bật khi vượt ngưỡng, gộp giữ điểm mới nhất, đầy thì đẩy tài xế chờ lâu nhất,",
+   "new": "Các test khác kiểm tra rằng coalesce chỉ bật khi vượt ngưỡng, phép gộp giữ điểm mới nhất, khi đầy thì đẩy tài xế chờ lâu nhất ra,",
+   "reason": "câu liệt kê thiếu động từ, khó đọc",
+   "severity": "medium"
+  },
+  {
+   "old": "600 giây cho cỡ 1,4 GB",
+   "new": "600 giây cho ra cỡ 1,4 GB",
+   "reason": "thiếu động từ",
+   "severity": "low"
+  },
+  {
+   "old": "Giới hạn dung lượng là để biên độ tác hại không phụ thuộc",
+   "new": "Giới hạn dung lượng là để mức tác hại tối đa không phụ thuộc",
+   "reason": "«biên độ tác hại» gượng",
+   "severity": "medium"
+  },
+  {
+   "old": "bảng giây-theo-giây",
+   "new": "bảng số liệu theo từng giây",
+   "reason": "cụm tự ghép",
+   "severity": "medium"
+  },
+  {
+   "old": "chỉ chậm thóang qua",
+   "new": "chỉ chậm thoáng qua",
+   "reason": "lỗi chính tả",
+   "severity": "high"
+  }
+ ]
+}

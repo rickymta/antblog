@@ -1,0 +1,23 @@
+{"file":"da-kpi-metric-chi-so-bao-ve.md","edits":[
+{"old": "ta xếp lượt vào W1/W2 theo lần nhận đầu tiên và giữ cohort ấy", "new": "ta xếp lượt vào W1/W2 theo thời điểm nhận lần đầu và giữ cohort ấy", "reason": "thống nhất cách gọi mốc cohort trong bài", "severity": "low"},
+{"old": "sẽ trộn hai tập nếu có lượt đi qua biên tuần.", "new": "sẽ trộn hai tập nếu có lượt nằm vắt qua ranh giới giữa hai tuần.", "reason": "\"biên tuần\" là từ tự ghép, \"đi qua\" gượng", "severity": "high"},
+{"old": "Các chỗ chưa chốt cho dữ liệu thực tế được giữ rõ.", "new": "Các chỗ chưa chốt cho dữ liệu thực tế được ghi rõ.", "reason": "\"được giữ rõ\" mơ hồ, phải đoán ý", "severity": "medium"},
+{"old": "mapping A cần xác nhận", "new": "cách ánh xạ khu vực A cần xác nhận", "reason": "\"mapping A\" cụt, thiếu danh từ", "severity": "medium"},
+{"old": "Dữ liệu test/trùng chỉ loại theo quy tắc có bằng chứng và lưu log", "new": "Dữ liệu test hoặc dữ liệu trùng chỉ bị loại theo quy tắc có bằng chứng và phải lưu log", "reason": "câu cụt, thiếu từ nối và dạng bị động rõ nghĩa", "severity": "medium"},
+{"old": "Owner | Chủ chỉ số phía vận hành, DA soạn; chưa gán người thật", "new": "Người phụ trách | Chủ chỉ số thuộc phía vận hành, DA soạn; chưa chỉ định người cụ thể", "reason": "owner là từ tiếng Anh thông thường; \"gán người thật\" không tự nhiên", "severity": "medium"},
+{"old": "Version / cập nhật | Lưu phiên bản nguồn", "new": "Phiên bản / cập nhật | Lưu phiên bản nguồn", "reason": "thống nhất \"phiên bản\" trong văn xuôi và nhãn bảng", "severity": "low"},
+{"old": "## 4. Biên thời gian và dữ liệu trễ", "new": "## 4. Ranh giới thời gian và dữ liệu trễ", "reason": "\"biên thời gian\" là từ tự ghép; dùng \"ranh giới\" theo bảng thuật ngữ", "severity": "medium"},
+{"old": "Dùng khoảng đầu kỳ có tính, đầu kỳ kế tiếp không tính giúp một thời điểm biên chỉ thuộc một kỳ.", "new": "Dùng khoảng có tính đầu kỳ nhưng không tính đầu kỳ kế tiếp giúp thời điểm nằm đúng ranh giới chỉ thuộc một kỳ.", "reason": "câu cụt khó đọc; \"thời điểm biên\" tự ghép", "severity": "high"},
+{"old": "nếu nguồn có phần giây nhỏ hơn.", "new": "nếu nguồn ghi thời gian chính xác tới phần nhỏ hơn một giây.", "reason": "\"phần giây nhỏ hơn\" cụt, khó hiểu", "severity": "medium"},
+{"old": "bài không áp một con số giờ tuỳ ý.", "new": "bài không áp đặt một con số giờ tuỳ ý.", "reason": "\"áp\" thiếu thành tố, nghe cụt", "severity": "low"},
+{"old": "của các nhóm không trùng và bao phủ đúng tập.", "new": "của các nhóm không chồng lấn và gộp lại đúng bằng tập đang xét.", "reason": "\"bao phủ đúng tập\" calque, thiếu rõ nghĩa", "severity": "medium"},
+{"old": "không thể được cộng thành hai khách duy nhất cho toàn hệ thống.", "new": "không được tính thành hai khách duy nhất khi cộng cho toàn hệ thống.", "reason": "câu dài, bị động kiểu tiếng Anh, tối nghĩa", "severity": "high"},
+{"old": "## 6. Chọn chỉ số bảo vệ theo cách có thể bị đánh đổi", "new": "## 6. Chọn chỉ số bảo vệ theo những gì có thể bị đánh đổi", "reason": "tiêu đề gượng, \"theo cách có thể bị đánh đổi\" sai trọng tâm", "severity": "medium"},
+{"old": "Cần mapping ticket–lượt, định nghĩa khiếu nại và cửa sổ", "new": "Cần cách nối ticket với lượt, định nghĩa khiếu nại và cửa sổ", "reason": "từ tiếng Anh lọt vào văn xuôi, cụm ghép cụt", "severity": "medium"},
+{"old": "bằng cách loại khách khó phục vụ trước nhận", "new": "bằng cách loại bỏ khách khó phục vụ ngay từ trước khi nhận", "reason": "\"trước nhận\" cụt, thiếu động từ", "severity": "medium"},
+{"old": "Không dùng “không tăng” mà quên cửa sổ, sai số và mức tác động được coi là đáng quan tâm.", "new": "Đừng dùng tiêu chí “không tăng” mà quên ghi kèm cửa sổ theo dõi, sai số và mức tác động được coi là đáng quan tâm.", "reason": "câu ghép thiếu chủ ngữ, mệnh đề cuối khó hiểu", "severity": "high"},
+{"old": "Nó không thay thế chỉ số trải nghiệm", "new": "Chỉ số này không thay thế chỉ số trải nghiệm", "reason": "tránh \"Nó\" chỉ sự vật trừu tượng ở đầu câu", "severity": "medium"},
+{"old": "Review câu sau:", "new": "Rà lại câu sau:", "reason": "từ tiếng Anh thông thường lọt vào văn xuôi", "severity": "low"},
+{"old": "thiếu ranh giới kỳ báo cáo/timezone; không có chính sách dữ liệu trễ và version.", "new": "thiếu ranh giới kỳ báo cáo và múi giờ; không có chính sách dữ liệu trễ và phiên bản.", "reason": "thống nhất thuật ngữ \"múi giờ\", \"phiên bản\"", "severity": "medium"},
+{"old": "owner/version; guardrail có định nghĩa riêng.", "new": "người phụ trách/phiên bản; chỉ số bảo vệ có định nghĩa riêng.", "reason": "thống nhất thuật ngữ trong bài", "severity": "medium"}
+]}

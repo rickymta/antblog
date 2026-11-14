@@ -1,7 +1,7 @@
 ---
 slug: python-real-time-scoring-feature-store-redis-latency
 title: "Chấm điểm thời gian thực: feature store trên Redis, ngân sách độ trễ, fallback"
-summary: "Bài 59: đưa bộ chấm điểm gian lận vào phục vụ: 30 đặc trưng trong Redis, ngân sách 50 ms bằng asyncio.timeout, điểm mặc định kèm cờ degraded, đo p50 và p99, cầu dao và từ chối bớt tải. Lab kiểm bằng độ trễ tiêm vào."
+summary: "Bài 59: đưa bộ chấm điểm gian lận vào phục vụ: 30 đặc trưng trong Redis, ngân sách 50 ms bằng asyncio.timeout, điểm mặc định kèm cờ degraded, đo p50 và p99, circuit breaker và giảm tải chủ động. Lab kiểm tra bằng cách tiêm độ trễ."
 category: python-advanced
 level: advanced
 tags: [python, toi-noi, fraud, redis, latency]
@@ -10,7 +10,7 @@ language: vi
 
 Mô hình ở [bài 57](/articles/python-scikit-learn-lightgbm-imbalanced-cross-validation) chạy tốt trên một bảng 66.704 chuyến. Nhưng mỗi chuyến của [Tới Nơi](/articles/du-an-mau-toi-noi) chỉ có một khoảnh khắc: lúc thu tiền, luồng thanh toán và Dispatch hỏi service fraud-scoring «chuyến này có đáng để người duyệt xem không» rồi đi tiếp. Ở cao điểm khoảng 70 chuyến mỗi giây, không ai chờ một service chậm hay kẹt hẳn. Để chấm, service phải biết khách này đã đi mấy chuyến trong giờ qua, tài xế vừa kết thúc chuyến trước ở đâu: những con số nằm ở một kho đọc nhanh, và kho đó có thể chậm, mất dữ liệu hay hỏng.
 
-Đây là bài 59 của lộ trình **Python nâng cao qua Tới Nơi**. Bạn cần quen 30 đặc trưng ở [bài 55](/articles/python-feature-engineering-tu-event-kafka), Redis ở [bài 27](/articles/python-redis-cache-rate-limit-geo) và deadline gRPC ở [bài 37](/articles/python-grpc-fraud-scoring-service). Điểm rủi ro là đầu vào cho người duyệt, không phải quyết định khoá tài khoản. «Không chặn Dispatch» ở đây có nghĩa cụ thể: người gọi (luồng thu tiền hay Dispatch) đặt hạn 50 ms; hết hạn mà chưa có điểm thì nó đi tiếp với kết quả `degraded` thay vì chờ. Mô hình của loạt bài chấm lúc thu tiền (`PaymentCaptured`); điểm lúc khách mới đặt chuyến cần mô hình khác, chỉ dùng đặc trưng biết lúc đặt, và lab không làm.
+Đây là bài 59 của lộ trình **Python nâng cao qua Tới Nơi**. Bạn cần quen 30 đặc trưng ở [bài 55](/articles/python-feature-engineering-tu-event-kafka), Redis ở [bài 27](/articles/python-redis-cache-rate-limit-geo) và deadline gRPC ở [bài 37](/articles/python-grpc-fraud-scoring-service). Điểm rủi ro là đầu vào cho người duyệt, không phải quyết định khoá tài khoản. «Không chặn Dispatch» ở đây có nghĩa cụ thể: người gọi (luồng thu tiền hay Dispatch) đặt hạn 50 ms; hết hạn mà chưa có điểm thì người gọi đi tiếp với kết quả `degraded` thay vì chờ. Mô hình của loạt bài chấm lúc thu tiền (`PaymentCaptured`); điểm lúc khách mới đặt chuyến cần mô hình khác, chỉ dùng đặc trưng biết lúc đặt, và lab không làm.
 
 <div class="tkh-callout tkh-callout--example">
 <span class="tkh-callout-title">Thử trước khi đọc</span>
@@ -20,7 +20,7 @@ Mô hình ở [bài 57](/articles/python-scikit-learn-lightgbm-imbalanced-cross-
 
 ## Online và offline: cùng 30 đặc trưng, hai nơi tính
 
-Lúc huấn luyện, bài 55 tính đặc trưng theo lô bằng polars trên cả bảng. Lúc phục vụ, từng chuyến đến một mình và cần cùng 30 con số đó trong vài mili giây. Nếu hai nơi tính khác nhau (training-serving skew), điểm kém đi mà không có lỗi nào; lab bắt hai nơi so với nhau.
+Lúc huấn luyện, bài 55 tính đặc trưng theo lô bằng polars trên cả bảng. Lúc phục vụ, từng chuyến đến một mình và cần cùng 30 con số đó trong vài mili giây. Nếu hai nơi tính khác nhau (training-serving skew), điểm kém đi mà không có lỗi nào; lab cho hai nơi đối chiếu với nhau.
 
 <figure class="tkh-fig">
 <div class="tkh-fig-box">
@@ -29,7 +29,7 @@ Lúc huấn luyện, bài 55 tính đặc trưng theo lô bằng polars trên c�
 <figcaption>Hình 1. Hai đường đi qua cùng một kho. Đường ghi nuôi Redis từ event; đường đọc có hạn chót và phải trả lời dù Redis hay mô hình có chậm. Bảng theo lô ở phía offline là mốc để kiểm đường online.</figcaption>
 </figure>
 
-Redis là kho đặc trưng online, và quy tắc của bài 27 vẫn đúng: nó không phải nguồn sự thật. Mất dữ liệu thì dựng lại bằng cách phát lại event theo thứ tự `paid_at`. Bộ tính online của bài 55 (`online.py`) chỉ phủ 14 trong 30 cột và thiếu `cust_promo_share_30d`; feature store của bài này phủ đủ 30 cột và lab in thẳng phạm vi đó:
+Redis là kho đặc trưng online, và quy tắc của bài 27 vẫn đúng: Redis không phải nguồn dữ liệu gốc. Mất dữ liệu thì dựng lại bằng cách phát lại event theo thứ tự `paid_at`. Bộ tính online của bài 55 (`online.py`) chỉ phủ 14 trong 30 cột và thiếu `cust_promo_share_30d`; feature store của bài này phủ đủ 30 cột và lab in thẳng phạm vi đó:
 
 ```text
 feature store phủ 30/30 cột: 13 từ chính các event của chuyến, 14 từ trạng thái Redis (đúng bộ online.py của bài 55), 3 bổ sung ở bài này (cust_promo_share_30d, impossible_speed, impossible_jump); cột mô hình cần mà store thiếu: []
@@ -66,7 +66,7 @@ elif mine is not None:  # Updater đã ghi chính chuyến này và nó là chuy
         last = drv[4:7]
 ```
 
-Để làm được điều đó, script ghi giữ chuyến cuối cũ làm `prev_*`. Kafka giao ít nhất một lần nên cùng chuyến có thể đến hai lần, và một chuyến phải đổi sáu khoá cùng lúc. Một script Lua giải cả hai: Redis chạy nó liền một mạch, và `ZADD` đầu tiên vào sorted set khách trả 0 nếu mã chuyến đã có, khi đó script thoát (`store.py`, trích):
+Để làm được điều đó, script ghi giữ chuyến cuối cũ làm `prev_*`. Kafka giao ít nhất một lần nên cùng chuyến có thể đến hai lần, và một chuyến phải cập nhật sáu khoá cùng lúc. Một script Lua xử lý cả hai: Redis chạy nó liền một mạch, và `ZADD` đầu tiên vào sorted set khách trả 0 nếu mã chuyến đã có, khi đó script thoát (`store.py`, trích):
 
 ```python
 _RECORD_LUA = """
@@ -97,9 +97,9 @@ ghi chuyến rồi đọc lại ngay: 3,336/3,336 chuyến cho đặc trưng y h
 Redis sau khi phát lại: 302,194 key, used_memory tăng 47.5 MiB (máy dùng chung, số xấp xỉ)
 ```
 
-Phép đối chiếu này chứng minh hai nơi dùng **cùng định nghĩa** khi trạng thái trong Redis đúng; nó không chứng minh sự khớp ở production, nơi event đến muộn, trùng hay mất. Tốc độ dựng lại dao động mạnh theo tải: lần này 8.577 chuyến mỗi giây, các lần chạy khác của lab trong lúc viết bài cho từ 2.502 đến 12.936 (không dán đủ output). Với 60 triệu chuyến của cửa sổ 30 ngày ở 2 triệu chuyến mỗi ngày, khoảng đó ứng với 1,3 đến 6,7 giờ trên một tiến trình; chia song song lab chưa đo.
+Phép đối chiếu này chứng minh hai nơi dùng **cùng định nghĩa** khi trạng thái trong Redis đúng; nó không chứng minh sự khớp ở production, nơi event đến muộn, trùng hay mất. Tốc độ dựng lại dao động mạnh theo tải: lần này 8.577 chuyến mỗi giây, các lần chạy khác của lab trong lúc viết bài cho kết quả từ 2.502 đến 12.936 (không dán đủ output). Với 60 triệu chuyến của cửa sổ 30 ngày ở 2 triệu chuyến mỗi ngày, khoảng đó ứng với 1,3 đến 6,7 giờ trên một tiến trình; chia song song lab chưa đo.
 
-Dựng lại còn có hai cái bẫy. Store trống (Redis khởi động lại mất dữ liệu) làm mọi đặc trưng thành 0: mốc `meta` bắt ca này và `Scorer` trả `store_cold`. Store đang dựng từ lịch sử ngắn thì cửa sổ 30 ngày còn thiếu: `history_from` ghi chuyến đầu tiên store thấy, và dưới 30 ngày lịch sử `Scorer` trả `store_building`. Ngưỡng này chỉ bảo vệ các cửa sổ; `prior_trips` đúng khi phát lại từ đầu hoặc nạp bù từ bảng offline.
+Dựng lại còn có hai cái bẫy. Store trống (Redis khởi động lại mất dữ liệu) làm mọi đặc trưng thành 0: mốc `meta` bắt trường hợp này và `Scorer` trả `store_cold`. Store đang dựng từ lịch sử ngắn thì cửa sổ 30 ngày còn thiếu: `history_from` ghi chuyến đầu tiên store thấy, và dưới 30 ngày lịch sử `Scorer` trả `store_building`. Ngưỡng này chỉ bảo vệ các cửa sổ; `prior_trips` đúng khi phát lại từ đầu hoặc nạp bù từ bảng offline.
 
 ## Ngân sách 50 ms: trả lời đúng hạn, kể cả khi không chấm được
 
@@ -115,7 +115,7 @@ async with asyncio.timeout(budget):  # chỉ ngắt được tại một `await`
         return self._degraded(trip, "store_cold", t0, read_ms)
 ```
 
-`Scorer.score()` không ném lỗi lên người gọi. Khi hết hạn, mất kết nối, store trống hay mới dựng, chuyến cũ đã có chuyến sau, mô hình từ chối đầu vào hay quá tải, nó trả `ScoreResult` với `degraded=True`, một `reason` ổn định và điểm mặc định: tỉ lệ gian lận nền của mô hình (0,0171), kèm `flagged=False`. Đây là quyết định «mở cửa khi lỗi» (fail-open); như bài 27 nhắc cho rate limit, hãy ghi nó ra từ trước. Hệ quả: `degraded=True` nghĩa là **chưa có điểm**, không phải «chuyến sạch»; bên nhận cần xếp những chuyến này vào đợt chấm bù theo lô (đường polars của bài 55) và đếm tỉ lệ `degraded` như một chỉ số sức khoẻ. Khi chấm được, `flagged` theo quy tắc chung của loạt bài (`model.flag`): p × (tiền chuyến + 20.000) > 8.000; ngưỡng toàn cục 0,149 chỉ để so sánh.
+`Scorer.score()` không ném lỗi lên người gọi. Khi hết hạn, mất kết nối, store trống hay mới dựng, chuyến cũ đã có chuyến sau, mô hình từ chối đầu vào hay quá tải, nó trả `ScoreResult` với `degraded=True`, một `reason` ổn định và điểm mặc định: tỉ lệ gian lận nền của mô hình (0,0171), kèm `flagged=False`. Đây là quyết định «mở cửa khi lỗi» (fail-open); như bài 27 nhắc cho rate limit, hãy ghi rõ quyết định này ngay từ đầu. Hệ quả: `degraded=True` nghĩa là **chưa có điểm**, không phải «chuyến sạch»; bên nhận cần xếp những chuyến này vào đợt chấm bù theo lô (đường polars của bài 55) và đếm tỉ lệ `degraded` như một chỉ số sức khoẻ. Khi chấm được, `flagged` theo quy tắc chung của loạt bài (`model.flag`): p × (tiền chuyến + 20.000) > 8.000; ngưỡng toàn cục 0,149 chỉ để so sánh.
 
 Người gọi còn có hạn của riêng mình: `score(trip, deadline_s=...)` lấy `min(ngân sách, deadline_s)`; với gRPC, `context.time_remaining()` (bài 37) là giá trị tự nhiên cho tham số này.
 
@@ -128,7 +128,7 @@ Người gọi còn có hạn của riêng mình: `score(trip, deadline_s=...)` 
 
 ## Đo p50 và p99
 
-Bước 3 của lab chấm 3.336 chuyến (một trong mỗi 20 chuyến của giai đoạn valid), mỗi lần một chuyến, và bước 4 in thời gian từng giai đoạn. Load average lúc đo khoảng 90 đến 125 trên 10 lõi, nên đây là các số của một máy ồn, không phải máy rảnh:
+Bước 3 của lab chấm 3.336 chuyến (một trong mỗi 20 chuyến của giai đoạn valid), mỗi lần một chuyến, và bước 4 in thời gian từng giai đoạn. Load average lúc đo khoảng 90 đến 125 trên 10 lõi, nên đây là các số của một máy đang bận, không phải máy rảnh:
 
 ```text
 giai đoạn (ms)                                  mẫu      p50      p90      p99       max
@@ -146,7 +146,7 @@ kết quả: {'ok': 3327, 'timeout': 9}; load average lúc đo 88.52 125.56 194.
 
 Ba điều đọc ra. Một: lần chấm điển hình mất 3,08 ms; hai dòng giai đoạn chỉ gồm chuyến `ok` nên bị cắt bởi ngân sách, và phân vị không cộng được thành phân vị của tổng. Hai: 9 trong 3.336 chuyến (0,27 %) chạm ngân sách, mất 52,84 ms ở trung vị và tới 137,24 ms. Event loop cũng có lúc thức dậy trễ tới 133,60 ms; hai con số cùng cỡ gợi ý hạn chót đến muộn vì loop không được cấp CPU, nhưng lab chưa chứng minh. Ba: PING trên client riêng (p50 0,57 ms) khác PING ngay sau một lời gọi timeout trên pool chấm điểm (p50 13,62 ms), nhưng nhóm sau chỉ có 9 mẫu nên chỉ là gợi ý rằng kết nối phải nối lại; mã nguồn `read_response` của redis-py 8.1.0 đóng kết nối khi bị huỷ giữa lúc chờ phản hồi.
 
-Thứ ít phụ thuộc tải hơn thời gian trôi qua là CPU tiêu thụ. Lab đo 500 chuyến mới tuần tự với ngân sách nới, rồi gửi 70 chuyến mỗi giây trong 10 giây theo lịch cố định, tính độ trễ **từ lịch** (không phải từ lúc coroutine bắt đầu) để không giấu việc người gọi bị trễ lịch:
+Đại lượng ít phụ thuộc vào tải hơn thời gian trôi qua là CPU tiêu thụ. Lab đo 500 chuyến mới tuần tự với ngân sách nới, rồi gửi 70 chuyến mỗi giây trong 10 giây theo lịch cố định, tính độ trễ **từ lịch** (không phải từ lúc coroutine bắt đầu) để không giấu việc người gọi bị trễ lịch:
 
 ```text
 CPU mỗi chuyến, một tiến trình, 500 chuyến tuần tự, ngân sách nới 5 giây: 3.27 ms CPU (3.66 ms thời gian trôi qua); CPU chiếm 89% thời gian trôi qua, phần còn lại chưa tách (chờ I/O, chờ được cấp CPU); nếu chỉ tính CPU thì tối đa khoảng 306 chuyến/giây
@@ -156,7 +156,7 @@ lệch lịch lúc bắt đầu gọi                       700     2.05     9.1
 tốc độ phát thực tế 69.6 chuyến/giây (đặt 70); kết quả: {'ok': 671, 'timeout': 29}; load average sau đo 86.27 123.84 193.43
 ```
 
-Mỗi chuyến tốn 3,27 ms CPU, nên 70 chuyến mỗi giây dùng cỡ 23 % một lõi nếu chỉ tính CPU; vậy mà 29 trên 700 lời gọi (4,1 %) bị `degraded` và p99 từ lịch tới xong là 93,31 ms. Khi nhiều lời gọi chồng nhau, mỗi lời gọi chờ thêm: trong 50 ms một tiến trình chỉ phục vụ nổi cỡ 15 chuyến chồng nhau. Lab thử đợt 200 chuyến đến cùng một lúc; mỗi cấu hình dùng client Redis mới, đổi một thứ so với A, và in số kết nối của pool trước và sau:
+Mỗi chuyến tốn 3,27 ms CPU, nên 70 chuyến mỗi giây dùng cỡ 23 % một lõi nếu chỉ tính CPU; vậy mà 29 trên 700 lời gọi (4,1 %) bị `degraded` và p99 từ lịch tới xong là 93,31 ms. Khi nhiều lời gọi chồng nhau, mỗi lời gọi chờ thêm: trong 50 ms một tiến trình chỉ xử lý kịp cỡ 15 chuyến chồng nhau. Lab thử đợt 200 chuyến đến cùng một lúc; mỗi cấu hình dùng client Redis mới, đổi một thứ so với A, và in số kết nối của pool trước và sau:
 
 ```text
 200 chuyến đến cùng một lúc, mỗi cấu hình dùng client Redis mới (đổi một thứ so với cấu hình đầu), load average 86.27 123.84 193.43:
@@ -174,11 +174,11 @@ Mỗi chuyến tốn 3,27 ms CPU, nên 70 chuyến mỗi giây dùng cỡ 23 % m
     xong sau 119 ms; p50 26.2, p99 69.7 ms; {'timeout': 100, 'store_error': 100}; lỗi store: {'MaxConnectionsError': 100}
 ```
 
-Đọc từng cặp. A so với B chỉ khác việc mở sẵn kết nối: cả hai gần như toàn timeout, nên mở sẵn không cứu được đợt 200 lời gọi. A so với C chỉ khác giới hạn 8 lời gọi cùng lúc: C trả 8 điểm thật trong 22 ms và từ chối 192 lời gọi ngay, pool giữ nguyên 16 kết nối vì không lời gọi nào bị huỷ giữa chừng; ở A pool kết thúc với 0 kết nối đang nối, khớp với việc huỷ giữa chừng đóng kết nối (lab không tách huỷ ở pha đọc Redis với pha mô hình, nơi kết nối đã trả về pool). D khác B ở hai thứ (loại pool và cỡ): pool mặc định của redis-py 8.1.0 giới hạn 100 kết nối chứ không «vô hạn», và 100 lời gọi vượt giới hạn nhận `MaxConnectionsError`. Kết luận chỉ đúng trong bốn cấu hình đã thử; lời giải thật cho đợt tăng tải là gom lô (bài 60 chấm 33.416 chuyến trong một lô mất 0,26 giây) hoặc thêm bản service.
+Đọc từng cặp. A so với B chỉ khác việc mở sẵn kết nối: cả hai gần như toàn timeout, nên mở sẵn không cứu được đợt 200 lời gọi. A so với C chỉ khác giới hạn 8 lời gọi cùng lúc: C trả 8 điểm thật trong 22 ms và từ chối 192 lời gọi ngay, pool giữ nguyên 16 kết nối vì không lời gọi nào bị huỷ giữa chừng; ở A pool kết thúc với 0 kết nối đang nối, khớp với việc huỷ giữa chừng đóng kết nối (lab không tách huỷ ở pha đọc Redis với pha mô hình, nơi kết nối đã trả về pool). D khác B ở hai thứ (loại pool và cỡ): pool mặc định của redis-py 8.1.0 giới hạn 100 kết nối chứ không «vô hạn», và 100 lời gọi vượt giới hạn nhận `MaxConnectionsError`. Kết luận chỉ đúng trong bốn cấu hình đã thử; lời giải thật cho đợt tăng tải là gom lô (bài 60 chấm 33.416 chuyến trong một lô mất 0,26 giây) hoặc thêm bản sao của service.
 
-## Khi hạ tầng hỏng: độ trễ tiêm vào
+## Khi hạ tầng hỏng: tiêm độ trễ
 
-Fallback chỉ có giá trị nếu chạy đúng khi cần. Bước 5 tiêm lỗi vào store và mô hình (`faults.py`) nên kết quả không phụ thuộc tốc độ máy: store «kẹt vĩnh viễn» là một `asyncio.Event().wait()` không bao giờ được set, và `FakeClock` thay `time.monotonic` trong cầu dao:
+Fallback chỉ có giá trị nếu chạy đúng khi cần. Bước 5 tiêm lỗi vào store và mô hình (`faults.py`) nên kết quả không phụ thuộc tốc độ máy: store «kẹt vĩnh viễn» là một `asyncio.Event().wait()` không bao giờ được set, và `FakeClock` thay `time.monotonic` trong circuit breaker:
 
 ```text
 store kẹt vĩnh viễn:       score=0.017110 degraded=True reason=timeout sau 91 ms; lời gọi bị hủy: 1
@@ -190,7 +190,7 @@ cầu dao (3 lần hỏng thì mở, chờ 2 giây, đồng hồ giả): ['timeo
 store khỏe, mô hình chậm 1,2 s, ngân sách 0,4 s, 5 lời gọi: ['timeout', 'timeout', 'timeout', 'timeout', 'timeout']
 ```
 
-(trích). Store chậm 300 ms thì `degraded` với ngân sách 50 ms nhưng ra điểm thật với ngân sách 2 giây: ngân sách là chính sách, không phải lỗi của store. Cầu dao (`Breaker`) giải bài toán khác: mỗi lời gọi vào một store treo đốt trọn 50 ms của người gọi. Sau ba lần hỏng liên tiếp nó mở hai giây và trả `breaker_open` mà không đụng store; hết hạn, đúng một lời gọi thăm dò đi qua. Cầu dao chỉ đếm lời gọi mà **store** không kịp trả lời: dòng cuối cho thấy store khoẻ mà mô hình chậm thì năm lời gọi đều `timeout`, không lần nào mở cầu dao.
+(trích). Store chậm 300 ms thì `degraded` với ngân sách 50 ms nhưng ra điểm thật với ngân sách 2 giây: ngân sách là chính sách, không phải lỗi của store. Circuit breaker (`Breaker`) giải bài toán khác: mỗi lời gọi vào một store treo đốt trọn 50 ms của người gọi. Sau ba lần hỏng liên tiếp nó mở hai giây và trả `breaker_open` mà không đụng store; hết hạn, đúng một lời gọi thăm dò đi qua. Circuit breaker chỉ đếm lời gọi mà **store** không kịp trả lời: dòng cuối cho thấy store khoẻ mà mô hình chậm thì năm lời gọi đều `timeout`, không lần nào mở circuit breaker.
 
 Rồi đến câu hỏi đầu bài, đo thật, cùng với việc luồng bị bỏ lại:
 
@@ -199,9 +199,9 @@ mô hình chặn 1.000 ms, ngân sách 250 ms: chạy thẳng trong loop -> degr
 max_in_flight=1, mô hình chặn 1,2 s, ngân sách 0,4 s, 5 lời gọi nối tiếp: ['timeout', 'overloaded', 'overloaded', 'overloaded', 'overloaded']; luồng bị bỏ lại 1, mô hình được bắt đầu 1 lần; sau khi luồng xong: 0
 ```
 
-Chạy thẳng, lời gọi kéo dài 1.019 ms và không có lỗi nào: đồng hồ hỏng mà không ai biết. Qua luồng, người gọi nhận câu trả lời ở 250 ms, nhưng luồng bị bỏ lại vẫn chạy hết (Python không huỷ được luồng): timeout bảo vệ **người gọi**, không giải phóng CPU. Vì thế giới hạn lời gọi cùng lúc phải tính cả luồng còn chạy: `Scorer` đếm chúng (`_stray`) tới khi xong, nên lời gọi thứ hai bị từ chối thay vì thêm một luồng nữa.
+Chạy thẳng, lời gọi kéo dài 1.019 ms và không có lỗi nào: ngân sách thời gian bị vượt mà không ai biết. Qua luồng, người gọi nhận câu trả lời ở 250 ms, nhưng luồng bị bỏ lại vẫn chạy hết (Python không huỷ được luồng): timeout bảo vệ **người gọi**, không giải phóng CPU. Vì thế giới hạn lời gọi cùng lúc phải tính cả luồng còn chạy: `Scorer` đếm chúng (`_stray`) tới khi xong, nên lời gọi thứ hai bị từ chối thay vì thêm một luồng nữa.
 
-Ba kiểu hỏng khác không gây lỗi nào. Store trống hay mới dựng đã nói ở trên. Chấm lại chuyến cũ khi hash đã đi quá nó, mà sorted set không còn thấy chuyến (đã quá cửa sổ): `last_us` của khách và `paid_us` của tài xế bắt ca đó và `Scorer` trả `state_ahead` thay vì một điểm sai. Cuối cùng, nguồn đặc trưng trả NaN hay thiếu cột: mô hình từ chối, và `Scorer` biến lỗi thành `degraded` kèm tên cột:
+Ba kiểu hỏng khác không gây lỗi nào. Store trống hay mới dựng đã nói ở trên. Chấm lại chuyến cũ khi hash đã đi quá nó, mà sorted set không còn thấy chuyến (đã quá cửa sổ): `last_us` của khách và `paid_us` của tài xế bắt trường hợp đó và `Scorer` trả `state_ahead` thay vì một điểm sai. Cuối cùng, nguồn đặc trưng trả NaN hay thiếu cột: mô hình từ chối, và `Scorer` biến lỗi thành `degraded` kèm tên cột:
 
 ```text
 chấm lại một chuyến cũ (khách đã có chuyến sau): degraded=True reason=state_ahead
@@ -231,24 +231,24 @@ Dọn: đã xóa 0 key `lab59:*`, còn lại 0
 Kiểm chứng: OK 57/57
 ```
 
-`--verify` kiểm 57 bất biến: đặc trưng và điểm online khớp bản theo lô, kể cả khi chuyến đã được ghi rồi mới đọc; cận cửa sổ; ghi trùng; chuyến đến muộn; store trống, đang dựng, chuyến cũ; mọi hành vi fallback bằng độ trễ tiêm vào và đồng hồ giả; luồng bị bỏ lại; dọn sạch key. Nó không kiểm tốc độ tuyệt đối và không ghim số p50 hay p99.
+`--verify` kiểm tra 57 bất biến: đặc trưng và điểm online khớp bản theo lô, kể cả khi chuyến đã được ghi rồi mới đọc; cận cửa sổ; ghi trùng; chuyến đến muộn; store trống, đang dựng, chuyến cũ; mọi hành vi fallback bằng cách tiêm độ trễ và dùng đồng hồ giả; luồng bị bỏ lại; dọn sạch key. Bước này không kiểm tra tốc độ tuyệt đối và không ghim số p50 hay p99.
 
 | Hiện tượng | Kiểm tra trước |
 |---|---|
 | Điểm đồng loạt thấp sau khi Redis khởi động lại | `reason=store_cold` hay `store_building`; phát lại event theo thứ tự `paid_at` |
-| p99 vượt ngân sách dù p50 thấp | CPU mỗi chuyến, số lời gọi chồng nhau và độ trễ event loop; giới hạn `max_in_flight`, gom lô, thêm bản service |
+| p99 vượt ngân sách dù p50 thấp | CPU mỗi chuyến, số lời gọi chồng nhau và độ trễ event loop; giới hạn `max_in_flight`, gom lô, thêm bản sao của service |
 | `store_error` với `MaxConnectionsError` khi tải tăng đột ngột | Cỡ và loại pool kết nối; pool mặc định giới hạn 100 |
 | Chấm lại chuyến cũ cho `cust_prior_trips` hay `drv_jump_*` khác bản theo lô | Hash giữ trạng thái mới nhất; `state_ahead` nghĩa là không chấm lại bằng store này |
 | `model_error` kèm `ModelInputError` | Cột thiếu hoặc NaN từ nguồn đặc trưng; sửa nguồn, không điền 0 |
 
 <div class="tkh-callout tkh-callout--warn">
 <span class="tkh-callout-title">Giới hạn của ví dụ so với production</span>
-<p>Dữ liệu là tổng hợp (200.000 chuyến trong 60 ngày); mọi số đo chỉ nói về bộ này, một seed, một máy bận. Mô hình chạy trong chính tiến trình đo, không qua gRPC, nên không có độ trễ mạng giữa Dispatch và service. Redis là một nút; lab không đo failover, không cấu hình giữ dữ liệu hay loại key khi đầy bộ nhớ (một Redis tự xoá key khi đầy làm đặc trưng biến mất âm thầm mà <code>applied_until</code> không bắt được). Script Lua đụng nhiều key nên trên Redis Cluster phải đặt tên key lại cho cùng slot; updater giả định event đến theo thứ tự thời gian. Chi phí 8.000 và 20.000 VND là giả định của bài 54, kèm hai điều: gắn cờ được xem là chặn hết thiệt hại (người duyệt không sai), và số tiền chuyến đại diện cho thiệt hại (với promo_abuse, thiệt hại thật chỉ là phần giảm giá). Hai tạo tác của bộ sinh ảnh hưởng mọi số mô hình trong loạt bài: chuyến sạch dùng mã NEWUSER50 giảm từ 7,8 % xuống 0,9 % theo thời gian vì quần thể khách gần như cố định, và tài khoản gian lận không dùng mã nào ngoài NEWUSER50 của promo_abuse nên <code>cust_promo_share_30d &gt; 0</code> gần như tố «sạch». Đã chạy với Python 3.14.7, redis-py 8.1.0, Redis server 7.4.12, lightgbm 4.7.0, scikit-learn 1.9.1, numpy 2.5.4, polars 2.1.0.</p>
+<p>Dữ liệu là tổng hợp (200.000 chuyến trong 60 ngày); mọi số đo chỉ nói về bộ này, một seed, một máy bận. Mô hình chạy trong chính tiến trình đo, không qua gRPC, nên không có độ trễ mạng giữa Dispatch và service. Redis là một nút; lab không đo failover, không cấu hình việc giữ dữ liệu hay chính sách loại key khi đầy bộ nhớ (một Redis tự xoá key khi đầy làm đặc trưng biến mất ngầm mà <code>applied_until</code> không bắt được). Script Lua đụng nhiều key nên trên Redis Cluster phải đặt lại tên key để cùng slot; updater giả định event đến theo thứ tự thời gian. Chi phí 8.000 và 20.000 VND là giả định của bài 54, kèm hai điều: gắn cờ được xem là chặn hết thiệt hại (người duyệt không sai), và số tiền chuyến đại diện cho thiệt hại (với promo_abuse, thiệt hại thật chỉ là phần giảm giá). Hai tạo tác của bộ sinh ảnh hưởng đến mọi số của mô hình trong loạt bài: chuyến sạch dùng mã NEWUSER50 giảm từ 7,8 % xuống 0,9 % theo thời gian vì quần thể khách gần như cố định, và tài khoản gian lận không dùng mã nào ngoài NEWUSER50 của promo_abuse nên <code>cust_promo_share_30d &gt; 0</code> gần như báo hiệu «sạch». Đã chạy với Python 3.14.7, redis-py 8.1.0, Redis server 7.4.12, lightgbm 4.7.0, scikit-learn 1.9.1, numpy 2.5.4, polars 2.1.0.</p>
 </div>
 
 **Bài tập:** (1) Mỗi chuyến tốn 3,27 ms CPU và ngân sách là 50 ms. Tối đa bao nhiêu lời gọi chồng nhau, chạy nối tiếp trên một lõi, trước khi lời gọi cuối chắc chắn quá hạn? Ở 70 chuyến mỗi giây, một tiến trình dùng bao nhiêu phần trăm một lõi? (2) Bỏ `cust_promo_share_30d` thì sorted set của khách chỉ cần giữ 24 giờ thay vì 30 ngày. Số mục giảm bao nhiêu lần ở tốc độ chuyến không đổi, và `cust_prior_trips` còn tính được không?
 
-<details><summary>Xem lời giải</summary><p>(1) 50 / 3,27 = 15,3, tức tối đa <b>15</b> lời gọi chồng nhau. Ở 70 chuyến mỗi giây: 70 × 3,27 = 229 ms CPU mỗi giây, khoảng <b>23 %</b> một lõi (chỉ tính CPU; lab vẫn thấy chuyến quá hạn vì chờ và độ ồn của máy). (2) 30 ngày / 24 giờ = <b>30 lần</b> ít hơn. <code>cust_prior_trips</code> <b>vẫn tính được</b> vì là bộ đếm trong hash; nhưng cờ chặn trùng của script dựa vào sorted set khách, nên một event giao lại sau hơn một ngày sẽ bị đếm hai lần.</p></details>
+<details><summary>Xem lời giải</summary><p>(1) 50 / 3,27 = 15,3, tức tối đa <b>15</b> lời gọi chồng nhau. Ở 70 chuyến mỗi giây: 70 × 3,27 = 229 ms CPU mỗi giây, khoảng <b>23 %</b> một lõi (chỉ tính CPU; lab vẫn thấy chuyến quá hạn vì chờ đợi và độ bận của máy). (2) 30 ngày / 24 giờ = <b>30 lần</b> ít hơn. <code>cust_prior_trips</code> <b>vẫn tính được</b> vì là bộ đếm trong hash; nhưng cờ chặn trùng của script dựa vào sorted set khách, nên một event giao lại sau hơn một ngày sẽ bị đếm hai lần.</p></details>
 
 Bài trước: [bài 58](/articles/python-networkx-graph-cau-ket-tai-xe-khach). Bài tiếp: [bài 60](/articles/python-model-registry-ab-drift-retraining).
 

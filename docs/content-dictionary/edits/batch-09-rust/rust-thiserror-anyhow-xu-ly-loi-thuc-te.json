@@ -1,0 +1,137 @@
+{
+ "file": "rust-thiserror-anyhow-xu-ly-loi-thuc-te.md",
+ "edits": [
+  {
+   "old": "in chuỗi nguyên nhân, downcast_ref và ánh xạ",
+   "new": "in chuỗi nguyên nhân, dùng downcast_ref và ánh xạ",
+   "reason": "Danh sách thiếu động từ",
+   "severity": "low"
+  },
+  {
+   "old": "Hai kiểu lỗi có kiểu, LedgerError",
+   "new": "Hai kiểu lỗi cụ thể, LedgerError",
+   "reason": "Lặp 'kiểu' gây khó đọc",
+   "severity": "medium"
+  },
+  {
+   "old": "Hai kiểu lỗi có kiểu đi vào",
+   "new": "Hai kiểu lỗi cụ thể đi vào",
+   "reason": "Lặp 'kiểu' gây khó đọc",
+   "severity": "medium"
+  },
+  {
+   "old": "là lỗi biên dịch, không phải lỗi âm thầm:",
+   "new": "là lỗi biên dịch, chứ không bị bỏ qua mà không báo gì:",
+   "reason": "Calque 'silent error'",
+   "severity": "medium"
+  },
+  {
+   "old": "vẫn chạy nguyên.",
+   "new": "vẫn chạy mà không cần sửa.",
+   "reason": "'chạy nguyên' cụt",
+   "severity": "low"
+  },
+  {
+   "old": "rustc chỉ rõ thiếu gì (thông điệp rút gọn):",
+   "new": "rustc chỉ rõ đang thiếu gì (thông báo lỗi rút gọn):",
+   "reason": "Thống nhất 'thông báo lỗi'",
+   "severity": "low"
+  },
+  {
+   "old": "Cách sửa tuỳ ý định:",
+   "new": "Cách sửa tuỳ thuộc ý định của bạn:",
+   "reason": "'tuỳ ý định' dễ hiểu nhầm thành 'tuỳ ý'",
+   "severity": "medium"
+  },
+  {
+   "old": "kiểm lúc biên dịch.",
+   "new": "kiểm tra lúc biên dịch.",
+   "reason": "'kiểm' cụt",
+   "severity": "medium"
+  },
+  {
+   "old": "phù hợp một dòng log:",
+   "new": "phù hợp để ghi log trên một dòng:",
+   "reason": "Câu thiếu động từ",
+   "severity": "medium"
+  },
+  {
+   "old": "dễ đọc hơn cho người:",
+   "new": "dễ đọc hơn đối với người đọc:",
+   "reason": "Gượng",
+   "severity": "low"
+  },
+  {
+   "old": "nên tránh dùng nó khi log lỗi",
+   "new": "nên tránh dùng dạng này khi ghi log lỗi",
+   "reason": "'nó' mơ hồ",
+   "severity": "low"
+  },
+  {
+   "old": "Không có `anyhow` vẫn đi hết chuỗi được,",
+   "new": "Không có `anyhow` vẫn duyệt hết chuỗi nguyên nhân được,",
+   "reason": "Gượng, thiếu danh từ",
+   "severity": "medium"
+  },
+  {
+   "old": "Nó nhìn xuyên các lớp `context`",
+   "new": "Hàm này nhìn xuyên các lớp `context`",
+   "reason": "Tránh 'Nó' ở đầu câu",
+   "severity": "medium"
+  },
+  {
+   "old": "Nó không đi xuống `source()`",
+   "new": "Tuy vậy, hàm không đi xuống `source()`",
+   "reason": "Tránh lặp 'Nó' ở đầu câu",
+   "severity": "medium"
+  },
+  {
+   "old": "rustc bắt buộc quyết định mã HTTP cho nó, chứ không âm thầm rơi vào mặc định.",
+   "new": "rustc buộc bạn quyết định mã HTTP cho nó, chứ biến thể đó không tự rơi vào mặc định mà không ai hay.",
+   "reason": "Thiếu chủ ngữ; calque 'silently'",
+   "severity": "medium"
+  },
+  {
+   "old": "đổi được thành nó bằng",
+   "new": "chuyển được thành kiểu đó bằng",
+   "reason": "'nó' mơ hồ",
+   "severity": "low"
+  },
+  {
+   "old": "tự lặp `source()`",
+   "new": "tự viết vòng lặp qua `source()`",
+   "reason": "'tự lặp' mơ hồ",
+   "severity": "medium"
+  },
+  {
+   "old": "Với người từ C#:",
+   "new": "Với người quen dùng C#:",
+   "reason": "Gượng",
+   "severity": "low"
+  },
+  {
+   "old": "từ ca thành công tới",
+   "new": "từ trường hợp thành công tới",
+   "reason": "'ca' không nên dùng ngoài nghĩa test case",
+   "severity": "medium"
+  },
+  {
+   "old": "kiểm 29 điều, gồm",
+   "new": "kiểm tra 29 điều, gồm",
+   "reason": "'kiểm' cụt",
+   "severity": "medium"
+  },
+  {
+   "old": "thử lại cùng key còn ra <code>replayed</code> nên",
+   "new": "thử lại cùng key còn trả về <code>replayed</code> nên",
+   "reason": "'còn ra' cụt",
+   "severity": "medium"
+  },
+  {
+   "old": "thành «thử lại được» với «không thử lại được»",
+   "new": "thành hai nhóm: «thử lại được» và «không thử lại được»",
+   "reason": "Gượng, thiếu danh từ",
+   "severity": "medium"
+  }
+ ]
+}

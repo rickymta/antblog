@@ -1,0 +1,125 @@
+{
+ "file": "location-sinh-ung-vien-diem-don-do-thi-di-bo.md",
+ "edits": [
+  {
+   "old": "loại cầu, hầm, vòng xuyến, đoạn quá ngắn, gom ứng viên gần nhau; đo số ứng viên ở từng bước và vì sao bán kính chim bay đánh lừa",
+   "new": "loại bỏ cầu, hầm, vòng xuyến và đoạn quá ngắn, gom các ứng viên gần nhau; đo số ứng viên ở từng bước và chỉ ra vì sao bán kính chim bay đánh lừa",
+   "reason": "Tóm tắt rời rạc, thiếu động từ nối",
+   "severity": "medium"
+  },
+  {
+   "old": "Mọi số đo là **trên dữ liệu mô phỏng**",
+   "new": "Mọi số đo đều lấy **trên dữ liệu mô phỏng**",
+   "reason": "Cấu trúc 'là trên' gượng",
+   "severity": "medium"
+  },
+  {
+   "old": "Chỗ khách đứng được snap lên cạnh đi bộ gần nhất",
+   "new": "Lab snap chỗ khách đứng lên cạnh đi bộ gần nhất",
+   "reason": "Chuyển bị động sang chủ động",
+   "severity": "medium"
+  },
+  {
+   "old": "nên chi phí tỉ lệ với vùng nhỏ quanh khách chứ không với cả thành phố",
+   "new": "nên chi phí tỉ lệ với vùng nhỏ quanh khách chứ không tỉ lệ với cả thành phố",
+   "reason": "Thiếu động từ ở vế sau",
+   "severity": "medium"
+  },
+  {
+   "old": "Đồ thị đi bộ OSM không phải thực tế (có thể thiếu lối đi tắt thật mà lab không kiểm ngoài thực địa), nhưng nó là thước đo",
+   "new": "Đồ thị đi bộ OSM không phản ánh đúng thực tế (có thể thiếu lối đi tắt thật mà lab không kiểm tra ngoài thực địa), nhưng đây là thước đo",
+   "reason": "Câu dịch máy, thiếu động từ",
+   "severity": "medium"
+  },
+  {
+   "old": "Hình 1 vẽ khách 193, ca mà lab in chi tiết",
+   "new": "Hình 1 vẽ khách 193, trường hợp mà lab in chi tiết",
+   "reason": "'ca' là từ dùng không thống nhất, thay bằng từ Việt",
+   "severity": "medium"
+  },
+  {
+   "old": "Cộng thêm quá ngưỡng đi bộ 250 m.",
+   "new": "Ngoài ra còn loại ứng viên vượt ngưỡng đi bộ 250 m.",
+   "reason": "Câu thiếu động từ",
+   "severity": "medium"
+  },
+  {
+   "old": "loại nhiều nhất không phải cầu hay hầm",
+   "new": "nhóm bị loại nhiều nhất không phải cầu hay hầm",
+   "reason": "Thiếu chủ ngữ",
+   "severity": "medium"
+  },
+  {
+   "old": "Nó có hệ quả cụ thể",
+   "new": "Ngưỡng này có hệ quả cụ thể",
+   "reason": "Tránh 'Nó' trừu tượng đầu câu",
+   "severity": "medium"
+  },
+  {
+   "old": "bỏ những điểm cùng đường, cùng chiều, nằm trong 25 m một điểm đã giữ",
+   "new": "bỏ những điểm cùng đường, cùng chiều và nằm trong phạm vi 25 m quanh một điểm đã giữ",
+   "reason": "Cụm cụt, khó đọc",
+   "severity": "medium"
+  },
+  {
+   "old": "Nó không bị loại mà chỉ bị gắn cờ nếu vi phạm, và không bị kiểm ngưỡng 250 m.",
+   "new": "Điểm ghim không bị loại mà chỉ bị gắn cờ nếu vi phạm, và không bị kiểm tra theo ngưỡng 250 m.",
+   "reason": "'Nó' mơ hồ, 'kiểm ngưỡng' cụt",
+   "severity": "high"
+  },
+  {
+   "old": "## Ngân sách đi bộ đổi số ứng viên mạnh hơn bạn nghĩ",
+   "new": "## Ngân sách đi bộ tác động tới số ứng viên mạnh hơn bạn nghĩ",
+   "reason": "Tiêu đề dịch sát tiếng Anh",
+   "severity": "medium"
+  },
+  {
+   "old": "sinh ứng viên không phải chỗ đắt",
+   "new": "sinh ứng viên không phải khâu tốn kém",
+   "reason": "Cách nói gượng",
+   "severity": "medium"
+  },
+  {
+   "old": "Ngưỡng 250 m cứng nghĩa là",
+   "new": "Ngưỡng cứng 250 m nghĩa là",
+   "reason": "Trật tự từ kiểu tiếng Anh",
+   "severity": "low"
+  },
+  {
+   "old": "**Chỗ chịu thiệt:**",
+   "new": "**Phần thiệt:**",
+   "reason": "Cách nói gượng",
+   "severity": "low"
+  },
+  {
+   "old": "vì nó chưa chạy thử nghiệm với các ngưỡng khác",
+   "new": "vì lab chưa chạy thử nghiệm với các ngưỡng khác",
+   "reason": "'nó' mơ hồ",
+   "severity": "medium"
+  },
+  {
+   "old": "snap không biết chướng ngại: có thể thiếu lối đi tắt thật, và nhiều khả năng góp phần vào đuôi",
+   "new": "phép snap không biết chướng ngại: đồ thị có thể thiếu lối đi tắt thật, và điều này nhiều khả năng góp phần vào đuôi",
+   "reason": "Thiếu chủ ngữ cho các vế sau",
+   "severity": "medium"
+  },
+  {
+   "old": "kiểm tổng các phần bằng 20.409",
+   "new": "kiểm tra tổng các phần có bằng 20.409",
+   "reason": "'kiểm tổng' cụt",
+   "severity": "medium"
+  },
+  {
+   "old": "nếu không có phương án lùi, hệ thống bỏ khách",
+   "new": "nếu không có phương án dự phòng, hệ thống bỏ khách",
+   "reason": "Dịch gượng của fallback",
+   "severity": "medium"
+  },
+  {
+   "old": "nên mọi số thời gian là cận trên bị phóng đại",
+   "new": "nên mọi số thời gian đều là cận trên và bị phóng đại",
+   "reason": "Câu thiếu liên kết",
+   "severity": "low"
+  }
+ ]
+}

@@ -36,13 +36,13 @@ Trong bài tập, câu hỏi được thu hẹp thành: **“Trong cohort lượ
 
 Đầu ra là một analysis brief ngắn, ghi người nhận, phạm vi, câu hỏi và quyết định được hỗ trợ. Chưa đặt nhiệm vụ “chứng minh chat giúp giảm huỷ”, vì câu đó đã gài sẵn kết luận mong muốn.
 
-Điều kiện qua bước: DA và người ra quyết định hiểu giống nhau về câu hỏi. Nếu chỉ cần biết tải công việc hỗ trợ, hãy bổ sung dữ liệu liên hệ CSKH thay vì dùng số huỷ thay cho số cuộc gọi.
+Điều kiện qua bước: DA và người ra quyết định hiểu giống nhau về câu hỏi. Nếu chỉ cần biết khối lượng công việc hỗ trợ, hãy bổ sung dữ liệu lượt liên hệ CSKH thay vì lấy số huỷ để thay cho số cuộc gọi.
 
 ## 3. Bước 2 — Chốt định nghĩa trước khi so sánh
 
 Ta dùng quy ước DA-P01: mỗi lượt chỉ thuộc một cohort theo thời điểm nhận đầu tiên; tử số là lượt huỷ trước đón trong cohort; mẫu số là toàn bộ lượt đã được nhận trong cohort. Múi giờ là Asia/Ho_Chi_Minh.
 
-W1/W2 hiện là nhãn tuần giả lập, không có ngày lịch cụ thể. “Cao điểm” cũng mới là nhãn nhóm loại trừ nhau với “còn lại”. Để tạo dataset timestamp thật, vận hành phải xác nhận ngày và khung giờ cụ thể trước; DA không tự điền rồi trình bày như một quy tắc đã có.
+W1/W2 hiện là nhãn tuần giả lập, không có ngày lịch cụ thể. “Cao điểm” cũng mới là nhãn của nhóm không giao với nhóm “còn lại”. Để tạo bộ dữ liệu có timestamp thật, vận hành phải xác nhận ngày và khung giờ cụ thể trước; DA không tự điền rồi trình bày như một quy tắc đã có.
 
 Đầu ra là metric contract — bản thoả thuận định nghĩa chỉ số. Ngoài công thức, cần có điều kiện loại trừ, thời điểm chốt kết quả, cách sửa số khi dữ liệu đến trễ và người xác nhận.
 
@@ -50,7 +50,7 @@ W1/W2 hiện là nhãn tuần giả lập, không có ngày lịch cụ thể. �
 
 ## 4. Bước 3 — Xác định nguồn và phạm vi lấy dữ liệu
 
-Với mỗi thông tin cần có, ghi nguồn dự kiến, chủ sở hữu và bằng chứng nguồn đáp ứng định nghĩa. Chưa có quyền hoặc trường cần thiết thì ghi thiếu, không giả lập trường đó trong kết quả chính thức.
+Với mỗi thông tin cần có, ghi nguồn dự kiến, người phụ trách nguồn và bằng chứng cho thấy nguồn đáp ứng định nghĩa. Chưa có quyền hoặc trường cần thiết thì ghi thiếu, không giả lập trường đó trong kết quả chính thức.
 
 | Thông tin cần | Nguồn cần kiểm tra khi triển khai | Câu hỏi xác minh |
 |---|---|---|
@@ -59,17 +59,17 @@ Với mỗi thông tin cần có, ghi nguồn dự kiến, chủ sở hữu và 
 | Khu vực và dịch vụ | Thuộc tính nghiệp vụ tại thời điểm phát sinh | Có thay đổi định nghĩa hoặc mapping không? |
 | Độ mới của tập dữ liệu | Metadata trích xuất/pipeline | Nguồn và bản sao đã cập nhật tới đâu? |
 
-Bảng là yêu cầu cần xác minh, không khẳng định những bảng hoặc cột ấy đã tồn tại trong Tới Nơi. Chỉ trạng thái cuối có thể không đủ để chứng minh một lượt huỷ trước hay sau thời điểm đón.
+Bảng này là danh sách yêu cầu cần xác minh, không khẳng định những bảng hoặc cột ấy đã tồn tại trong Tới Nơi. Chỉ trạng thái cuối có thể không đủ để chứng minh một lượt huỷ trước hay sau thời điểm đón.
 
-Ở P01, nguồn thực tế của bài học là **bảng tổng hợp giả lập đã cung cấp**. Phân tích được các phép tính trong bảng, nhưng không truy ngược từng chuyến. Giữ rõ giới hạn đó khi bàn giao.
+Ở P01, nguồn thực tế của bài học là **bảng tổng hợp giả lập đã cung cấp**. Ta phân tích được các phép tính trong bảng, nhưng không truy ngược được từng chuyến. Giữ rõ giới hạn đó khi bàn giao.
 
 ## 5. Bước 4 — Kiểm tra và chuẩn bị dữ liệu
 
-Khi có dữ liệu chi tiết, kiểm tra ít nhất: thiếu trường bắt buộc, trùng ID theo grain đã chọn, thời gian bất hợp lý, cohort chưa đủ kết quả và join làm nhân số dòng. Lưu quy tắc biến đổi cùng số dòng bị ảnh hưởng.
+Khi có dữ liệu chi tiết, kiểm tra ít nhất: thiếu trường bắt buộc, trùng ID theo grain đã chọn, thời gian bất hợp lý, cohort chưa đủ kết quả và phép join làm số dòng bị nhân lên. Lưu quy tắc biến đổi cùng số dòng bị ảnh hưởng.
 
 Đối với bảng tổng hợp P01, ta thực hiện được các kiểm tra nhỏ hơn:
 
-- Mỗi kỳ có đúng hai nhóm loại trừ nhau theo giả định bài tập.
+- Mỗi kỳ có đúng hai nhóm không giao nhau theo giả định bài tập.
 - Số huỷ không âm và không lớn hơn số được nhận.
 - W1: 500 + 500 = 1.000; 80 + 40 = 120.
 - W2: 750 + 750 = 1.500; 135 + 45 = 180.
@@ -77,7 +77,7 @@ Khi có dữ liệu chi tiết, kiểm tra ít nhất: thiếu trường bắt b
 
 Đầu ra là quality log: đã kiểm tra gì, kết quả, điểm chưa xác minh và ảnh hưởng tới kết luận. Không ghi “dữ liệu sạch 100%” chỉ vì phép cộng khớp; bảng tổng hợp vẫn không cho biết hệ thống nguồn đã bỏ sót sự kiện hay chưa.
 
-Nếu phải loại dữ liệu, lưu cả kết quả trước và sau cùng lý do. Đừng âm thầm bỏ ca có thời gian chờ cao vì nghĩ “chắc lỗi”; đó có thể chính là nhóm người dùng đang gặp vấn đề.
+Nếu phải loại dữ liệu, lưu cả kết quả trước và sau cùng lý do. Đừng lặng lẽ bỏ các ca có thời gian chờ cao vì nghĩ “chắc lỗi”; đó có thể chính là nhóm người dùng đang gặp vấn đề.
 
 ## 6. Bước 5 — Phân tích theo câu hỏi, giữ lại cách tính
 
@@ -93,11 +93,11 @@ Review gồm hai việc khác nhau: kiểm tra phép tính và kiểm tra kết 
 
 | Câu review | Ví dụ cần phát hiện |
 |---|---|
-| Tử số và mẫu số có cùng cohort? | Lấy huỷ xảy ra trong tuần chia cho nhận trong tuần dù gồm các lượt khác nhau |
+| Tử số và mẫu số có cùng cohort? | Lấy số huỷ xảy ra trong tuần chia cho số lượt nhận trong tuần, dù hai số này gồm các lượt khác nhau |
 | Tổng nhóm có khớp số chung? | Một lượt bị đưa vào hai vùng |
 | Hai kỳ có cùng điều kiện chốt? | W2 còn nhiều lượt chưa có kết quả |
-| Biểu đồ và câu chữ có cùng ý nghĩa? | Ghi “tỷ lệ tăng 50%” trong khi chỉ số đếm tăng 50% |
-| Khuyến nghị có cần bằng chứng chưa có? | Đề xuất triển khai chat toàn khu vực từ một bảng phân nhóm |
+| Biểu đồ và câu chữ có cùng ý nghĩa? | Ghi “tỷ lệ tăng 50%” trong khi số đếm tăng 50% |
+| Khuyến nghị có đòi hỏi bằng chứng mà ta chưa có không? | Đề xuất triển khai chat toàn khu vực từ một bảng phân nhóm |
 
 Một người đọc lại nhận định cùng bảng số là bước hữu ích. Nếu họ không tìm được mẫu số hoặc hiểu “cao điểm gây huỷ” từ câu chữ, cần sửa trước khi bàn giao. Lưu người review, ngày, phạm vi đã xem và vấn đề chưa đóng.
 
@@ -105,17 +105,17 @@ Một người đọc lại nhận định cùng bảng số là bước hữu �
 
 Gói bàn giao tối thiểu gồm brief, định nghĩa chỉ số, bảng kết quả, quality log và bản nhận định ngắn. Mở đầu bằng câu trả lời cho câu hỏi, rồi mới trình bày chi tiết kỹ thuật cần để kiểm tra.
 
-Khuyến nghị dự kiến cho ca này: xác minh lịch cao điểm và thay đổi tracking, sau đó thu thập thêm bằng chứng về nhóm cao điểm. Đây là khuyến nghị điều tra, chưa phải quyết định duyệt pilot.
+Khuyến nghị dự kiến cho ca này: xác minh lịch cao điểm và thay đổi cách ghi nhận, sau đó thu thập thêm bằng chứng về nhóm cao điểm. Đây là khuyến nghị điều tra, chưa phải quyết định duyệt pilot.
 
 Decision log — sổ quyết định — cần ghi người có thẩm quyền, lựa chọn, lý do, trạng thái và bước tiếp. Nếu chưa có người phản hồi, trạng thái vẫn là “đề xuất/chờ quyết định”. Không đổi thành “đã chốt” chỉ vì gửi xong báo cáo.
 
 ## 9. Bước 8 — Theo dõi và biết khi nào đóng việc
 
-Nếu báo cáo dùng lặp lại, cần người sở hữu lịch refresh, kiểm tra độ mới và xử lý số liệu sửa lại. Nếu chỉ là phân tích một lần, cần lưu gói có thể kiểm tra lại và ghi hạn sử dụng theo giả định.
+Nếu báo cáo dùng lặp lại, cần người phụ trách lịch làm mới dữ liệu (refresh), kiểm tra độ mới và xử lý số liệu sửa lại. Nếu chỉ là phân tích một lần, cần lưu gói có thể kiểm tra lại và ghi hạn sử dụng theo giả định.
 
 Phân biệt hai mốc hoàn thành: **hoàn thành phân tích đã giao** và **hoàn thành đánh giá tác động của hành động**. Có thể bàn giao phân tích mô tả khi chưa chạy pilot; không vì thế tuyên bố vấn đề huỷ đã được giải quyết.
 
-Nếu sau đó triển khai can thiệp, nhóm cần thống nhất cách đánh giá riêng: cohort, thời gian, chỉ số chính, chỉ số bảo vệ và thiết kế so sánh. Thấy tỷ lệ giảm sau ngày ra mắt chưa đủ để quy toàn bộ mức giảm cho can thiệp.
+Nếu sau đó triển khai can thiệp, nhóm cần thống nhất cách đánh giá riêng: cohort, thời gian, chỉ số chính, chỉ số bảo vệ và thiết kế so sánh. Thấy tỷ lệ giảm sau ngày ra mắt thì chưa đủ để quy toàn bộ mức giảm đó cho can thiệp.
 
 ## 10. Khi dữ liệu đến trễ: quay lại bước nào?
 
@@ -133,13 +133,13 @@ Tạo bảng tám hàng tương ứng tám bước, với các cột: người l
 
 Sau đó xử lý biến thể 15 lượt trễ. Viết thông báo đính chính trong năm câu, nêu phiên bản bị ảnh hưởng, số cũ/mới, nguyên nhân sửa, kết luận phải thay và bước kiểm tra tiếp.
 
-<details><summary>Gợi ý tự chấm</summary><p>Đạt khi đủ tám bước; có người xác nhận định nghĩa và review; tách bảng minh hoạ khỏi extract thật; tính đúng W2 195/1.500 = 13% và cao điểm 150/750 = 20%; giữ dấu vết phiên bản; nêu cần thông báo lại và xem xét quyết định đã dùng số cũ. Không được thêm 15 vào mẫu số vì các lượt đã ở trong cohort.</p></details>
+<details><summary>Gợi ý tự chấm</summary><p>Đạt khi đủ tám bước; có người xác nhận định nghĩa và review; tách bảng minh hoạ khỏi dữ liệu trích xuất thật; tính đúng W2 195/1.500 = 13% và cao điểm 150/750 = 20%; giữ dấu vết phiên bản; nêu cần thông báo lại và xem xét quyết định đã dùng số cũ. Không được thêm 15 vào mẫu số vì các lượt đã ở trong cohort.</p></details>
 
 **Câu hỏi:** Có cần chờ chứng minh được nguyên nhân huỷ mới được bàn giao phân tích không?
 
 <details><summary>Gợi ý trả lời</summary><p>Không, nếu nhiệm vụ đã thống nhất là phân tích mô tả và chọn nhóm cần điều tra. Phải bàn giao đúng phạm vi, nêu điều chưa biết và không trình bày kết quả mô tả như kết luận nhân quả. Nếu nhiệm vụ cần đánh giá tác động, bằng chứng hiện tại chưa đủ để đóng nhiệm vụ đó.</p></details>
 
-Checklist cuối: câu hỏi có người dùng; metric có định nghĩa; nguồn có giới hạn; kiểm tra có bằng chứng; kết quả có thể tính lại; đã review; quyết định có trạng thái; theo dõi có người sở hữu.
+Checklist cuối: câu hỏi có người dùng; metric có định nghĩa; nguồn có giới hạn; kiểm tra có bằng chứng; kết quả có thể tính lại; đã review; quyết định có trạng thái; theo dõi có người phụ trách.
 
 ## 12. Đọc thêm và hồ sơ thực hành
 

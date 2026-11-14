@@ -8,19 +8,19 @@ tags: [python, toi-noi, fastapi, openapi, problem-details]
 language: vi
 ---
 
-Service Dispatch của [Tới Nơi](/articles/du-an-mau-toi-noi), viết bằng C#, gọi `POST /v1/quotes` mà bài 31 vừa xuất bản. Khi yêu cầu sai, nó nhận lúc thì `{"detail": "khoảng cách ngoài miền 0..100 km: 150"}`, một chuỗi, lúc thì `{"detail": [...]}`, một danh sách, kèm thông điệp tiếng Anh và bản sao nguyên giá trị đã gửi. Người viết client phải đoán dạng nào. Đội ứng dụng di động sinh SDK từ `openapi.json` thì không thấy mã 400 ở đâu cả. Hai nỗi đau cùng một gốc: API chưa có **hợp đồng lỗi**.
+Service Dispatch của [Tới Nơi](/articles/du-an-mau-toi-noi), viết bằng C#, gọi `POST /v1/quotes` mà bài 31 vừa đưa lên HTTP. Khi yêu cầu sai, nó nhận lúc thì `{"detail": "khoảng cách ngoài miền 0..100 km: 150"}`, một chuỗi, lúc thì `{"detail": [...]}`, một danh sách, kèm thông điệp tiếng Anh và bản sao nguyên giá trị đã gửi. Người viết client phải đoán xem đó là dạng nào. Đội ứng dụng di động sinh SDK từ `openapi.json` thì không thấy mã 400 ở đâu cả. Hai vấn đề cùng một gốc: API chưa có **hợp đồng lỗi**.
 
-Bài này biến lỗi thành dữ liệu có cấu trúc theo RFC 9457 (Problem Details), đăng ký handler để mọi lỗi cùng một dạng, khai báo lỗi trong OpenAPI cho khớp hành vi, rồi chụp hợp đồng thành file để mỗi lần đổi hiện thành diff. Đây là bài 32 của lộ trình **Python trung bình qua Tới Nơi**. Lab tiếp nối lab bài 31, nên hãy đọc bài 31 trước.
+Bài này biến lỗi thành dữ liệu có cấu trúc theo RFC 9457 (Problem Details), đăng ký handler để mọi lỗi có cùng một dạng, khai báo lỗi trong OpenAPI cho khớp hành vi, rồi chụp hợp đồng thành file để mỗi thay đổi hiện ra thành một diff. Đây là bài 32 của lộ trình **Python trung bình qua Tới Nơi**. Lab tiếp nối lab bài 31, nên hãy đọc bài 31 trước.
 
 <div class="tkh-callout tkh-callout--example">
 <span class="tkh-callout-title">Thử trước khi đọc</span>
 <p>Bạn đã đăng ký handler đổi mọi lỗi 422 thành <code>application/problem+json</code>. Mở <code>/docs</code>, mục 422 của <code>POST /v1/quotes</code> sẽ mô tả body lỗi theo dạng nào: Problem Details mới, hay dạng <code>HTTPValidationError</code> cũ?</p>
-<details><summary>Xem đáp án</summary><p><b>Dạng cũ.</b> Handler chỉ đổi hành vi lúc chạy; tài liệu OpenAPI sinh từ khai báo của route, và FastAPI tự thêm 422 với schema mặc định nếu route không tự khai báo. Kết quả là tài liệu nói một đằng, server làm một nẻo. Bài chạy đúng ca này và sửa bằng <code>responses=</code>.</p></details>
+<details><summary>Xem đáp án</summary><p><b>Dạng cũ.</b> Handler chỉ đổi hành vi lúc chạy; tài liệu OpenAPI sinh từ khai báo của route, và FastAPI tự thêm 422 với schema mặc định nếu route không tự khai báo. Kết quả là tài liệu nói một đằng, server làm một nẻo. Bài chạy đúng tình huống này và sửa bằng <code>responses=</code>.</p></details>
 </div>
 
 ## Lỗi mặc định của FastAPI thiếu gì
 
-Ca xấu có hai lỗi cùng lúc, gửi tới app chưa đăng ký handler nào (trích output của `main.py`):
+Test case xấu có hai lỗi cùng lúc, gửi tới app chưa đăng ký handler nào (trích output của `main.py`):
 
 ```text
 422 application/json
@@ -33,10 +33,10 @@ Ca xấu có hai lỗi cùng lúc, gửi tới app chưa đăng ký handler nào
    "input": "bike", "ctx": {"expected": "'ride', 'food' or 'parcel'"}}]}
 ```
 
-(Trích; output thật in thụt dòng từng khoá, ở đây nén lại cho gọn.) Cấu trúc `detail[].loc/msg/type` đủ dùng khi phát triển, nhưng chưa thành hợp đồng:
+(Trích; kết quả chạy thật in thụt dòng từng khoá, ở đây nén lại cho gọn.) Cấu trúc `detail[].loc/msg/type` đủ dùng khi phát triển, nhưng chưa thành hợp đồng:
 
 - **Hai hình dạng.** Lỗi validation có `detail` là danh sách; lỗi `HTTPException` (như 400 ở bài 31, 404) có `detail` là chuỗi. Client phải viết hai nhánh.
-- **Không có định danh ổn định của ta.** `type` như `decimal_max_places` là mã của pydantic. Nó thuộc về thư viện, và nâng phiên bản có thể đổi tên. `msg` là tiếng Anh, so sánh chuỗi thì mong manh.
+- **Không có định danh ổn định của ta.** `type` như `decimal_max_places` là mã của pydantic. Mã này thuộc về thư viện, và khi nâng phiên bản thì tên có thể đổi. `msg` là tiếng Anh, so sánh chuỗi thì mong manh.
 - **Chép lại `input`.** Giá trị client gửi quay ngược trong phản hồi, và có thể nằm lại trong log của proxy. Với số giấy tờ hay mật khẩu, đó là rò rỉ.
 - **Cùng media type `application/json`** với phản hồi thành công, nên phần mềm trung gian không phân biệt được body lỗi chuẩn.
 
@@ -53,9 +53,9 @@ RFC 9457 (thay RFC 7807) định nghĩa một đối tượng JSON mô tả lỗ
 | `instance` | Định danh một lần xuất hiện của lỗi | đường dẫn request, `/v1/quotes` |
 | mở rộng | Dữ liệu máy đọc được, thay cho việc phân tích `detail` | `errors[]`, `min_km`, `max_km` |
 
-Vài điểm trong RFC đáng nhớ khi thiết kế. `type` là chỗ client rẽ nhánh, nên đổi `type` là thay đổi phá vỡ client. URI không bắt buộc phân giải được, nhưng RFC khuyến khích URI phân giải được vì đổi sang URI mới về sau đồng nghĩa đổi định danh; lab dùng `toinoi.example` (tên miền `.example` dành riêng, không bao giờ phân giải thật), production nên trỏ tới trang tài liệu thật. Khi chỉ cần mã HTTP, dùng `about:blank` và để `title` là tên chuẩn của mã (`Not Found`). Lab dùng `instance` là đường dẫn request: biết lỗi ở route nào, nhưng chưa phân biệt được hai lần gọi; định danh riêng từng lần để tra log cần một mã theo request. Bài 33 sẽ gán `request_id` ở middleware và đưa nó vào extension của Problem Details, để bên nhận lỗi đưa mã đó cho bên vận hành tra log.
+Vài điểm trong RFC đáng nhớ khi thiết kế. `type` là chỗ client rẽ nhánh, nên đổi `type` là thay đổi phá vỡ client. URI không bắt buộc phân giải được, nhưng RFC khuyến khích URI phân giải được vì đổi sang URI mới về sau đồng nghĩa đổi định danh; lab dùng `toinoi.example` (tên miền `.example` dành riêng, không bao giờ phân giải thật), production nên trỏ tới trang tài liệu thật. Khi chỉ cần mã HTTP, dùng `about:blank` và để `title` là tên chuẩn của mã (`Not Found`). Lab dùng `instance` là đường dẫn request: biết lỗi ở route nào, nhưng chưa phân biệt được hai lần gọi; định danh riêng từng lần để tra log thì cần một mã gắn với từng request. Bài 33 sẽ gán `request_id` ở middleware và đưa nó vào extension của Problem Details, để bên nhận lỗi đưa mã đó cho bên vận hành tra log.
 
-FastAPI không tự sinh dạng này, nên ta viết handler. Bài C# cùng chủ đề, [Validation, Problem Details và OpenAPI](/articles/dotnet10-validation-problem-details-openapi), dùng `AddProblemDetails` có sẵn của ASP.NET Core: cùng RFC, khác công sức. Lỗi validation ở bài C# là 400, ở FastAPI mặc định là 422; hai framework khác mặc định nên phải ghi vào hợp đồng chứ đừng suy ra.
+FastAPI không tự sinh dạng này, nên ta viết handler. Bài C# cùng chủ đề, [Validation, Problem Details và OpenAPI](/articles/dotnet10-validation-problem-details-openapi), dùng `AddProblemDetails` có sẵn của ASP.NET Core: cùng RFC, khác công sức. Lỗi validation ở bài C# là 400, ở FastAPI mặc định là 422; hai framework có mặc định khác nhau nên phải ghi vào hợp đồng chứ đừng suy ra.
 
 <figure class="tkh-fig">
 <div class="tkh-fig-box">
@@ -81,7 +81,7 @@ def problem_response(request, *, status, type_, title, detail=None, headers=None
     )
 ```
 
-`ProblemDetails` là một model pydantic với `extra="allow"` để nhận thành viên mở rộng; `exclude_none` bỏ `detail` hay `errors` khi không có. Dựng qua model thay vì dict tay thì cùng model đó mô tả lỗi trong OpenAPI, hai nơi không lệch nhau.
+`ProblemDetails` là một model pydantic với `extra="allow"` để nhận thành viên mở rộng; `exclude_none` bỏ `detail` hay `errors` khi không có. Dựng qua model thay vì dict viết tay thì cùng model đó mô tả lỗi trong OpenAPI, hai nơi không lệch nhau.
 
 Lỗi validation đổi thành danh sách phẳng, bỏ `input`, dịch thông điệp cho các mã đã gặp:
 
@@ -108,7 +108,7 @@ Chạy ba lỗi cùng lúc (`distance_km` 4 chữ số thập phân, `service` l
   {"field": "body.x", "code": "extra_forbidden", "message": "trường không có trong hợp đồng"}]}
 ```
 
-Client rẽ nhánh theo `type`, tô đỏ theo `errors[].field`, hiển thị `message`. `code` vẫn là mã của pydantic; muốn tách hẳn khỏi thư viện thì cần bảng đổi riêng. Lab giữ nguyên và verify khoá ba mã của ca ba lỗi, nên nâng pydantic mà đổi mã thì đỏ ngay.
+Client rẽ nhánh theo `type`, tô đỏ theo `errors[].field`, hiển thị `message`. `code` vẫn là mã của pydantic; muốn tách hẳn khỏi thư viện thì cần bảng đổi riêng. Lab giữ nguyên các mã đó và verify ghim cứng ba mã của test case ba lỗi, nên nâng pydantic mà đổi mã thì đỏ ngay.
 
 Lỗi miền khác lỗi hình dạng. Ở bài 31, route tự `try/except ValueError`. Ở đây miền ném một exception **có kiểu**, vẫn là `ValueError` với thông điệp cũ của loạt bài:
 
@@ -132,7 +132,7 @@ async def on_distance(request: Request, exc: DistanceOutOfRange) -> JSONResponse
     )
 ```
 
-Vì sao không đăng ký handler cho `ValueError` chung cho gọn? Vì `ValueError` bay ra từ **bất cứ đâu**, kể cả lỗi lập trình, và mọi lỗi đó sẽ bị báo là «khách gửi sai». Lab thêm một route phá có chủ ý ném `ValueError("bug-bi-mat: ...")` để kiểm:
+Vì sao không đăng ký handler cho `ValueError` chung cho gọn? Vì `ValueError` bay ra từ **bất cứ đâu**, kể cả lỗi lập trình, và mọi lỗi đó sẽ bị báo là «khách gửi sai». Lab thêm một route gây lỗi có chủ ý, route này ném `ValueError("bug-bi-mat: ...")` để kiểm:
 
 ```text
 -- 150 km (miền): 400 application/problem+json
@@ -145,7 +145,7 @@ Vì sao không đăng ký handler cho `ValueError` chung cho gọn? Vì `ValueEr
 {"type": "https://toinoi.example/problems/internal-error", "title": "Lỗi nội bộ", "status": 500, "detail": "Có lỗi ở phía máy chủ; hãy thử lại sau.", "instance": "/v1/_boom"}
 ```
 
-(Trích.) `ValueError` lạc chỗ ra 500, và phản hồi **không** chứa chữ `bug-bi-mat` hay tên lớp exception: handler `Exception` ghi chi tiết và traceback vào log, client chỉ thấy câu chung chung. Verify kiểm cả hai: body không lộ, và log có đúng một bản ghi kèm traceback. Hai chi tiết kỹ thuật: 404 và 405 do Starlette ném, nên handler phải đăng ký cho `starlette.exceptions.HTTPException` (lớp cha của `HTTPException` của FastAPI); còn handler `Exception` chạy ở tầng ngoài cùng và Starlette vẫn ném lại sau khi gửi phản hồi để server ghi log, nên test client phải đặt `raise_app_exceptions=False` mới nhận 500 thay vì exception.
+(Trích.) `ValueError` lạc chỗ ra 500, và phản hồi **không** chứa chữ `bug-bi-mat` hay tên lớp exception: handler `Exception` ghi chi tiết và traceback vào log, client chỉ thấy câu chung chung. Verify kiểm tra cả hai: body không lộ, và log có đúng một bản ghi kèm traceback. Hai chi tiết kỹ thuật: 404 và 405 do Starlette ném, nên handler phải đăng ký cho `starlette.exceptions.HTTPException` (lớp cha của `HTTPException` của FastAPI); còn handler `Exception` chạy ở tầng ngoài cùng và Starlette vẫn ném lại sau khi gửi phản hồi để server ghi log, nên test client phải đặt `raise_app_exceptions=False` mới nhận 500 thay vì exception.
 
 ## OpenAPI nói đúng về lỗi
 
@@ -170,9 +170,9 @@ v1 = APIRouter(prefix="/v1", tags=["quotes"], responses=COMMON_ERRORS)
 async def create_quote(body: QuoteRequest, request: Request, response: Response) -> QuoteResponse: ...
 ```
 
-`responses` đặt ở router áp cho mọi route, nên 422 và 500 khai báo một lần. Riêng 422 có lý do thêm: FastAPI tự gắn 422 mặc định (`HTTPValidationError`) vào mọi route có tham số, kể cả `GET` với `quote_id: str` hiện chưa thể gây 422; khai báo lại để tài liệu không rơi về schema cũ, và không đổi nghĩa khi kiểu tham số đổi sau này; 400 và 404 khai báo ở từng route vì chỉ route đó có. `operation_id` đặt tay cho tên ổn định (`createQuote`) thay vì `create_quote_v1_quotes_post` sinh từ tên hàm và đường dẫn. `tags` kèm mô tả gom route thành nhóm trong `/docs`.
+`responses` đặt ở router thì áp dụng cho mọi route, nên 422 và 500 khai báo một lần. Riêng 422 có lý do thêm: FastAPI tự gắn 422 mặc định (`HTTPValidationError`) vào mọi route có tham số, kể cả `GET` với `quote_id: str` hiện chưa thể gây 422; khai báo lại để tài liệu không rơi về schema cũ, và không đổi nghĩa khi kiểu tham số đổi sau này; 400 và 404 khai báo ở từng route vì chỉ route đó có. `operation_id` đặt bằng tay để có tên ổn định (`createQuote`) thay vì `create_quote_v1_quotes_post` sinh từ tên hàm và đường dẫn. `tags` kèm mô tả gom route thành nhóm trong `/docs`.
 
-Có một vướng: FastAPI gắn schema của `model` vào `application/json`, trong khi lỗi của ta là `application/problem+json`. Lab đổi tên khoá sau khi sinh, theo mẫu «extending OpenAPI» của FastAPI:
+Có một vướng mắc: FastAPI gắn schema của `model` vào `application/json`, trong khi lỗi của ta là `application/problem+json`. Lab đổi tên khoá sau khi sinh, theo mẫu «extending OpenAPI» của FastAPI:
 
 ```python
 def problem_media_type_in_openapi(app: FastAPI) -> None:
@@ -210,7 +210,7 @@ GET /v1/quotes/{quote_id}:
 schemas: ['FieldProblem', 'ProblemDetails', 'QuoteRequest', 'QuoteResponse', 'ServiceKind']
 ```
 
-`HTTPValidationError` đã biến mất khỏi danh sách schema, và mã 400, 404 đã có mặt. Nhưng tài liệu đúng chưa chứng minh server đúng, nên lab đối chiếu hai phía: gửi năm yêu cầu thật (201, 400, 422, 200, 404), tra mã trả về và media type trong đặc tả, rồi dựng lại body lỗi bằng chính model `ProblemDetails`. Kết quả `lệch 0 ca`. Và đây là cái bẫy trong câu đầu bài, dựng lại trong lab: app đăng ký handler nhưng route không khai báo `responses`:
+`HTTPValidationError` đã biến mất khỏi danh sách schema, và mã 400, 404 đã có mặt. Nhưng tài liệu đúng chưa chứng minh server đúng, nên lab đối chiếu hai phía: gửi năm yêu cầu thật (201, 400, 422, 200, 404), tra mã trả về và media type trong đặc tả, rồi dựng lại body lỗi bằng chính model `ProblemDetails`. Kết quả `lệch 0 ca`. Và đây là cái bẫy trong câu hỏi đầu bài, dựng lại trong lab: app đăng ký handler nhưng route không khai báo `responses`:
 
 ```text
 quên khai báo responses:
@@ -218,11 +218,11 @@ quên khai báo responses:
   OpenAPI  : {'application/json': 'HTTPValidationError'}
 ```
 
-Đặc tả nói body là `HTTPValidationError` còn server trả `problem+json`. SDK sinh tự động sẽ cố đọc lỗi theo schema sai, và không test nào về đặc tả cảnh báo vì tài liệu vẫn «hợp lệ».
+Đặc tả nói body là `HTTPValidationError` còn server trả `problem+json`. SDK sinh tự động sẽ cố đọc lỗi theo schema sai, và không test đặc tả nào cảnh báo, vì tài liệu vẫn «hợp lệ».
 
 ## Version và snapshot: đổi hợp đồng có chủ ý
 
-Tất cả route nằm dưới tiền tố `/v1` của `APIRouter`. `info.version` (`1.0.0`) là phiên bản hợp đồng theo semver, còn `/v1` chỉ là số major trong URL: một thay đổi tương thích, như thêm trường tuỳ chọn, tăng `1.0.0` lên `1.1.0` mà URL không đổi. Khi cần đổi phá vỡ, ta thêm router `/v2` chạy song song và để `/v1` sống thêm một thời gian cho client cũ. Thế nào là phá vỡ:
+Tất cả route nằm dưới tiền tố `/v1` của `APIRouter`. `info.version` (`1.0.0`) là phiên bản hợp đồng theo semver, còn `/v1` chỉ là số major trong URL: một thay đổi tương thích, như thêm trường tuỳ chọn, tăng `1.0.0` lên `1.1.0` mà URL không đổi. Khi cần đổi phá vỡ, ta thêm router `/v2` chạy song song và để `/v1` sống thêm một thời gian cho client cũ. Thế nào là thay đổi phá vỡ:
 
 | Thay đổi | Phá client cũ? | Cách làm |
 | --- | --- | --- |
@@ -241,13 +241,13 @@ diff khi đổi 201 thành 200:
   +          "200": {
 ```
 
-Khi chủ động đổi hợp đồng, chạy `main.py --write-snapshot`, xem `git diff` của file rồi commit cùng thay đổi code. Một diff không ai chủ ý là tín hiệu có người vừa phá hợp đồng.
+Khi chủ động đổi hợp đồng, chạy `main.py --write-snapshot`, xem `git diff` của file rồi commit cùng thay đổi code. Một diff mà không ai chủ ý tạo ra là tín hiệu có người vừa phá hợp đồng.
 
 <figure class="tkh-fig">
 <div class="tkh-fig-box">
 <svg viewBox="0 0 880 270" role="img" aria-label="Quy trình snapshot: đổi code, sinh openapi bằng app.openapi, so với snapshot đã commit. Khớp thì verify đạt. Lệch thì verify đỏ và in diff, người xem diff quyết định ghi lại snapshot và commit cùng code nếu cố ý, hoặc sửa code nếu vô ý."><defs><marker id="py32-1-arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0 0 L10 5 L0 10 z" class="f-phys"/></marker></defs><rect x="20" y="30" width="200" height="80" rx="10" class="f-pk-soft s-pk"/><text x="36" y="62" class="t-b">1. Đổi code</text><text x="36" y="86" class="t-small">route, model, status</text><path d="M220 70 L260 70" class="f-none s-phys" stroke-width="2" marker-end="url(#py32-1-arrow)"/><rect x="260" y="30" width="200" height="80" rx="10" class="f-pk-soft s-pk"/><text x="276" y="62" class="t-b">2. app.openapi()</text><text x="276" y="86" class="t-small">hợp đồng hiện tại</text><path d="M460 70 L500 70" class="f-none s-phys" stroke-width="2" marker-end="url(#py32-1-arrow)"/><rect x="500" y="30" width="200" height="80" rx="10" class="f-pk-soft s-pk"/><text x="516" y="62" class="t-b">3. So với snapshot</text><text x="516" y="86" class="t-small">file đã commit</text><path d="M700 70 L740 70" class="f-none s-phys" stroke-width="2" marker-end="url(#py32-1-arrow)"/><rect x="740" y="30" width="120" height="80" rx="10" class="f-phys-soft s-phys"/><text x="756" y="62" class="t-b">Khớp</text><text x="756" y="86" class="t-small">verify đạt</text><path d="M600 110 L600 160" class="f-none s-warn" stroke-width="2" marker-end="url(#py32-1-arrow)"/><rect x="500" y="160" width="360" height="80" rx="10" class="f-warn-soft s-warn"/><text x="516" y="192" class="t-b">Lệch</text><text x="516" y="216" class="t-small">verify đỏ, in đúng dòng khác biệt</text><path d="M500 200 L460 200" class="f-none s-warn" stroke-width="2" marker-end="url(#py32-1-arrow)"/><rect x="20" y="160" width="440" height="80" rx="10" class="f-bg s-line"/><text x="36" y="192" class="t-b">4. Người xem diff quyết định</text><text x="36" y="214" class="t-small">Cố ý: --write-snapshot, commit cùng thay đổi code</text><text x="36" y="230" class="t-small">Vô ý: sửa code cho khớp lại hợp đồng</text></svg>
 </div>
-<figcaption>Hình 2. Snapshot biến «ai đó vừa đổi hợp đồng» thành một diff có người xem. Nó không thay test hành vi; bài 36 đưa phép so này vào pytest.</figcaption>
+<figcaption>Hình 2. Snapshot biến «ai đó vừa đổi hợp đồng» thành một diff có người xem. Snapshot không thay thế test hành vi; bài 36 đưa phép so này vào pytest.</figcaption>
 </figure>
 
 ## Chạy và kiểm chứng
@@ -263,7 +263,7 @@ uv run --project examples/toi-noi-python/32-fastapi-validation-problem-details e
 OK 51/51
 ```
 
-51 ca gồm: 422 mặc định; bảy ca xấu cho 422 `problem+json` có `errors`, không echo input; ba lỗi cùng lúc; 400 kèm `min_km`, `max_km`; 404 hai loại; 405 giữ `Allow`; 500 không lộ nội dung và có log; 201 vẫn là `application/json`, `"1e2"` chuẩn hoá thành `"100"`; đặc tả khai đúng mã và media type; đối chiếu năm phản hồi thật; cái bẫy quên `responses`; snapshot. Môi trường: Python 3.14.7, FastAPI 0.162.0, Starlette 1.10.0, pydantic 2.14.3, httpx 0.28.1.
+51 test case gồm: 422 mặc định; bảy test case xấu cho 422 `problem+json` có `errors`, không chép lại input; ba lỗi cùng lúc; 400 kèm `min_km`, `max_km`; 404 hai loại; 405 giữ `Allow`; 500 không lộ nội dung và có log; 201 vẫn là `application/json`, `"1e2"` chuẩn hoá thành `"100"`; đặc tả khai đúng mã và media type; đối chiếu năm phản hồi thật; cái bẫy quên `responses`; snapshot. Môi trường: Python 3.14.7, FastAPI 0.162.0, Starlette 1.10.0, pydantic 2.14.3, httpx 0.28.1.
 
 Server thật ở cổng 8032 (giữ terminal này mở, dừng bằng Ctrl+C):
 
@@ -288,7 +288,7 @@ content-type: application/problem+json
 | 404 của route không tồn tại vẫn ra `{"detail":"Not Found"}` | Handler có đăng ký cho `starlette.exceptions.HTTPException` không; đăng ký cho `fastapi.HTTPException` thì không bắt được lỗi do Starlette ném |
 | `/docs` hiện 422 là `HTTPValidationError` dù server trả problem+json | Route hoặc router có khai báo `responses={422: {"model": ProblemDetails}}` không |
 | Test client ném exception thay vì nhận 500 | `httpx.ASGITransport(app=app, raise_app_exceptions=False)` |
-| `--verify` đỏ ở ca snapshot sau khi sửa model | Thay đổi có chủ ý không; nếu có, `--write-snapshot` rồi đọc `git diff` của `openapi.snapshot.json` |
+| `--verify` đỏ ở test case snapshot sau khi sửa model | Thay đổi có chủ ý không; nếu có, `--write-snapshot` rồi đọc `git diff` của `openapi.snapshot.json` |
 | Client mới nhận `type` lạ và không biết xử lý | `type` có đổi so với bản đã công bố không; thêm `type` mới thay vì đổi tên `type` cũ |
 
 <div class="tkh-callout tkh-callout--warn">
@@ -296,9 +296,9 @@ content-type: application/problem+json
 <p>URI <code>toinoi.example/problems/...</code> không phân giải thật; production cần trang tài liệu cho từng loại lỗi. Thông điệp tiếng Việt chỉ có cho bảy mã pydantic mà API này gặp, mã khác rơi về tiếng Anh, và chưa có <code>Accept-Language</code>. <code>instance</code> là đường dẫn chứ chưa phải mã riêng từng lần lỗi, và 500 chỉ ghi log vào bộ nhớ của demo; log có cấu trúc và <code>request_id</code> trong Problem Details là phần của bài 33. Snapshot chỉ so cấu trúc đặc tả, không biết server có làm đúng như tài liệu không (đó là phần đối chiếu và bài 36). OpenAPI vẫn chưa diễn đạt giới hạn 3 chữ số thập phân của <code>distance_km</code>; lab chỉ ghi vào <code>description</code>. Chưa có xác thực, giới hạn tần suất hay <code>/v2</code> thật.</p>
 </div>
 
-**Bài tập:** (1) Trong `app/main.py`, đổi `status_code=201` thành `status_code=200` rồi chạy `--verify`. Chạy trước khi đọc đáp án: bao nhiêu ca đỏ, và vì sao phép đối chiếu năm phản hồi thật với đặc tả vẫn xanh? (2) Thêm lỗi miền mới: dịch vụ `parcel` chỉ nhận tối đa 30 km, ném `ParcelTooFar` rồi đăng ký handler 400 với `type` riêng, nhưng quên khai báo gì thêm ở route. Ca nào của `--verify` bắt được lỗi tài liệu?
+**Bài tập:** (1) Trong `app/main.py`, đổi `status_code=201` thành `status_code=200` rồi chạy `--verify`. Chạy trước khi đọc đáp án: bao nhiêu test case đỏ, và vì sao phép đối chiếu năm phản hồi thật với đặc tả vẫn xanh? (2) Thêm lỗi miền mới: dịch vụ `parcel` chỉ nhận tối đa 30 km, ném `ParcelTooFar` rồi đăng ký handler 400 với `type` riêng, nhưng quên khai báo gì thêm ở route. Test case nào của `--verify` bắt được lỗi tài liệu?
 
-<details><summary>Xem lời giải</summary><p>(1) Lab chạy cho <code>FAIL 46/51</code>: năm ca đỏ là «201 vẫn là application/json», «1e2 nhận được» (ca này cũng đòi 201), «POST khai báo 201, 400, 422, 500», «thành công khai báo application/json» và so snapshot. Phép đối chiếu năm phản hồi vẫn xanh vì hành vi lẫn tài liệu cùng đổi sang 200 nên chúng khớp nhau; cái bắt được là những thứ nhớ hợp đồng <b>cũ</b>: snapshot đã commit và các ca khoá cứng mã 201. Bài học: đối chiếu tài liệu với hành vi và snapshot trả lời hai câu khác nhau («có nhất quán không» và «có đổi không»), cần cả hai. (2) Không ca nào. Snapshot chỉ ghi những gì đã được khai báo, nên tài liệu thiếu thì snapshot cũng thiếu; ma trận đối chiếu chỉ gồm năm phản hồi đã liệt kê, trong đó không có ca <code>parcel</code> quá 30 km. Muốn bắt, phải thêm đúng ca đó vào ma trận: gửi <code>parcel</code> 31 km và kiểm mã trả về có trong <code>responses</code>. Ở route này mã 400 đã được khai báo cho lỗi khoảng cách, nên tài liệu vẫn đúng về mã và media type; cái thiếu là mô tả riêng của loại lỗi mới.</p></details>
+<details><summary>Xem lời giải</summary><p>(1) Lab chạy cho <code>FAIL 46/51</code>: năm test case đỏ là «201 vẫn là application/json», «1e2 nhận được» (test case này cũng đòi 201), «POST khai báo 201, 400, 422, 500», «thành công khai báo application/json» và so snapshot. Phép đối chiếu năm phản hồi vẫn xanh vì hành vi lẫn tài liệu cùng đổi sang 200 nên chúng khớp nhau; cái bắt được là những thứ giữ bản hợp đồng <b>cũ</b>: snapshot đã commit và các test case ghim cứng mã 201. Bài học: đối chiếu tài liệu với hành vi và snapshot trả lời hai câu khác nhau («có nhất quán không» và «có đổi không»), cần cả hai. (2) Không test case nào. Snapshot chỉ ghi những gì đã được khai báo, nên tài liệu thiếu thì snapshot cũng thiếu; ma trận đối chiếu chỉ gồm năm phản hồi đã liệt kê, trong đó không có test case <code>parcel</code> quá 30 km. Muốn bắt, phải thêm đúng test case đó vào ma trận: gửi <code>parcel</code> 31 km và kiểm mã trả về có trong <code>responses</code>. Ở route này mã 400 đã được khai báo cho lỗi khoảng cách, nên tài liệu vẫn đúng về mã và media type; cái thiếu là mô tả riêng của loại lỗi mới.</p></details>
 
 Bài trước: [bài 31](/articles/python-fastapi-http-endpoint-bao-gia). Bài tiếp: [bài 33](/articles/python-fastapi-dependency-middleware-settings-logging).
 

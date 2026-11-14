@@ -10,19 +10,19 @@ language: vi
 
 Mỗi chuyến vừa hoàn thành của [Tới Nơi](/articles/du-an-mau-toi-noi) cần một điểm chấm gian lận để người duyệt xem sau. Sự kiện `trip.completed.v1` đến consumer Python qua Kafka (bài 38 và 39), nhưng consumer không nên gọi dịch vụ chấm điểm ngay trong vòng đọc: dịch vụ chậm thì partition kẹt. Cách quen thuộc là consumer chỉ **xếp một job** vào hàng đợi rồi đọc tiếp, còn một **worker** riêng làm việc đó.
 
-Việc đẩy sang worker tạo ba bài toán. Dịch vụ chấm điểm có thể lỗi tạm thời, nên job phải **thử lại có kiểm soát** và có chỗ cất khi hết lượt (dead-letter). Sự kiện có thể trùng (bài 39), nên hiệu ứng của job phải **idempotent**. Mỗi lần triển khai, worker nhận SIGTERM giữa lúc chạy job, nên phải **dừng êm**. Đây là bài 40 của lộ trình **Python trung bình qua Tới Nơi**, và là bài tổng hợp của P03 và P04. Bạn cần nắm Redis ở [bài 27](/articles/python-redis-cache-rate-limit-geo) và outbox, inbox ở [bài 39](/articles/python-outbox-inbox-idempotent-consumer).
+Việc đẩy sang worker tạo ba bài toán. Dịch vụ chấm điểm có thể lỗi tạm thời, nên job phải **thử lại có kiểm soát** và có nơi lưu khi hết lượt (dead-letter). Sự kiện có thể trùng (bài 39), nên hiệu ứng của job phải **idempotent**. Mỗi lần triển khai, worker nhận SIGTERM giữa lúc chạy job, nên phải **dừng có kiểm soát** (graceful shutdown). Đây là bài 40 của lộ trình **Python trung bình qua Tới Nơi**, và là bài tổng hợp của P03 và P04. Bạn cần nắm Redis ở [bài 27](/articles/python-redis-cache-rate-limit-geo) và outbox, inbox ở [bài 39](/articles/python-outbox-inbox-idempotent-consumer).
 
 <div class="tkh-callout tkh-callout--example">
 <span class="tkh-callout-title">Thử trước khi đọc</span>
 <p>Job <code>score_trip</code> gọi dịch vụ chấm điểm đang quá tải và nhận 503. Worker bắt lỗi rồi thử lại ngay lập tức, không chờ, và cứ thế vô hạn. Chuyện gì xảy ra với dịch vụ chấm điểm, và cần đổi những gì?</p>
-<details><summary>Xem đáp án</summary><p>Mỗi worker biến một lỗi thành hàng nghìn yêu cầu mỗi giây dội vào dịch vụ đang quá tải, làm nó khó hồi phục hơn (retry storm). Cần ba thay đổi: <b>chờ lâu dần</b> giữa các lần thử (backoff, thường có thêm jitter), <b>giới hạn số lần</b> thử, và khi hết lượt thì <b>đưa job vào dead-letter</b> thay vì thử mãi hay bỏ lặng lẽ.</p></details>
+<details><summary>Xem đáp án</summary><p>Mỗi worker biến một lỗi thành hàng nghìn yêu cầu mỗi giây dội vào dịch vụ đang quá tải, làm nó khó hồi phục hơn (retry storm). Cần ba thay đổi: <b>chờ lâu dần</b> giữa các lần thử (backoff, thường có thêm jitter), <b>giới hạn số lần</b> thử, và khi hết lượt thì <b>đưa job vào dead-letter</b> thay vì thử mãi hoặc bỏ qua mà không báo gì.</p></details>
 </div>
 
 ## Vì sao cần worker, và chọn arq hay taskiq
 
-BackgroundTasks của FastAPI (bài 35) chạy việc trong chính tiến trình API: tiến trình chết là việc biến mất, không có retry, không có lịch, không có chỗ xem việc nào thất bại. Worker với hàng đợi bền giải các vấn đề đó: job nằm ở Redis, sống sót qua lần khởi động lại của API, và nhiều worker cùng lấy việc. Đổi lại, hàng đợi chỉ bảo đảm **ít nhất một lần**: job có thể chạy lại vì retry, bị huỷ khi worker dừng, hoặc worker chết giữa chừng.
+BackgroundTasks của FastAPI (bài 35) chạy việc trong chính tiến trình API: tiến trình chết thì việc cũng biến mất, không có retry, không có lịch, không có chỗ xem việc nào thất bại. Worker với hàng đợi bền giải quyết các vấn đề đó: job nằm ở Redis, sống sót qua lần khởi động lại của API, và nhiều worker cùng lấy việc. Đổi lại, hàng đợi chỉ bảo đảm **ít nhất một lần**: job có thể chạy lại vì retry, bị huỷ khi worker dừng, hoặc worker chết giữa chừng.
 
-Lab dùng **arq**: thư viện job queue bất đồng bộ, nhỏ, nói chuyện với Redis qua redis-py. Hai điều cần nói rõ, kiểm ngày 6/11/2026. Một: arq 0.28.0 (phát hành 16/4/2026) khai báo hỗ trợ Python 3.14 và lab chạy đủ cả bài trên 3.14.7. Hai: README của dự án ghi arq đang ở **chế độ chỉ bảo trì**; nó vẫn chạy tốt nhưng cần cân nhắc cho dự án dài hạn. Hướng thay thế là **taskiq** với `taskiq-redis`; lab này **không chạy taskiq**, nên bài không đưa mã của nó, còn khái niệm thì áp dụng nguyên.
+Lab dùng **arq**: thư viện job queue bất đồng bộ, nhỏ, làm việc với Redis qua redis-py. Hai điều cần nói rõ, được kiểm tra ngày 6/11/2026. Một: arq 0.28.0 (phát hành 16/4/2026) khai báo hỗ trợ Python 3.14 và lab chạy đủ cả bài trên 3.14.7. Hai: README của dự án ghi arq đang ở **chế độ chỉ bảo trì**; nó vẫn chạy tốt nhưng cần cân nhắc cho dự án dài hạn. Hướng thay thế là **taskiq** với `taskiq-redis`; lab này **không chạy taskiq**, nên bài không đưa mã của nó, còn khái niệm thì áp dụng nguyên.
 
 arq mặc định đóng gói job bằng pickle, và giải pickle dữ liệu đọc từ Redis là chạy mã của bất kỳ ai ghi được vào Redis đó. Lab truyền `job_serializer` và `job_deserializer` bằng JSON (`app/settings.py`): job chỉ mang chuỗi, đọc được bằng `redis-cli`, không có đường thực thi mã.
 
@@ -37,7 +37,7 @@ Hàng đợi của arq là một sorted set trong Redis: mỗi job là một `jo
 <figcaption>Hình 1. Một job có ba kết cục. Chỉ lỗi tạm thời mới quay lại hàng đợi, và nó quay lại với giờ chạy muộn hơn; lỗi vĩnh viễn, lỗi chưa phân loại và lượt thử cuối đi thẳng vào dead-letter.</figcaption>
 </figure>
 
-Điều đầu tiên cần biết về arq: **chỉ `Retry` mới được thử lại**. Exception nào khác thoát khỏi hàm job làm job thất bại, không còn lần thử nào (chuyến có khoảng cách `abc`: hàm chỉ được gọi 1 lần). Vì vậy việc phân loại lỗi thuộc về code của ta, với hai loại trong `app/scoring.py`: `TransientScoringError` (backend 503, thử lại có thể thành công) và `InvalidTripError` (đầu vào sai, thử lại vô ích). Khoảng chờ tính bằng một hàm thuần (`app/jobs.py`):
+Điều đầu tiên cần biết về arq: **chỉ `Retry` mới được thử lại**. Exception nào khác thoát khỏi hàm job cũng làm job thất bại, và job không còn lần thử nào (chuyến có khoảng cách `abc`: hàm chỉ được gọi 1 lần). Vì vậy việc phân loại lỗi thuộc về code của ta, với hai loại trong `app/scoring.py`: `TransientScoringError` (backend 503, thử lại có thể thành công) và `InvalidTripError` (đầu vào sai, thử lại vô ích). Khoảng chờ tính bằng một hàm thuần (`app/jobs.py`):
 
 ```python
 def backoff_delay(job_try: int, *, rng: Random | None = None) -> float:
@@ -65,7 +65,7 @@ except Exception as exc:
     raise
 ```
 
-Chú thích ở nhánh cuối là chỗ dễ sai. Theo mã nguồn arq 0.28.0 (`worker.py`), khi `job_try` vượt `max_tries` worker ghi «max retries exceeded» mà **không gọi hàm của ta**; hàm cứ `raise Retry` ở lượt cuối thì không còn dịp ghi dead-letter. Vì thế `score_trip` tự đếm và ghi dead-letter ở lần chạy thứ `MAX_TRIES` trước khi ném lỗi. `TN-0002` có backend lỗi hai lần đầu rồi hồi phục, `TN-0003` lỗi mãi (log arq lấy từ lần chạy thật, lược các dòng khác):
+Chú thích ở nhánh cuối là chỗ dễ sai. Theo mã nguồn arq 0.28.0 (`worker.py`), khi `job_try` vượt `max_tries` worker ghi «max retries exceeded» mà **không gọi hàm của ta**; nếu hàm cứ `raise Retry` ở lượt cuối thì không còn dịp ghi dead-letter. Vì thế `score_trip` tự đếm và ghi dead-letter ở lần chạy thứ `MAX_TRIES` trước khi ném lỗi. `TN-0002` có backend lỗi hai lần đầu rồi hồi phục, `TN-0003` lỗi mãi (log arq lấy từ lần chạy thật, lược các dòng khác):
 
 ```text
   arq:   0.01s → lab40:score:TN-0002:score_trip('TN-0002', '5')
@@ -77,9 +77,9 @@ Chú thích ở nhánh cuối là chỗ dễ sai. Theo mã nguồn arq 0.28.0 (`
 TN-0002: lỗi 2 lần rồi thành công: success=True, lần thử 3, hàm được gọi 3 lần, tổng thời gian 0.92 giây (chờ tối thiểu 0,2 + 0,4)
 ```
 
-Số đứng trước chữ `→` là thời gian tính từ lúc **enqueue**, cộng dồn, không phải khoảng giữa hai lần chạy. Với `TN-0002`, lần chạy thứ hai bắt đầu ở 0,31 giây và thứ ba ở 0,82 giây, nên khoảng thật giữa các lần chạy là 0,30 và 0,51 giây: lớn hơn backoff 0,2 và 0,4 giây vì còn thời gian chạy hàm và chu kỳ thăm dò 0,1 giây của worker. `--verify` chỉ kiểm cận dưới (tổng thời gian không nhỏ hơn 0,6 giây).
+Số đứng trước chữ `→` là thời gian tính từ lúc **enqueue** (xếp job vào hàng đợi), cộng dồn, không phải khoảng giữa hai lần chạy. Với `TN-0002`, lần chạy thứ hai bắt đầu ở 0,31 giây và thứ ba ở 0,82 giây, nên khoảng thật giữa các lần chạy là 0,30 và 0,51 giây: lớn hơn backoff 0,2 và 0,4 giây vì còn thời gian chạy hàm và chu kỳ thăm dò 0,1 giây của worker. `--verify` chỉ kiểm cận dưới (tổng thời gian không nhỏ hơn 0,6 giây).
 
-Hai nhánh còn lại chặn hai cách job «biến mất» khỏi dead-letter. Thứ nhất, backend **treo**: để nguyên thì job chạm `job_timeout` của arq, thất bại, không retry và không qua code dead-letter của ta. Nên `call_backend` đặt hạn chót riêng 2 giây bằng `asyncio.timeout` (bài 21), ngắn hơn `job_timeout` 10 giây, và đổi `TimeoutError` thành `TransientScoringError`; `TN-0011` treo ở lần chạy đầu rồi thành công ở lần hai. Thứ hai, exception **chưa phân loại**: arq không thử lại, nên ta ghi dead-letter `unexpected` rồi ném lại. Đầu vào cũng cần kiểm kỹ: `Decimal("NaN")` là chuỗi hợp lệ nhưng so sánh với 0 ném `InvalidOperation` ngoài vùng bắt lỗi, nên `parse_distance` kiểm `is_finite()` trước.
+Hai nhánh còn lại chặn hai cách job «biến mất» khỏi dead-letter. Thứ nhất, backend **treo**: để nguyên thì job chạm `job_timeout` của arq, thất bại, không retry và không qua code dead-letter của ta. Nên `call_backend` đặt hạn chót riêng 2 giây bằng `asyncio.timeout` (bài 21), ngắn hơn `job_timeout` 10 giây, và đổi `TimeoutError` thành `TransientScoringError`; `TN-0011` treo ở lần chạy đầu rồi thành công ở lần hai. Thứ hai, exception **chưa phân loại**: arq không thử lại, nên ta ghi dead-letter `unexpected` rồi ném lại. Đầu vào cũng cần kiểm tra kỹ: `Decimal("NaN")` là chuỗi hợp lệ nhưng so sánh với 0 ném `InvalidOperation` ngoài vùng bắt lỗi, nên `parse_distance` kiểm `is_finite()` trước.
 
 ```text
 TN-0013: distance_km = 'NaN': hàm gọi 1 lần, lý do dead-letter: permanent
@@ -122,7 +122,7 @@ for raw in await redis.lrange(DLQ, 0, -1):
         await redis.lrem(DLQ, 1, raw)  # chỉ gỡ khỏi dead-letter khi đã enqueue được
 ```
 
-Hai chi tiết. Job đưa lại mang `job_id` **mới** (hậu tố `:redrive`), vì arq từ chối enqueue khi còn khoá job hoặc khoá kết quả của `job_id` cũ. Thứ tự «enqueue rồi mới gỡ» chọn trùng hơn mất: chết giữa hai bước thì job có thể được đưa lại hai lần, và ta nhờ tính idempotent ở phần dưới. Lab xoá cờ lỗi của backend giả rồi redrive: `dead-letter còn ['TN-0012', 'TN-0013', 'TN-0004']`, không còn `TN-0003`. Một job cron ghi độ dài DLQ vào Redis mỗi 30 giây để cảnh báo «DLQ khác 0» có chỗ đọc.
+Hai chi tiết. Job đưa lại mang `job_id` **mới** (hậu tố `:redrive`), vì arq từ chối enqueue khi còn khoá job hoặc khoá kết quả của `job_id` cũ. Thứ tự «enqueue rồi mới gỡ» chấp nhận trùng thay vì mất: chết giữa hai bước thì job có thể được đưa lại hai lần, và ta dựa vào tính idempotent ở phần dưới. Lab xoá cờ lỗi của backend giả rồi redrive: `dead-letter còn ['TN-0012', 'TN-0013', 'TN-0004']`, không còn `TN-0003`. Một job cron ghi độ dài DLQ vào Redis mỗi 30 giây để cảnh báo «DLQ khác 0» có chỗ đọc.
 
 ## Lịch, job hoãn và job idempotent
 
@@ -145,7 +145,7 @@ class WorkerSettings:
 
 Cron của arq mặc định `unique=True`: có nhiều worker thì mỗi mốc giờ chỉ một worker chạy job. Cron hợp với dọn dẹp, tổng hợp, báo cáo; retry thuộc về `Retry(defer=...)` của từng job. Lab khởi động một worker thật, chờ cron chạy lúc khởi động (`run_at_startup=True`) rồi đọc kết quả: `queued=1, dead_letters=3`.
 
-Phần còn lại của mục là **idempotency**, vì hàng đợi chỉ giao ít nhất một lần. Lab có hai lớp, mỗi lớp chống một loại trùng. **Lớp 1** ở lúc enqueue: `_job_id` đặt theo `trip_id` (`lab40:score:TN-0001`), arq trả `None` khi job cùng id đã tồn tại hoặc kết quả còn được giữ. Lớp này rẻ nhưng ngắn hạn: nó mất khi kết quả hết hạn (`keep_result`), và không chặn được hai producer dùng hai id khác nhau. **Lớp 2** nằm trong job và bền hơn: (2a) thấy kết quả đã có thì trả lại, không gọi backend; (2b) ghi kết quả bằng `SET key value NX`, chỉ một lần ghi được, và bộ đếm hiệu ứng chỉ tăng khi ghi được (`score_trip`, trích):
+Phần còn lại của mục nói về **idempotency**, vì hàng đợi chỉ giao ít nhất một lần. Lab có hai lớp, mỗi lớp chống một loại trùng. **Lớp 1** ở lúc enqueue: `_job_id` đặt theo `trip_id` (`lab40:score:TN-0001`), arq trả `None` khi job cùng id đã tồn tại hoặc kết quả còn được giữ. Lớp này rẻ nhưng ngắn hạn: nó mất khi kết quả hết hạn (`keep_result`), và không chặn được hai producer dùng hai id khác nhau. **Lớp 2** nằm trong job và bền hơn: (2a) thấy kết quả đã có thì trả lại, không gọi backend; (2b) ghi kết quả bằng `SET key value NX`, chỉ một lần ghi được, và bộ đếm hiệu ứng chỉ tăng khi ghi được (`score_trip`, trích):
 
 ```python
 existing = await redis.get(SCORE + trip_id)
@@ -156,7 +156,7 @@ if await redis.set(SCORE + trip_id, json.dumps(result), nx=True):
     await redis.incr(EFFECTS)
 ```
 
-Đoạn đầu trả kết quả cũ cho job đến sau, không gọi backend; đoạn sau bảo vệ chính cái cửa sổ giữa «đã đọc, chưa có» và «ghi», khi hai job cùng chuyến chạy đồng thời. Lab kiểm cả ba tình huống:
+Đoạn đầu trả kết quả cũ cho job đến sau, không gọi backend; đoạn sau bảo vệ chính khoảng hở giữa «đã đọc, chưa có» và «ghi», khi hai job cùng chuyến chạy đồng thời. Lab kiểm cả ba tình huống:
 
 ```text
 Enqueue lại cùng job_id của TN-0001: None
@@ -168,7 +168,7 @@ Dòng đầu là lớp 1, dòng hai là bước 2a. Dòng ba là bước 2b, ca 
 
 ## Graceful shutdown: SIGTERM không được làm mất job
 
-Mỗi lần triển khai, hệ thống điều phối gửi SIGTERM cho worker. Mặc định arq **huỷ ngay** các job đang chạy. `job_completion_wait` đổi hành vi đó: sau tín hiệu, worker ngừng nhận job mới và cho job đang chạy tối đa ngần ấy giây, hết hạn mới huỷ. Tài liệu arq gợi ý đặt nó cùng `terminationGracePeriodSeconds` của Kubernetes: hệ thống chỉ cho sống 30 giây thì chờ 60 giây là vô nghĩa. Lab đọc giá trị từ `LAB40_GRACE_S` (mặc định 10) và khởi động worker thật bằng đúng lệnh `arq app.worker.WorkerSettings` hai lần.
+Mỗi lần triển khai, hệ thống điều phối gửi SIGTERM cho worker. Mặc định arq **huỷ ngay** các job đang chạy. `job_completion_wait` đổi hành vi đó: sau tín hiệu, worker ngừng nhận job mới và cho job đang chạy tối đa ngần ấy giây, hết hạn mới huỷ. Tài liệu arq gợi ý đặt nó cùng `terminationGracePeriodSeconds` của Kubernetes: hệ thống chỉ cho worker 30 giây để dừng thì chờ 60 giây là vô nghĩa. Lab đọc giá trị từ `LAB40_GRACE_S` (mặc định 10) và khởi động worker thật bằng đúng lệnh `arq app.worker.WorkerSettings` hai lần.
 
 Lần một chờ 10 giây. Job `TN-0008` được cấu hình chậm 1,5 giây; ngay khi nó bắt đầu chạy, lab gửi SIGTERM, đợi dòng log shutdown, rồi enqueue thêm `TN-0010` (đến **sau** tín hiệu):
 
@@ -188,11 +188,11 @@ SIGTERM không chờ: worker thoát mã 0; job TN-0009 xếp lại hàng đợi=
 Worker mới: TN-0009 success=True, lần thử 2; TN-0010 success=True; hiệu ứng tổng = 9
 ```
 
-Job bị huỷ giữa chừng không mất: arq xếp nó lại hàng đợi (`will be run again`), và worker khởi động sau chạy nó ở lần thử 2. Việc này an toàn nhờ idempotent: lần bị huỷ chưa kịp ghi điểm (`SET NX` ở cuối hàm), nên lần chạy lại chỉ tạo một hiệu ứng.
+Job bị huỷ giữa chừng không mất: arq xếp nó lại hàng đợi (`will be run again`), và worker khởi động sau chạy nó ở lần thử 2. Việc này an toàn nhờ tính idempotent: lần bị huỷ chưa kịp ghi điểm (`SET NX` ở cuối hàm), nên lần chạy lại chỉ tạo một hiệu ứng.
 
 ## Tổng kết P03 và P04
 
-P03 và P04 dựng dần các mảnh mà nhóm service Python của [Tới Nơi](/articles/du-an-mau-toi-noi) cần, theo năm lớp (hình 2). Nền bất đồng bộ: [bài 21](/articles/python-asyncio-coroutine-task-timeout-cancellation) cho `asyncio.timeout` mà bài này dùng, bài 22 và 23 cho GIL, `Lock`, `Queue`. Dữ liệu: PostgreSQL (24, 25), MongoDB (26), Redis (27; hàng đợi job là một cách dùng mới của nó), test trên database thật (28), polars và numpy (29, 30; chưa bài nào của P04 dùng tới). API: hợp đồng và lỗi (31, 32), dependency (33), JWT (34), upload và `BackgroundTasks` (35; dẫn tới câu hỏi «khi nào cần worker»), test httpx (36), gRPC (37). Thông điệp: Kafka (38), outbox và inbox (39). Cuối cùng là worker của bài này.
+P03 và P04 dựng dần các mảnh ghép mà nhóm service Python của [Tới Nơi](/articles/du-an-mau-toi-noi) cần, theo năm lớp (hình 2). Nền bất đồng bộ: [bài 21](/articles/python-asyncio-coroutine-task-timeout-cancellation) cho `asyncio.timeout` mà bài này dùng, bài 22 và 23 cho GIL, `Lock`, `Queue`. Dữ liệu: PostgreSQL (24, 25), MongoDB (26), Redis (27; hàng đợi job là một cách dùng mới của nó), test trên database thật (28), polars và numpy (29, 30; chưa bài nào của P04 dùng tới). API: hợp đồng và lỗi (31, 32), dependency (33), JWT (34), upload và `BackgroundTasks` (35; dẫn tới câu hỏi «khi nào cần worker»), test httpx (36), gRPC (37). Thông điệp: Kafka (38), outbox và inbox (39). Cuối cùng là worker của bài này.
 
 <figure class="tkh-fig">
 <div class="tkh-fig-box">
@@ -203,7 +203,7 @@ P03 và P04 dựng dần các mảnh mà nhóm service Python của [Tới Nơi]
 
 Có một sợi chỉ chung: **mỗi chỗ giao việc cho hệ thống khác đều có thể trùng hoặc mất, và cách chữa là ghi ý định hoặc dấu «đã làm» vào nơi bền, trong cùng một thao tác nguyên tử với hiệu ứng.** Ở PostgreSQL đó là UNIQUE và cột `version` (bài 25), ở ranh giới database và Kafka là outbox và inbox (bài 39), ở worker là `SET NX` theo `trip_id` (bài này).
 
-Hai điều chưa nối với nhau: `score_trip` gọi backend chấm điểm **giả** chứ không gọi service gRPC của bài 37, và consumer bài 39 chưa enqueue job vào hàng đợi bài này. Lộ trình nâng cao dùng đúng các mảnh này: bài 41 mở P05 với bài toán KYC tài xế, bài 46 đóng gói OCR thành service có API và worker. Điểm chấm gian lận và kết quả OCR luôn là đầu vào cho người duyệt.
+Hai chỗ chưa được nối với nhau: `score_trip` gọi backend chấm điểm **giả** chứ không gọi service gRPC của bài 37, và consumer bài 39 chưa enqueue job vào hàng đợi bài này. Lộ trình nâng cao dùng đúng các mảnh này: bài 41 mở P05 với bài toán KYC tài xế, bài 46 đóng gói OCR thành service có API và worker. Điểm chấm gian lận và kết quả OCR luôn là đầu vào cho người duyệt.
 
 ## Chạy và kiểm chứng
 
@@ -267,7 +267,7 @@ Worker mới: TN-0009 success=True, lần thử 2; TN-0010 success=True; hiệu 
 OK 26/26
 ```
 
-`--verify` chạy 26 kiểm tra, in `OK 26/26` khi đạt; sai thì in tên ca, `FAIL n/m` (n là số ca đạt) và exit 1; không nối được Redis thì in `FAIL: không nối được Redis tại <url> ...` và exit 1. Thời gian phụ thuộc máy (macOS Apple silicon, Redis trong Docker); lab in load average ở dòng đầu, lần chạy cuối khoảng 50 trên máy dùng chung đang bận, nên `--verify` chỉ kiểm cận dưới. Ta chạy lab ba lần liên tiếp, cả ba `OK 26/26`. Thử phá bảy chỗ đều ra `FAIL`: bỏ `nx=True` (23/26), bỏ ghi dead-letter ở lượt cuối (7/8), bỏ `defer` của `Retry` (25/26), đặt thời gian chờ shutdown bằng 0 (21/22), bỏ `is_finite()` (24/26), bỏ hạn chót riêng của backend (21/26), bỏ nhánh `except Exception` (23/26); mẫu số nhỏ (8, 22) là do kịch bản dừng giữa chừng ở ca hỏng. Phiên bản: Python 3.14.7, arq 0.28.0, redis-py 5.3.1, Redis 7.4.
+`--verify` chạy 26 kiểm tra, in `OK 26/26` khi đạt; sai thì in tên ca, `FAIL n/m` (n là số ca đạt) và exit 1; không nối được Redis thì in `FAIL: không nối được Redis tại <url> ...` và exit 1. Thời gian phụ thuộc máy (macOS Apple silicon, Redis trong Docker); lab in load average ở dòng đầu, lần chạy cuối khoảng 50 trên máy dùng chung đang bận, nên `--verify` chỉ kiểm cận dưới. Ta chạy lab ba lần liên tiếp, cả ba `OK 26/26`. Thử phá bảy chỗ đều ra `FAIL`: bỏ `nx=True` (23/26), bỏ ghi dead-letter ở lượt cuối (7/8), bỏ `defer` của `Retry` (25/26), đặt thời gian chờ shutdown bằng 0 (21/22), bỏ `is_finite()` (24/26), bỏ hạn chót riêng của backend (21/26), bỏ nhánh `except Exception` (23/26); tổng số ca nhỏ (8, 22) là do kịch bản dừng giữa chừng ở ca hỏng. Phiên bản: Python 3.14.7, arq 0.28.0, redis-py 5.3.1, Redis 7.4.
 
 | Hiện tượng | Kiểm tra trước |
 | --- | --- |
@@ -279,7 +279,7 @@ OK 26/26
 
 <div class="tkh-callout tkh-callout--warn">
 <span class="tkh-callout-title">Giới hạn của ví dụ so với production</span>
-<p>Lab chạy một Redis một node, tối đa hai worker, backend giả có lỗi theo kế hoạch, backoff tính bằng mili-giây. Dead-letter nằm trong Redis, vốn không phải nguồn sự thật (bài 27): Redis khởi động lại mà không lưu bền là mất DLQ, nên production nên giữ nó ở PostgreSQL hoặc Kafka. Ta đo riêng một lần, ngoài <code>--verify</code>, cho worker bị <code>kill -9</code> giữa job: job được nhận lại sau 20,1 giây (<code>job_timeout</code> 10 giây cộng 10 giây của arq) ở <code>job_try</code> 2. Theo mã nguồn arq, nếu lượt nhận lại vượt <code>max_tries</code> thì job ra «max N retries exceeded» mà không qua code dead-letter của ta (ca này chưa chạy; cách vá là cron quét kết quả thất bại, lab không làm). Job chạm <code>job_timeout</code> cũng không vào dead-letter; lab chặn bằng hạn chót riêng của backend. Chưa đo thông lượng ở 70 chuyến mỗi giây, chưa có giám sát, chưa thử Redis Cluster hay Sentinel, chưa chạy taskiq. Điểm chấm là dữ liệu giả.</</p>
+<p>Lab chạy một Redis một node, tối đa hai worker, backend giả có lỗi theo kế hoạch, backoff tính bằng mili-giây. Dead-letter nằm trong Redis, vốn không phải nguồn dữ liệu gốc (bài 27): Redis khởi động lại mà không lưu bền là mất DLQ, nên production nên giữ nó ở PostgreSQL hoặc Kafka. Ta đo riêng một lần, ngoài <code>--verify</code>, cho worker bị <code>kill -9</code> giữa job: job được nhận lại sau 20,1 giây (<code>job_timeout</code> 10 giây cộng 10 giây của arq) ở <code>job_try</code> 2. Theo mã nguồn arq, nếu lượt nhận lại vượt <code>max_tries</code> thì job ra «max N retries exceeded» mà không qua code dead-letter của ta (ca này chưa chạy; cách vá là cron quét kết quả thất bại, lab không làm). Job chạm <code>job_timeout</code> cũng không vào dead-letter; lab chặn bằng hạn chót riêng của backend. Chưa đo thông lượng ở 70 chuyến mỗi giây, chưa có giám sát, chưa thử Redis Cluster hay Sentinel, chưa chạy taskiq. Điểm chấm là dữ liệu giả.</p>
 </div>
 
 **Bài tập:** (1) Vì sao `score_trip` tự ghi dead-letter ở lần chạy thứ `MAX_TRIES` thay vì cứ `raise Retry` rồi để arq báo hết lượt? (2) Hai producer cùng enqueue job cho `TN-0007` với hai `job_id` khác nhau, hai worker cùng nhận. Kết quả cuối cùng là gì và nhờ lớp nào?

@@ -1,0 +1,179 @@
+{
+  "file": "dotnet10-use-case-dat-chuyen-end-to-end.md",
+  "edits": [
+    {
+      "old": "Identity nghiệp vụ phải lấy từ mapping danh tính đã xác thực;",
+      "new": "Danh tính nghiệp vụ phải lấy từ phần ánh xạ danh tính đã xác thực;",
+      "reason": "Từ Việt có sẵn; \"mapping\" gượng",
+      "severity": "medium"
+    },
+    {
+      "old": "map sang Guid theo hợp đồng lab rồi",
+      "new": "ánh xạ thành Guid theo hợp đồng của lab rồi",
+      "reason": "\"map sang\" dịch máy, thiếu \"của\"",
+      "severity": "medium"
+    },
+    {
+      "old": "Pipeline kiểm dữ liệu;",
+      "new": "Pipeline kiểm tra dữ liệu;",
+      "reason": "Lược mất chữ \"tra\"",
+      "severity": "low"
+    },
+    {
+      "old": "Một API bind xong chưa là một command hợp lệ.",
+      "new": "Dữ liệu từ API được bind xong vẫn chưa phải là một command hợp lệ.",
+      "reason": "Câu thiếu chủ ngữ, cụt, phải đoán ý",
+      "severity": "high"
+    },
+    {
+      "old": "Receipt khoá theo CustomerId/key chứa input chuẩn hoá",
+      "new": "Receipt có khoá là CustomerId/key và chứa input chuẩn hoá",
+      "reason": "Thiếu từ nối, hai động từ liền nhau",
+      "severity": "medium"
+    },
+    {
+      "old": "trả cùng kết quả, lab dùng 201 và cùng Location cho cả lần đầu/lần lặp.",
+      "new": "trả cùng kết quả, lab dùng 201 và cùng Location ở cả lần đầu lẫn lần lặp.",
+      "reason": "Câu cụt, dùng dấu gạch chéo thay từ nối",
+      "severity": "low"
+    },
+    {
+      "old": "Cùng key mà đổi distance trả 409.",
+      "new": "Cùng key mà đổi distance thì trả 409.",
+      "reason": "Thiếu từ nối",
+      "severity": "low"
+    },
+    {
+      "old": "constraint phân xử cuối.",
+      "new": "constraint là nơi phân xử cuối cùng.",
+      "reason": "Thiếu động từ",
+      "severity": "medium"
+    },
+    {
+      "old": "Candidate thua rollback cả Trip và Outbox của nó,",
+      "new": "Ứng viên thua cuộc rollback cả Trip và Outbox của nó,",
+      "reason": "\"Candidate\" nên dùng \"ứng viên\"; câu thiếu quan hệ rõ ràng",
+      "severity": "high"
+    },
+    {
+      "old": "AsNoTracking của đường đọc receipt tránh identity map trả lại object candidate còn trong tracker sau failure.",
+      "new": "AsNoTracking ở đường đọc receipt giúp identity map không trả lại object ứng viên còn trong tracker sau khi lỗi.",
+      "reason": "Thống nhất \"ứng viên\"; \"tránh ... trả lại\" gượng",
+      "severity": "medium"
+    },
+    {
+      "old": "fingerprint/so khớp phải mở rộng theo tất cả field ảnh hưởng ý định.",
+      "new": "fingerprint và phép so khớp phải mở rộng theo tất cả trường ảnh hưởng ý định.",
+      "reason": "Dùng gạch chéo thay danh từ; \"field\" đã có từ Việt",
+      "severity": "medium"
+    },
+    {
+      "old": "Không dùng chỉ distance như lab cho hợp đồng nhiều field rồi nhận nhầm replay.",
+      "new": "Đừng chỉ dùng distance như lab cho hợp đồng nhiều trường, rồi nhận nhầm replay.",
+      "reason": "Trật tự từ \"không dùng chỉ\" gượng",
+      "severity": "medium"
+    },
+    {
+      "old": "Khác chủ hoặc không tồn tại đều 404 trong service tổng hợp này;",
+      "new": "Khác chủ hoặc không tồn tại đều trả 404 trong service tổng hợp này;",
+      "reason": "Thiếu động từ",
+      "severity": "low"
+    },
+    {
+      "old": "đây là lựa chọn khác demo đơn giản bài 19 trả 403 cho owner sai.",
+      "new": "đây là lựa chọn khác với demo đơn giản ở bài 19, vốn trả 403 cho owner sai.",
+      "reason": "Câu dính liền, dễ hiểu nhầm",
+      "severity": "medium"
+    },
+    {
+      "old": "Hợp đồng mới được nêu và test tường minh để",
+      "new": "Hợp đồng mới được nêu rõ và có test riêng để",
+      "reason": "\"test tường minh\" gượng",
+      "severity": "low"
+    },
+    {
+      "old": "Handler kiểm version quan sát được,",
+      "new": "Handler kiểm tra version đã quan sát được,",
+      "reason": "Lược mất chữ \"tra\"",
+      "severity": "low"
+    },
+    {
+      "old": "Hai request chồng lấp có một 200 và một 409; test còn kiểm chỉ có một trip.accepted.v1 trong Outbox.",
+      "new": "Hai request chồng lấp cho ra một kết quả 200 và một kết quả 409; test còn kiểm tra rằng chỉ có một trip.accepted.v1 trong Outbox.",
+      "reason": "Câu thiếu động từ, phải đoán ý",
+      "severity": "medium"
+    },
+    {
+      "old": "Policy driver ở lab chưa kiểm hồ sơ/khu vực/khả năng nhận thêm chuyến.",
+      "new": "Policy dành cho tài xế ở lab chưa kiểm tra hồ sơ, khu vực hay khả năng nhận thêm chuyến.",
+      "reason": "Danh từ ghép kiểu tiếng Anh; gạch chéo",
+      "severity": "medium"
+    },
+    {
+      "old": "Không đưa demo này thành dispatch production chỉ vì",
+      "new": "Đừng biến demo này thành hệ thống dispatch chạy production chỉ vì",
+      "reason": "Lược mất danh từ chính, calque",
+      "severity": "high"
+    },
+    {
+      "old": "Không fake nguyên HTTP response hoặc thay EF bằng một dictionary rồi gọi đó là kiểm transaction.",
+      "new": "Không giả lập toàn bộ HTTP response hoặc thay EF bằng một dictionary rồi gọi đó là kiểm tra transaction.",
+      "reason": "\"fake\" văn nói; \"nguyên\" gượng; thiếu \"tra\"",
+      "severity": "medium"
+    },
+    {
+      "old": "Các ca gồm thiếu/ngoài miền/precision sai, key lỗi,",
+      "new": "Các test case gồm thiếu giá trị, ngoài miền, sai độ chính xác thập phân, key lỗi,",
+      "reason": "Thống nhất \"test case\"; cụm gạch chéo cụt",
+      "severity": "high"
+    },
+    {
+      "old": "database phải không có Trip/Outbox mới.",
+      "new": "database không được có Trip/Outbox mới.",
+      "reason": "Trật tự từ kiểu tiếng Anh",
+      "severity": "low"
+    },
+    {
+      "old": "Health/architecture/telemetry được kiểm trong cùng suite nhưng có tiêu chí riêng.",
+      "new": "Health, architecture và telemetry được kiểm tra trong cùng suite nhưng có tiêu chí riêng.",
+      "reason": "Gạch chéo, thiếu \"tra\"",
+      "severity": "low"
+    },
+    {
+      "old": "Việc test trust dùng khoá trong memory không chứng minh identity provider thật, metadata rotation hoặc TLS của môi trường triển khai.",
+      "new": "Việc test trust bằng khoá trong memory không chứng minh được identity provider thật, metadata rotation hay TLS của môi trường triển khai.",
+      "reason": "Câu thiếu từ nối và \"được\"",
+      "severity": "medium"
+    },
+    {
+      "old": "Nếu chèn một network call giữa ghi Trip và receipt bằng hai commit,",
+      "new": "Nếu ghi Trip và receipt bằng hai commit rồi chèn một network call vào giữa,",
+      "reason": "Câu mơ hồ về \"giữa\" và \"bằng hai commit\"",
+      "severity": "medium"
+    },
+    {
+      "old": "dùng một ranh giới local đúng và cơ chế giao tiếp ngoài transaction.",
+      "new": "dùng một ranh giới local đúng và để cơ chế giao tiếp nằm ngoài transaction.",
+      "reason": "Thiếu động từ cho vế sau",
+      "severity": "medium"
+    },
+    {
+      "old": "Test không tự skip khi thiếu PostgreSQL.",
+      "new": "Test không tự bỏ qua khi thiếu PostgreSQL.",
+      "reason": "Từ Việt quen dùng cho \"skip\"",
+      "severity": "medium"
+    },
+    {
+      "old": "phạm vi, prerequisites và phần chưa được triển khai thật.",
+      "new": "phạm vi, điều kiện tiên quyết và phần chưa triển khai thật.",
+      "reason": "Từ Việt quen dùng cho \"prerequisites\"",
+      "severity": "medium"
+    },
+    {
+      "old": "kiểm replay, conflict và hai tài xế",
+      "new": "kiểm tra replay, conflict và hai tài xế",
+      "reason": "Lược mất chữ \"tra\"",
+      "severity": "low"
+    }
+  ]
+}

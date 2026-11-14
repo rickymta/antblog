@@ -1,0 +1,179 @@
+{
+ "file": "rust-closure-iterator-adapter-doi-soat-bo-nho.md",
+ "edits": [
+  {
+   "old": "sao kê VíXanh giả theo",
+   "new": "sao kê VíXanh giả lập theo",
+   "reason": "'giả' cụt, thiếu 'lập'",
+   "severity": "medium"
+  },
+  {
+   "old": "đối chiếu LINQ.",
+   "new": "so sánh với LINQ.",
+   "reason": "Gượng, thiếu giới từ",
+   "severity": "low"
+  },
+  {
+   "old": "Khoá khớp là",
+   "new": "Khoá dùng để khớp là",
+   "reason": "Cụm tự ghép nghe cụt",
+   "severity": "medium"
+  },
+  {
+   "old": "Dấu giữ như bước capture của",
+   "new": "Dấu của các posting giống bước capture của",
+   "reason": "'Dấu giữ' không rõ nghĩa",
+   "severity": "high"
+  },
+  {
+   "old": "Compiler cài trait cho closure tuỳ cách nó dùng các biến đó:",
+   "new": "Compiler tự cho closure implement trait tương ứng, tuỳ cách closure dùng các biến đó:",
+   "reason": "'cài trait' gượng; 'nó' mơ hồ",
+   "severity": "medium"
+  },
+  {
+   "old": "nên đòi ít nhất có thể:",
+   "new": "nên đòi hỏi ít nhất có thể:",
+   "reason": "Câu cụt",
+   "severity": "low"
+  },
+  {
+   "old": "là mượn nó mutably.",
+   "new": "là mượn nó để ghi.",
+   "reason": "Trộn Anh-Việt",
+   "severity": "medium"
+  },
+  {
+   "old": "Nó **không** quyết định",
+   "new": "Từ khoá này **không** quyết định",
+   "reason": "Tránh 'Nó' chỉ sự vật",
+   "severity": "medium"
+  },
+  {
+   "old": "Bỏ `move`, closure mượn",
+   "new": "Nếu bỏ `move`, closure sẽ mượn",
+   "reason": "Câu cụt, giống mệnh lệnh",
+   "severity": "low"
+  },
+  {
+   "old": "Thứ tự adapter có nghĩa:",
+   "new": "Thứ tự adapter quan trọng:",
+   "reason": "Calque 'matters'",
+   "severity": "medium"
+  },
+  {
+   "old": "Sao kê có dòng `VX-2,12a` cho `dòng 3: số tiền không hợp lệ (\"12a\")`",
+   "new": "Sao kê có dòng `VX-2,12a` cho ra `dòng 3: số tiền không hợp lệ (\"12a\")`",
+   "reason": "'cho' cụt",
+   "severity": "low"
+  },
+  {
+   "old": "thay `or_insert`:",
+   "new": "thay cho `or_insert`:",
+   "reason": "Thiếu giới từ",
+   "severity": "low"
+  },
+  {
+   "old": "để kiểm tràn số",
+   "new": "để kiểm tra tràn số",
+   "reason": "'kiểm' cụt",
+   "severity": "medium"
+  },
+  {
+   "old": "hợp hai tập khoá nên luôn sắp theo",
+   "new": "để hợp hai tập khoá, nên luôn được sắp theo",
+   "reason": "Câu thiếu liên kết",
+   "severity": "low"
+  },
+  {
+   "old": "giá trị sau âm thầm thay giá trị trước, không có lỗi.",
+   "new": "giá trị sau ghi đè giá trị trước mà không báo lỗi.",
+   "reason": "Calque 'silently'",
+   "severity": "medium"
+  },
+  {
+   "old": "Việc chỉ xảy ra khi bước tiêu thụ",
+   "new": "Việc đó chỉ xảy ra khi bước tiêu thụ",
+   "reason": "Thiếu từ chỉ định, 'Việc' lơ lửng",
+   "severity": "medium"
+  },
+  {
+   "old": "mà không đổi nó:",
+   "new": "mà không đổi phần tử đó:",
+   "reason": "'nó' mơ hồ",
+   "severity": "low"
+  },
+  {
+   "old": "Output thật:",
+   "new": "Kết quả chạy thật:",
+   "reason": "Từ tiếng Anh thường",
+   "severity": "low"
+  },
+  {
+   "old": "và <code>--verify</code> kiểm.",
+   "new": "và <code>--verify</code> kiểm tra.",
+   "reason": "'kiểm' cụt",
+   "severity": "medium"
+  },
+  {
+   "old": "Lazy cho hai điều: chỉ trả công cho phần cần dùng",
+   "new": "Lazy mang lại hai lợi ích: chỉ tốn công cho phần cần dùng",
+   "reason": "Dịch gượng",
+   "severity": "medium"
+  },
+  {
+   "old": "thì vẫn đang mượn mutably biến đó, nên",
+   "new": "thì vẫn đang mượn để ghi biến đó, nên",
+   "reason": "Trộn Anh-Việt",
+   "severity": "medium"
+  },
+  {
+   "old": "nên cài đặt đổi được mà API không đổi.",
+   "new": "nên có thể đổi phần cài đặt mà API không đổi.",
+   "reason": "Trật tự từ gượng",
+   "severity": "low"
+  },
+  {
+   "old": "## Với người từ C#: LINQ",
+   "new": "## Với người quen dùng C#: LINQ",
+   "reason": "Gượng",
+   "severity": "low"
+  },
+  {
+   "old": "LINQ và iterator adapter cùng một ý tưởng.",
+   "new": "LINQ và iterator adapter có chung một ý tưởng.",
+   "reason": "Thiếu động từ",
+   "severity": "medium"
+  },
+  {
+   "old": "| Ra từ điển |",
+   "new": "| Thu thành từ điển |",
+   "reason": "Cụm tự ghép",
+   "severity": "medium"
+  },
+  {
+   "old": "Rust bắt chọn mượn hay `move`",
+   "new": "Rust buộc người viết chọn giữa mượn và `move`",
+   "reason": "Dịch gượng",
+   "severity": "medium"
+  },
+  {
+   "old": "kiểm các giá trị trên, in",
+   "new": "kiểm tra các giá trị trên, in",
+   "reason": "'kiểm' cụt",
+   "severity": "medium"
+  },
+  {
+   "old": "Lab chỉ có một ngày, một PSP, khớp đúng từng đồng, dữ liệu trong bộ nhớ,",
+   "new": "Lab chỉ xét một ngày, một PSP, yêu cầu khớp đúng từng đồng, dữ liệu nằm trong bộ nhớ,",
+   "reason": "Danh sách thiếu động từ",
+   "severity": "medium"
+  },
+  {
+   "old": "Phép trừ trần có thể tràn",
+   "new": "Phép trừ không kiểm tra có thể tràn",
+   "reason": "'trần' dễ hiểu nhầm là giới hạn trần",
+   "severity": "medium"
+  }
+ ]
+}

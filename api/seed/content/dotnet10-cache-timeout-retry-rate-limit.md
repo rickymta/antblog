@@ -8,29 +8,29 @@ tags: [csharp, dotnet, dotnet-10, toi-noi]
 language: vi
 ---
 
-Đây là **bài 25** trong loạt **C# và .NET 10 qua [Tới Nơi](/articles/du-an-mau-toi-noi)**. Các ví dụ target `net10.0`, dùng dữ liệu giả và cùng code đã chạy kiểm chứng trong repository.
+Đây là **bài 25** trong loạt **C# và .NET 10 qua [Tới Nơi](/articles/du-an-mau-toi-noi)**. Các ví dụ nhắm tới `net10.0`, dùng dữ liệu giả và cùng code đã được chạy kiểm chứng trong repository.
 
 <div class="tkh-callout tkh-callout--example">
 <span class="tkh-callout-title">Thử trước khi đọc</span>
-<p>Một POST thanh toán timeout có thể retry an toàn chỉ vì dùng HttpClient resilience không?</p>
-<details><summary>Xem đáp án</summary><p>Không. Server có thể đã thực hiện hiệu ứng; retry cần hợp đồng idempotency và tra trạng thái, không chỉ một policy kỹ thuật.</p></details>
+<p>Một POST thanh toán bị timeout có thể retry an toàn chỉ vì đã dùng HttpClient resilience không?</p>
+<details><summary>Xem đáp án</summary><p>Không. Server có thể đã thực hiện hiệu ứng; retry cần có hợp đồng idempotency và việc tra trạng thái, chứ không chỉ một policy kỹ thuật.</p></details>
 </div>
 
 ## Bốn cơ chế, bốn câu hỏi
 
-Cache tránh tính/đọc lại dữ liệu phù hợp; timeout giới hạn thời gian chờ; retry thử lại lỗi tạm theo hợp đồng; rate limiting quyết định lượng yêu cầu được nhận. Chúng không cùng chữa một loại lỗi và không thay transaction.
+Cache giúp tránh tính lại hoặc đọc lại dữ liệu phù hợp; timeout giới hạn thời gian chờ; retry thử lại lỗi tạm theo hợp đồng; rate limiting quyết định lượng yêu cầu được nhận. Chúng không chữa cùng một loại lỗi và không thay thế được transaction.
 
-Lab tạo GET /tariffs cho bảng giá công khai, không cache báo giá riêng của khách hoặc endpoint có quyền sở hữu. Named HttpClient partner dùng handler giả trong test, không gọi ra Internet. Giá trị bảng giá vẫn là dữ liệu minh hoạ của Tới Nơi.
+Lab tạo GET /tariffs cho bảng giá công khai, không cache báo giá riêng của khách hoặc endpoint gắn với quyền sở hữu. Named HttpClient tên partner dùng handler giả trong test, không gọi ra Internet. Giá trị bảng giá vẫn là dữ liệu minh hoạ của Tới Nơi.
 
-Mục tiêu là quan sát từng chính sách. Một bộ limiter cực nhỏ với permit 2 không phải cấu hình production; nó giúp request thứ ba bộc lộ đường từ chối mà không phải bắn tải lớn.
+Mục tiêu là quan sát từng chính sách. Một bộ limiter cực nhỏ với permit 2 không phải cấu hình production; nó giúp request thứ ba đi vào nhánh bị từ chối mà không cần bắn tải lớn.
 
 ## Cache cần key, thời hạn và cách mất hiệu lực
 
-IMemoryCache dùng key tariff:v1, absolute expiration 10 giây. Hai lần đọc tuần tự trong thời gian cache sống chỉ gọi TariffSource một lần; Remove key rồi đọc lại làm nguồn được gọi lần hai.
+IMemoryCache dùng key tariff:v1, absolute expiration 10 giây. Hai lần đọc tuần tự khi cache còn hiệu lực chỉ gọi TariffSource một lần; Remove key rồi đọc lại thì nguồn được gọi lần hai.
 
-GetOrCreate không tự bảo đảm mọi caller đồng thời chỉ có một lần fill. Lab không tuyên bố đã giải cache stampede. Key cần phản ánh version/biến số làm đổi nội dung; nếu thêm thành phố hay loại dịch vụ thì key đơn giản hiện tại chưa đủ.
+GetOrCreate không tự bảo đảm mọi caller đồng thời chỉ có một lần nạp dữ liệu vào cache. Lab không tuyên bố đã giải cache stampede. Key cần phản ánh phiên bản và các biến số làm đổi nội dung; nếu thêm thành phố hay loại dịch vụ thì key đơn giản hiện tại chưa đủ.
 
-Memory cache ở mỗi replica khác nhau, mất khi process dừng. Không dùng nó làm nguồn chân lý cho tiền hoặc quyền. Nếu dữ liệu đã lỗi thời có thể ảnh hưởng giao dịch, quy tắc freshness và invalidation phải được định nghĩa cùng nghiệp vụ.
+Memory cache của mỗi replica là một bản riêng, và mất khi process dừng. Không dùng nó làm nguồn dữ liệu gốc cho tiền hoặc quyền. Nếu dữ liệu đã lỗi thời có thể ảnh hưởng giao dịch, quy tắc freshness và invalidation phải được định nghĩa cùng nghiệp vụ.
 
 <figure class="tkh-fig">
 <div class="tkh-fig-box">
@@ -41,19 +41,19 @@ Memory cache ở mỗi replica khác nhau, mất khi process dừng. Không dùn
 
 ## Retry phải có ngân sách và loại thao tác
 
-AddStandardResilienceHandler cấu hình một lần retry, delay bằng 0 và tắt jitter chỉ để test xác định. GET gặp 503 rồi thành công được gửi hai lần; POST cùng failure không retry theo DisableForUnsafeHttpMethods. Production thường cần backoff/jitter và quan sát để tránh retry storm.
+AddStandardResilienceHandler cấu hình một lần retry, delay bằng 0 và tắt jitter chỉ để test cho kết quả xác định. GET gặp 503 rồi thành công được gửi hai lần; POST gặp cùng lỗi thì không retry, theo DisableForUnsafeHttpMethods. Production thường cần backoff/jitter và quan sát để tránh retry storm.
 
-Attempt timeout 1 giây, tổng budget 3 giây. HttpClient.Timeout được đặt vô hạn để lab có một lớp điều khiển timeout chính rõ ràng; không phải khuyến cáo bỏ mọi deadline. Token của caller và các timeout vẫn cần được phân biệt trong log/metric.
+Timeout cho mỗi lần thử là 1 giây, tổng ngân sách thời gian là 3 giây. HttpClient.Timeout được đặt vô hạn để lab có một lớp điều khiển timeout chính rõ ràng; không phải khuyến cáo bỏ mọi deadline. Token của phía gọi và các timeout vẫn cần được phân biệt trong log/metric.
 
-Handler chờ trong test nhận token và hợp tác dừng. Timeout là tín hiệu giới hạn chờ/xử lý theo pipeline, không đảm bảo một dependency phớt lờ cancellation sẽ tự chết. Retry POST cần thiết kế idempotency ngay cả khi cấu hình kỹ thuật cho phép nó.
+Handler chờ trong test nhận token và chủ động dừng theo token đó. Timeout là tín hiệu giới hạn chờ/xử lý theo pipeline, không đảm bảo một dependency phớt lờ cancellation sẽ tự dừng. Retry POST cần thiết kế idempotency ngay cả khi cấu hình kỹ thuật cho phép retry.
 
 ## Rate limiting đứng trước handler
 
-Fixed-window limiter nhận 2 request trong cửa sổ một phút, queue bằng 0 và tự replenishment. Request vượt nhận 429, kể cả bảng giá đang cache: giới hạn nhận request và cache hit là hai quyết định riêng.
+Fixed-window limiter nhận 2 request trong cửa sổ một phút, queue bằng 0 và tự nạp lại hạn mức. Request vượt nhận 429, kể cả bảng giá đang cache: giới hạn số request được nhận và cache hit là hai quyết định riêng.
 
-Policy demo không partition theo người dùng nên là giới hạn chia sẻ trong process cho endpoint gắn policy. Nó không phải quota toàn cluster; production có thể cần partition theo danh tính đã xác thực, IP đáng tin qua proxy hoặc một hạ tầng phân tán. Không tin header userId tự gửi để cấp quota.
+Policy demo không partition theo người dùng nên đây là giới hạn dùng chung trong process cho endpoint gắn policy. Nó không phải quota toàn cluster; production có thể cần partition theo danh tính đã xác thực, IP đáng tin qua proxy hoặc một hạ tầng phân tán. Không tin header userId tự gửi để cấp quota.
 
-Không xếp một hàng dài ở gateway, thêm hàng dài ở limiter rồi thêm Channel vô hạn bên trong. Tổng thời gian và số yêu cầu đang giữ tài nguyên cần có budget rõ, nếu không “thử lại” chỉ kéo dài một sự cố.
+Không xếp một hàng dài ở gateway, thêm hàng dài ở limiter rồi thêm Channel vô hạn bên trong. Tổng thời gian và số yêu cầu đang giữ tài nguyên cần có ngân sách rõ ràng, nếu không “thử lại” chỉ kéo dài một sự cố.
 
 <figure class="tkh-fig">
 <div class="tkh-fig-box">
@@ -62,9 +62,9 @@ Không xếp một hàng dài ở gateway, thêm hàng dài ở limiter rồi th
 <figcaption>Hình 2. Không áp cùng chính sách retry cho mọi request có thể tạo hiệu ứng.</figcaption>
 </figure>
 
-## Bốn ca kiểm chứng và bài tập
+## Bốn test case kiểm chứng và bài tập
 
-Các ca kiểm cache hit/429, invalidation, retry GET nhưng không POST và timeout dependency hợp tác. Cache expiry thực tế 10 giây là cấu hình được đặt, chưa có fake-clock test chứng minh biên hết hạn trong bộ này.
+Bốn test case kiểm chứng gồm cache hit/429, invalidation, retry GET nhưng không retry POST, và timeout với dependency hợp tác. Cache expiry thực tế 10 giây là cấu hình được đặt, chưa có fake-clock test chứng minh biên hết hạn trong bộ này.
 
 **Bài tập:** nếu bảng giá khác theo city, key tariff:v1 có còn đúng? Khi request thứ ba cache hit nhưng bị 429, đó có phải cache hỏng không?
 

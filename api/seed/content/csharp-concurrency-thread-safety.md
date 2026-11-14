@@ -8,29 +8,29 @@ tags: [csharp, dotnet, dotnet-10, toi-noi]
 language: vi
 ---
 
-Đây là **bài 13** trong loạt **C# và .NET 10 qua [Tới Nơi](/articles/du-an-mau-toi-noi)**. Các ví dụ target `net10.0`; code trong repository và các đoạn đầy đủ dưới đây dùng cùng implementation được chạy kiểm chứng.
+Đây là **bài 13** trong loạt **C# và .NET 10 qua [Tới Nơi](/articles/du-an-mau-toi-noi)**. Các ví dụ target `net10.0`; code trong repository và các đoạn đầy đủ dưới đây dùng cùng một bản cài đặt đã được chạy kiểm chứng.
 
 <div class="tkh-callout tkh-callout--example">
 <span class="tkh-callout-title">Thử trước khi đọc</span>
-<p>Một phép gán string là đủ an toàn để kiểm tra chuyến trống rồi nhận chuyến không?</p>
+<p>Một phép gán string có đủ an toàn để kiểm tra chuyến trống rồi nhận chuyến không?</p>
 <details><summary>Xem đáp án</summary><p>Không. Chuỗi thao tác đọc điều kiện và ghi tài xế phải giữ tính nguyên tử theo invariant, không chỉ xét riêng từng phép gán.</p></details>
 </div>
 
 ## Hai câu trả lời thành công, một tài xế bị ghi đè
 
-Hai tài xế cùng nhận TN-1. Mỗi lời gọi thấy Driver null, sau đó gán Driver của mình và trả true. Kết quả chỉ còn một Driver trong object nhưng cả hai caller đều nghĩ mình thắng. Đây là race check-then-act: trạng thái dùng để ra quyết định có thể đổi trước lúc ghi.
+Hai tài xế cùng nhận TN-1. Mỗi lời gọi thấy Driver null, sau đó gán Driver của mình và trả true. Kết quả là object chỉ còn lại một Driver, nhưng cả hai người gọi đều nghĩ mình thắng. Đây là race condition kiểu check-then-act: trạng thái dùng để ra quyết định có thể đổi trước lúc ghi.
 
-Concurrency là nhiều tác vụ có tiến độ chồng lấp; parallelism là thực thi thật sự đồng thời trên tài nguyên xử lý. Race có thể xảy ra chỉ từ việc xen kẽ await, không cần chứng minh hai CPU chạy cùng một nanosecond.
+Concurrency là nhiều tác vụ có tiến độ chồng lấp; parallelism là thực thi thật sự đồng thời trên tài nguyên xử lý. Race condition có thể xảy ra chỉ từ việc các await xen kẽ nhau, không cần chứng minh hai CPU chạy đúng cùng một thời điểm.
 
-Ta cố ý tạo bản sai UnsafeTrip để tái hiện bằng lịch xác định. Nó chỉ dùng trong lab. Không đưa API public setter này trở lại domain vì “test race cần sửa được”.
+Ta cố ý tạo bản có lỗi UnsafeTrip để tái hiện race bằng lịch chạy xác định. Lớp này chỉ dùng trong lab. Đừng đưa public setter này trở lại domain vì “test race cần sửa được”.
 
 ## Lịch xen kẽ được điều khiển thay vì cầu may
 
 Hai UnsafeAccept cùng đọc điều kiện trước khi await một TaskCompletionSource. Interlocked.Increment tăng bộ đếm reader một cách nguyên tử; reader thứ hai mở gate. Cả hai đã chụp available=true rồi mới được ghi. Khi WhenAll xong, cả hai kết quả đều true.
 
-Điểm đồng bộ giúp test fail ổn định nếu suy luận bị đổi, thay vì vòng lặp ngẫu nhiên có khi không thấy lỗi. TaskCompletionSource được cấu hình RunContinuationsAsynchronously để không thực thi continuation tuỳ ý ngay trong đoạn phát tín hiệu.
+Điểm đồng bộ giúp test fail ổn định nếu suy luận bị đổi, thay vì dùng vòng lặp ngẫu nhiên, vốn có khi không thấy lỗi. TaskCompletionSource được cấu hình RunContinuationsAsynchronously để không thực thi continuation tuỳ ý ngay trong đoạn phát tín hiệu.
 
-Đừng dùng thứ tự Driver cuối cùng làm assertion ở bản sai; đó là kết quả của lịch chạy và không phải invariant cần chứng minh. Điều quan trọng là hai phản hồi thành công cho một chỗ nhận duy nhất.
+Đừng dùng Driver được ghi cuối cùng làm assertion cho bản có lỗi; đó là kết quả của lịch chạy chứ không phải invariant cần chứng minh. Điều quan trọng là hai phản hồi thành công cho một chỗ nhận duy nhất.
 
 <figure class="tkh-fig">
 <div class="tkh-fig-box">
@@ -41,19 +41,19 @@ Hai UnsafeAccept cùng đọc điều kiện trước khi await một TaskComple
 
 ## Lock phải bao cả kiểm tra và thay đổi
 
-GuardedTrip dùng một object gate private và readonly. Trong lock, nó đọc driver, từ chối nếu đã có, hoặc gán driver và trả true. Tất cả đường đọc Driver của demo cũng dùng cùng gate. Nếu mỗi method khoá một object khác nhau thì không có cùng vùng bảo vệ.
+GuardedTrip dùng một object gate private và readonly. Trong lock, nó đọc driver, từ chối nếu đã có, hoặc gán driver và trả true. Tất cả đường đọc Driver của demo cũng dùng cùng gate. Nếu mỗi method khoá một object khác nhau thì chúng không chung một vùng bảo vệ.
 
-Không lock trên string, this hoặc một object công khai mà caller khác có thể giữ khoá ngoài dự kiến. Giữ vùng lock ngắn, không gọi mạng hoặc chạy công việc chậm trong đó. C# không cho await trực tiếp trong thân lock; nếu cần phối hợp bất đồng bộ, phải chọn primitive và phạm vi khác thay vì chặn thread chờ I/O.
+Đừng lock trên string, this hoặc một object công khai mà caller khác có thể giữ khoá ngoài dự kiến. Giữ vùng lock ngắn, không gọi mạng hoặc chạy công việc chậm trong đó. C# không cho await trực tiếp trong thân lock; nếu cần phối hợp bất đồng bộ, phải chọn primitive và phạm vi khác thay vì chặn thread chờ I/O.
 
-20 task thử nhận cùng một GuardedTrip; sau WhenAll chỉ có một true. Ta không khẳng định driver số 1 sẽ thắng hoặc lock công bằng. Thuộc tính cần giữ là số người thắng, dữ liệu tài xế được ghi và lần nhận sau bị từ chối.
+20 task cùng thử nhận một GuardedTrip; sau WhenAll chỉ có một true. Ta không khẳng định driver số 1 sẽ thắng hoặc lock công bằng. Những điều cần giữ đúng là số người thắng, dữ liệu tài xế được ghi và các lần nhận sau bị từ chối.
 
-## Một process đúng chưa giải được hai server
+## Một process chạy đúng chưa giải quyết được bài toán hai server
 
-Mỗi replica backend có bộ nhớ và lock riêng. Hai replica tải cùng hàng Requested thành hai object, mỗi object có gate riêng, cả hai có thể nhận. Muốn chống xung đột lưu bền phải thiết kế conditional update, optimistic concurrency/version hoặc cơ chế giao dịch phù hợp tại nơi sở hữu dữ liệu.
+Mỗi replica backend có bộ nhớ và lock riêng. Hai replica nạp cùng một hàng Requested thành hai object, mỗi object có gate riêng, cả hai có thể nhận. Muốn chống xung đột ở tầng lưu trữ bền, phải thiết kế conditional update, optimistic concurrency/version hoặc cơ chế giao dịch phù hợp tại nơi sở hữu dữ liệu.
 
-DDD entity giữ luật chuyển trạng thái; Application handler phối hợp tải và lưu; repository/UoW commit trong transaction cục bộ. Không kéo một lock C# qua mạng hoặc coi singleton DI là singleton toàn hệ thống. Bài transaction/PostgreSQL sẽ kiểm chứng bằng hai connection thay vì hai task trên object.
+DDD entity giữ luật chuyển trạng thái; Application handler phối hợp tải và lưu; repository/UoW commit trong transaction cục bộ. Đừng kéo một lock C# qua mạng hoặc coi singleton DI là singleton của toàn hệ thống. Bài transaction/PostgreSQL sẽ kiểm chứng bằng hai connection thay vì hai task trên object.
 
-Thread-safe collection cũng không tự làm nhiều bước nghiệp vụ thành atomic. Đọc rồi ghi trong ConcurrentDictionary vẫn cần API kết hợp/hợp đồng thích hợp khi invariant yêu cầu vậy.
+Thread-safe collection cũng không tự biến nhiều bước nghiệp vụ thành một thao tác nguyên tử (atomic). Đọc rồi ghi trong ConcurrentDictionary vẫn cần API kết hợp hoặc hợp đồng phù hợp khi invariant đòi hỏi như vậy.
 
 <figure class="tkh-fig">
 <div class="tkh-fig-box">
@@ -62,11 +62,11 @@ Thread-safe collection cũng không tự làm nhiều bước nghiệp vụ thà
 <figcaption>Hình 2. Gate bảo vệ vùng tới hạn trong một process; hai server không chia sẻ vùng lock này.</figcaption>
 </figure>
 
-## Bài tập và ca cần bảo vệ
+## Bài tập và các test case cần bảo vệ
 
-Bộ --verify xác nhận race bản sai có 2 người thắng, bản khoá có 1, Driver không thiếu và lời gọi đến sau bị từ chối. Task.Run ở đây dùng để tạo contention cho đoạn đồng bộ ngắn; không phải khuyến cáo bọc mọi API async bằng Task.Run.
+Nhánh --verify xác nhận bản có lỗi cho ra 2 người thắng trong race, bản có khoá cho ra 1, Driver không bị thiếu và lời gọi đến sau bị từ chối. Task.Run ở đây dùng để tạo contention cho đoạn đồng bộ ngắn; đây không phải khuyến cáo bọc mọi API async bằng Task.Run.
 
-**Bài tập:** dời kiểm tra driver ra ngoài lock, chỉ khoá phép gán. Invariant có còn được bảo vệ không? Hai container có cùng source code và gate private có chia sẻ gate không?
+**Bài tập:** dời kiểm tra driver ra ngoài lock, chỉ khoá phép gán. Invariant có còn được bảo vệ không? Hai container chạy cùng source code và dùng gate private thì có chia sẻ gate không?
 
 <details><summary>Xem đáp án</summary><p>Không: cả hai vẫn có thể kiểm tra trước khi một người ghi. Gate là object riêng trong mỗi process, không có tác dụng đồng bộ dữ liệu giữa container.</p></details>
 
@@ -78,7 +78,7 @@ Từ thư mục gốc repository:
 dotnet run --project examples/toi-noi-dotnet/13-concurrency -- --verify
 ```
 
-Lệnh --verify chạy các ca cố định trên chính code minh hoạ; sai kỳ vọng sẽ trả exit code thất bại. Không cần package NuGet bổ sung.
+Lệnh --verify chạy các test case cố định trên chính code minh hoạ; nếu sai kỳ vọng sẽ trả về exit code thất bại. Không cần package NuGet bổ sung.
 
 ### Program.cs — 13-concurrency/Program.cs
 

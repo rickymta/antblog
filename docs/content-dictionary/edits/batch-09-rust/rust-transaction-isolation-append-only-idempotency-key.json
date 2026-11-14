@@ -1,0 +1,227 @@
+{
+ "file": "rust-transaction-isolation-append-only-idempotency-key.md",
+ "edits": [
+  {
+   "old": "Bài 24: ghi journal_entries và postings trong một transaction sqlx, chống ghi trùng bằng ON CONFLICT DO NOTHING, thấy write skew ở READ COMMITTED",
+   "new": "Bài 24: ghi journal_entries và postings trong một transaction sqlx, chống ghi trùng bằng ON CONFLICT DO NOTHING, tái hiện write skew ở READ COMMITTED",
+   "reason": "Thiếu động từ rõ nghĩa: 'thấy write skew' nên là 'tái hiện'",
+   "severity": "medium"
+  },
+  {
+   "old": "<p>Trong một transaction, <code>SELECT</code> kiểm xem <code>idempotency_key</code> đã có chưa",
+   "new": "<p>Trong một transaction, <code>SELECT</code> kiểm tra xem <code>idempotency_key</code> đã có chưa",
+   "reason": "Lược mất chữ 'tra'",
+   "severity": "low"
+  },
+  {
+   "old": "`tx.commit()` kết thúc có hiệu lực.",
+   "new": "`tx.commit()` kết thúc và làm các thay đổi có hiệu lực.",
+   "reason": "Cụm cụt, thiếu đối tượng của 'có hiệu lực'",
+   "severity": "medium"
+  },
+  {
+   "old": "identity không hoàn lại khi rollback, id 2 và 3 đã bị tiêu cho hai lần thất bại.",
+   "new": "identity không hoàn lại khi rollback, id 2 và 3 đã bị dùng mất cho hai lần thất bại.",
+   "reason": "'bị tiêu' là calque của 'consumed'",
+   "severity": "medium"
+  },
+  {
+   "old": "Cơ chế có hai nửa: cột `idempotency_key` unique",
+   "new": "Cơ chế gồm hai phần: cột `idempotency_key` unique",
+   "reason": "'hai nửa' gượng",
+   "severity": "low"
+  },
+  {
+   "old": "key đã có thì nó không báo lỗi mà trả **không dòng nào**.",
+   "new": "key đã có thì câu lệnh không báo lỗi mà trả **không dòng nào**.",
+   "reason": "'nó' chỉ sự vật trừu tượng, nhắc lại danh từ",
+   "severity": "low"
+  },
+  {
+   "old": "T1 commit thì T2 phải trả rỗng, T1 rollback thì T2 được chèn.",
+   "new": "T1 commit thì T2 phải nhận về 0 dòng, T1 rollback thì T2 được chèn.",
+   "reason": "'trả rỗng' cụt, thống nhất với 'nhận 0 dòng' trong bài",
+   "severity": "medium"
+  },
+  {
+   "old": "nó chờ T1 kết thúc rồi nhận kết quả đúng với cách T1 kết thúc.",
+   "new": "nó chờ T1 kết thúc rồi nhận kết quả tương ứng với cách T1 kết thúc.",
+   "reason": "'đúng với cách' gượng",
+   "severity": "medium"
+  },
+  {
+   "old": "Lab kiểm bằng quan sát: T1 chèn key",
+   "new": "Lab kiểm chứng bằng cách quan sát: T1 chèn key",
+   "reason": "'kiểm bằng quan sát' cụt",
+   "severity": "low"
+  },
+  {
+   "old": "vì ở PostgreSQL một câu lỗi làm hỏng cả transaction đang mở.",
+   "new": "vì ở PostgreSQL một câu lệnh gặp lỗi sẽ làm hỏng cả transaction đang mở.",
+   "reason": "'câu lỗi' là cụm tự ghép",
+   "severity": "medium"
+  },
+  {
+   "old": "PostgreSQL không trả 0 dòng rồi để ta đọc lại vào chỗ trống:",
+   "new": "PostgreSQL không trả 0 dòng rồi để ta đọc lại mà không thấy gì:",
+   "reason": "'đọc lại vào chỗ trống' khó hiểu",
+   "severity": "high"
+  },
+  {
+   "old": "Thử trong psql, T2 đang đứng chờ T1 cũng vậy:",
+   "new": "Thử trong psql, T2 đang chờ T1 cũng cho kết quả như vậy:",
+   "reason": "Câu cụt, thiếu vị ngữ rõ nghĩa",
+   "severity": "medium"
+  },
+  {
+   "old": "`ON CONFLICT DO NOTHING` cũng tiêu một giá trị identity. Kiểm trong psql:",
+   "new": "`ON CONFLICT DO NOTHING` cũng dùng mất một giá trị identity. Thử trong psql:",
+   "reason": "'tiêu' là calque; 'Kiểm' cụt",
+   "severity": "medium"
+  },
+  {
+   "old": "để lab tái hiện đúng lịch cuộc đua.",
+   "new": "để lab tái hiện đúng thứ tự xen kẽ của race condition.",
+   "reason": "'lịch cuộc đua' là calque; dùng thuật ngữ race condition theo bảng thuật ngữ",
+   "severity": "medium"
+  },
+  {
+   "old": "nên không khoá chung gì. PostgreSQL",
+   "new": "nên không khoá chung dòng nào. PostgreSQL",
+   "reason": "'không khoá chung gì' cụt, thiếu danh từ",
+   "severity": "medium"
+  },
+  {
+   "old": "Mức cô lập quyết định database có phát hiện được hay không.",
+   "new": "Mức cô lập quyết định việc database có phát hiện được lỗi này hay không.",
+   "reason": "Câu thiếu tân ngữ của 'phát hiện'",
+   "severity": "medium"
+  },
+  {
+   "old": "Không có lỗi nào để bắt: sổ vẫn cân, chỉ quy tắc nghiệp vụ ngoài ràng buộc của bảng bị phá.",
+   "new": "Không có lỗi nào để bắt: sổ vẫn cân, chỉ có quy tắc nghiệp vụ nằm ngoài ràng buộc của bảng bị phá.",
+   "reason": "Câu cụt, thiếu động từ",
+   "severity": "medium"
+  },
+  {
+   "old": "Hướng khác ngoài SERIALIZABLE là khoá một dòng chung",
+   "new": "Ngoài SERIALIZABLE, còn một hướng khác là khoá một dòng chung",
+   "reason": "Trật tự câu gượng",
+   "severity": "low"
+  },
+  {
+   "old": "một bài ở cấp nâng cao sẽ quay lại.",
+   "new": "một bài ở cấp nâng cao sẽ quay lại hướng này.",
+   "reason": "'quay lại' thiếu bổ ngữ",
+   "severity": "low"
+  },
+  {
+   "old": "Nó không khoá chặn trước mà theo dõi ai đọc gì, ai ghi gì (SSI);",
+   "new": "PostgreSQL không khoá chặn trước mà theo dõi ai đọc gì, ai ghi gì (SSI);",
+   "reason": "'Nó' mơ hồ ở đầu câu, nhắc lại chủ ngữ",
+   "severity": "medium"
+  },
+  {
+   "old": "Bảo đảm chỉ có hiệu lực khi mọi giao dịch",
+   "new": "Bảo đảm này chỉ có hiệu lực khi mọi giao dịch",
+   "reason": "Thiếu chỉ định từ, câu cụt",
+   "severity": "low"
+  },
+  {
+   "old": "(kể cả bước kiểm hạn mức, vì bản đọc cũ vô hiệu)",
+   "new": "(kể cả bước kiểm tra hạn mức, vì kết quả đã đọc trước đó không còn hiệu lực)",
+   "reason": "'bản đọc cũ vô hiệu' tự ghép, nghe cụt",
+   "severity": "medium"
+  },
+  {
+   "old": "và chỉ với 40001, còn lỗi khác",
+   "new": "và chỉ thử lại với 40001, còn lỗi khác",
+   "reason": "Thiếu động từ",
+   "severity": "medium"
+  },
+  {
+   "old": "lab dùng nó để `Barrier` chỉ chặn ở lần đầu.",
+   "new": "lab dùng số lần thử này để `Barrier` chỉ chặn ở lần đầu.",
+   "reason": "'nó' mơ hồ",
+   "severity": "medium"
+  },
+  {
+   "old": "Số lần 40001 phụ thuộc lịch chạy;",
+   "new": "Số lần 40001 phụ thuộc thứ tự chạy của các task;",
+   "reason": "'lịch chạy' là calque của schedule",
+   "severity": "low"
+  },
+  {
+   "old": "Vòng retry còn có test không cần dựng cuộc đua:",
+   "new": "Vòng retry còn có test không cần dựng race condition:",
+   "reason": "Thống nhất thuật ngữ race condition",
+   "severity": "low"
+  },
+  {
+   "old": "để kiểm giới hạn số lần và «lỗi 23505 không bị thử lại».",
+   "new": "để kiểm tra giới hạn số lần thử và việc «lỗi 23505 không bị thử lại».",
+   "reason": "'kiểm giới hạn số lần' cụt",
+   "severity": "medium"
+  },
+  {
+   "old": "phải theo dõi lần đọc, có thể huỷ oan)",
+   "new": "phải theo dõi lần đọc, có thể huỷ nhầm)",
+   "reason": "'huỷ oan' khẩu ngữ gượng",
+   "severity": "low"
+  },
+  {
+   "old": "có quy tắc trải trên nhiều dòng.",
+   "new": "có quy tắc liên quan đến nhiều dòng.",
+   "reason": "'trải trên' gượng",
+   "severity": "medium"
+  },
+  {
+   "old": "gặp là lỗi trả thẳng cho người gọi.",
+   "new": "gặp mã này thì lỗi được trả thẳng cho người gọi.",
+   "reason": "Câu thiếu chủ ngữ, phải đoán ý",
+   "severity": "medium"
+  },
+  {
+   "old": "Xuống PostgreSQL, nó phải thành cơ chế để không client nào sửa được dòng đã ghi.",
+   "new": "Khi đưa xuống PostgreSQL, quy ước này phải thành cơ chế để không client nào sửa được dòng đã ghi.",
+   "reason": "Câu cụt, 'nó' mơ hồ, 'không client nào' là calque",
+   "severity": "medium"
+  },
+  {
+   "old": "`TRUNCATE` không kích hoạt trigger theo dòng, và chỉ nhận trigger cấp statement.",
+   "new": "`TRUNCATE` không kích hoạt trigger theo dòng, và chỉ gắn được trigger cấp statement.",
+   "reason": "'chỉ nhận trigger' gượng",
+   "severity": "medium"
+  },
+  {
+   "old": "`TN001` là SQLSTATE tự đặt của loạt để Rust phân biệt",
+   "new": "`TN001` là SQLSTATE tự đặt của loạt bài để Rust phân biệt",
+   "reason": "Thiếu danh từ 'bài'",
+   "severity": "low"
+  },
+  {
+   "old": "Lab thử bốn câu lệnh phá sổ có `TN-0001`:",
+   "new": "Lab thử bốn câu lệnh phá sổ đang chứa `TN-0001`:",
+   "reason": "'phá sổ có' mơ hồ",
+   "severity": "low"
+  },
+  {
+   "old": "Sai thì sửa bằng bút toán đảo",
+   "new": "Nếu ghi sai thì sửa bằng bút toán đảo",
+   "reason": "Câu cụt, thiếu chủ thể",
+   "severity": "low"
+  },
+  {
+   "old": "đổi lại cần kiểm SQL do provider sinh ở các trường hợp biên.",
+   "new": "đổi lại phải kiểm tra SQL do provider sinh ra ở các trường hợp biên.",
+   "reason": "'cần kiểm' cụt",
+   "severity": "medium"
+  },
+  {
+   "old": "Muốn biết sổ có thiếu bút toán không phải đối soát với nguồn",
+   "new": "Muốn biết sổ có thiếu bút toán hay không thì phải đối soát với nguồn",
+   "reason": "Câu nhập nhằng, thiếu 'thì'",
+   "severity": "medium"
+  }
+ ]
+}

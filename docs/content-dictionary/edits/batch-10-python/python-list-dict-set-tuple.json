@@ -1,0 +1,20 @@
+{"file":"python-list-dict-set-tuple.md","edits":[
+{"old":"tài xế nào vừa đang online vừa đủ","new":"tài xế nào vừa online vừa đủ","reason":"Thừa chữ đang, nghe vấp","severity":"low"},
+{"old":"Cả bốn đều là \"một đống phần tử\",","new":"Cả bốn đều là «một đống phần tử»,","reason":"Thống nhất dấu trích dẫn « » trong bài","severity":"low"},
+{"old":"bốn cấu trúc dựng sẵn của Python,","new":"bốn cấu trúc có sẵn của Python,","reason":"Dựng sẵn là dịch từng chữ của built-in","severity":"medium"},
+{"old":"Cho cả bốn dùng chung list thì ở 6 phần tử","new":"Nếu dùng list cho cả bốn việc thì ở 6 phần tử","reason":"Cụm tự ghép, thiếu chủ ngữ rõ ràng","severity":"medium"},
+{"old":"Các độ phức tạp là trung bình theo tài liệu và cách cài đặt phổ biến của CPython,","new":"Các độ phức tạp ở đây là giá trị trung bình, theo tài liệu và cách cài đặt phổ biến của CPython,","reason":"Câu thiếu từ nối, đọc phải đoán ý","severity":"low"},
+{"old":"Kết quả thật của lab:","new":"Kết quả chạy thật của lab:","reason":"Dùng cách nói chuẩn theo bảng thuật ngữ","severity":"low"},
+{"old":"Tuple khác list ở chỗ không thêm, bớt hay gán lại phần tử được.","new":"Tuple khác list ở chỗ không thể thêm, bớt hay gán lại phần tử.","reason":"Trật tự từ kiểu tiếng Anh","severity":"medium"},
+{"old":"Unpack giúp đọc tuple gọn:","new":"Unpack (tách phần tử) giúp đọc tuple gọn hơn:","reason":"Câu cụt, thiếu giải nghĩa lần đầu","severity":"low"},
+{"old":"Gợi ý kiểu như `list[str]` giúp","new":"Type hint như `list[str]` giúp","reason":"Thống nhất với cách gọi type hint trong cả loạt","severity":"medium"},
+{"old":"với giá trị đắt, dùng","new":"với giá trị tốn kém khi tạo, dùng","reason":"Giá trị đắt là cụm tự ghép","severity":"medium"},
+{"old":"Đừng viết logic phụ thuộc thứ tự một set.","new":"Đừng viết logic phụ thuộc vào thứ tự của một set.","reason":"Thiếu giới từ, câu cụt","severity":"low"},
+{"old":"(số đo thay đổi theo máy, chỉ nên đọc theo tỷ lệ)","new":"(kết quả đo thay đổi theo máy, chỉ nên đọc theo tỷ lệ)","reason":"Số đo gượng; dùng kết quả đo","severity":"low"},
+{"old":"nơi một sửa đổi ảnh hưởng mọi tên đang trỏ tới.","new":"nơi một lần sửa đổi ảnh hưởng đến mọi tên đang trỏ tới.","reason":"Danh từ sửa đổi thiếu lượng từ, nghe cụt","severity":"low"},
+{"old":"trong suốt đời nó;","new":"trong suốt vòng đời của nó;","reason":"Đời nó nghe khẩu ngữ","severity":"medium"},
+{"old":"Ngay cả tuple cũng thất bại khi bên trong có list:","new":"Ngay cả tuple cũng không hash được khi bên trong có list:","reason":"Thất bại gượng, nêu rõ điều gì không xảy ra","severity":"medium"},
+{"old":"giải bài toán nào cũng gặp ở Tới Nơi.","new":"giải những bài toán lúc nào cũng gặp ở Tới Nơi.","reason":"Cụm cụt, đọc phải đoán ý","severity":"medium"},
+{"old":"chống trùng trong bài chưa phải idempotency.","new":"chống trùng trong bài chưa phải là idempotency (xử lý lặp không đổi kết quả).","reason":"Thuật ngữ chưa giải nghĩa lần đầu","severity":"low"},
+{"old":"| Có phải `b = a`, hoặc `copy()` nông với list lồng nhau;","new":"| Có phải do `b = a`, hoặc do `copy()` nông với list lồng nhau;","reason":"Câu cụt thiếu giới từ","severity":"medium"}
+]}

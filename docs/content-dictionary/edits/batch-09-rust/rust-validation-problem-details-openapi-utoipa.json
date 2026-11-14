@@ -1,0 +1,125 @@
+{
+ "file": "rust-validation-problem-details-openapi-utoipa.md",
+ "edits": [
+  {
+   "old": "bắt rejection của axum::Json",
+   "new": "bắt lỗi từ chối (rejection) của axum::Json",
+   "reason": "Giải nghĩa thuật ngữ lần đầu",
+   "severity": "low"
+  },
+  {
+   "old": "Lab chạy đúng ca này ở mục về rejection",
+   "new": "Lab chạy đúng trường hợp này ở mục về rejection",
+   "reason": "'ca' khẩu ngữ",
+   "severity": "low"
+  },
+  {
+   "old": "nên để ra đường dẫn `postings[0].account` vẫn phải tự duyệt cây",
+   "new": "nên muốn lấy ra đường dẫn `postings[0].account` vẫn phải tự duyệt cây",
+   "reason": "'để ra' gượng",
+   "severity": "medium"
+  },
+  {
+   "old": "Lý do lớn hơn nằm ở chỗ đặt bất biến.",
+   "new": "Lý do lớn hơn nằm ở nơi đặt các bất biến (invariant).",
+   "reason": "'đặt bất biến' gượng",
+   "severity": "medium"
+  },
+  {
+   "old": "Lớp HTTP chỉ kiểm thứ nó sở hữu",
+   "new": "Lớp HTTP chỉ kiểm tra những gì nó sở hữu",
+   "reason": "Động từ cụt",
+   "severity": "low"
+  },
+  {
+   "old": "và để miền quyết định.",
+   "new": "và để tầng miền quyết định.",
+   "reason": "Thiếu danh từ 'tầng'",
+   "severity": "medium"
+  },
+  {
+   "old": "client phải bỏ qua mở rộng nó không nhận ra",
+   "new": "client phải bỏ qua thành phần mở rộng mà nó không nhận ra",
+   "reason": "Câu cụt thiếu danh từ",
+   "severity": "medium"
+  },
+  {
+   "old": "Một ca validation thật trong lab:",
+   "new": "Kết quả thật của một lỗi validation trong lab:",
+   "reason": "'ca' khẩu ngữ, câu cụt",
+   "severity": "medium"
+  },
+  {
+   "old": "và `traceId` gánh phần đó.",
+   "new": "còn `traceId` đảm nhận phần đó.",
+   "reason": "Cách nói tự nhiên hơn",
+   "severity": "low"
+  },
+  {
+   "old": "kết quả là lỗi chứ không phải một mã 500 âm thầm:",
+   "new": "kết quả là lỗi biên dịch, chứ không phải một mã 500 xuất hiện mà không ai hay:",
+   "reason": "Calque 'âm thầm'",
+   "severity": "medium"
+  },
+  {
+   "old": "`detail` ở các ca này là",
+   "new": "`detail` ở các trường hợp này là",
+   "reason": "'ca' khẩu ngữ",
+   "severity": "low"
+  },
+  {
+   "old": "khai báo route và các status hợp đồng cam kết",
+   "new": "khai báo route và các mã trạng thái mà hợp đồng cam kết",
+   "reason": "Câu cụt thiếu từ nối",
+   "severity": "medium"
+  },
+  {
+   "old": "Version API là một tiền tố",
+   "new": "Phiên bản API là một tiền tố",
+   "reason": "Thống nhất 'phiên bản'",
+   "severity": "medium"
+  },
+  {
+   "old": "để lỗi của API cùng một dạng",
+   "new": "để lỗi của API có cùng một dạng",
+   "reason": "Thiếu động từ",
+   "severity": "medium"
+  },
+  {
+   "old": "và một test kiểm điều đó.",
+   "new": "và một test kiểm tra điều đó.",
+   "reason": "Động từ cụt",
+   "severity": "low"
+  },
+  {
+   "old": "Ca lệch và ca xung đột cho:",
+   "new": "Trường hợp lệch và trường hợp xung đột cho:",
+   "reason": "'ca' khẩu ngữ",
+   "severity": "low"
+  },
+  {
+   "old": "`--verify` kiểm 43 điều kiện",
+   "new": "`--verify` kiểm tra 43 điều kiện",
+   "reason": "Động từ cụt",
+   "severity": "low"
+  },
+  {
+   "old": "một test kiểm biên 2 MB",
+   "new": "một test kiểm tra ngưỡng 2 MB",
+   "reason": "'kiểm biên' tự ghép",
+   "severity": "medium"
+  },
+  {
+   "old": "nó chỉ chắc route tồn tại",
+   "new": "nó chỉ bảo đảm route tồn tại",
+   "reason": "'chỉ chắc' gượng",
+   "severity": "medium"
+  },
+  {
+   "old": "Cần một test gọi ca đóng băng và kiểm mã trả về",
+   "new": "Cần một test gọi trường hợp đóng băng và kiểm tra mã trả về",
+   "reason": "'ca' khẩu ngữ, động từ cụt",
+   "severity": "low"
+  }
+ ]
+}

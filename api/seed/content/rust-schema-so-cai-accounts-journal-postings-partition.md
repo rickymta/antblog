@@ -8,12 +8,12 @@ tags: [rust, toi-noi, ledger, postgresql, schema, partition]
 language: vi
 ---
 
-Đây là bài 25 của lộ trình **Rust trung bình qua [Tới Nơi](/articles/du-an-mau-toi-noi)**. [Bài 24](/articles/rust-transaction-isolation-append-only-idempotency-key) ghi một bút toán trong một transaction. Bài này hỏi transaction đó ghi vào bảng nào, và DB có tự giữ được bất biến «tổng bằng 0» của [bài 13](/articles/rust-double-entry-journal-entry-posting) hay chỉ trông vào code Rust phía trên.
+Đây là bài 25 của lộ trình **Rust trung bình qua [Tới Nơi](/articles/du-an-mau-toi-noi)**. [Bài 24](/articles/rust-transaction-isolation-append-only-idempotency-key) ghi một bút toán trong một transaction. Bài này hỏi transaction đó ghi vào bảng nào, và DB có tự giữ được bất biến «tổng bằng 0» của [bài 13](/articles/rust-double-entry-journal-entry-posting) hay chỉ dựa vào code Rust phía trên.
 
 <div class="tkh-callout tkh-callout--example">
 <span class="tkh-callout-title">Thử trước khi đọc</span>
-<p><code>JournalEntry</code> của <code>ledger-core</code> đã từ chối bút toán lệch trước khi ghi. DB còn cần kiểm lại không? Nếu cần, một <code>CHECK</code> trên <code>postings</code> có đủ không?</p>
-<details><summary>Xem đáp án</summary><p>Cần, vì script SQL chạy tay, service khác hay adapter có bug đều ghi thẳng được. <code>CHECK</code> không đủ: nó chỉ nhìn một dòng, còn tổng bằng 0 là tính chất của nhiều dòng cùng <code>entry_id</code>. Kiểm sau từng <code>INSERT</code> cũng sai vì giữa chừng bút toán chưa cân: phải kiểm lúc commit.</p></details>
+<p><code>JournalEntry</code> của <code>ledger-core</code> đã từ chối bút toán lệch trước khi ghi. DB còn cần kiểm tra lại không? Nếu cần, một <code>CHECK</code> trên <code>postings</code> có đủ không?</p>
+<details><summary>Xem đáp án</summary><p>Cần, vì script SQL chạy tay, service khác hay adapter có bug đều ghi thẳng được. <code>CHECK</code> không đủ: nó chỉ nhìn một dòng, còn tổng bằng 0 là tính chất của nhiều dòng cùng <code>entry_id</code>. Kiểm tra sau từng <code>INSERT</code> cũng sai vì giữa chừng bút toán chưa cân: phải kiểm tra lúc commit.</p></details>
 </div>
 
 ## Bốn bảng, mỗi bảng giữ một loại sự thật
@@ -56,9 +56,9 @@ CREATE TABLE account_balances (
 );
 ```
 
-`postings` không có cột thời gian: `posted_at` nằm ở `journal_entries`, một thời điểm cho cả bút toán. `amount_dong` có dấu theo dòng tiền (dương là vào, âm là ra), không phải nợ/có. Mọi DDL chạy trong schema `lab_<uuid>` do pool đặt `search_path`, xoá cuối ca.
+`postings` không có cột thời gian: `posted_at` nằm ở `journal_entries`, một thời điểm cho cả bút toán. `amount_dong` có dấu theo dòng tiền (dương là vào, âm là ra), không phải nợ/có. Mọi DDL chạy trong schema `lab_<uuid>` do pool đặt `search_path`, và xoá khi lab chạy xong.
 
-`CHECK` và khoá ngoại được kiểm ngay tại câu `INSERT`, từng dòng một. Ba vi phạm dưới đây cho SQLSTATE và thông điệp thật của PostgreSQL 18.6:
+`CHECK` và khoá ngoại được kiểm tra ngay tại câu `INSERT`, từng dòng một. Ba vi phạm dưới đây cho SQLSTATE và thông điệp thật của PostgreSQL 18.6:
 
 ```text
 accounts.kind = 'equity'
@@ -69,11 +69,11 @@ postings.account_id = 'driver:DR-999' (chưa có tài khoản)
   SQLSTATE 23503: insert or update on table "postings" violates foreign key constraint "postings_account_id_fkey"
 ```
 
-Nhưng `CHECK` chỉ thấy dòng đang ghi: posting -100 và +90 đều qua, phải nhìn cả hai mới thấy lệch -10.
+Nhưng `CHECK` chỉ thấy dòng đang ghi: posting -100 và +90 đều vượt qua được, phải nhìn cả hai mới thấy lệch -10.
 
 ## Làm sao để DB tự từ chối bút toán lệch?
 
-Dùng **constraint trigger** khai báo `DEFERRABLE INITIALLY DEFERRED`: PostgreSQL xếp sự kiện vào hàng chờ và chạy lúc commit (sớm hơn chỉ khi transaction tự gọi `SET CONSTRAINTS ... IMMEDIATE`). Giữa transaction ta được ghi từng posting; chỉ trạng thái cuối phải hợp lệ. Hàm kiểm trong `sql/02_balance_check.sql` (rút gọn: bỏ nhánh chọn `entry_id` và vòng lặp):
+Dùng **constraint trigger** khai báo `DEFERRABLE INITIALLY DEFERRED`: PostgreSQL xếp sự kiện vào hàng chờ và chạy lúc commit (sớm hơn chỉ khi transaction tự gọi `SET CONSTRAINTS ... IMMEDIATE`). Giữa chừng transaction, ta được phép ghi từng posting; chỉ trạng thái cuối phải hợp lệ. Hàm kiểm tra trong `sql/02_balance_check.sql` (rút gọn: bỏ nhánh chọn `entry_id` và vòng lặp):
 
 ```sql
 -- sql/02_balance_check.sql (rút gọn)
@@ -97,7 +97,7 @@ CREATE CONSTRAINT TRIGGER postings_balanced
     FOR EACH ROW EXECUTE FUNCTION check_entry_balanced();
 ```
 
-`sum(bigint)` trả `numeric` nên không tràn. Nhánh đếm không thừa: bút toán 0 dòng có tổng đúng bằng 0, chỉ `v_count` mới bắt được. Bút toán rỗng không kích hoạt trigger trên `postings`, nên cần trigger thứ hai, `entries_have_postings`, trên `journal_entries`. `UPDATE` chuyển posting sang bút toán khác thì hàm kiểm cả bút toán cũ lẫn mới. Lab mô phỏng code lỗi: ghi posting -100 và +90 rồi cập nhật số dư như thường. Từng câu chạy được, lỗi chỉ đến ở `COMMIT`:
+`sum(bigint)` trả `numeric` nên không tràn. Nhánh đếm không thừa: bút toán 0 dòng có tổng đúng bằng 0, chỉ `v_count` mới bắt được. Bút toán rỗng không kích hoạt trigger trên `postings`, nên cần trigger thứ hai, `entries_have_postings`, trên `journal_entries`. `UPDATE` chuyển posting sang bút toán khác thì hàm kiểm cả bút toán cũ lẫn mới. Lab mô phỏng code lỗi: ghi posting -100 và +90 rồi cập nhật số dư như thường. Từng câu lệnh đều chạy được, lỗi chỉ xuất hiện ở `COMMIT`:
 
 ```text
 posting -100 và +90, rồi COMMIT
@@ -109,20 +109,20 @@ bút toán một dòng
   sau ba lần thử: 1 bút toán, 3 posting
 ```
 
-Số `4`, `5`, `6` là `id` của các bút toán bị huỷ: identity không hoàn lại giá trị khi rollback, nên mã `JE-` có thể có lỗ hổng.
+Số `4`, `5`, `6` là `id` của các bút toán bị huỷ: identity không hoàn lại giá trị khi rollback, nên mã `JE-` có thể có khoảng trống.
 
 <figure class="tkh-fig">
 <div class="tkh-fig-box">
 <svg viewBox="0 0 880 260" role="img" aria-label="Hình 2. Dòng thời gian một transaction ghi bút toán lệch. Bước 1 đến 5 là BEGIN, INSERT bút toán, hai INSERT posting và upsert số dư, tất cả chạy được. Bước 6 là COMMIT: constraint trigger chạy, thấy tổng bằng -10, ném lỗi 23514 và transaction bị rollback, mất cả posting, bút toán và số dư."><defs><marker id="rust-schema-so-cai-1-a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10 z" class="f-phys"/></marker></defs><rect x="10" y="20" width="120" height="64" rx="10" class="f-phys-soft s-phys"/><text x="22" y="46" class="t-b">1 · BEGIN</text><text x="22" y="66" class="t-small">mở transaction</text><rect x="158" y="20" width="120" height="64" rx="10" class="f-phys-soft s-phys"/><text x="170" y="46" class="t-b">2 · INSERT</text><text x="170" y="66" class="t-small">bút toán rỗng</text><rect x="306" y="20" width="120" height="64" rx="10" class="f-phys-soft s-phys"/><text x="318" y="46" class="t-b">3 · INSERT</text><text x="318" y="66" class="t-small">posting -100</text><rect x="454" y="20" width="120" height="64" rx="10" class="f-phys-soft s-phys"/><text x="466" y="46" class="t-b">4 · INSERT</text><text x="466" y="66" class="t-small">posting +90</text><rect x="602" y="20" width="120" height="64" rx="10" class="f-phys-soft s-phys"/><text x="614" y="46" class="t-b">5 · UPSERT</text><text x="614" y="66" class="t-small">2 dòng số dư</text><rect x="750" y="20" width="120" height="64" rx="10" class="f-warn-soft s-warn"/><text x="762" y="46" class="t-b">6 · COMMIT</text><text x="762" y="66" class="t-small">chạy trigger</text><path d="M130 52 L158 52" class="f-none s-phys" stroke-width="2" marker-end="url(#rust-schema-so-cai-1-a)"/><path d="M278 52 L306 52" class="f-none s-phys" stroke-width="2" marker-end="url(#rust-schema-so-cai-1-a)"/><path d="M426 52 L454 52" class="f-none s-phys" stroke-width="2" marker-end="url(#rust-schema-so-cai-1-a)"/><path d="M574 52 L602 52" class="f-none s-phys" stroke-width="2" marker-end="url(#rust-schema-so-cai-1-a)"/><path d="M722 52 L750 52" class="f-none s-phys" stroke-width="2" marker-end="url(#rust-schema-so-cai-1-a)"/><rect x="10" y="130" width="540" height="100" rx="10" class="f-none s-line dash"/><text x="26" y="156" class="t-b">Bước 1 đến 5: DB chưa kiểm tổng</text><text x="26" y="180" class="t-small">Trigger đã xếp một sự kiện chờ cho mỗi dòng vừa ghi (DEFERRED).</text><text x="26" y="198" class="t-small">Trạng thái dở dang là hợp lệ: bút toán được dựng từng dòng.</text><text x="26" y="216" class="t-small">Khoá ngoại và CHECK từng dòng thì đã chạy ngay ở mỗi INSERT.</text><rect x="590" y="130" width="280" height="100" rx="10" class="f-warn-soft s-warn"/><text x="606" y="156" class="t-b">Bước 6: SUM = -10 ≠ 0</text><text x="606" y="180" class="t-small">RAISE 23514, COMMIT thất bại</text><text x="606" y="198" class="t-small">rollback: mất cả posting, bút toán</text><text x="606" y="216" class="t-small">và hai lần cập nhật số dư</text><path d="M810 84 L810 130" class="f-none s-warn" stroke-width="2" marker-end="url(#rust-schema-so-cai-1-a)"/></svg>
 </div>
-<figcaption>Hình 2. Kiểm tổng chạy ở bước cuối; lỗi xoá luôn phần số dư vì cùng transaction.</figcaption>
+<figcaption>Hình 2. Kiểm tra tổng chạy ở bước cuối; khi gặp lỗi, phần số dư cũng bị xoá theo vì nằm cùng transaction.</figcaption>
 </figure>
 
-Trigger không miễn phí: mỗi dòng ghi xếp một sự kiện, lúc commit mỗi sự kiện chạy một truy vấn cộng theo `entry_id`. Lab nạp 120.000 posting trong một transaction: ba lần chạy cho 3,28 đến 3,48 giây khi bật hai trigger, 1,35 đến 1,48 giây khi tắt bằng `ALTER TABLE ... DISABLE TRIGGER` (máy còn chạy các lab khác). Nạp lịch sử hàng triệu dòng thì phải tính. Chủ bảng tắt được trigger như lab vừa làm, nên role của ứng dụng không nên là chủ bảng. Ở phía C#, trigger này nằm trong migration dưới dạng `migrationBuilder.Sql(...)` (xem [bài EF Core và PostgreSQL](/articles/dotnet10-efcore-postgresql-mapping-migration)).
+Trigger không miễn phí: mỗi dòng ghi xếp một sự kiện, lúc commit mỗi sự kiện chạy một truy vấn cộng theo `entry_id`. Lab nạp 120.000 posting trong một transaction: ba lần chạy cho 3,28 đến 3,48 giây khi bật hai trigger, 1,35 đến 1,48 giây khi tắt bằng `ALTER TABLE ... DISABLE TRIGGER` (máy còn chạy các lab khác). Nạp lịch sử hàng triệu dòng thì phải tính đến chi phí này của trigger. Chủ bảng tắt được trigger như lab vừa làm, nên role của ứng dụng không nên là chủ bảng. Ở phía C#, trigger này nằm trong migration dưới dạng `migrationBuilder.Sql(...)` (xem [bài EF Core và PostgreSQL](/articles/dotnet10-efcore-postgresql-mapping-migration)).
 
 ## account_balances: projection cập nhật cùng transaction
 
-Đọc rồi ghi lại số dư từ ứng dụng sẽ mất cập nhật khi hai request đồng thời (bài 13 đã mô phỏng). Lab cộng thẳng trong DB:
+Đọc rồi ghi lại số dư từ ứng dụng sẽ mất cập nhật khi hai request chạy đồng thời (bài 13 đã mô phỏng). Lab cộng thẳng trong DB:
 
 ```rust
 // src/ledger.rs (rút gọn)
@@ -140,9 +140,9 @@ for (account, delta) in deltas {
 }
 ```
 
-`EXCLUDED` là dòng định chèn; phép cộng chạy trong DB, dưới khoá dòng, nên ở READ COMMITTED không mất cập nhật. `post_entry_in` nhận `&mut Transaction` nên bút toán, posting và số dư cùng commit hoặc cùng mất.
+`EXCLUDED` là dòng định chèn; phép cộng chạy trong DB, dưới khoá dòng, nên ở READ COMMITTED không mất cập nhật. `post_entry_in` nhận `&mut Transaction` nên bút toán, posting và số dư cùng commit hoặc cùng bị huỷ.
 
-Deadlock có xảy ra không? Có, nếu sai thứ tự: mỗi upsert giữ khoá dòng số dư tới hết transaction. Test `opposite_lock_order_deadlocks` cho hai transaction khoá hai tài khoản ngược chiều; PostgreSQL huỷ đúng một bên với SQLSTATE `40P01`. Lab tránh bằng cách gộp delta rồi duyệt theo tên tài khoản. Transaction ghi nhiều bút toán, hay job khoá theo thứ tự khác, vẫn có thể kẹt, nên đường ghi production phải thử lại khi gặp `40P01`.
+Deadlock có xảy ra không? Có, nếu khoá sai thứ tự: mỗi upsert giữ khoá dòng số dư tới hết transaction. Test `opposite_lock_order_deadlocks` cho hai transaction khoá hai tài khoản ngược chiều; PostgreSQL huỷ đúng một bên với SQLSTATE `40P01`. Lab tránh bằng cách gộp delta rồi duyệt theo tên tài khoản. Transaction ghi nhiều bút toán, hay job khoá theo thứ tự khác, vẫn có thể kẹt, nên đường ghi production phải thử lại khi gặp `40P01`.
 
 Chuyến `TN-0001` qua `ledger-core` (`capture_entry` với chính sách phí mặc định) ghi `JE-000001`:
 
@@ -178,11 +178,11 @@ Lab sửa tay số dư tài xế bớt 500, đối chiếu, dựng lại từ po
   tổng số dư: 0; tài khoản lệch: 0
 ```
 
-`version` 42 là 1 (`TN-0001`) cộng 1 (dựng lại) cộng 40: không mất lần cập nhật nào. Kết quả đối chiếu khác rỗng là sự cố cần điều tra trước: dựng lại chỉ che nguyên nhân, và phải chặn ghi đồng thời vì `SUM` đọc theo snapshot, có thể đè mất bút toán vừa commit.
+`version` 42 là 1 (`TN-0001`) cộng 1 (dựng lại) cộng 40: không mất lần cập nhật nào. Kết quả đối chiếu không rỗng là sự cố cần điều tra trước: dựng lại chỉ che nguyên nhân, và khi dựng lại phải chặn ghi đồng thời vì `SUM` đọc theo snapshot, có thể đè mất bút toán vừa commit.
 
 ## Index nào cho truy vấn nào?
 
-Khoá chính `(entry_id, line_no)` không tìm được theo tài khoản, mà đó là truy vấn của job đối chiếu và mọi sao kê. Lab sinh 60.000 bút toán hai dòng bằng `generate_series` (1.000 tài khoản, mỗi tài khoản khoảng 120 posting), chạy `EXPLAIN (ANALYZE, BUFFERS)` hai lần và lấy lần sau để cache ấm. Chưa có index:
+Khoá chính `(entry_id, line_no)` không giúp tìm theo tài khoản, trong khi đó là truy vấn của job đối chiếu và mọi sao kê. Lab sinh 60.000 bút toán hai dòng bằng `generate_series` (1.000 tài khoản, mỗi tài khoản khoảng 120 posting), chạy `EXPLAIN (ANALYZE, BUFFERS)` hai lần và lấy lần sau để cache ấm. Chưa có index:
 
 ```text
 Aggregate  (cost=2383.60..2383.61 rows=1 width=40) (actual time=5.239..5.239 rows=1.00 loops=1)
@@ -212,9 +212,9 @@ Execution Time: 0.264 ms
 
 Không index, PostgreSQL đọc cả bảng (`Seq Scan`), bỏ 119.880 dòng (`Rows Removed by Filter`), tốn 883 page. Có index, dò index mất 3 page, rồi nhảy tới 120 page của bảng (`Heap Blocks: exact=120`): tổng 123. Posting của một tài khoản nằm rải khắp bảng nên vẫn chạm 120 page: rẻ hơn 7 lần, không phải 1.000 lần.
 
-Số đo trên máy viết bài (MacBook Pro M1 Max, PostgreSQL 18.6 trong Docker, cache ấm), không phải SLA. Số page ổn định, thời gian thì không: ba lần cho 5,1 đến 5,3 ms (không index) và 0,10 đến 0,26 ms (có index). Lab đặt `max_parallel_workers_per_gather = 0` để hai kế hoạch cùng chạy một tiến trình: 883 page còn dưới ngưỡng `min_parallel_table_scan_size` (8 MB) nên planner chưa chọn parallel, nhưng thử nhân đôi bảng là `Gather` xuất hiện và thời gian không còn so thẳng được.
+Số đo trên máy viết bài (MacBook Pro M1 Max, PostgreSQL 18.6 trong Docker, cache ấm), không phải SLA. Số page ổn định, thời gian thì không: ba lần cho 5,1 đến 5,3 ms (không index) và 0,10 đến 0,26 ms (có index). Lab đặt `max_parallel_workers_per_gather = 0` để hai kế hoạch cùng chạy một tiến trình: 883 page còn dưới ngưỡng `min_parallel_table_scan_size` (8 MB) nên planner chưa chọn parallel, nhưng nếu thử nhân đôi bảng thì `Gather` xuất hiện và thời gian không còn so thẳng được.
 
-Vì sao `(account_id, entry_id)` mà không phải `(account_id, posted_at)`? Vì `postings` không có `posted_at`, và một index không trải qua hai bảng. `entry_id` tăng theo thứ tự cấp số nên index này cho posting của một tài khoản gần đúng theo thời gian. Chỉ gần đúng: identity cấp số lúc `INSERT`, `now()` lấy giờ bắt đầu transaction, nên giao dịch đồng thời có thể lệch thứ tự. Sao kê theo khoảng thời gian thì join `journal_entries`. Bản partition buộc phải có `posted_at` trong bảng, và index ở đó là `(account_id, posted_at)`.
+Vì sao `(account_id, entry_id)` mà không phải `(account_id, posted_at)`? Vì `postings` không có `posted_at`, và một index không thể gồm cột của hai bảng. `entry_id` tăng theo thứ tự cấp số nên index này trả posting của một tài khoản theo thứ tự gần đúng với thời gian. Chỉ gần đúng: identity cấp số lúc `INSERT`, `now()` lấy giờ bắt đầu transaction, nên giao dịch đồng thời có thể lệch thứ tự. Sao kê theo khoảng thời gian thì join `journal_entries`. Bản partition buộc phải có `posted_at` trong bảng, và index ở đó là `(account_id, posted_at)`.
 
 ## Partition theo tháng đổi gì trong schema?
 
@@ -227,14 +227,14 @@ Lab dựng thêm `postings_p`, cùng nội dung `postings` nhưng `PARTITION BY 
 <figcaption>Hình 3. Partition pruning thấy trong <code>EXPLAIN</code>: kế hoạch một tháng chỉ nhắc tới <code>postings_p_2026_03</code>.</figcaption>
 </figure>
 
-Pruning là phần dễ chịu; phần phải trả nằm ở ràng buộc. Thứ nhất, giữ khoá chính cũ `(entry_id, line_no)` bị từ chối:
+Pruning là phần dễ chịu; phần phải trả nằm ở ràng buộc. Thứ nhất, giữ nguyên khoá chính cũ `(entry_id, line_no)` thì bị từ chối:
 
 ```text
 PRIMARY KEY (entry_id, line_no) trên bảng PARTITION BY RANGE (posted_at):
   Some(("0A000", "unique constraint on partitioned table must include all partitioning columns"))
 ```
 
-Khoá chính và unique của bảng partition phải chứa partition key, vì mỗi partition chỉ tự kiểm unique trong phạm vi nó; nên `postings_p` có khoá chính `(entry_id, line_no, posted_at)`. Thứ hai là lỗ hổng: DB không còn đảm bảo `(entry_id, line_no)` duy nhất toàn bảng.
+Khoá chính và unique của bảng partition phải chứa partition key, vì mỗi partition chỉ tự kiểm tra tính duy nhất trong phạm vi của nó, nên `postings_p` có khoá chính `(entry_id, line_no, posted_at)`. Thứ hai là một kẽ hở: DB không còn đảm bảo `(entry_id, line_no)` duy nhất toàn bảng.
 
 ```text
 trùng (entry_id, line_no, posted_at) bị từ chối: true
@@ -249,7 +249,7 @@ FK (entry_id, line_no) -> postings_p:
 FK (entry_id, line_no, posted_at) -> postings_p: được chấp nhận
 ```
 
-Chiều ngược lại êm: `postings_p` trỏ khoá ngoại tới `journal_entries(id)` và `accounts(id)` bình thường. Thứ tư, nặng nhất với sổ cái: partition luôn `journal_entries` theo `posted_at` thì sao?
+Chiều ngược lại thì không gặp vấn đề gì: `postings_p` trỏ khoá ngoại tới `journal_entries(id)` và `accounts(id)` bình thường. Thứ tư, nặng nhất với sổ cái: partition cả `journal_entries` theo `posted_at` thì sao?
 
 ```text
 UNIQUE (idempotency_key) trên bảng PARTITION BY RANGE (posted_at):
@@ -257,18 +257,18 @@ UNIQUE (idempotency_key) trên bảng PARTITION BY RANGE (posted_at):
 UNIQUE (idempotency_key, posted_at), cùng key khác posted_at: cả hai dòng được nhận
 ```
 
-`idempotency_key` không thể unique toàn cục nữa. Thêm `posted_at` vào unique thì tạo được bảng, nhưng lần ghi lại `trip:TN-0001:capture` có `posted_at` mới là thành bút toán thứ hai. Vì vậy lab chỉ partition posting; nếu buộc phải partition `journal_entries`, khoá idempotency phải nằm ở một bảng riêng không partition. Thứ năm, dòng có `posted_at` ngoài mọi partition không có chỗ ở:
+`idempotency_key` không thể unique toàn cục nữa. Thêm `posted_at` vào unique thì tạo được bảng, nhưng lần ghi lại `trip:TN-0001:capture` với `posted_at` mới sẽ thành bút toán thứ hai. Vì vậy lab chỉ partition posting; nếu buộc phải partition `journal_entries`, khoá idempotency phải nằm ở một bảng riêng không partition. Thứ năm, dòng có `posted_at` ngoài mọi partition không có partition nào để chứa:
 
 ```text
 posted_at = 2026-11-06 (ngoài mọi partition):
   Some(("23514", "no partition of relation \"postings_p\" found for row"))
 ```
 
-Partition phải được tạo trước kỳ ghi, bằng job; hoặc có partition `DEFAULT`, nhưng nó hứng dữ liệu lạc và làm việc thêm partition mới chậm hơn.
+Partition phải được tạo trước kỳ ghi, bằng job; hoặc dùng partition `DEFAULT`, nhưng partition này hứng dữ liệu lạc và khiến việc thêm partition mới chậm hơn.
 
 ## Khi nào CHƯA cần partition?
 
-Với 120.000 posting, bảng và index chiếm khoảng 17 MB; truy vấn một tài khoản đọc 123 page, dưới 1 ms, với index thường. Bản partition cho một tài khoản trong một tháng đọc 24 page nhưng cũng chỉ trả 22 dòng thay vì 120: không phải lợi thế bù được các ràng buộc vừa liệt kê. Partition đáng giá ở chỗ khác: bỏ dữ liệu cũ bằng `DROP` hay `DETACH` thay vì `DELETE` hàng triệu dòng, `VACUUM` từng phần, chuyển tháng ít dùng sang lưu trữ rẻ hơn. Tài liệu PostgreSQL nêu quy tắc kinh nghiệm: bảng phải lớn hơn bộ nhớ máy chủ thì partition mới đáng.
+Với 120.000 posting, bảng và index chiếm khoảng 17 MB; truy vấn một tài khoản đọc 123 page, dưới 1 ms, với index thường. Bản partition cho một tài khoản trong một tháng đọc 24 page nhưng cũng chỉ trả 22 dòng thay vì 120: đó không phải lợi thế đủ lớn để bù các ràng buộc vừa liệt kê. Partition đáng giá ở chỗ khác: bỏ dữ liệu cũ bằng `DROP` hay `DETACH` thay vì `DELETE` hàng triệu dòng, `VACUUM` từng phần, chuyển tháng ít dùng sang lưu trữ rẻ hơn. Tài liệu PostgreSQL nêu quy tắc kinh nghiệm: bảng phải lớn hơn bộ nhớ máy chủ thì partition mới đáng.
 
 Cách làm gợi ý: bắt đầu bằng bảng thường, đúng khoá chính, đúng index; đo trên dữ liệu cỡ thật; chuyển sang partition khi một con số cụ thể (thời gian `VACUUM`, kích thước bảng) chạm ngưỡng đã định.
 
@@ -283,16 +283,16 @@ cargo run --manifest-path examples/toi-noi-rust/25-schema-so-cai/Cargo.toml -- -
 cargo test --manifest-path examples/toi-noi-rust/25-schema-so-cai/Cargo.toml
 ```
 
-Lệnh đầu in mọi kết quả trích ở trên. Lệnh thứ hai in `VERIFY OK` (mã 0) hoặc `VERIFY FAIL: …` (mã 1); nó kiểm hình dạng kế hoạch và số page, không kiểm con số thời gian. Lệnh thứ ba chạy 9 test, 8 trong số đó dùng PostgreSQL thật. Thiếu `TOI_NOI_PG_URL` thì lab thất bại kèm cách bật compose.
+Lệnh đầu in mọi kết quả trích ở trên. Lệnh thứ hai in `VERIFY OK` (mã 0) hoặc `VERIFY FAIL: …` (mã 1); lệnh này kiểm tra hình dạng kế hoạch và số page, không kiểm tra con số thời gian. Lệnh thứ ba chạy 9 test, 8 trong số đó dùng PostgreSQL thật. Thiếu `TOI_NOI_PG_URL` thì lab thất bại kèm cách bật compose.
 
 <div class="tkh-callout tkh-callout--warn">
 <span class="tkh-callout-title">Giới hạn của ví dụ</span>
 <p>Dữ liệu bench đều đặn (mỗi bút toán hai dòng, không ghi đồng thời lúc đo), nên số đo chỉ cho thấy hình dạng kế hoạch, không dự báo tải thật. Lab không có append-only (bài 24), không tách role ứng dụng khỏi chủ bảng, không có job đối chiếu định kỳ, không thử lại khi `40P01`, và chỉ tạo sáu partition cố định.</p>
 </div>
 
-**Bài tập:** một dev thêm cột `balance_dong` vào `postings` ("số dư sau dòng này") để khỏi cộng dồn. Hai request đồng thời cùng ghi posting cho `driver:DR-001`. Vì sao cột đó khó đúng, và với schema của bài này lấy «số dư tài khoản tại bút toán `JE-000007`» bằng cách nào mà không thêm cột?
+**Bài tập:** một dev thêm cột `balance_dong` vào `postings` ("số dư sau dòng này") để không phải cộng dồn. Hai request đồng thời cùng ghi posting cho `driver:DR-001`. Vì sao cột đó khó giữ đúng, và với schema của bài này lấy «số dư tài khoản tại bút toán `JE-000007`» bằng cách nào mà không thêm cột?
 
-<details><summary>Xem lời giải</summary><p>Cột đó buộc mỗi request đọc số dư dòng trước rồi cộng. Hai request đọc cùng giá trị cũ thì một số dư sai mà PostgreSQL không báo lỗi; muốn đúng phải khoá tuần tự mọi posting của tài khoản. Với schema này đó là một phép cộng: <code>SELECT COALESCE(SUM(amount_dong), 0) FROM postings WHERE account_id = $1 AND entry_id &lt;= 7</code>. Index <code>(account_id, entry_id)</code> giúp đọc đúng khoảng cần.</p></details>
+<details><summary>Xem lời giải</summary><p>Cột đó buộc mỗi request đọc số dư dòng trước rồi cộng. Hai request đọc cùng giá trị cũ thì có một số dư bị sai mà PostgreSQL không báo lỗi; muốn đúng phải khoá tuần tự mọi posting của tài khoản. Với schema này đó là một phép cộng: <code>SELECT COALESCE(SUM(amount_dong), 0) FROM postings WHERE account_id = $1 AND entry_id &lt;= 7</code>. Index <code>(account_id, entry_id)</code> giúp đọc đúng khoảng cần.</p></details>
 
 Bài trước: [bài 24](/articles/rust-transaction-isolation-append-only-idempotency-key). Bài tiếp: [bài 26](/articles/rust-repository-unit-of-work-trait-transaction).
 

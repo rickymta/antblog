@@ -10,7 +10,7 @@ language: vi
 
 Lúc cao điểm, 25.000 tài xế online của [Tới Nơi](/articles/du-an-mau-toi-noi) mỗi người gửi vị trí một lần mỗi 4 giây: khoảng **6.250 dòng mỗi giây**. Một phút là 375.000 dòng. Nếu muốn quét một khoảng dữ liệu để tìm các điểm có tốc độ phi lý (vài trăm km/h do GPS nhảy), cách đầu tiên ta nghĩ tới là đọc hết vào một list rồi lọc. Bài này cho thấy cách đó tốn bao nhiêu RAM và cách để chỉ giữ một điểm trong bộ nhớ tại mỗi thời điểm.
 
-Đây là bài 06 của lộ trình **Python cơ bản qua Tới Nơi**. Ta đi từ comprehension (cách viết gọn một vòng lặp tạo list, dict, set), qua giao thức iterator đứng sau mọi vòng `for`, tới generator và `yield`, rồi áp dụng vào bài toán 1 triệu điểm GPS giả với số liệu thật. Người đã đọc bài C# về [LINQ và deferred execution](/articles/csharp-linq-deferred-execution) sẽ nhận ra ý tưởng "chưa chạy cho tới khi có người duyệt"; Python làm điều đó bằng generator, và khác ở chỗ generator chỉ duyệt được một lần.
+Đây là bài 06 của lộ trình **Python cơ bản qua Tới Nơi**. Ta đi từ comprehension (cách viết gọn một vòng lặp tạo list, dict, set), qua giao thức iterator đứng sau mọi vòng `for`, tới generator và `yield`, rồi áp dụng vào bài toán 1 triệu điểm GPS giả với số liệu thật. Người đã đọc bài C# về [LINQ và deferred execution](/articles/csharp-linq-deferred-execution) sẽ nhận ra ý tưởng «chưa chạy cho tới khi có người duyệt»; Python làm điều đó bằng generator, và khác ở chỗ generator chỉ duyệt được một lần.
 
 <div class="tkh-callout tkh-callout--example">
 <span class="tkh-callout-title">Thử trước khi đọc</span>
@@ -30,7 +30,7 @@ cities = {t.city for t in TRIPS}                                   # set compreh
 
 Kết quả thật: `['TN-0001', 'TN-0003', 'TN-0004', 'TN-0006']` cho list, `['DN', 'HN', 'HP', 'SG']` cho set (đã `sorted` để in). Ba dòng trên đọc như một câu: «lấy mã của mỗi chuyến mà cước từ 14.250». Biến vòng lặp `t` nằm trong phạm vi riêng của comprehension, không rò ra ngoài.
 
-Comprehension hợp khi mỗi phần tử có một biểu thức ngắn, tối đa một điều kiện. Nó xấu đi khi lồng nhiều tầng. Lab có hai cách tính cùng một thứ: gom chuyến có cước từ 14.250 theo từng tài xế.
+Comprehension hợp khi mỗi phần tử có một biểu thức ngắn, tối đa một điều kiện. Comprehension trở nên khó đọc khi lồng nhiều tầng. Lab có hai cách tính cùng một thứ: gom chuyến có cước từ 14.250 theo từng tài xế.
 
 ```python
 # Cách 1: một dòng lồng nhau. Quét TRIPS một lần cho mỗi tài xế, khó đọc.
@@ -45,7 +45,7 @@ for t in TRIPS:
         loop[t.driver].append(t.id)
 ```
 
-Hai cách ra cùng kết quả `{'DR-001': ['TN-0001', 'TN-0003'], 'DR-003': ['TN-0004']}` sau khi bỏ khoá có list rỗng (cách 1 còn tạo khoá `DR-002` với list rỗng, cách 2 không), nhưng cách 1 có độ phức tạp tỷ lệ tích số tài xế và số chuyến. Với 25.000 tài xế và vài triệu chuyến, đây là lỗi hiệu năng ẩn trong một dòng "thông minh". Dấu hiệu nên chuyển về vòng `for`: phải cuộn ngang, có `if` lồng nhau, cần log hay bắt exception từng phần tử, hoặc đang dùng comprehension chỉ để gọi hàm có side effect (`[print(x) for x in xs]`).
+Hai cách ra cùng kết quả `{'DR-001': ['TN-0001', 'TN-0003'], 'DR-003': ['TN-0004']}` sau khi bỏ khoá có list rỗng (cách 1 còn tạo khoá `DR-002` với list rỗng, cách 2 không), nhưng cách 1 có độ phức tạp tỷ lệ với tích của số tài xế và số chuyến. Với 25.000 tài xế và vài triệu chuyến, đây là lỗi hiệu năng ẩn trong một dòng «thông minh». Dấu hiệu nên chuyển về vòng `for`: phải cuộn ngang, có `if` lồng nhau, cần log hay bắt exception từng phần tử, hoặc đang dùng comprehension chỉ để gọi hàm có side effect (`[print(x) for x in xs]`).
 
 ## Iterator: vòng `for` thật sự làm gì
 
@@ -66,7 +66,7 @@ while True:              # đây là điều vòng for làm ngầm
         break
 ```
 
-Vòng `for item in ids:` gọi `iter(ids)` một lần, rồi `next()` lặp lại cho tới khi gặp `StopIteration` và kết thúc êm, không có lỗi nào lan ra ngoài. Lab kiểm ra ba điều: `iter(ids) is ids` là `False` (list là iterable, không phải iterator), `iter(it2) is it2` là `True` (iterator trả về chính nó, nên dùng trong `for` được), và vòng `while` thủ công cho kết quả bằng vòng `for`. Một iterator đã đi qua thì không quay lại: muốn duyệt lại, ta phải lấy iterator mới từ iterable gốc.
+Vòng `for item in ids:` gọi `iter(ids)` một lần, rồi `next()` lặp lại cho tới khi gặp `StopIteration` và kết thúc êm, không có lỗi nào lan ra ngoài. Lab kiểm tra ba điều: `iter(ids) is ids` là `False` (list là iterable, không phải iterator), `iter(it2) is it2` là `True` (iterator trả về chính nó, nên dùng trong `for` được), và vòng `while` thủ công cho kết quả bằng vòng `for`. Một iterator đã đi qua thì không quay lại: muốn duyệt lại, ta phải lấy iterator mới từ iterable gốc.
 
 ## Generator và `yield`: hàm chạy từng đoạn
 
@@ -103,7 +103,7 @@ Hệ quả thực tế: không gọi được `len()` trên generator, không l�
 
 ## 1 triệu điểm GPS mà không nạp hết vào list
 
-Lab giả lập luồng vị trí bằng một generator. Mỗi điểm gồm số thứ tự, mã tài xế (1 đến 25.000), tốc độ, vĩ độ, kinh độ. Dữ liệu sinh bằng `random.Random(seed)` với seed cố định, nên mỗi lần chạy ra đúng cùng một dòng dữ liệu; ta chỉ dùng `random()` vì tài liệu của module `random` cam kết: cùng seed thì `random()` cho cùng một chuỗi số giữa các phiên bản Python, còn các phương thức khác (như `gauss` hay `choice`) có thể đổi thuật toán. Khoảng 0,1% điểm là «lỗi GPS» với tốc độ 150 đến 400 km/h; còn lại 0 đến 60 km/h. Ngưỡng phi lý là trên 120 km/h.
+Lab giả lập luồng vị trí bằng một generator. Mỗi điểm gồm số thứ tự, mã tài xế (1 đến 25.000), tốc độ, vĩ độ, kinh độ. Dữ liệu sinh bằng `random.Random(seed)` với seed cố định, nên mỗi lần chạy đều sinh đúng cùng một dòng dữ liệu; ta chỉ dùng `random()` vì tài liệu của module `random` cam kết: cùng seed thì `random()` cho cùng một chuỗi số giữa các phiên bản Python, còn các phương thức khác (như `gauss` hay `choice`) có thể đổi thuật toán. Khoảng 0,1% điểm là «lỗi GPS» với tốc độ 150 đến 400 km/h; còn lại 0 đến 60 km/h. Ngưỡng phi lý là trên 120 km/h.
 
 ```python
 def gps_stream(n, seed=SEED):
@@ -162,11 +162,11 @@ Cùng 972 điểm phi lý, nhưng list giữ cả triệu điểm cùng lúc nê
 <figcaption>Hình 2. list nạp hết giữ mọi phần tử cùng lúc; generator giữ đúng một phần tử đang xử lý (ô đặc), các ô nét đứt đã được thu hồi hoặc chưa được sinh ra.</figcaption>
 </figure>
 
-`sys.getsizeof` dễ gây hiểu nhầm ở đây. Với list triệu điểm nó báo 8.448.728 byte, chỉ khoảng 8 MiB, vì `getsizeof` đo «vỏ ngoài» (mảng con trỏ), không cộng các tuple và số thực mà list trỏ tới. Với generator nó báo 296 byte và con số này không đổi dù nguồn dài bao nhiêu. Muốn biết tổng bộ nhớ Python cấp phát cho các đối tượng, dùng `tracemalloc` như trên. Lưu ý đó không phải bộ nhớ tiến trình (RSS) mà hệ điều hành báo.
+`sys.getsizeof` dễ gây hiểu nhầm ở đây. Với list một triệu điểm, hàm này báo 8.448.728 byte, chỉ khoảng 8 MiB, vì `getsizeof` đo «vỏ ngoài» (mảng con trỏ), không cộng các tuple và số thực mà list trỏ tới. Với generator, hàm này báo 296 byte và con số này không đổi dù nguồn dài bao nhiêu. Muốn biết tổng bộ nhớ Python cấp phát cho các đối tượng, dùng `tracemalloc` như trên. Lưu ý rằng đó không phải bộ nhớ tiến trình (RSS) mà hệ điều hành báo.
 
 ## `itertools` và các hàm tổng hợp
 
-Module `itertools` cung cấp các mảnh ghép để xây pipeline mà không materialize (tạo hẳn list trong bộ nhớ). Lab dùng bốn thứ:
+Module `itertools` cung cấp các mảnh ghép để xây pipeline mà không phải tạo hẳn list trong bộ nhớ (materialize). Lab dùng bốn thứ:
 
 ```python
 head = [p.seq for p in islice(gps_stream(POINTS), 3)]   # [0, 1, 2]: lấy 3 điểm đầu của 1 triệu
@@ -176,7 +176,7 @@ list(batched((t.id for t in TRIPS), 4))                 # từng nhóm 4 phần 
 
 Kết quả `batched` là `[('TN-0001', 'TN-0002', 'TN-0003', 'TN-0004'), ('TN-0005', 'TN-0006')]`. `itertools.batched` có sẵn trong thư viện chuẩn từ Python 3.12, không cần cài thêm gói; hữu ích khi ghi 1 triệu điểm xuống database từng lô 1.000 dòng.
 
-`groupby` là hàm đặt bẫy người mới. Nó chỉ gom các phần tử **liền nhau** có cùng khoá, không như `GROUP BY` của SQL. Cùng sáu chuyến, khi chưa sắp xếp, ta nhận sáu nhóm:
+`groupby` là hàm dễ khiến người mới sa bẫy. Hàm này chỉ gom các phần tử **liền nhau** có cùng khoá, khác với `GROUP BY` của SQL. Cùng sáu chuyến, khi chưa sắp xếp, ta nhận sáu nhóm:
 
 ```text
 unsorted_groups : [('SG', 1), ('HN', 1), ('SG', 1), ('DN', 1), ('SG', 1), ('HP', 1)]
@@ -189,13 +189,13 @@ Các hàm tổng hợp `sum`, `max`, `min`, `any`, `all` nhận thẳng generato
 
 ## Đối chiếu LINQ, và giới hạn của ví dụ
 
-Trong C#, `Where` và `Select` của LINQ to Objects cũng trì hoãn: khai báo query chưa chạy predicate, chỉ khi `foreach` hoặc `ToList` mới chạy. Generator expression của Python gần với một query LINQ, còn `list(...)` tương ứng với `ToList()`. Khác biệt quan trọng: query LINQ duyệt lại sẽ chạy lại từ nguồn (bài C# cho thấy duyệt lần hai thấy cả dòng mới thêm), còn generator đã cạn thì duyệt lại ra rỗng. Muốn nhiều lần duyệt trong Python, bạn tạo lại generator từ iterable gốc, hoặc lưu bằng `list`.
+Trong C#, `Where` và `Select` của LINQ to Objects cũng trì hoãn: khai báo query chưa chạy predicate, chỉ khi `foreach` hoặc `ToList` mới chạy. Generator expression của Python gần với một query LINQ, còn `list(...)` tương ứng với `ToList()`. Khác biệt quan trọng: query LINQ duyệt lại sẽ chạy lại từ nguồn (bài C# cho thấy duyệt lần hai thấy cả dòng mới thêm), còn generator đã cạn thì duyệt lại ra rỗng. Muốn duyệt nhiều lần trong Python, bạn tạo lại generator từ iterable gốc, hoặc lưu bằng `list`.
 
-Cả hai thế giới có chung một cạm bẫy: lazy không đồng nghĩa mọi bước đều streaming. `sorted` và `groupby` sau khi sort cần toàn bộ dữ liệu; còn lỗi trong generator chỉ lộ ra tại thời điểm kéo, không phải lúc khai báo, nên traceback có thể trỏ tới nơi bạn không nghĩ.
+Cả hai thế giới có chung một cạm bẫy: lazy không có nghĩa là mọi bước đều xử lý theo từng phần tử (streaming). `sorted` và `groupby` sau khi sort cần toàn bộ dữ liệu; còn lỗi trong generator chỉ lộ ra tại thời điểm kéo, không phải lúc khai báo, nên traceback có thể trỏ tới nơi bạn không ngờ tới.
 
 <div class="tkh-callout tkh-callout--warn">
 <span class="tkh-callout-title">Giới hạn so với production</span>
-<p>Dữ liệu ở đây do generator tự sinh trong cùng một process, còn dữ liệu thật đến từ Kafka, qua mạng, có độ trễ, thứ tự đảo và điểm thiếu. Tốc độ là một trường có sẵn trong điểm giả; thực tế phải suy ra từ khoảng cách giữa hai điểm liên tiếp và chênh lệch thời gian, sau đó mới lọc nhiễu. Ngưỡng 120 km/h là giả định để học. Lab chạy một luồng đơn, không xử lý lỗi từng điểm, và số đo bộ nhớ là của một lần chạy trên một máy.</p>
+<p>Dữ liệu ở đây do generator tự sinh trong cùng một process, còn dữ liệu thật đến từ Kafka, qua mạng, có độ trễ, thứ tự bị đảo và điểm bị thiếu. Tốc độ là một trường có sẵn trong điểm giả; thực tế phải suy ra từ khoảng cách giữa hai điểm liên tiếp và chênh lệch thời gian, sau đó mới lọc nhiễu. Ngưỡng 120 km/h là giả định để học. Lab chạy một luồng đơn, không xử lý lỗi từng điểm, và kết quả đo bộ nhớ là của một lần chạy trên một máy.</p>
 </div>
 
 | Hiện tượng | Kiểm tra trước |
@@ -204,7 +204,7 @@ Cả hai thế giới có chung một cạm bẫy: lazy không đồng nghĩa m�
 | `TypeError: object of type 'generator' has no len()` | Generator không biết độ dài; đếm bằng `sum(1 for _ in g)` hoặc lưu list |
 | `groupby` cho nhiều nhóm trùng khoá | Chưa `sorted` theo cùng khoá; `groupby` chỉ gom phần tử liền nhau |
 | RAM tăng vọt khi xử lý file/luồng lớn | Có `list(...)` hoặc `[... for ...]` ở giữa pipeline không; đổi sang generator expression |
-| Lỗi chỉ xuất hiện khi chạy một nơi xa chỗ khai báo | Lazy: lỗi bung ra khi có người kéo; kiểm tra chỗ tiêu thụ |
+| Lỗi chỉ xuất hiện lúc chạy, ở một nơi xa chỗ khai báo | Lazy: lỗi bung ra khi có người kéo; kiểm tra chỗ tiêu thụ |
 
 ## Chạy và kiểm chứng
 
@@ -215,13 +215,13 @@ uv run --project examples/toi-noi-python/06-comprehension-generator examples/toi
 uv run --project examples/toi-noi-python/06-comprehension-generator examples/toi-noi-python/06-comprehension-generator/main.py --verify
 ```
 
-Lệnh đầu chạy vài giây và in các khối kết quả như trên, gồm hai dòng so sánh generator và list. Lệnh thứ hai kiểm 15 kết quả: comprehension, iterator, generator lười và dùng một lần, `islice`, `chain`, `batched`, `groupby`, số điểm phi lý bằng 972, generator và list cho cùng đáp án, và đỉnh bộ nhớ generator nhỏ hơn rất nhiều so với list. Kết quả cuối:
+Lệnh đầu chạy vài giây và in các khối kết quả như trên, gồm hai dòng so sánh generator và list. Lệnh thứ hai kiểm tra 15 kết quả: comprehension, iterator, generator lười và dùng một lần, `islice`, `chain`, `batched`, `groupby`, số điểm phi lý bằng 972, generator và list cho cùng đáp án, và đỉnh bộ nhớ generator nhỏ hơn rất nhiều so với list. Kết quả cuối:
 
 ```text
 OK 15/15
 ```
 
-Sai kiểm tra nào, chương trình in `FAIL` kèm tên và thoát với mã 1.
+Kiểm tra nào sai thì chương trình in `FAIL` kèm tên và thoát với mã 1.
 
 **Bài tập:** (1) Viết generator expression tính tổng tốc độ của các điểm phi lý trong 1 triệu điểm mà không tạo list. (2) Vì sao `groupby(gps_stream(1000), key=lambda p: p.driver_no)` hầu như cho mỗi điểm một nhóm riêng?
 

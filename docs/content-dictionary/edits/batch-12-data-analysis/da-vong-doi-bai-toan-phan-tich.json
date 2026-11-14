@@ -1,0 +1,19 @@
+{"file":"da-vong-doi-bai-toan-phan-tich.md","edits":[
+{"old": "Nếu chỉ cần biết tải công việc hỗ trợ, hãy bổ sung dữ liệu liên hệ CSKH thay vì dùng số huỷ thay cho số cuộc gọi.", "new": "Nếu chỉ cần biết khối lượng công việc hỗ trợ, hãy bổ sung dữ liệu lượt liên hệ CSKH thay vì lấy số huỷ để thay cho số cuộc gọi.", "reason": "\"tải công việc\" là cụm ghép cụt; \"dùng … thay cho\" lặp động từ", "severity": "high"},
+{"old": "“Cao điểm” cũng mới là nhãn nhóm loại trừ nhau với “còn lại”.", "new": "“Cao điểm” cũng mới là nhãn của nhóm không giao với nhóm “còn lại”.", "reason": "\"nhãn nhóm loại trừ nhau với\" cụt, calque của mutually exclusive", "severity": "medium"},
+{"old": "Để tạo dataset timestamp thật,", "new": "Để tạo bộ dữ liệu có timestamp thật,", "reason": "hai danh từ tiếng Anh đứng liền kiểu định ngữ; dùng \"bộ dữ liệu\" thống nhất với các bài cùng loạt", "severity": "medium"},
+{"old": "ghi nguồn dự kiến, chủ sở hữu và bằng chứng nguồn đáp ứng định nghĩa", "new": "ghi nguồn dự kiến, người phụ trách nguồn và bằng chứng cho thấy nguồn đáp ứng định nghĩa", "reason": "\"chủ sở hữu\" calque của owner; \"bằng chứng nguồn đáp ứng\" thiếu động từ nối", "severity": "medium"},
+{"old": "Bảng là yêu cầu cần xác minh, không khẳng định", "new": "Bảng này là danh sách yêu cầu cần xác minh, không khẳng định", "reason": "câu cụt thiếu danh từ", "severity": "medium"},
+{"old": "Phân tích được các phép tính trong bảng, nhưng không truy ngược từng chuyến.", "new": "Ta phân tích được các phép tính trong bảng, nhưng không truy ngược được từng chuyến.", "reason": "câu thiếu chủ ngữ", "severity": "medium"},
+{"old": "và join làm nhân số dòng.", "new": "và phép join làm số dòng bị nhân lên.", "reason": "\"nhân số dòng\" gượng, thiếu danh từ \"phép\"", "severity": "medium"},
+{"old": "Mỗi kỳ có đúng hai nhóm loại trừ nhau theo giả định bài tập.", "new": "Mỗi kỳ có đúng hai nhóm không giao nhau theo giả định bài tập.", "reason": "thống nhất cách gọi nhóm không giao nhau trong cả bài", "severity": "medium"},
+{"old": "Đừng âm thầm bỏ ca có thời gian chờ cao", "new": "Đừng lặng lẽ bỏ các ca có thời gian chờ cao", "reason": "calque \"âm thầm\" của silently", "severity": "medium"},
+{"old": "Lấy huỷ xảy ra trong tuần chia cho nhận trong tuần dù gồm các lượt khác nhau", "new": "Lấy số huỷ xảy ra trong tuần chia cho số lượt nhận trong tuần, dù hai số này gồm các lượt khác nhau", "reason": "động từ đứng làm danh từ, câu cụt", "severity": "medium"},
+{"old": "Ghi “tỷ lệ tăng 50%” trong khi chỉ số đếm tăng 50%", "new": "Ghi “tỷ lệ tăng 50%” trong khi số đếm tăng 50%", "reason": "\"chỉ số đếm\" dễ đọc nhầm với từ \"chỉ\"; thống nhất \"số đếm\"", "severity": "low"},
+{"old": "Khuyến nghị có cần bằng chứng chưa có?", "new": "Khuyến nghị có đòi hỏi bằng chứng mà ta chưa có không?", "reason": "câu hỏi cụt, khó hiểu", "severity": "medium"},
+{"old": "xác minh lịch cao điểm và thay đổi tracking,", "new": "xác minh lịch cao điểm và thay đổi cách ghi nhận,", "reason": "từ tiếng Anh thông thường; thống nhất với bài DA-001", "severity": "medium"},
+{"old": "cần người sở hữu lịch refresh, kiểm tra độ mới", "new": "cần người phụ trách lịch làm mới dữ liệu (refresh), kiểm tra độ mới", "reason": "\"người sở hữu\" calque của owner", "severity": "medium"},
+{"old": "Thấy tỷ lệ giảm sau ngày ra mắt chưa đủ để quy toàn bộ mức giảm cho can thiệp.", "new": "Thấy tỷ lệ giảm sau ngày ra mắt thì chưa đủ để quy toàn bộ mức giảm đó cho can thiệp.", "reason": "câu cụt, thiếu từ nối và đại từ chỉ định", "severity": "medium"},
+{"old": "tách bảng minh hoạ khỏi extract thật", "new": "tách bảng minh hoạ khỏi dữ liệu trích xuất thật", "reason": "từ tiếng Anh thông thường lọt vào văn xuôi", "severity": "medium"},
+{"old": "theo dõi có người sở hữu.", "new": "theo dõi có người phụ trách.", "reason": "\"người sở hữu\" calque của owner", "severity": "medium"}
+]}

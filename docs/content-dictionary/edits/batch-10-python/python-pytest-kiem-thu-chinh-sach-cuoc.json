@@ -1,0 +1,233 @@
+{
+ "file": "python-pytest-kiem-thu-chinh-sach-cuoc.md",
+ "edits": [
+  {
+   "old": "và xem nó thêm được gì.",
+   "new": "và xem pytest mang lại thêm điều gì.",
+   "reason": "\"nó\" mơ hồ",
+   "severity": "low"
+  },
+  {
+   "old": "Cả bốn ca cho kết quả nguyên (12.000, 14.250, 25.500), nên không ca nào rơi",
+   "new": "Cả bốn test case cho kết quả nguyên (12.000, 14.250, 25.500), nên không test case nào rơi",
+   "reason": "thống nhất test case",
+   "severity": "medium"
+  },
+  {
+   "old": "Chỉ một ca như 2,001 km (cước thô 12.004,5) mới lộ ra; bảng ca của bài 03 đã có ca đó.",
+   "new": "Chỉ một test case như 2,001 km (cước thô 12.004,5) mới lộ ra; bảng của bài 03 đã có test case đó.",
+   "reason": "thống nhất test case",
+   "severity": "medium"
+  },
+  {
+   "old": "đã tự chạy, so với bảng kỳ vọng, in",
+   "new": "đã tự chạy, so kết quả với bảng kỳ vọng, in",
+   "reason": "thiếu tân ngữ, câu cụt",
+   "severity": "medium"
+  },
+  {
+   "old": "và các ca bị từ chối. pytest không trả lời thay câu hỏi «ca nào đáng kiểm»;",
+   "new": "và các test case bị từ chối. pytest không trả lời thay ta câu hỏi «test case nào đáng kiểm»;",
+   "reason": "thống nhất test case",
+   "severity": "medium"
+  },
+  {
+   "old": "**Tên và báo cáo từng ca.** `--verify` gộp thành một con số; pytest cho mỗi ca một tên",
+   "new": "**Tên và báo cáo từng test case.** `--verify` gộp thành một con số; pytest cho mỗi test case một tên",
+   "reason": "thống nhất test case",
+   "severity": "medium"
+  },
+  {
+   "old": "Thêm hàm `test_*` là nó được chạy.",
+   "new": "Thêm hàm `test_*` là pytest tự chạy hàm đó.",
+   "reason": "\"nó\" mơ hồ",
+   "severity": "medium"
+  },
+  {
+   "old": "- **Giá trị trung gian khi sai**, không chỉ",
+   "new": "- **Hiện giá trị trung gian khi test sai**, không chỉ",
+   "reason": "mục liệt kê thiếu động từ, phải đoán ý",
+   "severity": "medium"
+  },
+  {
+   "old": "- **Chọn ca để chạy**: một test,",
+   "new": "- **Chọn test để chạy**: một test,",
+   "reason": "thống nhất thuật ngữ",
+   "severity": "low"
+  },
+  {
+   "old": "mã thoát khác 0 khi có ca sai,",
+   "new": "mã thoát khác 0 khi có test case sai,",
+   "reason": "thống nhất test case",
+   "severity": "low"
+  },
+  {
+   "old": "Cách chọn ca theo phân vùng và giá trị biên",
+   "new": "Cách chọn test case theo phân vùng và giá trị biên",
+   "reason": "thống nhất test case",
+   "severity": "medium"
+  },
+  {
+   "old": "pytest viết lại `assert` khi import module test để khi sai nó in được từng giá trị trung gian",
+   "new": "pytest viết lại `assert` khi import module test để khi test sai, pytest in được từng giá trị trung gian",
+   "reason": "\"nó\" mơ hồ",
+   "severity": "medium"
+  },
+  {
+   "old": "thành 24 ca, mỗi ca một test riêng có tên ghép từ `ids`. Danh sách ca do pytest liệt kê",
+   "new": "thành 24 test case, mỗi test case chạy như một test riêng, tên ghép từ `ids`. Danh sách test case do pytest liệt kê",
+   "reason": "thống nhất test case",
+   "severity": "medium"
+  },
+  {
+   "old": "parametrize nhân một test thành nhiều ca. Một ca đỏ không che khuất các ca còn lại,",
+   "new": "parametrize nhân một test thành nhiều test case. Một test case đỏ không che khuất các test case còn lại,",
+   "reason": "thống nhất test case",
+   "severity": "medium"
+  },
+  {
+   "old": "Hai ca 2,001 và 2,499 km rơi đúng vào nửa đồng, đáp lại câu hỏi đầu bài.",
+   "new": "Hai test case 2,001 và 2,499 km rơi đúng vào nửa đồng, nên trả lời được câu hỏi đầu bài.",
+   "reason": "thống nhất test case; câu nối gượng",
+   "severity": "medium"
+  },
+  {
+   "old": "chứ không im lặng trả giá.",
+   "new": "chứ không lặng lẽ trả về một mức giá.",
+   "reason": "\"im lặng trả giá\" cụt",
+   "severity": "low"
+  },
+  {
+   "old": "Các ca được chọn có lý do. Ngoài miền gồm hai ca sát biên",
+   "new": "Các test case được chọn có lý do. Nhóm ngoài miền gồm hai test case sát biên",
+   "reason": "thống nhất test case; thiếu danh từ chính",
+   "severity": "medium"
+  },
+  {
+   "old": "Sai kiểu gồm `float`",
+   "new": "Nhóm sai kiểu gồm `float`",
+   "reason": "thiếu danh từ chính",
+   "severity": "medium"
+  },
+  {
+   "old": "ca sau sẽ thừa hưởng phần bẩn của ca trước.",
+   "new": "test sau sẽ nhận dữ liệu đã bị test trước làm bẩn.",
+   "reason": "\"phần bẩn\" là cách nói cụt, thống nhất test",
+   "severity": "medium"
+  },
+  {
+   "old": "chính sách là tham số, nên kiểm nó đơn giản.",
+   "new": "chính sách là tham số, nên việc kiểm thử đơn giản.",
+   "reason": "\"kiểm nó\" cụt",
+   "severity": "medium"
+  },
+  {
+   "old": "thường là thiết kế mà phụ thuộc được truyền vào;",
+   "new": "thường là thiết kế nhận phụ thuộc từ bên ngoài;",
+   "reason": "bị động kiểu tiếng Anh",
+   "severity": "low"
+  },
+  {
+   "old": "Nó không phải code ứng dụng;",
+   "new": "Cấu hình này không phải code ứng dụng;",
+   "reason": "\"Nó\" chỉ sự vật trừu tượng đầu câu",
+   "severity": "medium"
+  },
+  {
+   "old": "Chi tiết của ca thất bại đầu tiên (trích):",
+   "new": "Chi tiết của test case thất bại đầu tiên (trích):",
+   "reason": "thống nhất test case",
+   "severity": "low"
+  },
+  {
+   "old": "là ba ca 2,001 km;",
+   "new": "là ba test case 2,001 km;",
+   "reason": "thống nhất test case",
+   "severity": "low"
+  },
+  {
+   "old": "ca 2,499 km vẫn xanh,",
+   "new": "test case 2,499 km vẫn xanh,",
+   "reason": "thống nhất test case",
+   "severity": "low"
+  },
+  {
+   "old": "chỉ ca 2,001 km phân biệt được",
+   "new": "chỉ test case 2,001 km phân biệt được",
+   "reason": "thống nhất test case",
+   "severity": "low"
+  },
+  {
+   "old": "9 ca còn xanh là các ca từ chối đầu vào, vì chúng không tính tiền.",
+   "new": "9 test case còn xanh là các test case từ chối đầu vào, vì chúng không tính tiền.",
+   "reason": "thống nhất test case",
+   "severity": "medium"
+  },
+  {
+   "old": "chạy 8 ca), `-x`",
+   "new": "chạy 8 test case), `-x`",
+   "reason": "thống nhất test case",
+   "severity": "low"
+  },
+  {
+   "old": "`-q` giảm chữ còn `-v`",
+   "new": "`-q` giảm bớt chữ in ra, còn `-v`",
+   "reason": "\"giảm chữ\" cụt",
+   "severity": "medium"
+  },
+  {
+   "old": "Test đáng giá khi kiểm **hành vi nhìn thấy được**:",
+   "new": "Test đáng giá khi kiểm tra **hành vi quan sát được**:",
+   "reason": "\"nhìn thấy được\" dịch từng chữ của observable",
+   "severity": "medium"
+  },
+  {
+   "old": "Đừng kiểm chi tiết hiện thực",
+   "new": "Đừng kiểm tra chi tiết cài đặt",
+   "reason": "\"hiện thực\" là calque của implementation, \"kiểm\" cụt",
+   "severity": "medium"
+  },
+  {
+   "old": "Bài C# có 9 ca; ở đây 36 là số ca pytest đếm",
+   "new": "Bài C# có 9 test case; ở đây 36 là số test case pytest đếm",
+   "reason": "thống nhất test case",
+   "severity": "medium"
+  },
+  {
+   "old": "| Tên ca xấu như",
+   "new": "| Tên test case xấu như",
+   "reason": "thống nhất test case",
+   "severity": "low"
+  },
+  {
+   "old": "36 test chỉ chứng minh các ca ta đã chọn,",
+   "new": "36 test chỉ chứng minh các test case ta đã chọn,",
+   "reason": "thống nhất test case",
+   "severity": "medium"
+  },
+  {
+   "old": "vì sao ca 100,001 (đang bị từ chối)",
+   "new": "vì sao test case 100,001 (đang bị từ chối)",
+   "reason": "thống nhất test case",
+   "severity": "low"
+  },
+  {
+   "old": "(1) Ba ca <code>",
+   "new": "(1) Ba test case <code>",
+   "reason": "thống nhất test case",
+   "severity": "low"
+  },
+  {
+   "old": "Ca 100,001 bị từ chối ở cả hai phiên bản,",
+   "new": "Test case 100,001 bị từ chối ở cả hai phiên bản,",
+   "reason": "thống nhất test case",
+   "severity": "low"
+  },
+  {
+   "old": "nên chỉ ca <b>nằm đúng trên biên</b>",
+   "new": "nên chỉ test case <b>nằm đúng trên biên</b>",
+   "reason": "thống nhất test case",
+   "severity": "low"
+  }
+ ]
+}

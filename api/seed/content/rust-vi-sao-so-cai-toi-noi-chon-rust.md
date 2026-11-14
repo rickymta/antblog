@@ -1,20 +1,20 @@
 ---
 slug: rust-vi-sao-so-cai-toi-noi-chon-rust
 title: "Vì sao sổ cái Tới Nơi viết bằng Rust khi backend chính là C#?"
-summary: "Bài 01: quyết định kiến trúc vì sao riêng service sổ cái dùng Rust dù backend chính là C#/.NET 10; bốn tiêu chí có bằng chứng chạy được, cái giá phải trả, ranh giới hẹp và điều kiện để xét lại."
+summary: "Bài 01: quyết định kiến trúc vì sao riêng service sổ cái dùng Rust dù backend chính là C#/.NET 10; bốn tiêu chí, mỗi tiêu chí có bằng chứng chạy được, cái giá phải trả, ranh giới hẹp và điều kiện để xét lại."
 category: rust-beginner
 level: beginner
 tags: [rust, toi-noi, ledger, adr, kien-truc]
 language: vi
 ---
 
-Đây là bài 01 của lộ trình **Rust cơ bản qua [Tới Nơi](/articles/du-an-mau-toi-noi)**. Hồ sơ dự án ghi nhận khoảng 2 triệu chuyến mỗi ngày; giả sử mỗi chuyến ghi ít nhất một bút toán, sổ cái nhận hàng triệu bút toán mỗi ngày. Lệch một đồng trên một bút toán là lệch đối soát cuối ngày với cổng thanh toán, và rất khó tìm ra nó trong hàng triệu dòng.
+Đây là bài 01 của lộ trình **Rust cơ bản qua [Tới Nơi](/articles/du-an-mau-toi-noi)**. Hồ sơ dự án ghi nhận khoảng 2 triệu chuyến mỗi ngày; giả sử mỗi chuyến ghi ít nhất một bút toán, sổ cái nhận hàng triệu bút toán mỗi ngày. Lệch một đồng trên một bút toán sẽ làm lệch đối soát cuối ngày với cổng thanh toán, và rất khó tìm ra chỗ lệch đó trong hàng triệu dòng.
 
-Bạn đã theo loạt C#/.NET 10, nên câu hỏi hợp lý là: vì sao riêng service sổ cái lại dùng ngôn ngữ khác? Bài này là một **quyết định kiến trúc (ADR)**: nêu tiêu chí của đúng service này, có bằng chứng chạy được, nói rõ cái giá và lúc nào nên đổi ý.
+Bạn đã theo loạt C#/.NET 10, nên câu hỏi hợp lý là: vì sao riêng service sổ cái lại dùng ngôn ngữ khác? Bài này là một **quyết định kiến trúc (ADR)**: nêu tiêu chí của đúng service này, kèm bằng chứng chạy được, nói rõ cái giá và lúc nào nên đổi ý.
 
 <div class="tkh-callout tkh-callout--example">
 <span class="tkh-callout-title">Thử trước khi đọc</span>
-<p>Viết sổ cái bằng Rust thì sổ cái tự đúng nghiệp vụ, đúng hay sai?</p>
+<p>Nếu viết sổ cái bằng Rust thì sổ cái tự đúng nghiệp vụ. Nhận định này đúng hay sai?</p>
 <details><summary>Xem đáp án</summary><p><b>Sai.</b> Sổ cái cần invariant (mỗi bút toán cân bằng, không sửa bút toán đã ghi), quy tắc làm tròn và đối soát với cổng thanh toán. Ngôn ngữ nào cũng phải tự viết các quy tắc đó. Rust chỉ giúp những invariant ấy khó bị vi phạm hơn ở tầng kiểu và bộ nhớ.</p></details>
 </div>
 
@@ -25,17 +25,17 @@ Tài liệu kiến trúc Tới Nơi (mục 4.9, Payment & Wallet) có một khuy
 Từ đó, tiêu chí của service sổ cái là:
 
 - **Tiền không được lặng lẽ sai.** Mọi phép cộng trừ hoặc đúng, hoặc báo lỗi rõ ràng.
-- **Append-only và idempotent.** Bút toán đã ghi không bị sửa; ghi lần hai cùng `idempotency_key` (ví dụ `trip:TN-0001:capture`) trả về bút toán cũ.
-- **Mọi trạng thái đều được xử lý.** Thêm trạng thái mới mà một chỗ quên xử lý là lỗi tiền bạc.
-- **Độ trễ p99 và bộ nhớ dễ đoán.** Sổ cái nằm trên đường thanh toán; độ trễ đuôi tăng bất thường kéo cả luồng chờ.
+- **Append-only và idempotent.** Bút toán đã ghi không bị sửa; ghi lần hai với cùng `idempotency_key` (ví dụ `trip:TN-0001:capture`) thì trả về bút toán cũ.
+- **Mọi trạng thái đều được xử lý.** Thêm trạng thái mới mà có chỗ quên xử lý thì đó là lỗi tiền bạc.
+- **Độ trễ p99 và bộ nhớ dễ đoán.** Sổ cái nằm trên đường thanh toán; độ trễ đuôi tăng bất thường khiến cả luồng thanh toán phải chờ theo.
 
 Lưu ý: với khoảng 70 chuyến tạo mới mỗi giây lúc cao điểm (theo hồ sơ), **thông lượng thô không phải lý do** đổi ngôn ngữ: ở mức đó, giới hạn nhiều khả năng nằm ở database và mạng hơn là ở ngôn ngữ. Đây là lập luận, loạt này không đo C# trên tải sổ cái.
 
 ## C#/.NET 10 có đủ tốt để viết sổ cái không?
 
-Có. C#/.NET 10 là backend chủ đạo của Tới Nơi: đặt chuyến, đơn hàng, điều phối đều viết bằng nó, và nó vẫn đủ để viết một sổ cái đúng. `decimal`, `long` với `checked`, record bất biến ([bài về Money](/articles/csharp-record-struct-money-quote)), transaction và idempotency ([bài về transaction](/articles/dotnet10-transaction-concurrency-idempotency)) đều dùng được; GC của .NET hiện đại thường có thời gian dừng ngắn và tinh chỉnh được ([bài về GC](/articles/dotnet10-allocation-gc-disposal)).
+Có. C#/.NET 10 là backend chủ đạo của Tới Nơi: đặt chuyến, đơn hàng, điều phối đều viết bằng nó, và C# vẫn đủ để viết một sổ cái đúng. `decimal`, `long` với `checked`, record bất biến ([bài về Money](/articles/csharp-record-struct-money-quote)), transaction và idempotency ([bài về transaction](/articles/dotnet10-transaction-concurrency-idempotency)) đều dùng được; GC của .NET hiện đại thường có thời gian dừng ngắn và tinh chỉnh được ([bài về GC](/articles/dotnet10-allocation-gc-disposal)).
 
-Vì vậy đây **không phải xếp hạng ngôn ngữ**. Đây là lựa chọn của dự án mẫu cho một service có tiêu chí hẹp, và nó có điều kiện để bị đảo. Một đội khác, với SLO và kỹ năng khác, hoàn toàn có thể chọn C# cho cả sổ cái.
+Vì vậy đây **không phải xếp hạng ngôn ngữ**. Đây là lựa chọn của dự án mẫu cho một service có tiêu chí hẹp, và quyết định này có điều kiện để bị đảo ngược. Một đội khác, với SLO và kỹ năng khác, hoàn toàn có thể chọn C# cho cả sổ cái.
 
 ## Bốn tiêu chí và bằng chứng chạy được
 
@@ -48,7 +48,7 @@ Lab `01-vi-sao-rust` là một binary chỉ dùng thư viện chuẩn; mỗi ti�
 <figcaption>Hình 1. Bốn tiêu chí và cơ chế Rust đáp ứng chúng. Dải gạch đứt ở dưới là phần luôn thuộc về nghiệp vụ, bất kể ngôn ngữ.</figcaption>
 </figure>
 
-**(a) Bất biến ở kiểu.** Tiền là newtype bọc `i64` đơn vị đồng. Phép cộng chỉ có một cách là `checked_add`, trả `Option`: tràn thì `None`, không có ngoại lệ ngầm và cũng không wrap im lặng.
+**(a) Bất biến ở kiểu.** Tiền là newtype bọc `i64` đơn vị đồng. Phép cộng chỉ có một cách là `checked_add`, trả về `Option`: tràn thì `None`, không có ngoại lệ ngầm và cũng không quay vòng mà không báo gì.
 
 ```rust
 // src/main.rs (trích)
@@ -62,7 +62,7 @@ impl Money {
 }
 ```
 
-Vì `Money` không cài `Add`, ghi `a + b` trên hai `Money` không biên dịch được; người viết buộc phải đi qua hàm kiểm tra tràn. C# làm được tương tự: không định nghĩa `operator +`, cộng trong ngữ cảnh `checked` (tràn ném `OverflowException`) hoặc trả `Money?`. Khác biệt chủ yếu là quy ước: ở Rust, khả năng tràn nằm ngay trong kiểu trả về, người gọi thấy và phải xử lý.
+Vì `Money` không cài đặt `Add`, nên viết `a + b` cho hai `Money` sẽ không biên dịch được; người viết buộc phải đi qua hàm kiểm tra tràn. C# làm được tương tự: không định nghĩa `operator +`, cộng trong ngữ cảnh `checked` (tràn thì ném `OverflowException`) hoặc trả về `Money?`. Khác biệt chủ yếu là quy ước: ở Rust, khả năng tràn nằm ngay trong kiểu trả về, người gọi thấy và phải xử lý.
 
 **(b) `match` vét cạn.** Sáu trạng thái thanh toán là một `enum`; hàm dưới đây không có nhánh `_`, nên mọi biến thể đều phải được liệt kê.
 
@@ -89,7 +89,7 @@ error[E0004]: non-exhaustive patterns: `PaymentState::Disputed` not covered
    |           ^^^^^ pattern `PaymentState::Disputed` not covered
 ```
 
-Mọi `match` không có nhánh `_` trên enum này đều báo cùng lỗi, nên không chỗ nào bị quên. Trong C#, `switch` expression ([bài về pattern matching](/articles/csharp-nullable-pattern-matching)) không vét cạn cho cảnh báo CS8509, còn câu lệnh `switch` thì không cảnh báo; nâng cảnh báo thành lỗi (`WarningsAsErrors`) là cấu hình, không phải mặc định.
+Mọi `match` không có nhánh `_` trên enum này đều báo cùng lỗi, nên không có chỗ nào bị quên. Trong C#, `switch` expression ([bài về pattern matching](/articles/csharp-nullable-pattern-matching)) không vét cạn sẽ bị cảnh báo CS8509, còn câu lệnh `switch` thì không cảnh báo; nâng cảnh báo thành lỗi (`WarningsAsErrors`) là cấu hình, không phải mặc định.
 
 **(c) Ownership.** Giả sử ta đang đọc dòng đầu của một bút toán qua tham chiếu, trong khi code khác thêm dòng vào chính bút toán đó. Rust cấm vì `&mut` là độc quyền: không thể có tham chiếu sửa khi còn tham chiếu đọc đang sống. Đoạn dưới nằm trong lab dưới dạng chú thích; bỏ comment sẽ thấy lỗi E0502 thật:
 
@@ -113,7 +113,7 @@ error[E0502]: cannot borrow `entry` as mutable because it is also borrowed as im
     |                ----- immutable borrow later used here
 ```
 
-Lỗi bị chặn **khi biên dịch**, không đợi lúc chạy. Đây chưa phải append-only ở tầng database; bảo đảm đó nằm ở schema và quyền ghi.
+Lỗi bị chặn **khi biên dịch**, không đợi lúc chạy. Cơ chế này chưa phải append-only ở tầng database; bảo đảm đó nằm ở schema và quyền ghi.
 
 **(d) `Drop` tất định.** Khi một giá trị ra khỏi phạm vi, Rust gọi `Drop` ngay tại đó, theo thứ tự ngược với thứ tự khai báo. Lab mở hai tài nguyên giả (`db_conn`, `entry_lock`) và ghi lại thứ tự giải phóng:
 
@@ -126,7 +126,7 @@ Lỗi bị chặn **khi biên dịch**, không đợi lúc chạy. Đây chưa p
 } // hết phạm vi: biến khai báo sau bị drop trước
 ```
 
-Output thật của `cargo run`:
+Kết quả chạy thật của `cargo run`:
 
 ```text
 1) 20.400 + 5.100 = Some(Money(25500))
@@ -141,13 +141,13 @@ Với tài nguyên như kết nối hay khoá, C# cũng giải phóng tất đ�
 
 Mỗi lợi ích đều có giá, cần viết ra trước khi quyết định:
 
-- **Đường cong học.** Ownership và borrow checker làm những tuần đầu chậm hơn đáng kể.
-- **Tuyển dụng.** Người có kinh nghiệm Rust production ít hơn; service chỉ một hai người hiểu là rủi ro.
+- **Đường cong học.** Ownership và borrow checker khiến những tuần đầu chậm hơn đáng kể.
+- **Tuyển dụng.** Người có kinh nghiệm Rust production ít hơn; service mà chỉ một hai người hiểu thì là rủi ro.
 - **Thời gian build.** Biên dịch Rust thường lâu hơn, nhất là bản release.
 - **Hệ sinh thái.** Với ORM hay UI, hệ sinh thái .NET rộng và trưởng thành hơn.
 - **Hai toolchain.** CI, image, giám sát, quy trình bảo mật đều phải làm hai lần.
 
-Cách giảm chi phí là giữ **ranh giới hẹp**: chỉ ledger và đối soát; giao tiếp với phần còn lại bằng hợp đồng gRPC và Kafka có version; một team nhỏ sở hữu trọn service.
+Cách giảm chi phí là giữ **ranh giới hẹp**: chỉ ledger và đối soát; giao tiếp với phần còn lại bằng hợp đồng gRPC và Kafka có đánh số phiên bản; một team nhỏ sở hữu trọn service.
 
 ## Rust nằm ở đâu trong hệ thống?
 
@@ -165,7 +165,7 @@ Rust **chỉ** dành cho ledger và đối soát; ta không viết lại Booking
 Một ADR tốt nói được lúc nào nó hết hiệu lực. Nên xét lại khi:
 
 - **Đội không giữ được kỹ năng Rust.** Người hiểu service rời đi, review chậm, sửa lỗi phải nhờ người ngoài.
-- **Lượng bút toán nhỏ và SLO đã đạt.** Nếu .NET đáp ứng p99 và bộ nhớ theo **số đo** trên cùng tải, lợi ích của Rust không bù nổi chi phí hai toolchain.
+- **Lượng bút toán nhỏ và SLO đã đạt.** Nếu .NET đáp ứng p99 và bộ nhớ theo **số liệu đo** trên cùng tải, lợi ích của Rust không bù nổi chi phí hai toolchain.
 - **Chi phí vận hành vượt lợi ích.** CI, bảo mật, on-call cho hai ngôn ngữ tốn hơn phần đạt được.
 - **Ranh giới bị xói mòn.** Nếu Rust lan sang Booking, Payment hay báo cáo thì lập luận «đảo nhỏ» không còn đúng.
 
@@ -175,7 +175,7 @@ Bảng dưới so sánh theo tiêu chí của sổ cái.
 | --- | --- | --- | --- |
 | Tiền đúng | `decimal`, `long` với `checked` | `Money(i64)` với `checked_add` | Cả hai làm được; C# cần bật `checked`, Rust đặt tràn vào kiểu trả về |
 | Mọi trạng thái được xử lý | `switch` expression thiếu nhánh: cảnh báo CS8509 | `match` thiếu nhánh: lỗi E0004 | Cảnh báo C# có thể nâng thành lỗi bằng cấu hình |
-| Quản lý bộ nhớ | GC thế hệ, pause thường ngắn | Ownership, `Drop`, không GC | Rust dễ đoán hơn theo xu hướng; cần đo, không dùng khẩu hiệu |
+| Quản lý bộ nhớ | GC phân thế hệ, thời gian dừng thường ngắn | Ownership, `Drop`, không GC | Rust dễ đoán hơn theo xu hướng; cần đo, không dùng khẩu hiệu |
 | Hệ sinh thái | Rất rộng (ORM, web, UI) | Nhỏ hơn cho ORM và UI | Ledger không cần UI; ORM không bắt buộc |
 | Người và tuyển dụng | Nhiều người biết, onboarding nhanh | Học lâu hơn, ít người có kinh nghiệm | Rủi ro lớn nhất của quyết định này |
 | Build và vận hành | Build nhanh hơn, một toolchain với hệ thống | Build chậm hơn, thêm toolchain | Chi phí cố định, trả hằng ngày |
@@ -193,11 +193,11 @@ cargo run --manifest-path examples/toi-noi-rust/01-vi-sao-rust/Cargo.toml
 cargo run --manifest-path examples/toi-noi-rust/01-vi-sao-rust/Cargo.toml -- --verify
 ```
 
-Lệnh đầu in ba bằng chứng trên. Lệnh sau `assert` từng giá trị (25.500, tràn là `None`, chỉ `Captured` và `Refunded` ghi sổ, thứ tự drop) và in `VERIFY OK`; sai thì dừng với exit code khác 0.
+Lệnh đầu in ba bằng chứng trên. Lệnh sau dùng `assert` để kiểm tra từng giá trị (25.500, tràn là `None`, chỉ `Captured` và `Refunded` ghi sổ, thứ tự drop) và in `VERIFY OK`; sai thì dừng với exit code khác 0.
 
 <div class="tkh-callout tkh-callout--warn">
 <span class="tkh-callout-title">Giới hạn của ví dụ</span>
-<p>Lab chỉ chứng minh cơ chế ngôn ngữ trên vài dòng code. Nó chưa có bút toán đủ hai phía, idempotency, database, Kafka hay gRPC, và không nói gì về hiệu năng. Các con số tải (2 triệu chuyến mỗi ngày, 70 chuyến mỗi giây) là số hư cấu của dự án mẫu; chọn ngôn ngữ cho service thật cần số đo trên tải thật.</p>
+<p>Lab chỉ chứng minh cơ chế ngôn ngữ trên vài dòng code. Lab chưa có bút toán đủ hai phía, idempotency, database, Kafka hay gRPC, và không nói gì về hiệu năng. Các con số tải (2 triệu chuyến mỗi ngày, 70 chuyến mỗi giây) là số hư cấu của dự án mẫu; chọn ngôn ngữ cho service thật cần số liệu đo trên tải thật.</p>
 </div>
 
 **Bài tập:** liệt kê ba service khác của Tới Nơi (ngoài sổ cái) và lập luận có nên dùng Rust cho từng cái không, theo cùng bốn tiêu chí.

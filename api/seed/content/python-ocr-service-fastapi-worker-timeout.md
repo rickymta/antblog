@@ -1,7 +1,7 @@
 ---
 slug: python-ocr-service-fastapi-worker-timeout
 title: "Đóng gói OCR thành service: FastAPI nhận ảnh, worker xử lý, timeout"
-summary: "Bài 46: đưa OCR Tesseract thành service. FastAPI nhận ảnh, worker arq chạy OCR như tiến trình con có thể kill, timeout dừng việc thật, job idempotent theo hồ sơ và hash ảnh, tải thử p50/p95 bằng httpx."
+summary: "Bài 46: đưa OCR Tesseract thành service. FastAPI nhận ảnh, worker arq chạy OCR như tiến trình con có thể kill, timeout dừng việc thật, job idempotent theo hồ sơ và hash ảnh, kiểm thử tải, đo p50/p95 bằng httpx."
 category: python-advanced
 level: advanced
 tags: [python, toi-noi, fastapi, arq, ocr, timeout]
@@ -10,17 +10,17 @@ language: vi
 
 Bài 41 đến 45 chạy OCR trong một script: đưa một tấm thẻ vào, nhận về các trường, mất khoảng 0,4 giây. Khi `kyc-ocr` của [Tới Nơi](/articles/du-an-mau-toi-noi) mở cho tài xế đăng ký thật, những thứ script không phải nghĩ tới đổ dồn vào cùng lúc: nhiều người gửi ảnh đồng thời, Tesseract là một tiến trình ngoài ăn hết một lõi CPU, và thỉnh thoảng có ảnh làm nó chạy lâu gấp nhiều lần. Nếu API gọi OCR thẳng, vài ảnh xấu là đủ hạ gục cả service.
 
-Đây là bài 46 của lộ trình **Python nâng cao qua Tới Nơi**. Bài dựa vào ba lớp kiểm khi nhận ảnh ở [bài 35](/articles/python-fastapi-upload-background-task-streaming), lỗi `application/problem+json` ở [bài 32](/articles/python-fastapi-validation-problem-details-openapi) và worker arq trên Redis ở [bài 40](/articles/python-worker-arq-scheduling-retry-dead-letter). Tách trường là bản rút gọn vì lab tự chứa và bài chỉ cần đủ trường để service có kết quả; [bài 44](/articles/python-hau-xu-ly-ocr-regex-parse-truong-checksum) đã làm đầy đủ. OCR dùng `vie+eng --psm 6` như bài 43, trên thẻ phẳng chưa qua tiền xử lý của bài 42. Ảnh là thẻ giả; kết quả OCR là đầu vào cho người duyệt, không tự động là quyết định xác minh.
+Đây là bài 46 của lộ trình **Python nâng cao qua Tới Nơi**. Bài dựa vào ba lớp kiểm tra khi nhận ảnh ở [bài 35](/articles/python-fastapi-upload-background-task-streaming), lỗi `application/problem+json` ở [bài 32](/articles/python-fastapi-validation-problem-details-openapi) và worker arq trên Redis ở [bài 40](/articles/python-worker-arq-scheduling-retry-dead-letter). Tách trường là bản rút gọn vì lab chạy độc lập và bài chỉ cần đủ trường để service có kết quả; [bài 44](/articles/python-hau-xu-ly-ocr-regex-parse-truong-checksum) đã làm đầy đủ. OCR dùng `vie+eng --psm 6` như bài 43, trên thẻ phẳng chưa qua tiền xử lý của bài 42. Ảnh là thẻ giả; kết quả OCR là đầu vào cho người duyệt, không tự động trở thành quyết định xác minh.
 
 <div class="tkh-callout tkh-callout--example">
 <span class="tkh-callout-title">Thử trước khi đọc</span>
 <p>Worker chạy OCR bằng <code>await asyncio.wait_for(asyncio.to_thread(chay_tesseract, anh), timeout=5)</code>. Đến giây thứ 5 ta nhận <code>TimeoutError</code> và đánh dấu job thất bại. Tiến trình Tesseract lúc đó còn chạy không, và yêu cầu kế tiếp có bị ảnh hưởng không?</p>
-<details><summary>Xem đáp án</summary><p><b>Còn chạy.</b> <code>wait_for</code> chỉ ngừng <i>chờ</i>: thread không thể bị huỷ từ ngoài, và tiến trình con mà thread đã sinh ra vẫn sống tới khi tự xong. Job đã «thất bại» trong sổ sách trong khi CPU vẫn phục vụ nó; với một ảnh treo thì nó phục vụ mãi. Bài chạy đúng thí nghiệm này: bỏ cuộc sau 0,15 giây mà Tesseract còn chạy thêm một lúc nữa. Yêu cầu kế tiếp bị ảnh hưởng gián tiếp: mỗi lần như vậy chiếm một thread của executor mặc định (tối đa <code>min(32, số lõi + 4)</code> theo tài liệu Python) và một lõi CPU tới khi Tesseract tự xong; đủ nhiều ảnh treo thì thread cạn và việc kế tiếp phải xếp hàng. Muốn timeout dừng việc thật thì tiến trình con phải bị kill.</p></details>
+<details><summary>Xem đáp án</summary><p><b>Còn chạy.</b> <code>wait_for</code> chỉ ngừng <i>chờ</i>: thread không thể bị huỷ từ ngoài, và tiến trình con mà thread đã sinh ra vẫn sống tới khi tự xong. Job đã «thất bại» trong sổ sách trong khi Tesseract vẫn chiếm CPU; với một ảnh treo thì nó chiếm mãi. Bài chạy đúng thí nghiệm này: bỏ cuộc sau 0,15 giây mà Tesseract còn chạy thêm một lúc nữa. Yêu cầu kế tiếp bị ảnh hưởng gián tiếp: mỗi lần như vậy chiếm một thread của executor mặc định (tối đa <code>min(32, số lõi + 4)</code> theo tài liệu Python) và một lõi CPU tới khi Tesseract tự xong; đủ nhiều ảnh treo thì thread cạn và việc kế tiếp phải xếp hàng. Muốn timeout dừng việc thật thì tiến trình con phải bị kill.</p></details>
 </div>
 
 ## Từ script sang service: API, hàng đợi, worker
 
-Service có ba phần. **API** nhận ảnh, kiểm, lưu vào kho, xếp một job vào hàng đợi rồi trả `202`. **Worker** lấy job, chạy OCR, ghi kết quả. **Redis** nằm giữa, giữ hàng đợi, trạng thái job và kết quả. API không chạy OCR và không giữ trạng thái nào trong RAM.
+Service có ba phần. **API** nhận ảnh, kiểm tra, lưu vào kho, xếp một job vào hàng đợi rồi trả `202`. **Worker** lấy job, chạy OCR, ghi kết quả. **Redis** nằm giữa, giữ hàng đợi, trạng thái job và kết quả. API không chạy OCR và không giữ trạng thái nào trong RAM.
 
 <figure class="tkh-fig">
 <div class="tkh-fig-box">
@@ -29,19 +29,19 @@ Service có ba phần. **API** nhận ảnh, kiểm, lưu vào kho, xếp một 
 <figcaption>Hình 1. Ba phần của service. Mọi trạng thái nằm ở Redis và kho ảnh, nên thêm bản API hay thêm worker không làm đổi câu trả lời.</figcaption>
 </figure>
 
-Lý do tách là điều bài 35 đã chạm tới: `BackgroundTasks` giữ job trong dict của tiến trình API, nên khởi động lại là mất và nhiều bản API cho `GET` job vừa tạo trả `404`; bản đầu của lab 35 còn đánh mã `JOB-0001` bằng bộ đếm riêng nên hai tiến trình phát trùng mã. Lab này không dict, không bộ đếm: mã job là **UUID v5** suy từ `(kyc_id, loại giấy tờ, sha256 của ảnh)`, nên mọi bản API tự tính ra cùng một mã.
+Lý do tách là điều bài 35 đã đề cập: `BackgroundTasks` giữ job trong dict của tiến trình API, nên khởi động lại là mất và khi chạy nhiều bản API thì `GET` job vừa tạo trả `404`; bản đầu của lab 35 còn đánh mã `JOB-0001` bằng bộ đếm riêng nên hai tiến trình phát trùng mã. Lab này không dùng dict, không dùng bộ đếm: mã job là **UUID v5** suy từ `(kyc_id, loại giấy tờ, sha256 của ảnh)`, nên mọi bản API tự tính ra cùng một mã.
 
-Ta chọn **arq** như bài 40: có sẵn hàng đợi bền, retry và `job_timeout`. `ProcessPoolExecutor` đặt ngay trong API đơn giản hơn, nhưng pool chết cùng API, trạng thái nằm trong RAM, và huỷ một việc đang chạy trong pool không dừng được nó (phần timeout). `kill_workers()` và `terminate_workers()` của Python 3.14 thì dừng cả pool, tức mọi yêu cầu khác. arq đang ở chế độ chỉ bảo trì (bài 40 đã nói); khái niệm giữ nguyên nếu đổi thư viện. Một ràng buộc phiên bản: theo bài 43, PaddleOCR chỉ có wheel đến Python 3.13, nên nếu `kyc-ocr` dùng nó thì worker chạy image Python 3.13 riêng còn API vẫn 3.14; job serialize bằng JSON nên hai phía chỉ chia sẻ Redis và kho ảnh. Lab chỉ chạy Tesseract nên không thử cấu hình đó.
+Ta chọn **arq** như bài 40: có sẵn hàng đợi bền, retry và `job_timeout`. `ProcessPoolExecutor` đặt ngay trong API đơn giản hơn, nhưng pool chết cùng API, trạng thái nằm trong RAM, và huỷ một việc đang chạy trong pool không dừng được nó (phần timeout). `kill_workers()` và `terminate_workers()` của Python 3.14 thì dừng cả pool, tức là dừng luôn mọi yêu cầu khác. arq đang ở chế độ chỉ bảo trì (bài 40 đã nói); khái niệm giữ nguyên nếu đổi thư viện. Một ràng buộc phiên bản: theo bài 43, PaddleOCR chỉ có wheel đến Python 3.13, nên nếu `kyc-ocr` dùng nó thì worker chạy image Python 3.13 riêng còn API vẫn 3.14; job serialize bằng JSON nên hai phía chỉ chia sẻ Redis và kho ảnh. Lab chỉ chạy Tesseract nên không thử cấu hình đó.
 
 Worker không chạy Tesseract trong thread hay pool mà **sinh nó thành tiến trình con bằng `asyncio.create_subprocess_exec`**. Coroutine của job chỉ chờ I/O, nên một worker với `max_jobs = 4` điều phối bốn lần OCR song song mà vòng lặp sự kiện vẫn rảnh, và mỗi lần OCR là một tiến trình của hệ điều hành, tức là kill được.
 
 ## Cửa vào: nhận ảnh và từ chối sớm
 
-Handler `POST /v1/kyc/ocr-jobs` dùng lại ba lớp kiểm của bài 35: middleware nhìn `Content-Length`, `read_limited` đếm byte thật (giới hạn 10 MiB như bài 35), và Pillow xác định định dạng từ byte đầu file (JPEG, MPO hoặc PNG), đếm điểm ảnh từ header (trần 50 triệu) rồi gọi `verify()`. Tên file và `Content-Type` do client khai nên không được tin. Mọi lỗi theo đúng một dạng Problem Details của bài 32; lỗi 422 có `errors[{field, code, message}]` mà không chép lại giá trị đã gửi.
+Handler `POST /v1/kyc/ocr-jobs` dùng lại ba lớp kiểm tra của bài 35: middleware nhìn `Content-Length`, `read_limited` đếm byte thật (giới hạn 10 MiB như bài 35), và Pillow xác định định dạng từ byte đầu file (JPEG, MPO hoặc PNG), đếm điểm ảnh từ header (trần 50 triệu) rồi gọi `verify()`. Tên file và `Content-Type` do client khai nên không được tin. Mọi lỗi đều theo đúng một dạng Problem Details của bài 32; lỗi 422 có `errors[{field, code, message}]` mà không chép lại giá trị đã gửi.
 
-Cửa không bắt được mọi thứ, và lab kiểm đúng ranh giới đó. PNG cắt đôi bị `verify()` bắt ngay (`400 image-corrupt`) vì PNG có checksum. JPEG cắt đôi thì header vẫn đọc được và `verify()` gần như không kiểm gì, nên nó qua cửa với `202` và chỉ lộ khi worker giải nén thật: job `failed` với `error.code = image_unreadable`. Worker tự giải nén ảnh trong thread trước khi gọi Tesseract để lỗi này có tên, thay vì thành một thông báo lạ của Tesseract.
+Cửa không bắt được mọi thứ, và lab kiểm tra đúng ranh giới đó. PNG cắt đôi bị `verify()` bắt ngay (`400 image-corrupt`) vì PNG có checksum. JPEG cắt đôi thì header vẫn đọc được và `verify()` gần như không kiểm gì, nên nó qua cửa với `202` và chỉ lộ khi worker giải nén thật: job `failed` với `error.code = image_unreadable`. Worker tự giải nén ảnh trong thread trước khi gọi Tesseract để lỗi này có tên, thay vì thành một thông báo lạ của Tesseract.
 
-Phần cuối của handler phân biệt nhận với xử lý. Ghi ảnh trước, xếp job sau, để job không bao giờ trỏ vào object chưa có (`app/main.py`, trích):
+Phần cuối của handler tách việc nhận ra khỏi việc xử lý. Ghi ảnh trước, xếp job sau, để job không bao giờ trỏ vào object chưa có (`app/main.py`, trích):
 
 ```python
 digest = sha256_hex(data)
@@ -62,9 +62,9 @@ return out
 
 ## Idempotency theo hồ sơ và hash ảnh
 
-Tài xế bấm «Gửi» hai lần vì mạng chập chờn, hoặc app tự gửi lại. Cùng một ảnh của cùng một hồ sơ không được sinh hai job. Khoá idempotency của lab là **`(kyc_id, loại giấy tờ, sha256 của ảnh)`**. Mã job suy ra được từ ba giá trị ấy, nên `GET` job phải kiểm quyền người gọi với hồ sơ (bài 34), điều lab chưa làm.
+Tài xế bấm «Gửi» hai lần vì mạng chập chờn, hoặc app tự gửi lại. Cùng một ảnh của cùng một hồ sơ không được sinh hai job. Khoá idempotency của lab là **`(kyc_id, loại giấy tờ, sha256 của ảnh)`**. Mã job suy ra được từ ba giá trị ấy, nên `GET` job phải kiểm tra quyền của người gọi đối với hồ sơ (bài 34), điều lab chưa làm.
 
-arq cho sẵn cơ chế này: `enqueue_job(..., _job_id=...)` trả `None` nếu khoá job hoặc khoá kết quả của mã đó đã tồn tại, và phép kiểm nằm trong một transaction `WATCH` nên hai yêu cầu đồng thời không cùng thắng (theo mã nguồn arq 0.28.0). Lab đo: mười `POST` đồng thời cùng một thẻ cho đúng một `202`, chín `200` và một job trong hàng đợi; cùng hồ sơ ảnh khác, hoặc cùng ảnh hồ sơ khác, đều cho job mới.
+arq cho sẵn cơ chế này: `enqueue_job(..., _job_id=...)` trả `None` nếu khoá job hoặc khoá kết quả của mã đó đã tồn tại, và phép kiểm nằm trong một transaction `WATCH` nên hai yêu cầu đồng thời không cùng thắng (theo mã nguồn arq 0.28.0). Lab đo: mười `POST` đồng thời cùng một thẻ cho đúng một `202`, chín `200` và một job trong hàng đợi; cùng hồ sơ nhưng ảnh khác, hoặc cùng ảnh nhưng hồ sơ khác, đều cho job mới.
 
 ```text
   lặp lại đúng thẻ       -> 200  job 35f01a2d…  (job cũ)  done
@@ -73,9 +73,9 @@ arq cho sẵn cơ chế này: `enqueue_job(..., _job_id=...)` trả `None` nếu
   10 POST đồng thời cùng thẻ: [200, 200, 200, 200, 200, 200, 200, 200, 200, 202] -> 1 job
 ```
 
-Cửa sổ idempotency bằng thời gian giữ kết quả, `result_ttl_s = 900` giây; đó cũng là thời hạn số giấy tờ rõ nằm trong Redis nên ta giữ ngắn, lưu lâu dài là việc của bài 47. Job `failed` chia hai loại. `image_unreadable` được «nhớ»: gửi lại đúng ảnh hỏng trả `200` với job cũ, vì chạy lại chỉ cho lỗi cũ; người dùng chụp ảnh khác (hash khác, job mới). `ocr_timeout` có thể do worker quá tải nên được thử lại: gửi lại đúng ảnh xoá khoá kết quả rồi xếp lại, và nếu hai yêu cầu cùng thử lại thì chỉ một `enqueue_job` thành công. `ocr_failed` và `internal_error` cũng bị nhớ trong cửa sổ mà lab chưa có endpoint thử lại: đó là giới hạn.
+Cửa sổ idempotency bằng thời gian giữ kết quả, `result_ttl_s = 900` giây; đó cũng là khoảng thời gian số giấy tờ rõ nằm trong Redis, nên ta giữ ngắn, lưu lâu dài là việc của bài 47. Job `failed` chia hai loại. `image_unreadable` được «nhớ»: gửi lại đúng ảnh hỏng trả `200` với job cũ, vì chạy lại chỉ cho lỗi cũ; người dùng chụp ảnh khác (hash khác, job mới). `ocr_timeout` có thể do worker quá tải nên được thử lại: gửi lại đúng ảnh xoá khoá kết quả rồi xếp lại, và nếu hai yêu cầu cùng thử lại thì chỉ một `enqueue_job` thành công. `ocr_failed` và `internal_error` cũng bị nhớ trong cửa sổ đó, còn lab chưa có endpoint thử lại: đây là một giới hạn.
 
-Bốn trạng thái trả về (`queued`, `running`, `done`, `failed`) được dựng từ ba khoá của arq. Lần chạy `--verify` đầu tiên bắt được một lỗi đua: ca quan sát trạng thái báo `['queued', 'running', 404, 'done']`, tức một `GET` đúng lúc job vừa xong nhận `404` cho job có thật. Bản đầu gọi `Job.status()` rồi `Job.info()` của arq, hai lượt đọc; job xong giữa hai lượt thì lượt sau không còn thấy khoá job. Cách sửa là đọc cả ba khoá trong **một** transaction (`describe_job`, trích):
+Bốn trạng thái trả về (`queued`, `running`, `done`, `failed`) được dựng từ ba khoá của arq. Lần chạy `--verify` đầu tiên bắt được một race condition: test case quan sát trạng thái báo `['queued', 'running', 404, 'done']`, tức một `GET` đúng lúc job vừa xong nhận `404` cho job có thật. Bản đầu gọi `Job.status()` rồi `Job.info()` của arq, hai lượt đọc; job xong giữa hai lượt thì lượt sau không còn thấy khoá job. Cách sửa là đọc cả ba khoá trong **một** transaction (`describe_job`, trích):
 
 ```python
 async with pool.pipeline(transaction=True) as tr:
@@ -90,11 +90,11 @@ if job_raw is None:
 return JobOut(..., status=JobState.RUNNING if in_progress else JobState.QUEUED)
 ```
 
-Hàm job trả thất bại có phân loại bằng giá trị trả về (`{"ok": False, "error": {...}}`) chứ không `raise`, để arq coi job là «chạy xong» và không tự thử lại. Thông báo gửi ra client là câu cố định theo mã lỗi; stderr của Tesseract và thông báo của Pillow chỉ vào log. Ngoại lệ không lường trước thoát ra và API trả `failed` với `internal_error`. Worker đặt `log_results = False` vì arq mặc định in kết quả job ra log, mà kết quả có số giấy tờ rõ.
+Hàm job báo thất bại có phân loại qua giá trị trả về (`{"ok": False, "error": {...}}`) chứ không `raise`, để arq coi job là «chạy xong» và không tự thử lại. Thông báo gửi ra client là câu cố định theo mã lỗi; stderr của Tesseract và thông báo của Pillow chỉ vào log. Ngoại lệ không lường trước sẽ lan ra ngoài, và API trả `failed` với `internal_error`. Worker đặt `log_results = False` vì arq mặc định in kết quả job ra log, mà kết quả có số giấy tờ rõ.
 
 ## Timeout: dừng việc thật, không chỉ ngừng chờ
 
-Timeout có ba tầng và phải xếp theo thứ tự: một lần gọi Tesseract (`ocr_timeout_s`, 20 giây) ngắn hơn timeout cả job (`job_timeout`, 30 giây), cả hai ngắn hơn timeout phía client. Nhờ vậy lỗi do ta phân loại (`ocr_timeout`) luôn thấy trước lỗi chung của framework. arq thực thi `job_timeout` bằng `asyncio.wait_for` bọc quanh job, tức **huỷ coroutine**; điều đó chỉ hữu ích nếu huỷ coroutine dẫn tới dừng việc thật.
+Timeout có ba tầng và phải xếp theo thứ tự: một lần gọi Tesseract (`ocr_timeout_s`, 20 giây) ngắn hơn timeout cả job (`job_timeout`, 30 giây), cả hai ngắn hơn timeout phía client. Nhờ vậy lỗi do ta phân loại (`ocr_timeout`) luôn xuất hiện trước lỗi chung của framework. arq thực thi `job_timeout` bằng `asyncio.wait_for` bọc quanh job, tức **huỷ coroutine**; điều đó chỉ hữu ích nếu huỷ coroutine dẫn tới dừng việc thật.
 
 Lab đặt ba cách cạnh nhau trên cùng một thẻ với timeout 0,15 giây (output của `main.py`; máy đang rất bận, load average ghi ở dòng đầu của output đầy đủ bên dưới):
 
@@ -114,7 +114,7 @@ Lab đặt ba cách cạnh nhau trên cùng một thẻ với timeout 0,15 giây
 <figcaption>Hình 2. Cùng một mốc timeout, ba kết cục. Chỉ cách cuối trả lại tài nguyên đúng lúc. Các đoạn không vẽ theo tỉ lệ thời gian.</figcaption>
 </figure>
 
-Cách thứ nhất là lỗi của câu hỏi đầu bài. Cách thứ hai: `future.result(timeout)` báo `TimeoutError` nhưng `cancel()` trả `False` vì việc đã chạy, nên với pool một worker, yêu cầu kế tiếp phải chờ tới khi việc cũ tự xong. Bản đầu của lab đo sai chỗ này: pool chưa được làm ấm, worker (spawn trên macOS) còn đang nạp lại `main.py` khi hết timeout, Tesseract chỉ bắt đầu sau timeout, và phần lớn «chờ» là khởi động worker. Giờ lab làm ấm pool bằng một việc rỗng trước khi đo (2,24 giây trong lần chạy trên) và kiểm Tesseract đã bắt đầu *trước* timeout; chỉ khi đó câu «việc đã chạy nên `cancel()` trả `False`» mới đúng. Cách thứ ba là `run_tesseract` của lab (`app/ocr.py`, trích):
+Cách thứ nhất chính là tình huống của câu hỏi đầu bài. Cách thứ hai: `future.result(timeout)` báo `TimeoutError` nhưng `cancel()` trả `False` vì việc đã chạy, nên với pool một worker, yêu cầu kế tiếp phải chờ tới khi việc cũ tự xong. Bản đầu của lab đo sai chỗ này: pool chưa được làm ấm, worker (spawn trên macOS) còn đang nạp lại `main.py` khi hết timeout, Tesseract chỉ bắt đầu sau timeout, và phần lớn «chờ» là khởi động worker. Giờ lab làm ấm pool bằng một việc rỗng trước khi đo (2,24 giây trong lần chạy trên) và kiểm Tesseract đã bắt đầu *trước* timeout; chỉ khi đó câu «việc đã chạy nên `cancel()` trả `False`» mới đúng. Cách thứ ba là `run_tesseract` của lab (`app/ocr.py`, trích):
 
 ```python
 proc = await asyncio.create_subprocess_exec(
@@ -135,7 +135,7 @@ finally:
 
 Còn một lý do để không chạy `subprocess.run` ngay trong coroutine. Lab đo độ trễ lớn nhất của vòng lặp sự kiện (một «nhịp tim» 10 ms) trong lúc OCR: `subprocess.run` trong `async def` làm vòng lặp đứng gần suốt thời gian OCR, còn `asyncio` subprocess chỉ chậm 8 ms (so với 1.084 ms trong lần chạy trên). Trong service thật, mọi yêu cầu khác của cùng tiến trình, kể cả `/healthz`, ngừng trả lời.
 
-Về số luồng: FAQ của Tesseract khuyên `OMP_THREAD_LIMIT=1` khi chạy mỗi lõi một tiến trình, và lab đặt nó. Nhưng binary Tesseract 5.5.4 của Homebrew trên máy này không dùng OpenMP (`tesseract --version` không in «Found OpenMP», `otool -L` không thấy thư viện OpenMP), nên biến không có tác dụng ở đây: dòng cuối output trên cho CPU bằng nhau (0,43 giây) có và không có nó. Ta giữ biến cho build có OpenMP. Khi máy bận, CPU tin được hơn thời gian thực.
+Về số luồng: FAQ của Tesseract khuyên `OMP_THREAD_LIMIT=1` khi chạy mỗi lõi một tiến trình, và lab đặt nó. Nhưng binary Tesseract 5.5.4 của Homebrew trên máy này không dùng OpenMP (`tesseract --version` không in «Found OpenMP», `otool -L` không thấy thư viện OpenMP), nên biến này không có tác dụng ở đây: dòng cuối output trên cho CPU bằng nhau (0,43 giây) có và không có nó. Ta giữ biến cho build có OpenMP. Khi máy bận, thời gian CPU đáng tin hơn thời gian thực.
 
 ## Tải thử: p50 và p95
 
@@ -163,9 +163,9 @@ sau khi đo:   load average 1/5/15 phút: 36.17 82.79 96.82
     trong đó Tesseract chạy  p50      994 ms   p95     2763 ms
 ```
 
-(Trích, bỏ dòng độ chính xác. Lần đo này chạy trước các sửa sau review (khoá idempotency thêm loại giấy tờ, `image_sha256` trong kết quả), vốn không nằm trên đường đo, nhưng không phải lần chạy cuối. Load average khoảng 35 là mức thấp nhất máy có trong buổi đo; một lần chạy sau đó, load 156 rồi 268, cho Tesseract p50 3.738 ms ngay ở mức 2 đồng thời.) Thông lượng tăng từ 3,0 lên 7,6 job/giây khi đồng thời tăng từ 2 lên 8, rồi **giảm** còn 4,3 ở mức 32: chờ trong hàng vọt lên 2,3 giây và Tesseract cũng chậm hơn (994 ms so với 690 ms); lab không đo nguyên nhân.
+(Trích, bỏ dòng độ chính xác. Lần đo này chạy trước các sửa sau review (khoá idempotency thêm loại giấy tờ, `image_sha256` trong kết quả), các sửa này vốn không nằm trên đường đo, nhưng đây không phải lần chạy cuối. Load average khoảng 35 là mức thấp nhất máy có trong buổi đo; một lần chạy sau đó, load 156 rồi 268, cho Tesseract p50 3.738 ms ngay ở mức 2 đồng thời.) Thông lượng tăng từ 3,0 lên 7,6 job/giây khi đồng thời tăng từ 2 lên 8, rồi **giảm** còn 4,3 ở mức 32: chờ trong hàng vọt lên 2,3 giây và Tesseract cũng chậm hơn (994 ms so với 690 ms); lab không đo nguyên nhân.
 
-«POST tới khi nhận 202» là thứ người dùng thấy ngay: kiểm ảnh, ghi kho, xếp hàng, chưa có OCR. «Chờ trong hàng» tăng khi số yêu cầu đồng thời vượt số chỗ của worker (2 worker nhân 4 job); quá tải thì tăng worker hoặc từ chối sớm bằng giới hạn tốc độ, không tăng timeout. Số giấy tờ đúng cả 40 thẻ ở mỗi mức, ngày sinh 38 đến 40 trên 40; họ tên chỉ đúng nguyên văn rất ít vì Tesseract đọc «NGUYỄN VĂN A» thành «NGUYEN VAN A», nhưng đúng khi bỏ dấu ở cả 40 thẻ. Đo và giảm lỗi đó là việc của bài 44 và 45.
+«POST tới khi nhận 202» là thứ người dùng thấy ngay: kiểm ảnh, ghi kho, xếp hàng, chưa có OCR. «Chờ trong hàng» tăng khi số yêu cầu đồng thời vượt số chỗ của worker (2 worker nhân 4 job); quá tải thì tăng worker hoặc từ chối sớm bằng giới hạn tốc độ, không tăng timeout. Số giấy tờ đọc đúng ở cả 40 thẻ trong mỗi mức, ngày sinh 38 đến 40 trên 40; họ tên chỉ đúng nguyên văn rất ít vì Tesseract đọc «NGUYỄN VĂN A» thành «NGUYEN VAN A», nhưng đúng khi bỏ dấu ở cả 40 thẻ. Đo và giảm lỗi đó là việc của bài 44 và 45.
 
 ## Chạy và kiểm chứng
 
@@ -211,7 +211,7 @@ Với tiến trình thật, lab khởi động hai uvicorn trên hai cổng cùn
   GET ở API B (pid 94632) -> 200 done, worker pid 94629
 ```
 
-Kiểm chứng đầy đủ là chế độ `--verify`: 42 ca, gồm 29 ca gọi app trong tiến trình qua `httpx.ASGITransport` với worker arq chạy theo lượt, 6 ca về bộ tách trường và timeout, 7 ca trên tiến trình thật (output nguyên văn của lần chạy cuối; dòng đầu ghi máy và load average lúc chạy):
+Kiểm chứng đầy đủ là chế độ `--verify`: 42 test case, gồm 29 test case gọi app trong tiến trình qua `httpx.ASGITransport` với worker arq chạy theo lượt, 6 test case về bộ tách trường và timeout, 7 test case trên tiến trình thật (output nguyên văn của lần chạy cuối; dòng đầu ghi máy và load average lúc chạy):
 
 ```bash
 uv run --project examples/toi-noi-python/46-ocr-service-fastapi-worker examples/toi-noi-python/46-ocr-service-fastapi-worker/main.py --verify
@@ -268,7 +268,7 @@ Nhóm 3: hai uvicorn và hai arq là tiến trình thật
 OK 42/42
 ```
 
-Ca đo thời gian chỉ kiểm bất biến (thứ tự mốc, tiến trình còn hay không), không kiểm số giây tuyệt đối. Để biết `finally` có cần không, ta thay nó bằng `pass`. Hai ca đỏ:
+Test case đo thời gian chỉ kiểm bất biến (thứ tự mốc, tiến trình còn hay không), không kiểm số giây tuyệt đối. Để biết `finally` có cần không, ta thay nó bằng `pass`. Hai test case đỏ:
 
 ```text
   SAI  kill khi hết hạn: tiến trình con không còn, việc kế tiếp chạy được ngay  [{'gave_up_s': 0.17123616696335375, 'child_alive_after_timeout': True, 'next_job_s': 1.583122249925509}]
@@ -290,14 +290,14 @@ FAIL 40/42
 
 <div class="tkh-callout tkh-callout--warn">
 <span class="tkh-callout-title">Giới hạn của ví dụ so với production</span>
-<p>Một Redis đơn lẻ, không replica: ví dụ không nói gì về mất job khi Redis chết. Kho ảnh là thư mục trên một máy; production là S3 hoặc GCS có mã hoá, vòng đời, quét virus. Worker bị kill giữa chừng thì theo mã nguồn arq, khoá «đang chạy» hết hạn sau <code>job_timeout</code> cộng 10 giây rồi job được lấy lại; lab không thử ca này. Không có xác thực hay phân quyền (bài 34) và giới hạn tốc độ theo tài xế. Số giấy tờ rõ nằm trong Redis 15 phút; bài 47 lưu lâu dài với mặt nạ PII. Tách trường chỉ là regex trên thẻ giả sạch; ảnh chụp thật cho kết quả khác hẳn. Số đo lấy trên macOS Apple M1 Max đang bận.</p>
+<p>Một Redis đơn lẻ, không replica: ví dụ không nói gì về mất job khi Redis chết. Kho ảnh là thư mục trên một máy; production dùng S3 hoặc GCS, có mã hoá, vòng đời, quét virus. Worker bị kill giữa chừng thì theo mã nguồn arq, khoá «đang chạy» hết hạn sau <code>job_timeout</code> cộng 10 giây rồi job được lấy lại; lab không thử trường hợp này. Không có xác thực hay phân quyền (bài 34), cũng không có giới hạn tốc độ theo tài xế. Số giấy tờ rõ nằm trong Redis 15 phút; bài 47 lưu lâu dài với mặt nạ PII. Tách trường chỉ là regex trên thẻ giả sạch; ảnh chụp thật cho kết quả khác hẳn. Số đo lấy trên macOS Apple M1 Max đang bận.</p>
 </div>
 
 **Bài tập 1:** Hai ảnh JPEG khác nhau về byte (một ảnh đã được app nén lại) nhưng cùng là mặt trước một thẻ, gửi cho cùng `KYC-0001`. Service tạo mấy job, và có đúng ý «một ảnh một lần OCR» không?
 
 **Bài tập 2:** Ảnh JPEG cắt đôi cho job `failed` với `image_unreadable`; tài xế gửi lại đúng file đó trong 15 phút. Điều đó khác gì khi lỗi là `ocr_timeout`, và vì sao lab đối xử hai lỗi khác nhau?
 
-<details><summary>Xem lời giải</summary><p><b>1.</b> Hai job: hash khác nên mã job khác. Khoá idempotency là <i>byte của ảnh</i>, không phải «nội dung thẻ», nên chỉ chặn việc gửi lại đúng một file. Chặn cả ảnh nén lại cần khoá theo thứ ổn định hơn, như một job đang chạy cho mỗi hồ sơ, và trả giá bằng phức tạp. <b>2.</b> Ảnh cắt đôi: <code>200</code> với job <code>failed</code> cũ, không chạy lại, vì chạy lại chỉ cho lỗi cũ. <code>ocr_timeout</code>: <code>202</code> và chạy lại thật, vì lỗi có thể do worker quá tải chứ không do ảnh. Đừng tắt idempotency cho mọi job lỗi: một ảnh hỏng sẽ bị chạy lại mỗi lần bấm.</p></details>
+<details><summary>Xem lời giải</summary><p><b>1.</b> Hai job: hash khác nên mã job khác. Khoá idempotency là <i>byte của ảnh</i>, không phải «nội dung thẻ», nên chỉ chặn việc gửi lại đúng một file. Chặn cả ảnh nén lại cần khoá theo thứ ổn định hơn, như một job đang chạy cho mỗi hồ sơ, và đổi lại là độ phức tạp cao hơn. <b>2.</b> Ảnh cắt đôi: <code>200</code> với job <code>failed</code> cũ, không chạy lại, vì chạy lại chỉ cho lỗi cũ. <code>ocr_timeout</code>: <code>202</code> và chạy lại thật, vì lỗi có thể do worker quá tải chứ không do ảnh. Đừng tắt idempotency cho mọi job lỗi: một ảnh hỏng sẽ bị chạy lại mỗi lần bấm.</p></details>
 
 Bài trước: [bài 45](/articles/python-danh-gia-ocr-cer-wer-threshold). Bài tiếp: [bài 47](/articles/python-luu-ket-qua-ocr-mongodb-pii-retention).
 

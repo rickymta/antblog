@@ -1,0 +1,197 @@
+{
+ "file": "location-lich-su-gps-parquet-retention-quyen-rieng-tu.md",
+ "edits": [
+  {
+   "old": "Một tài xế khiếu nại cước chuyến hôm qua sai vì",
+   "new": "Một tài xế khiếu nại rằng cước chuyến hôm qua sai vì",
+   "reason": "Câu thiếu liên từ",
+   "severity": "low"
+  },
+  {
+   "old": "nơi coalesce quyết định điểm nào không bao giờ tới Kafka",
+   "new": "nơi bước gộp điểm (coalesce) quyết định điểm nào không bao giờ tới Kafka",
+   "reason": "Thống nhất thuật ngữ gộp",
+   "severity": "low"
+  },
+  {
+   "old": "áp dụng sampling, retention, partitioning và chính sách quyền riêng tư",
+   "new": "áp dụng giảm mẫu (sampling), retention, phân vùng (partitioning) và chính sách quyền riêng tư",
+   "reason": "Chú thích thuật ngữ một lần",
+   "severity": "medium"
+  },
+  {
+   "old": "tạm rồi rename",
+   "new": "tạm rồi đổi tên",
+   "reason": "Thống nhất với văn xuôi",
+   "severity": "low"
+  },
+  {
+   "old": "Kết hợp với bài 13 cho một hệ quả cần nói thẳng",
+   "new": "Kết hợp với bài 13, cách làm này dẫn tới một hệ quả cần nói thẳng",
+   "reason": "Thiếu chủ ngữ và động từ",
+   "severity": "high"
+  },
+  {
+   "old": "writer đọc tới đâu commit tới đó, và có sự cố thì đọc lại",
+   "new": "writer đọc tới đâu thì ghi nhận offset (commit) tới đó, và khi có sự cố thì đọc lại",
+   "reason": "Câu đọc gượng, thiếu tân ngữ",
+   "severity": "medium"
+  },
+  {
+   "old": "Đây là giao hàng ít nhất một lần",
+   "new": "Đây là cơ chế giao ít nhất một lần",
+   "reason": "Thống nhất với sơ đồ, bỏ calque giao hàng",
+   "severity": "medium"
+  },
+  {
+   "old": "Bộ giảm mẫu giữ một điểm khi nó là điểm đầu",
+   "new": "Bộ giảm mẫu giữ một điểm khi điểm đó là điểm đầu",
+   "reason": "Tránh Nó",
+   "severity": "low"
+  },
+  {
+   "old": "Nếu không có nó thì «không có dòng nào»",
+   "new": "Nếu thiếu cơ chế này thì «không có dòng nào»",
+   "reason": "Tránh Nó chỉ sự vật trừu tượng",
+   "severity": "medium"
+  },
+  {
+   "old": "đây là một nguồn dòng thừa mà bài tập 1 quay lại",
+   "new": "đây là một nguyên nhân sinh ra dòng thừa, và bài tập 1 quay lại vấn đề này",
+   "reason": "Cụm gượng",
+   "severity": "medium"
+  },
+  {
+   "old": "không được giả định lấy mẫu 4 giây",
+   "new": "không được giả định điểm được lấy mẫu mỗi 4 giây",
+   "reason": "Thiếu chủ ngữ",
+   "severity": "medium"
+  },
+  {
+   "old": "Vẽ từ output của <code>history-writer demo</code>. Mọi số là trên dữ liệu mô phỏng.",
+   "new": "Vẽ từ kết quả chạy của <code>history-writer demo</code>. Mọi số đều lấy từ dữ liệu mô phỏng.",
+   "reason": "Từ Anh thông thường, câu gượng",
+   "severity": "medium"
+  },
+  {
+   "old": "So với 53,2 MB protobuf của chính các sự kiện đó là nhỏ hơn 13 lần, phần lớn cùng nhờ bố cục cột",
+   "new": "So với 53,2 MB protobuf của chính các sự kiện đó thì nhỏ hơn 13 lần, phần lớn là nhờ bố cục cột",
+   "reason": "Câu lủng củng, 'cùng nhờ' khó hiểu",
+   "severity": "medium"
+  },
+  {
+   "old": "Bố cục thư mục kiểu Hive, mỗi lần flush một file mới:",
+   "new": "Bố cục thư mục kiểu Hive, mỗi lần flush ghi ra một file mới:",
+   "reason": "Thiếu động từ",
+   "severity": "medium"
+  },
+  {
+   "old": "nên engine đọc cắt được cả thư mục mà không mở file",
+   "new": "nên engine đọc có thể bỏ qua cả thư mục mà không cần mở file",
+   "reason": "Cách nói gượng",
+   "severity": "medium"
+  },
+  {
+   "old": "Xoá dữ liệu cũ cũng nhờ vậy là xoá nguyên thư mục.",
+   "new": "Nhờ vậy, xoá dữ liệu cũ cũng là xoá nguyên một thư mục.",
+   "reason": "Mệnh đề lủng củng, tách ý",
+   "severity": "medium"
+  },
+  {
+   "old": "để kiểm hợp đồng (",
+   "new": "để kiểm tra hợp đồng (",
+   "reason": "Động từ cụt",
+   "severity": "medium"
+  },
+  {
+   "old": "thư mục là lần chạy thật 60 giây dưới đây",
+   "new": "thư mục là kết quả lần chạy thật 60 giây ở đoạn dưới",
+   "reason": "Câu thiếu danh từ",
+   "severity": "medium"
+  },
+  {
+   "old": "hằng số trong một thư mục đầu ra, và",
+   "new": "giá trị không đổi trong một thư mục đầu ra, và",
+   "reason": "Cách nói khó hiểu",
+   "severity": "low"
+  },
+  {
+   "old": "truy cập hạn chế, giữ ngắn nhất",
+   "new": "truy cập hạn chế, thời hạn giữ ngắn nhất",
+   "reason": "Thiếu danh từ chính",
+   "severity": "medium"
+  },
+  {
+   "old": "(test kiểm điều này)",
+   "new": "(test kiểm tra điều này)",
+   "reason": "Động từ cụt",
+   "severity": "low"
+  },
+  {
+   "old": "production lấy khoá từ KMS và xoay theo chính sách",
+   "new": "môi trường production lấy khoá từ KMS và đổi khoá định kỳ theo chính sách",
+   "reason": "Thiếu danh từ, calque của rotate",
+   "severity": "medium"
+  },
+  {
+   "old": "Bên được lợi ở mức coarse là người bị ghi lại",
+   "new": "Bên được lợi ở mức coarse là người có dữ liệu được ghi lại",
+   "reason": "Cách nói gượng",
+   "severity": "medium"
+  },
+  {
+   "old": "Chúng chỉ để chạy retention và có số đếm để kiểm.",
+   "new": "Chúng chỉ để chạy thử retention và có số đếm để kiểm tra.",
+   "reason": "Động từ cụt",
+   "severity": "medium"
+  },
+  {
+   "old": "Phần giảm mẫu và retention không cần Kafka (từ gốc repository):",
+   "new": "Phần giảm mẫu và retention không cần Kafka (chạy từ thư mục gốc của repository):",
+   "reason": "Câu cụt",
+   "severity": "medium"
+  },
+  {
+   "old": "Output của `demo` (rút gọn;",
+   "new": "Kết quả chạy của `demo` (rút gọn;",
+   "reason": "Từ Anh thông thường",
+   "severity": "low"
+  },
+  {
+   "old": "kiểm: giảm mẫu theo từng lý do",
+   "new": "kiểm tra: giảm mẫu theo từng lý do",
+   "reason": "Động từ cụt",
+   "severity": "medium"
+  },
+  {
+   "old": "chưa khử trùng lặp dòng (giao hàng ít nhất một lần)",
+   "new": "chưa khử trùng lặp dòng (giao ít nhất một lần)",
+   "reason": "Thống nhất cách gọi",
+   "severity": "medium"
+  },
+  {
+   "old": "cận dưới trên lý thuyết",
+   "new": "cận dưới theo lý thuyết",
+   "reason": "Cụm gượng",
+   "severity": "low"
+  },
+  {
+   "old": "bài không có số đo cho ca này",
+   "new": "bài không có số đo cho trường hợp này",
+   "reason": "Calque 'ca'",
+   "severity": "medium"
+  },
+  {
+   "old": "Tính bằng chuỗi ngày trong tên thư mục, không phải thời gian sửa file.",
+   "new": "Lab so sánh bằng chuỗi ngày trong tên thư mục, không phải thời gian sửa file.",
+   "reason": "Câu thiếu chủ ngữ",
+   "severity": "medium"
+  },
+  {
+   "old": "nên không có ý nghĩa khi chọn ô lưới mịn hơn mức làm tròn này",
+   "new": "nên chọn ô lưới mịn hơn mức làm tròn này cũng không có ý nghĩa",
+   "reason": "Câu thiếu chủ ngữ",
+   "severity": "medium"
+  }
+ ]
+}

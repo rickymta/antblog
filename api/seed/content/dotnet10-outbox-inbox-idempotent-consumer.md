@@ -8,7 +8,7 @@ tags: [csharp, dotnet, dotnet-10, toi-noi, postgresql, ef-core]
 language: vi
 ---
 
-Đây là **bài 26** trong loạt **C# và .NET 10 qua [Tới Nơi](/articles/du-an-mau-toi-noi)**. Các ví dụ target `net10.0`, dùng dữ liệu giả và cùng code đã chạy kiểm chứng trong repository.
+Đây là **bài 26** trong loạt **C# và .NET 10 qua [Tới Nơi](/articles/du-an-mau-toi-noi)**. Các ví dụ nhắm tới `net10.0`, dùng dữ liệu giả và cùng code đã được chạy kiểm chứng trong repository.
 
 <div class="tkh-callout tkh-callout--example">
 <span class="tkh-callout-title">Thử trước khi đọc</span>
@@ -20,17 +20,17 @@ language: vi
 
 Một use case ghi chuyến vào PostgreSQL rồi gửi TripCreated cho service khác. Database commit xong nhưng broker lỗi thì thông điệp có thể mất. Đảo thứ tự cũng không giải được: gửi trước rồi transaction database thất bại khiến consumer thấy một chuyến chưa tồn tại.
 
-Outbox lưu ý định gửi trong cùng transaction với thay đổi nghiệp vụ. Dispatcher đọc ý định đã commit, gửi ra ngoài rồi đánh dấu đã gửi. Việc gửi có thể được thử lại độc lập với request ban đầu; transaction local không phải kéo dài tới broker.
+Outbox lưu ý định gửi trong cùng transaction với thay đổi nghiệp vụ. Dispatcher đọc ý định đã commit, gửi ra ngoài rồi đánh dấu đã gửi. Việc gửi có thể được thử lại độc lập với request ban đầu; transaction local không cần phải kéo dài tới broker.
 
-Lab dùng PostgreSQL thật cho trạng thái Outbox/Inbox và publisher ghi nhận trong memory để điều khiển failure window. Nó chưa kiểm broker mạng, confirm/ack của một sản phẩm cụ thể hoặc vận hành nhiều dispatcher.
+Lab dùng PostgreSQL thật cho trạng thái Outbox/Inbox và publisher ghi nhận trong memory để điều khiển failure window. Lab chưa kiểm chứng broker chạy qua mạng, cơ chế confirm/ack của một sản phẩm cụ thể hoặc việc vận hành nhiều dispatcher.
 
-## Atomicity ở writer, giao lại ở dispatcher
+## Tính nguyên tử ở writer, lần giao lại ở dispatcher
 
-OutboxWriter thêm TripRow và OutboxRow vào một SaveChanges. Test foreign key thất bại yêu cầu cả hai bảng không có hàng mới. Điều cần giữ là sự kiện không tách khỏi commit của dữ liệu mà nó mô tả.
+OutboxWriter thêm TripRow và OutboxRow vào một SaveChanges. Test cho trường hợp foreign key thất bại yêu cầu cả hai bảng không có hàng mới. Điều cần giữ là sự kiện không tách khỏi commit của dữ liệu mà nó mô tả.
 
-Dispatcher gọi PublishAsync trước rồi mới lưu Published=true. Một cờ test mô phỏng lỗi ngay giữa hai bước. Broker giả đã có thông điệp, nhưng Outbox vẫn pending. Chạy lại dispatcher gửi cùng EventId thêm lần nữa.
+Dispatcher gọi PublishAsync trước rồi mới lưu Published=true. Một cờ test mô phỏng lỗi ngay giữa hai bước. Broker giả đã có thông điệp, nhưng Outbox vẫn pending. Chạy lại dispatcher thì cùng EventId được gửi thêm một lần nữa.
 
-Không đánh dấu Published trước khi gọi broker để giảm duplicate: cách đó đổi duplicate thành nguy cơ mất thông điệp. Cũng không gộp “đã gọi PublishAsync” với “mọi consumer đã xử lý thành công”; đó là các mốc khác nhau.
+Không đánh dấu Published trước khi gọi broker để giảm lần giao trùng: cách đó đổi lần giao trùng thành nguy cơ mất thông điệp. Cũng không gộp “đã gọi PublishAsync” với “mọi consumer đã xử lý thành công”; đó là các mốc khác nhau.
 
 <figure class="tkh-fig">
 <div class="tkh-fig-box">
@@ -39,21 +39,21 @@ Không đánh dấu Published trước khi gọi broker để giảm duplicate: 
 <figcaption>Hình 1. Outbox giữ intent cùng dữ liệu nghiệp vụ, không biến hai hệ thống thành một transaction.</figcaption>
 </figure>
 
-## Inbox gắn nhận diện thông điệp với hiệu ứng
+## Inbox gắn định danh thông điệp với hiệu ứng
 
-ReceiptConsumer ghi Inbox với khoá consumer/EventId cùng ReceiptRow trong một SaveChanges. Khi hai lần giao cùng EventId cạnh tranh, unique constraint và transaction bảo vệ để chỉ một lần tạo hiệu ứng local.
+ReceiptConsumer ghi Inbox với khoá consumer/EventId cùng ReceiptRow trong một SaveChanges. Khi hai lần giao cùng EventId cạnh tranh, unique constraint và transaction bảo đảm chỉ một lần giao tạo ra hiệu ứng local.
 
-Sau SQLSTATE 23505, consumer kiểm tra Inbox đúng consumer/EventId đã có trước khi trả false. Không bỏ qua mọi unique violation hoặc mọi DbUpdateException như thể đó chắc chắn là duplicate hợp lệ. EventId cần ổn định giữa các lần gửi lại của cùng sự kiện.
+Sau SQLSTATE 23505, consumer kiểm tra xem Inbox đã có đúng cặp consumer/EventId đó hay chưa trước khi trả false. Không bỏ qua mọi unique violation hoặc mọi DbUpdateException như thể đó chắc chắn là bản trùng hợp lệ. EventId cần ổn định giữa các lần gửi lại của cùng sự kiện.
 
-Receipt ở đây chỉ là dấu hiệu ứng trong database consumer, chưa là thu tiền hoặc gửi email thật. Nếu consumer gọi một API ngoài trước commit Inbox, cửa sổ dual-write xuất hiện ở phía consumer. Cần idempotency của dependency hoặc một Outbox tiếp theo, không suy từ một hàng Inbox ra mọi tác động ngoài đều once.
+Receipt ở đây chỉ là bản ghi đánh dấu hiệu ứng trong database của consumer, chưa phải việc thu tiền hoặc gửi email thật. Nếu consumer gọi một API ngoài trước commit Inbox, cửa sổ dual-write xuất hiện ở phía consumer. Cần idempotency của dependency hoặc một Outbox tiếp theo, không suy từ một hàng Inbox ra rằng mọi tác động bên ngoài đều chỉ xảy ra đúng một lần.
 
 ## Những đảm bảo demo chưa có
 
-Dispatcher lab chỉ có một worker và tải tập pending nhỏ. Chưa có lease, SKIP LOCKED, batching, backoff, dead-letter, cleanup hay ordering theo aggregate. Thêm nhiều instance mà không thiết kế claim/lease có thể gửi trùng nhiều hơn hoặc làm sai thứ tự quan sát.
+Dispatcher lab chỉ có một worker và khối lượng pending nhỏ. Lab chưa có lease, SKIP LOCKED, batching, backoff, dead-letter, cleanup hay ordering theo aggregate. Thêm nhiều instance mà không thiết kế claim/lease có thể gửi trùng nhiều hơn hoặc làm sai thứ tự quan sát.
 
-Source và consumer được đặt trong một persistence lab/schema cho thuận tiện kiểm chứng, nhưng dùng các lần commit/context riêng. Không có transaction xuyên broker hoặc hai service. Production mỗi service sở hữu dữ liệu và hạ tầng giao tiếp theo ranh giới đã thống nhất cho Tới Nơi.
+Bên gửi và consumer được đặt trong cùng một persistence lab và schema cho thuận tiện kiểm chứng, nhưng dùng các lần commit/context riêng. Không có transaction xuyên broker hoặc hai service. Ở production, mỗi service sở hữu dữ liệu và hạ tầng giao tiếp theo ranh giới đã thống nhất cho Tới Nơi.
 
-Domain event bên trong aggregate và integration event ra ngoài cũng không nên đồng nhất. Hợp đồng ngoài cần version, ngữ nghĩa và dữ liệu tối thiểu; không serialize nguyên graph EF đang tracking hay gửi giấy tờ OCR trong mọi event.
+Domain event bên trong aggregate và integration event ra ngoài cũng không nên đồng nhất. Hợp đồng ngoài cần version, ngữ nghĩa và dữ liệu tối thiểu; không serialize nguyên graph đối tượng mà EF đang theo dõi (tracking) hay gửi giấy tờ OCR trong mọi event.
 
 <figure class="tkh-fig">
 <div class="tkh-fig-box">
@@ -64,15 +64,15 @@ Domain event bên trong aggregate và integration event ra ngoài cũng không n
 
 ## Hai thí nghiệm và bài tập
 
-Test đầu quan sát hai lần publish cùng event nhưng một Inbox/Receipt; Outbox cuối cùng published, dữ liệu chuyến tồn tại. Test thứ hai quan sát ghi chuyến thất bại không để lại Outbox mồ côi.
+Test đầu quan sát hai lần publish cùng event nhưng kết quả vẫn là một Inbox/Receipt; Outbox cuối cùng ở trạng thái published và dữ liệu chuyến tồn tại. Test thứ hai quan sát trường hợp ghi chuyến thất bại không để lại Outbox mồ côi.
 
-**Bài tập:** nếu tạo EventId mới ở mỗi lần dispatcher retry, Inbox còn nhận ra thông điệp trùng không? Nếu mark Published trước publish, lỗi sau mark gây ra điều gì?
+**Bài tập:** nếu tạo EventId mới ở mỗi lần dispatcher retry, Inbox còn nhận ra thông điệp trùng không? Nếu đánh dấu Published trước khi publish, lỗi xảy ra sau bước đánh dấu gây ra điều gì?
 
-<details><summary>Xem đáp án</summary><p>Không, mỗi ID mới trông như sự kiện mới. Mark trước có thể làm intent biến mất khỏi tập pending dù chưa gửi, gây mất giao hàng. Chấp nhận và kiểm soát duplicate tốt hơn che một cửa sổ mất dữ liệu.</p></details>
+<details><summary>Xem đáp án</summary><p>Không, mỗi ID mới trông như sự kiện mới. Đánh dấu trước có thể làm ý định gửi biến mất khỏi tập pending dù chưa gửi, gây mất thông điệp. Chấp nhận và kiểm soát lần giao trùng tốt hơn là che đi một cửa sổ mất dữ liệu.</p></details>
 
 ## Chạy ví dụ và kiểm chứng
 
-Cần PostgreSQL local và database riêng tên `toi_noi_dotnet_lab`. Thiết lập biến môi trường `TOI_NOI_PG` bằng connection string của lab trước khi chạy; không đưa mật khẩu vào source. README của persistence lab có hướng dẫn. Fixture từ chối database khác tên hoặc host ngoài localhost, không âm thầm skip khi thiếu kết nối; nó chỉ tạo và dọn schema GUID riêng.
+Cần PostgreSQL local và database riêng tên `toi_noi_dotnet_lab`. Thiết lập biến môi trường `TOI_NOI_PG` bằng connection string của lab trước khi chạy; không đưa mật khẩu vào source. README của persistence lab có hướng dẫn. Fixture từ chối database khác tên hoặc host ngoài localhost, không tự bỏ qua test mà không báo lỗi khi thiếu kết nối; fixture chỉ tạo và dọn schema GUID riêng.
 
 Từ thư mục gốc repository:
 

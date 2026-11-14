@@ -1,14 +1,14 @@
 ---
 slug: python-concurrency-lock-queue-semaphore
 title: "Lock, Queue, Semaphore: tránh nhận trùng chuyến"
-summary: "Bài 23: tái hiện race hai tài xế cùng nhận một chuyến bằng asyncio và thread, sửa bằng asyncio.Lock, threading.Lock, giới hạn bằng Semaphore, điều tiết bằng Queue có maxsize. Có số đo thật và lab --verify."
+summary: "Bài 23: tái hiện race khi hai tài xế cùng nhận một chuyến bằng asyncio và thread, sửa bằng asyncio.Lock, threading.Lock, giới hạn bằng Semaphore, điều tiết bằng Queue có maxsize. Có số đo thật và lab --verify."
 category: python-intermediate
 level: intermediate
 tags: [python, toi-noi, concurrency, asyncio]
 language: vi
 ---
 
-Lúc cao điểm [Tới Nơi](/articles/du-an-mau-toi-noi) tạo khoảng 70 chuyến mỗi giây, và một chuyến vừa vào trạng thái `searching` có thể hiện trên điện thoại của nhiều tài xế trong vùng. Nhiều người bấm «Nhận» trong cùng một giây, nhưng chỉ một người được nhận. Nếu code kiểm tra «chuyến còn trống không» rồi mới ghi tên tài xế, hai lời gọi đến sát nhau có thể cùng thấy «còn trống», cùng ghi, cùng nhận được câu trả lời «thành công». Hai tài xế cùng chạy tới đón một khách, hệ thống chỉ còn tên người ghi sau.
+Lúc cao điểm [Tới Nơi](/articles/du-an-mau-toi-noi) tạo khoảng 70 chuyến mỗi giây, và một chuyến vừa vào trạng thái `searching` có thể hiện trên điện thoại của nhiều tài xế trong vùng. Nhiều người bấm «Nhận» trong cùng một giây, nhưng chỉ một người được nhận. Nếu code kiểm tra «chuyến còn trống không» rồi mới ghi tên tài xế, hai lời gọi đến sát nhau có thể cùng thấy «còn trống», cùng ghi, cùng nhận được câu trả lời «thành công». Hai tài xế cùng chạy tới đón một khách, hệ thống chỉ còn giữ tên của người ghi sau cùng.
 
 Đây là bài 23 của lộ trình **Python trung bình qua Tới Nơi**. Bạn cần quen asyncio ([bài 21](/articles/python-asyncio-coroutine-task-timeout-cancellation)) và biết thread và GIL ([bài 22](/articles/python-gil-threading-multiprocessing-free-threaded)). Bài C# cùng chủ đề là [concurrency và thread safety](/articles/csharp-concurrency-thread-safety); ở đây ta làm với coroutine và thread của Python, cộng thêm `Semaphore` và `Queue`.
 
@@ -74,11 +74,11 @@ asyncio.Lock, 20 tài xế: 1 người thắng, driver = DR-001, status = accept
 Vài điều cần nhớ khi dùng:
 
 - **Cùng một lock cho cùng một dữ liệu.** Hai hàm cùng sửa `Trip` mà dùng hai lock khác nhau thì không bảo vệ gì.
-- **Không tái nhập.** Giữ lock rồi xin lại trong cùng coroutine sẽ chờ mãi. Lab bọc lần xin thứ hai trong `asyncio.timeout` của bài 21 để thấy `TimeoutError` thay vì treo.
+- **Lock không tái nhập được.** Giữ lock rồi xin lại trong cùng coroutine sẽ chờ mãi. Lab bọc lần xin thứ hai trong `asyncio.timeout` của bài 21 để thấy `TimeoutError` thay vì treo.
 - **Giữ ngắn.** Mọi coroutine khác xếp hàng chờ; đừng gọi mạng chậm trong khối lock nếu không bắt buộc.
 - **Không dùng cho thread.** `asyncio.Lock`, `Semaphore` và `Queue` đều ghi rõ là không an toàn khi dùng từ nhiều thread.
 
-## Thread cũng bị: Barrier để tái hiện, threading.Lock để sửa
+## Thread cũng gặp lỗi này: Barrier để tái hiện, threading.Lock để sửa
 
 Với thread, check-then-act cũng hỏng, nhưng khó tái hiện vì thread bị ngắt ở những thời điểm khó đoán. Thay vì cầu may, lab điều khiển lịch bằng `threading.Barrier`: mọi thread đọc xong rồi mới cùng ghi (`main.py`):
 
@@ -102,7 +102,7 @@ def accept_thread_locked(trip: Trip, driver_id: str, lock: threading.Lock) -> bo
         return True
 ```
 
-Pool phải có đủ 8 worker cho 8 tác vụ (`ThreadPoolExecutor(max_workers=count)`), nếu ít hơn, các thread đầu chờ ở Barrier tới hết `timeout=5` rồi nhận `BrokenBarrierError` sau 5 giây. Kết quả:
+Pool phải có đủ 8 worker cho 8 tác vụ (`ThreadPoolExecutor(max_workers=count)`); nếu ít hơn, các thread đầu chờ ở Barrier tới hết `timeout=5` rồi nhận `BrokenBarrierError` sau 5 giây. Kết quả:
 
 ```text
 không khóa, 8 thread (có Barrier): 8 người báo thắng, driver cuối = DR-007
@@ -162,12 +162,12 @@ có một lời gọi hàm, interval 1e-6 s       [25, 20, 16, 32, 35]
 
 Đọc cụ thể từng dòng:
 
-- **Có GIL, không có lời gọi: 0 trên cả 10 lượt**, kể cả khi yêu cầu chuyển thread dày đặc (`1e-6`). Hai dòng bytecode lab in ra cho thấy lý do: trên đường «chuyến còn trống», giữa `LOAD_ATTR` (đọc `driver_id`) và `STORE_ATTR` (ghi) không có lệnh `CALL`. Theo cách CPython đang cài, một thread chỉ nhường GIL khi chờ I/O hoặc ở điểm kiểm tra như vào hàm, gọi hàm, nhảy lùi trong vòng lặp; đoạn này không có điểm nào, nên thread khác không chen vào được. Đây là **chi tiết cài đặt**, không phải bảo đảm của ngôn ngữ.
+- **Có GIL, không có lời gọi: 0 trên cả 10 lượt**, kể cả khi yêu cầu chuyển thread dày đặc (`1e-6`). Hai dòng bytecode lab in ra cho thấy lý do: trên đường «chuyến còn trống», giữa `LOAD_ATTR` (đọc `driver_id`) và `STORE_ATTR` (ghi) không có lệnh `CALL`. Theo cách CPython hiện thực, một thread chỉ nhường GIL khi chờ I/O hoặc ở điểm kiểm tra như vào hàm, gọi hàm, nhảy lùi trong vòng lặp; đoạn này không có điểm nào, nên thread khác không chen vào được. Đây là **chi tiết cài đặt**, không phải bảo đảm của ngôn ngữ.
 - **Có GIL, thêm một lời gọi hàm, interval mặc định: vẫn 0.** Đã có chỗ để nhường GIL, nhưng yêu cầu chuyển thread chỉ xuất hiện sau khoảng 5 mili giây, còn đoạn giữa hai dòng chỉ dài cỡ vài chục lệnh. Đó là cách ta hiểu kết quả; lab không đo riêng cơ chế này.
 - **Có GIL, thêm một lời gọi hàm, interval `1e-6`: 15 đến 29 chuyến hỏng trên 2.000.** Cùng logic sai, chỉ thêm một lời gọi và một tham số, race lộ ra ở mọi lượt.
 - **3.14t (không có GIL): cả bốn dòng đều hỏng**, từ 8 đến 51 chuyến trên 2.000, kể cả bản không có lời gọi với interval mặc định. Số dao động mạnh giữa các lượt, nên chỉ đọc là «có lỗi, cỡ vài chục trên 2.000».
 
-Bài học cho test: code sai chạy 2.000 chuyến trên build có GIL vẫn xanh, nhưng thêm một dòng log, đổi tham số chuyển thread hoặc chuyển sang build free-threaded (bài 22) là lỗi lộ ra. Test xanh nhờ **may mắn của một cài đặt** không chứng minh gì. Hãy tái hiện race bằng lịch xen kẽ điều khiển được (Barrier ở trên, `await` có chủ ý ở phần asyncio) và sửa bằng khoá, không dựa vào việc «hiện giờ chưa thấy lỗi». Đo trên Apple Silicon 10 lõi (8 hiệu năng, 2 tiết kiệm điện), load average 16 đến 18 lúc đo; số cụ thể sẽ khác ở máy khác.
+Bài học cho test: code sai chạy 2.000 chuyến trên build có GIL vẫn xanh, nhưng thêm một dòng log, đổi tham số chuyển thread hoặc chuyển sang build free-threaded (bài 22) là lỗi lộ ra. Test xanh nhờ **may mắn của một cách cài đặt** không chứng minh gì. Hãy tái hiện race bằng lịch xen kẽ điều khiển được (Barrier ở trên, `await` có chủ ý ở phần asyncio) và sửa bằng khoá, không dựa vào việc «hiện giờ chưa thấy lỗi». Đo trên Apple Silicon 10 lõi (8 hiệu năng, 2 tiết kiệm điện), load average 16 đến 18 lúc đo; số cụ thể sẽ khác ở máy khác.
 
 Lưu ý: `threading.Lock` đặt trong coroutine sẽ chặn cả event loop (bài 21); `asyncio.Lock` chỉ có ý nghĩa giữa các coroutine của một loop.
 
@@ -197,7 +197,7 @@ không giới hạn  : đỉnh đồng thời 100, mất 0.05 s
 Semaphore(10)   : đỉnh đồng thời  10, mất 0.51 s
 ```
 
-Không giới hạn thì cả 100 lời gọi cùng bay tới service, mất 0,05 giây. Với `Semaphore(10)` đỉnh đúng bằng 10 và tổng thời gian xấp xỉ 10 lượt nối nhau (100 chia 10, nhân 0,05 giây). Ta đổi thời gian lấy việc phía sau không bị quá tải. Về ý nghĩa, `Lock` là trường hợp số giấy phép bằng 1. `asyncio.BoundedSemaphore` thêm bảo vệ: báo lỗi nếu `release()` nhiều hơn `acquire()`, hữu ích khi tự gọi `acquire`/`release` thay vì dùng `async with`.
+Không giới hạn thì cả 100 lời gọi cùng bay tới service, mất 0,05 giây. Với `Semaphore(10)` đỉnh đúng bằng 10 và tổng thời gian xấp xỉ 10 lượt nối nhau (100 chia 10, nhân 0,05 giây). Ta đánh đổi thời gian để phía sau không bị quá tải. Về bản chất, `Lock` là trường hợp số giấy phép bằng 1. `asyncio.BoundedSemaphore` thêm bảo vệ: báo lỗi nếu `release()` nhiều hơn `acquire()`, hữu ích khi tự gọi `acquire`/`release` thay vì dùng `async with`.
 
 ## Queue: producer, consumer và backpressure
 
@@ -235,7 +235,7 @@ async def consumer() -> None:
 
 - **`maxsize`.** Queue đầy thì `await queue.put()` treo producer cho tới khi có chỗ. Đó là backpressure: tốc độ vào bị kéo về tốc độ ra. `maxsize=0` là không giới hạn, producer không bao giờ chờ.
 - **`task_done` và `join`.** Mỗi `get()` phải được cân bằng bằng một `task_done()` (nên đặt trong `finally`); `await queue.join()` chờ tới khi mọi phần tử đã được đánh dấu xong. Sau `join` ta mới `gather` các consumer.
-- **Dừng.** Cách cổ điển là **sentinel**: producer đặt vào mỗi consumer một giá trị `None` làm tín hiệu thoát. Từ Python 3.13 có `Queue.shutdown()`: producer gọi một lần, consumer lấy hết phần còn trong queue rồi `get()` ném `QueueShutDown`. Hai chi tiết theo tài liệu: một producer đang treo ở `put()` cũng nhận `QueueShutDown`, và `shutdown(immediate=True)` bỏ luôn phần còn lại trong queue (kể cả mở khoá `join()` dù việc chưa làm), nên chỉ dùng khi chấp nhận mất yêu cầu chưa xử lý.
+- **Dừng.** Cách cổ điển là **sentinel**: producer đặt vào mỗi consumer một giá trị `None` làm tín hiệu thoát. Từ Python 3.13 có `Queue.shutdown()`: producer gọi một lần, consumer lấy hết phần còn trong queue rồi `get()` ném `QueueShutDown`. Hai chi tiết theo tài liệu: một producer đang treo ở `put()` cũng nhận `QueueShutDown`, và `shutdown(immediate=True)` bỏ luôn phần còn lại trong queue (kể cả việc mở khoá `join()` dù công việc chưa xử lý xong), nên chỉ dùng khi chấp nhận mất yêu cầu chưa xử lý.
 
 30 yêu cầu, 3 consumer, mỗi yêu cầu 0,02 giây (bảng do lab in):
 
@@ -255,7 +255,7 @@ maxsize=5 + shutdown()        30           5         0.16 s       0.21 s
 
 Cột `peak qsize` là bằng chứng. Không giới hạn, producer đẩy cả 30 yêu cầu trước khi consumer kịp lấy: đỉnh 30 và producer xong gần như tức thì (0,00 giây), tức toàn bộ backlog nằm trong bộ nhớ. Với `maxsize=5` đỉnh không vượt 5 và producer bị giữ lại tới 0,19 giây, gần bằng thời gian xử lý toàn bộ (0,21 giây). Tổng thời gian xong gần như không đổi (0,20 và 0,21 giây) vì nút thắt là ba consumer. Backpressure không làm hệ thống nhanh hơn, nó làm hệ thống **không phình**. Cả ba cách đều xử lý đủ 30 yêu cầu và dừng cả 3 consumer.
 
-Queue còn giúp tránh khoá theo một cách khác: nếu mọi thay đổi của một chuyến đều đi qua đúng một consumer (ví dụ chia consumer theo mã chuyến), thì không còn hai bên cùng sửa dữ liệu đó và không cần lock cho nó. Điều kiện là mọi đường sửa chuyến đều phải đi qua queue; một đường tắt bên ngoài là đủ để race quay lại. Với thread thì dùng `queue.Queue` của thư viện chuẩn, không dùng `asyncio.Queue`.
+Queue còn giúp tránh khoá theo một cách khác: nếu mọi thay đổi của một chuyến đều đi qua đúng một consumer (ví dụ chia consumer theo mã chuyến), thì không còn hai bên cùng sửa dữ liệu đó và không cần lock cho nó. Điều kiện là mọi đường sửa chuyến đều phải đi qua queue; chỉ cần một đường tắt bên ngoài là race quay lại. Với thread thì dùng `queue.Queue` của thư viện chuẩn, không dùng `asyncio.Queue`.
 
 ## Chạy và kiểm chứng
 
@@ -301,7 +301,7 @@ maxsize=5 + shutdown()        30           5         0.16 s       0.21 s
 OK 20/20
 ```
 
-20 ca `--verify` kiểm các số logic lặp lại được: 2, 20 và 8 người thắng khi không khoá, đúng 1 với cả hai loại Lock; Lock không tái nhập; đỉnh đồng thời 100 so với 10; ba cấu hình queue xử lý đủ 30 yêu cầu và dừng đủ 3 consumer; `maxsize=5` không vượt 5. Các ca thời gian dùng ngưỡng rộng (`Semaphore(10)` mất ít nhất 0,45 giây, producer có backpressure bị giữ từ 0,05 giây). Bảng race (số chuyến hỏng) không được kiểm vì phụ thuộc máy và build Python; nó chỉ để quan sát.
+20 test case của `--verify` kiểm các số liệu logic lặp lại được: 2, 20 và 8 người thắng khi không khoá, đúng 1 với cả hai loại Lock; Lock không cho tái nhập; đỉnh đồng thời 100 so với 10; ba cấu hình queue xử lý đủ 30 yêu cầu và dừng đủ 3 consumer; `maxsize=5` không vượt 5. Các test case về thời gian dùng ngưỡng rộng (`Semaphore(10)` mất ít nhất 0,45 giây, producer có backpressure bị giữ từ 0,05 giây). Bảng race (số chuyến hỏng) không được kiểm vì phụ thuộc máy và build Python; nó chỉ để quan sát.
 
 | Hiện tượng | Kiểm tra trước |
 |---|---|
@@ -313,7 +313,7 @@ OK 20/20
 
 <div class="tkh-callout tkh-callout--warn">
 <span class="tkh-callout-title">Giới hạn của ví dụ so với production</span>
-<p>Mọi khoá trong bài chỉ có hiệu lực <b>trong một process</b>. Tới Nơi chạy nhiều bản của cùng service: hai server tải cùng một chuyến thành hai đối tượng <code>Trip</code>, mỗi đối tượng có lock riêng, cả hai vẫn nhận được. Race giữa nhiều server phải được chặn ở nơi sở hữu dữ liệu, bằng giao dịch, khoá dòng hoặc cập nhật có điều kiện trong PostgreSQL (bài 25), không bằng <code>asyncio.Lock</code>. <code>Semaphore</code> và <code>Queue</code> cũng chỉ giới hạn trong một process; giới hạn toàn hệ thống cần rate limit dùng chung (bài 27). Queue trong bộ nhớ mất hết khi process chết; việc không được mất cần hàng đợi bền như Kafka hoặc job queue trên Redis.</p>
+<p>Mọi khoá trong bài chỉ có hiệu lực <b>trong một process</b>. Tới Nơi chạy nhiều bản của cùng service: hai server tải cùng một chuyến thành hai đối tượng <code>Trip</code>, mỗi đối tượng có lock riêng, cả hai vẫn nhận được. Phải chặn race giữa nhiều server ở nơi sở hữu dữ liệu, bằng giao dịch, khoá dòng hoặc cập nhật có điều kiện trong PostgreSQL (bài 25), không bằng <code>asyncio.Lock</code>. <code>Semaphore</code> và <code>Queue</code> cũng chỉ giới hạn trong một process; giới hạn toàn hệ thống cần rate limit dùng chung (bài 27). Queue trong bộ nhớ mất hết khi process chết; việc không được mất cần hàng đợi bền như Kafka hoặc job queue trên Redis.</p>
 </div>
 
 **Bài tập 1:** Trong `accept_locked`, chuyển dòng `if trip.driver_id is not None: return False` ra **trước** khối `async with lock`. Với 20 tài xế có còn đúng một người thắng không? Vì sao? (Ta đã chạy thử biến thể này.)

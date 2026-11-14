@@ -1,7 +1,7 @@
 ---
 slug: location-sinh-ung-vien-diem-don-do-thi-di-bo
 title: "Sinh ứng viên điểm đón: khách đi bộ tới được đâu"
-summary: "Bài 33: Dijkstra có giới hạn trên đồ thị đi bộ, ứng viên theo từng chiều xe, loại cầu, hầm, vòng xuyến, đoạn quá ngắn, gom ứng viên gần nhau; đo số ứng viên ở từng bước và vì sao bán kính chim bay đánh lừa."
+summary: "Bài 33: Dijkstra có giới hạn trên đồ thị đi bộ, ứng viên theo từng chiều xe, loại bỏ cầu, hầm, vòng xuyến và đoạn quá ngắn, gom các ứng viên gần nhau; đo số ứng viên ở từng bước và chỉ ra vì sao bán kính chim bay đánh lừa."
 category: location-routing
 level: advanced
 tags: [toi-noi, location, rust, pickup, candidate-generation, dijkstra, walking-graph, openstreetmap]
@@ -10,7 +10,7 @@ language: vi
 
 Khách đứng trong một khúc đường nhỏ ở TP.HCM, cách các đoạn cầu, hầm hoặc cầu vượt khoảng 160 đến 200 mét về phía tây và tây bắc. Hàm mục tiêu `J` của [bài 32](/articles/location-ham-muc-tieu-diem-hen-khach-va-tai-xe) cần một danh sách điểm đón ứng viên để chấm. Nếu lấy mọi cạnh xe chạy trong bán kính 250 m chim bay, danh sách đó sẽ có cả đoạn đường ở bên kia một con kênh hay dải phân cách mà khách phải đi vòng cả trăm mét mới tới, và cả mặt cầu vượt nơi xe không được phép dừng. Bài này dựng bước đầu tiên của pipeline chọn điểm đón: **sinh ứng viên**, tức xác định khách đi bộ tới được những đâu và xe dừng được ở đâu trong tầm đó.
 
-Đây là bài 33 của lộ trình **Tối ưu quãng đường hai phía** qua [Tới Nơi](/articles/du-an-mau-toi-noi). Bài dùng đồ thị đi bộ và các profile của [bài 24](/articles/location-profile-xe-may-o-to-di-bo-trong-hem) và hướng cạnh của [bài 23](/articles/location-chi-phi-re-u-turn-do-thi-theo-canh). Mọi số đo là **trên dữ liệu mô phỏng**: kịch bản `hcm-baseline`, đồ thị TP.HCM (126.699 nút, 319.074 cạnh, © OpenStreetMap contributors), 300 khách đầu tiên của seed 20270001 (kịch bản chỉ sinh 209 khách). Bài này chỉ **đếm và đo thời gian**; lợi ích của danh sách ứng viên cho khách và tài xế được đo ở bài 32 và bài 34.
+Đây là bài 33 của lộ trình **Tối ưu quãng đường hai phía** qua [Tới Nơi](/articles/du-an-mau-toi-noi). Bài dùng đồ thị đi bộ và các profile của [bài 24](/articles/location-profile-xe-may-o-to-di-bo-trong-hem) và hướng cạnh của [bài 23](/articles/location-chi-phi-re-u-turn-do-thi-theo-canh). Mọi số đo đều lấy **trên dữ liệu mô phỏng**: kịch bản `hcm-baseline`, đồ thị TP.HCM (126.699 nút, 319.074 cạnh, © OpenStreetMap contributors), 300 khách đầu tiên của seed 20270001 (kịch bản chỉ sinh 209 khách). Bài này chỉ **đếm và đo thời gian**; lợi ích của danh sách ứng viên cho khách và tài xế được đo ở bài 32 và bài 34.
 
 <div class="tkh-callout tkh-callout--example">
 <span class="tkh-callout-title">Thử trước khi đọc</span>
@@ -20,7 +20,7 @@ Khách đứng trong một khúc đường nhỏ ở TP.HCM, cách các đoạn 
 
 ## Dijkstra có giới hạn trên đồ thị đi bộ
 
-Ý tưởng chính: không ước bằng khoảng cách, mà **duyệt đồ thị đi bộ** từ chỗ khách đứng và dừng ngay khi quãng đi vượt ngân sách. Chỗ khách đứng được snap lên cạnh đi bộ gần nhất (bằng R-tree của [bài 07](/articles/location-rstar-r-tree-snap-diem-ve-duong)), rồi chạy Dijkstra với ngân sách là 250 m chia cho tốc độ của bảng chi phí đi bộ (5 km/h):
+Ý tưởng chính: không ước bằng khoảng cách, mà **duyệt đồ thị đi bộ** từ chỗ khách đứng và dừng ngay khi quãng đi vượt ngân sách. Lab snap chỗ khách đứng lên cạnh đi bộ gần nhất (bằng R-tree của [bài 07](/articles/location-rstar-r-tree-snap-diem-ve-duong)), rồi chạy Dijkstra với ngân sách là 250 m chia cho tốc độ của bảng chi phí đi bộ (5 km/h):
 
 `examples/toi-noi-location/rust/crates/pickup/src/candidates.rs`
 
@@ -44,7 +44,7 @@ Khách đứng trong một khúc đường nhỏ ở TP.HCM, cách các đoạn 
         }
 ```
 
-Hàm trả về tập nút tới được kèm thời gian đi. Dijkstra có giới hạn chỉ chạm những nút trong tầm: trung bình 41,9 nút trên tổng 126.699 của đồ thị (0,0331%), nên chi phí tỉ lệ với vùng nhỏ quanh khách chứ không với cả thành phố. So với «mọi cạnh trong bán kính chim bay»:
+Hàm trả về tập nút tới được kèm thời gian đi. Dijkstra có giới hạn chỉ chạm những nút trong tầm: trung bình 41,9 nút trên tổng 126.699 của đồ thị (0,0331%), nên chi phí tỉ lệ với vùng nhỏ quanh khách chứ không tỉ lệ với cả thành phố. So với «mọi cạnh trong bán kính chim bay»:
 
 | Trên 209 khách mẫu (seed 20270001) | Trung bình | p50 | p95 | Lớn nhất |
 |---|---:|---:|---:|---:|
@@ -52,7 +52,7 @@ Hàm trả về tập nút tới được kèm thời gian đi. Dijkstra có gi�
 | trong đó đi bộ tới được ≤ 250 m | 49,2 | 43 | 109 | 203 |
 | chim bay gần nhưng đi bộ quá 250 m | 69,1 | 67 | 132 | 191 |
 
-Hơn một nửa cạnh «gần» theo thước chim bay là cạnh xa theo đường đi bộ. Đó là lý do bài 30 và bài 32 gọi đuôi `walk_m` của baseline là **đi vòng** chứ không phải đi xa: hai điểm cách nhau 60 m trên bản đồ có thể nằm hai bên một con kênh, một mặt cầu, một dải phân cách. Đồ thị đi bộ OSM không phải thực tế (có thể thiếu lối đi tắt thật mà lab không kiểm ngoài thực địa), nhưng nó là thước đo nhất quán với thước đo của baseline.
+Hơn một nửa cạnh «gần» theo thước chim bay là cạnh xa theo đường đi bộ. Đó là lý do bài 30 và bài 32 gọi đuôi `walk_m` của baseline là **đi vòng** chứ không phải đi xa: hai điểm cách nhau 60 m trên bản đồ có thể nằm hai bên một con kênh, một mặt cầu, một dải phân cách. Đồ thị đi bộ OSM không phản ánh đúng thực tế (có thể thiếu lối đi tắt thật mà lab không kiểm tra ngoài thực địa), nhưng đây là thước đo nhất quán với thước đo của baseline.
 
 ## Từ nút tới ứng viên: theo từng chiều xe
 
@@ -65,7 +65,7 @@ Tập nút đi bộ tới được là điểm xuất phát. Với mỗi nút, l
 <figcaption>Hình 1. Khách 193 của seed 20270001 (không liên quan khách 193 của seed 20261106 ở bài 32): chỗ đứng, điểm ghim lệch 13,2 m, bốn vị trí ứng viên trong tám dòng đầu của output (mỗi vị trí là hai chiều xe) với quãng đi bộ ước lượng, và bốn vị trí cạnh bị loại vì là cầu, hầm hoặc cầu vượt cách 160 đến 200 m về phía tây và tây bắc. Trên dữ liệu mô phỏng, toạ độ lấy từ output lab; hình không vẽ đường vì lab không xuất hình học đường. © OpenStreetMap contributors.</figcaption>
 </figure>
 
-Hình 1 vẽ khách 193, ca mà lab in chi tiết vì có nhiều cạnh bị loại nhất: 84 nút tới được, 222 điểm dừng thô, loại 36 (cầu, hầm), 48 (quá ngắn), 26 (quá xa), gom 6, còn 106 ứng viên. Tám dòng đầu của danh sách (xếp theo quãng đi bộ ước lượng) thực ra là bốn vị trí, mỗi vị trí hai chiều xe. Điểm cách 41,7 m là ví dụ cho nhận xét ở trên: hai nhãn `Left` và `Right` cho cùng một toạ độ.
+Hình 1 vẽ khách 193, trường hợp mà lab in chi tiết vì có nhiều cạnh bị loại nhất: 84 nút tới được, 222 điểm dừng thô, loại 36 (cầu, hầm), 48 (quá ngắn), 26 (quá xa), gom 6, còn 106 ứng viên. Tám dòng đầu của danh sách (xếp theo quãng đi bộ ước lượng) thực ra là bốn vị trí, mỗi vị trí hai chiều xe. Điểm cách 41,7 m là ví dụ cho nhận xét ở trên: hai nhãn `Left` và `Right` cho cùng một toạ độ.
 
 ## Ràng buộc cứng: loại hẳn, không phải phạt
 
@@ -103,7 +103,7 @@ pub fn stop_violation(engine: &Engine, e: EdgeId, min_edge_m: f64) -> Option<Vio
 }
 ```
 
-Bốn nhóm: cầu, hầm, cầu vượt (theo cờ OSM hoặc lớp `layer` khác 0); vòng xuyến; đường cao tốc và các nhánh nối; và cạnh quá ngắn, hiểu là nằm trọn trong nút giao. Cộng thêm quá ngưỡng đi bộ 250 m. Tách «loại hẳn» khỏi «phạt» là có chủ ý (bài 32): một khoản phạt luôn có thể bị lợi ích lớn hơn lấn át, còn dừng trên cầu vượt thì không.
+Bốn nhóm: cầu, hầm, cầu vượt (theo cờ OSM hoặc lớp `layer` khác 0); vòng xuyến; đường cao tốc và các nhánh nối; và cạnh quá ngắn, hiểu là nằm trọn trong nút giao. Ngoài ra còn loại ứng viên vượt ngưỡng đi bộ 250 m. Tách «loại hẳn» khỏi «phạt» là có chủ ý (bài 32): một khoản phạt luôn có thể bị lợi ích lớn hơn lấn át, còn dừng trên cầu vượt thì không.
 
 <figure class="tkh-fig">
 <div class="tkh-fig-box">
@@ -112,11 +112,11 @@ Bốn nhóm: cầu, hầm, cầu vượt (theo cờ OSM hoặc lớp `layer` kh�
 <figcaption>Hình 2. Số cạnh xe theo chiều quanh 209 khách mẫu của seed 20270001, tổng 20.409, trên dữ liệu mô phỏng, đồ thị TP.HCM. 56,2% còn lại làm ứng viên; 23,5% bị loại vì cạnh quá ngắn; 14,3% vì đi bộ quá 250 m; 3,9% bị gom; cao tốc và vòng xuyến 1,5%; cầu, hầm, cầu vượt chỉ 0,7%. Ngưỡng 20 m, 250 m và 25 m là giả định của lab.</figcaption>
 </figure>
 
-Con số bất ngờ của Hình 2: loại nhiều nhất không phải cầu hay hầm (139 cạnh, 0,7%) hay cao tốc và vòng xuyến (303 cạnh, 1,5%) mà là **cạnh quá ngắn dưới 20 m: 4.797 cạnh, 23,5%**, tức đoạn nằm trong nút giao và ngã tư. Ngưỡng 20 m là giả định của lab, chưa hiệu chỉnh. Nó có hệ quả cụ thể: ở nút giao dày đặc, nơi người thật hay đón khách, danh sách ứng viên mỏng đi đáng kể. Kiểm tra bất biến: **0 ứng viên đầu ra vi phạm** ràng buộc cứng (cầu, hầm, cấm dừng, vòng xuyến, quá ngắn) và 0 ứng viên có quãng đi bộ ước lượng quá 250 m.
+Con số bất ngờ của Hình 2: nhóm bị loại nhiều nhất không phải cầu hay hầm (139 cạnh, 0,7%) hay cao tốc và vòng xuyến (303 cạnh, 1,5%) mà là **cạnh quá ngắn dưới 20 m: 4.797 cạnh, 23,5%**, tức đoạn nằm trong nút giao và ngã tư. Ngưỡng 20 m là giả định của lab, chưa hiệu chỉnh. Ngưỡng này có hệ quả cụ thể: ở nút giao dày đặc, nơi người thật hay đón khách, danh sách ứng viên mỏng đi đáng kể. Kiểm tra bất biến: **0 ứng viên đầu ra vi phạm** ràng buộc cứng (cầu, hầm, cấm dừng, vòng xuyến, quá ngắn) và 0 ứng viên có quãng đi bộ ước lượng quá 250 m.
 
 ## Gom ứng viên gần nhau
 
-Hai điểm cách nhau vài mét trên cùng một đường, cùng chiều, không đáng là hai lựa chọn. Lab sắp ứng viên theo quãng đi bộ ước lượng tăng dần rồi giữ lại ứng viên đi bộ ít nhất, bỏ những điểm cùng đường, cùng chiều, nằm trong 25 m một điểm đã giữ:
+Hai điểm cách nhau vài mét trên cùng một đường, cùng chiều, không đáng là hai lựa chọn. Lab sắp ứng viên theo quãng đi bộ ước lượng tăng dần rồi giữ lại ứng viên đi bộ ít nhất, bỏ những điểm cùng đường, cùng chiều và nằm trong phạm vi 25 m quanh một điểm đã giữ:
 
 `examples/toi-noi-location/rust/crates/pickup/src/candidates.rs`
 
@@ -145,9 +145,9 @@ Hai điểm cách nhau vài mét trên cùng một đường, cùng chiều, kh�
         }
 ```
 
-Gom bỏ trung bình 3,8 ứng viên mỗi khách (p95 11, lớn nhất 20), chiếm 3,9% số cạnh theo chiều. Còn lại trung bình **54,9 ứng viên mỗi khách** (p95 118, lớn nhất 176), nghĩa là bộ xếp hạng ở bài 35 chấm vài chục điểm (tối đa 176 trong mẫu này), không phải hàng nghìn. Bộ sinh trả điểm ghim riêng cho mỗi chiều (trung bình 1,9). Nó không bị loại mà chỉ bị gắn cờ nếu vi phạm, và không bị kiểm ngưỡng 250 m. Bộ xếp hạng ở bài 35 chỉ chấm điểm ghim hợp lệ; điểm ghim vi phạm chỉ được dùng khi không còn ứng viên nào khác (`pin_forced`).
+Gom bỏ trung bình 3,8 ứng viên mỗi khách (p95 11, lớn nhất 20), chiếm 3,9% số cạnh theo chiều. Còn lại trung bình **54,9 ứng viên mỗi khách** (p95 118, lớn nhất 176), nghĩa là bộ xếp hạng ở bài 35 chấm vài chục điểm (tối đa 176 trong mẫu này), không phải hàng nghìn. Bộ sinh trả điểm ghim riêng cho mỗi chiều (trung bình 1,9). Điểm ghim không bị loại mà chỉ bị gắn cờ nếu vi phạm, và không bị kiểm tra theo ngưỡng 250 m. Bộ xếp hạng ở bài 35 chỉ chấm điểm ghim hợp lệ; điểm ghim vi phạm chỉ được dùng khi không còn ứng viên nào khác (`pin_forced`).
 
-## Ngân sách đi bộ đổi số ứng viên mạnh hơn bạn nghĩ
+## Ngân sách đi bộ tác động tới số ứng viên mạnh hơn bạn nghĩ
 
 Ngân sách 250 m là một lựa chọn. Lab đo thử bốn mức (trên dữ liệu mô phỏng, 209 khách, seed 20270001, **thời gian đo khi máy đang chịu tải nặng** nên chỉ so tương đối):
 
@@ -158,15 +158,15 @@ Ngân sách 250 m là một lựa chọn. Lab đo thử bốn mức (trên dữ 
 | 250 m | 54,9 | 118 | 72 |
 | 400 m | 145,5 | 310 | 163 |
 
-Số ứng viên tăng nhanh hơn tuyến tính: ngân sách tăng 2,5 lần (100 sang 250 m) thì ứng viên tăng 5,5 lần, vì vùng tới được tăng theo diện tích. Mỗi ứng viên thêm vào là một ô cần tính `J` ở bước sau (bài 34, bài 35), nên chi phí này không miễn phí. Thời gian một lần sinh ở mức 250 m: p50 71 µs, p95 458 µs, lớn nhất 22.499 µs, so với ~2 ms CPU mỗi tuyến A\* ở tầng chấm lại của bài 35: sinh ứng viên không phải chỗ đắt.
+Số ứng viên tăng nhanh hơn tuyến tính: ngân sách tăng 2,5 lần (100 sang 250 m) thì ứng viên tăng 5,5 lần, vì vùng tới được tăng theo diện tích. Mỗi ứng viên thêm vào là một ô cần tính `J` ở bước sau (bài 34, bài 35), nên chi phí này không miễn phí. Thời gian một lần sinh ở mức 250 m: p50 71 µs, p95 458 µs, lớn nhất 22.499 µs, so với ~2 ms CPU mỗi tuyến A\* ở tầng chấm lại của bài 35: sinh ứng viên không phải khâu tốn kém.
 
 ## Ai được lợi, ai chịu thiệt
 
 Bước sinh ứng viên không tối ưu gì một mình, nhưng nó đặt giới hạn cho mọi bước sau, nên đáng hỏi ai chịu ảnh hưởng.
 
-- **Khách được bảo vệ.** Ngưỡng 250 m cứng nghĩa là mọi ứng viên không phải điểm ghim có quãng đi bộ ước lượng không quá 250 m trên đồ thị đi bộ, nên thuật toán phía sau không thể đẩy khách đi xa hơn mức đó chỉ để tài xế đỡ chạy. Điểm ghim là ngoại lệ, và đây là lý do `walk_m` max của `p04-v1` vẫn trên 1.000 m ở bài 32.
+- **Khách được bảo vệ.** Ngưỡng cứng 250 m nghĩa là mọi ứng viên không phải điểm ghim có quãng đi bộ ước lượng không quá 250 m trên đồ thị đi bộ, nên thuật toán phía sau không thể đẩy khách đi xa hơn mức đó chỉ để tài xế đỡ chạy. Điểm ghim là ngoại lệ, và đây là lý do `walk_m` max của `p04-v1` vẫn trên 1.000 m ở bài 32.
 - **Tài xế được bảo vệ khỏi điểm dừng bất hợp lý**: không phải dừng trên cầu, cao tốc, vòng xuyến.
-- **Chỗ chịu thiệt:** ràng buộc cứng có thể loại đúng điểm sẽ cho `J` tốt nhất. Ngưỡng 20 m loại gần một phần tư số cạnh; ngưỡng 250 m có thể loại điểm thuận cho tài xế mà khách sẵn lòng đi bộ thêm một chút. Lab không đo mức thiệt này, vì nó chưa chạy thử nghiệm với các ngưỡng khác trên simulator (chỉ đo số ứng viên ở bốn ngân sách).
+- **Phần thiệt:** ràng buộc cứng có thể loại đúng điểm sẽ cho `J` tốt nhất. Ngưỡng 20 m loại gần một phần tư số cạnh; ngưỡng 250 m có thể loại điểm thuận cho tài xế mà khách sẵn lòng đi bộ thêm một chút. Lab không đo mức thiệt này, vì lab chưa chạy thử nghiệm với các ngưỡng khác trên simulator (chỉ đo số ứng viên ở bốn ngân sách).
 - **Khách ở xa đường xe** (chỗ đứng cách mọi đường ô tô hơn 250 m đi bộ) có thể không có ứng viên nào ngoài điểm ghim. Lab buộc dùng ghim trong trường hợp đó (cờ `pin_forced`) và bài này không thống kê tần suất.
 
 ## Chạy ví dụ và kiểm chứng
@@ -178,7 +178,7 @@ export PATH="$HOME/.rustup/toolchains/stable-aarch64-apple-darwin/bin:$PATH"
 cargo run --release -q --manifest-path examples/toi-noi-location/rust/Cargo.toml -p labs --bin loc33_sinh_ung_vien
 ```
 
-Cấu hình: Apple Silicon, `--release`, `GenConfig` mặc định (đi bộ ≤ 250 m, gom trong 25 m, cạnh ≥ 20 m), kịch bản `hcm-baseline`, seed 20270001. `uptime` lúc chạy: load averages 404,41 410,54 405,91, nên mọi số thời gian là cận trên bị phóng đại; số đếm tái lập từng chữ số. Output (rút gọn):
+Cấu hình: Apple Silicon, `--release`, `GenConfig` mặc định (đi bộ ≤ 250 m, gom trong 25 m, cạnh ≥ 20 m), kịch bản `hcm-baseline`, seed 20270001. `uptime` lúc chạy: load averages 404,41 410,54 405,91, nên mọi số thời gian đều là cận trên và bị phóng đại; số đếm tái lập từng chữ số. Output (rút gọn):
 
 ```text
 -- 1. đếm ứng viên ở từng bước (ngân sách đi bộ 250 m) --
@@ -195,7 +195,7 @@ Cấu hình: Apple Silicon, `--release`, `GenConfig` mặc định (đi bộ ≤
 
 ## Giới hạn của ví dụ
 
-- **Đồ thị đi bộ là OSM**, snap không biết chướng ngại: có thể thiếu lối đi tắt thật, và nhiều khả năng góp phần vào đuôi `walk_m` ở baseline (bài 32). Lab không kiểm ngoài thực địa. Quãng đi bộ đo dọc đồ thị giữa hai điểm đã snap, không gồm đoạn từ chỗ đứng ra tới đường.
+- **Đồ thị đi bộ là OSM**, phép snap không biết chướng ngại: đồ thị có thể thiếu lối đi tắt thật, và điều này nhiều khả năng góp phần vào đuôi `walk_m` ở baseline (bài 32). Lab không kiểm ngoài thực địa. Quãng đi bộ đo dọc đồ thị giữa hai điểm đã snap, không gồm đoạn từ chỗ đứng ra tới đường.
 - **Ba ngưỡng là giả định**: 20 m (cạnh quá ngắn), 250 m (đi bộ), 25 m (gom). Chưa hiệu chỉnh và chưa đo ảnh hưởng của chúng lên `J` hay `deadhead_m`.
 - **Ứng viên chỉ ở giữa cạnh và chân đường vuông góc**, không có điểm dừng thật như lề đường, bãi đỗ, cổng (bài 37 thêm lớp cổng, sảnh bằng dữ liệu bịa).
 - **Chưa có thẻ cấm dừng thật** của OSM (biển cấm, `parking:*`); chỉ có cờ cầu, hầm, vòng xuyến, loại đường.
@@ -203,7 +203,7 @@ Cấu hình: Apple Silicon, `--release`, `GenConfig` mặc định (đi bộ ≤
 
 ## Bài tập
 
-**Bài 1.** Từ Hình 2 (20.409 cạnh theo chiều), tính tỉ lệ cạnh còn lại làm ứng viên và kiểm tổng các phần bằng 20.409. Nếu hạ ngưỡng cạnh ngắn từ 20 m xuống 10 m, bạn kỳ vọng tỉ lệ nào đổi nhiều nhất, và bạn đo tác động đó thế nào?
+**Bài 1.** Từ Hình 2 (20.409 cạnh theo chiều), tính tỉ lệ cạnh còn lại làm ứng viên và kiểm tra tổng các phần có bằng 20.409. Nếu hạ ngưỡng cạnh ngắn từ 20 m xuống 10 m, bạn kỳ vọng tỉ lệ nào đổi nhiều nhất, và bạn đo tác động đó thế nào?
 
 <details><summary>Lời giải bài 1</summary>
 <p>11.469 / 20.409 = 56,2%. Tổng: 11.469 + 4.797 + 2.915 + 786 + 303 + 139 = 20.409. Tỉ lệ «quá ngắn» (23,5%) đổi nhiều nhất, và một phần số cạnh chuyển sang «còn lại». Đo bằng cách chạy lại lab với <code>min_edge_m</code> khác, rồi chạy so sánh cặp trên 20 seed đánh giá (bài 32) cho <code>deadhead_m</code> và <code>u_turns</code>, vì ứng viên mới nằm trong nút giao có thể cho J tốt hơn nhưng cũng cản đường hơn; số đếm một mình không trả lời được.</p>
@@ -218,7 +218,7 @@ Cấu hình: Apple Silicon, `--release`, `GenConfig` mặc định (đi bộ ≤
 **Bài 3.** Bộ sinh luôn trả điểm ghim, kể cả khi nó bị gắn cờ vi phạm, và bộ xếp hạng buộc dùng nó khi không còn gì khác. Nêu một tình huống khiến điều này cần thiết và một rủi ro của nó.
 
 <details><summary>Lời giải bài 3</summary>
-<p>Cần thiết khi khách đứng giữa vùng mà mọi cạnh xe quanh đó đều bị loại hoặc quá xa (ví dụ khu có toàn cầu vượt và đoạn quá ngắn): nếu không có phương án lùi, hệ thống bỏ khách, điều lab tránh bằng cách buộc dùng ghim và không bao giờ bỏ khách. Rủi ro: ghim có thể nằm trên điểm không nên dừng (cầu, vòng xuyến); lab mới gắn cờ, chưa có cơ chế cảnh báo tài xế, nên cần một lớp dữ liệu nơi khó (bài 37) để xử lý.</p>
+<p>Cần thiết khi khách đứng giữa vùng mà mọi cạnh xe quanh đó đều bị loại hoặc quá xa (ví dụ khu có toàn cầu vượt và đoạn quá ngắn): nếu không có phương án dự phòng, hệ thống bỏ khách, điều lab tránh bằng cách buộc dùng ghim và không bao giờ bỏ khách. Rủi ro: ghim có thể nằm trên điểm không nên dừng (cầu, vòng xuyến); lab mới gắn cờ, chưa có cơ chế cảnh báo tài xế, nên cần một lớp dữ liệu nơi khó (bài 37) để xử lý.</p>
 </details>
 
 Bài trước: [bài 32](/articles/location-ham-muc-tieu-diem-hen-khach-va-tai-xe). Bài tiếp: [bài 34](/articles/location-phia-duong-huong-tiep-can-tranh-quay-dau).

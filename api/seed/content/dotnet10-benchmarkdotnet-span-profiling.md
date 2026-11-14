@@ -8,29 +8,29 @@ tags: [csharp, dotnet, dotnet-10, toi-noi]
 language: vi
 ---
 
-Đây là **bài 28** trong loạt **C# và .NET 10 qua [Tới Nơi](/articles/du-an-mau-toi-noi)**. Các ví dụ target `net10.0`, dùng dữ liệu giả và cùng code đã chạy kiểm chứng trong repository.
+Đây là **bài 28** trong loạt **C# và .NET 10 qua [Tới Nơi](/articles/du-an-mau-toi-noi)**. Các ví dụ nhắm tới `net10.0`, dùng dữ liệu giả và cùng code đã được chạy kiểm chứng trong repository.
 
 <div class="tkh-callout tkh-callout--example">
 <span class="tkh-callout-title">Thử trước khi đọc</span>
-<p>Một benchmark nhanh hơn trên 1000 dòng có đủ khẳng định API production nhanh hơn cùng tỷ lệ không?</p>
+<p>Một benchmark nhanh hơn trên 1000 dòng có đủ để khẳng định API production nhanh hơn cùng tỷ lệ không?</p>
 <details><summary>Xem đáp án</summary><p>Không. Microbenchmark chỉ đo vùng công việc và môi trường đã chọn; cần profile và đo lại đường request thật.</p></details>
 </div>
 
 ## Đo chỗ đang tốn, không tối ưu theo cảm giác
 
-Giả sử đọc batch dòng “ID,amount” đang tạo nhiều chuỗi tạm. Ta có hai cách: Split tạo mảng/các phần chuỗi, còn ReadOnlySpan cắt một view để parse phần amount mà không tạo substring. Trước khi so tốc độ, hai parser phải cùng nhận format và cùng từ chối input sai trong phạm vi đã chốt.
+Giả sử việc đọc một batch dòng “ID,amount” đang tạo nhiều chuỗi tạm. Ta có hai cách: Split tạo ra một mảng các chuỗi con, còn ReadOnlySpan cắt một view để parse phần amount mà không tạo substring. Trước khi so tốc độ, hai parser phải cùng chấp nhận format và cùng từ chối input sai trong phạm vi đã chốt.
 
-Format lab rất hẹp: một ID không rỗng, một dấu phẩy, amount nguyên không dấu theo InvariantCulture. Đây không phải parser CSV tổng quát có quote/escape và không thay kiểu decimal cho tiền trong các use case trước. Số nguyên ở đây là dữ liệu VND đã được định nghĩa cho thí nghiệm.
+Định dạng của lab rất hẹp: một ID không rỗng, một dấu phẩy, amount nguyên không dấu theo InvariantCulture. Đây không phải parser CSV tổng quát có quote/escape và không thay kiểu decimal cho tiền trong các use case trước. Số nguyên ở đây là dữ liệu VND đã được định nghĩa cho thí nghiệm.
 
-Nếu profile thực tế cho thấy SQL/network chiếm gần hết latency, tối ưu parser này có thể không đem lại lợi ích đáng kể cho người dùng. Bắt đầu từ bottleneck quan sát được và giữ tiêu chí tính đúng trước.
+Nếu profile thực tế cho thấy SQL/network chiếm gần hết latency, tối ưu parser này có thể không đem lại lợi ích đáng kể cho người dùng. Bắt đầu từ bottleneck quan sát được và đặt tiêu chí về tính đúng đắn lên trước.
 
-## Setup nằm ngoài vùng đo
+## Phần setup nằm ngoài vùng đo
 
 GlobalSetup tạo mảng dòng theo N=10 hoặc N=1000. Hai benchmark cùng đọc nguồn đó và trả tổng amount để kết quả không bị bỏ đi. MemoryDiagnoser đo allocation managed trong vùng benchmark, không tính chi phí tạo dataset ở GlobalSetup như một lần xử lý request.
 
-Baseline Split và phương thức Span đều kiểm shape cơ bản trước parse. Chế độ --verify so tổng với công thức kỳ vọng độc lập cho hai dataset và kiểm hai cặp input lỗi. Không dựa vào “hai implementation bằng nhau” nếu cả hai có thể cùng sai.
+Baseline Split và phương thức Span đều kiểm tra cấu trúc cơ bản của dòng trước khi parse. Chế độ --verify so tổng với công thức kỳ vọng độc lập cho hai dataset và kiểm tra hai cặp input lỗi. Không dựa vào việc “hai implementation cho kết quả bằng nhau” nếu cả hai có thể cùng sai.
 
-Chạy Release, không gắn debugger, ghi runtime/hardware/job. Không dùng Stopwatch cho một phép cực ngắn rồi bỏ qua JIT, warmup, overhead và noise. BenchmarkDotNet tự điều phối nhiều bước đo, nhưng người viết vẫn phải chọn thí nghiệm đúng.
+Chạy ở cấu hình Release, không gắn debugger, ghi lại runtime, phần cứng và job. Không dùng Stopwatch cho một phép cực ngắn rồi bỏ qua JIT, warmup, overhead và noise. BenchmarkDotNet tự điều phối nhiều bước đo, nhưng người viết vẫn phải chọn thí nghiệm đúng.
 
 <figure class="tkh-fig">
 <div class="tkh-fig-box">
@@ -43,18 +43,18 @@ Chạy Release, không gắn debugger, ghi runtime/hardware/job. Không dùng St
 
 Lượt lab dùng BenchmarkDotNet 0.15.8, .NET 10.0.10, SDK 10.0.302 trên Intel Core i7-10700. Job có 1 launch, 1 warmup và 3 iteration; dữ liệu và report gốc được giữ tại results/short-run.md trong project.
 
-| N dòng / operation | Split Mean | Span Mean | Split allocated | Span allocated báo cáo |
+| N dòng / operation | Split Mean | Span Mean | Split allocated | Span allocated theo báo cáo |
 | --- | --- | --- | --- | --- |
 | 10 | 556,3 ns | 126,4 ns | 1120 B | không ghi nhận allocation managed |
 | 1000 | 45.533,1 ns | 13.180,8 ns | 112000 B | không ghi nhận allocation managed |
 
-Một operation là xử lý cả N dòng, không phải một dòng. Error ở Split N=10 lớn hơn Mean do lượt ngắn nhiễu; không nên lấy tỷ lệ ở dòng đó làm cam kết speedup. Dấu gạch trong allocation report không có nghĩa toàn process không dùng bộ nhớ hoặc Span không có chi phí.
+Một operation là xử lý cả N dòng, không phải một dòng. Error ở Split N=10 lớn hơn Mean vì lượt đo ngắn có nhiều sai số; không nên lấy tỷ lệ ở dòng đó làm cam kết speedup. Dấu gạch trong allocation report không có nghĩa toàn process không dùng bộ nhớ hoặc Span không có chi phí.
 
 ## Span là view có ràng buộc lifetime
 
-`ReadOnlySpan<char>` nhìn vào phần dữ liệu đã có, không sở hữu một bản sao chuỗi mới. ReadOnly nghĩa không sửa qua view này, không tự khoá nguồn mutable ở mọi tình huống. Không giữ view vượt lifetime owner hoặc đưa nó tuỳ tiện vào object sống lâu.
+`ReadOnlySpan<char>` nhìn vào phần dữ liệu đã có, không sở hữu một bản sao chuỗi mới. ReadOnly nghĩa là không sửa được qua view này, không tự khoá nguồn mutable ở mọi tình huống. Không giữ view lâu hơn vòng đời (lifetime) của chủ sở hữu hoặc đưa nó tuỳ tiện vào object có vòng đời dài.
 
-Trong ví dụ parse đồng bộ, span chỉ sống trong phương thức và trỏ tới string còn tồn tại. Không có await trong vùng đó. Các khả năng mới của C# không xoá quy tắc an toàn ref/lifetime; compiler vẫn giới hạn nơi span được sống qua điểm await/yield.
+Trong ví dụ parse đồng bộ, span chỉ sống trong phương thức và trỏ tới string còn tồn tại. Không có await trong vùng đó. Các khả năng mới của C# không xoá quy tắc an toàn ref/lifetime; compiler vẫn giới hạn việc span tồn tại qua điểm await/yield.
 
 Sau khi microbenchmark thấy giảm allocation, quay lại profile service: CPU samples, allocation rate, GC pauses, heap retention, throughput và latency tail. dotnet-counters/dotnet-trace hỗ trợ quan sát thực tế nhưng không phải số đo đã được thu trong lượt benchmark này.
 
@@ -67,11 +67,11 @@ Sau khi microbenchmark thấy giảm allocation, quay lại profile service: CPU
 
 ## Chạy lại và bài tập
 
-Chế độ --verify chỉ kiểm correctness, không chạy benchmark. Để chạy phép đo ngắn giống lab, dùng lệnh riêng trong README; nên tăng warmup/iteration và kiểm trên môi trường ổn định trước khi công bố kết luận định lượng.
+Chế độ --verify chỉ kiểm tra correctness, không chạy benchmark. Để chạy phép đo ngắn giống lab, dùng lệnh riêng trong README; nên tăng warmup/iteration và kiểm trên môi trường ổn định trước khi công bố kết luận định lượng.
 
-**Bài tập:** nếu đưa dựng dataset vào trong phương thức Span nhưng để ngoài Split, so sánh còn công bằng không? Nếu bỏ validation ở parser nhanh, có được gọi đó là cùng một tối ưu không?
+**Bài tập:** nếu đưa bước dựng dataset vào trong phương thức Span nhưng để ngoài phương thức Split, so sánh còn công bằng không? Nếu bỏ validation ở parser nhanh, có được gọi đó là cùng một tối ưu không?
 
-<details><summary>Xem đáp án</summary><p>Không, hai vùng đo đã khác công việc. Bỏ validation đổi hợp đồng; phải so cùng semantics hoặc nêu rõ đang đo một loại tác vụ khác, không dùng kết quả để hợp thức hoá lỗi dữ liệu.</p></details>
+<details><summary>Xem đáp án</summary><p>Không, hai vùng đo đã khác công việc. Bỏ validation đổi hợp đồng; phải so sánh cùng ngữ nghĩa hoặc nêu rõ đang đo một loại tác vụ khác, không dùng kết quả để hợp thức hoá lỗi dữ liệu.</p></details>
 
 ## Chạy ví dụ và kiểm chứng
 
@@ -87,7 +87,7 @@ Lệnh trên chỉ kiểm correctness. Chạy lượt benchmark ngắn từ gố
 dotnet run --project examples/toi-noi-dotnet/28-benchmark-span -c Release -- --filter '*FareBenchmarks*' --job short --warmupCount 1 --iterationCount 3 --launchCount 1
 ```
 
-Report quan sát nằm ở `examples/toi-noi-dotnet/28-benchmark-span/results/short-run.md`. Kết quả máy khác hoặc lượt đo dài hơn có thể khác; không viết assertion phụ thuộc một số nanosecond cố định.
+Report quan sát nằm ở `examples/toi-noi-dotnet/28-benchmark-span/results/short-run.md`. Kết quả trên máy khác hoặc lượt đo dài hơn có thể khác; không viết assertion phụ thuộc vào một số nanosecond cố định.
 
 ### Program.cs — 28-benchmark-span/Program.cs
 

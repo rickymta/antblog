@@ -1,16 +1,16 @@
 ---
 slug: python-luu-ket-qua-ocr-mongodb-pii-retention
 title: "Lưu kết quả OCR: document MongoDB, mặt nạ PII, versioning và retention"
-summary: "Bài 47: lưu kết quả OCR vào MongoDB có chính sách PII. Che số giấy tờ, băm HMAC có khoá bí mật để đối chiếu, TTL index cho bản gốc, audit ai xem, migration schema v2 (bài 26) sang v3 đọc được cả hai."
+summary: "Bài 47: lưu kết quả OCR vào MongoDB có chính sách PII. Che số giấy tờ, băm HMAC có khoá bí mật để đối chiếu, TTL index tự xoá bản gốc khi hết hạn, audit ghi lại ai đã xem, migration schema từ v2 (bài 26) sang v3 và đọc được cả hai."
 category: python-advanced
 level: advanced
 tags: [python, toi-noi, mongodb, pii, retention]
 language: vi
 ---
 
-Service OCR của bài 46 giữ kết quả trong Redis 15 phút. Người duyệt hồ sơ của [Tới Nơi](/articles/du-an-mau-toi-noi) cần xem nó hôm sau, tuần sau, cạnh các lần OCR bằng mô hình mới hơn, nên nó phải sang một kho bền. Nhưng thứ cần lưu là số CCCD, họ tên, ngày sinh của người thật, và «lưu» kéo theo bốn câu hỏi: lưu **trường nào** và ở dạng nào, **bao lâu**, **ai** được xem, và **dữ liệu cũ** ra sao khi đổi cách lưu.
+Service OCR của bài 46 giữ kết quả trong Redis 15 phút. Người duyệt hồ sơ của [Tới Nơi](/articles/du-an-mau-toi-noi) cần xem kết quả này hôm sau, tuần sau, cạnh các lần OCR bằng mô hình mới hơn, nên kết quả phải chuyển sang một kho bền. Nhưng thứ cần lưu là số CCCD, họ tên, ngày sinh của người thật, và «lưu» kéo theo bốn câu hỏi: lưu **trường nào** và ở dạng nào, **bao lâu**, **ai** được xem, và **dữ liệu cũ** ra sao khi đổi cách lưu.
 
-Đây là bài 47 của lộ trình **Python nâng cao qua Tới Nơi**, bài cuối của phần OCR giấy tờ. Bài nối tiếp [bài 26](/articles/python-mongodb-pymongo-motor-document-ocr) (document OCR, `schema_version`, bộ trường `full_name`, `id_number`...) và nhận đầu vào là kết quả job của [bài 46](/articles/python-ocr-service-fastapi-worker-timeout). Dữ liệu hoàn toàn tổng hợp. Kết quả OCR là đầu vào cho người duyệt, không tự động là quyết định xác minh.
+Đây là bài 47 của lộ trình **Python nâng cao qua Tới Nơi**, bài cuối của phần OCR giấy tờ. Bài nối tiếp [bài 26](/articles/python-mongodb-pymongo-motor-document-ocr) (document OCR, `schema_version`, bộ trường `full_name`, `id_number`...) và nhận đầu vào là kết quả job của [bài 46](/articles/python-ocr-service-fastapi-worker-timeout). Dữ liệu hoàn toàn tổng hợp. Kết quả OCR là đầu vào cho người duyệt, không tự động trở thành quyết định xác minh.
 
 <div class="tkh-callout tkh-callout--example">
 <span class="tkh-callout-title">Thử trước khi đọc</span>
@@ -62,7 +62,7 @@ Một document trong `lab47_ocr_documents` sau khi lưu kết quả thật của
 }
 ```
 
-So với bài 26: ngày sinh `13/03/1990` trên thẻ được đổi sang ISO, `confidence` là nhỏ nhất của các trường, và có thêm `image_sha256`, `missing_fields`. Mới là `id_number_masked`, `id_number_hash`, `pii_key_id`, `raw_id`: số CCCD rõ **không còn** trong document. Số rõ, văn bản thô và khoá ảnh nằm ở document tương ứng của `lab47_ocr_raw`, có `expire_at` đúng 30 ngày sau `created_at`. Họ tên và ngày sinh vẫn rõ vì người duyệt cần chúng và chúng ít nhạy cảm hơn số giấy tờ (vẫn là dữ liệu cá nhân); đó là quyết định cần pháp chế ký, và bài này không phải tư vấn pháp lý.
+So với bài 26: ngày sinh `13/03/1990` trên thẻ được đổi sang ISO, `confidence` là nhỏ nhất của các trường, và có thêm `image_sha256`, `missing_fields`. Điểm mới là `id_number_masked`, `id_number_hash`, `pii_key_id`, `raw_id`: số CCCD rõ **không còn** trong document. Số rõ, văn bản thô và khoá ảnh nằm ở document tương ứng của `lab47_ocr_raw`, có `expire_at` đúng 30 ngày sau `created_at`. Họ tên và ngày sinh vẫn rõ vì người duyệt cần chúng và chúng ít nhạy cảm hơn số giấy tờ (vẫn là dữ liệu cá nhân); đó là quyết định cần pháp chế ký, và bài này không phải tư vấn pháp lý.
 
 Về số phiên bản, bài nối tiếp dãy của bài 26: **v2** là document còn `fields.id_number` rõ (hình dạng sau migration của bài 26), **v3** là dạng đã che. Document v1 của bài 26 phải qua migration của bài 26 trước; `normalize_to_v3` gặp v1 ném `ValueError` thay vì đoán.
 
@@ -75,7 +75,7 @@ def pii_hash(value: str, document_type: str, key: PiiKey) -> str:
     return hmac.new(key.key, f"{document_type}\x1f{value}".encode(), hashlib.sha256).hexdigest()
 ```
 
-Khoá HMAC này là **khoá bí mật chung của hệ thống** (hay gọi là pepper), không phải salt: salt công khai và khác nhau mỗi bản ghi, còn ở đây cùng số phải ra cùng hash thì mới tra index được, nên khoá phải chung và phải giữ kín. Vì vậy mã dùng tên `PiiKey`, `pii_hash_key`, biến môi trường `TOINOI_PII_HASH_KEY`, tối thiểu 32 ký tự (production: 32 byte ngẫu nhiên). Hash kèm loại giấy tờ để CCCD và GPLX trùng chữ số không trùng hash; `pii_key_id` ghi trong document để xoay khoá. `PiiSettings` không có giá trị mặc định cho khoá, kiểu `SecretStr` với `hide_input_in_errors`: thiếu hoặc ngắn thì `ValidationError` mà không in lại giá trị; `PiiKey` có `__repr__` che khoá. Khoá trong `main.py` là **giá trị của lab**, công khai trong mã nguồn; production lấy từ secret manager (Vault, AWS Secrets Manager, Azure Key Vault...) và đặt tách khỏi cơ sở dữ liệu. Thí nghiệm sau cho thấy vì sao «tách» là cốt lõi:
+Khoá HMAC này là **khoá bí mật chung của hệ thống** (hay gọi là pepper), không phải salt: salt công khai và khác nhau mỗi bản ghi, còn ở đây cùng số phải ra cùng hash thì mới tra index được, nên khoá phải chung và phải giữ kín. Vì vậy mã dùng tên `PiiKey`, `pii_hash_key`, biến môi trường `TOINOI_PII_HASH_KEY`, tối thiểu 32 ký tự (production: 32 byte ngẫu nhiên). Hash kèm loại giấy tờ để CCCD và GPLX có cùng chữ số vẫn không trùng hash; `pii_key_id` ghi trong document để xoay khoá. `PiiSettings` không có giá trị mặc định cho khoá, kiểu `SecretStr` với `hide_input_in_errors`: thiếu hoặc ngắn thì `ValidationError` mà không in lại giá trị; `PiiKey` có `__repr__` che khoá. Khoá trong `main.py` là **giá trị của lab**, công khai trong mã nguồn; production lấy khoá từ secret manager (Vault, AWS Secrets Manager, Azure Key Vault...) và đặt tách khỏi cơ sở dữ liệu. Thí nghiệm sau cho thấy vì sao «tách» là cốt lõi:
 
 ```text
 SHA-256 trơn, biết 6 số đầu: dò lại được 099090159083 sau 2.49 giây (tối đa 10^6 lần thử)
@@ -85,7 +85,7 @@ nếu lộ cả khóa lẫn dữ liệu: dò ra 099090159083 sau 7.34 giây
 
 Dòng đầu là đáp án của câu hỏi mở bài (thời gian tính tới lúc gặp số đúng, tối đa 10^6 lần thử). Dòng hai: không có khoá thì thử hết một triệu khả năng mà không ra gì. Dòng ba: **lộ cả khoá lẫn dữ liệu thì HMAC không cứu được**, nên khoá không được nằm cạnh dữ liệu: cùng bản sao lưu, cùng log, cùng repository.
 
-## Lưu idempotent, lưu từng phiên bản mô hình và từng ảnh
+## Lưu idempotent theo từng phiên bản mô hình và từng ảnh
 
 Khoá của một kết quả là `(kyc_id, document_type, model_version, image_sha256)`, và `raw` dùng cùng khoá. Bản đầu thiếu `image_sha256`: ảnh chụp lại với cùng mô hình đụng khoá cũ và bị coi là «đã có», tức mất kết quả mới. Giờ nó là document mới, bản cũ còn, «bản mới nhất» là bản có `created_at` lớn nhất (đồng hạng theo `_id`). `save_ocr_result` tìm document theo khoá và trả ngay nếu có, **không đụng tới `raw`** (nếu `raw` đã hết hạn thì lưu lại không dựng `raw` mới trong khi `raw_id` vẫn trỏ cái cũ); rồi biến đổi dữ liệu (che, băm, đổi ngày), ghi `raw`, ghi document. Biến đổi chạy trước mọi lần ghi để đầu vào xấu không để lại `raw` mồ côi; chết giữa hai lần ghi thì `raw` mồ côi tự hết hạn nhờ TTL. Chạy lại an toàn nhờ unique index:
 
@@ -100,7 +100,7 @@ except DuplicateKeyError:
 
 OCR không đọc ra số, số chỉ 11 chữ số, hay ngày `31/02/1990` không có thật đều là việc của người duyệt: lab **lưu lại** document với `needs_review: true`, trường đó `null` và tên nó nằm trong `missing_fields`, thay vì từ chối và mất kết quả.
 
-Hình dạng document được canh ở **chính collection** bằng `$jsonSchema`. Trong thời gian chuyển đổi validator nhận cả v2 và v3 (`oneOf`); v3 đóng kín ở cả hai cấp, chỉ nhận trường đã khai, hash đúng mẫu 64 chữ số hex (`app/documents.py`, trích):
+Hình dạng document được kiểm soát ngay ở **chính collection** bằng `$jsonSchema`. Trong thời gian chuyển đổi validator nhận cả v2 và v3 (`oneOf`); v3 đóng kín ở cả hai cấp, chỉ nhận trường đã khai, hash đúng mẫu 64 chữ số hex (`app/documents.py`, trích):
 
 ```python
 "fields": {
@@ -115,7 +115,7 @@ Hình dạng document được canh ở **chính collection** bằng `$jsonSchem
 
 Lab thử sáu document sai và cả sáu bị từ chối với mã `121`: số rõ trong `fields`, trường lạ trong `fields`, trường lạ ngoài `fields` (`raw_text`), hash rỗng, mặt nạ sai dạng, thiếu `pii_key_id`.
 
-Đối chiếu theo số giấy tờ đi qua hash và **cũng bị ghi audit**: `lookup_by_number` cần scope `kyc:view`, ghi hành động `lookup` (không ghi số được tra), rồi băm số bằng từng khoá còn hiệu lực và tra `ix_id_hash`; kết quả chỉ có dạng che. Lab cho `KYC-0007` và `KYC-2001` cùng số: tra ra bốn document (hai hồ sơ, vì `KYC-0007` có ba), `explain` báo `IXSCAN` trên `ix_id_hash`, kiểm 4 document, trả 4. Xoay khoá có cái giá: tra bằng khoá mới một mình không thấy bản ghi cũ, nên phải **giữ khoá cũ trong danh sách tra** tới khi bản ghi cũ hết vòng đời; băm lại chỉ làm được cho bản còn `raw`, vì khi `raw` đã hết hạn thì số rõ không còn ở đâu.
+Đối chiếu theo số giấy tờ đi qua hash và **cũng bị ghi audit**: `lookup_by_number` cần scope `kyc:view`, ghi hành động `lookup` (không ghi số được tra), rồi băm số bằng từng khoá còn hiệu lực và tra `ix_id_hash`; kết quả chỉ có dạng che. Lab cho `KYC-0007` và `KYC-2001` dùng cùng một số: tra ra bốn document (hai hồ sơ, vì `KYC-0007` có ba), `explain` báo `IXSCAN` trên `ix_id_hash`, đã xét 4 document, trả 4. Xoay khoá có cái giá: tra bằng khoá mới một mình không thấy bản ghi cũ, nên phải **giữ khoá cũ trong danh sách tra** tới khi bản ghi cũ hết vòng đời; băm lại chỉ làm được cho bản còn `raw`, vì khi `raw` đã hết hạn thì số rõ không còn ở đâu.
 
 ## Retention bằng TTL index
 
@@ -125,7 +125,7 @@ Lab thử sáu document sai và cả sáu bị từ chối với mã `121`: số
 await raw.create_index("expire_at", expireAfterSeconds=0, name="ttl_raw_expire_at")
 ```
 
-Ba điều thường làm người ta thất vọng, và lab thử cả ba. Một: bộ quét TTL của `mongod` chạy theo chu kỳ (mặc định 60 giây), nên «hết hạn lúc 10:00» không có nghĩa là «biến mất lúc 10:00». Để quan sát, lab tạm đặt `ttlMonitorSleepSecs` về 1 giây, và tham số này áp cho **cả `mongod`**: mọi lab khác dùng chung container cũng bị quét nhanh trong lúc đó. Nó không nằm trong trang tham số chính thức của MongoDB; lab dùng vì `setParameter` đổi được lúc chạy (đã thử trên 8.3.13). Lab trả lại bằng `finally` và bắt SIGTERM (gửi SIGTERM giữa chừng: tham số về 60, collection được xoá). Bị SIGKILL thì tham số kẹt ở 1; lần chạy sau thấy giá trị không lớn hơn 1, cảnh báo và trả về 60. Hai: trường phải là **kiểu date**; `expire_at` là chuỗi ISO không bao giờ hết hạn, không có cảnh báo nào. Ba: TTL chỉ xoá document trong collection đó, không biết gì về ảnh trong kho. Năm document thử:
+Ba điều thường làm người ta thất vọng, và lab thử cả ba. Một: bộ quét TTL của `mongod` chạy theo chu kỳ (mặc định 60 giây), nên «hết hạn lúc 10:00» không có nghĩa là «biến mất lúc 10:00». Để quan sát, lab tạm đặt `ttlMonitorSleepSecs` về 1 giây, và tham số này áp cho **cả `mongod`**: mọi lab khác dùng chung container cũng bị quét nhanh trong lúc đó. Tham số này không có trong trang tham số chính thức của MongoDB; lab dùng vì `setParameter` đổi được lúc chạy (đã thử trên 8.3.13). Lab trả tham số về giá trị cũ bằng `finally` và bắt SIGTERM (gửi SIGTERM giữa chừng thì tham số về 60 và các collection của lab được xoá). Bị SIGKILL thì tham số kẹt ở 1; lần chạy sau thấy giá trị không lớn hơn 1, cảnh báo và trả về 60. Hai: trường phải là **kiểu date**; `expire_at` là chuỗi ISO không bao giờ hết hạn, không có cảnh báo nào. Ba: TTL chỉ xoá document trong collection đó, không biết gì về ảnh trong kho. Năm document thử:
 
 | Document | `expire_at` | Kết quả |
 | --- | --- | --- |
@@ -135,11 +135,11 @@ Ba điều thường làm người ta thất vọng, và lab thử cả ba. Mộ
 | D | chuỗi ISO của hôm qua | còn (sai kiểu, không bao giờ hết hạn) |
 | E | 3 giây sau, không gỡ gì | bị xoá (đối chứng cho C) |
 
-E chứng minh C còn lại là do ta gỡ `expire_at` chứ không phải bộ quét chưa chạy. Về ảnh: `raw` chỉ giữ khoá đối tượng, nên khi TTL xoá document, **ảnh trong kho vẫn còn** và thành ảnh mồ côi; retention thật phải đặt luật vòng đời ở chính kho (S3, Azure Blob lifecycle) với cùng thời hạn. Bản sao lưu cũng giữ dữ liệu cũ tới khi nó hết hạn.
+E chứng minh C còn lại là do ta gỡ `expire_at` chứ không phải bộ quét chưa chạy. Về ảnh: `raw` chỉ giữ khoá đối tượng, nên khi TTL xoá document, **ảnh trong kho vẫn còn** và thành ảnh mồ côi; retention thật phải đặt luật vòng đời ở chính kho (S3, Azure Blob lifecycle) với cùng thời hạn. Bản sao lưu cũng giữ dữ liệu cũ tới khi chính bản sao lưu hết hạn.
 
 ## Audit: ai xem gì
 
-Mọi lần đọc đi qua `view_document` hoặc `lookup_by_number`: kiểm quyền, **ghi audit**, rồi mới dựng kết quả. Nếu kho audit hỏng, hàm ném ngoại lệ và không byte dữ liệu nào được trả: đóng cửa khi audit hỏng, vì mở cửa là cách dễ nhất để mất dấu vết đúng lúc cần (`app/access.py`, trích):
+Mọi lần đọc đi qua `view_document` hoặc `lookup_by_number`: kiểm quyền, **ghi audit**, rồi mới dựng kết quả. Nếu kho audit hỏng, hàm ném ngoại lệ và không có dữ liệu nào được trả: đóng cửa khi audit hỏng, vì mở cửa là cách dễ nhất để mất dấu vết đúng lúc cần (`app/access.py`, trích):
 
 ```python
 if reveal and ("kyc:reveal" not in actor.scopes or not reason or len(reason.strip()) < REVEAL_MIN_REASON):
@@ -170,7 +170,7 @@ result = await docs.update_one(
 modified += result.modified_count
 ```
 
-Ảnh gốc của v2 không còn biết nên `image_sha256` là `null` (validator v3 cho phép đúng trường hợp này). Bộ lọc `schema_version: 2` làm migration chạy lại và chạy đồng thời được: lab chạy hai tác vụ cùng lúc trong **một** tiến trình, lần này chúng báo sửa 6 và 0 document (cách chia có thể khác giữa các lần, tổng luôn đúng sáu). Sau đó không còn document v2, không còn trường `id_number`, và quét cả collection không thấy sáu số rõ. Câu đó chỉ nói về collection chính: số rõ vẫn nằm trong `raw` tới hạn và trong bản sao lưu cũ.
+Ta không còn biết ảnh gốc của v2 là ảnh nào nên `image_sha256` là `null` (validator v3 cho phép đúng trường hợp này). Bộ lọc `schema_version: 2` giúp migration chạy lại và chạy đồng thời được: lab chạy hai tác vụ cùng lúc trong **một** tiến trình, lần này chúng báo sửa 6 và 0 document (cách chia có thể khác giữa các lần, tổng luôn đúng sáu). Sau đó không còn document v2, không còn trường `id_number`, và quét cả collection không thấy sáu số rõ. Câu đó chỉ nói về collection chính: số rõ vẫn nằm trong `raw` tới hạn và trong bản sao lưu cũ.
 
 <figure class="tkh-fig">
 <div class="tkh-fig-box">
@@ -201,7 +201,7 @@ còn lại: ['KYC-9002', 'KYC-9003', 'KYC-9004'] (B còn hạn, C đã gỡ expi
 
 A biến mất sau 1,2 giây (một chu kỳ quét 1 giây), E sau 3,3 giây, sát hạn 3 giây của nó, và đúng B, C, D ở lại. Nhật ký audit của demo (10 dòng; bỏ `expire_at`):
 
-Kiểm chứng đầy đủ là chế độ `--verify`: 53 ca, chạy trên máy rất bận (load average ở dòng đầu). Output nguyên văn:
+Kiểm chứng đầy đủ là chế độ `--verify`: 53 test case, chạy trên máy đang rất bận (load average ở dòng đầu). Output nguyên văn:
 
 ```bash
 uv run --project examples/toi-noi-python/47-luu-ket-qua-ocr-mongodb-pii examples/toi-noi-python/47-luu-ket-qua-ocr-mongodb-pii/main.py --verify
@@ -265,7 +265,7 @@ MongoDB mongodb://localhost:27019/toinoi; khóa băm của lab (không dùng ngo
 OK 53/53
 ```
 
-Để thấy validator thật sự làm việc, ta phá có chủ ý: bỏ dòng `"additionalProperties": False` ở cấp `fields`. Đúng một ca đỏ, và `[None, None, 121, 121, 121, 121]` nói rằng hai document, một mang `id_number` rõ, một mang `so_cccd`, đã lọt vào collection:
+Để thấy validator thật sự làm việc, ta cố ý phá nó: bỏ dòng `"additionalProperties": False` ở cấp `fields`. Đúng một test case đỏ, và `[None, None, 121, 121, 121, 121]` nói rằng hai document, một mang `id_number` rõ, một mang `so_cccd`, đã lọt vào collection:
 
 ```text
   SAI  validator v3 từ chối số rõ, trường lạ (trong và ngoài fields), hash rỗng, mặt nạ sai dạng, thiếu pii_key_id (mã 121)  [[None, None, 121, 121, 121, 121]]
@@ -282,14 +282,14 @@ FAIL 52/53
 
 <div class="tkh-callout tkh-callout--warn">
 <span class="tkh-callout-title">Giới hạn của ví dụ so với production</span>
-<p>Một MongoDB đơn lẻ, không replica set: ví dụ không nói gì về độ bền khi ghi hay failover, và ta dựa vào thứ tự ghi cùng idempotency thay vì transaction. Khoá băm là chuỗi công khai trong <code>main.py</code>; production dùng secret manager và xoay khoá theo lịch. Mặt nạ để lộ ba số đầu và hai số cuối, và băm không thay thế mã hoá: ai có cả khoá lẫn dữ liệu vẫn dò lại được số giấy tờ, nên dữ liệu nhạy cảm còn cần mã hoá khi lưu và kiểm soát truy cập. Các hạn 30 và 400 ngày là giá trị lab, thời hạn thật do pháp chế quyết định; bài này không phải tư vấn pháp lý. Lab không có xoá theo yêu cầu của chủ thể dữ liệu (kể cả sao lưu), và audit chưa được bảo vệ ở mức quyền cơ sở dữ liệu. Số liệu chạy trên macOS Apple M1 Max rất bận, Python 3.14.7, pymongo 4.19.0, MongoDB 8.3.13.</p>
+<p>Một MongoDB đơn lẻ, không replica set: ví dụ không nói gì về độ bền khi ghi hay failover, và ta dựa vào thứ tự ghi cùng idempotency thay vì transaction. Khoá băm là chuỗi công khai trong <code>main.py</code>; production dùng secret manager và xoay khoá theo lịch. Mặt nạ để lộ ba số đầu và hai số cuối, và băm không thay thế mã hoá: ai có cả khoá lẫn dữ liệu vẫn dò lại được số giấy tờ, nên dữ liệu nhạy cảm còn cần mã hoá khi lưu và kiểm soát truy cập. Các hạn 30 và 400 ngày là giá trị lab, thời hạn thật do pháp chế quyết định; bài này không phải tư vấn pháp lý. Lab không có xoá theo yêu cầu của chủ thể dữ liệu (kể cả sao lưu), và audit chưa được bảo vệ ở mức quyền cơ sở dữ liệu. Số liệu chạy trên máy macOS Apple M1 Max đang rất bận, Python 3.14.7, pymongo 4.19.0, MongoDB 8.3.13.</p>
 </div>
 
-**Bài tập 1:** `KYC-0007` có ba document nên một lần tra theo số trả ba dòng của cùng hồ sơ. Người duyệt chỉ muốn bản mới nhất mỗi hồ sơ. Bạn đổi `find_by_number` thế nào?
+**Bài tập 1:** `KYC-0007` có ba document nên một lần tra theo số trả ba dòng của cùng hồ sơ. Người duyệt chỉ muốn bản mới nhất của mỗi hồ sơ. Bạn đổi `find_by_number` thế nào?
 
-**Bài tập 2:** Pháp chế yêu cầu giữ số CCCD của một hồ sơ đang bị khiếu nại quá 30 ngày. Làm thế nào bằng thứ lab đã có, và quên thì có hại gì?
+**Bài tập 2:** Pháp chế yêu cầu giữ số CCCD của một hồ sơ đang bị khiếu nại quá 30 ngày. Làm cách nào bằng những thứ lab đã có, và quên thì có hại gì?
 
-<details><summary>Xem lời giải</summary><p><b>1.</b> Aggregation: <code>$match</code> theo loại, <code>pii_key_id</code> và hash (dùng <code>ix_id_hash</code>), <code>$sort</code> theo <code>created_at</code> giảm dần, <code>$group</code> theo <code>kyc_id</code> với <code>$first</code>; hoặc chọn bản mới nhất mỗi <code>kyc_id</code> trong Python khi mỗi số chỉ có vài document. <b>2.</b> Gỡ trường <code>expire_at</code> của đúng document <code>raw</code> đó bằng <code>$unset</code>, như document C trong thí nghiệm TTL. Quên đặt lại <code>expire_at</code> khi vụ việc kết thúc thì số rõ nằm đó vô thời hạn, trái chính sách.</p></details>
+<details><summary>Xem lời giải</summary><p><b>1.</b> Aggregation: <code>$match</code> theo loại, <code>pii_key_id</code> và hash (dùng <code>ix_id_hash</code>), <code>$sort</code> theo <code>created_at</code> giảm dần, <code>$group</code> theo <code>kyc_id</code> với <code>$first</code>; hoặc chọn bản mới nhất của mỗi <code>kyc_id</code> trong Python khi mỗi số chỉ có vài document. <b>2.</b> Gỡ trường <code>expire_at</code> của đúng document <code>raw</code> đó bằng <code>$unset</code>, như document C trong thí nghiệm TTL. Quên đặt lại <code>expire_at</code> khi vụ việc kết thúc thì số rõ nằm đó vô thời hạn, trái chính sách.</p></details>
 
 Bài trước: [bài 46](/articles/python-ocr-service-fastapi-worker-timeout). Bài tiếp: [bài 48](/articles/python-face-detection-landmarks-mediapipe-opencv).
 

@@ -8,7 +8,7 @@ tags: [toi-noi, location, rust, wgs84, geojson, newtype, e7, precision]
 language: vi
 ---
 
-Một điểm đón của chuyến TN-0001 nằm gần chợ Bến Thành: vĩ độ 10,7725, kinh độ 106,698 (toạ độ xấp xỉ để minh hoạ, không phải số đo khảo sát). Ở app, điểm này là cặp `(lat, lng)`. Khi xuất ra GeoJSON để xem trên bản đồ, cùng điểm đó phải là `[lng, lat]`: kinh độ đứng trước. Chỉ cần một dòng code quên đổi chỗ, ghim sẽ rơi sang một nơi khác, và nếu may thì nó rơi ra ngoài khoảng giá trị hợp lệ để hệ thống kêu lên.
+Một điểm đón của chuyến TN-0001 nằm gần chợ Bến Thành: vĩ độ 10,7725, kinh độ 106,698 (toạ độ xấp xỉ để minh hoạ, không phải số đo khảo sát). Ở app, điểm này là cặp `(lat, lng)`. Khi xuất ra GeoJSON để xem trên bản đồ, cùng điểm đó phải là `[lng, lat]`: kinh độ đứng trước. Chỉ cần một dòng code quên đổi chỗ, ghim sẽ rơi sang một nơi khác, và nếu may thì nó rơi ra ngoài khoảng giá trị hợp lệ để hệ thống báo lỗi.
 
 May mắn đó chỉ có ở một số vùng. Ở Việt Nam kinh độ khoảng 102–110, lớn hơn 90, nên một «vĩ độ» 106,698 bị bắt ngay. Ở Abuja (vĩ độ 9,07, kinh độ 7,40) đảo thứ tự cho ra một điểm vẫn hợp lệ ở cả hai chiều, và không ai bắt được nó. Bài này dựng kiểu `LatLng` để việc bắt lỗi không còn dựa vào may mắn của vùng địa lý, rồi đo xem một chữ số thập phân là bao nhiêu mét, và vì sao lưu toạ độ bằng số nguyên `i32` là hợp lý. Đây là bài 03 của lộ trình **Nền tảng định vị** qua [Tới Nơi](/articles/du-an-mau-toi-noi), đọc sau bài [ADR về ranh giới các ngôn ngữ](/articles/location-adr-rust-go-python-csharp-ranh-gioi-service). Bài dùng crate `geo-core` của lab và giả định bạn đã biết struct, trait và `Result` của Rust.
 
@@ -22,13 +22,13 @@ May mắn đó chỉ có ở một số vùng. Ở Việt Nam kinh độ khoản
 
 GPS trong điện thoại trả về vị trí theo **WGS84**: một ellipsoid chuẩn của Trái Đất, kèm quy ước vĩ độ là góc từ xích đạo (từ −90° ở cực nam tới +90° ở cực bắc, dương về phía bắc) và kinh độ là góc từ kinh tuyến gốc (từ −180° tới +180°, dương về phía đông). OpenStreetMap cũng lưu toạ độ theo hệ này, nên dữ liệu bản đồ của lab và GPS của tài xế nói cùng một thứ tiếng. Mã định danh quen thuộc của nó là EPSG:4326. Khi cần hiển thị lên bản đồ web, thư viện hiển thị thường chiếu tiếp sang Web Mercator; phần đó nằm ở lớp hiển thị và bài này không đụng tới.
 
-**VN-2000** là hệ toạ độ quốc gia của Việt Nam. Dữ liệu đo đạc hoặc địa chính của cơ quan nhà nước có thể đến ở hệ này. Để đặt chúng lên cùng bản đồ với GPS phải biến đổi datum và lưới chiếu, việc cần một thư viện như PROJ. Lab **chưa chạy phép biến đổi WGS84 sang VN-2000**, nên bài này không có số nào về độ lệch giữa hai hệ và không khẳng định hai hệ lệch nhau bao nhiêu mét. Điều bài rút ra chỉ là một quy tắc thiết kế: mọi toạ độ đi vào hệ thống phải ghi rõ nó thuộc hệ nào, và biến đổi ở **biên**, đúng một chỗ, không để lẫn bên trong.
+**VN-2000** là hệ toạ độ quốc gia của Việt Nam. Dữ liệu đo đạc hoặc địa chính của cơ quan nhà nước có thể được cung cấp theo hệ này. Muốn đặt chúng lên cùng bản đồ với GPS thì phải biến đổi datum và lưới chiếu, và việc này cần một thư viện như PROJ. Lab **chưa chạy phép biến đổi WGS84 sang VN-2000**, nên bài này không có số nào về độ lệch giữa hai hệ và không khẳng định hai hệ lệch nhau bao nhiêu mét. Điều bài này rút ra chỉ là một quy tắc thiết kế: mọi toạ độ đi vào hệ thống phải ghi rõ nó thuộc hệ nào, và biến đổi ở **biên**, đúng một chỗ, không để các hệ lẫn lộn bên trong hệ thống.
 
-Phạm vi lab dùng một khung hình chữ nhật quanh Việt Nam: vĩ độ 8,0 đến 23,4 và kinh độ 102,1 đến 109,5, cùng bbox nội thành TP.HCM (vĩ độ 10,70–10,86, kinh độ 106,60–106,78).
+Phạm vi lab dùng là một khung hình chữ nhật quanh Việt Nam: vĩ độ 8,0 đến 23,4 và kinh độ 102,1 đến 109,5, cùng bbox nội thành TP.HCM (vĩ độ 10,70–10,86, kinh độ 106,60–106,78).
 
-## Newtype: để trình biên dịch giữ thứ tự thay con người
+## Newtype: để trình biên dịch giữ thứ tự thay cho con người
 
-Cách ngây thơ nhất là truyền hai `f64`: `fn dist(lat1: f64, lng1: f64, lat2: f64, lng2: f64)`. Bốn số cùng kiểu, nên đảo hai số bất kỳ vẫn biên dịch. Newtype bọc mỗi số vào một kiểu riêng, miễn phí lúc chạy:
+Cách ngây thơ nhất là truyền hai `f64`: `fn dist(lat1: f64, lng1: f64, lat2: f64, lng2: f64)`. Bốn số cùng kiểu, nên đảo hai số bất kỳ vẫn biên dịch. Newtype bọc mỗi số vào một kiểu riêng và không tốn thêm chi phí lúc chạy:
 
 `examples/toi-noi-location/rust/crates/geo-core/src/coord.rs`
 
@@ -57,7 +57,7 @@ impl Lat {
 }
 ```
 
-Trường bên trong là riêng tư nên bên ngoài module không thể viết `Lat(500.0)`; muốn có một `Lat` phải đi qua `Lat::new` và bị kiểm tra: số hữu hạn, nằm trong [−90, 90]. `Lng` làm tương tự với [−180, 180]. Hai kiểu này gộp thành `LatLng`, và hàm tạo nhận chúng theo đúng thứ tự:
+Trường bên trong không công khai (private) nên bên ngoài module không thể viết `Lat(500.0)`; muốn có một `Lat` phải đi qua `Lat::new` và bị kiểm tra: số hữu hạn, nằm trong [−90, 90]. `Lng` làm tương tự với [−180, 180]. Hai kiểu này gộp thành `LatLng`, và hàm tạo nhận chúng theo đúng thứ tự:
 
 `examples/toi-noi-location/rust/crates/geo-core/src/coord.rs`
 
@@ -88,7 +88,7 @@ impl LatLng {
     }
 ```
 
-Doctest `compile_fail` **khẳng định rằng đoạn code đảo thứ tự không biên dịch được**, và nếu một ngày ai đó đổi API làm đoạn đó biên dịch, test sẽ đỏ. `try_new` là cửa vào cho số thô, ví dụ vừa parse từ JSON hay từ file OSM; nó kiểm khoảng giá trị và là chỗ duy nhất dữ liệu bẩn bị chặn.
+Doctest `compile_fail` **khẳng định rằng đoạn code đảo thứ tự không biên dịch được**, và nếu một ngày ai đó đổi API làm đoạn đó biên dịch, test sẽ đỏ. `try_new` là cửa vào cho số thô, ví dụ số vừa parse từ JSON hay từ file OSM; nó kiểm tra khoảng giá trị và là chỗ duy nhất dữ liệu bẩn bị chặn.
 
 Hai lớp bảo vệ này khác nhau về bản chất, và Hình 1 cho thấy tại sao cần cả hai.
 
@@ -99,14 +99,14 @@ Hai lớp bảo vệ này khác nhau về bản chất, và Hình 1 cho thấy t
 <figcaption>Hình 1. Đảo thứ tự lat/lng ở Việt Nam bị bắt vì kinh độ (khoảng 102–110) lớn hơn 90. Ở nơi khác thì không: Abuja nằm trong khoảng hợp lệ cả hai chiều. Số lấy từ <code>loc03_toa_do</code>; điểm xanh dương là vĩ độ, xanh lục là kinh độ, vẽ đúng vị trí trên trục.</figcaption>
 </figure>
 
-Lớp khoảng giá trị (`try_new`) hữu ích nhưng phụ thuộc địa lý: nó bắt được đảo thứ tự ở TP.HCM vì 106,698 vượt 90, còn ở Abuja thì không. Lớp kiểu (`Lat` khác `Lng`) không phụ thuộc gì: nó chặn lỗi ở mọi nơi trên Trái Đất, ngay lúc biên dịch, trước khi có dữ liệu nào chảy qua. Output của lab minh hoạ đúng điều đó:
+Lớp khoảng giá trị (`try_new`) hữu ích nhưng phụ thuộc địa lý: nó bắt được đảo thứ tự ở TP.HCM vì 106,698 vượt 90, còn ở Abuja thì không. Lớp kiểu (`Lat` khác `Lng`) không phụ thuộc gì: nó chặn lỗi ở mọi nơi trên Trái Đất, ngay lúc biên dịch, trước khi có dữ liệu nào chảy qua. Kết quả chạy của lab minh hoạ đúng điều đó:
 
 ```text
 try_new(106.6980, 10.7725)     = Err(vĩ độ 106.698 ngoài khoảng [-90, 90] (có thể đã đảo lat/lng))
 Abuja (lat 9.07, lng 7.40) đảo thành try_new(7.40, 9.07) = LatLng(7.4000000, 9.0700000): khoảng giá trị không bắt được, chỉ kiểu mới chặn
 ```
 
-Quy tắc dùng: số thô chỉ tồn tại ở biên (parse, đọc file, nhận request), đi qua `try_new` một lần, và từ đó trở vào trong mọi hàm chỉ truyền `LatLng`.
+Quy tắc dùng: số thô chỉ tồn tại ở biên (parse, đọc file, nhận request), đi qua `try_new` một lần, và từ đó trở đi mọi hàm bên trong chỉ truyền `LatLng`.
 
 ## GeoJSON ngược thứ tự, và một chỗ đổi duy nhất
 
@@ -126,7 +126,7 @@ Quy tắc dùng: số thô chỉ tồn tại ở biên (parse, đọc file, nh�
     }
 ```
 
-Mọi xuất GeoJSON đi qua `to_lnglat` và mọi nhập đi qua `from_lnglat`. Đây cũng là cách để kiểm: tìm trong mã nguồn mọi chỗ tự viết `[x, y]` mà không qua hàm này. Lab xác nhận vòng đi về: `from_lnglat(to_lnglat(p)) == p` cho kết quả `true`, và GeoJSON của điểm Bến Thành ra đúng `"coordinates":[106.698,10.7725]`.
+Mọi lần xuất GeoJSON đều đi qua `to_lnglat` và mọi lần nhập đều đi qua `from_lnglat`. Đây cũng là cách để kiểm tra: tìm trong mã nguồn mọi chỗ tự viết `[x, y]` mà không qua hàm này. Lab xác nhận vòng đi về: `from_lnglat(to_lnglat(p)) == p` cho kết quả `true`, và GeoJSON của điểm Bến Thành ra đúng `"coordinates":[106.698,10.7725]`.
 
 ## Mỗi chữ số thập phân là bao nhiêu mét
 
@@ -162,7 +162,7 @@ Với 5–7 chữ số có nghĩa, có ba cách lưu một số toạ độ. Lab
 | `i32` E6 (độ × 10⁶) | 0,078048 m | 0,041693 m |
 | `f32` | 0,422926 m | 0,212028 m |
 
-`f32` sai tới **42 cm**: nó chỉ có khoảng bảy chữ số có nghĩa cho cả phần nguyên lẫn phần thập phân của một số như 106,698, nên không dùng được cho toạ độ. E7 sai tối đa 7,8 mm, thấp hơn nhiều mọi nhiễu GPS. E8 không vừa `i32`, vì 180° × 10⁸ = 18.000.000.000 lớn hơn `i32::MAX` = 2.147.483.647; E7 thì tối đa 1.800.000.000, còn dư chỗ. Dạng E7 được định nghĩa như sau:
+`f32` sai tới **42 cm**: kiểu này chỉ có khoảng bảy chữ số có nghĩa cho cả phần nguyên lẫn phần thập phân của một số như 106,698, nên không dùng được cho toạ độ. E7 sai tối đa 7,8 mm, nhỏ hơn nhiều so với mọi nhiễu GPS. E8 không vừa `i32`, vì 180° × 10⁸ = 18.000.000.000 lớn hơn `i32::MAX` = 2.147.483.647; E7 thì tối đa 1.800.000.000, còn dư chỗ. Dạng E7 được định nghĩa như sau:
 
 `examples/toi-noi-location/rust/crates/geo-core/src/coord.rs`
 
@@ -187,7 +187,7 @@ pub struct LatLngE7 {
 
 Về bộ nhớ, `LatLng` (hai `f64`) là 16 byte và `LatLngE7` (hai `i32`) là 8 byte, tiết kiệm 50%. Nhưng con số quan trọng phải đặt đúng quy mô: 25.000 tài xế trực tuyến tốn 0,40 MB so với 0,20 MB, nên bộ nhớ **không phải lý do chính** ở quy mô này. Với đồ thị TP.HCM 126.699 nút thì 2,03 MB so với 1,01 MB, cũng nhỏ. Lý do thật của E7 nằm ở nơi khác:
 
-- **Hợp đồng và file nhị phân.** `lat_e7` và `lng_e7` kiểu `sint32` là cách toạ độ đi trên dây trong hợp đồng protobuf của lab; đồ thị lưu dưới dạng cột mảng liền nhau.
+- **Hợp đồng và file nhị phân.** `lat_e7` và `lng_e7` kiểu `sint32` là cách toạ độ được truyền đi trong hợp đồng protobuf của lab; đồ thị lưu dưới dạng cột mảng liền nhau.
 - **`Eq` và `Hash`.** `LatLngE7` dẫn xuất được `Eq` và `Hash`, nên làm khoá của `HashMap` được; một `f64` thì không (có NaN và hai cách viết số không).
 - **`Pod`.** Struct hai `i32` ghi thẳng ra file và đọc lại bằng `bytemuck` không cần chuyển đổi.
 
@@ -197,7 +197,7 @@ Quy ước của lab: tính toán dùng `LatLng` (`f64`), lưu trữ và truyề
 
 ## Vì sao float ổn với toạ độ mà không ổn với tiền
 
-Hai câu hỏi hay đi liền nhau trong code review: sao toạ độ dùng `f64` được, còn tiền thì phải là số nguyên? Lab trả lời bằng số. Khoảng cách giữa hai số `f64` liền kề ở quanh kinh độ 106,698 là 1,42·10⁻¹⁴ độ, tức khoảng 1,56·10⁻⁹ m, cỡ nano mét. GPS điện thoại sai vài mét, nên sai số do float nằm dưới nhiễu hàng tỉ lần và không có ai quan tâm.
+Hai câu hỏi hay đi liền nhau trong code review: sao toạ độ dùng `f64` được, còn tiền thì phải là số nguyên? Lab trả lời bằng số. Khoảng cách giữa hai số `f64` liền kề ở quanh kinh độ 106,698 là 1,42·10⁻¹⁴ độ, tức khoảng 1,56·10⁻⁹ m, cỡ nano mét. GPS điện thoại sai vài mét, nên sai số do float nhỏ hơn nhiễu hàng tỉ lần nên không ai bận tâm.
 
 Với tiền, sai số bé nhưng **bị ép về một nấc rời rạc**:
 
@@ -216,18 +216,18 @@ Với tiền, sai số bé nhưng **bị ép về một nấc rời rạc**:
     );
 ```
 
-Kết quả: `0.29 * 100.0` ra `28.999999999999996` và ép về `i64` thành 28 đồng thay vì 29; `4.35 * 100.0` ra 434,99999999999994 và thành 434 thay vì 435. Chênh một đồng là đủ để hai hệ thống đối soát không khớp. Cước của Tới Nơi (12.000 đồng cho 2 km đầu, 4.500 đồng mỗi km vượt) vì thế luôn là số nguyên đồng; loạt Rust qua Tới Nơi có kiểu `Money` cho việc đó. Còn toạ độ không có nấc rời rạc nào bị ép: hiếm khi ta so sánh hai toạ độ bằng `==`, và khi so thì so theo khoảng cách có dung sai.
+Kết quả: `0.29 * 100.0` ra `28.999999999999996` và ép về `i64` thành 28 đồng thay vì 29; `4.35 * 100.0` ra 434,99999999999994 và thành 434 thay vì 435. Chênh một đồng là đủ để hai hệ thống đối soát không khớp. Cước của Tới Nơi (12.000 đồng cho 2 km đầu, 4.500 đồng mỗi km vượt) vì thế luôn là số nguyên đồng; loạt Rust qua Tới Nơi có kiểu `Money` cho việc đó. Còn toạ độ không bị ép vào nấc rời rạc nào: hiếm khi ta so sánh hai toạ độ bằng `==`, và khi so thì so theo khoảng cách có dung sai.
 
 ## Chạy ví dụ và kiểm chứng
 
-Từ gốc repo (trên máy viết `cargo` không có sẵn trên PATH, nên thêm đường dẫn toolchain trước; lab không cần PBF, Redis hay mạng):
+Từ gốc repo (trên máy của tác giả, `cargo` không có sẵn trên PATH, nên thêm đường dẫn toolchain trước; lab không cần PBF, Redis hay mạng):
 
 ```bash
 export PATH="$HOME/.rustup/toolchains/stable-aarch64-apple-darwin/bin:$PATH"
 cargo run -q --release --manifest-path examples/toi-noi-location/rust/Cargo.toml -p labs --bin loc03_toa_do
 ```
 
-Cấu hình đo: `--release`, 1.000.000 điểm ngẫu nhiên, seed 20261106, Apple M1 Max. Mọi số trong bài này không phụ thuộc thời gian (sai số, số mét, kích thước), nên không bị ảnh hưởng bởi việc máy viết lúc đó chịu tải nặng. Output mục 1 và mục 3 (nguyên văn từ `results/p01.md`):
+Cấu hình đo: `--release`, 1.000.000 điểm ngẫu nhiên, seed 20261106, Apple M1 Max. Mọi số trong bài này không phụ thuộc thời gian (sai số, số mét, kích thước), nên không bị ảnh hưởng bởi việc máy của tác giả lúc đó chịu tải nặng. Kết quả chạy mục 1 và mục 3 (nguyên văn từ `results/p01.md`):
 
 ```text
 -- 1. newtype chặn đảo lat/lng --
@@ -261,7 +261,7 @@ Dòng cuối của lab cũng cho biết việc **chưa làm**:
 [chưa chạy] WGS84 → VN-2000: cần phép biến đổi datum và lưới chiếu (thư viện proj); lab này chưa tính, nên bài chỉ nêu khái niệm.
 ```
 
-Kiểm tra toàn phần (`bash examples/toi-noi-location/verify-p01.sh`) chạy `cargo test`, trong đó có doctest `compile_fail` của `LatLng::new`, rồi chạy lại lab này; kết quả ghi `PASS`.
+Kiểm tra toàn bộ (`bash examples/toi-noi-location/verify-p01.sh`) chạy `cargo test`, trong đó có doctest `compile_fail` của `LatLng::new`, rồi chạy lại lab này; kết quả ghi `PASS`.
 
 ## Giới hạn của ví dụ
 
@@ -273,7 +273,7 @@ Lab chưa chạy phép biến đổi WGS84 sang VN-2000 nên không có số nà
 
 <details><summary>Lời giải</summary>
 
-(1) Parse JSON của service thứ nhất rồi gán vào hàm nhận hai số: chặn bằng cách parse thẳng sang `Lat` và `Lng` có tên trường, không giữ mảng số thô. (2) Đọc GeoJSON bằng cách lấy phần tử 0 làm vĩ độ: chặn bằng `from_lnglat` là chỗ duy nhất đọc `[lng, lat]`. (3) Xuất ra GeoJSON bằng cách tự viết `[lat, lng]`: chặn bằng `to_lnglat`. Ở Việt Nam lớp khoảng giá trị bắt được cả ba, nhưng chỉ lớp kiểu mới bắt được ở Abuja.
+(1) Parse JSON của service thứ nhất rồi gán vào hàm nhận hai số: chặn bằng cách parse thẳng sang `Lat` và `Lng` theo tên trường, không giữ mảng số thô. (2) Đọc GeoJSON bằng cách lấy phần tử 0 làm vĩ độ: chặn bằng `from_lnglat`, chỗ duy nhất đọc `[lng, lat]`. (3) Xuất ra GeoJSON bằng cách tự viết `[lat, lng]`: chặn bằng `to_lnglat`. Ở Việt Nam lớp khoảng giá trị bắt được cả ba, nhưng chỉ lớp kiểu mới bắt được ở Abuja.
 
 </details>
 
@@ -281,7 +281,7 @@ Lab chưa chạy phép biến đổi WGS84 sang VN-2000 nên không có số nà
 
 <details><summary>Lời giải</summary>
 
-Một đơn vị ở chữ số thứ 5 là khoảng 1,11 m theo vĩ độ, nên làm tròn tới số gần nhất sai tối đa khoảng một nửa, 0,56 m. Con số này nhỏ hơn nhiều khoảng cách giữa hai làn, nên làm tròn toạ độ không phải thứ khiến xe bị bám nhầm làn; nhiễu GPS vài mét mới là nguyên nhân, sẽ được xử lý ở các bài bám đường.
+Một đơn vị ở chữ số thứ 5 là khoảng 1,11 m theo vĩ độ, nên làm tròn tới số gần nhất sai tối đa khoảng một nửa, 0,56 m. Con số này nhỏ hơn nhiều so với khoảng cách giữa hai làn, nên việc làm tròn toạ độ không phải nguyên nhân khiến xe bị gán nhầm làn; nhiễu GPS vài mét mới là nguyên nhân, sẽ được xử lý ở các bài bám đường.
 
 </details>
 
@@ -289,7 +289,7 @@ Một đơn vị ở chữ số thứ 5 là khoảng 1,11 m theo vĩ độ, nên
 
 <details><summary>Lời giải</summary>
 
-Tính chất: với mọi `LatLng` hợp lệ `p`, `p` và `p.to_e7().to_latlng()` lệch nhau không quá 0,5·10⁻⁷ độ theo mỗi trục, tức khoảng 5,6 mm mỗi trục và dưới 8 mm theo đường chéo. Dung sai lấy từ bước lượng tử (0,5·10⁻⁷ độ) cộng một ít bù cho làm tròn `f64`, giống test `e7_round_trip_within_6mm` trong `coord.rs`. Không dùng `==` vì làm tròn về số nguyên rồi chia lại không trả đúng giá trị `f64` gốc, chỉ trả giá trị gần nó trong dung sai.
+Tính chất: với mọi `LatLng` hợp lệ `p`, `p` và `p.to_e7().to_latlng()` lệch nhau không quá 0,5·10⁻⁷ độ theo mỗi trục, tức khoảng 5,6 mm mỗi trục và dưới 8 mm theo đường chéo. Dung sai lấy từ bước lượng tử (0,5·10⁻⁷ độ) cộng thêm một lượng dự phòng cho sai số làm tròn của `f64`, giống test `e7_round_trip_within_6mm` trong `coord.rs`. Không dùng `==` vì làm tròn về số nguyên rồi chia lại không trả đúng giá trị `f64` gốc, chỉ trả giá trị gần nó trong dung sai.
 
 </details>
 

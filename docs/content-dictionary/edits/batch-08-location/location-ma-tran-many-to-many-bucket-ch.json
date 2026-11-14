@@ -1,0 +1,281 @@
+{
+ "file": "location-ma-tran-many-to-many-bucket-ch.md",
+ "edits": [
+  {
+   "old": "kiểm đúng từng ô, đo rayon, ngân sách độ trễ, và nói rõ",
+   "new": "kiểm tra đúng từng ô, đo hiệu quả của rayon, đo ngân sách độ trễ, và nói rõ",
+   "reason": "Thiếu động từ, cụm cụt",
+   "severity": "medium"
+  },
+  {
+   "old": "và đo xem nó nhanh hơn bao nhiêu mà vẫn ra đúng từng ô.",
+   "new": "và đo xem cách này nhanh hơn bao nhiêu mà vẫn cho ra đúng từng ô.",
+   "reason": "Bỏ «nó» chỉ sự vật trừu tượng",
+   "severity": "medium"
+  },
+  {
+   "old": "Mọi số đo là trên đồ thị HCM",
+   "new": "Mọi số đo đều lấy trên đồ thị HCM",
+   "reason": "Câu kiểu tiếng Anh",
+   "severity": "medium"
+  },
+  {
+   "old": "Theo bạn, tính nó bằng 10.000 truy vấn",
+   "new": "Theo bạn, tính ma trận này bằng 10.000 truy vấn",
+   "reason": "Bỏ «nó»",
+   "severity": "low"
+  },
+  {
+   "old": "Qua ba lần chạy tỉ lệ là 32,5–38,7 lần.",
+   "new": "Qua ba lần chạy, tỉ lệ nằm trong khoảng 32,5–38,7 lần.",
+   "reason": "Câu cụt",
+   "severity": "low"
+  },
+  {
+   "old": "còn N×M truy vấn tăng theo tích. Hai cách ra cùng từng ô.",
+   "new": "còn N×M truy vấn tăng theo tích. Hai cách cho ra cùng kết quả ở từng ô.",
+   "reason": "Thiếu động từ",
+   "severity": "medium"
+  },
+  {
+   "old": "Bài toán tham lam của baseline chỉ hỏi",
+   "new": "Cách ghép tham lam của baseline chỉ hỏi",
+   "reason": "Dùng từ không đúng đối tượng",
+   "severity": "medium"
+  },
+  {
+   "old": "Chim bay trả lời được câu đó rất rẻ",
+   "new": "Khoảng cách chim bay trả lời được câu đó rất rẻ",
+   "reason": "Lược mất danh từ chính",
+   "severity": "medium"
+  },
+  {
+   "old": "Một ma trận chậm chặn cả hai phần; một ma trận nhanh nhưng sai ô nào đó thì làm sai quyết định ghép mà không ai thấy lỗi.",
+   "new": "Một ma trận chậm sẽ làm nghẽn cả hai phần; một ma trận nhanh nhưng sai ở ô nào đó thì làm sai quyết định ghép mà không ai nhận ra lỗi.",
+   "reason": "Cụm cụt, từ gượng",
+   "severity": "medium"
+  },
+  {
+   "old": "CH cho một tính chất: với mỗi cặp nút",
+   "new": "CH có một tính chất: với mỗi cặp nút",
+   "reason": "Sai động từ",
+   "severity": "high"
+  },
+  {
+   "old": "rồi lấy nút gặp nhau cho tổng nhỏ nhất.",
+   "new": "rồi lấy nút gặp nhau có tổng nhỏ nhất.",
+   "reason": "Sai động từ",
+   "severity": "low"
+  },
+  {
+   "old": "Nên với M đích ta chạy M tìm kiếm ngược đi lên đúng một lần,",
+   "new": "Nên với M đích, ta chạy M tìm kiếm ngược đi lên, mỗi đích đúng một lần,",
+   "reason": "Câu mơ hồ về \"đúng một lần\"",
+   "severity": "medium"
+  },
+  {
+   "old": "là phép cộng-so sánh trên mảng liên tục",
+   "new": "là phép cộng và phép so sánh trên mảng liên tục",
+   "reason": "Cụm tự ghép nghe cụt",
+   "severity": "medium"
+  },
+  {
+   "old": "Tính đúng theo cùng lý lẽ với CH hai chiều:",
+   "new": "Tính đúng của cách này dựa trên cùng lập luận với CH hai chiều:",
+   "reason": "Câu thiếu chủ ngữ",
+   "severity": "medium"
+  },
+  {
+   "old": "nút kèm chi phí đi nốt phần cạnh, nên",
+   "new": "nút kèm chi phí đi nốt phần còn lại của cạnh, nên",
+   "reason": "Giọng dịch máy, thiếu chữ",
+   "severity": "medium"
+  },
+  {
+   "old": "Dựng hai lượt (đếm rồi điền) cho một mảng liên tục, quét nhanh và không cấp phát từng bucket.",
+   "new": "Bucket được dựng hai lượt (đếm rồi điền) thành một mảng liên tục, nên quét nhanh và không phải cấp phát từng bucket.",
+   "reason": "Câu thiếu chủ ngữ và liên kết",
+   "severity": "medium"
+  },
+  {
+   "old": "ở mỗi nút chốt nó quét bucket và hạ ô nào có tổng nhỏ hơn.",
+   "new": "ở mỗi nút chốt, tìm kiếm đó quét bucket và cập nhật những ô có tổng nhỏ hơn.",
+   "reason": "Bỏ «nó», cụm gượng",
+   "severity": "medium"
+  },
+  {
+   "old": "Các hàng độc lập nhau nên chạy song song được; đó là chỗ `rayon` vào cuộc ở mục sau.",
+   "new": "Các hàng độc lập với nhau nên chạy song song được; đó là chỗ `rayon` phát huy tác dụng ở mục sau.",
+   "reason": "Từ thừa, cụm gượng",
+   "severity": "medium"
+  },
+  {
+   "old": "Cột «khác nhau» đếm số ô khác với bucket một luồng, cộng ba cách còn lại.",
+   "new": "Cột «khác nhau» đếm số ô khác với bucket một luồng, tính riêng cho từng cách trong ba cách còn lại.",
+   "reason": "Câu tối nghĩa",
+   "severity": "medium"
+  },
+  {
+   "old": "của `matrix.rs` làm việc tương tự trên đồ thị tổng hợp nhỏ, và `legs_with_offsets_add_to_the_cost` kiểm rằng chân",
+   "new": "của `matrix.rs` kiểm tra điều tương tự trên đồ thị tổng hợp nhỏ, và `legs_with_offsets_add_to_the_cost` kiểm tra rằng chân",
+   "reason": "Lược chữ, giọng dịch máy",
+   "severity": "medium"
+  },
+  {
+   "old": "ra đúng 1.250 ms thêm)",
+   "new": "ra đúng 1.250 ms cộng thêm)",
+   "reason": "Cụm cụt",
+   "severity": "low"
+  },
+  {
+   "old": "không đọc ms tuyệt đối.",
+   "new": "không đọc số ms tuyệt đối.",
+   "reason": "Thiếu danh từ",
+   "severity": "low"
+  },
+  {
+   "old": "Số liệu ở cột này là *một* lần chạy;",
+   "new": "Số liệu ở cột này lấy từ *một* lần chạy;",
+   "reason": "Câu kiểu tiếng Anh",
+   "severity": "low"
+  },
+  {
+   "old": "còn 10×10 chỉ 2,1 lần ở lần chính.",
+   "new": "còn 10×10 chỉ đạt 2,1 lần ở lần chạy chính.",
+   "reason": "Câu cụt",
+   "severity": "medium"
+  },
+  {
+   "old": "Hai cách ra cùng từng ô (0 ô khác).",
+   "new": "Hai cách cho ra cùng kết quả ở từng ô (0 ô khác).",
+   "reason": "Thiếu động từ",
+   "severity": "medium"
+  },
+  {
+   "old": "Hai điều rút ra. Thứ nhất,",
+   "new": "Từ đó rút ra hai điều. Thứ nhất,",
+   "reason": "Trật tự câu kiểu tiếng Anh",
+   "severity": "low"
+  },
+  {
+   "old": "chia cho N×M ô, cộng phần quét bucket.",
+   "new": "chia đều cho N×M ô, cộng thêm phần quét bucket.",
+   "reason": "Câu cụt",
+   "severity": "low"
+  },
+  {
+   "old": "chi phí điều phối và tranh lõi (máy đang tải)",
+   "new": "chi phí điều phối và tranh chấp lõi CPU (máy đang tải)",
+   "reason": "Dịch gượng",
+   "severity": "medium"
+  },
+  {
+   "old": "cho thấy điểm chuyển ở quanh 300×300.",
+   "new": "cho thấy điểm chuyển nằm quanh 300×300.",
+   "reason": "Câu gượng",
+   "severity": "low"
+  },
+  {
+   "old": "Mỗi hình dạng được đo 15 lần với mẫu nút mới mỗi lần, ghi p50 và p95 (ms), lần chạy chính, vẫn khi máy chịu tải:",
+   "new": "Mỗi hình dạng đo 15 lần, mỗi lần với mẫu nút mới, ghi p50 và p95 (ms); đây là lần chạy chính, máy vẫn đang chịu tải:",
+   "reason": "Bỏ bị động, câu cụt",
+   "severity": "medium"
+  },
+  {
+   "old": "Vì ma trận bucket nằm trên CH đó, nó thừa hưởng hạn chế này.",
+   "new": "Vì ma trận bucket nằm trên CH đó, ma trận thừa hưởng hạn chế này.",
+   "reason": "Bỏ «nó» chỉ sự vật trừu tượng",
+   "severity": "medium"
+  },
+  {
+   "old": "Hệ quả cho Tới Nơi cụ thể:",
+   "new": "Hệ quả cụ thể cho Tới Nơi:",
+   "reason": "Trật tự từ kiểu tiếng Anh",
+   "severity": "medium"
+  },
+  {
+   "old": "vì nó không tính việc phải quay đầu",
+   "new": "vì ma trận không tính việc phải quay đầu",
+   "reason": "Bỏ «nó»",
+   "severity": "medium"
+  },
+  {
+   "old": "đi tới điểm đúng phía bất lợi tốn thêm so với «phía nào cũng được» trong 89,5% số ô",
+   "new": "đi tới điểm đúng phía bất lợi tốn thêm thời gian so với «phía nào cũng được» ở 89,5% số ô",
+   "reason": "Câu thiếu danh từ, khó đọc",
+   "severity": "medium"
+  },
+  {
+   "old": "Đây là việc các bài sau phải làm, chưa phải kết quả đã đo:",
+   "new": "Những việc dưới đây còn phải làm, chưa phải kết quả đã đo:",
+   "reason": "Lặp ý với câu hỏi trước",
+   "severity": "low"
+  },
+  {
+   "old": "**Đừng tin thứ hạng gần nhau.**",
+   "new": "**Đừng tin thứ hạng của những ứng viên sát nhau.**",
+   "reason": "Cụm tự ghép nghe cụt",
+   "severity": "medium"
+  },
+  {
+   "old": "Bất cứ tuyên bố «xếp hạng bằng ma trận tốt hơn gần nhất» phải kèm số đo",
+   "new": "Bất cứ tuyên bố nào rằng «xếp hạng bằng ma trận tốt hơn gần nhất» đều phải kèm số đo",
+   "reason": "Câu thiếu từ nối",
+   "severity": "medium"
+  },
+  {
+   "old": "**Nguồn và đích là nút ngẫu nhiên đều**",
+   "new": "**Nguồn và đích là nút ngẫu nhiên, phân bố đều**",
+   "reason": "Cụm tự ghép nghe cụt",
+   "severity": "medium"
+  },
+  {
+   "old": "hoặc ít hơn, chưa đo.",
+   "new": "hoặc ít hơn, nhưng chưa đo.",
+   "reason": "Câu cụt",
+   "severity": "low"
+  },
+  {
+   "old": "lab tính ô đủ, không bỏ ô xa;",
+   "new": "lab tính đủ mọi ô, không bỏ ô xa;",
+   "reason": "Trật tự từ",
+   "severity": "medium"
+  },
+  {
+   "old": "việc cắt tỉa theo H3 là bài của P05.",
+   "new": "việc cắt tỉa theo H3 thuộc phần P05.",
+   "reason": "Diễn đạt gượng",
+   "severity": "low"
+  },
+  {
+   "old": "và còn phải cộng chi phí dựng bucket; lab chưa đo riêng so sánh này",
+   "new": "và còn phải tính thêm chi phí dựng bucket; lab chưa đo riêng phép so sánh này",
+   "reason": "Câu gượng",
+   "severity": "low"
+  },
+  {
+   "old": "rồi mọi nút gặp nhau đều được xét.",
+   "new": "rồi xét mọi nút gặp nhau.",
+   "reason": "Bỏ bị động",
+   "severity": "low"
+  },
+  {
+   "old": "nên tài xế phải vòng qua dải phân cách hoặc quay đầu sẽ bị đánh giá quá nhanh",
+   "new": "nên tài xế phải vòng qua dải phân cách hoặc quay đầu sẽ bị ước tính quá lạc quan",
+   "reason": "«đánh giá quá nhanh» sai cách nói",
+   "severity": "medium"
+  },
+  {
+   "old": "(lab đo đi vào đúng phía bất lợi tốn thêm trung bình 10,9 s, trong 89,5% số ô có tốn thêm, chưa tính quay đầu)",
+   "new": "(lab đo được việc đi vào đúng phía bất lợi tốn thêm trung bình 10,9 s, và có tốn thêm ở 89,5% số ô; chưa tính quay đầu)",
+   "reason": "Câu rối, thiếu động từ",
+   "severity": "medium"
+  },
+  {
+   "old": "và cách giảm.",
+   "new": "và cách giảm thiểu.",
+   "reason": "Câu cụt",
+   "severity": "low"
+  }
+ ]
+}

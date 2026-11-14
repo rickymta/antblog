@@ -8,7 +8,7 @@ tags: [design-pattern, typescript, structural, adapter, bridge, composite, decor
 language: vi
 ---
 
-[Bài mở đầu](/articles/design-pattern-la-gi) chia 23 pattern của GoF thành ba nhóm theo câu hỏi mỗi nhóm trả lời. [Bài trước](/articles/nhom-khoi-tao-creational) lo chuyện **tạo** đối tượng. Bài này lo chuyện **ghép** chúng lại: bọc một SDK lạ cho vừa interface của mình, xếp món thành combo, chồng phụ phí lên cước, dựng một cửa duy nhất cho chuỗi việc rối rắm. Mọi ví dụ lấy từ [Tới Nơi](/articles/du-an-mau-toi-noi) và đều là TypeScript đã biên dịch với `--strict`; các con số là kết quả chạy thật.
+[Bài mở đầu](/articles/design-pattern-la-gi) chia 23 pattern của GoF thành ba nhóm theo câu hỏi mỗi nhóm trả lời. [Bài trước](/articles/nhom-khoi-tao-creational) lo chuyện **tạo** đối tượng. Bài này lo chuyện **ghép** chúng lại: bọc một SDK lạ cho vừa interface của mình, xếp món thành combo, chồng phụ phí lên cước, dựng một cửa duy nhất che đi chuỗi việc rối rắm. Mọi ví dụ lấy từ [Tới Nơi](/articles/du-an-mau-toi-noi) và đều là TypeScript đã biên dịch với `--strict`; các con số là kết quả chạy thật.
 
 Bắt đầu bằng một câu hỏi. Chọn đáp án trong đầu rồi mới mở phần giải thích.
 
@@ -66,7 +66,7 @@ async function etaSeconds(cityId: number, a: LatLng, b: LatLng): Promise<number>
 }
 ```
 
-Chỗ đau: mỗi nơi gọi phải biết cả ba SDK, đổi đơn vị đúng (phút hay giây, km hay mét), nhớ thứ tự kinh độ/vĩ độ. Một lần quên đổi `lat`/`lng` ở RouteX là tài xế ở Hà Nội được báo «cách 9.000 km». Thêm nhà cung cấp thứ tư là sửa mọi chỗ có `if`.
+Chỗ đau: mỗi nơi gọi phải biết cả ba SDK, quy đổi đúng đơn vị (phút hay giây, km hay mét), nhớ thứ tự kinh độ/vĩ độ. Một lần quên đổi `lat`/`lng` ở RouteX là tài xế ở Hà Nội được báo «cách 9.000 km». Thêm nhà cung cấp thứ tư là sửa mọi chỗ có `if`.
 
 ### Lời giải
 
@@ -260,7 +260,7 @@ Dùng khi bạn thấy **hai chiều thay đổi độc lập** và tên lớp b
 
 Cái giá: bạn phải **chọn đúng đường cắt** từ đầu. Ranh giới giữa abstraction và implementor là một interface; nếu sau này một loại thông báo cần thứ mà `Channel` không có (ví dụ khuyến mãi cần ảnh, SMS không gửi được ảnh), bạn phải mở rộng interface cho mọi kênh hoặc thêm khả năng tuỳ chọn (`supportsImage`). Nếu chỉ có một chiều thật sự thay đổi — ví dụ chỉ có một kênh push — Bridge chỉ là một lớp trung gian thừa.
 
-Ở TypeScript hiện đại, nhiều khi Bridge rút gọn thành: «loại thông báo» là một hàm `compose(): Message`, «kênh» là một object `Channel`, và hàm `send(compose, channel, to)` ghép hai thứ. Ý tưởng — hai trục tách nhau, ghép lúc chạy — vẫn nguyên.
+Ở TypeScript hiện đại, nhiều khi Bridge rút gọn thành: «loại thông báo» là một hàm `compose(): Message`, «kênh» là một object `Channel`, và hàm `send(compose, channel, to)` ghép hai thứ. Ý tưởng — hai trục tách nhau, ghép lúc chạy — vẫn được giữ nguyên.
 
 ## Composite — combo chứa món, món chứa topping
 
@@ -284,7 +284,7 @@ function cartTotal(lines: (Dish | Combo)[]): number {
 }
 ```
 
-Rồi cần thêm «thời gian quán chuẩn bị» — viết lại đúng vòng lặp đó lần nữa. Rồi quán muốn «combo gia đình» chứa hai combo nhỏ — cả hai hàm đều vỡ.
+Rồi cần thêm «thời gian quán chuẩn bị» — viết lại đúng vòng lặp đó lần nữa. Rồi quán muốn «combo gia đình» chứa hai combo nhỏ — cả hai hàm đều không còn chạy đúng.
 
 ### Lời giải
 
@@ -351,7 +351,7 @@ Giỏ hàng: 136.000 đ · 15 phút
     + Thêm đùi gà: 20.000 đ
 ```
 
-Kiểm tay: combo = 53.000 + 30.000 − 12.000 = 71.000 đ; giỏ = 71.000 + 65.000 = 136.000 đ. Thời gian giỏ là **15 phút** chứ không phải 14 + 15 = 29, vì bếp làm các món song song — luật «max» nằm trong `Combo`, luật «cộng» nằm trong `Dish`, và giỏ không cần biết điều đó.
+Tính tay: combo = 53.000 + 30.000 − 12.000 = 71.000 đ; giỏ = 71.000 + 65.000 = 136.000 đ. Thời gian giỏ là **15 phút** chứ không phải 14 + 15 = 29, vì bếp làm các món song song — luật «max» nằm trong `Combo`, luật «cộng» nằm trong `Dish`, và giỏ không cần biết điều đó.
 
 ### Các vai
 
@@ -366,9 +366,9 @@ Dùng khi dữ liệu **thật sự là cây** và bạn muốn mọi phép tín
 
 Cái giá:
 
-- **An toàn hay trong suốt.** Ở đây `add()` chỉ có trên lớp cành — gọi `add()` trên `Topping` là lỗi biên dịch (an toàn). Nếu đưa `add()` lên `MenuItem` để client không phải phân biệt (trong suốt), lá phải cài một `add()` vô nghĩa và ném lỗi lúc chạy.
-- **Luật của từng tầng nằm rải rác.** Giảm giá combo được trừ trước hay sau voucher của giỏ? Câu hỏi đó trả lời ở đâu trong cây? Composite không giải quyết hộ — bạn phải ghi rõ.
-- **Cây sâu hoặc có vòng** (combo chứa chính nó) làm đệ quy tràn ngăn xếp. Dữ liệu menu do quán tự nhập thì phải kiểm vòng lúc lưu.
+- **Chọn an toàn hay trong suốt.** Ở đây `add()` chỉ có trên lớp cành — gọi `add()` trên `Topping` là lỗi biên dịch (an toàn). Nếu đưa `add()` lên `MenuItem` để client không phải phân biệt (trong suốt), lá phải cài một `add()` vô nghĩa và ném lỗi lúc chạy.
+- **Luật của từng tầng nằm rải rác.** Giảm giá combo được trừ trước hay sau voucher của giỏ? Câu trả lời nằm ở đâu trong cây? Composite không giải quyết hộ — bạn phải ghi rõ.
+- **Cây sâu hoặc có vòng** (combo chứa chính nó) làm đệ quy tràn ngăn xếp. Dữ liệu menu do quán tự nhập thì phải kiểm tra xem có vòng hay không lúc lưu.
 
 Khi dữ liệu chỉ phẳng một tầng (món + vài tuỳ chọn cố định), một mảng và một `reduce` là đủ.
 
@@ -485,7 +485,7 @@ Thứ tự B: 54.000 đ
   Làm tròn lên 1.000 (+700) → 54.000
 ```
 
-Chênh **2.000 đ** cho cùng một chuyến. Voucher phần trăm đứng sau phụ phí thì giảm trên số lớn hơn (12.925 đ so với 9.060 đ). Lưu ý cách đọc: lớp **trong cùng** (`BaseFare`) tính trước, lớp ngoài cùng tính sau cùng — ngược với thứ tự bạn đọc chữ `new` từ trái sang phải.
+Chênh **2.000 đ** cho cùng một chuyến. Voucher phần trăm đứng sau phụ phí thì giảm trên số tiền lớn hơn (12.925 đ so với 9.060 đ). Lưu ý cách đọc: lớp **trong cùng** (`BaseFare`) tính trước, lớp ngoài cùng tính sau cùng — ngược với thứ tự bạn đọc chữ `new` từ trái sang phải.
 
 <figure class="tkh-fig">
 <div class="tkh-fig-box">
@@ -516,7 +516,7 @@ Chênh **2.000 đ** cho cùng một chuyến. Voucher phần trăm đứng sau p
 <text x="50" y="250" class="t-small">Mũi tên = thứ tự tính, từ lớp trong cùng (BaseFare) ra lớp ngoài cùng (RoundUp). Cùng 4 decorator, khách trả chênh 2.000 đ.</text>
 </svg>
 </div>
-<figcaption><b>Hình 2 · Decorator ghép được, nhưng không giao hoán.</b> Số trong ô là kết quả chạy thật của hai chuỗi bọc ở trên. Phép nhân (cao điểm) và phép trừ theo phần trăm (voucher) đổi chỗ cho nhau là đổi tiền.</figcaption>
+<figcaption><b>Hình 2 · Decorator ghép được, nhưng không giao hoán.</b> Số trong ô là kết quả chạy thật của hai chuỗi bọc ở trên. Phép nhân (cao điểm) và phép trừ theo phần trăm (voucher) đổi chỗ cho nhau thì số tiền đổi theo.</figcaption>
 </figure>
 
 Hệ quả thực tế: **thứ tự bọc là một quyết định nghiệp vụ**, phải nằm ở đúng một chỗ có tên (ví dụ hàm `buildFareCalculator(city, kind, now)` ở composition root), có test chốt số tiền, và được bộ phận vận hành duyệt. Đừng để mỗi nơi tự `new` một chuỗi.
@@ -530,12 +530,12 @@ Hệ quả thực tế: **thứ tự bọc là một quyết định nghiệp v�
 
 ### Khi nào dùng / khi nào không
 
-Dùng khi có **nhiều hành vi bổ sung bật/tắt theo tổ hợp**, mỗi hành vi đứng độc lập được, và bạn muốn ghép chúng lúc chạy thay vì tạo lớp con cho từng tổ hợp. Ngoài tính cước, Decorator xuất hiện khắp nơi ở tầng hạ tầng: bọc một `HttpClient` để thêm thử lại, thêm log, thêm đo thời gian.
+Dùng khi có **nhiều hành vi bổ sung bật/tắt theo tổ hợp**, mỗi hành vi đứng độc lập được, và bạn muốn ghép chúng lúc chạy thay vì tạo lớp con cho từng tổ hợp. Ngoài tính cước, Decorator xuất hiện khắp nơi ở tầng hạ tầng: bọc một `HttpClient` để thêm cơ chế thử lại, thêm log, thêm đo thời gian.
 
 Cái giá:
 
 - **Thứ tự** như vừa thấy — sai thứ tự không báo lỗi, chỉ ra số sai.
-- **Danh tính**: `a !== a.inner`; code nào so sánh đối tượng hoặc dùng `instanceof BaseFare` sẽ hỏng khi có lớp bọc.
+- **Danh tính đối tượng**: `a !== a.inner`; code nào so sánh đối tượng hoặc dùng `instanceof BaseFare` sẽ hỏng khi có lớp bọc.
 - **Nhiều lớp nhỏ** và stack trace dài. Khi các quy tắc phụ thuộc lẫn nhau (voucher chỉ áp nếu không có phụ phí trời mưa), chuỗi decorator bắt đầu phải «nhìn» các lớp khác — lúc đó một bảng quy tắc tường minh hoặc Chain of Responsibility hợp hơn.
 
 ### Cách viết gọn ở TypeScript hiện đại
@@ -579,11 +579,11 @@ async function onBookPressed(customerId: string, req: unknown) {
 }
 ```
 
-Đoạn này còn có một lỗi tinh vi: nếu `dispatch.enqueue` lỗi, nó trả lại tiền dù chuyến **đã được lưu** — chuyến tồn tại mà không có tiền giữ.
+Đoạn này còn có một lỗi tinh vi: nếu `dispatch.enqueue` lỗi, đoạn code này vẫn trả lại tiền dù chuyến **đã được lưu** — chuyến tồn tại mà không có tiền giữ.
 
 ### Lời giải
 
-Một lớp `PlaceTripFacade` đưa ra đúng một hàm `place()`, bên trong điều phối bốn hệ con và chứa luật bù trừ ở một chỗ:
+Một lớp `PlaceTripFacade` cung cấp đúng một hàm `place()`, bên trong điều phối bốn hệ con và chứa luật bù trừ ở một chỗ:
 
 ```ts
 class PlaceTripFacade {
@@ -618,7 +618,7 @@ release h1
 place() lỗi: DB timeout
 ```
 
-Tiền đã giữ được trả lại trước khi lỗi lan ra ngoài. App khách giờ chỉ còn một dòng: `await placeTrip.place(req)`.
+Hệ thống trả lại tiền đã giữ trước khi lỗi lan ra ngoài. App khách giờ chỉ còn một dòng: `await placeTrip.place(req)`.
 
 ### Các vai
 
@@ -633,10 +633,10 @@ Dùng khi một **ca sử dụng** cần nhiều hệ con theo một trình tự
 Cái giá:
 
 - **Facade dễ phình thành «God object».** Giữ mỗi facade gắn với một ca sử dụng (`PlaceTripFacade`, `CancelTripFacade`) thay vì một `TripFacade` biết mọi thứ.
-- **Facade không biến bốn bước thành một giao dịch.** Giữ tiền ở dịch vụ thanh toán và lưu chuyến ở database là hai hệ khác nhau; facade chỉ đặt luật bù trừ ở một chỗ. Muốn chắc chắn hơn (máy chết giữa hai bước) thì cần bảng outbox hoặc saga — chủ đề của chuyên mục Architecture.
+- **Facade không biến bốn bước thành một giao dịch.** Giữ tiền ở dịch vụ thanh toán và lưu chuyến ở database là hai hệ thống khác nhau; facade chỉ đặt luật bù trừ ở một chỗ. Muốn chắc chắn hơn (máy chủ chết giữa hai bước) thì cần bảng outbox hoặc saga — chủ đề của chuyên mục Architecture.
 - **Đừng tạo facade cho một hệ con duy nhất** chỉ để «có tầng». Một lớp chỉ chuyển tiếp nguyên xi từng hàm là tầng thừa.
 
-Ở TypeScript, facade thường chỉ là một hàm `placeTrip(deps)(req)` hoặc một «use case» trong kiến trúc phân tầng — tên khác, cùng ý.
+Ở TypeScript, facade thường chỉ là một hàm `placeTrip(deps)(req)` hoặc một «ca sử dụng» (use case) trong kiến trúc phân tầng — tên khác, cùng ý.
 
 ## Flyweight — 25.000 tài xế trên một bản đồ
 
@@ -664,7 +664,7 @@ Một icon 64 × 64 điểm ảnh RGBA đã giải mã là 16.384 byte. Ước l
 
 ### Lời giải
 
-Tách trạng thái của marker làm hai:
+Tách trạng thái của marker thành hai phần:
 
 - **Nội tại** (intrinsic) — giống nhau giữa nhiều tài xế, không đổi: kiểu xe, màu, ảnh icon. Gom vào một đối tượng **dùng chung, bất biến** (flyweight).
 - **Ngoại tại** (extrinsic) — riêng từng tài xế, đổi liên tục: toạ độ, hướng. Giữ ở đối tượng ngữ cảnh, hoặc truyền vào lúc vẽ.
@@ -713,7 +713,7 @@ Tài xế đổi trạng thái từ «rảnh» sang «đang chở» chỉ là g�
 
 ### Đo thật
 
-Dựng 25.000 marker theo ba cách trong Node.js 22.18 (V8), mỗi cách một tiến trình riêng; đo `heapUsed + arrayBuffers` sau `gc()` trước và sau khi dựng (chạy với `--expose-gc`, ba lần, ra cùng số). Cách thứ ba đi xa hơn: phần ngoại tại không còn là object mà là các mảng kiểu số (`Float64Array` cho toạ độ, `Float32Array` cho hướng, `Uint8Array` chỉ số tới 1 trong 6 flyweight).
+Dựng 25.000 marker theo ba cách trong Node.js 22.18 (V8), mỗi cách một tiến trình riêng; đo `heapUsed + arrayBuffers` sau `gc()` trước và sau khi dựng (chạy với `--expose-gc`, ba lần, cho cùng kết quả). Cách thứ ba đi xa hơn: phần ngoại tại không còn là object mà là các mảng kiểu số (`Float64Array` cho toạ độ, `Float32Array` cho hướng, `Uint8Array` chỉ số tới 1 trong 6 flyweight).
 
 ```ts
 const used = () => { gc(); const m = process.memoryUsage(); return m.heapUsed + m.arrayBuffers; };
@@ -841,7 +841,7 @@ class LazyMenuProxy implements MenuService {
 }
 ```
 
-Ghép kiểm quyền bên ngoài cache, rồi bắn đồng thời 1.000 lượt xem menu của 10 quán, sửa menu quán `m3` bằng tài khoản chủ quán, và thử sửa quán `m4` bằng cùng tài khoản đó:
+Ghép kiểm quyền bên ngoài cache, rồi gửi đồng thời 1.000 lượt xem menu của 10 quán, sửa menu quán `m3` bằng tài khoản chủ quán, và thử sửa quán `m4` bằng cùng tài khoản đó:
 
 ```ts
 const db = new DbMenuService();
@@ -855,7 +855,7 @@ m3 sau khi sửa, version = 2 · truy vấn DB = 11
 FORBIDDEN: u7 không quản lý quán m4
 ```
 
-Chi tiết đáng chú ý: proxy cất **`Promise`** chứ không cất menu đã có. 100 lượt xem cùng một quán đến trong lúc truy vấn đầu tiên còn đang chạy sẽ cùng chờ một `Promise` — nếu cất giá trị, cả 100 lượt đều trượt cache và cùng đập xuống database (hiện tượng thường gọi là *cache stampede*). Sau khi sửa, lượt đọc kế tiếp chỉ tốn thêm đúng một truy vấn.
+Chi tiết đáng chú ý: proxy cất **`Promise`** chứ không cất menu đã có. 100 lượt xem cùng một quán đến trong lúc truy vấn đầu tiên còn đang chạy sẽ cùng chờ một `Promise` — nếu cất giá trị, cả 100 lượt đều không trúng cache và cùng dồn xuống database (hiện tượng thường gọi là *cache stampede*). Sau khi sửa, lượt đọc kế tiếp chỉ tốn thêm đúng một truy vấn.
 
 ### Các vai
 
@@ -973,7 +973,7 @@ Cả hai đều là «một đối tượng cài interface X và giữ tham chi�
 
 <div class="tkh-callout tkh-callout--warn">
 <span class="tkh-callout-title">Dấu hiệu dùng sai</span>
-<p>Một «Facade» chỉ chuyển tiếp nguyên xi từng hàm của một hệ con. Một «Adapter» cho interface do chính bạn viết tuần trước (sửa interface đi). Một Flyweight cho 200 đối tượng. Năm tầng Decorator mà không có test nào chốt thứ tự. Mỗi pattern ở đây đều thêm một tầng gián tiếp — tầng đó phải trả được tiền của nó.</p>
+<p>Một «Facade» chỉ chuyển tiếp nguyên xi từng hàm của một hệ con. Một «Adapter» cho interface do chính bạn viết tuần trước (sửa interface đi). Một Flyweight cho 200 đối tượng. Năm tầng Decorator mà không có test nào chốt thứ tự. Mỗi pattern ở đây đều thêm một tầng gián tiếp — tầng đó phải xứng đáng với chi phí mà nó gây ra.</p>
 </div>
 
 ## Tóm tắt

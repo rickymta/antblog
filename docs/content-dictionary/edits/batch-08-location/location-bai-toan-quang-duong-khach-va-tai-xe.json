@@ -1,0 +1,131 @@
+{
+ "file": "location-bai-toan-quang-duong-khach-va-tai-xe.md",
+ "edits": [
+  {
+   "old": "Vì sao tối ưu cho một bên đều sai",
+   "new": "Vì sao tối ưu cho một bên thì đều sai",
+   "reason": "Thiếu từ nối, câu cụt",
+   "severity": "low"
+  },
+  {
+   "old": "rồi trả lời làm sao **tổng quãng đường và thời gian của cả khách lẫn tài xế** nhỏ nhất",
+   "new": "rồi trả lời câu hỏi làm sao để **tổng quãng đường và thời gian của cả khách lẫn tài xế** nhỏ nhất",
+   "reason": "Câu thiếu khung \"câu hỏi làm sao để\", nghe cụt",
+   "severity": "medium"
+  },
+  {
+   "old": "nó chưa có dòng code nào, chỉ đặt bài toán",
+   "new": "bài này chưa có dòng code nào, chỉ đặt bài toán",
+   "reason": "Tránh \"nó\" chỉ sự vật trừu tượng, nhắc lại danh từ",
+   "severity": "low"
+  },
+  {
+   "old": "và số đo hệ số vòng trên bản đồ",
+   "new": "và kết quả đo hệ số vòng trên bản đồ",
+   "reason": "\"số đo hệ số vòng\" gượng",
+   "severity": "medium"
+  },
+  {
+   "old": "nên hai thứ mét không cộng thẳng vào nhau được",
+   "new": "nên hai loại mét này không cộng thẳng vào nhau được",
+   "reason": "\"hai thứ mét\" là cụm tự ghép",
+   "severity": "medium"
+  },
+  {
+   "old": "B đứng trước và tiết kiệm 400 m km rỗng",
+   "new": "B đứng trước và tiết kiệm 400 m chạy rỗng",
+   "reason": "\"400 m km rỗng\" lặp đơn vị, nghe cụt",
+   "severity": "medium"
+  },
+  {
+   "old": "Chữ nhật cam là tài xế",
+   "new": "Hình chữ nhật cam là tài xế",
+   "reason": "Thiếu danh từ chính",
+   "severity": "medium"
+  },
+  {
+   "old": "và nó là của đồ thị bị cắt theo khung lab",
+   "new": "và đó là số của đồ thị bị cắt theo khung lab",
+   "reason": "Câu cụt, \"nó là của\" gượng",
+   "severity": "medium"
+  },
+  {
+   "old": "Nó **chưa** cho biết thứ tự hai tài xế bị đảo bao nhiêu lần",
+   "new": "Con số này **chưa** cho biết thứ tự hai tài xế bị đảo bao nhiêu lần",
+   "reason": "Nhắc lại danh từ thay cho \"Nó\"",
+   "severity": "medium"
+  },
+  {
+   "old": "mà không có thước thì chỉ là cảm giác",
+   "new": "mà không có thước đo thì chỉ là cảm giác",
+   "reason": "Thiếu chữ \"đo\"",
+   "severity": "medium"
+  },
+  {
+   "old": "Đón đúng ghim cho 0, đổi lại km rỗng tăng",
+   "new": "Đón đúng ghim thì kết quả bằng 0, đổi lại km rỗng tăng",
+   "reason": "\"cho 0\" cụt",
+   "severity": "medium"
+  },
+  {
+   "old": "chỉ xuất hiện khi lệnh chạy lại được, so với một baseline",
+   "new": "chỉ xuất hiện khi có lệnh chạy lại để tái hiện kết quả, so với một baseline",
+   "reason": "\"lệnh chạy lại được\" gượng, thiếu ý",
+   "severity": "medium"
+  },
+  {
+   "old": "Dòng 1 và dòng 3 là hai đĩa:",
+   "new": "Dòng 1 và dòng 3 là hai đĩa cân:",
+   "reason": "Nói rõ hình ảnh chiếc cân",
+   "severity": "low"
+  },
+  {
+   "old": "nó quyết định luôn hướng xe chạy khi đã có khách, và việc quay đầu ở đoạn đó tốn cước của chính khách",
+   "new": "điểm đón còn quyết định cả hướng xe chạy khi đã có khách, và việc quay đầu ở đoạn đó làm chính khách tốn thêm cước",
+   "reason": "Tránh \"nó\"; \"tốn cước\" thiếu ý",
+   "severity": "medium"
+  },
+  {
+   "old": "và được lưu cùng snapshot của quote, và được hiệu chỉnh",
+   "new": "và được lưu cùng snapshot của quote, đồng thời được hiệu chỉnh",
+   "reason": "Lặp \"và\" liên tiếp",
+   "severity": "low"
+  },
+  {
+   "old": "bằng việc cực tiểu tổng chi phí này trên cả một lô chuyến và cả một lô tài xế",
+   "new": "bằng việc tối thiểu hoá tổng chi phí này trên cả lô chuyến lẫn lô tài xế",
+   "reason": "\"cực tiểu\" là giọng dịch máy; \"cả một... và cả một\" nặng nề",
+   "severity": "medium"
+  },
+  {
+   "old": "Teal là lộ trình nền tảng",
+   "new": "Màu xanh ngọc là lộ trình nền tảng",
+   "reason": "Từ tiếng Anh thông thường lọt vào văn xuôi",
+   "severity": "low"
+  },
+  {
+   "old": "Nó có đúng một con đường thẳng",
+   "new": "Ví dụ này có đúng một con đường thẳng",
+   "reason": "Tránh \"Nó\" đầu câu",
+   "severity": "low"
+  },
+  {
+   "old": "Số duy nhất đến từ máy đo là hệ số vòng",
+   "new": "Số duy nhất đến từ phép đo thật là hệ số vòng",
+   "reason": "\"máy đo\" gượng",
+   "severity": "medium"
+  },
+  {
+   "old": "ở số đo bài 04 (số đó không nói",
+   "new": "ở kết quả đo của bài 04 (số đó không nói",
+   "reason": "\"số đo bài 04\" cụt",
+   "severity": "medium"
+  },
+  {
+   "old": "bằng cách cực tiểu `walk_m + deadhead_m`",
+   "new": "bằng cách tối thiểu hoá `walk_m + deadhead_m`",
+   "reason": "Thống nhất cách nói với phần trên",
+   "severity": "low"
+  }
+ ]
+}

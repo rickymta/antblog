@@ -1,0 +1,17 @@
+{
+  "file": "rust-hexagonal-clean-workspace-crates-port-adapter.md",
+  "edits": [
+    {
+      "old": "hiện thực các port",
+      "new": "cài đặt các port",
+      "reason": "Loạt Rust dịch implement là «cài đặt» (rust-r1, rust-r3); «hiện thực» là cách dịch thứ ba trong cùng loạt. Chữ trong Hình 1.",
+      "severity": "low"
+    },
+    {
+      "old": "Thời gian tường dao động",
+      "new": "Thời gian thực tế (wall-clock) dao động",
+      "reason": "«Thời gian tường» là dịch từng chữ của wall-clock time; rust-r5 đã chốt «thời gian thực tế (wall-clock)» ở bài tổng hợp, location-r3 cũng sửa cụm này.",
+      "severity": "low"
+    }
+  ]
+}

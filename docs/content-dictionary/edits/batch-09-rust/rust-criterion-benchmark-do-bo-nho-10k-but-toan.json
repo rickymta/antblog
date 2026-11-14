@@ -1,0 +1,155 @@
+{
+ "file": "rust-criterion-benchmark-do-bo-nho-10k-but-toan.md",
+ "edits": [
+  {
+   "old": "sổ cái có ghi nổi 10.000 bút toán/giây không?",
+   "new": "sổ cái có ghi kịp 10.000 bút toán/giây không?",
+   "reason": "'ghi nổi' dùng sai nghĩa",
+   "severity": "medium"
+  },
+  {
+   "old": "chỉ gộp lô bằng unnest vượt 10.000 bút toán/giây.",
+   "new": "chỉ cách gộp lô bằng unnest mới vượt được 10.000 bút toán/giây.",
+   "reason": "Câu cụt, thiếu chủ thể và từ nối",
+   "severity": "high"
+  },
+  {
+   "old": "Ghi hàng triệu bút toán mỗi giây trong bộ nhớ không nói gì về PostgreSQL.",
+   "new": "Việc ghi hàng triệu bút toán mỗi giây trong bộ nhớ không cho biết gì về PostgreSQL.",
+   "reason": "Danh từ hoá chủ ngữ cho rõ",
+   "severity": "medium"
+  },
+  {
+   "old": "Số PostgreSQL chỉ nói về cấu hình này",
+   "new": "Số đo PostgreSQL chỉ có giá trị với cấu hình này",
+   "reason": "'chỉ nói về' gượng",
+   "severity": "medium"
+  },
+  {
+   "old": "nên độ trễ thường cao và dao động hơn server thật",
+   "new": "nên độ trễ thường cao hơn và dao động nhiều hơn server thật",
+   "reason": "So sánh thiếu vế",
+   "severity": "medium"
+  },
+  {
+   "old": "nhưng dùng được cho benchmark, thường bọc ở đầu vào.",
+   "new": "nhưng vẫn dùng được cho benchmark, và ta thường bọc ở đầu vào.",
+   "reason": "Câu cụt, thiếu chủ ngữ",
+   "severity": "medium"
+  },
+  {
+   "old": "Quy tắc dùng được: nghi ngờ",
+   "new": "Quy tắc rút ra: nghi ngờ",
+   "reason": "'Quy tắc dùng được' gượng",
+   "severity": "medium"
+  },
+  {
+   "old": "BenchmarkDotNet tiêu thụ giá trị method `[Benchmark]` trả về",
+   "new": "BenchmarkDotNet dùng giá trị trả về của method `[Benchmark]`",
+   "reason": "Calque 'tiêu thụ', trật tự từ",
+   "severity": "medium"
+  },
+  {
+   "old": "thì tôi chưa tách nguyên nhân.",
+   "new": "thì tôi chưa xác định được nguyên nhân.",
+   "reason": "'tách nguyên nhân' gượng",
+   "severity": "medium"
+  },
+  {
+   "old": "không thống kê, không thay criterion)",
+   "new": "không thống kê, không thay thế criterion)",
+   "reason": "Thiếu chữ 'thế'",
+   "severity": "low"
+  },
+  {
+   "old": "Cái giá là build lại sau khi sửa một dòng: khoảng 5 giây",
+   "new": "Cái giá là mỗi lần build lại sau khi sửa một dòng mất khoảng 5 giây",
+   "reason": "Câu thiếu động từ",
+   "severity": "medium"
+  },
+  {
+   "old": "nên thu 30.000 con trỏ cần 14 lần cấp phát",
+   "new": "nên gom 30.000 con trỏ cần 14 lần cấp phát",
+   "reason": "'thu' dùng sai nghĩa",
+   "severity": "medium"
+  },
+  {
+   "old": "Ít cấp phát hơn 14 lần không thành nhanh hơn 14 lần.",
+   "new": "Ít cấp phát hơn 14 lần không có nghĩa là nhanh hơn 14 lần.",
+   "reason": "Câu thiếu động từ",
+   "severity": "medium"
+  },
+  {
+   "old": "kiểm lúc chạy (",
+   "new": "kiểm tra lúc chạy (",
+   "reason": "Động từ cụt",
+   "severity": "low"
+  },
+  {
+   "old": "Ba cách ghi cùng một dữ liệu, thêm hai thí nghiệm giải thích.",
+   "new": "Có ba cách ghi cùng một dữ liệu, kèm hai thí nghiệm để giải thích.",
+   "reason": "Câu thiếu động từ",
+   "severity": "medium"
+  },
+  {
+   "old": "cách 1 cần bốn mỗi bút toán",
+   "new": "cách 1 cần bốn round trip mỗi bút toán",
+   "reason": "Thiếu danh từ",
+   "severity": "high"
+  },
+  {
+   "old": "Các cách còn lại đều không;",
+   "new": "Các cách còn lại đều không đạt;",
+   "reason": "Câu cụt",
+   "severity": "medium"
+  },
+  {
+   "old": "chỉ nhanh gấp khoảng hai.",
+   "new": "chỉ nhanh hơn khoảng hai lần.",
+   "reason": "Cách nói tự nhiên hơn",
+   "severity": "low"
+  },
+  {
+   "old": "Số của nó chưa gồm",
+   "new": "Số đo của cách này chưa gồm",
+   "reason": "'Số của nó' mơ hồ",
+   "severity": "medium"
+  },
+  {
+   "old": "fsync có thể thành phần lớn",
+   "new": "fsync có thể chiếm phần lớn thời gian",
+   "reason": "'thành phần lớn' gượng",
+   "severity": "medium"
+  },
+  {
+   "old": "`--verify` không kiểm số đo tuyệt đối",
+   "new": "`--verify` không kiểm tra số đo tuyệt đối",
+   "reason": "Động từ cụt",
+   "severity": "low"
+  },
+  {
+   "old": "chạy 10 ca (5 trong bộ nhớ, 5 với PostgreSQL)",
+   "new": "chạy 10 test case (5 trong bộ nhớ, 5 với PostgreSQL)",
+   "reason": "Thống nhất 'test case'",
+   "severity": "medium"
+  },
+  {
+   "old": "Workload hư cấu, bảng bắt đầu rỗng",
+   "new": "Khối lượng công việc hư cấu, bảng bắt đầu rỗng",
+   "reason": "Từ tiếng Anh thông thường lọt vào văn xuôi",
+   "severity": "medium"
+  },
+  {
+   "old": "Hai nguồn lệch thì tin các bút toán.",
+   "new": "Khi bảng cộng dồn và các bút toán lệch nhau thì tin các bút toán.",
+   "reason": "Câu cụt, nói rõ hai nguồn nào",
+   "severity": "high"
+  },
+  {
+   "old": "PostgreSQL thật có ghi nổi 10.000 bút toán/giây không?",
+   "new": "PostgreSQL thật có ghi kịp 10.000 bút toán/giây không?",
+   "reason": "Thống nhất với tiêu đề, 'ghi nổi' dùng sai nghĩa",
+   "severity": "medium"
+  }
+ ]
+}

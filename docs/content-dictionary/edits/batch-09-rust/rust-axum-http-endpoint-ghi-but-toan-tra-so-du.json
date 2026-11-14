@@ -1,0 +1,143 @@
+{
+ "file": "rust-axum-http-endpoint-ghi-but-toan-tra-so-du.md",
+ "edits": [
+  {
+   "old": "AppError thành 400/404/409/413/415/422",
+   "new": "AppError đổi thành các mã 400/404/409/413/415/422",
+   "reason": "Câu thiếu động từ",
+   "severity": "medium"
+  },
+  {
+   "old": "một thư viện cùng một repository chạy trên PostgreSQL",
+   "new": "một thư viện cùng với một repository chạy trên PostgreSQL",
+   "reason": "Thiếu từ nối",
+   "severity": "low"
+  },
+  {
+   "old": "Server là ba dòng:",
+   "new": "Phần khởi động server gồm ba dòng:",
+   "reason": "Câu cụt, thiếu danh từ",
+   "severity": "medium"
+  },
+  {
+   "old": "Trả về là bất kỳ kiểu nào có",
+   "new": "Giá trị trả về là bất kỳ kiểu nào cài đặt",
+   "reason": "Thiếu danh từ, 'cài' → 'cài đặt'",
+   "severity": "medium"
+  },
+  {
+   "old": "loại cài `FromRequestParts`",
+   "new": "loại cài đặt `FromRequestParts`",
+   "reason": "'cài' là cách dịch gượng của implement",
+   "severity": "medium"
+  },
+  {
+   "old": "loại cài `FromRequest` tiêu thụ",
+   "new": "loại cài đặt `FromRequest` tiêu thụ",
+   "reason": "Thống nhất 'cài đặt'",
+   "severity": "medium"
+  },
+  {
+   "old": "tôi chạy ca này trong một bản sao tạm",
+   "new": "tôi chạy trường hợp này trong một bản sao tạm",
+   "reason": "'ca' khẩu ngữ, không phải test case",
+   "severity": "low"
+  },
+  {
+   "old": "nên đổi chính sách chỉ phải sửa một nơi",
+   "new": "nên khi đổi chính sách, ta chỉ cần sửa ở một nơi",
+   "reason": "Cấu trúc nặng, giọng dịch máy",
+   "severity": "medium"
+  },
+  {
+   "old": "Test `storage_error_is_500_without_details` ghim điều này",
+   "new": "Test `storage_error_is_500_without_details` kiểm chứng điều này",
+   "reason": "'ghim' gượng",
+   "severity": "low"
+  },
+  {
+   "old": "Chi tiết chỉ vào log của server.",
+   "new": "Chi tiết chỉ được ghi vào log của server.",
+   "reason": "Câu thiếu động từ",
+   "severity": "medium"
+  },
+  {
+   "old": "client phân biệt hai ca đó bằng",
+   "new": "client phân biệt hai trường hợp đó bằng",
+   "reason": "'ca' khẩu ngữ",
+   "severity": "low"
+  },
+  {
+   "old": "Source axum 0.8.9 viết",
+   "new": "Mã nguồn axum 0.8.9 viết",
+   "reason": "Từ tiếng Anh thông thường",
+   "severity": "low"
+  },
+  {
+   "old": "khác ở chỗ lỗi được bắt.",
+   "new": "khác ở cách bắt lỗi.",
+   "reason": "Tránh bị động",
+   "severity": "medium"
+  },
+  {
+   "old": "`GET` số dư cho thân JSON đúng thứ tự khai báo của struct",
+   "new": "`GET` số dư trả thân JSON theo đúng thứ tự khai báo của struct",
+   "reason": "Câu thiếu động từ rõ nghĩa",
+   "severity": "medium"
+  },
+  {
+   "old": "thêm các ca: thiếu trường",
+   "new": "thêm các trường hợp: thiếu trường",
+   "reason": "'ca' khẩu ngữ",
+   "severity": "low"
+  },
+  {
+   "old": "tám request song song cùng một key mới cho đúng một 201 cùng bảy 200",
+   "new": "tám request song song cùng một key mới cho đúng một 201 và bảy 200",
+   "reason": "'cùng' dùng sai chỗ",
+   "severity": "low"
+  },
+  {
+   "old": "`cargo test` chạy 8 ca: 2 ca đơn vị cho bảng ánh xạ lỗi (không cần PostgreSQL) và 6 ca",
+   "new": "`cargo test` chạy 8 test case: 2 test case đơn vị cho bảng ánh xạ lỗi (không cần PostgreSQL) và 6 test case",
+   "reason": "Thống nhất 'test case'",
+   "severity": "medium"
+  },
+  {
+   "old": "Biên 2 MB nằm ở `oneshot`",
+   "new": "Ngưỡng 2 MB được kiểm ở `oneshot`",
+   "reason": "'Biên' cụt",
+   "severity": "medium"
+  },
+  {
+   "old": "tôi đã gặp đúng ca đó.",
+   "new": "tôi đã gặp đúng trường hợp đó.",
+   "reason": "'ca' khẩu ngữ",
+   "severity": "low"
+  },
+  {
+   "old": "Máy lab chạy client và server cùng một máy, không TLS.",
+   "new": "Máy lab chạy cả client lẫn server trên cùng một máy, không TLS.",
+   "reason": "Lặp từ 'máy'",
+   "severity": "low"
+  },
+  {
+   "old": "Tôi đã chạy ca này trong một bản sao tạm.",
+   "new": "Tôi đã chạy trường hợp này trong một bản sao tạm.",
+   "reason": "'ca' khẩu ngữ",
+   "severity": "low"
+  },
+  {
+   "old": "cả ở ca 400 và 422 của extractor",
+   "new": "cả ở trường hợp 400 và 422 của extractor",
+   "reason": "'ca' khẩu ngữ",
+   "severity": "low"
+  },
+  {
+   "old": "(ca này nằm trong <code>--verify</code>)",
+   "new": "(trường hợp này nằm trong <code>--verify</code>)",
+   "reason": "'ca' khẩu ngữ",
+   "severity": "low"
+  }
+ ]
+}

@@ -1,0 +1,149 @@
+{
+ "file": "rust-sqlx-postgresql-pool-migration-query.md",
+ "edits": [
+  {
+   "old": "đọc TOI_NOI_PG_URL, chạy migration",
+   "new": "lấy URL từ TOI_NOI_PG_URL, chạy migration",
+   "reason": "\"đọc\" thiếu tân ngữ rõ ràng",
+   "severity": "low"
+  },
+  {
+   "old": "quên code đang đọc cột nào",
+   "new": "quên rằng code đang đọc cột nào",
+   "reason": "Câu nặng, thiếu \"rằng\" nên khó đọc",
+   "severity": "medium"
+  },
+  {
+   "old": "cho compiler kiểm câu SQL",
+   "new": "cho compiler kiểm tra câu SQL",
+   "reason": "Lược mất chữ \"tra\"",
+   "severity": "low"
+  },
+  {
+   "old": "So với driver trần, nó thêm ba thứ",
+   "new": "So với driver trần, sqlx thêm ba thứ",
+   "reason": "Tránh \"nó\" chỉ sự vật trừu tượng",
+   "severity": "low"
+  },
+  {
+   "old": "thêm phần kiểm lúc biên dịch",
+   "new": "thêm phần kiểm tra lúc biên dịch",
+   "reason": "Lược mất chữ \"tra\"",
+   "severity": "low"
+  },
+  {
+   "old": "Muốn so với cách EF Core",
+   "new": "Muốn so sánh với cách EF Core",
+   "reason": "Thiếu động từ",
+   "severity": "low"
+  },
+  {
+   "old": "máy chủ chỉ nhận số kết nối giới hạn",
+   "new": "máy chủ chỉ nhận một số kết nối có giới hạn",
+   "reason": "Cụm tự ghép nghe cụt",
+   "severity": "medium"
+  },
+  {
+   "old": "mỗi ca tạo schema",
+   "new": "mỗi test case tạo schema",
+   "reason": "Thống nhất \"test case\"",
+   "severity": "low"
+  },
+  {
+   "old": "nó không thoát ký tự gì",
+   "new": "và lớp bọc này không thoát ký tự nào",
+   "reason": "Tránh \"nó\", trật tự kiểu Anh",
+   "severity": "low"
+  },
+  {
+   "old": "Chạy migration từ code chỉ một dòng",
+   "new": "Chạy migration từ code chỉ cần một dòng",
+   "reason": "Thiếu động từ",
+   "severity": "medium"
+  },
+  {
+   "old": "của từng ca và trong",
+   "new": "của từng test case và trong",
+   "reason": "Thống nhất \"test case\"",
+   "severity": "low"
+  },
+  {
+   "old": "Hai lưu ý. Một, proc macro trên Rust stable không báo được cargo theo dõi cả một thư mục",
+   "new": "Hai lưu ý. Thứ nhất, proc macro trên Rust stable không báo cho cargo biết cần theo dõi cả một thư mục",
+   "reason": "Câu thiếu \"cho\", \"biết\", đọc vướng",
+   "severity": "high"
+  },
+  {
+   "old": "Hai, **không sửa file migration đã áp dụng**",
+   "new": "Thứ hai, **không sửa file migration đã áp dụng**",
+   "reason": "Đánh số lưu ý tự nhiên hơn",
+   "severity": "low"
+  },
+  {
+   "old": "buộc khoá chính vào định dạng hiển thị",
+   "new": "buộc khoá chính (primary key) phụ thuộc vào định dạng hiển thị",
+   "reason": "Thiếu động từ; tránh nhầm khoá chính với khoá (lock)",
+   "severity": "medium"
+  },
+  {
+   "old": "ở cuối thông điệp đầu",
+   "new": "ở cuối thông báo lỗi đầu tiên",
+   "reason": "\"thông điệp\" là calque của message",
+   "severity": "medium"
+  },
+  {
+   "old": "Vì macro kiểm theo schema có thật",
+   "new": "Vì macro kiểm tra theo schema thật",
+   "reason": "Lược mất chữ \"tra\"",
+   "severity": "low"
+  },
+  {
+   "old": "(nó mất sau mỗi ca)",
+   "new": "(schema này mất sau mỗi test case)",
+   "reason": "\"nó\" mơ hồ; thống nhất \"test case\"",
+   "severity": "medium"
+  },
+  {
+   "old": "để lỡ ai sửa câu SQL mà quên làm mới",
+   "new": "phòng khi ai đó sửa câu SQL mà quên làm mới",
+   "reason": "\"để lỡ ai\" gượng",
+   "severity": "medium"
+  },
+  {
+   "old": "tức chỉ hơn 84.000 chuyến",
+   "new": "tức chỉ cần hơn 84.000 chuyến",
+   "reason": "Thiếu động từ",
+   "severity": "medium"
+  },
+  {
+   "old": "lúc sửa đắt nhất",
+   "new": "lúc sửa tốn kém nhất",
+   "reason": "\"đắt\" dịch sát chữ expensive",
+   "severity": "medium"
+  },
+  {
+   "old": "đổi ở biên, một hàm nhỏ qua",
+   "new": "đổi kiểu ở biên, bằng một hàm nhỏ đi qua",
+   "reason": "Cụm cụt, thiếu động từ và bổ ngữ",
+   "severity": "medium"
+  },
+  {
+   "old": "kiểm mọi giá trị trên rồi in",
+   "new": "kiểm tra mọi giá trị trên rồi in",
+   "reason": "Lược mất chữ \"tra\"",
+   "severity": "low"
+  },
+  {
+   "old": "8 ca integration (mỗi ca một schema riêng",
+   "new": "8 test case integration (mỗi test case một schema riêng",
+   "reason": "Thống nhất \"test case\"",
+   "severity": "low"
+  },
+  {
+   "old": "không đổi băm nên",
+   "new": "không đổi mã băm nên",
+   "reason": "\"đổi băm\" cụt",
+   "severity": "medium"
+  }
+ ]
+}

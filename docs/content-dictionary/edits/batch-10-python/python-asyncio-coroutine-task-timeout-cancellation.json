@@ -1,0 +1,131 @@
+{
+  "file": "python-asyncio-coroutine-task-timeout-cancellation.md",
+  "edits": [
+    {
+      "old": "Gọi cả mười cùng lúc thì chỉ mất bằng lời gọi chậm nhất.",
+      "new": "Gọi cả mười cùng lúc thì thời gian chỉ bằng lời gọi chậm nhất.",
+      "reason": "«mất bằng» gượng",
+      "severity": "low"
+    },
+    {
+      "old": "Cách thường dùng không cần tự giữ là `gather` hoặc `TaskGroup`.",
+      "new": "Cách dùng thông thường mà không cần tự giữ tham chiếu là `gather` hoặc `TaskGroup`.",
+      "reason": "Câu cụt, thiếu tân ngữ",
+      "severity": "medium"
+    },
+    {
+      "old": "nhưng ràng vòng đời các Task vào khối `async with`:",
+      "new": "nhưng gắn vòng đời của các Task vào khối `async with`:",
+      "reason": "«ràng» gượng, thiếu «của»",
+      "severity": "low"
+    },
+    {
+      "old": "(một lần chạy, giây dao động theo máy):",
+      "new": "(một lần chạy, số giây dao động theo máy):",
+      "reason": "Cụm cụt",
+      "severity": "low"
+    },
+    {
+      "old": "loop không có gì làm trong lúc một Task chờ thì chuyển sang Task khác.",
+      "new": "khi một Task chờ, loop chuyển sang chạy Task khác.",
+      "reason": "Câu rối, phải đoán ý",
+      "severity": "medium"
+    },
+    {
+      "old": "Hai lời gọi chậm ghi lại chúng chạy xong hay bị huỷ",
+      "new": "Hai lời gọi chậm ghi lại việc chúng chạy xong hay bị huỷ",
+      "reason": "Câu gượng, thiếu danh từ làm tân ngữ",
+      "severity": "medium"
+    },
+    {
+      "old": "(khi review, thứ tự bị huỷ đã ra «B trước A»)",
+      "new": "(khi review, có lần thứ tự huỷ ra «B trước A»)",
+      "reason": "Câu cụt, «bị huỷ đã ra» khó hiểu",
+      "severity": "medium"
+    },
+    {
+      "old": "Thời hạn nên đặt ở **biên** của một thao tác trọn vẹn (một yêu cầu của khách), không rải từng lời gọi nhỏ mà quên tổng.",
+      "new": "Thời hạn nên đặt **bao quanh** cả một thao tác trọn vẹn (một yêu cầu của khách), không rải ở từng lời gọi nhỏ rồi quên mất tổng thời gian.",
+      "reason": "«biên» là từ tự ghép, câu cụt",
+      "severity": "medium"
+    },
+    {
+      "old": "Phần dọn dẹp thuộc `finally`, vì nó chạy trong mọi trường hợp.",
+      "new": "Phần dọn dẹp thuộc `finally`, vì khối này chạy trong mọi trường hợp.",
+      "reason": "Tránh «nó» mơ hồ",
+      "severity": "low"
+    },
+    {
+      "old": "Dòng áp chót của output là phản ví dụ trong lab:",
+      "new": "Dòng áp chót của kết quả in ra là phản ví dụ trong lab:",
+      "reason": "Từ tiếng Anh lọt vào văn xuôi",
+      "severity": "low"
+    },
+    {
+      "old": "một coroutine nuốt nó thì việc vẫn tiếp tục chạy sau hạn chót.",
+      "new": "một coroutine nuốt nó thì công việc vẫn tiếp tục chạy sau hạn chót.",
+      "reason": "«việc» cụt",
+      "severity": "low"
+    },
+    {
+      "old": "Dòng cuối của output là thí nghiệm trong lab",
+      "new": "Dòng cuối là kết quả của thí nghiệm trong lab",
+      "reason": "Câu sai chủ ngữ: dòng không thể là thí nghiệm",
+      "severity": "medium"
+    },
+    {
+      "old": "thì phải gọi thêm `uncancel()`, và việc này không khuyến khích.",
+      "new": "thì phải gọi thêm `uncancel()`, và việc này không được khuyến khích.",
+      "reason": "Thiếu chủ ngữ cho «không khuyến khích»",
+      "severity": "medium"
+    },
+    {
+      "old": "sẽ thấy cùng ý: C# truyền",
+      "new": "sẽ thấy cùng một ý tưởng: C# truyền",
+      "reason": "«cùng ý» cụt",
+      "severity": "low"
+    },
+    {
+      "old": "loop tự do nên nhịp tim giữ nguyên 0,05 giây.",
+      "new": "loop vẫn rảnh nên nhịp tim giữ nguyên 0,05 giây.",
+      "reason": "«tự do» là dịch từng chữ của free",
+      "severity": "low"
+    },
+    {
+      "old": "`to_thread` chỉ hợp với việc **chờ**",
+      "new": "`to_thread` chỉ phù hợp với việc **chờ**",
+      "reason": "«hợp với» khẩu ngữ",
+      "severity": "low"
+    },
+    {
+      "old": "Output đầy đủ của lần chạy cuối cùng,",
+      "new": "Kết quả in ra đầy đủ của lần chạy cuối cùng,",
+      "reason": "Từ tiếng Anh lọt vào văn xuôi",
+      "severity": "low"
+    },
+    {
+      "old": "20 ca của `--verify` chia hai nhóm.",
+      "new": "20 test case của `--verify` chia hai nhóm.",
+      "reason": "Thống nhất «test case»",
+      "severity": "medium"
+    },
+    {
+      "old": "Ngưỡng vẫn có thể trượt trên máy rất bận;",
+      "new": "Ngưỡng vẫn có thể không đạt trên máy rất bận;",
+      "reason": "«trượt» là calque của fail",
+      "severity": "low"
+    },
+    {
+      "old": "Mười lời gọi cùng lúc không phải bài học chung:",
+      "new": "Mười lời gọi cùng lúc không phải bài học tổng quát:",
+      "reason": "«bài học chung» mơ hồ",
+      "severity": "low"
+    },
+    {
+      "old": "tưởng Task đã dừng do bị huỷ trong khi nó vẫn chạy tiếp những gì sau <code>except</code>.",
+      "new": "tưởng Task đã dừng vì bị huỷ, trong khi Task vẫn chạy tiếp các lệnh nằm sau khối <code>except</code>.",
+      "reason": "Câu gượng, «những gì sau» khó hiểu",
+      "severity": "medium"
+    }
+  ]
+}

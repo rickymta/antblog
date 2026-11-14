@@ -1,0 +1,215 @@
+{
+  "file": "rust-opentelemetry-trace-tu-csharp-sang-rust-grpc-kafka.md",
+  "edits": [
+    {
+      "old": "cha-con hay link, sampling, metric hữu hạn, log có trace_id",
+      "new": "quan hệ cha-con hay link, sampling, metric có tập nhãn hữu hạn, log có trace_id",
+      "reason": "Cụm cụt, thiếu danh từ chính",
+      "severity": "medium"
+    },
+    {
+      "old": "Cần cho yêu cầu mang theo một mã, và mọi nơi đi qua đều ghi mã đó.",
+      "new": "Cần để yêu cầu mang theo một mã, và mọi nơi nó đi qua đều ghi mã đó.",
+      "reason": "Câu thiếu chủ thể, đọc gượng",
+      "severity": "medium"
+    },
+    {
+      "old": "muốn nối hai tiến trình thì nó phải đi qua dây.",
+      "new": "muốn nối hai tiến trình thì span context phải đi qua đường truyền giữa chúng.",
+      "reason": "Dùng \"nó\" chỉ sự vật trừu tượng; \"đi qua dây\" dịch sát từ wire",
+      "severity": "medium"
+    },
+    {
+      "old": "một chặng quên header thì cây tách làm hai mà không lỗi nào báo",
+      "new": "một chặng quên header thì cây tách làm hai mà không có lỗi nào được báo ra",
+      "reason": "Câu thiếu động từ \"có\"",
+      "severity": "low"
+    },
+    {
+      "old": "Tương ứng với C#: `StartActivity`",
+      "new": "Đối chiếu với C#: `StartActivity`",
+      "reason": "Diễn đạt tự nhiên hơn",
+      "severity": "low"
+    },
+    {
+      "old": "Lab kiểm bốn điều, không cần Docker.",
+      "new": "Lab kiểm tra bốn điều, không cần Docker.",
+      "reason": "\"Kiểm\" đứng một mình nghe cụt",
+      "severity": "medium"
+    },
+    {
+      "old": "bị bỏ, cho context rỗng thay vì panic",
+      "new": "bị bỏ qua, trả về context rỗng thay vì panic",
+      "reason": "Câu cụt, thiếu động từ rõ nghĩa",
+      "severity": "medium"
+    },
+    {
+      "old": "(đang ghi Stable): `rpc.status_code`",
+      "new": "(đang ghi trạng thái Stable): `rpc.status_code`",
+      "reason": "Thiếu danh từ chính",
+      "severity": "low"
+    },
+    {
+      "old": "Messaging và Kafka vẫn Development nên tên còn đổi:",
+      "new": "Messaging và Kafka vẫn ở trạng thái Development nên tên còn có thể đổi:",
+      "reason": "Thiếu danh từ, câu cụt",
+      "severity": "medium"
+    },
+    {
+      "old": "Và khi lỗi, span `ledger.entry.post` chỉ ghi mã cố định (`error.type = unbalanced`), không ghi thông điệp lỗi gốc vì nó có số tiền.",
+      "new": "Và khi có lỗi, span `ledger.entry.post` chỉ ghi mã cố định (`error.type = unbalanced`), không ghi thông điệp lỗi gốc vì thông điệp đó chứa số tiền.",
+      "reason": "Câu thiếu \"có\"; \"nó\" mơ hồ",
+      "severity": "medium"
+    },
+    {
+      "old": "Nối tiếp nguyên tắc PII tối thiểu của",
+      "new": "Tiếp nối nguyên tắc PII tối thiểu của",
+      "reason": "Dùng từ tự nhiên hơn",
+      "severity": "low"
+    },
+    {
+      "old": "nên cha của span consumer là `send ledger.entry-posted`",
+      "new": "nên span cha của span consumer là `send ledger.entry-posted`",
+      "reason": "Thống nhất cách gọi span cha",
+      "severity": "low"
+    },
+    {
+      "old": "Hình 2. Một span chỉ có một cha, nên xử lý lô không thể là con của nhiều producer: dùng link.",
+      "new": "Hình 2. Một span chỉ có một cha, nên span xử lý lô không thể làm con của nhiều producer: hãy dùng link.",
+      "reason": "Câu thiếu chủ ngữ",
+      "severity": "medium"
+    },
+    {
+      "old": "SDK cắt link vượt 128 mỗi span (mặc định)",
+      "new": "SDK cắt bớt link vượt quá 128 trên mỗi span (mặc định)",
+      "reason": "Trật tự từ kiểu tiếng Anh, câu cụt",
+      "severity": "medium"
+    },
+    {
+      "old": "Lab gửi bốn thông điệp từ bốn trace, xử lý một cái riêng và ba cái theo lô. Span lô không có cha, nằm trong trace khác cả bốn,",
+      "new": "Lab gửi bốn thông điệp từ bốn trace, xử lý riêng một thông điệp và xử lý ba thông điệp còn lại theo lô. Span lô không có cha, nằm trong một trace khác với cả bốn trace kia,",
+      "reason": "Cụm cụt, đại từ \"cái\" mơ hồ",
+      "severity": "medium"
+    },
+    {
+      "old": "Xử lý là một giao dịch chung cho cả lô thì dùng link, vì cho thông điệp thứ ba làm \"con\" của thông điệp đầu là nói sai về nhân quả.",
+      "new": "Khi việc xử lý là một giao dịch chung cho cả lô thì dùng link, vì coi thông điệp thứ ba là \"con\" của thông điệp đầu là nói sai về quan hệ nhân quả.",
+      "reason": "Câu lủng củng, thiếu chủ ngữ rõ ràng",
+      "severity": "high"
+    },
+    {
+      "old": "các nơi sau chỉ tôn trọng.",
+      "new": "các nơi sau chỉ làm theo quyết định đó.",
+      "reason": "Thiếu tân ngữ",
+      "severity": "medium"
+    },
+    {
+      "old": "Bốn quyết định, kiểm trực tiếp bằng SDK:",
+      "new": "Bốn quyết định, kiểm tra trực tiếp bằng SDK:",
+      "reason": "\"Kiểm\" đứng một mình nghe cụt",
+      "severity": "low"
+    },
+    {
+      "old": "nên consumer cùng quyết định, không có trace chỉ có đuôi.",
+      "new": "nên consumer đưa ra cùng quyết định, và không xảy ra tình trạng trace chỉ còn phần đuôi.",
+      "reason": "Cụm mơ hồ, khó hiểu",
+      "severity": "high"
+    },
+    {
+      "old": "giữ riêng trace lỗi cần tail sampling ở Collector, lab không dựng.",
+      "new": "muốn giữ riêng trace lỗi thì cần tail sampling ở Collector, và lab không dựng phần này.",
+      "reason": "Câu cụt, thiếu tân ngữ",
+      "severity": "medium"
+    },
+    {
+      "old": "mỗi thao tác process một mẫu (cả lô là một mẫu)",
+      "new": "mỗi thao tác process cho một mẫu (cả lô cũng chỉ là một mẫu)",
+      "reason": "Trật tự từ, diễn đạt gượng",
+      "severity": "low"
+    },
+    {
+      "old": "Lag kiểm bằng số đếm, không bằng đồng hồ:",
+      "new": "Lab kiểm lag bằng cách đếm số thông điệp, không dùng đồng hồ:",
+      "reason": "Câu thiếu chủ ngữ",
+      "severity": "medium"
+    },
+    {
+      "old": "Chi phí tỷ lệ với số khách chứ không với tải:",
+      "new": "Chi phí tăng theo số khách chứ không theo tải:",
+      "reason": "Diễn đạt gượng kiểu dịch",
+      "severity": "medium"
+    },
+    {
+      "old": "mà vẫn mất dữ liệu phần còn lại.",
+      "new": "mà vẫn mất dữ liệu của phần còn lại.",
+      "reason": "Thiếu giới từ",
+      "severity": "low"
+    },
+    {
+      "old": "Tài liệu SDK nói bản cuối cùng của provider bị bỏ sẽ tự shutdown,",
+      "new": "Tài liệu SDK nói bản cuối cùng của provider, khi bị drop, sẽ tự shutdown,",
+      "reason": "\"Bị bỏ\" mơ hồ; dùng đúng thuật ngữ drop",
+      "severity": "medium"
+    },
+    {
+      "old": "mỗi cái phát một span rồi thoát: một gọi `shutdown`, một quên.",
+      "new": "mỗi tiến trình phát một span rồi thoát: một tiến trình gọi `shutdown`, một tiến trình quên gọi.",
+      "reason": "Câu cụt thiếu chủ ngữ",
+      "severity": "medium"
+    },
+    {
+      "old": "Chu kỳ của processor đặt 1 giờ",
+      "new": "Chu kỳ của processor được đặt là 1 giờ",
+      "reason": "Câu thiếu động từ \"là\"",
+      "severity": "low"
+    },
+    {
+      "old": "Thứ tự tắt nối tiếp",
+      "new": "Thứ tự tắt tiếp nối",
+      "reason": "Từ tự nhiên hơn",
+      "severity": "low"
+    },
+    {
+      "old": "nên trong tokio phải qua `spawn_blocking`",
+      "new": "nên trong tokio phải gọi qua `spawn_blocking`",
+      "reason": "Thiếu động từ",
+      "severity": "medium"
+    },
+    {
+      "old": "xoá cuối ca). Mục 1 in cây span:",
+      "new": "xoá khi chạy xong). Mục 1 in cây span:",
+      "reason": "\"Ca\" không rõ nghĩa",
+      "severity": "medium"
+    },
+    {
+      "old": "kiểm cùng cây cha-con trên dữ liệu Jaeger",
+      "new": "kiểm tra cùng cây cha-con trên dữ liệu Jaeger",
+      "reason": "\"Kiểm\" đứng một mình nghe cụt",
+      "severity": "low"
+    },
+    {
+      "old": "và kiểm cây có hai service:",
+      "new": "và kiểm tra cây có hai service:",
+      "reason": "\"Kiểm\" đứng một mình nghe cụt",
+      "severity": "low"
+    },
+    {
+      "old": "Chưa có tail sampling, TLS hay xác thực cho OTLP, chính sách giữ dữ liệu, log OTLP.",
+      "new": "Ví dụ cũng chưa có tail sampling, TLS hay xác thực cho OTLP, chính sách lưu giữ dữ liệu và log OTLP.",
+      "reason": "Câu liệt kê cụt, thiếu chủ ngữ",
+      "severity": "high"
+    },
+    {
+      "old": "client Rust giả lập đứng thay C#;",
+      "new": "client Rust giả lập thay cho C#;",
+      "reason": "Diễn đạt gượng",
+      "severity": "low"
+    },
+    {
+      "old": "<code>ParentBased</code> nhìn cờ của cha ở xa trước",
+      "new": "<code>ParentBased</code> xem cờ của span cha từ xa trước",
+      "reason": "\"Cha ở xa\" dịch gượng từ remote parent",
+      "severity": "medium"
+    }
+  ]
+}

@@ -8,21 +8,21 @@ tags: [rust, toi-noi, ledger, axum, webhook, hmac]
 language: vi
 ---
 
-Khách `CU-001` trả chuyến `TN-0001`. VíXanh trừ tiền rồi gọi vào ledger: «đã thu 25.500 đồng, mã giao dịch `vx_ch_0001`». Đó chỉ là một request HTTP tới một URL công khai, ai biết URL cũng gửi được cùng nội dung. Ledger phải biết người gửi là VíXanh, không xử lý một giao dịch hai lần, và không đánh rơi thông báo đến sai thứ tự so với event nội bộ.
+Khách `CU-001` trả chuyến `TN-0001`. VíXanh trừ tiền rồi gọi vào ledger: «đã thu 25.500 đồng, mã giao dịch `vx_ch_0001`». Đó chỉ là một request HTTP tới một URL công khai, ai biết URL cũng gửi được cùng nội dung. Ledger phải biết người gửi là VíXanh, không xử lý một giao dịch hai lần, và không làm mất thông báo đến lệch thứ tự so với event nội bộ.
 
 Đây là bài 38 của lộ trình **Rust trung bình qua [Tới Nơi](/articles/du-an-mau-toi-noi)**, dựng trên axum như [bài 31](/articles/rust-axum-http-endpoint-ghi-but-toan-tra-so-du) và nối tiếp inbox ở [bài 37](/articles/rust-outbox-inbox-idempotent-consumer). VíXanh là cổng thanh toán giả: **định dạng header, thuật toán, khoá và hành vi gửi lại là giả định của lab**. Bài không mô tả PSP thật nào; tích hợp thật phải theo tài liệu của PSP đó.
 
 <div class="tkh-callout tkh-callout--example">
 <span class="tkh-callout-title">Thử trước khi đọc</span>
 <p>Hai bản JSON có cùng khoá và cùng giá trị, chỉ khác thứ tự khoá. Chữ ký HMAC tính trên bản thứ nhất có hợp lệ với bản thứ hai không?</p>
-<details><summary>Xem đáp án</summary><p>Không. HMAC tính trên byte, khác một byte là ra thẻ khác. Vì vậy phải xác thực trên đúng byte nhận được, trước khi parse JSON.</p></details>
+<details><summary>Xem đáp án</summary><p>Không. HMAC tính trên byte, khác một byte là ra giá trị HMAC khác. Vì vậy phải xác thực trên đúng byte nhận được, trước khi parse JSON.</p></details>
 </div>
 
 ## Ký trên byte thô: vì sao handler nhận `Bytes` chứ không phải `Json`?
 
-VíXanh và ledger chia sẻ một bí mật. Với mỗi webhook, VíXanh tính `HMAC-SHA256(secret, "<t>." + body)` (`t` là epoch giây, `body` là byte của request) và gửi `X-ViXanh-Signature: t=<epoch>,v1=<hex>`. Ledger tính lại và so. Với body 155 byte của `TN-0001`, `t=1793934000` (2026-11-06T03:00:00Z) và khoá lab, thẻ bắt đầu `51f0ae52…`; một test so Rust với giá trị tính độc lập bằng Python 3.
+VíXanh và ledger chia sẻ một bí mật. Với mỗi webhook, VíXanh tính `HMAC-SHA256(secret, "<t>." + body)` (`t` là epoch giây, `body` là byte của request) và gửi `X-ViXanh-Signature: t=<epoch>,v1=<hex>`. Ledger tính lại và so. Với body 155 byte của `TN-0001`, `t=1793934000` (2026-11-06T03:00:00Z) và khoá lab, giá trị HMAC bắt đầu `51f0ae52…`; một test so Rust với giá trị tính độc lập bằng Python 3.
 
-Phải ký trên byte vì đi vòng qua serde thì không trả lại đúng byte ban đầu: thứ tự khoá, khoảng trắng, cách escape đều có thể đổi. Lab parse body thành `serde_json::Value` rồi serialize lại: vẫn 155 byte nhưng không giống từng byte, và thẻ cũ không còn khớp. Với `Json<T>`, axum parse trước khi handler thấy byte, tức là ta mất thứ cần ký. Extractor `Bytes` đưa nguyên byte, nên xác thực trước, parse sau:
+Phải ký trên byte vì nếu đi vòng qua serde thì không lấy lại được đúng byte ban đầu: thứ tự khoá, khoảng trắng, cách escape đều có thể đổi. Lab parse body thành `serde_json::Value` rồi serialize lại: vẫn 155 byte nhưng không giống từng byte, và giá trị HMAC cũ không còn khớp. Với `Json<T>`, axum parse trước khi handler thấy byte, tức là ta mất thứ cần ký. Extractor `Bytes` đưa nguyên byte, nên xác thực trước, parse sau:
 
 ```rust
 // src/app.rs (rút gọn: bỏ phần parse JSON và ánh xạ kết quả)
@@ -59,9 +59,9 @@ async fn vixanh_webhook(
     // ... từ đây body là thật: serde_json::from_slice trên đúng byte đã xác thực
 ```
 
-Mọi lý do làm chữ ký bị từ chối đều ra ngoài bằng cùng một `401`, kèm `WWW-Authenticate` vì RFC 9110 bắt buộc; lý do thật chỉ vào log (stderr), và log không chứa khoá hay thẻ tính được. Router đặt `DefaultBodyLimit` 64 KiB vì `Bytes` đọc hết body vào bộ nhớ; body 100 KiB nhận `413` (có test).
+Mọi lý do làm chữ ký bị từ chối đều trả về cùng một `401`, kèm `WWW-Authenticate` vì RFC 9110 bắt buộc; lý do thật chỉ vào log (stderr), và log không chứa khoá hay giá trị HMAC tính được. Router đặt `DefaultBodyLimit` 64 KiB vì `Bytes` đọc hết body vào bộ nhớ; body 100 KiB nhận `413` (có test).
 
-Còn «callback từ app khách»? App trên điện thoại có thể báo «tôi đã thanh toán», nhưng mọi thứ nằm trong app đều trích ra được: không đặt bí mật ở đó và không tin lời nó. Request không header nhận `401` và ledger không ghi gì, như dòng thứ tư dưới đây.
+Còn «callback từ app khách»? App trên điện thoại có thể báo «tôi đã thanh toán», nhưng mọi thứ nằm trong app đều có thể bị trích xuất: không đặt bí mật ở đó và không tin lời nó. Request không header nhận `401` và ledger không ghi gì, như dòng thứ tư dưới đây.
 
 ```text
 webhook hợp lệ        : 200 applied
@@ -82,9 +82,9 @@ sau các lần từ chối   : 1 webhook, 1 bút toán
 <figcaption>Hình 1. Chỉ byte đã xác thực mới được parse; từ chối ở bước nào cũng không để lại dấu vết trong sổ.</figcaption>
 </figure>
 
-## So sánh thẻ bằng `==` có sao không?
+## So sánh giá trị HMAC bằng `==` có sao không?
 
-So hai slice bằng `==` thường dừng ở byte khác nhau đầu tiên, nên thời gian so phụ thuộc số byte đầu đoán đúng; về lý thuyết kẻ tấn công đo thời gian để đoán dần từng byte của thẻ. Qua mạng nhiễu rất khó khai thác, nhưng tránh nó không tốn thêm gì. Lab đếm số byte mà phép so kiểu `==` phải xét (mô hình đếm, không phải số đo thời gian) với thẻ giả đúng sẵn vài byte đầu, và cho `verify_slice` nhận cùng thẻ giả đó:
+So hai slice bằng `==` thường dừng ở byte khác nhau đầu tiên, nên thời gian so phụ thuộc vào số byte đầu tiên đoán đúng; về lý thuyết kẻ tấn công đo thời gian để đoán dần từng byte của giá trị HMAC. Qua mạng nhiễu rất khó khai thác, nhưng tránh nó không tốn thêm gì. Lab đếm số byte mà phép so kiểu `==` phải xét (mô hình đếm, không phải số đo thời gian) với giá trị giả đúng sẵn vài byte đầu, và cho `verify_slice` nhận cùng giá trị giả đó:
 
 ```text
 đoán đúng  0 byte đầu    : == phải xét  1 byte; verify_slice nhận: false
@@ -94,7 +94,7 @@ So hai slice bằng `==` thường dừng ở byte khác nhau đầu tiên, nên
 đoán đúng 31 byte đầu    : == phải xét 32 byte; verify_slice nhận: false
 ```
 
-`verify_slice` của trait `Mac` (crate `digest` 0.11.3 mà `hmac` 0.13 dùng, bên trong gọi `ct_eq` của `ctutils`, còn `digest` 0.10 dùng `subtle`) so đủ 32 byte bất kể sai ở đâu; độ dài thẻ được kiểm trước vì không phải bí mật. Tự `finalize().into_bytes()` rồi `==` là bỏ mất bảo vệ. Ở .NET, `CryptographicOperations.FixedTimeEquals` đóng vai trò tương đương.
+`verify_slice` của trait `Mac` (crate `digest` 0.11.3 mà `hmac` 0.13 dùng, bên trong gọi `ct_eq` của `ctutils`, còn `digest` 0.10 dùng `subtle`) so đủ 32 byte bất kể sai ở đâu; độ dài giá trị HMAC được kiểm trước vì không phải bí mật. Tự `finalize().into_bytes()` rồi `==` là bỏ mất bảo vệ. Ở .NET, `CryptographicOperations.FixedTimeEquals` đóng vai trò tương đương.
 
 ```rust
 // src/signature.rs (rút gọn: bỏ chú thích tài liệu)
@@ -147,7 +147,7 @@ VíXanh ký lại, cùng body: 200 duplicate
 
 Bản gửi lại sau 120 giây vẫn trong cửa sổ, chữ ký vẫn đúng, nên nó qua tầng này và dừng ở tầng sau: `duplicate`. Cửa sổ không thay thế khử trùng lặp: nó giới hạn thời gian một bản đã bắt còn dùng được, còn trong khoảng đó việc chặn thuộc về `external_ref`.
 
-Lab giả định VíXanh ký lại với `t` mới ở mỗi lần gửi lại (dòng thứ năm). PSP nào gửi lại nguyên header cũ sau vài phút thì sẽ bị cửa sổ từ chối, nên phải đọc tài liệu của nó. Đồng hồ ledger lệch quá cửa sổ thì mọi webhook thật thành «cũ»: đưa tỷ lệ `Stale` lên dashboard.
+Lab giả định VíXanh ký lại với `t` mới ở mỗi lần gửi lại (dòng thứ năm). PSP nào gửi lại nguyên header cũ sau vài phút thì sẽ bị cửa sổ từ chối, nên phải đọc tài liệu của nó. Đồng hồ ledger lệch quá cửa sổ thì mọi webhook thật bị coi là «cũ»: đưa tỷ lệ `Stale` lên dashboard.
 
 ## `external_ref` unique: webhook trùng chỉ chạy một lần
 
@@ -169,7 +169,7 @@ CREATE TABLE psp_webhooks (
 
 `INSERT ... ON CONFLICT (external_ref) DO NOTHING RETURNING external_ref` trả một dòng nếu ta là người đầu tiên, không trả gì nếu đã có: cùng kỹ thuật với `idempotency_key` ở [bài 24](/articles/rust-transaction-isolation-append-only-idempotency-key) và `event_id` của inbox (bài 37); phía .NET có [bài tương ứng](/articles/dotnet10-transaction-concurrency-idempotency). Tám bản y hệt gửi cùng lúc tới một chuyến mới cho `1 applied, 7 duplicate; bút toán 2` (gồm cả `TN-0001` ở bước trước). Bản trùng nhận `200` chứ không phải `409`: webhook đã được xử lý, và theo giả định trên `409` chỉ làm VíXanh gửi tiếp vô ích.
 
-Hai tình huống nghiệp vụ đi qua cùng bảng. `external_ref` khác nhưng cùng chuyến (VíXanh thu hai lần): `idempotency_key` `trip:TN-0001:capture` của sổ chặn bút toán thứ hai, ta đánh dấu `double_capture` để người đối soát hoàn tiền. Số tiền webhook khác cước đã biết: đánh dấu `mismatch`, không ghi sổ. Cả hai trả `200` vì gửi lại không sửa được gì.
+Hai tình huống nghiệp vụ đi qua cùng bảng. `external_ref` khác nhưng cùng chuyến (VíXanh thu hai lần): `idempotency_key` `trip:TN-0001:capture` của sổ chặn bút toán thứ hai, ta đánh dấu `double_capture` để người đối soát hoàn tiền. Khi số tiền trong webhook khác cước đã biết, ta đánh dấu `mismatch`, không ghi sổ. Cả hai trả `200` vì gửi lại không sửa được gì.
 
 ```text
 số tiền lệch          : 200 mismatch, bút toán thêm 0
@@ -189,9 +189,9 @@ event giao lặp        : nhặt lại 0 webhook
 event trước, webhook sau: 200 applied
 ```
 
-`202` hay `200` cho trường hợp chờ? Lab giả định VíXanh coi mọi 2xx là đã giao, nên cả hai đều làm nó ngừng thử lại; PSP thật có thể khác, cần kiểm tra tài liệu. Lab chọn `202` vì theo RFC 9110 nó nghĩa là đã nhận để xử lý nhưng chưa xử lý xong, còn `200` báo request đã thành công; và vì đếm riêng được số webhook đang chờ. Không trả 5xx ở đây: webhook đã nằm an toàn trong bảng, 5xx chỉ làm VíXanh gửi lại vô ích.
+`202` hay `200` cho trường hợp chờ? Lab giả định VíXanh coi mọi 2xx là đã nhận, nên cả hai đều làm nó ngừng thử lại; PSP thật có thể khác, cần kiểm tra tài liệu. Lab chọn `202` vì theo RFC 9110 nó nghĩa là đã nhận để xử lý nhưng chưa xử lý xong, còn `200` báo request đã thành công; và vì đếm riêng được số webhook đang chờ. Không trả 5xx ở đây: webhook đã nằm an toàn trong bảng, 5xx chỉ làm VíXanh gửi lại vô ích.
 
-Có một cuộc đua. Webhook kiểm `payments` (chưa có) đúng lúc event chèn `payments` rồi quét `pending` (chưa thấy, vì webhook chưa commit): hai bên bỏ lỡ nhau và webhook kẹt mãi. Lab đặt khoá advisory theo `trip_id` trong cả hai transaction. Khoá tự nhả khi commit hoặc rollback, và bên đến sau luôn thấy bản đã commit của bên đến trước (READ COMMITTED lấy snapshot mới cho từng câu lệnh).
+Ở đây có một race condition. Webhook kiểm tra `payments` (chưa có) đúng lúc event chèn `payments` rồi quét `pending` (chưa thấy, vì webhook chưa commit): hai bên bỏ lỡ nhau và webhook kẹt mãi. Lab đặt khoá advisory theo `trip_id` trong cả hai transaction. Khoá tự nhả khi commit hoặc rollback, và bên đến sau luôn thấy bản đã commit của bên đến trước (READ COMMITTED lấy snapshot mới cho từng câu lệnh).
 
 ```rust
 // src/store.rs (rút gọn: bỏ chú thích tài liệu)
@@ -234,7 +234,7 @@ pub async fn receive_webhook(pool: &PgPool, hook: &Webhook) -> Result<Outcome> {
 }
 ```
 
-Thí nghiệm: 40 chuyến, mỗi chuyến một webhook và một event chạy cùng lúc, event trễ 0 đến 9 ms. Có khoá, sáu lần chạy đều 0 webhook kẹt. Tạm bỏ hai lời gọi `lock_trip`, sáu lần chạy cho số webhook kẹt `pending` là 0, 0, 5, 2, 1, 4 (số đo trên máy viết bài, không phải SLA). Hai lần ra 0 mới là điều đáng nhớ: cuộc đua không lộ ở mọi lần chạy, nên test xanh không chứng minh an toàn, lý lẽ về khoá ở trên mới bảo đảm.
+Thí nghiệm: 40 chuyến, mỗi chuyến một webhook và một event chạy cùng lúc, event trễ 0 đến 9 ms. Có khoá, sáu lần chạy đều 0 webhook kẹt. Tạm bỏ hai lời gọi `lock_trip`, sáu lần chạy cho số webhook kẹt `pending` là 0, 0, 5, 2, 1, 4 (số đo trên máy viết bài, không phải SLA). Điều đáng nhớ là hai lần cho kết quả 0: race condition không lộ ra ở mọi lần chạy, nên test xanh không chứng minh an toàn, lý lẽ về khoá ở trên mới bảo đảm.
 
 ```text
 đua 40 chuyến          : còn pending 0, applied 43 (tổng gồm 3 chuyến trên); trả 202 ở 32 chuyến (đổi theo lịch chạy)
@@ -260,7 +260,7 @@ Quy ước: 5xx nghĩa là «tôi chưa lưu gì, hãy gửi lại»; 2xx nghĩa
 | Đã ghi sổ, trùng, lệch tiền, thu hai lần | `200` | Đã nhận; phần cần người xử lý nằm ở cảnh báo |
 | Database lỗi | `503` | Transaction đã rollback; gửi lại là xử lý lại từ đầu |
 
-Thí nghiệm gây lỗi thật bằng `ALTER TABLE payments RENAME`. VíXanh trong lab thử lại tối đa năm lần, mỗi lần ký lại với `t` mới và giữ nguyên body; sau lần thứ hai ta trả tên bảng về.
+Thí nghiệm gây lỗi thật bằng `ALTER TABLE payments RENAME`. VíXanh trong lab thử lại tối đa năm lần, mỗi lần ký lại với `t` mới và giữ nguyên body; sau lần thứ hai ta đổi tên bảng lại như cũ.
 
 ```text
 các lần thử           : [503, 503, 200]
@@ -272,7 +272,7 @@ Dòng thứ hai là cốt lõi: sau lần lỗi đầu `psp_webhooks` không có
 
 ## Xoay vòng khoá: hai khoá hợp lệ cùng lúc
 
-Đổi bí mật trong một bước luôn có khoảng hở. Quy trình: nạp khoá mới B (A và B cùng hợp lệ), VíXanh chuyển sang ký bằng B, chờ đến khi không còn webhook ký bằng A, rồi gỡ A. Lab giả định lúc chuyển VíXanh có thể gửi header hai chữ ký `v1=…,v1=…`. `KeyRing` thử mọi `v1` với mọi khoá còn hợp lệ, tối đa bốn `v1` mỗi header để không bị bắt tốn CPU. Lab chưa ghi khoá nào khớp; muốn biết lúc nào gỡ được A, production cần đếm theo `kid`.
+Đổi bí mật trong một bước luôn có khoảng hở. Quy trình: nạp khoá mới B (A và B cùng hợp lệ), VíXanh chuyển sang ký bằng B, chờ đến khi không còn webhook ký bằng A, rồi gỡ A. Lab giả định lúc chuyển VíXanh có thể gửi header hai chữ ký `v1=…,v1=…`. `KeyRing` thử mọi `v1` với mọi khoá còn hợp lệ, tối đa bốn `v1` mỗi header để kẻ gửi không ép được hệ thống tốn CPU. Lab chưa ghi lại khoá nào khớp; muốn biết lúc nào gỡ được A, production cần đếm theo `kid`.
 
 ```text
 chỉ có A; VíXanh đã ký bằng B            -> 401
@@ -302,9 +302,9 @@ cargo test --manifest-path examples/toi-noi-rust/38-webhook-hmac/Cargo.toml
 
 `--verify` in các khối kết quả ở trên rồi kiểm từng giá trị; đạt thì in `VERIFY OK` và thoát mã 0. `cargo test` chạy 13 test đơn vị (không cần database) và 7 test tích hợp. Log từ chối ra stderr; thêm `2>/dev/null` để đọc output sạch.
 
-**Bài tập:** header `t=1793934000,v1=<hex viết hoa>` có qua `verify` không, khi thẻ đúng? Vì sao điều đó không phải lỗ hổng, và nếu so hai chuỗi hex bằng `==` thì chuyện gì xảy ra?
+**Bài tập:** header `t=1793934000,v1=<hex viết hoa>` có qua `verify` không, khi giá trị HMAC đúng? Vì sao điều đó không phải lỗ hổng, và nếu so hai chuỗi hex bằng `==` thì chuyện gì xảy ra?
 
-<details><summary>Xem lời giải</summary><p>Có qua. <code>hex::decode</code> chấp nhận cả hoa lẫn thường và giải ra cùng dãy byte, rồi <code>verify_slice</code> so byte. Không phải lỗ hổng: kẻ tấn công vẫn phải biết bí mật mới tạo được dãy byte đúng, chữ hoa chỉ là cách viết khác của cùng một thẻ. So hai chuỗi hex bằng <code>==</code> thì chuỗi hoa bị từ chối nhầm dù chữ ký đúng, và phép so đó cũng không bảo vệ được thời gian.</p></details>
+<details><summary>Xem lời giải</summary><p>Có qua. <code>hex::decode</code> chấp nhận cả hoa lẫn thường và giải ra cùng dãy byte, rồi <code>verify_slice</code> so byte. Không phải lỗ hổng: kẻ tấn công vẫn phải biết bí mật mới tạo được dãy byte đúng, chữ hoa chỉ là cách viết khác của cùng một giá trị HMAC. So hai chuỗi hex bằng <code>==</code> thì chuỗi hoa bị từ chối nhầm dù chữ ký đúng, và phép so đó cũng không bảo vệ được thời gian.</p></details>
 
 Bài trước: [bài 37](/articles/rust-outbox-inbox-idempotent-consumer). Bài tiếp: [bài 39](/articles/rust-graceful-shutdown-health-readiness-backpressure).
 

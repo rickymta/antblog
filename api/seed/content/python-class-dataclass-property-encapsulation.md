@@ -1,14 +1,14 @@
 ---
 slug: python-class-dataclass-property-encapsulation
 title: "Class, dataclass, property và encapsulation: bảo vệ trạng thái chuyến"
-summary: "Bài 11: dựng Trip bằng class thường rồi @dataclass, @property chỉ đọc, quy ước _private, __slots__ có đo thật và máy trạng thái 8 trạng thái với advance() từ chối chuyển sai. Có output thật và lab chạy được."
+summary: "Bài 11: dựng Trip bằng class thường rồi @dataclass, @property chỉ đọc, quy ước _private, __slots__ có đo thật và máy trạng thái 8 trạng thái với advance() từ chối chuyển trạng thái không hợp lệ. Có kết quả chạy thật và lab chạy được."
 category: python-beginner
 level: beginner
 tags: [python, toi-noi, dataclass, encapsulation]
 language: vi
 ---
 
-Một service phân tích của [Tới Nơi](/articles/du-an-mau-toi-noi) nhận chuyến dưới dạng dict, đúng kiểu dữ liệu JSON ta đọc ở bài 09: `{"trip_id": "TN-0001", "status": "requested", ...}`. Một dòng `trip["status"] = "completed"` chạy thành công trên chuyến vừa được yêu cầu: chưa tìm tài xế, chưa đón khách, vẫn «hoàn thành». Dict không biết gì về nghiệp vụ nên không từ chối. Chuyến sai trạng thái đi tiếp vào báo cáo, vào bước tính tiền, và đến lúc ai đó thấy số liệu lạ thì không còn biết dòng nào gây ra. Bài này chuyển chuyến từ «túi dữ liệu» thành một **đối tượng tự bảo vệ trạng thái của mình**.
+Một service phân tích của [Tới Nơi](/articles/du-an-mau-toi-noi) nhận chuyến dưới dạng dict, đúng kiểu dữ liệu JSON ta đọc ở bài 09: `{"trip_id": "TN-0001", "status": "requested", ...}`. Một dòng `trip["status"] = "completed"` chạy thành công trên chuyến vừa được yêu cầu: chưa tìm tài xế, chưa đón khách, vẫn «hoàn thành». Dict không biết gì về nghiệp vụ nên không từ chối. Chuyến sai trạng thái đi tiếp vào báo cáo, vào bước tính tiền, và đến lúc ai đó thấy số liệu lạ thì không còn biết dòng nào gây ra lỗi. Bài này chuyển chuyến từ «túi dữ liệu» thành một **đối tượng tự bảo vệ trạng thái của mình**.
 
 Đây là bài 11 của lộ trình **Python cơ bản qua Tới Nơi**, mở đầu phần 02. Bạn cần quen hàm (bài 03), dict và tuple (bài 05), exception (bài 08) và cách chạy kiểm chứng (bài 10).
 
@@ -35,13 +35,13 @@ class TripPlain:
         self.driver_id: str | None = None
 ```
 
-Code trong `main.py` của lab 11. So với dict, ta được tên thuộc tính cố định (gõ sai `trip.stauts` ra `AttributeError` ngay khi đọc) và một nơi để gắn hành vi. Nhưng `status` vẫn là thuộc tính công khai: `a.status = "completed"` vẫn chạy. Class thường cũng cho hai điều bất ngờ: `__eq__` mặc định so danh tính (`is`), nên hai chuyến cùng nội dung không bằng nhau, và `repr` mặc định chỉ in tên lớp với địa chỉ chứ không in nội dung.
+Đó là code trong `main.py` của lab 11. So với dict, ta được tên thuộc tính cố định (gõ sai `trip.stauts` ra `AttributeError` ngay khi đọc) và một nơi để gắn hành vi. Nhưng `status` vẫn là thuộc tính công khai: `a.status = "completed"` vẫn chạy. Class thường còn có hai hành vi gây bất ngờ: `__eq__` mặc định so danh tính (`is`), nên hai chuyến cùng nội dung không bằng nhau, và `repr` mặc định chỉ in tên lớp với địa chỉ chứ không in nội dung.
 
 Hai hạn chế đó dẫn đến công cụ tiếp theo.
 
 ## `@dataclass`: bỏ phần lặp, giữ ý nghĩa
 
-Ba dòng `self.x = x` lặp theo số field, cộng `__repr__` và `__eq__` viết tay, là phần dễ sai nhất mà chẳng có nghiệp vụ gì. Decorator `@dataclass` (trong module `dataclasses`, PEP 557) đọc các **annotation** của lớp và sinh `__init__`, `__repr__`, `__eq__` thay ta. Phiên bản đầy đủ của `Trip` có thêm vài điều ta cần để ý:
+Ba dòng `self.x = x` lặp theo số field, cộng `__repr__` và `__eq__` viết tay, là phần dễ sai nhất nhưng không chứa nghiệp vụ nào. Decorator `@dataclass` (trong module `dataclasses`, PEP 557) đọc các **annotation** của lớp và sinh `__init__`, `__repr__`, `__eq__` thay ta. Phiên bản đầy đủ của `Trip` có thêm vài điều ta cần để ý:
 
 ```python
 @dataclass
@@ -69,7 +69,7 @@ class Trip:
         calculate_fare(self.distance_km, service=self.service)  # từ chối khoảng cách/dịch vụ sai
 ```
 
-Đây là bản đã **đóng gói**: từ điển miền của Tới Nơi mô tả chuyến với bảy trường (`trip_id`, `customer_id`, `driver_id`, `service`, `distance_km`, `status`, `created_at`), và lớp này giữ đủ bảy, đúng thứ tự đó. Khác biệt là `driver_id` và `status` nằm sau property nên chúng không nhận từ constructor: gọi `Trip(trip_id, customer_id, service, distance_km, created_at)` với **năm** tham số, chuyến luôn ra đời ở `requested` và chưa có tài xế. Các bài sau dùng lại cùng tập trường (bài 16 so khớp mẫu trên chúng), dù lab của mỗi bài có thể khai báo `Trip` gọn hơn.
+Đây là bản đã **đóng gói**: từ điển miền của Tới Nơi mô tả chuyến với bảy trường (`trip_id`, `customer_id`, `driver_id`, `service`, `distance_km`, `status`, `created_at`), và lớp này giữ đủ bảy, đúng thứ tự đó. Khác biệt là `driver_id` và `status` được truy cập qua property nên constructor không nhận hai trường này: gọi `Trip(trip_id, customer_id, service, distance_km, created_at)` với **năm** tham số, chuyến luôn ra đời ở `requested` và chưa có tài xế. Các bài sau dùng lại cùng tập trường (bài 16 so khớp mẫu trên chúng), dù lab của mỗi bài có thể khai báo `Trip` gọn hơn.
 
 Năm điều đáng nhớ:
 
@@ -77,13 +77,13 @@ Năm điều đáng nhớ:
 - **`init=False`** loại field khỏi tham số của constructor: người gọi không thể tạo chuyến đã ở trạng thái `completed`. **`repr=False`** bỏ field khỏi `repr`; ta ẩn lịch sử cho gọn.
 - **`__post_init__`** chạy ngay sau `__init__` do dataclass sinh. Đó là chỗ từ chối dữ liệu sai lúc tạo: mã chuyến, thời điểm phải aware (bài 04), khoảng cách và dịch vụ hợp lệ (ta gọi `calculate_fare` một lần để dùng lại đúng quy tắc miền, không viết hai lần).
 - **Thứ tự field.** Trong số các field nhận qua constructor, field không có mặc định phải đứng trước field có mặc định, nếu không Python báo `TypeError: non-default argument ... follows default argument`.
-- **Annotation là cách dataclass nhận ra field, không phải ép kiểu.** `str` hay `Decimal` ở đây không bị kiểm lúc chạy; bài 12 nói về công cụ kiểm tra kiểu.
+- **Annotation là cách dataclass nhận ra field, không phải ép kiểu.** `str` hay `Decimal` ở đây không bị kiểm tra lúc chạy; bài 12 nói về công cụ kiểm tra kiểu.
 
-Hành vi `__eq__` cũng thay đổi: hai `Trip` bằng nhau khi **mọi field** bằng nhau, kể cả `_status`. Hệ quả đi kèm là dataclass có `eq=True` mà không `frozen` sẽ đặt `__hash__` thành `None`, nghĩa là `hash(trip)` ném `TypeError: unhashable type: 'Trip'`. Điều này hợp lý: đối tượng đổi được thì hash cũng sẽ đổi, mà phần tử của `set` và khoá của `dict` không được phép đổi hash. Vì vậy ta dùng `trip.trip_id` làm khoá trong `dict[str, Trip]`, giống dict tài xế ở bài 05, và bài 13 giải thích cách có đối tượng hash được bằng `frozen=True`.
+Hành vi `__eq__` cũng thay đổi: hai `Trip` bằng nhau khi **mọi field** bằng nhau, kể cả `_status`. Hệ quả đi kèm là dataclass có `eq=True` mà không `frozen` sẽ đặt `__hash__` thành `None`, nghĩa là `hash(trip)` ném `TypeError: unhashable type: 'Trip'`. Điều này hợp lý: đối tượng đổi được thì hash cũng sẽ đổi, mà phần tử của `set` và khoá của `dict` không được phép đổi hash. Vì vậy ta dùng `trip.trip_id` làm khoá trong `dict[str, Trip]`, giống dict tài xế ở bài 05, và bài 13 giải thích cách tạo đối tượng hash được bằng `frozen=True`.
 
 ## `@property` và «riêng theo quy ước»
 
-`@property` biến một phương thức thành thuộc tính đọc được, gọi bằng `trip.fare` chứ không phải `trip.fare()`. Nó phục vụ hai việc trong `Trip`:
+`@property` biến một phương thức thành thuộc tính đọc được, gọi bằng `trip.fare` chứ không phải `trip.fare()`. Decorator này phục vụ hai việc trong `Trip`:
 
 ```python
     @property
@@ -96,9 +96,9 @@ Hành vi `__eq__` cũng thay đổi: hai `Trip` bằng nhau khi **mọi field** 
         return calculate_fare(self.distance_km, service=self.service)
 ```
 
-`fare` là **giá trị suy ra**: không lưu, mỗi lần đọc tính lại từ `distance_km` và `service`, nên không thể lệch khỏi chúng. `status` là **lối đọc chỉ đọc** vào `_status`. Property không khai báo setter thì phép gán bị từ chối. `driver_id` làm tương tự, còn `history` trả `tuple(self._history)`, một bản sao bất biến, để bên ngoài không cầm được list nội bộ mà sửa.
+`fare` là **giá trị suy ra**: không lưu, mỗi lần đọc tính lại từ `distance_km` và `service`, nên không thể lệch khỏi chúng. `status` là **lối truy cập chỉ đọc** tới `_status`. Property không khai báo setter thì phép gán bị từ chối. `driver_id` làm tương tự, còn `history` trả `tuple(self._history)`, một bản sao bất biến, để bên ngoài không cầm được list nội bộ mà sửa.
 
-Còn dấu gạch dưới? Tên bắt đầu bằng `_` là quy ước PEP 8 cho «phần bên trong, đừng đụng từ ngoài». Python không có `private` như C# hay Java: nếu bạn viết `trip._status = "completed"` thì nó chạy. Tên bắt đầu bằng hai gạch dưới (`self.__x`) cũng không khoá gì; Python chỉ đổi tên thuộc tính thành `_TênLớp__x` để tránh trùng tên khi kế thừa, và ai biết tên đã đổi vẫn truy cập được. Tức là encapsulation trong Python là **thoả thuận giữa những người viết code**, được hỗ trợ bởi cấu trúc: không có setter, chỉ có một cửa vào để đổi trạng thái. Nếu bạn quen `private set` của C# ở [bài C# về class và property](/articles/csharp-class-property-encapsulation), đây là phần khác biệt đáng chú ý nhất.
+Còn dấu gạch dưới? Tên bắt đầu bằng `_` là quy ước PEP 8 cho «phần bên trong, đừng đụng từ ngoài». Python không có `private` như C# hay Java: nếu bạn viết `trip._status = "completed"` thì nó chạy. Tên bắt đầu bằng hai gạch dưới (`self.__x`) cũng không khoá gì; Python chỉ đổi tên thuộc tính thành `_TênLớp__x` để tránh trùng tên khi kế thừa, và ai biết tên đã đổi vẫn truy cập được. Tức là encapsulation trong Python là **thoả thuận giữa những người viết code**, và được cấu trúc code hỗ trợ: không có setter, chỉ có một cửa vào để đổi trạng thái. Nếu bạn quen `private set` của C# ở [bài C# về class và property](/articles/csharp-class-property-encapsulation), đây là phần khác biệt đáng chú ý nhất.
 
 <figure class="tkh-fig">
 <div class="tkh-fig-box">
@@ -158,7 +158,7 @@ Phương thức `advance` là **cửa duy nhất** được sửa `_status`. Ngu
 
 Ba lớp kiểm tra tương ứng ba loại lỗi: tên trạng thái không tồn tại, chuyển không có trong dict, và dữ liệu đi kèm không khớp (nhận chuyến mà không nói ai nhận). Điều kiện cuối giữ một **bất biến** của mô hình: từ `accepted` trở đi chuyến luôn có `driver_id`. Bất biến ấy chỉ giữ được vì `driver_id` không có setter; nếu ai gán `trip.driver_id = None` được, mọi kiểm tra trên mất ý nghĩa.
 
-Chuyển sang `cancelled` ghi nhận ở đây là một bước thường như các bước khác; hồ sơ thật còn cần lý do huỷ và ai huỷ (khách, tài xế hay hệ thống), mà bài này cố ý chưa mô hình hoá.
+Việc chuyển sang `cancelled` được ghi nhận ở đây như một bước thường, giống các bước khác; hồ sơ thật còn cần lý do huỷ và ai huỷ (khách, tài xế hay hệ thống), mà bài này cố ý chưa mô hình hoá.
 
 ## `__slots__`: đo trước khi tin
 
@@ -176,9 +176,9 @@ class TripRowSlots:
 
 `TripRow` giống hệt nhưng chỉ có `@dataclass`. Hàm `bytes_per_instance` tạo 50.000 đối tượng, đo phần bộ nhớ cấp thêm bằng `tracemalloc` (trừ phần con trỏ của list chứa); các giá trị field là cùng một object, nên con số chỉ phản ánh khung đối tượng. Kết quả (lần chạy ở phần sau): **112 byte** cho `TripRow`, **72 byte** cho `TripRowSlots`, ít hơn khoảng 36%. Trên 2 triệu chuyến mỗi ngày, 40 byte chênh lệch là chừng 80 MB, nhưng chỉ nếu bạn nạp cả ngày vào bộ nhớ cùng lúc; bài 06 đã cho thấy ta thường tránh điều đó bằng generator.
 
-Hai lưu ý khi đo. Thứ nhất, `sys.getsizeof` không phải thước đo phù hợp ở đây: lab in `48` cho bản không slots và `72` cho bản slots, tức là kết quả **ngược** với thực tế, vì với bản không slots nó không tính dữ liệu thuộc tính (cách CPython lưu chúng thay đổi theo phiên bản). `tracemalloc` đo cái chương trình thật sự cấp phát. Thứ hai, con số này của một cấu hình cụ thể (Python 3.14.7, macOS arm64); đổi phiên bản hay nền tảng thì chênh lệch đổi theo, nên lab chỉ kiểm «có slots thì nhỏ hơn».
+Hai lưu ý khi đo. Thứ nhất, `sys.getsizeof` không phải thước đo phù hợp ở đây: lab in `48` cho bản không slots và `72` cho bản slots, tức là kết quả **ngược** với thực tế, vì với bản không slots nó không tính dữ liệu thuộc tính (cách CPython lưu chúng thay đổi theo phiên bản). `tracemalloc` đo cái chương trình thật sự cấp phát. Thứ hai, con số này đo trên một cấu hình cụ thể (Python 3.14.7, macOS arm64); đổi phiên bản hay nền tảng thì chênh lệch đổi theo, nên lab chỉ kiểm «có slots thì nhỏ hơn».
 
-Cái giá của slots: không thêm được thuộc tính ngoài danh sách (`AttributeError: ... no __dict__ for setting new attributes`), kế thừa phức tạp hơn, và một số tính năng như `weakref` phải xin riêng. Slots **không** thay thế encapsulation: nó ngăn thuộc tính lạ, không ngăn gán vào thuộc tính đã khai báo. Với `Trip` chỉ vài nghìn đối tượng trong bộ nhớ, không cần slots; hãy nghĩ đến nó khi số lượng đối tượng nhỏ lên tới hàng triệu.
+Cái giá của slots: không thêm được thuộc tính ngoài danh sách (`AttributeError: ... no __dict__ for setting new attributes`), kế thừa phức tạp hơn, và một số tính năng như `weakref` phải khai báo riêng. Slots **không** thay thế encapsulation: nó ngăn thuộc tính lạ, không ngăn gán vào thuộc tính đã khai báo. Với `Trip` chỉ vài nghìn đối tượng trong bộ nhớ, không cần slots; hãy nghĩ đến nó khi có tới hàng triệu đối tượng nhỏ.
 
 ## Chạy và kiểm chứng
 
@@ -223,9 +223,9 @@ sys.getsizeof: 48 (không slots) so với 72 (slots)
 thêm thuộc tính lạ: AttributeError: 'TripRowSlots' object has no attribute 'note' and no __dict__ for setting new attributes
 ```
 
-Cách đọc. Phần 1 cho thấy lỗ hổng của class thường: chuyến nhảy thẳng sang `completed` mà không ai hỏi. Phần 2: `==` của dataclass so nội dung, `hash` bị từ chối, list mặc định bị chặn từ lúc khai báo. Phần 3: gán vào property thì lỗi, nhưng `t1._status = 'completed'` chạy được, đúng như đáp án câu hỏi đầu bài. Phần 4: `advance` từ chối chuyển sai và nhận chuyến thiếu tài xế, và đối tượng giữ nguyên. Dòng `trạng thái sau lỗi: searching` không mâu thuẫn: bước `searching` trước đó hợp lệ, chỉ bước `accepted` thiếu `driver_id` bị từ chối.
+Cách đọc. Phần 1 cho thấy lỗ hổng của class thường: chuyến nhảy thẳng sang `completed` mà không ai hỏi. Phần 2: `==` của dataclass so nội dung, `hash` bị từ chối, list mặc định bị chặn từ lúc khai báo. Phần 3: gán vào property thì lỗi, nhưng `t1._status = 'completed'` chạy được, đúng như đáp án câu hỏi đầu bài. Phần 4: `advance` từ chối bước chuyển sai và việc nhận chuyến thiếu tài xế, còn đối tượng giữ nguyên. Dòng `trạng thái sau lỗi: searching` không mâu thuẫn: bước `searching` trước đó hợp lệ, chỉ bước `accepted` thiếu `driver_id` bị từ chối.
 
-Chế độ `--verify` so các kết quả này (cùng cước 0, 2, 2,5, 5 km là 12.000, 12.000, 14.250, 25.500; mọi chuyển hợp lệ; bốn trạng thái huỷ được; hai trạng thái cuối; các ca từ chối ở `__post_init__`) với giá trị kỳ vọng:
+Chế độ `--verify` so các kết quả này (cùng cước 0, 2, 2,5, 5 km là 12.000, 12.000, 14.250, 25.500; mọi chuyển hợp lệ; bốn trạng thái huỷ được; hai trạng thái cuối; các test case từ chối ở `__post_init__`) với giá trị kỳ vọng:
 
 ```bash
 uv run --project examples/toi-noi-python/11-class-dataclass-property examples/toi-noi-python/11-class-dataclass-property/main.py --verify
@@ -245,14 +245,14 @@ OK 36/36
 
 <div class="tkh-callout tkh-callout--warn">
 <span class="tkh-callout-title">Giới hạn của ví dụ so với production</span>
-<p>Mọi bảo vệ ở đây nằm trong bộ nhớ của một process. Hai request ở hai server có thể nạp cùng một chuyến <code>requested</code>, mỗi bên gọi <code>advance("searching")</code> thành công trên bản sao riêng của nó; encapsulation không phải khoá phân tán, và <code>advance()</code> cũng không an toàn khi nhiều thread cùng sửa một object. Trạng thái thật phải đi qua database với kiểm tra lúc ghi (bài 25 nói về optimistic concurrency). Mô hình 8 trạng thái là bản học tập: chưa có lý do huỷ, chưa có thời điểm của từng bước, và <code>created_at</code> được truyền vào thay vì đọc đồng hồ để lab chạy lặp lại được. Việc thay đồng hồ bằng đối tượng tiêm vào được là chủ đề bài 14.</p>
+<p>Mọi bảo vệ ở đây nằm trong bộ nhớ của một process. Hai request ở hai server có thể nạp cùng một chuyến <code>requested</code>, mỗi bên gọi <code>advance("searching")</code> thành công trên bản sao riêng của nó; encapsulation không phải khoá phân tán, và <code>advance()</code> cũng không an toàn khi nhiều thread cùng sửa một object. Trạng thái thật phải đi qua database với kiểm tra lúc ghi (bài 25 nói về optimistic concurrency). Mô hình 8 trạng thái là bản học tập: chưa có lý do huỷ, chưa có thời điểm của từng bước, và <code>created_at</code> được truyền vào thay vì đọc đồng hồ để lab chạy lặp lại được. Việc dùng đồng hồ được inject là chủ đề của bài 14.</p>
 </div>
 
 **Bài tập 1:** `trip.history.append("completed")` và `trip._history.append("completed")` khác nhau thế nào về hậu quả?
 
 **Bài tập 2:** viết thuộc tính hoặc phương thức `can_advance(new_status) -> bool` trả `True` nếu chuyển được mà không ném lỗi. Có nên dùng nó rồi gọi `advance` hai lần (kiểm tra, rồi chuyển) không?
 
-<details><summary>Xem lời giải</summary><p>(1) Câu đầu ném <code>AttributeError: 'tuple' object has no attribute 'append'</code>, vì <code>history</code> trả tuple (một bản sao), nên không có gì bị đổi. Câu sau chạy được và để lịch sử ghi <code>completed</code> trong khi <code>status</code> vẫn là trạng thái cũ: hai thông tin lệch nhau mà không báo lỗi nào. Đó là lý do chỉ có một nơi (<code>advance</code>) được ghi cả hai, và đó là việc quy ước gạch dưới chỉ nhắc chứ không cưỡng chế. (2) Một cách viết: <code>return new_status in ALLOWED_TRANSITIONS.get(self._status, ())</code>. Nó chỉ trả lời về <i>bảng chuyển</i>, chưa tính điều kiện <code>driver_id</code> đi kèm, nên «<code>can_advance</code> đúng» vẫn có thể gặp <code>ValueError</code> khi gọi <code>advance</code>. Dùng nó để hiển thị nút trên giao diện thì được; còn để «kiểm tra rồi chuyển» thì hai bước tách rời dễ lệch nhau khi code khác chen vào giữa, nên đường chính vẫn là gọi <code>advance</code> và bắt <code>ValueError</code>.</p></details>
+<details><summary>Xem lời giải</summary><p>(1) Câu đầu ném <code>AttributeError: 'tuple' object has no attribute 'append'</code>, vì <code>history</code> trả tuple (một bản sao), nên không có gì bị đổi. Câu sau chạy được và để lịch sử ghi <code>completed</code> trong khi <code>status</code> vẫn là trạng thái cũ: hai thông tin lệch nhau mà không báo lỗi nào. Đó là lý do chỉ có một nơi (<code>advance</code>) được ghi cả hai, và đó là việc quy ước gạch dưới chỉ nhắc chứ không cưỡng chế. (2) Một cách viết: <code>return new_status in ALLOWED_TRANSITIONS.get(self._status, ())</code>. Hàm này chỉ trả lời về <i>bảng chuyển</i>, chưa tính điều kiện <code>driver_id</code> đi kèm, nên «<code>can_advance</code> đúng» vẫn có thể gặp <code>ValueError</code> khi gọi <code>advance</code>. Dùng nó để hiển thị nút trên giao diện thì được; còn để «kiểm tra rồi chuyển» thì hai bước tách rời dễ lệch nhau khi code khác chen vào giữa, nên đường chính vẫn là gọi <code>advance</code> và bắt <code>ValueError</code>.</p></details>
 
 Bài trước: [bài 10](/articles/python-pytest-kiem-thu-chinh-sach-cuoc). Bài tiếp: [bài 12](/articles/python-type-hints-mypy-protocol-generics).
 

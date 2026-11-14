@@ -1,0 +1,167 @@
+{
+ "file": "python-opencv-phat-hien-canh-perspective-deskew.md",
+ "edits": [
+  {
+   "old": "Ở bài 41, Tesseract trần đọc ảnh xoay",
+   "new": "Ở bài 41, Tesseract nguyên bản đọc ảnh xoay",
+   "reason": "Cụm tự ghép nghe cụt",
+   "severity": "medium"
+  },
+  {
+   "old": "nên hình chữ nhật thành hình thang:",
+   "new": "nên hình chữ nhật biến thành hình thang:",
+   "reason": "Câu thiếu động từ tự nhiên",
+   "severity": "low"
+  },
+  {
+   "old": "Bài làm đúng việc đó và đo kết quả.",
+   "new": "Bài này làm đúng việc đó rồi đo kết quả.",
+   "reason": "Thiếu chủ ngữ tự nhiên",
+   "severity": "medium"
+  },
+  {
+   "old": "Ảnh có bốn điều kiện (lược bớt dòng cuối của ví dụ):",
+   "new": "Ảnh chia theo bốn điều kiện chụp (output đã bỏ bớt dòng cuối):",
+   "reason": "Câu cụt, thiếu nghĩa",
+   "severity": "medium"
+  },
+  {
+   "old": "là Tesseract trên nguyên ảnh: 0,972",
+   "new": "là kết quả của Tesseract chạy trên ảnh nguyên bản: 0,972",
+   "reason": "Câu thiếu động từ, lược danh từ",
+   "severity": "medium"
+  },
+  {
+   "old": "trong khi chính 50 giấy tờ đó khi ảnh sạch cho 0,024.",
+   "new": "trong khi cùng 50 giấy tờ đó ở dạng ảnh sạch cho 0,024.",
+   "reason": "Cách diễn đạt gượng",
+   "severity": "low"
+  },
+  {
+   "old": "để cạnh mỏng một điểm ảnh,",
+   "new": "để cạnh mỏng còn một điểm ảnh,",
+   "reason": "Câu cụt",
+   "severity": "low"
+  },
+  {
+   "old": "Ta dãn cạnh bằng nhân 3x3 hai lần",
+   "new": "Ta dãn cạnh bằng kernel 3x3 hai lần",
+   "reason": "Dịch ép thuật ngữ kernel",
+   "severity": "medium"
+  },
+  {
+   "old": "`hard` lệch tới 19,7 px ở ảnh xấu nhất; ta không tách từng ảnh nên không giải thích.",
+   "new": "`hard` lệch tới 19,7 px ở ảnh xấu nhất; ta không xét riêng từng ảnh nên không giải thích được.",
+   "reason": "Câu cụt, thiếu từ",
+   "severity": "medium"
+  },
+  {
+   "old": "ra 0 trên 7, do kiểm tra",
+   "new": "cho kết quả 0 trên 7, do kiểm tra",
+   "reason": "Cách nói cụt",
+   "severity": "low"
+  },
+  {
+   "old": "Cả bảy ảnh ra tứ giác lệch",
+   "new": "Cả bảy ảnh đều cho tứ giác lệch",
+   "reason": "Cách nói cụt",
+   "severity": "low"
+  },
+  {
+   "old": "Giải thích hợp lý, ta không đo riêng:",
+   "new": "Có một cách giải thích hợp lý nhưng ta không đo riêng:",
+   "reason": "Câu thiếu chủ ngữ",
+   "severity": "medium"
+  },
+  {
+   "old": "sẽ nắn sai thẻ có chữ ở phần bị cắt mà không báo.",
+   "new": "sẽ nắn sai thẻ có chữ ở phần bị cắt mà không báo gì.",
+   "reason": "Cách sửa chuẩn thay cho 'không báo'",
+   "severity": "low"
+  },
+  {
+   "old": "Thứ tự góc quan trọng: đảo hai góc là ảnh bị lật hoặc xoắn,",
+   "new": "Thứ tự góc rất quan trọng: đảo chỗ hai góc thì ảnh bị lật hoặc xoắn,",
+   "reason": "Cấu trúc câu kiểu tiếng Anh",
+   "severity": "medium"
+  },
+  {
+   "old": "và quy ước đổi theo bản OpenCV.",
+   "new": "và quy ước này thay đổi theo từng bản OpenCV.",
+   "reason": "Câu cụt",
+   "severity": "medium"
+  },
+  {
+   "old": "`deskew` rồi xoay ngược góc đó quanh tâm bằng",
+   "new": "`deskew` lấy góc đó rồi xoay ngược lại quanh tâm bằng",
+   "reason": "Câu thiếu động từ",
+   "severity": "high"
+  },
+  {
+   "old": "góc ước lượng đúng 0,00:",
+   "new": "góc ước lượng bằng đúng 0,00:",
+   "reason": "Dễ hiểu nhầm 'đúng' là chính xác",
+   "severity": "low"
+  },
+  {
+   "old": "trên ảnh có mặt bàn nó không làm gì",
+   "new": "trên ảnh có mặt bàn thì bước này không làm gì",
+   "reason": "Dùng 'nó' chỉ sự vật trừu tượng",
+   "severity": "low"
+  },
+  {
+   "old": "Ta tách việc đo làm ba bảng, mỗi bảng đổi một nhóm biến.",
+   "new": "Ta chia phép đo thành ba bảng, mỗi bảng thay đổi một nhóm biến.",
+   "reason": "Cách nói gượng",
+   "severity": "low"
+  },
+  {
+   "old": "(ảnh trừ bản làm mờ hộp 5x5)",
+   "new": "(ảnh trừ bản làm mờ box 5x5)",
+   "reason": "Dịch ép thuật ngữ box blur",
+   "severity": "medium"
+  },
+  {
+   "old": "lọc trung vị làm nó còn 1,82.",
+   "new": "lọc trung vị làm số đo này còn 1,82.",
+   "reason": "Dùng 'nó' chỉ sự vật trừu tượng",
+   "severity": "low"
+  },
+  {
+   "old": "Kết luận đổi.",
+   "new": "Kết luận thay đổi.",
+   "reason": "Câu cụt",
+   "severity": "medium"
+  },
+  {
+   "old": "nên CER của hai bài không so với nhau được.",
+   "new": "nên CER của hai bài không so sánh với nhau được.",
+   "reason": "Cách nói gượng",
+   "severity": "low"
+  },
+  {
+   "old": "lệnh sau kiểm 33 điều",
+   "new": "lệnh sau kiểm tra 33 điều",
+   "reason": "Động từ cụt",
+   "severity": "low"
+  },
+  {
+   "old": "Các ca kiểm là bất biến và thứ bậc lớn:",
+   "new": "Các test case kiểm tra những bất biến và thứ bậc lớn:",
+   "reason": "Thống nhất thuật ngữ, câu thiếu động từ",
+   "severity": "medium"
+  },
+  {
+   "old": "không tự động là quyết định xác minh.",
+   "new": "không tự thành quyết định xác minh.",
+   "reason": "Giọng dịch máy",
+   "severity": "low"
+  },
+  {
+   "old": "tắt kiểm tra sát mép cho CER 0,020 thay vì 0,336.",
+   "new": "nếu tắt kiểm tra sát mép thì CER là 0,020 thay vì 0,336.",
+   "reason": "Câu cụt, thiếu động từ",
+   "severity": "medium"
+  }
+ ]
+}

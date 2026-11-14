@@ -1,18 +1,18 @@
 ---
 slug: location-hoc-diem-don-tu-lich-su-dbscan-python
 title: "Học điểm đón từ lịch sử bằng DBSCAN: vòng tròn và kết quả rỗng"
-summary: "Bài 39: DBSCAN trên đơn vị mét bằng Python và uv, xuất bảng hub cho Rust. Bảng học được không làm J tốt hơn (km rỗng −0,4 m [−1,5; +0,7]) vì lịch sử là vòng tròn và thưa. Trên dữ liệu mô phỏng, chỉ chứng minh phương pháp."
+summary: "Bài 39: DBSCAN trên đơn vị mét bằng Python và uv, xuất bảng hub cho Rust. Bảng học được không làm J tốt hơn (km rỗng −0,4 m [−1,5; +0,7]) vì lịch sử là vòng tròn và thưa. Trên dữ liệu mô phỏng, bài chỉ chứng minh phương pháp."
 category: location-routing
 level: advanced
 tags: [toi-noi, location, python, uv, dbscan, clustering, rust, simulation, bias]
 language: vi
 ---
 
-Một người vận hành nhìn bản đồ nhiệt của các điểm đón trong tháng và thấy vài đốm đỏ: nhiều khách hay được đón ở cùng một cổng, cùng một đoạn lề. Ý tưởng tự nhiên là biến các đốm đó thành một **bảng điểm đón** và đưa cho bộ chọn điểm đón như danh sách ứng viên đáng tin: nơi mà tài xế thật sự đã dừng, dễ đỗ, khách quen. Phân cụm theo mật độ là công cụ hiển nhiên cho việc này, và nó chạy tốt bằng Python trong vài chục dòng. Nhưng đây là bài phải dè chừng nhất trong cả phần, vì dữ liệu lịch sử của chúng ta không đến từ đời thật. Nó đến từ simulator.
+Một người vận hành nhìn bản đồ nhiệt của các điểm đón trong tháng và thấy vài đốm đỏ: nhiều khách hay được đón ở cùng một cổng, cùng một đoạn lề. Ý tưởng tự nhiên là biến các đốm đó thành một **bảng điểm đón** và đưa cho bộ chọn điểm đón như danh sách ứng viên đáng tin: nơi mà tài xế thật sự đã dừng, dễ đỗ, khách quen. Phân cụm theo mật độ là công cụ hiển nhiên cho việc này, và nó chạy tốt bằng Python trong vài chục dòng. Nhưng đây là bài phải dè chừng nhất trong cả phần, vì dữ liệu lịch sử của chúng ta không đến từ đời thật. Dữ liệu ấy đến từ simulator.
 
-Bài này làm ba việc. Dựng đường ống: xuất lịch sử điểm đón từ simulator, chạy DBSCAN bằng Python trong môi trường `uv`, đưa bảng hub về Rust. Đo xem bảng đó có làm hàm mục tiêu `J` tốt hơn không. Và, quan trọng nhất, nói rõ **vòng tròn** của việc học từ dữ liệu do chính mình sinh ra. Kết quả đo là **rỗng**: bảng hub không làm `J` tốt hơn. Phần lớn bài là giải thích vì sao, và việc đó dạy được nhiều hơn một con số đẹp.
+Bài này làm ba việc. Dựng pipeline: xuất lịch sử điểm đón từ simulator, chạy DBSCAN bằng Python trong môi trường `uv`, đưa bảng hub về Rust. Đo xem bảng đó có làm hàm mục tiêu `J` tốt hơn không. Và, quan trọng nhất, nói rõ **vòng tròn** của việc học từ dữ liệu do chính mình sinh ra. Kết quả đo là **rỗng**: bảng hub không làm `J` tốt hơn. Phần lớn bài là giải thích vì sao, và việc đó dạy được nhiều hơn một con số đẹp.
 
-Đây là bài 39 của lộ trình **Tối ưu quãng đường hai phía** qua [Tới Nơi](/articles/du-an-mau-toi-noi). Bài dựng trên bộ sinh ứng viên của [bài 33](/articles/location-sinh-ung-vien-diem-don-do-thi-di-bo), khoảng cách theo mét của [bài 04](/articles/location-khoang-cach-haversine-equirectangular-sai-so) và việc lưu lịch sử vị trí của [bài 20](/articles/location-lich-su-gps-parquet-retention-quyen-rieng-tu). So sánh cặp theo 20 seed đánh giá (20270001…20270020, khoảng tin cậy t 95%) như đã định nghĩa ở [bài 32](/articles/location-ham-muc-tieu-diem-hen-khach-va-tai-xe). Mọi số trong bài là **trên dữ liệu mô phỏng**; simulator không dự đoán thế giới thật, và bài này chỉ chứng minh **phương pháp**, không chứng minh hiệu quả ngoài đời.
+Đây là bài 39 của lộ trình **Tối ưu quãng đường hai phía** qua [Tới Nơi](/articles/du-an-mau-toi-noi). Bài dựng trên bộ sinh ứng viên của [bài 33](/articles/location-sinh-ung-vien-diem-don-do-thi-di-bo), khoảng cách theo mét của [bài 04](/articles/location-khoang-cach-haversine-equirectangular-sai-so) và việc lưu lịch sử vị trí của [bài 20](/articles/location-lich-su-gps-parquet-retention-quyen-rieng-tu). Bài so sánh cặp theo 20 seed đánh giá (20270001…20270020, khoảng tin cậy t 95%) như đã định nghĩa ở [bài 32](/articles/location-ham-muc-tieu-diem-hen-khach-va-tai-xe). Mọi số trong bài đều đo **trên dữ liệu mô phỏng**; simulator không dự đoán thế giới thật, và bài này chỉ chứng minh **phương pháp**, không chứng minh hiệu quả ngoài đời.
 
 <div class="tkh-callout tkh-callout--example">
 <span class="tkh-callout-title">Thử trước khi đọc</span>
@@ -26,13 +26,13 @@ Hai chi tiết về dữ liệu cần nói trước, vì người đọc loạt 
 
 **Lịch sử là CSV do simulator xuất, không phải Parquet.** [Bài 20](/articles/location-lich-su-gps-parquet-retention-quyen-rieng-tu) thiết kế lịch sử GPS lưu dạng Parquet. Bài này **không** dùng nó, vì hợp đồng Parquet của dự án (`proto/location/v1/gps-history-parquet.md`) mô tả điểm GPS lấy mẫu của tài xế, không có nhãn «đây là điểm đón». Thứ DBSCAN cần là **điểm dừng đón**: nơi một chuyến hoàn thành đã đón khách. Lab Rust xuất đúng thứ đó ra CSV với cột `seed, customer, lat, lng, pin_lat, pin_lng, outcome`. Trong thực tế bạn sẽ dựng điểm đón từ sự kiện chuyến (trạng thái «đã đón») ghép với vị trí tài xế lúc đó, có thể từ Parquet, và đó là việc của pipeline Python ở phần P06.
 
-**Lịch sử có đúng 40 seed riêng.** Seed 20260301…20260340, không giao với dải chỉnh (20261201…20261210) và dải đánh giá (20270001…20270020). Lab chạy baseline (đón đúng ghim, tài xế gần nhất) trên 40 seed, được 8.723 dòng, trong đó 7.546 chuyến hoàn thành. Chỉ chuyến hoàn thành mới được học, vì ở chuyến huỷ khách chưa thực sự được đón tại điểm đó.
+**Lịch sử có đúng 40 seed riêng.** Seed 20260301…20260340, không giao với dải seed dùng để chỉnh (20261201…20261210) và dải đánh giá (20270001…20270020). Lab chạy baseline (đón đúng ghim, tài xế gần nhất) trên 40 seed, thu được 8.723 dòng, trong đó 7.546 chuyến hoàn thành. Chỉ chuyến hoàn thành mới được học, vì ở chuyến huỷ khách chưa thực sự được đón tại điểm đó.
 
 ## DBSCAN trên đơn vị mét
 
 DBSCAN (Ester, Kriegel, Sander, Xu, KDD-96) gom các điểm theo mật độ: một điểm là **lõi** nếu có ít nhất `min_samples` điểm (kể cả nó) trong bán kính `eps`; các điểm lõi gần nhau nối thành cụm; điểm không thuộc cụm nào là **nhiễu**. Khác với k-means, nó không cần biết trước số cụm và để lại nhiễu. Với điểm đón, hai tính chất đó hợp lý: ta không biết có bao nhiêu điểm đón nổi tiếng, và phần lớn điểm đón chỉ là «khách đứng đâu đó».
 
-Quan trọng là **đơn vị**. `eps` phải tính bằng mét; nếu đưa độ vĩ độ, kinh độ thẳng vào, `eps` sẽ lệch theo hướng vì một độ kinh ngắn hơn một độ vĩ theo cos(vĩ độ). Script chiếu equirectangular quanh trọng tâm (đủ chính xác trong bbox một thành phố, như bài 04), rồi chạy DBSCAN trên mét.
+Quan trọng là **đơn vị**. `eps` phải tính bằng mét; nếu đưa thẳng giá trị vĩ độ, kinh độ (tính theo độ) vào, `eps` sẽ lệch theo hướng vì một độ kinh ngắn hơn một độ vĩ theo cos(vĩ độ). Script chiếu equirectangular quanh trọng tâm (đủ chính xác trong bbox một thành phố, như bài 04), rồi chạy DBSCAN trên mét.
 
 `examples/toi-noi-location/python/loc39/loc39_dbscan.py`
 
@@ -61,9 +61,9 @@ def fit_hubs(xy: np.ndarray, eps: float, min_samples: int) -> tuple[np.ndarray, 
     return (np.array(hubs) if hubs else np.zeros((0, 2))), np.array(counts)
 ```
 
-## Chọn tham số: một quy tắc đặt trước, một cái so ngẫu nhiên
+## Chọn tham số: một quy tắc đặt trước, một mốc so sánh ngẫu nhiên
 
-Chọn `eps` và `min_samples` bằng mắt là cách dễ nhất để «chỉnh tới khi đẹp». Script làm khác: chia 40 seed thành 30 seed huấn luyện và 10 seed kiểm định **theo seed, không xáo trộn**; học hub trên huấn luyện; chấm trên kiểm định bằng **độ phủ** (tỉ lệ điểm đón kiểm định cách một hub không quá 100 m); và so với một baseline ngẫu nhiên có cùng số hub chọn trong điểm đón huấn luyện. Quy tắc chọn được đặt trước: trong các cấu hình có từ 5 đến 150 hub và trung bình từ 10 điểm mỗi hub, chọn cấu hình có độ phủ **vượt** ngẫu nhiên lớn nhất; hoà thì ít hub hơn.
+Chọn `eps` và `min_samples` bằng mắt là cách dễ nhất để «chỉnh tới khi đẹp». Script làm khác: chia 40 seed thành 30 seed huấn luyện và 10 seed kiểm định **theo seed, không xáo trộn**; học hub trên huấn luyện; chấm điểm trên tập kiểm định bằng **độ phủ** (tỉ lệ điểm đón kiểm định cách một hub không quá 100 m); và so với một baseline ngẫu nhiên có cùng số hub chọn trong điểm đón huấn luyện. Quy tắc chọn được đặt trước: trong các cấu hình có từ 5 đến 150 hub và trung bình từ 10 điểm mỗi hub, chọn cấu hình có độ phủ **vượt** ngẫu nhiên lớn nhất; nếu hoà thì chọn cấu hình ít hub hơn.
 
 Để chọn lưới, script in khoảng cách từ mỗi điểm tới láng giềng thứ k (trên tập huấn luyện):
 
@@ -84,7 +84,7 @@ Nguồn: `results/p04.md`, LOC-39. Láng giềng thứ 10 cách trung vị tới
 | 250 | 20 | 12 | 0,007 | 0,004 | +0,003 | |
 | 400 | 40 | 5 | 0,002 | 0,002 | +0,000 | |
 
-Nguồn: `results/p04.md`, LOC-39, quét tham số trên 24 cấu hình (sáu dòng được trích), chấm trên 10 seed kiểm định, trên dữ liệu mô phỏng. Cấu hình chọn theo quy tắc là `eps` = 100 m, `min_samples` = 10, cho 31 hub trên tập huấn luyện. Độ phủ của hub chỉ **3,2%** điểm đón kiểm định, so với 1,2% khi chọn hub ngẫu nhiên, và cả hai đều rất thấp: hầu hết điểm đón mới không rơi cạnh hub nào. Chênh +0,020 lại được chọn là lớn nhất trong 24 cấu hình trên chính tập kiểm định và so với một lần chọn ngẫu nhiên, nên nó lạc quan; không nên đọc là bằng chứng chắc rằng học hơn ngẫu nhiên. Hồ sơ cuối cùng, học trên cả 40 seed, có 62 hub và 84% điểm đón là nhiễu.
+Nguồn: `results/p04.md`, LOC-39, quét tham số trên 24 cấu hình (sáu dòng được trích), chấm trên 10 seed kiểm định, trên dữ liệu mô phỏng. Cấu hình chọn theo quy tắc là `eps` = 100 m, `min_samples` = 10, cho 31 hub trên tập huấn luyện. Độ phủ của hub chỉ đạt **3,2%** điểm đón kiểm định, so với 1,2% khi chọn hub ngẫu nhiên, và cả hai đều rất thấp: hầu hết điểm đón mới không rơi cạnh hub nào. Mức chênh +0,020 lại được chọn là lớn nhất trong 24 cấu hình trên chính tập kiểm định và so với một lần chọn ngẫu nhiên, nên con số này lạc quan; không nên đọc đó là bằng chứng chắc chắn rằng cách học hơn ngẫu nhiên. Hồ sơ cuối cùng, học trên cả 40 seed, có 62 hub và 84% điểm đón là nhiễu.
 
 ## Vòng tròn: học lại cái mình đã đặt
 
@@ -106,16 +106,16 @@ Nguồn: `results/p04.md`, LOC-39, quét tham số trên 24 cấu hình (sáu d�
 <figcaption>Hình 2. Khoảng cách từ mỗi điểm nóng đã đặt tới hub học được gần nhất (mét), cùng số hub trong 2σ của điểm nóng đó. Đường đứt đứng đánh dấu 2σ. Sáu trong tám điểm nóng có hub gần nhất trong vòng 422 m; hai điểm nóng trọng số thấp nhất còn lại ít hoặc không có hub. Trên dữ liệu mô phỏng.</figcaption>
 </figure>
 
-Hình 2 đọc được hai điều. Các điểm nóng có trọng số cao (Chợ Bến Thành, Landmark 81: trọng số 3,0 và 2,0) có hub gần nhất chỉ 64–65 m và hàng chục hub quanh đó. Điểm nóng trọng số thấp, nhu cầu ít (Gò Vấp, trọng số 1,0) thì hub gần nhất cách 2.346 m, **không có hub nào** trong 2σ. DBSCAN không phát hiện «điểm đón mới», nó phát hiện **nơi simulator đã cho nhiều khách**. Script đo mỗi hub bằng σ riêng của điểm nóng: 62/62 hub nằm trong 2σ, 52 hub trong 1σ, xa nhất 1,5σ. Tám vòng 2σ chỉ phủ 18% diện tích bbox của lab, nên việc mọi hub rơi vào đó không phải chuyện ngẫu nhiên. Nhưng vòng 2σ vẫn rộng (bán kính 1.400–2.000 m): nó nói hub nằm trong vùng đã đặt, không nói hub trùng điểm nóng; bảng khoảng cách ở Hình 2 cho biết chi tiết đó. Cụm học được là vùng nhu cầu cho trước, không phải khám phá.
+Hình 2 đọc được hai điều. Các điểm nóng có trọng số cao (Chợ Bến Thành, Landmark 81: trọng số 3,0 và 2,0) có hub gần nhất chỉ cách 64–65 m và có hàng chục hub quanh đó. Điểm nóng trọng số thấp, nhu cầu ít (Gò Vấp, trọng số 1,0) thì hub gần nhất cách 2.346 m, **không có hub nào** trong 2σ. DBSCAN không phát hiện «điểm đón mới», nó phát hiện **nơi simulator đã cho nhiều khách**. Script đo khoảng cách từ mỗi hub tới điểm nóng theo σ riêng của điểm nóng đó: 62/62 hub nằm trong 2σ, 52 hub trong 1σ, xa nhất 1,5σ. Tám vòng 2σ chỉ phủ 18% diện tích bbox của lab, nên việc mọi hub rơi vào đó không phải do ngẫu nhiên. Nhưng vòng 2σ vẫn rộng (bán kính 1.400–2.000 m): nó nói hub nằm trong vùng đã đặt, không nói hub trùng điểm nóng; bảng khoảng cách ở Hình 2 cho biết chi tiết đó. Cụm học được là vùng nhu cầu cho trước, không phải khám phá.
 
-**Không có «điểm đón nổi tiếng» để học.** Vì khách đứng ngẫu nhiên và trơn quanh điểm nóng, mật độ điểm đón không có đỉnh nhọn cấp vài chục mét. Với `eps` từ 50 m trở xuống, chỉ `min_samples` = 5 còn cho cụm (32 hub ở `eps` 50 m, 3 hub ở 25 m), mỗi hub trung bình chưa tới 6 điểm; các `min_samples` lớn hơn cho 0 hub. Ngoài đời, những nơi như cổng một toà nhà hay miệng hẻm thật sự có đỉnh nhọn. Mô phỏng này không có, nên nó không thể cho thấy DBSCAN học được gì từ chúng.
+**Không có «điểm đón nổi tiếng» để học.** Vì khách đứng ngẫu nhiên, phân bố mượt quanh điểm nóng, mật độ điểm đón không có đỉnh nhọn cấp vài chục mét. Với `eps` từ 50 m trở xuống, chỉ `min_samples` = 5 còn cho cụm (32 hub ở `eps` 50 m, 3 hub ở 25 m), mỗi hub trung bình chưa tới 6 điểm; các `min_samples` lớn hơn cho 0 hub. Ngoài đời, những nơi như cổng một toà nhà hay miệng hẻm thật sự có đỉnh nhọn. Mô phỏng này không có những đỉnh đó, nên không thể cho thấy DBSCAN học được gì từ chúng.
 
-**Vòng 2: học từ nơi tài xế đã đón sẽ củng cố thiên lệch.** Đây là vòng mà lab **không** đo trực tiếp, nhưng nó là rủi ro chính khi đem phương pháp này ra thực tế. Lịch sử điểm đón là nơi tài xế **đã** dừng, tức nơi mà hệ thống hiện tại (ở đây là baseline, đón ở ghim đã snap) đã đưa họ tới. Nếu bảng học được được đưa lại vào bộ chọn điểm đón và bộ chọn thiên về các hub, tài xế sẽ đón nhiều hơn ở các hub; lần học sau, các hub đó lại đông hơn. Nơi chưa ai từng đón không bao giờ vào bảng, kể cả khi nó tốt hơn. Cái bạn học được là thói quen của hệ thống cũ, không phải điểm đón tốt.
+**Vòng 2: học từ nơi tài xế đã đón sẽ củng cố thiên lệch.** Đây là vòng mà lab **không** đo trực tiếp, nhưng nó là rủi ro chính khi đem phương pháp này ra thực tế. Lịch sử điểm đón là nơi tài xế **đã** dừng, tức nơi mà hệ thống hiện tại (ở đây là baseline, đón ở ghim đã snap) đã đưa họ tới. Nếu bảng học được quay lại làm đầu vào của bộ chọn điểm đón và bộ chọn thiên về các hub, tài xế sẽ đón nhiều hơn ở các hub; lần học sau, các hub đó lại đông hơn. Nơi chưa ai từng đón không bao giờ vào bảng, kể cả khi nó tốt hơn. Điều bạn học được là thói quen của hệ thống cũ, không phải điểm đón tốt.
 
 Lab đo được **một nửa** của thiên lệch đó, ở bước học (chưa có vòng phản hồi):
 
 - Trong 7.546 điểm đón lịch sử của baseline, **541 (7,2%)** nằm ở chỗ mà ràng buộc cứng của `J` sẽ loại: 355 trên cạnh quá ngắn, 137 trên cầu, hầm hay cầu vượt, 22 trên vòng xuyến, 27 trên đường cấm dừng. Lý do: baseline snap ghim lên đường gần nhất bất kể luật dừng.
-- Trong 62 hub học được, **3 hub (4,8%)** nằm trên cạnh vi phạm ràng buộc cứng. Bảng học thẳng từ lịch sử học luôn cả các chỗ đó.
+- Trong 62 hub học được, **3 hub (4,8%)** nằm trên cạnh vi phạm ràng buộc cứng. Vì học thẳng từ lịch sử, bảng học luôn cả các chỗ đó.
 
 Lab chặn rủi ro này theo một cách đơn giản: hub chỉ được thêm làm **ứng viên** và vẫn phải qua ràng buộc cứng. Đoạn mã dưới đây là bước thêm hub trong bộ xếp hạng:
 
@@ -151,7 +151,7 @@ Lab chặn rủi ro này theo một cách đơn giản: hub chỉ được thêm
                     }
 ```
 
-Hub bị bỏ nếu quá xa khách, không snap được trong 30 m, vi phạm ràng buộc cứng, hoặc trùng một ứng viên đã có trong 10 m. Điều đó trả lời câu hỏi «hub có thể đưa khách vào chỗ cấm dừng không»: không, trong lab. Nó cũng giải thích kết quả rỗng ở mục sau.
+Hub bị bỏ nếu quá xa khách, không snap được trong 30 m, vi phạm ràng buộc cứng, hoặc trùng một ứng viên đã có trong 10 m. Điều đó trả lời câu hỏi «hub có thể đưa khách vào chỗ cấm dừng không»: không, trong lab. Cơ chế lọc này cũng giải thích kết quả rỗng ở mục sau.
 
 ## Bảng học được có làm J tốt hơn không: không
 
@@ -169,15 +169,15 @@ Cách đo là so cặp ba lần trên cùng 20 seed đánh giá: `J` không hub 
 
 Nguồn: `results/p04.md`, LOC-39 (3). Mọi khoảng tin cậy chứa 0 hoặc bằng 0; không chỉ số nào trong bảng đầy đủ (19 chỉ số) có khoảng loại 0. Trên dữ liệu mô phỏng.
 
-Hub có mặt trong tập ứng viên của **5,5%** yêu cầu, trung bình 0,10 hub thêm cho mỗi yêu cầu. Vì sao ít vậy? Bộ sinh ứng viên của bài 33 đã **liệt kê mọi điểm dừng hợp lệ trong tầm đi bộ** của khách. Hub là một điểm dừng hợp lệ, nên thường đã có sẵn một ứng viên trong 10 m. Hub chỉ có ích khi nó mang thông tin mà `J` chưa có, ví dụ «điểm này dễ đỗ, khách quen», chứ không chỉ là một điểm dừng hợp lệ. Mô phỏng không có thông tin nào như vậy, và `J` không có số hạng nào cho độ phổ biến: thêm một hub chỉ thêm một chỗ được chấm như mọi chỗ khác.
+Hub có mặt trong tập ứng viên của **5,5%** yêu cầu, trung bình 0,10 hub thêm cho mỗi yêu cầu. Vì sao ít vậy? Bộ sinh ứng viên của bài 33 đã **liệt kê mọi điểm dừng hợp lệ trong tầm đi bộ** của khách. Hub là một điểm dừng hợp lệ, nên thường đã có sẵn một ứng viên trong 10 m. Hub chỉ có ích khi nó mang thông tin mà `J` chưa có, ví dụ «điểm này dễ đỗ, khách quen», chứ không chỉ là một điểm dừng hợp lệ. Mô phỏng không có thông tin nào như vậy, và `J` không có số hạng nào cho độ phổ biến: thêm một hub chỉ là thêm một ứng viên được chấm điểm như mọi ứng viên khác.
 
-**Phép thử lệch phân phối.** Lab dịch toàn bộ điểm nóng 0,02° (khoảng 2,2 km) về phía bắc nhưng giữ bảng hub học ở vị trí cũ. Nếu hub có ích thì lệch sẽ làm nó có hại (đưa khách tới chỗ cũ). Kết quả: hub chỉ có mặt trong **1,0%** yêu cầu (so với 5,5%), và không có tác dụng cũng không có hại: `deadhead_m` −0,0 [−0,1; +0,0]. Hub rơi khỏi tập ứng viên khi nhu cầu dịch đi; phép thử này cho thấy bảng học được **không theo kịp** thay đổi phân phối, một điểm yếu của bảng học từ lịch sử, nhưng vì hub vốn không có ích nên nó không đo được thiệt hại.
+**Phép thử lệch phân phối.** Lab dịch toàn bộ điểm nóng 0,02° (khoảng 2,2 km) về phía bắc nhưng giữ bảng hub học ở vị trí cũ. Nếu hub có ích thì độ lệch này sẽ làm nó có hại (đưa khách tới chỗ cũ). Kết quả: hub chỉ có mặt trong **1,0%** yêu cầu (so với 5,5%), và không có tác dụng cũng không có hại: `deadhead_m` −0,0 [−0,1; +0,0]. Hub rơi khỏi tập ứng viên khi nhu cầu dịch đi; phép thử này cho thấy bảng học được **không theo kịp** thay đổi phân phối, một điểm yếu của bảng học từ lịch sử, nhưng vì hub vốn không có ích nên nó không đo được thiệt hại.
 
 ## Ai được lợi, ai chịu thiệt
 
 Với bảng học được như một thành phần riêng, **không thấy ai được lợi hay chịu thiệt**: mọi khoảng tin cậy chứa 0. Ở đây «không khác biệt» đáng tin hơn thường lệ vì khoảng rất hẹp (km rỗng ±1,1 m), và lý do cũng đơn giản: hub hiếm khi đổi quyết định, nên phần lớn seed cho kết quả y hệt (ở `deadhead_m`, 17 trên 20 seed không đổi). Phần lợi ích của `J` so với baseline (ở hai dòng (1) và (2) trong output) là của chính `J`, không phải của bảng: `deadhead_m` −107,0 m so với −107,4 m có hub, như nhau.
 
-Rủi ro, nếu đem phương pháp ra đời thật, thuộc về **khách ở những nơi hiếm người đón**: một bảng học từ lịch sử sẽ thiên về nơi đã đông. Nơi nhiều người đón (trung tâm) được hub thêm ứng viên tốt; nơi ít người đón (rìa) không có hub nào, và nếu hub còn tác động tới việc chọn điểm thì sự chênh lệch dịch vụ giữa hai khu tăng lên. Lab không đo điều này; đây là một rủi ro cần kiểm ngay khi có dữ liệu thật, theo tinh thần nguyên tắc «không phân biệt đối xử theo khu vực» của [bài 45](/articles/location-chi-phi-ghep-cong-bang-tai-xe-rui-ro-huy).
+Rủi ro, nếu đem phương pháp ra đời thật, thuộc về **khách ở những nơi hiếm người đón**: một bảng học từ lịch sử sẽ thiên về nơi đã đông. Nơi nhiều người đón (trung tâm) được hub bổ sung thêm ứng viên tốt; nơi ít người đón (rìa) không có hub nào, và nếu hub còn tác động tới việc chọn điểm thì sự chênh lệch dịch vụ giữa hai khu tăng lên. Lab không đo điều này; đây là một rủi ro cần kiểm tra ngay khi có dữ liệu thật, theo tinh thần nguyên tắc «không phân biệt đối xử theo khu vực» của [bài 45](/articles/location-chi-phi-ghep-cong-bang-tai-xe-rui-ro-huy).
 
 ## Chạy ví dụ và kiểm chứng
 
@@ -190,7 +190,7 @@ cargo run --release -q --manifest-path examples/toi-noi-location/rust/Cargo.toml
 cargo run --release -q --manifest-path examples/toi-noi-location/rust/Cargo.toml -p labs --bin loc39_hoc_diem_don -- --eval --jobs 6
 ```
 
-Bước 1 ghi `python/artifacts/loc39/pickups_history.csv` (thư mục này nằm trong `.gitignore`). Bước 2 đọc file đó, quét tham số, ghi `pickup_table.csv` với cột `hub_id, lat, lng, n_points, n_seeds, radius_m`. Bước 3 nạp bảng và đo `J` có hub so với không hub. Output thật của bước 1 và các dòng chính của bước 2 (Python 3.13.15, trên dữ liệu mô phỏng):
+Bước 1 ghi `python/artifacts/loc39/pickups_history.csv` (thư mục này nằm trong `.gitignore`). Bước 2 đọc file đó, quét tham số, ghi `pickup_table.csv` với cột `hub_id, lat, lng, n_points, n_seeds, radius_m`. Bước 3 nạp bảng và đo `J` có hub so với không hub. Kết quả chạy thật của bước 1 và các dòng chính của bước 2 (Python 3.13.15, trên dữ liệu mô phỏng):
 
 ```text
 đã ghi 8723 dòng (7546 chuyến hoàn thành) vào .../python/artifacts/loc39/pickups_history.csv
@@ -219,19 +219,19 @@ Kiểm tra nhanh không cần simulator: `uv run python loc39_dbscan.py --selfte
 - **Hub chỉ là ứng viên**, không phải ưu tiên; `J` vẫn chọn theo chi phí. Một cách dùng khác (cộng điểm thưởng cho hub) chưa thử.
 - **Dữ liệu vào không phải Parquet GPS** của hợp đồng lịch sử (xem trên); không dùng dữ liệu thật.
 - **Chỉ một họ thuật toán** (DBSCAN, một lưới 24 cấu hình, một metric độ phủ 100 m). HDBSCAN hay OPTICS (mật độ thay đổi) không thử.
-- **«62/62 hub trong 2σ»** là phép đo thô: vòng 2σ có bán kính 1.400–2.000 m. Nó xác nhận hub nằm trong vùng đã đặt, không nói gì về từng điểm dừng.
+- **«62/62 hub trong 2σ»** là phép đo thô: vòng 2σ có bán kính 1.400–2.000 m. Phép đo này xác nhận hub nằm trong vùng đã đặt, không nói gì về từng điểm dừng.
 - **Seed lịch sử tách khỏi seed đánh giá**, nhưng cùng một kịch bản; phép thử lệch phân phối là một dịch chuyển duy nhất (0,02° về phía bắc).
 - **Phiên bản thư viện** ghim trong `uv.lock`; chưa chạy lại trên phiên bản khác.
 
 ## Bài tập
 
-**Bài 1.** Với `eps` = 100 m, `min_samples` = 5 độ phủ vượt ngẫu nhiên lớn nhất (+0,023) nhưng bị loại, còn `min_samples` = 10 (+0,020) được chọn. Vì sao quy tắc đặt trước loại cấu hình đầu, và đó có phải là «chọn cho đẹp» không?
+**Bài 1.** Với `eps` = 100 m, `min_samples` = 5 có độ phủ vượt ngẫu nhiên lớn nhất (+0,023) nhưng bị loại, còn `min_samples` = 10 (+0,020) được chọn. Vì sao quy tắc đặt trước loại cấu hình đầu, và đó có phải là «chọn cho đẹp» không?
 
 <details><summary>Lời giải bài 1</summary>
 <p>Cấu hình đầu cho 154 hub, vượt giới hạn 150 hub của quy tắc; quy tắc được viết trước khi chạy quét, nhằm tránh một bảng quá dày (gần như mọi điểm là hub, độ phủ tăng chỉ vì nhiều hub). Đó không phải chọn cho đẹp vì giới hạn có sẵn từ trước và áp dụng như nhau cho mọi dòng; nhưng nó vẫn là một lựa chọn của người viết, và con số 150 chưa được biện minh bằng dữ liệu.</p>
 </details>
 
-**Bài 2.** Thiết kế một thí nghiệm trong simulator để đo **vòng 2** (bảng hub làm đổi nơi đón và lần học sau học lại chính nó). Chỉ rõ cái gì thay đổi giữa các thế hệ và chỉ số nào báo thiên lệch tăng.
+**Bài 2.** Thiết kế một thí nghiệm trong simulator để đo **vòng 2** (bảng hub làm đổi nơi đón và lần học sau học lại chính nó). Chỉ rõ điều gì thay đổi giữa các thế hệ và chỉ số nào báo thiên lệch tăng.
 
 <details><summary>Lời giải bài 2</summary>
 <p>Chạy theo thế hệ: thế hệ 0 học từ baseline; thế hệ 1 dùng bảng thế hệ 0 theo cách làm hub có trọng số (ví dụ cộng bớt vào <code>J</code> của hub) rồi xuất lịch sử điểm đón mới; học lại bảng; lặp vài thế hệ. Chỉ số báo thiên lệch: tỉ lệ điểm đón nằm ở hub, số hub, và độ chênh dịch vụ (ETA, quãng đi bộ) giữa khu đông điểm đón và khu thưa. Nếu thiên lệch tăng, tỉ lệ điểm đón ở hub tăng qua thế hệ trong khi khách ở khu thưa không được lợi tương ứng.</p>
@@ -240,7 +240,7 @@ Kiểm tra nhanh không cần simulator: `uv run python loc39_dbscan.py --selfte
 **Bài 3.** Hub chỉ có mặt trong 5,5% yêu cầu. Nếu một hub luôn trùng một ứng viên có sẵn trong 10 m thì nó bị bỏ. Hãy chỉ ra một thay đổi **mà lab chưa làm** khiến bảng học được có thể giúp thật, và nói điều kiện dữ liệu cần có.
 
 <details><summary>Lời giải bài 3</summary>
-<p>Cho hub mang thông tin mà <code>J</code> không có: ví dụ một hệ số «độ dễ đỗ, độ tin cậy» học từ lịch sử thật (tỉ lệ đón thành công, thời gian khách chờ ở điểm đó, tỉ lệ khách không tìm thấy xe), dùng làm số hạng thưởng hoặc phạt trong <code>J</code>. Điều kiện: có nhãn kết quả thật cho từng điểm đón, mà simulator không có (khách đứng ngẫu nhiên, mọi điểm dừng hợp lệ như nhau). Ngoài đời, cần kiểm không phân biệt đối xử theo khu vực trước khi bật.</p>
+<p>Cho hub mang thông tin mà <code>J</code> không có: ví dụ một hệ số «độ dễ đỗ, độ tin cậy» học từ lịch sử thật (tỉ lệ đón thành công, thời gian khách chờ ở điểm đó, tỉ lệ khách không tìm thấy xe), dùng làm số hạng thưởng hoặc phạt trong <code>J</code>. Điều kiện: có nhãn kết quả thật cho từng điểm đón, mà simulator không có (khách đứng ngẫu nhiên, mọi điểm dừng hợp lệ như nhau). Ngoài đời, cần kiểm tra việc không phân biệt đối xử theo khu vực trước khi bật.</p>
 </details>
 
 Bài trước: [bài 38](/articles/location-toi-uu-diem-tra-cong-vao-chuyen-ke-tiep). Bài tiếp: [bài 40](/articles/location-cuoc-quote-giai-thich-doi-diem-don-cho-khach).

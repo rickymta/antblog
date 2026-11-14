@@ -1,0 +1,107 @@
+{
+  "file": "dotnet10-middleware-di-options-logging.md",
+  "edits": [
+    {
+      "old": "Các ví dụ target `net10.0`; code trong repository và các đoạn đầy đủ dưới đây dùng cùng implementation được chạy kiểm chứng.",
+      "new": "Các ví dụ nhắm tới `net10.0`; code trong repository và các đoạn đầy đủ dưới đây dùng cùng một bản cài đặt đã được chạy kiểm chứng.",
+      "reason": "Bỏ giọng dịch máy, 'target' và 'implementation' lọt vào văn xuôi.",
+      "severity": "medium"
+    },
+    {
+      "old": "<p>Không. Nó sống theo container/process đang chạy;",
+      "new": "<p>Không. Singleton sống theo container/process đang chạy;",
+      "reason": "'Nó' chỉ vật trừu tượng ở đầu câu.",
+      "severity": "low"
+    },
+    {
+      "old": "request được xử lý bởi luồng nào và timestamp nào đi ra. Rải Console.WriteLine trong policy không tạo được một cách quan sát thống nhất.",
+      "new": "luồng nào xử lý request và timestamp nào được trả về. Rải Console.WriteLine trong policy không tạo ra một cách quan sát thống nhất.",
+      "reason": "Bị động kiểu Anh; 'đi ra' gượng.",
+      "severity": "medium"
+    },
+    {
+      "old": "Không mô phỏng hệ thống version giá theo thời điểm hiệu lực;",
+      "new": "Bài không mô phỏng hệ thống phiên bản bảng giá theo thời điểm hiệu lực;",
+      "reason": "'version giá' là từ ghép gượng; thống nhất 'phiên bản'; thiếu chủ ngữ.",
+      "severity": "high"
+    },
+    {
+      "old": "UseExceptionHandler được đăng ký trước middleware quan sát để bọc lỗi phía trong.",
+      "new": "UseExceptionHandler đăng ký trước middleware quan sát để bọc các lỗi phát sinh bên trong.",
+      "reason": "Bỏ bị động, làm rõ 'lỗi phía trong'.",
+      "severity": "medium"
+    },
+    {
+      "old": "Đường request đi vào theo thứ tự đăng ký, quay ra sau await theo chiều ngược. Nếu không gọi next, middleware có thể short-circuit; nếu viết header quá muộn sau khi response bắt đầu, hành vi không còn như kỳ vọng.",
+      "new": "Request đi vào theo thứ tự đăng ký và quay ra sau await theo chiều ngược lại. Nếu không gọi next, middleware có thể ngắt chuỗi xử lý (short-circuit); nếu ghi header quá muộn, sau khi response đã bắt đầu, hành vi sẽ không như kỳ vọng.",
+      "reason": "Câu cụt, giải nghĩa short-circuit, 'viết header' gượng.",
+      "severity": "medium"
+    },
+    {
+      "old": "Log Request completed chỉ chạy ở đường next trở về bình thường của middleware này;",
+      "new": "Log Request completed chỉ chạy khi next trả về bình thường trong middleware này;",
+      "reason": "Cụm 'đường next trở về' tự ghép.",
+      "severity": "medium"
+    },
+    {
+      "old": "không gán cho ví dụ những bảo đảm nó chưa có.",
+      "new": "đừng gán cho ví dụ những bảo đảm mà ví dụ chưa có.",
+      "reason": "'nó' mơ hồ, câu cụt.",
+      "severity": "low"
+    },
+    {
+      "old": "Đây là thí nghiệm lifetime, không là endpoint tiết lộ thông tin hạ tầng cần public ở production.",
+      "new": "Đây là thí nghiệm về lifetime, không phải endpoint tiết lộ thông tin hạ tầng cần công khai ở production.",
+      "reason": "'không là' dịch máy; 'public' viết tiếng Anh.",
+      "severity": "high"
+    },
+    {
+      "old": "Không inject dependency scoped vào singleton rồi giữ lâu: nó có thể bị nâng lifetime và chia sẻ state ngoài ý muốn.",
+      "new": "Đừng inject dependency scoped vào singleton rồi giữ lại lâu dài: dependency đó có thể sống lâu như singleton (lifetime bị nâng lên) và chia sẻ state ngoài ý muốn.",
+      "reason": "'nâng lifetime' gượng, 'nó' mơ hồ.",
+      "severity": "high"
+    },
+    {
+      "old": "Middleware truyền thống sống lâu cũng cần cách nhận dependency scoped đúng phạm vi",
+      "new": "Middleware truyền thống có vòng đời dài cũng cần cách nhận dependency scoped đúng phạm vi",
+      "reason": "'sống lâu' ngay sau 'truyền thống' gây hiểu nhầm.",
+      "severity": "medium"
+    },
+    {
+      "old": "Nếu cấu hình âm, test mong OptionsValidationException khi khởi động, không chờ tới request đầu rồi trả giá âm.",
+      "new": "Nếu cấu hình có giá trị âm, test kỳ vọng OptionsValidationException ngay khi khởi động, thay vì chờ tới request đầu tiên rồi trả giá âm.",
+      "reason": "'cấu hình âm' cụt, 'test mong' gượng.",
+      "severity": "medium"
+    },
+    {
+      "old": "Không log toàn bộ configuration để debug vì các mục khác có thể chứa bí mật.",
+      "new": "Đừng log toàn bộ cấu hình để debug, vì các mục khác có thể chứa bí mật.",
+      "reason": "Thống nhất 'cấu hình'.",
+      "severity": "low"
+    },
+    {
+      "old": "điều này không hứa hot reload theo từng request.",
+      "new": "điều này không bảo đảm tự nạp lại cấu hình (hot reload) theo từng request.",
+      "reason": "'không hứa' dịch máy.",
+      "severity": "medium"
+    },
+    {
+      "old": "nếu sau này chấp nhận correlation từ ngoài phải validate/giới hạn theo hợp đồng.",
+      "new": "nếu sau này chấp nhận mã correlation từ bên ngoài thì phải kiểm tra và giới hạn theo hợp đồng.",
+      "reason": "Thiếu liên từ, 'validate/giới hạn' trộn cách viết.",
+      "severity": "medium"
+    },
+    {
+      "old": "vì sao fail fast tốt hơn âm thầm thay về 0?",
+      "new": "vì sao fail fast tốt hơn việc tự thay về 0 mà không báo gì?",
+      "reason": "Calque 'âm thầm' (theo style guide).",
+      "severity": "medium"
+    },
+    {
+      "old": "nên kết quả so instance đổi.",
+      "new": "nên kết quả so sánh instance sẽ đổi.",
+      "reason": "Thiếu từ 'so sánh'.",
+      "severity": "medium"
+    }
+  ]
+}

@@ -1,0 +1,185 @@
+{
+ "file": "python-abc-protocol-composition-dependency-injection.md",
+ "edits": [
+  {
+   "old": "nhưng gặp cùng một vật cản.",
+   "new": "nhưng vướng cùng một vật cản.",
+   "reason": "«gặp vật cản» gượng",
+   "severity": "low"
+  },
+  {
+   "old": "Bài 10 đã kết bằng ý rằng thiết kế dễ test là thiết kế mà phụ thuộc được truyền vào;",
+   "new": "Bài 10 đã khép lại bằng nhận định rằng thiết kế dễ test là thiết kế truyền phụ thuộc từ ngoài vào;",
+   "reason": "«kết bằng ý rằng» là giọng dịch máy, bị động gượng",
+   "severity": "medium"
+  },
+  {
+   "old": "Bài sẽ chạy đúng ca này, rồi dùng ABC và Protocol để dời lỗi về sớm hơn.",
+   "new": "Bài sẽ chạy đúng trường hợp này, rồi dùng ABC và Protocol để lỗi lộ ra sớm hơn.",
+   "reason": "«ca» và «dời lỗi về sớm hơn» gượng",
+   "severity": "medium"
+  },
+  {
+   "old": "Lỗi <code>AttributeError</code> chỉ bay ra khi dòng",
+   "new": "Lỗi <code>AttributeError</code> chỉ xuất hiện khi dòng",
+   "reason": "«bay ra» là calque của raise/fly",
+   "severity": "low"
+  },
+  {
+   "old": "khai báo hợp đồng bằng kiểu rồi để mypy kiểm. Nhưng trước khi tới đó, ta xem mã chưa có hợp đồng nào trông ra sao.",
+   "new": "khai báo hợp đồng bằng kiểu rồi để mypy kiểm tra. Nhưng trước khi tới đó, ta xem đoạn code chưa có hợp đồng nào trông ra sao.",
+   "reason": "«kiểm» đứng một mình, «mã» dễ nhầm với mã lỗi",
+   "severity": "low"
+  },
+  {
+   "old": "vì mỗi lần đọc đồng hồ thật cho một giá trị khác",
+   "new": "vì mỗi lần đọc, đồng hồ thật trả về một giá trị khác",
+   "reason": "câu khó đọc, dễ hiểu nhầm «đọc đồng hồ thật cho»",
+   "severity": "medium"
+  },
+  {
+   "old": "Bảng giá cũng không thay được:",
+   "new": "Ta cũng không thay được bảng giá:",
+   "reason": "câu thiếu chủ ngữ, mơ hồ",
+   "severity": "medium"
+  },
+  {
+   "old": "«phương thức này lớp con bắt buộc cài»",
+   "new": "«lớp con bắt buộc phải cài đặt phương thức này»",
+   "reason": "trật tự từ kiểu tiếng Anh, thiếu chủ ngữ",
+   "severity": "medium"
+  },
+  {
+   "old": "Phần được ABC cưỡng chế là việc cài `lookup`. Python kiểm điều đó **lúc khởi tạo**, không phải lúc gọi:",
+   "new": "ABC cưỡng chế việc cài `lookup`, và Python kiểm tra điều đó **lúc khởi tạo**, không phải lúc gọi:",
+   "reason": "bị động gượng, «kiểm» đứng một mình",
+   "severity": "medium"
+  },
+  {
+   "old": "và mypy còn báo trước cả khi chạy (`[abstract]`, xem phần cuối)",
+   "new": "và mypy còn báo lỗi từ trước khi chạy (`[abstract]`, xem phần cuối)",
+   "reason": "câu thiếu danh từ «lỗi»",
+   "severity": "medium"
+  },
+  {
+   "old": "Nếu cần kiểm cả lúc chạy, `@runtime_checkable` cho phép `isinstance`",
+   "new": "Nếu cần kiểm tra cả lúc chạy, `@runtime_checkable` cho phép dùng `isinstance`",
+   "reason": "«kiểm» đứng một mình",
+   "severity": "low"
+  },
+  {
+   "old": "vẫn nói đúng.",
+   "new": "vẫn trả về True.",
+   "reason": "«nói đúng» mơ hồ, đối chiếu với output",
+   "severity": "medium"
+  },
+  {
+   "old": "dựa vào mypy để kiểm chữ ký; dùng `isinstance` với Protocol nhiều nhất để phân nhánh lúc chạy, đừng coi nó là cổng an toàn.",
+   "new": "dựa vào mypy để kiểm tra chữ ký; cùng lắm chỉ dùng `isinstance` với Protocol để phân nhánh lúc chạy, đừng coi nó là cổng an toàn.",
+   "reason": "«nhiều nhất» dịch máy từ at most",
+   "severity": "medium"
+  },
+  {
+   "old": "Với người đã đọc loạt C#, đối chiếu: `interface` trong C# là **nominal**, lớp phải khai báo `: IFarePolicy`, còn Protocol của Python là **structural**.",
+   "new": "Với người đã đọc loạt C#, ta có thể đối chiếu như sau: `interface` trong C# là **nominal** (khớp theo tên khai báo), lớp phải khai báo `: IFarePolicy`, còn Protocol của Python là **structural** (khớp theo cấu trúc).",
+   "reason": "câu cụt thiếu chủ ngữ, thuật ngữ nominal/structural chưa có chú giải",
+   "severity": "medium"
+  },
+  {
+   "old": "hai bài chung cách nghĩ, khác ở chỗ",
+   "new": "hai bài có chung cách nghĩ, khác ở chỗ",
+   "reason": "thiếu động từ",
+   "severity": "low"
+  },
+  {
+   "old": "**không phải thứ gì cũng cần cổng**:",
+   "new": "**không phải thứ gì cũng cần cổng (port)**:",
+   "reason": "chú giải «cổng» ở lần dùng đầu để thống nhất khái niệm",
+   "severity": "medium"
+  },
+  {
+   "old": "(bài 13 đã đặt nó nhận `now` làm tham số;",
+   "new": "(bài 13 đã cho hàm này nhận `now` làm tham số;",
+   "reason": "«nó» mơ hồ",
+   "severity": "low"
+  },
+  {
+   "old": "nên ở mốc 5 phút tròn nó đã hết hạn",
+   "new": "nên ở mốc 5 phút tròn báo giá đã hết hạn",
+   "reason": "«nó» mơ hồ, nhắc lại danh từ",
+   "severity": "low"
+  },
+  {
+   "old": "test bên dưới ghi nó lại như một phần đặc tả.",
+   "new": "test bên dưới ghi lại lựa chọn đó như một phần đặc tả.",
+   "reason": "«nó» mơ hồ",
+   "severity": "medium"
+  },
+  {
+   "old": "Test hạn báo giá không phải chờ:",
+   "new": "Test kiểm tra hạn báo giá không phải chờ:",
+   "reason": "lược mất động từ, cụm tự ghép cụt",
+   "severity": "medium"
+  },
+  {
+   "old": "Test, mypy cho mã và test, và mypy cho các lỗi cố ý trong `broken.py`:",
+   "new": "Chạy test, mypy cho mã và test, rồi mypy cho các lỗi cố ý trong `broken.py`:",
+   "reason": "câu thiếu động từ",
+   "severity": "medium"
+  },
+  {
+   "old": "Dòng 29 chính là ca của câu hỏi đầu bài,",
+   "new": "Dòng 29 chính là trường hợp của câu hỏi đầu bài,",
+   "reason": "thống nhất bỏ «ca»",
+   "severity": "medium"
+  },
+  {
+   "old": "Chế độ `--verify` kiểm các kết quả trên,",
+   "new": "Chế độ `--verify` kiểm tra các kết quả trên,",
+   "reason": "«kiểm» đứng một mình",
+   "severity": "low"
+  },
+  {
+   "old": "Test báo giá lúc đạt lúc trượt, tuỳ giờ chạy",
+   "new": "Test báo giá lúc đạt lúc không đạt, tuỳ giờ chạy",
+   "reason": "«trượt» là dịch từ fail, thống nhất «không đạt»",
+   "severity": "medium"
+  },
+  {
+   "old": "Thêm cổng cho mọi hàm, mã khó đọc hẳn",
+   "new": "Thêm cổng cho mọi hàm khiến mã khó đọc hẳn đi",
+   "reason": "câu thiếu liên kết nhân quả",
+   "severity": "medium"
+  },
+  {
+   "old": "cần nơi lưu và kiểm báo giá phía server",
+   "new": "cần nơi lưu và kiểm tra báo giá phía server",
+   "reason": "«kiểm» đứng một mình",
+   "severity": "low"
+  },
+  {
+   "old": "và chưa kiểm nội dung file;",
+   "new": "và chưa kiểm tra nội dung file;",
+   "reason": "«kiểm» đứng một mình",
+   "severity": "low"
+  },
+  {
+   "old": "chữ ký trong Protocol chỉ được kiểm khi ta chạy mypy",
+   "new": "chữ ký trong Protocol chỉ được kiểm tra khi ta chạy mypy",
+   "reason": "«kiểm» đứng một mình",
+   "severity": "low"
+  },
+  {
+   "old": "chính sách mới đi vào qua nhà cung cấp, đúng mục tiêu của DI.",
+   "new": "chính sách mới đi vào qua nguồn chính sách, đúng mục tiêu của DI.",
+   "reason": "một khái niệm một tên: «nguồn chính sách»",
+   "severity": "medium"
+  },
+  {
+   "old": "rồi lỗi mới bay ra ở lần gọi",
+   "new": "rồi lỗi mới xuất hiện ở lần gọi",
+   "reason": "«bay ra» là calque",
+   "severity": "low"
+  }
+ ]
+}

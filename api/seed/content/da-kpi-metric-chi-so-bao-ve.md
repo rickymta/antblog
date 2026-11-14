@@ -29,75 +29,75 @@ Trong P01, tỷ lệ huỷ trước đón là metric chính của câu hỏi. Ch
 
 **Grain** là ý nghĩa của một đơn vị quan sát: một lượt, một khách, một sự kiện hay một giao dịch. P01 dùng một lượt đặt xe đã được nhận. Một lượt có nhiều sự kiện nhưng chỉ được đếm một lần trong mẫu số.
 
-**Cohort** là tập lượt thoả điều kiện đã chốt. Với P01, ta xếp lượt vào W1/W2 theo lần nhận đầu tiên và giữ cohort ấy khi chờ kết quả. Nếu một lượt được nhận cuối W1 nhưng huỷ đầu W2, nó vẫn thuộc tử số của cohort W1 theo định nghĩa này.
+**Cohort** là tập lượt thoả điều kiện đã chốt. Với P01, ta xếp lượt vào W1/W2 theo thời điểm nhận lần đầu và giữ cohort ấy khi chờ kết quả. Nếu một lượt được nhận cuối W1 nhưng huỷ đầu W2, nó vẫn thuộc tử số của cohort W1 theo định nghĩa này.
 
-Đếm “mọi huỷ xảy ra trong W2” trả lời một câu hỏi theo sự kiện, có thể hữu ích cho vận hành. Nhưng chia số đó cho “lượt nhận trong W2” sẽ trộn hai tập nếu có lượt đi qua biên tuần.
+Đếm “mọi huỷ xảy ra trong W2” trả lời một câu hỏi theo sự kiện, có thể hữu ích cho vận hành. Nhưng chia số đó cho “lượt nhận trong W2” sẽ trộn hai tập nếu có lượt nằm vắt qua ranh giới giữa hai tuần.
 
 ## 3. Hợp đồng M-01 cho tỷ lệ huỷ trước đón
 
-Đây là bản **v0.1 đề xuất trong bài tập**. Các chỗ chưa chốt cho dữ liệu thực tế được giữ rõ.
+Đây là bản **v0.1 đề xuất trong bài tập**. Các chỗ chưa chốt cho dữ liệu thực tế được ghi rõ.
 
 | Trường | Định nghĩa |
 |---|---|
 | Tên / ID | M-01 — Tỷ lệ huỷ trước đón trong cohort đã được nhận |
 | Mục đích | Mô tả kết quả giai đoạn sau nhận, trước đón |
 | Grain | Một lượt đặt xe duy nhất |
-| Phạm vi | Dịch vụ ride, khu vực A; mapping A cần xác nhận |
+| Phạm vi | Dịch vụ ride, khu vực A; cách ánh xạ khu vực A cần xác nhận |
 | Mốc cohort | Lần tài xế nhận đầu tiên trong khoảng [đầu kỳ, đầu kỳ kế tiếp) |
 | Múi giờ | Asia/Ho_Chi_Minh khi xác định ranh giới kỳ báo cáo |
 | Mẫu số | Số lượt duy nhất thuộc cohort |
 | Tử số | Số lượt thuộc cohort được xác nhận huỷ trước khi đón |
 | Công thức | Tử số / mẫu số × 100% |
 | Kết quả chưa biết | Giữ trong cohort, báo riêng; chưa công bố tỷ lệ cuối kỳ khi chưa đủ điều kiện chốt |
-| Loại trừ | Dữ liệu test/trùng chỉ loại theo quy tắc có bằng chứng và lưu log |
+| Loại trừ | Dữ liệu test hoặc dữ liệu trùng chỉ bị loại theo quy tắc có bằng chứng và phải lưu log |
 | Phân nhóm | Cao điểm/còn lại theo thời điểm nhận; lịch cụ thể cần xác nhận |
-| Owner | Chủ chỉ số phía vận hành, DA soạn; chưa gán người thật |
-| Version / cập nhật | Lưu phiên bản nguồn, thời điểm chốt và lịch sử sửa số |
+| Người phụ trách | Chủ chỉ số thuộc phía vận hành, DA soạn; chưa chỉ định người cụ thể |
+| Phiên bản / cập nhật | Lưu phiên bản nguồn, thời điểm chốt và lịch sử sửa số |
 
 Với mẫu số bằng 0, tỷ lệ **không xác định**, không hiển thị 0% như một kết quả tốt. Nếu chưa đủ kết quả, có thể hiển thị số huỷ đã xác nhận trên cohort kèm nhãn “tạm tính” và số chưa biết; không được làm người đọc hiểu đó là tỷ lệ cuối cùng.
 
-## 4. Biên thời gian và dữ liệu trễ
+## 4. Ranh giới thời gian và dữ liệu trễ
 
-Dùng khoảng đầu kỳ có tính, đầu kỳ kế tiếp không tính giúp một thời điểm biên chỉ thuộc một kỳ. Không dùng “tới 23:59:59” như cách bao hết ngày nếu nguồn có phần giây nhỏ hơn.
+Dùng khoảng có tính đầu kỳ nhưng không tính đầu kỳ kế tiếp giúp thời điểm nằm đúng ranh giới chỉ thuộc một kỳ. Không dùng “tới 23:59:59” như cách bao hết ngày nếu nguồn ghi thời gian chính xác tới phần nhỏ hơn một giây.
 
 Độ trễ có hai mặt: hành trình chưa kết thúc và kết quả đã xảy ra nhưng chưa tới kho báo cáo. Mỗi mặt cần cách xác minh. Có thể mọi lượt nguồn đã đóng nhưng pipeline vẫn thiếu sự kiện; ngược lại pipeline cập nhật đầy đủ nhưng vẫn còn lượt chưa có kết quả.
 
-P01 giả định bảng luyện tính đã đủ kết quả. Khi triển khai thật, thời gian chờ và điều kiện chốt phải do nhóm xác định từ dữ liệu và nhu cầu sử dụng; bài không áp một con số giờ tuỳ ý. Nếu sửa kỳ cũ, phải cập nhật cả kết luận dùng số đó và thông báo người nhận theo quy trình DA-003.
+P01 giả định bảng luyện tính đã đủ kết quả. Khi triển khai thật, thời gian chờ và điều kiện chốt phải do nhóm xác định từ dữ liệu và nhu cầu sử dụng; bài không áp đặt một con số giờ tuỳ ý. Nếu sửa kỳ cũ, phải cập nhật cả kết luận dùng số đó và thông báo người nhận theo quy trình DA-003.
 
 ## 5. Đọc đúng mức thay đổi và tổng hợp
 
 Trong baseline P01, cao điểm từ 80/500 = 16% lên 135/750 = 18%. Chênh lệch là **2 điểm phần trăm**. Mức tăng tương đối là (18% − 16%)/16% = **12,5%**. Nên ghi cả số đếm để người đọc hiểu quy mô.
 
-Không lấy trung bình đơn giản các tỷ lệ khi mẫu số khác nhau. Biến thể độc lập: nhóm X có 10/100 huỷ, nhóm Y có 180/900. Tỷ lệ chung là 190/1.000 = **19%**, không phải (10% + 20%)/2 = 15%. Công thức an toàn là tổng tử số chia tổng mẫu số của các nhóm không trùng và bao phủ đúng tập.
+Không lấy trung bình đơn giản các tỷ lệ khi mẫu số khác nhau. Biến thể độc lập: nhóm X có 10/100 huỷ, nhóm Y có 180/900. Tỷ lệ chung là 190/1.000 = **19%**, không phải (10% + 20%)/2 = 15%. Công thức an toàn là tổng tử số chia tổng mẫu số của các nhóm không chồng lấn và gộp lại đúng bằng tập đang xét.
 
-Nếu nhóm chồng lấn, ngay cả cộng tử số/mẫu số cũng sai. Một khách có lượt ở cả hai khu vực không thể được cộng thành hai khách duy nhất cho toàn hệ thống. Grain phải đi cùng mỗi chỉ số.
+Nếu nhóm chồng lấn, ngay cả cộng tử số/mẫu số cũng sai. Một khách có lượt ở cả hai khu vực không được tính thành hai khách duy nhất khi cộng cho toàn hệ thống. Grain phải đi cùng mỗi chỉ số.
 
-## 6. Chọn chỉ số bảo vệ theo cách có thể bị đánh đổi
+## 6. Chọn chỉ số bảo vệ theo những gì có thể bị đánh đổi
 
 Giả sử một thay đổi làm nút huỷ khó tìm hơn. Tỷ lệ huỷ có thể giảm trong khi khách chờ lâu hoặc phải gọi hỗ trợ. Vì vậy, cần dự kiến mặt trái của hành động và cách phát hiện nó.
 
 | Chỉ số dự kiến | Điều muốn bảo vệ | Khoảng trống hiện tại |
 |---|---|---|
-| Tỷ lệ lượt có khiếu nại trong cửa sổ theo dõi | Trải nghiệm khi gặp vấn đề | Cần mapping ticket–lượt, định nghĩa khiếu nại và cửa sổ |
+| Tỷ lệ lượt có khiếu nại trong cửa sổ theo dõi | Trải nghiệm khi gặp vấn đề | Cần cách nối ticket với lượt, định nghĩa khiếu nại và cửa sổ |
 | Thời gian chờ và tỷ lệ chưa giải quyết | Tránh “giảm huỷ” bằng cách giữ lượt treo | Cần lịch sử, cách xử lý lượt chưa đón/đã huỷ |
-| Tỷ lệ hoàn thành trên toàn bộ yêu cầu | Tránh cải thiện cohort đã nhận bằng cách loại khách khó phục vụ trước nhận | Cần dữ liệu mọi yêu cầu và kết quả |
+| Tỷ lệ hoàn thành trên toàn bộ yêu cầu | Tránh cải thiện cohort đã nhận bằng cách loại bỏ khách khó phục vụ ngay từ trước khi nhận | Cần dữ liệu mọi yêu cầu và kết quả |
 | Tỷ lệ lỗi ứng dụng ở luồng liên quan | Tránh đổi trải nghiệm gây lỗi | Cần định nghĩa phiên/lượt và nguồn ghi nhận |
 
-Đây là danh sách đề xuất, **chưa có baseline, ngưỡng hoặc kết quả đo**. Mỗi chỉ số muốn sử dụng đều cần hợp đồng riêng. Không dùng “không tăng” mà quên cửa sổ, sai số và mức tác động được coi là đáng quan tâm.
+Đây là danh sách đề xuất, **chưa có baseline, ngưỡng hoặc kết quả đo**. Mỗi chỉ số muốn sử dụng đều cần hợp đồng riêng. Đừng dùng tiêu chí “không tăng” mà quên ghi kèm cửa sổ theo dõi, sai số và mức tác động được coi là đáng quan tâm.
 
-Chỉ số chất lượng dữ liệu có vai trò khác: ví dụ tỷ lệ lượt thiếu thời điểm nhận cho biết phép đo có đáng tin không. Nó không thay thế chỉ số trải nghiệm, nhưng có thể khiến nhóm phải hoãn dùng kết quả.
+Chỉ số chất lượng dữ liệu có vai trò khác: ví dụ tỷ lệ lượt thiếu thời điểm nhận cho biết phép đo có đáng tin không. Chỉ số này không thay thế chỉ số trải nghiệm, nhưng có thể khiến nhóm phải hoãn dùng kết quả.
 
 ## 7. Bài tập: tìm lỗi trong định nghĩa
 
-Review câu sau: “Tỷ lệ huỷ tuần = số event cancelled tuần đó / số khách đã đặt xe; lấy dữ liệu hiện tại, tuần sau chạy lại cũng được.” Hãy chỉ ra ít nhất bốn điểm cần sửa và viết hợp đồng ngắn cho M-01.
+Rà lại câu sau: “Tỷ lệ huỷ tuần = số event cancelled tuần đó / số khách đã đặt xe; lấy dữ liệu hiện tại, tuần sau chạy lại cũng được.” Hãy chỉ ra ít nhất bốn điểm cần sửa và viết hợp đồng ngắn cho M-01.
 
-<details><summary>Gợi ý lời giải</summary><p>Tử số event và mẫu số khách khác grain; event trong kỳ chưa chắc thuộc cohort cùng kỳ; chưa phân biệt huỷ trước/sau nhận và trước đón; thiếu ranh giới kỳ báo cáo/timezone; không có chính sách dữ liệu trễ và version. Với M-01, đếm lượt duy nhất ở cả tử và mẫu, cố định cohort theo lần nhận đầu, kiểm chứng lịch sử trước đón, lưu thời điểm chốt và kết quả chưa biết.</p></details>
+<details><summary>Gợi ý lời giải</summary><p>Tử số event và mẫu số khách khác grain; event trong kỳ chưa chắc thuộc cohort cùng kỳ; chưa phân biệt huỷ trước/sau nhận và trước đón; thiếu ranh giới kỳ báo cáo và múi giờ; không có chính sách dữ liệu trễ và phiên bản. Với M-01, đếm lượt duy nhất ở cả tử và mẫu, cố định cohort theo lần nhận đầu, kiểm chứng lịch sử trước đón, lưu thời điểm chốt và kết quả chưa biết.</p></details>
 
 **Bài tính:** Nhóm X/Y trong ví dụ có tỷ lệ chung bao nhiêu? Nếu nhóm Y thiếu 20 kết quả cuối, có được tiếp tục ghi “tỷ lệ cuối kỳ 19%” không?
 
 <details><summary>Gợi ý trả lời</summary><p>Khi đủ kết quả như đề gốc, 190/1.000 = 19%. Nếu đổi điều kiện sang thiếu 20 kết quả, phải nêu đó là số đã xác nhận/tạm tính và đánh giá khả năng sửa tỷ lệ; không giữ nhãn kết quả cuối. Không loại 20 lượt khỏi mẫu số chỉ để hết giá trị thiếu.</p></details>
 
-Checklist: grain; cohort; tử/mẫu cùng tập; biên thời gian; mẫu số 0; trạng thái chưa biết; loại trừ có log; owner/version; guardrail có định nghĩa riêng.
+Checklist: grain; cohort; tử/mẫu cùng tập; biên thời gian; mẫu số 0; trạng thái chưa biết; loại trừ có log; người phụ trách/phiên bản; chỉ số bảo vệ có định nghĩa riêng.
 
 ## 8. Tham khảo và bước tiếp
 

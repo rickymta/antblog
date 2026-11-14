@@ -1,0 +1,191 @@
+{
+  "file": "location-cuoc-quote-giai-thich-doi-diem-don-cho-khach.md",
+  "edits": [
+    {
+      "old": "Mỗi km thêm là 4.500 đồng.",
+      "new": "Mỗi km thêm làm cước tăng 4.500 đồng.",
+      "reason": "Câu cụt, thiếu động từ rõ nghĩa",
+      "severity": "low"
+    },
+    {
+      "old": "quote là một ảnh chụp bất biến",
+      "new": "quote là một snapshot bất biến",
+      "reason": "Thống nhất một tên: mục sau và hình đều dùng snapshot",
+      "severity": "medium"
+    },
+    {
+      "old": "Mô hình cước ở đây là cùng mô hình với các loạt khác của dự án",
+      "new": "Mô hình cước ở đây giống mô hình của các loạt khác trong dự án",
+      "reason": "Cấu trúc kiểu dịch máy",
+      "severity": "low"
+    },
+    {
+      "old": "Lab in vài giá trị để kiểm tay:",
+      "new": "Lab in vài giá trị để kiểm tra bằng tay:",
+      "reason": "Cụm tự ghép, thiếu chữ",
+      "severity": "medium"
+    },
+    {
+      "old": "Nó chứa điểm đón",
+      "new": "Quote chứa điểm đón",
+      "reason": "Tránh Nó chỉ sự vật trừu tượng đầu câu",
+      "severity": "medium"
+    },
+    {
+      "old": "Output thật của lab cho một quote ví dụ",
+      "new": "Kết quả chạy thật của lab cho một quote ví dụ",
+      "reason": "Từ tiếng Anh thông thường trong văn xuôi",
+      "severity": "medium"
+    },
+    {
+      "old": "để kiểm sau này rằng chính sách trong snapshot là chính sách đã dùng",
+      "new": "để sau này kiểm tra được rằng chính sách trong snapshot là chính sách đã dùng",
+      "reason": "Động từ kiểm cụt, trật tự từ kiểu Anh",
+      "severity": "medium"
+    },
+    {
+      "old": "bản ghi đồng ý nên idempotent theo",
+      "new": "bản ghi đồng ý nên idempotent (gọi lại nhiều lần vẫn cho cùng kết quả) theo",
+      "reason": "Giải nghĩa thuật ngữ ở lần đầu",
+      "severity": "low"
+    },
+    {
+      "old": "chưa kiểm trong một hệ thống thật",
+      "new": "chưa được kiểm chứng trong một hệ thống thật",
+      "reason": "Động từ kiểm cụt",
+      "severity": "low"
+    },
+    {
+      "old": "là của bên khác.",
+      "new": "do bên khác gánh.",
+      "reason": "Câu mơ hồ, nói rõ ai chịu phần chênh",
+      "severity": "medium"
+    },
+    {
+      "old": "Câu chữ ở mục sau luôn nói cả hai.",
+      "new": "Câu chữ ở mục sau luôn nêu cả cước lẫn quãng đi bộ.",
+      "reason": "Cả hai chưa rõ chỉ gì",
+      "severity": "low"
+    },
+    {
+      "old": "và nếu đổi sau khi đặt xe thì nên được hỏi",
+      "new": "và nếu điểm đón đổi sau khi đặt xe thì khách nên được hỏi",
+      "reason": "Thiếu chủ ngữ, không rõ ai được hỏi",
+      "severity": "medium"
+    },
+    {
+      "old": "Output thật cho khách và tài xế",
+      "new": "Kết quả chạy thật của hai câu cho khách và tài xế",
+      "reason": "Từ tiếng Anh thông thường trong văn xuôi",
+      "severity": "medium"
+    },
+    {
+      "old": "Giấu quãng đi bộ khi cước giảm là cách làm khách thấy mình bị chọn thay.",
+      "new": "Giấu quãng đi bộ khi cước giảm là cách khiến khách cảm thấy bị quyết định thay mình.",
+      "reason": "Dịch gượng",
+      "severity": "medium"
+    },
+    {
+      "old": "đóng vai «quote»",
+      "new": "đóng vai trò «quote»",
+      "reason": "Cụm đóng vai thiếu danh từ",
+      "severity": "low"
+    },
+    {
+      "old": "Hai: đuôi dài, p95",
+      "new": "Hai: phân bố có đuôi dài, p95",
+      "reason": "Lược mất danh từ chính",
+      "severity": "medium"
+    },
+    {
+      "old": "nên nhân hai trung bình cho khoảng 6,51 triệu",
+      "new": "nên lấy số chuyến hoàn thành nhân với cước trung bình cho khoảng 6,51 triệu",
+      "reason": "Phép tính nhân hai trung bình không rõ nghĩa, nói rõ hai đại lượng",
+      "severity": "high"
+    },
+    {
+      "old": "đó là một quyết định kinh doanh phải ghi vào hợp đồng với Pricing, không phải của thuật toán",
+      "new": "đó là một quyết định kinh doanh phải ghi vào hợp đồng với Pricing, không phải quyết định của thuật toán",
+      "reason": "Câu cụt",
+      "severity": "low"
+    },
+    {
+      "old": "không chỉnh tới khi đẹp",
+      "new": "không chỉnh cho tới khi kết quả trông đẹp",
+      "reason": "Dịch sát tiếng Anh, thiếu chủ thể",
+      "severity": "medium"
+    },
+    {
+      "old": "Trọng số chọn theo quy tắc nêu trước.",
+      "new": "Trọng số được chọn theo quy tắc nêu từ trước.",
+      "reason": "Câu cụt",
+      "severity": "low"
+    },
+    {
+      "old": "do ca ghim sai quyết định",
+      "new": "do các trường hợp ghim sai quyết định",
+      "reason": "Dùng ca với nghĩa chung dễ lẫn với test case",
+      "severity": "low"
+    },
+    {
+      "old": "nó không xoá lối rẽ (bài 32 giải thích)",
+      "new": "nó không xoá được rủi ro «lối rẽ» (bài 32 giải thích)",
+      "reason": "Lối rẽ là calque của forking paths, người đọc khó hiểu",
+      "severity": "high"
+    },
+    {
+      "old": "Tức `walk_m` p95 và max «giảm» là bỏ các ca ghim sai, không phải thắng thật.",
+      "new": "Tức là `walk_m` p95 và max «giảm» do bỏ các trường hợp ghim sai, không phải do cải thiện thật.",
+      "reason": "Câu thiếu quan hệ nhân quả, giọng dịch máy",
+      "severity": "medium"
+    },
+    {
+      "old": "Nó có nghĩa là «không khác biệt rõ»",
+      "new": "Điều cần rút ra là «không khác biệt rõ»",
+      "reason": "Tránh Nó chỉ sự vật trừu tượng đầu câu",
+      "severity": "medium"
+    },
+    {
+      "old": "Giả thuyết, lab chưa kiểm:",
+      "new": "Đây là giả thuyết, lab chưa kiểm:",
+      "reason": "Câu thiếu chủ ngữ, vị ngữ",
+      "severity": "low"
+    },
+    {
+      "old": "Thêm: `walk_m` p50 chỉ khác",
+      "new": "Ngoài ra, `walk_m` p50 chỉ khác",
+      "reason": "Từ nối cụt",
+      "severity": "low"
+    },
+    {
+      "old": "chiến lược thấy chỗ đứng lệch nên chọn điểm xa hơn cho khách",
+      "new": "chiến lược nhận vị trí đứng bị lệch của khách nên chọn điểm xa hơn cho họ",
+      "reason": "Dịch sát gượng",
+      "severity": "medium"
+    },
+    {
+      "old": "Kết luận của độ nhạy gọn trong một câu",
+      "new": "Kết luận của phần độ nhạy gói gọn trong một câu",
+      "reason": "Thiếu động từ",
+      "severity": "medium"
+    },
+    {
+      "old": "cho output giống từng chữ số",
+      "new": "cho kết quả giống từng chữ số",
+      "reason": "Từ tiếng Anh thông thường trong văn xuôi",
+      "severity": "low"
+    },
+    {
+      "old": "nó bỏ qua độ nhạy giả định và dải xác nhận",
+      "new": "lệnh này bỏ qua phần độ nhạy theo giả định và dải xác nhận",
+      "reason": "Nó mơ hồ, cụm độ nhạy giả định cụt",
+      "severity": "medium"
+    },
+    {
+      "old": "nhưng nền tảng có động cơ chỉnh để ít đề xuất tăng cước",
+      "new": "nhưng nền tảng có động cơ điều chỉnh để giảm số đề xuất tăng cước",
+      "reason": "Calque, câu cụt",
+      "severity": "medium"
+    }
+  ]
+}

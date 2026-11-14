@@ -1,0 +1,11 @@
+{
+  "file": "location-kho-vi-tri-moi-nhat-h3-redis-geo-kafka.md",
+  "edits": [
+    {
+      "old": "nguồn sự thật",
+      "new": "nguồn dữ liệu gốc",
+      "reason": "Theo terminology.json (source-of-truth): «nguồn sự thật» thành «nguồn dữ liệu gốc», như các bài khác trong loạt.",
+      "severity": "medium"
+    }
+  ]
+}

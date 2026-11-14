@@ -1,0 +1,161 @@
+{
+  "file": "nhom-hanh-vi-dong-goi-hanh-vi.md",
+  "edits": [
+    {
+      "old": "nên được tách làm hai bài:",
+      "new": "nên được tách thành hai bài:",
+      "reason": "Diễn đạt tự nhiên hơn",
+      "severity": "low"
+    },
+    {
+      "old": "Bên vận hành yêu cầu:",
+      "new": "Bộ phận vận hành yêu cầu:",
+      "reason": "Thiếu chủ thể (style guide mục 2)",
+      "severity": "medium"
+    },
+    {
+      "old": "gõ sai thì im lặng",
+      "new": "gõ sai thì không báo gì",
+      "reason": "Calque «im lặng»",
+      "severity": "medium"
+    },
+    {
+      "old": "Việc chọn strategy nào được đẩy ra một hàm riêng",
+      "new": "Việc chọn strategy nào được tách thành một hàm riêng",
+      "reason": "Calque «đẩy ra một hàm»",
+      "severity": "medium"
+    },
+    {
+      "old": "mỗi ô giờ là một lớp và mỗi mũi tên",
+      "new": "bây giờ mỗi ô là một lớp và mỗi mũi tên",
+      "reason": "Trật tự từ gây khó đọc",
+      "severity": "medium"
+    },
+    {
+      "old": "chỉ giữ trạng thái hiện tại và chuyển lời.",
+      "new": "chỉ giữ trạng thái hiện tại và chuyển tiếp lời gọi.",
+      "reason": "«Chuyển lời» cụt, thiếu danh từ",
+      "severity": "medium"
+    },
+    {
+      "old": "Nó được dựng lại từ cột `trips.status`",
+      "new": "Đối tượng này được dựng lại từ cột `trips.status`",
+      "reason": "Tránh «Nó» chỉ sự vật trừu tượng ở đầu câu",
+      "severity": "medium"
+    },
+    {
+      "old": "tính đúng khi chạy đồng thời",
+      "new": "tính đúng đắn khi chạy đồng thời",
+      "reason": "«Tính đúng» thiếu tự nhiên",
+      "severity": "low"
+    },
+    {
+      "old": "chia tiền trước khi thu tiền là chuyển khoản tiền chưa có.",
+      "new": "chia tiền trước khi thu tiền nghĩa là chuyển khoản tiền chưa thu được.",
+      "reason": "Câu vòng vèo, khó hiểu",
+      "severity": "high"
+    },
+    {
+      "old": "cả hai đều thật đến mức quen thuộc",
+      "new": "cả hai đều là lỗi quen thuộc trong thực tế",
+      "reason": "Diễn đạt gượng",
+      "severity": "medium"
+    },
+    {
+      "old": "Kiểm tay một dòng:",
+      "new": "Tính tay một dòng:",
+      "reason": "«Kiểm tay» là cụm tự ghép",
+      "severity": "medium"
+    },
+    {
+      "old": "sẽ đẻ ra `FoodPrepaidCorporateCompletion`",
+      "new": "sẽ sinh ra `FoodPrepaidCorporateCompletion`",
+      "reason": "«Đẻ ra» là khẩu ngữ",
+      "severity": "medium"
+    },
+    {
+      "old": "sửa lớp cha có thể làm vỡ lớp con và ngược lại",
+      "new": "sửa lớp cha có thể làm hỏng lớp con và ngược lại",
+      "reason": "«Làm vỡ» dùng sai nghĩa",
+      "severity": "medium"
+    },
+    {
+      "old": "và nếu lo thì chuyển sang dạng hàm ở dưới",
+      "new": "và nếu còn lo ngại thì chuyển sang dạng hàm ở phần dưới",
+      "reason": "Câu cụt",
+      "severity": "low"
+    },
+    {
+      "old": "Để ý: `CompletionSteps` giờ",
+      "new": "Lưu ý: `CompletionSteps` giờ",
+      "reason": "Văn phong",
+      "severity": "low"
+    },
+    {
+      "old": "xếp hàng chạy dần khi tổng đài",
+      "new": "xếp hàng chạy lần lượt khi tổng đài",
+      "reason": "«Chạy dần» không rõ nghĩa",
+      "severity": "medium"
+    },
+    {
+      "old": "đã trôi qua, không có gì để cầm lấy",
+      "new": "đã trôi qua nên không có gì để cầm lấy",
+      "reason": "Câu thiếu vế chính",
+      "severity": "high"
+    },
+    {
+      "old": "tình huống khó nhất của thử lại.",
+      "new": "tình huống khó nhất của cơ chế thử lại.",
+      "reason": "Thiếu danh từ chính",
+      "severity": "medium"
+    },
+    {
+      "old": "cần một đời sống sau lúc được yêu cầu",
+      "new": "cần tồn tại tiếp sau lúc được yêu cầu",
+      "reason": "Calque «life of its own»",
+      "severity": "medium"
+    },
+    {
+      "old": "Lỗi thứ hai kín hơn",
+      "new": "Lỗi thứ hai khó thấy hơn",
+      "reason": "«Kín hơn» dịch gượng",
+      "severity": "medium"
+    },
+    {
+      "old": "chỉ khác `CartState` thành danh sách điểm dừng",
+      "new": "chỉ khác ở chỗ `CartState` đổi thành danh sách điểm dừng",
+      "reason": "Câu thiếu động từ",
+      "severity": "medium"
+    },
+    {
+      "old": "Nó chạy một lần, có danh tính",
+      "new": "Command chạy một lần, có danh tính",
+      "reason": "Tránh «Nó» chỉ sự vật trừu tượng",
+      "severity": "medium"
+    },
+    {
+      "old": "Nó chỉ là một phương án thay thế được",
+      "new": "Đối tượng này chỉ là một phương án thay thế được",
+      "reason": "Tránh «Nó» chỉ sự vật trừu tượng",
+      "severity": "medium"
+    },
+    {
+      "old": "Đảo dễ, hoặc có tác dụng ngoài",
+      "new": "Phép đảo dễ viết, hoặc có tác dụng ngoài",
+      "reason": "Câu cụt",
+      "severity": "medium"
+    },
+    {
+      "old": "Đảo phiền, trạng thái nhỏ",
+      "new": "Phép đảo khó viết, trạng thái nhỏ",
+      "reason": "«Đảo phiền» khẩu ngữ, cụt",
+      "severity": "medium"
+    },
+    {
+      "old": "và nhánh thứ ba bắt đầu sửa lây sang hai nhánh kia",
+      "new": "và việc sửa nhánh này bắt đầu kéo theo phải sửa hai nhánh kia",
+      "reason": "«Sửa lây sang» không tự nhiên",
+      "severity": "medium"
+    }
+  ]
+}

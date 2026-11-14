@@ -1,16 +1,16 @@
 ---
 slug: rust-string-str-ngay-gio-dinh-dang-tien
 title: "String, &str, ngày giờ UTC và định dạng tiền: hiển thị đúng, lưu đúng"
-summary: "Bài 08: String sở hữu, &str mượn; UTF-8 với len() là byte; tách mã tài khoản bằng split_once; impl Display in 25.500 VND; jiff lưu Timestamp UTC và hiển thị giờ Asia/Ho_Chi_Minh."
+summary: "Bài 08: String sở hữu, &str mượn; chuỗi UTF-8 với len() đếm theo byte; tách mã tài khoản bằng split_once; impl Display để in 25.500 VND; jiff lưu Timestamp UTC và hiển thị giờ Asia/Ho_Chi_Minh."
 category: rust-beginner
 level: beginner
 tags: [rust, toi-noi, ledger, string, jiff, utf-8]
 language: vi
 ---
 
-Màn hình thu nhập của tài xế ghi «Tài xế Nguyễn Văn An nhận 20.400 VND lúc 09:30 06/11/2026». Trong sổ cái, cùng bút toán chỉ là số nguyên `20400` và một thời điểm `2026-11-06T02:30:00Z`. Chữ có dấu, dấu chấm phân nhóm và giờ +07:00 chỉ tồn tại ở lớp hiển thị. Lẫn hai lớp này là cách nhanh nhất để lưu sai.
+Màn hình thu nhập của tài xế ghi «Tài xế Nguyễn Văn An nhận 20.400 VND lúc 09:30 06/11/2026». Trong sổ cái, bút toán đó chỉ là số nguyên `20400` và một thời điểm `2026-11-06T02:30:00Z`. Chữ có dấu, dấu chấm phân nhóm và giờ +07:00 chỉ tồn tại ở lớp hiển thị. Trộn lẫn hai lớp này là cách nhanh nhất để lưu sai.
 
-Đây là bài 08 của lộ trình **Rust cơ bản qua [Tới Nơi](/articles/du-an-mau-toi-noi)**. Sau [bài 07](/articles/rust-result-option-toan-tu-hoi-loi-la-gia-tri), lỗi đã là giá trị; hôm nay ta xử lý văn bản và thời gian, hai nơi dữ liệu dễ đổi nghĩa khi qua biên. Ví dụ chạy với Rust 1.98, edition 2024 và `jiff` 0.2; mỗi bài là một crate độc lập.
+Đây là bài 08 của lộ trình **Rust cơ bản qua [Tới Nơi](/articles/du-an-mau-toi-noi)**. Sau [bài 07](/articles/rust-result-option-toan-tu-hoi-loi-la-gia-tri), lỗi đã là giá trị; hôm nay ta xử lý văn bản và thời gian, hai nơi dữ liệu dễ đổi nghĩa khi đi qua ranh giới giữa các hệ thống. Ví dụ chạy với Rust 1.98, edition 2024 và `jiff` 0.2; mỗi bài là một crate độc lập.
 
 <div class="tkh-callout tkh-callout--example">
 <span class="tkh-callout-title">Thử trước khi đọc</span>
@@ -20,7 +20,7 @@ Màn hình thu nhập của tài xế ghi «Tài xế Nguyễn Văn An nhận 20
 
 ## String sở hữu, &str mượn: khác nhau ở đâu?
 
-`String` là chuỗi UTF-8 nằm trên heap, có chủ sở hữu duy nhất và co giãn được. Trên stack nó chỉ là ba từ: con trỏ, capacity và độ dài (24 byte trên máy 64-bit). `&str` là một lát cắt mượn: con trỏ và độ dài (16 byte), không sở hữu gì. Literal `"Tài xế"` có kiểu `&'static str`, dữ liệu nằm sẵn trong binary. Quy tắc ownership của [bài 04](/articles/rust-ownership-move-borrow-but-toan) áp dụng nguyên vẹn: `String` bị move, `&str` được mượn và không được sống lâu hơn chủ.
+`String` là chuỗi UTF-8 nằm trên heap, có chủ sở hữu duy nhất và co giãn được. Trên stack, nó chỉ gồm ba trường: con trỏ, capacity và độ dài (24 byte trên máy 64-bit). `&str` là một lát cắt mượn: con trỏ và độ dài (16 byte), không sở hữu gì. Literal `"Tài xế"` có kiểu `&'static str`, dữ liệu nằm sẵn trong binary. Quy tắc ownership của [bài 04](/articles/rust-ownership-move-borrow-but-toan) áp dụng nguyên vẹn: `String` bị move, còn `&str` được mượn và không được sống lâu hơn chủ sở hữu.
 
 <figure class="tkh-fig">
 <div class="tkh-fig-box">
@@ -41,7 +41,7 @@ println!("{}", greeting(literal)); // &'static str
 println!("{}", greeting(&owned)); // &String tự đổi thành &str (deref coercion)
 ```
 
-`String::from`, `to_owned` và `to_string` đều tạo `String` mới; `format!` làm điều đó khi cần ghép nhiều mảnh. Hàm `greeting(name: &str)` nhận được cả literal lẫn `&String` nhờ **deref coercion**: compiler tự đổi `&String` thành `&str`. Vì vậy quy tắc thực dụng là: tham số nhận `&str`, kết quả tạo mới trả `String`. Viết `name: &String` chỉ làm hàm kén đối số hơn.
+`String::from`, `to_owned` và `to_string` đều tạo `String` mới; `format!` làm điều đó khi cần ghép nhiều mảnh. Hàm `greeting(name: &str)` nhận được cả literal lẫn `&String` nhờ **deref coercion**: compiler tự đổi `&String` thành `&str`. Vì vậy quy tắc thực dụng là: tham số nhận `&str`, kết quả tạo mới thì trả về `String`. Viết `name: &String` chỉ khiến hàm nhận được ít loại đối số hơn.
 
 ## Vì sao len() không phải số ký tự, và cắt chuỗi có thể panic?
 
@@ -53,19 +53,19 @@ Rust lưu chuỗi dạng UTF-8: ký tự ASCII chiếm 1 byte, `à` 2 byte, `ế
 get(0..2) = None, get(0..3) = Some("Tà")
 ```
 
-`len()` là byte, `chars()` duyệt từng ký tự, `char_indices()` cho kèm vị trí byte, như dòng thứ hai: `i` bắt đầu ở byte 3 vì `à` chiếm byte 1 và 2. Cắt `&driver[0..2]` rơi vào giữa `à`, và Rust không trả về nửa ký tự. Nó panic ở thời gian chạy:
+`len()` đếm số byte, `chars()` duyệt từng ký tự, `char_indices()` cho kèm vị trí byte, như dòng thứ hai: `i` bắt đầu ở byte 3 vì `à` chiếm byte 1 và 2. Cắt `&driver[0..2]` rơi vào giữa `à`, và Rust không trả về nửa ký tự. Thay vào đó, chương trình panic ở thời gian chạy:
 
 ```text
 end byte index 2 is not a char boundary; it is inside 'à' (bytes 1..3 of string)
 ```
 
-Muốn không panic, dùng `get(0..2)` (trả `None`) hoặc `is_char_boundary`, hoặc tìm vị trí bằng `find("Nguyễn")` rồi mới cắt. Index bằng số nguyên thì bị từ chối ngay khi compile, vì vị trí byte không trùng thứ tự ký tự:
+Muốn tránh panic, dùng `get(0..2)` (trả `None`) hoặc `is_char_boundary`, hoặc tìm vị trí bằng `find("Nguyễn")` rồi mới cắt. Index bằng số nguyên thì bị từ chối ngay khi compile, vì vị trí byte không trùng thứ tự ký tự:
 
 ```text
 error[E0277]: the type `str` cannot be indexed by `{integer}`
 ```
 
-Hai giới hạn cần biết. Một: `chars()` đếm Unicode scalar value, không phải «chữ người đọc thấy». Hai: `à` gõ dạng một code point và `a` cộng dấu huyền là hai chuỗi byte khác nhau. Lab kiểm `"\u{e0}" != "a\u{300}"`. std không chuẩn hoá; việc đó cần crate ngoài như `unicode-normalization`, bài này không dùng, nên chuẩn hoá ở biên nhập trước khi so sánh hoặc dùng làm khoá.
+Hai giới hạn cần biết. Thứ nhất: `chars()` đếm Unicode scalar value, không phải «chữ người đọc thấy». Thứ hai: `à` gõ dạng một code point và `a` cộng dấu huyền là hai chuỗi byte khác nhau. Lab kiểm `"\u{e0}" != "a\u{300}"`. std không chuẩn hoá; muốn chuẩn hoá phải dùng crate ngoài như `unicode-normalization`, bài này không dùng, nên cần chuẩn hoá ngay lúc nhận dữ liệu, trước khi so sánh hoặc dùng làm khoá.
 
 ## Tách mã tài khoản và đọc số mà không sao chép
 
@@ -85,7 +85,7 @@ fn parse_account(code: &str) -> Result<(&str, &str), String> {
 }
 ```
 
-Lỗi là giá trị `Result` như bài 07. Kết quả hai `&str` sống cùng đầu vào; cách Rust ghi nhớ điều đó (lifetime) là chủ đề của [bài 09](/articles/rust-vec-hashmap-btreemap-lifetime-so-cai-bo-nho). Với `psp:vixanh:clearing`, kết quả là `("psp", "vixanh:clearing")`: tách một lần, phần còn lại giữ nguyên. Các hàm kiểm tra cạnh nó là `starts_with`, `split_whitespace`, `trim`.
+Lỗi là giá trị `Result` như bài 07. Hai `&str` trong kết quả sống cùng thời gian với đầu vào; cách Rust ghi nhớ điều đó (lifetime) là chủ đề của [bài 09](/articles/rust-vec-hashmap-btreemap-lifetime-so-cai-bo-nho). Với `psp:vixanh:clearing`, kết quả là `("psp", "vixanh:clearing")`: tách một lần, phần còn lại giữ nguyên. Các hàm xử lý chuỗi hay dùng kèm là `starts_with`, `split_whitespace`, `trim`.
 
 Đọc số dùng `parse::<i64>()`, trả `Result` thay vì ném exception. `"25500".parse::<i64>()` là `Ok(25500)`, còn `"25.500"` là `Err(ParseIntError { kind: InvalidDigit })`. Đó là chủ ý: chuỗi hiển thị `25.500` không phải dữ liệu. Hợp đồng giữa service là số `25500` kèm `"currency": "VND"`; chuỗi «25.500 VND» không bao giờ được parse ngược.
 
@@ -145,12 +145,12 @@ Hiển thị: 09:30 ngày 06/11/2026
 
 Bốn quy tắc rút ra từ lab:
 
-- **Naive bị từ chối.** `"2026-11-06T09:30:00".parse::<Timestamp>()` trả `Err("failed to find offset component, which is required for parsing a timestamp")`. Chuỗi thiếu `Z` hoặc offset không biết là mốc nào, nên không thành thời điểm một cách âm thầm. API nhận ISO 8601 có offset.
-- **Sắp xếp theo `Timestamp`.** `09:30+07:00` là 02:30Z, sớm hơn `03:00+00:00`. So như chuỗi thì kết quả ngược; so `Timestamp` thì đúng. Sổ cái sắp bút toán theo `posted_at` UTC, không sắp theo chuỗi hiển thị.
-- **`Span` cộng trừ.** `posted_at.checked_add(90.minutes())` ra `2026-11-06T04:00:00Z`; hiệu hai mốc là `Span` tính bằng giây; `round` với đơn vị lớn nhất là giờ rồi in bằng `{:#}` (dạng «friendly» của jiff) thì đọc được `1h 30m`, còn `{}` in dạng ISO 8601 `PT1H30M`. `Timestamp` từ chối cộng «1 ngày» vì ngày không có độ dài cố định; cần `Zoned`: `local.checked_add(1.day())` ra `2026-11-07T09:30:00+07:00[Asia/Ho_Chi_Minh]`.
-- **Tên múi giờ có thể thất bại.** `TimeZone::get` trả `Result`, vì dữ liệu IANA nằm trong hệ điều hành (macOS, Linux: `/usr/share/zoneinfo`) hoặc được gói vào binary (mặc định trên Windows; nơi khác bật feature `tzdb-bundle-always`).
+- **Chuỗi không kèm múi giờ (naive) bị từ chối.** `"2026-11-06T09:30:00".parse::<Timestamp>()` trả `Err("failed to find offset component, which is required for parsing a timestamp")`. Chuỗi thiếu `Z` hoặc offset không biết là mốc nào, nên bị báo lỗi thay vì lặng lẽ được coi là một thời điểm. API nhận ISO 8601 có offset.
+- **Sắp xếp theo `Timestamp`.** `09:30+07:00` là 02:30Z, sớm hơn `03:00+00:00`. So sánh như chuỗi thì kết quả ngược; so sánh `Timestamp` thì đúng. Sổ cái sắp bút toán theo `posted_at` UTC, không sắp theo chuỗi hiển thị.
+- **Cộng, trừ với `Span`.** `posted_at.checked_add(90.minutes())` ra `2026-11-06T04:00:00Z`; hiệu hai mốc là `Span` tính bằng giây; `round` với đơn vị lớn nhất là giờ rồi in bằng `{:#}` (dạng dễ đọc «friendly» của jiff) thì đọc được `1h 30m`, còn `{}` in dạng ISO 8601 `PT1H30M`. `Timestamp` từ chối cộng «1 ngày» vì ngày không có độ dài cố định; cần `Zoned`: `local.checked_add(1.day())` ra `2026-11-07T09:30:00+07:00[Asia/Ho_Chi_Minh]`.
+- **Tra cứu tên múi giờ có thể thất bại.** `TimeZone::get` trả `Result`, vì dữ liệu IANA nằm trong hệ điều hành (macOS, Linux: `/usr/share/zoneinfo`) hoặc được gói vào binary (mặc định trên Windows; nơi khác bật feature `tzdb-bundle-always`).
 
-Đối chiếu C#: `Timestamp` gần `DateTimeOffset` đã quy về UTC, và `Zoned` giống `DateTimeOffset` cộng thêm tên múi giờ IANA thay vì chỉ một offset cố định. Quy tắc giống loạt C# (đã nêu ở bài về [culture](/articles/csharp-chuoi-ngay-gio-culture)): lưu một mốc không mơ hồ, đổi sang giờ địa phương ở cửa ra.
+Đối chiếu C#: `Timestamp` gần `DateTimeOffset` đã quy về UTC, và `Zoned` giống `DateTimeOffset` cộng thêm tên múi giờ IANA thay vì chỉ một offset cố định. Quy tắc giống loạt C# (đã nêu ở bài về [culture](/articles/csharp-chuoi-ngay-gio-culture)): lưu một mốc không mơ hồ, đổi sang giờ địa phương khi hiển thị cho người dùng.
 
 ## Bảng tra nhanh
 
@@ -181,7 +181,7 @@ Lệnh thứ hai in `VERIFY OK` khi `format_vnd(25_500) == "25.500 VND"`, `forma
 
 <div class="tkh-callout tkh-callout--warn">
 <span class="tkh-callout-title">Giới hạn của ví dụ</span>
-<p>Lab chỉ làm VND một ngôn ngữ, không có locale, không chuẩn hoá Unicode, không xử lý múi giờ khác, và <code>Line</code> chỉ là dòng sổ rút gọn để minh hoạ hiển thị. Dữ liệu múi giờ đến từ hệ điều hành; môi trường container tối giản có thể thiếu tzdata, khi đó cài gói <code>tzdata</code> hoặc bật feature <code>tzdb-bundle-always</code> của <code>jiff</code> để gói dữ liệu IANA vào binary. Chuỗi hiển thị không bao giờ quay lại thành dữ liệu lưu. Tên và số liệu là hư cấu của Tới Nơi.</p>
+<p>Lab chỉ xử lý VND và một ngôn ngữ, không có locale, không chuẩn hoá Unicode, không xử lý múi giờ khác, và <code>Line</code> chỉ là dòng sổ rút gọn để minh hoạ hiển thị. Dữ liệu múi giờ đến từ hệ điều hành; môi trường container tối giản có thể thiếu tzdata, khi đó cài gói <code>tzdata</code> hoặc bật feature <code>tzdb-bundle-always</code> của <code>jiff</code> để gói dữ liệu IANA vào binary. Chuỗi hiển thị không bao giờ quay lại thành dữ liệu lưu. Tên và số liệu là hư cấu của Tới Nơi.</p>
 </div>
 
 **Bài tập:** `Money(-25_500)` in thế nào bằng `{:>14}`? Và `"2026-11-06T17:30:00Z"` hiển thị ngày nào ở Việt Nam, vì sao khác ngày UTC?

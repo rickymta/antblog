@@ -1,0 +1,143 @@
+{
+ "file": "python-luu-ket-qua-ocr-mongodb-pii-retention.md",
+ "edits": [
+  {
+   "old": "TTL index cho bản gốc, audit ai xem, migration schema v2 (bài 26) sang v3 đọc được cả hai",
+   "new": "TTL index tự xoá bản gốc khi hết hạn, audit ghi lại ai đã xem, migration schema từ v2 (bài 26) sang v3 và đọc được cả hai",
+   "reason": "Câu cụt, thiếu động từ",
+   "severity": "medium"
+  },
+  {
+   "old": "cần xem nó hôm sau, tuần sau, cạnh các lần OCR bằng mô hình mới hơn, nên nó phải sang một kho bền",
+   "new": "cần xem kết quả này hôm sau, tuần sau, cạnh các lần OCR bằng mô hình mới hơn, nên kết quả phải chuyển sang một kho bền",
+   "reason": "Đại từ \"nó\" mơ hồ",
+   "severity": "medium"
+  },
+  {
+   "old": "không tự động là quyết định xác minh",
+   "new": "không tự động trở thành quyết định xác minh",
+   "reason": "Câu gượng, dễ hiểu sai",
+   "severity": "medium"
+  },
+  {
+   "old": "Mới là `id_number_masked`",
+   "new": "Điểm mới là `id_number_masked`",
+   "reason": "Câu cụt",
+   "severity": "low"
+  },
+  {
+   "old": "Hash kèm loại giấy tờ để CCCD và GPLX trùng chữ số không trùng hash",
+   "new": "Hash kèm loại giấy tờ để CCCD và GPLX có cùng chữ số vẫn không trùng hash",
+   "reason": "Câu khó đọc",
+   "severity": "medium"
+  },
+  {
+   "old": "production lấy từ secret manager",
+   "new": "production lấy khoá từ secret manager",
+   "reason": "Từ tiếng Anh thông thường",
+   "severity": "low"
+  },
+  {
+   "old": "Lưu idempotent, lưu từng phiên bản mô hình và từng ảnh",
+   "new": "Lưu idempotent theo từng phiên bản mô hình và từng ảnh",
+   "reason": "Tiêu đề lặp động từ, cấu trúc lệch",
+   "severity": "medium"
+  },
+  {
+   "old": "Hình dạng document được canh ở **chính collection** bằng",
+   "new": "Hình dạng document được kiểm soát ngay ở **chính collection** bằng",
+   "reason": "Từ khẩu ngữ",
+   "severity": "medium"
+  },
+  {
+   "old": "kiểm 4 document, trả 4",
+   "new": "đã xét 4 document, trả 4",
+   "reason": "Cụm cụt, nghĩa không rõ",
+   "severity": "low"
+  },
+  {
+   "old": "Lab cho `KYC-0007` và `KYC-2001` cùng số",
+   "new": "Lab cho `KYC-0007` và `KYC-2001` dùng cùng một số",
+   "reason": "Thiếu động từ",
+   "severity": "medium"
+  },
+  {
+   "old": "Lab trả lại bằng `finally` và bắt SIGTERM (gửi SIGTERM giữa chừng: tham số về 60, collection được xoá)",
+   "new": "Lab trả tham số về giá trị cũ bằng `finally` và bắt SIGTERM (gửi SIGTERM giữa chừng thì tham số về 60 và các collection của lab được xoá)",
+   "reason": "Thiếu tân ngữ, câu mơ hồ",
+   "severity": "medium"
+  },
+  {
+   "old": "Nó không nằm trong trang tham số chính thức của MongoDB",
+   "new": "Tham số này không có trong trang tham số chính thức của MongoDB",
+   "reason": "Đại từ \"nó\" ở đầu câu",
+   "severity": "medium"
+  },
+  {
+   "old": "Bản sao lưu cũng giữ dữ liệu cũ tới khi nó hết hạn.",
+   "new": "Bản sao lưu cũng giữ dữ liệu cũ tới khi chính bản sao lưu hết hạn.",
+   "reason": "Đại từ \"nó\" mơ hồ",
+   "severity": "medium"
+  },
+  {
+   "old": "và không byte dữ liệu nào được trả",
+   "new": "và không có dữ liệu nào được trả",
+   "reason": "Calque \"byte\" đếm được",
+   "severity": "low"
+  },
+  {
+   "old": "Ảnh gốc của v2 không còn biết nên",
+   "new": "Ta không còn biết ảnh gốc của v2 là ảnh nào nên",
+   "reason": "Dịch gượng \"no longer known\"",
+   "severity": "medium"
+  },
+  {
+   "old": "làm migration chạy lại và chạy đồng thời được",
+   "new": "giúp migration chạy lại và chạy đồng thời được",
+   "reason": "Cách nói gượng",
+   "severity": "low"
+  },
+  {
+   "old": "53 ca, chạy trên máy rất bận",
+   "new": "53 test case, chạy trên máy đang rất bận",
+   "reason": "Thống nhất thuật ngữ test case",
+   "severity": "medium"
+  },
+  {
+   "old": "ta phá có chủ ý:",
+   "new": "ta cố ý phá nó:",
+   "reason": "Cụm gượng",
+   "severity": "low"
+  },
+  {
+   "old": "Đúng một ca đỏ, và",
+   "new": "Đúng một test case đỏ, và",
+   "reason": "Thống nhất thuật ngữ test case",
+   "severity": "medium"
+  },
+  {
+   "old": "Số liệu chạy trên macOS Apple M1 Max rất bận",
+   "new": "Số liệu chạy trên máy macOS Apple M1 Max đang rất bận",
+   "reason": "Thiếu danh từ",
+   "severity": "low"
+  },
+  {
+   "old": "Người duyệt chỉ muốn bản mới nhất mỗi hồ sơ.",
+   "new": "Người duyệt chỉ muốn bản mới nhất của mỗi hồ sơ.",
+   "reason": "Thiếu từ nối",
+   "severity": "low"
+  },
+  {
+   "old": "chọn bản mới nhất mỗi <code>kyc_id</code>",
+   "new": "chọn bản mới nhất của mỗi <code>kyc_id</code>",
+   "reason": "Thiếu từ nối",
+   "severity": "low"
+  },
+  {
+   "old": "Làm thế nào bằng thứ lab đã có",
+   "new": "Làm cách nào bằng những thứ lab đã có",
+   "reason": "Văn nói",
+   "severity": "low"
+  }
+ ]
+}

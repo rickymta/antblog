@@ -20,7 +20,7 @@ Finance muốn mỗi posting mang mã tiền tệ. Product muốn thử quy tắ
 
 ## Vì sao không đổi cột trong một lần triển khai?
 
-Triển khai cuốn chiếu nghĩa là có lúc hai phiên bản code cùng đọc và ghi một database. Expand/contract tách nó thành ba pha, mỗi bước tương thích với cả hai phiên bản: **expand** (chỉ thêm: cột nullable, trigger), triển khai code mới rồi **backfill** theo lô, và **contract** (siết ràng buộc, bỏ cái cũ khi không còn ai dùng).
+Triển khai cuốn chiếu nghĩa là có lúc hai phiên bản code cùng đọc và ghi một database. Expand/contract tách thay đổi thành ba pha, mỗi pha tương thích với cả hai phiên bản: **expand** (chỉ thêm: cột nullable, trigger), triển khai code mới rồi **backfill** theo lô, và **contract** (siết ràng buộc, bỏ cái cũ khi không còn ai dùng).
 
 Lab có ba bản code: `AppV1` (không biết cột mới), `AppV2` ghi đúp (cả cột cũ lẫn mới) và `AppV2` chỉ ghi cột mới. Mỗi ô của Hình 1 là một lần ghi thật của bản code ở hàng đó, trên schema ở giai đoạn đó.
 
@@ -31,11 +31,11 @@ Lab có ba bản code: `AppV1` (không biết cột mới), `AppV2` ghi đúp (c
 <figcaption>Hình 1. Thứ tự an toàn đọc được từ ma trận: expand, code ghi đúp, backfill, contract A, code chỉ ghi cột mới, rồi mới contract B.</figcaption>
 </figure>
 
-Hàng cuối cho thấy vì sao thứ tự quan trọng: code «chỉ cột mới» lên trước contract A thì lỗi ngay. Đổi schema sự kiện ở [bài 55](/articles/rust-hop-dong-su-kien-xuyen-ngon-ngu-protobuf-version) cùng một ý: thêm trước, đổi người ghi, gỡ sau. Với loạt C#, [bài EF Core 10](/articles/dotnet10-efcore-postgresql-mapping-migration) coi migration là lịch sử có thể review; ở đây là thứ tự áp dụng nó.
+Hàng cuối cho thấy vì sao thứ tự quan trọng: code «chỉ cột mới» lên trước contract A thì lỗi ngay. Đổi schema sự kiện ở [bài 55](/articles/rust-hop-dong-su-kien-xuyen-ngon-ngu-protobuf-version) cũng theo một ý đó: thêm trước, đổi người ghi, gỡ sau. Với loạt C#, [bài EF Core 10](/articles/dotnet10-efcore-postgresql-mapping-migration) coi migration là lịch sử có thể review; bài này bàn về thứ tự áp dụng nó.
 
 ## Expand và backfill: hai phiên bản cùng chạy, ghi đúp, không sửa số tiền
 
-Expand thêm cột nullable, không giá trị mặc định. Code cũ không biết cột, nên trigger `BEFORE INSERT` ghi hộ `'VND'`; với `policy_version` thì ghi hộ `1`, vì mọi chuyến trước giờ dùng một quy tắc duy nhất. Phần của `postings` (rút gọn, trong code là các hằng `Step` của `src/migrate.rs`):
+Expand thêm cột nullable, không có giá trị mặc định. Code cũ không biết cột, nên trigger `BEFORE INSERT` ghi hộ `'VND'`; với `policy_version` thì ghi hộ `1`, vì mọi chuyến trước giờ dùng một quy tắc duy nhất. Phần áp dụng cho `postings` (rút gọn, trong code là các hằng `Step` của `src/migrate.rs`):
 
 ```sql
 ALTER TABLE postings ADD COLUMN currency text;
@@ -46,7 +46,7 @@ CREATE TRIGGER postings_fill_currency BEFORE INSERT ON postings
     FOR EACH ROW EXECUTE FUNCTION postings_fill_currency();
 ```
 
-Backfill phải `UPDATE` posting, mà trigger append-only của bài 24 cấm mọi `UPDATE`. Expand nới đúng một kiểu: từ `NULL` sang `'VND'`, bốn cột gốc không đổi; ghi `'USD'`, sửa `amount_dong` hay `DELETE` vẫn nhận SQLSTATE `TN001` (có test).
+Backfill phải `UPDATE` posting, mà trigger append-only của bài 24 cấm mọi `UPDATE`. Expand chỉ nới đúng một trường hợp: từ `NULL` sang `'VND'`, bốn cột gốc không đổi; ghi `'USD'`, sửa `amount_dong` hay `DELETE` vẫn nhận SQLSTATE `TN001` (có test).
 
 ```sql
 IF TG_OP = 'UPDATE' AND OLD.currency IS NULL AND NEW.currency = 'VND'
@@ -56,23 +56,23 @@ THEN RETURN NEW; END IF;
 RAISE EXCEPTION 'sổ cái append-only: % trên postings bị cấm', TG_OP USING ERRCODE = 'TN001';
 ```
 
-Cái giá: từ expand tới contract A, câu «posting không bao giờ bị `UPDATE`» tạm không đúng. Số tiền vẫn được bảo vệ, nhưng phiên nào có quyền ghi cũng điền được `currency`. Mỗi `UPDATE` còn sinh bản dòng mới: thêm WAL, dead tuple, độ trễ replica. Lab nới bằng một nhánh trong trigger chứ không `DISABLE TRIGGER`, vì lệnh đó tắt kiểm tra cho mọi phiên; cửa sổ đóng lại ở contract A.
+Cái giá: từ expand tới contract A, câu «posting không bao giờ bị `UPDATE`» tạm không đúng. Số tiền vẫn được bảo vệ, nhưng phiên nào có quyền ghi cũng điền được `currency`. Mỗi `UPDATE` còn sinh một phiên bản dòng mới: thêm WAL, dead tuple, độ trễ replica. Lab nới bằng một nhánh trong trigger chứ không `DISABLE TRIGGER`, vì lệnh đó tắt kiểm tra cho mọi phiên; cửa sổ đóng lại ở contract A.
 
-**Ghi đúp.** `fee_events` bản 1 chỉ có `fee_percent`. Quy tắc mới có sàn nên không biểu diễn được bằng một tỷ lệ; cột `policy_version` thay chỗ nó. Trong giai đoạn chuyển, code mới ghi cả hai (`WriteMode::Dual`, `src/app.rs`):
+**Ghi đúp.** `fee_events` bản 1 chỉ có `fee_percent`. Quy tắc mới có sàn nên không biểu diễn được bằng một tỷ lệ; cột `policy_version` thay thế cho cột đó. Trong giai đoạn chuyển, code mới ghi cả hai (`WriteMode::Dual`, `src/app.rs`):
 
 ```rust
 "INSERT INTO fee_events (trip_id, fare_dong, fee_percent, policy_version) \
  VALUES ($1, $2, $3, $4) ON CONFLICT (trip_id) DO NOTHING RETURNING policy_version"
 ```
 
-Cái giá: `fee_percent` của chuyến theo quy tắc mới chỉ là tỷ lệ danh nghĩa (15), còn tỷ lệ thật của chuyến 12.000 đồng là 25%. Hai chuyến ghi giữa chừng:
+Cái giá: `fee_percent` của chuyến theo quy tắc mới chỉ là tỷ lệ danh nghĩa (15), còn tỷ lệ thật của chuyến 12.000 đồng là 25%. Hai chuyến được ghi giữa lúc đang chuyển đổi:
 
 ```text
 TN-0121 bởi code v1: currency ["VND"], fee_percent Some(20), policy_version Some(1)
 TN-0122 bởi code v2: currency ["VND"], fee_percent Some(15), policy_version Some(2)
 ```
 
-**Backfill theo lô.** Mỗi lô lấy `batch_size` khoá kế tiếp sau checkpoint, điền dòng còn `NULL` và dời checkpoint trong một transaction. `IS NULL` làm lô idempotent; `FOR UPDATE` trên dòng checkpoint để hai tiến trình cùng tên xếp hàng: test giữ dòng đó tới khi `pg_stat_activity` thấy cả hai đang chờ, rồi nhả, và không lô nào dùng chung checkpoint (`backfill_batch`, rút gọn):
+**Backfill theo lô.** Mỗi lô lấy `batch_size` khoá kế tiếp sau checkpoint, điền dòng còn `NULL` và dời checkpoint trong một transaction. `IS NULL` khiến lô idempotent; `FOR UPDATE` đặt trên dòng checkpoint để hai tiến trình cùng tên phải xếp hàng: test giữ dòng đó tới khi `pg_stat_activity` thấy cả hai đang chờ, rồi nhả, và không lô nào dùng chung checkpoint (`backfill_batch`, rút gọn):
 
 ```rust
 // src/migrate.rs
@@ -96,7 +96,7 @@ còn NULL trước contract: 0 posting, 0 sự kiện
 dấu vân tay posting cũ trước bb74c48290697ecfe6711f11f43883d6 / sau bb74c48290697ecfe6711f11f43883d6: giống nhau true
 ```
 
-Mỗi dòng cũ được điền đúng một lần (250 + 250 + 100 = 600). Dấu vân tay là md5 của bốn cột gốc của mọi posting cũ: số tiền và tài khoản không đổi. Trigger cân bút toán của bài 25 khai báo cả `UPDATE`, nên mỗi dòng bị sửa kích hoạt lại kiểm «tổng bằng 0» lúc commit.
+Mỗi dòng cũ được điền đúng một lần (250 + 250 + 100 = 600). Dấu vân tay là md5 của bốn cột gốc của mọi posting cũ: số tiền và tài khoản không đổi. Trigger cân bút toán của bài 25 khai báo cả `UPDATE`, nên mỗi dòng bị sửa sẽ kích hoạt lại phép kiểm «tổng bằng 0» lúc commit.
 
 ## Contract: NOT NULL có quét cả bảng không?
 
@@ -110,9 +110,9 @@ VALIDATE CONSTRAINT postings_currency_nn                   ShareUpdateExclusiveL
 SET NOT NULL postings.currency                             AccessExclusiveLock        quét 0
 ```
 
-`ADD COLUMN` xin khoá mạnh nhất nhưng không quét và không viết lại bảng (`pg_relation_filenode` giữ nguyên). `VALIDATE` quét một lần nhưng chỉ lấy `ShareUpdateExclusiveLock`: giữ nó mở thì bút toán mới vẫn ghi được. `SET NOT NULL` sau khi có `CHECK` hợp lệ không quét (từ PostgreSQL 12), rồi `CHECK` tạm được bỏ. Còn `NULL` mà `VALIDATE` thì PostgreSQL trả `23514` và không đổi gì: hàng rào chặn contract sớm.
+`ADD COLUMN` xin khoá mạnh nhất nhưng không quét và không viết lại bảng (`pg_relation_filenode` giữ nguyên). `VALIDATE` quét một lần nhưng chỉ lấy `ShareUpdateExclusiveLock`: giữ khoá đó mở thì bút toán mới vẫn ghi được. `SET NOT NULL` sau khi có `CHECK` hợp lệ không quét (từ PostgreSQL 12), rồi `CHECK` tạm được bỏ. Nếu còn `NULL` mà chạy `VALIDATE` thì PostgreSQL trả `23514` và không đổi gì: đây là hàng rào chặn việc contract quá sớm.
 
-**Có khi không cần đường dài.** Giá trị là hằng thì từ PostgreSQL 11, `ADD COLUMN ... NOT NULL DEFAULT` chỉ ghi mặc định vào catalog: không viết lại bảng, không `UPDATE`, không phải nới trigger. Với riêng `currency`, đó là cách nên chọn ngoài đời; bài đi đường dài vì giá trị phải tính từ dữ liệu thì không có lối tắt này. `DEFAULT` volatile vẫn viết lại cả bảng. PostgreSQL 18 còn cho `ADD CONSTRAINT ... NOT NULL ... NOT VALID` rồi `VALIDATE`, không cần `CHECK` tạm:
+**Có khi không cần đường dài.** Nếu giá trị là hằng thì từ PostgreSQL 11, `ADD COLUMN ... NOT NULL DEFAULT` chỉ ghi mặc định vào catalog: không viết lại bảng, không `UPDATE`, không phải nới trigger. Với riêng `currency`, đó là cách nên chọn ngoài đời; bài này đi đường dài vì với giá trị phải tính từ dữ liệu thì không có lối tắt này. `DEFAULT` volatile vẫn viết lại cả bảng. PostgreSQL 18 còn cho `ADD CONSTRAINT ... NOT NULL ... NOT VALID` rồi `VALIDATE`, không cần `CHECK` tạm:
 
 ```text
 ADD COLUMN source NOT NULL DEFAULT hằng                    AccessExclusiveLock        quét 0
@@ -136,13 +136,13 @@ VALIDATE CONSTRAINT note_nn                                ShareUpdateExclusiveL
 khóa AccessExclusiveLock, quét 1 lần; bút toán mới bị chặn: true; ghi được sau khi commit: true
 ```
 
-«Bị chặn» đọc từ `pg_stat_activity` (`pg_blocking_pids` chứa phiên DDL). Mọi số đo trên PostgreSQL 18.6, khớp tài liệu `ALTER TABLE`.
+«Bị chặn» đọc từ `pg_stat_activity` (`pg_blocking_pids` chứa phiên DDL). Mọi số đo lấy trên PostgreSQL 18.6 và khớp với tài liệu `ALTER TABLE`.
 
-Contract tách hai giai đoạn. **A** (còn quay lại được): `SET NOT NULL` hai cột mới, nới `fee_percent`, trả trigger append-only về chặt (sửa `currency` của posting cũ lại nhận `TN001`). **B** (không quay lại được): bỏ trigger ghi hộ và cột `fee_percent`.
+Contract tách hai giai đoạn. **A** (còn quay lại được): `SET NOT NULL` hai cột mới, nới `fee_percent`, siết lại trigger append-only như ban đầu (sửa `currency` của posting cũ lại nhận `TN001`). **B** (không quay lại được): bỏ trigger ghi hộ và cột `fee_percent`.
 
 ## Một ALTER đang chờ khoá có chặn cả truy vấn đọc không?
 
-Có. Lab dựng ba phiên: A đọc dài, giữ `AccessShareLock` trên `postings`; B chạy `ADD COLUMN`; C là `SELECT count(*)` ngắn đến sau B.
+Có. Lab dựng ba phiên: A đọc dài, giữ `AccessShareLock` trên `postings`; B chạy `ADD COLUMN`; C chạy `SELECT count(*)` ngắn, đến sau B.
 
 <figure class="tkh-fig">
 <div class="tkh-fig-box">
@@ -158,7 +158,7 @@ ALTER bị chặn bởi phiên đọc dài: true; truy vấn đọc ngắn bị 
 nhả phiên đọc dài: ALTER xong (true), truy vấn đọc thấy 50 dòng
 ```
 
-Cách chữa là `lock_timeout` ngắn: không lấy được khoá thì bỏ cuộc, trả hàng đợi, thử lại. Mẫu của lab: 200 ms, tối đa 5 lần, chỉ thử lại khi lỗi là `55P03` (`src/migrate.rs`):
+Cách chữa là `lock_timeout` ngắn: không lấy được khoá thì bỏ cuộc, trả hàng đợi, thử lại. Thông số của lab: 200 ms, tối đa 5 lần, chỉ thử lại khi lỗi là `55P03` (`src/migrate.rs`):
 
 ```rust
 match attempt(n).await {
@@ -172,20 +172,20 @@ match attempt(n).await {
 }
 ```
 
-Phiên đọc dài còn giữ bảng thì `expand` hết hạn ở lần 1, hoàn tác sạch, người ghi không bị chặn; phiên đọc xong thì lần 2 thành công:
+Nếu phiên đọc dài còn giữ bảng thì `expand` hết thời gian chờ ở lần 1, hoàn tác sạch, người ghi không bị chặn; khi phiên đọc xong thì lần 2 thành công:
 
 ```text
 lần 1: SQLSTATE 55P03; cột chưa được thêm: true; người ghi không bị chặn: true
 phiên đọc dài kết thúc: thành công ở lần 2, cột có mặt: true
 ```
 
-Lab thử lại ngay; production nên nghỉ có jitter giữa các lần. `expand` của lab gộp hai bảng trong một transaction để hoàn tác sạch, nên khoá `postings` có thể bị giữ thêm tối đa một `lock_timeout` lúc chờ `fee_events`; bảng lớn nên tách mỗi bảng một transaction.
+Lab thử lại ngay; production nên chờ một khoảng có jitter giữa các lần. `expand` của lab gộp hai bảng trong một transaction để hoàn tác sạch, nên khoá `postings` có thể bị giữ thêm tối đa một `lock_timeout` lúc chờ `fee_events`; bảng lớn nên tách mỗi bảng một transaction.
 
 ## Feature flag: lưu ở đâu, đọc lúc nào, replay có ra đúng số cũ không?
 
-**Lưu ở đâu.** Biến môi trường hay file cần triển khai lại. Redis nhanh nhưng không là nguồn sự thật ([bài 28](/articles/rust-redis-cache-so-du-rate-limit-lock-ttl)). Lab đặt cờ trong bảng `feature_flags` của database sổ cái: một nguồn cho mọi instance, đổi không cần deploy.
+**Lưu ở đâu.** Đổi biến môi trường hay file thì phải triển khai lại. Redis nhanh nhưng không phải là nguồn dữ liệu gốc ([bài 28](/articles/rust-redis-cache-so-du-rate-limit-lock-ttl)). Lab đặt cờ trong bảng `feature_flags` của database sổ cái: một nguồn cho mọi instance, đổi không cần deploy.
 
-**Đọc lúc nào.** Đúng một lần cho mỗi chuyến, tại chỗ quyết định phí, và kết quả vào sự kiện `fee_events` cùng `policy_version`. Sau đó bút toán và replay đều đọc sự kiện, không hỏi lại cờ. Sự kiện đầu tiên thắng (`ON CONFLICT DO NOTHING`), nên hai instance thấy cờ khác nhau vẫn ra cùng một phiên bản.
+**Đọc lúc nào.** Đọc đúng một lần cho mỗi chuyến, tại nơi quyết định phí, và kết quả được ghi vào sự kiện `fee_events` cùng `policy_version`. Sau đó bút toán và replay đều đọc sự kiện, không hỏi lại cờ. Sự kiện đầu tiên thắng (`ON CONFLICT DO NOTHING`), nên hai instance thấy cờ khác nhau vẫn cho ra cùng một phiên bản.
 
 <figure class="tkh-fig">
 <div class="tkh-fig-box">
@@ -194,7 +194,7 @@ Lab thử lại ngay; production nên nghỉ có jitter giữa các lần. `expa
 <figcaption>Hình 4. Cờ chỉ có mặt ở một chỗ, trước sự kiện. Sau sự kiện, quy tắc phí là dữ liệu chứ không còn là cấu hình.</figcaption>
 </figure>
 
-Quy tắc phí là enum, `match` vét cạn: thêm `V3` mà quên cập nhật là lỗi biên dịch. Quy tắc mới có sàn, cài trên `FeePolicy` của [bài 11](/articles/rust-trait-generics-chinh-sach-phi-lam-tron) (`src/policy.rs`):
+Quy tắc phí là enum, `match` vét cạn: thêm `V3` mà quên cập nhật là lỗi biên dịch. Quy tắc mới có sàn, được cài đặt trên `FeePolicy` của [bài 11](/articles/rust-trait-generics-chinh-sach-phi-lam-tron) (`src/policy.rs`):
 
 ```rust
 fn fee(&self, fare: Money) -> Result<Money, LedgerError> {
@@ -203,7 +203,7 @@ fn fee(&self, fare: Money) -> Result<Money, LedgerError> {
 }
 ```
 
-**Bật theo tỷ lệ, tất định theo `tripId`.** Nhóm của chuyến là hàm thuần của tên cờ và mã chuyến. Hàm băm là FNV-1a tự viết, vì `DefaultHasher` không đặc tả thuật toán và có thể đổi giữa các bản Rust (`src/flags.rs`):
+**Bật theo tỷ lệ, tất định theo `tripId`.** Nhóm của chuyến là kết quả của một hàm thuần nhận tên cờ và mã chuyến làm đầu vào. Hàm băm là FNV-1a tự viết, vì `DefaultHasher` không đặc tả thuật toán và có thể đổi giữa các bản Rust (`src/flags.rs`):
 
 ```rust
 pub fn bucket(flag: FlagName, trip_id: &str) -> u8 {
@@ -222,9 +222,9 @@ số chuyến được chọn trong TN-0001..TN-1000: [(0, 0), (10, 115), (30, 3
 bộ chọn ngẫu nhiên hỏi hai lần ở 50%: 513 trong 1000 chuyến đổi ý
 ```
 
-Ở 10%, trong bốn chuyến đầu chỉ `TN-0004` được chọn. Dòng cuối là cách sai, chọn «ngẫu nhiên» mỗi lần hỏi: hơn nửa số chuyến đổi ý.
+Ở 10%, trong bốn chuyến đầu chỉ `TN-0004` được chọn. Dòng cuối là cách làm sai: chọn «ngẫu nhiên» mỗi lần hỏi thì hơn nửa số chuyến đổi ý.
 
-**Replay.** Cờ tắt cho `TN-0001`, `TN-0002`, bật 100% cho `TN-0003`, `TN-0004`. Bút toán cũ không đổi khi cờ bật; replay theo `policy_version` ra đúng từng đồng, còn áp quy tắc hiện hành thì lệch:
+**Replay.** Cờ tắt cho `TN-0001`, `TN-0002`, bật 100% cho `TN-0003`, `TN-0004`. Bút toán cũ không đổi khi cờ bật; replay theo `policy_version` cho ra đúng từng đồng, còn replay bằng quy tắc hiện hành thì lệch:
 
 ```text
 TN-0001: cước 25500, quy tắc V1, phí 5100, tài xế 20400
@@ -246,22 +246,22 @@ hai worker cùng xử lý TN-0005 với hai phiên bản đề xuất khác nhau
 
 ## Rollback: code lùi được, dữ liệu thì không
 
-Rollback code không rollback dữ liệu: bút toán và sự kiện đã ghi vẫn nằm đó. Lab thử lùi từng bước:
+Rollback code không kéo theo rollback dữ liệu: bút toán và sự kiện đã ghi vẫn nằm đó. Lab thử lùi từng bước:
 
 | Đã làm | Lùi bằng | Lab quan sát |
 | --- | --- | --- |
 | Bật cờ | Tắt cờ, tức thì | Chuyến đã tính `V2` giữ `policy_version = 2`; bút toán không đổi, replay vẫn đúng |
 | Expand, code ghi đúp | Triển khai lại code cũ | Code cũ ghi được, nhưng đọc `fee_percent` của `TN-0011` ra 15% khi tỷ lệ thật là 25% |
 | Contract A | Code cũ vẫn chạy (trigger còn) | Hình 1: code cũ ghi được; nhưng dòng do code «chỉ cột mới» ghi có `fee_percent` rỗng, báo cáo của code cũ sẽ lỗi vì `NULL` |
-| Contract B | Chỉ bằng dựng lại | Code cũ ghi lỗi `23502`, đọc báo cáo lỗi `42703` |
+| Contract B | Chỉ bằng cách dựng lại | Code cũ ghi lỗi `23502`, đọc báo cáo thì lỗi `42703` |
 
-Sau contract B, «lùi» là một migration mới: thêm lại cột và trigger. Cột `fee_percent` trở lại rỗng ở 14 trên 15 dòng, và báo cáo của code cũ lỗi vì `NULL`. Lab suy lại được vì `policy_version` còn và tỷ lệ danh nghĩa của mỗi phiên bản biết trước. Cột bị bỏ mà không suy ra được thì chỉ còn bản sao lưu.
+Sau contract B, «lùi» là một migration mới: thêm lại cột và trigger. Cột `fee_percent` trở lại rỗng ở 14 trên 15 dòng, và báo cáo của code cũ lỗi vì `NULL`. Lab suy lại được vì `policy_version` vẫn còn và tỷ lệ danh nghĩa của mỗi phiên bản đã biết trước. Cột bị bỏ mà không suy ra được thì chỉ còn bản sao lưu.
 
-Thứ tự lùi vì thế là: tắt cờ trước, rồi lùi code, và chỉ contract B khi chắc không còn lùi.
+Thứ tự lùi vì thế là: tắt cờ trước, rồi lùi code, và chỉ chạy contract B khi chắc chắn không còn cần lùi.
 
 ## Cấu hình kiểu an toàn: sai thì không khởi động
 
-Cấu hình là chuỗi thì gõ sai không báo gì: `legacy_fee_rule` chỉ nhận đúng `"v2"`, còn `"V2"` hay `"v3"` âm thầm thành `V1`. Với enum và `deny_unknown_fields`, lỗi hiện ra trước chuyến đầu tiên (`src/config.rs`, rút gọn):
+Nếu cấu hình là chuỗi thì gõ sai không báo gì: `legacy_fee_rule` chỉ nhận đúng `"v2"`, còn `"V2"` hay `"v3"` bị đổi thành `V1` mà không báo gì. Với enum và `deny_unknown_fields`, lỗi hiện ra trước chuyến đầu tiên (`src/config.rs`, rút gọn):
 
 ```rust
 #[derive(Debug, Deserialize)]
@@ -283,7 +283,7 @@ batchSize = 0
 cách chuỗi, "v2" / "V2" / "v3" thành: [V2, V1, V1]
 ```
 
-(Rút gọn: bỏ ca `lockTimeoutMs = 60000`.) Cờ trong DB cũng được kiểm lúc khởi động: `validate_all` từ chối tên ngoài enum `FlagName` và từ chối khi thiếu dòng của cờ đã biết.
+(Rút gọn: bỏ trường hợp `lockTimeoutMs = 60000`.) Cờ trong DB cũng được kiểm lúc khởi động: `validate_all` từ chối tên ngoài enum `FlagName` và từ chối khi thiếu dòng của cờ đã biết.
 
 <div class="tkh-callout tkh-callout--warn">
 <span class="tkh-callout-title">Giới hạn của ví dụ</span>

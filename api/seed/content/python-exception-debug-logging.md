@@ -10,7 +10,7 @@ language: vi
 
 Bộ phận hỗ trợ của [Tới Nơi](/articles/du-an-mau-toi-noi) nhận một phản ánh: khách đi 2,5 km nhưng app báo **25.500 VND**, đúng giá của chuyến 5 km. Log không có dòng lỗi nào, service không crash, không có traceback. Chương trình chạy thành công và đưa ra con số sai. Đây là loại sự cố khó nhất, vì không có gì tự báo cho ta biết hướng cần tìm.
 
-Đây là bài 08 của lộ trình **Python cơ bản qua Tới Nơi**. Bài này dùng lại mô hình cước đã quen (12.000 VND cho 2 km đầu, 4.500 VND mỗi km vượt) và thêm một lớp nhận dữ liệu từ thiết bị theo đơn vị **mét**.
+Đây là bài 08 của lộ trình **Python cơ bản qua Tới Nơi**. Bài này dùng lại mô hình cước đã quen (12.000 VND cho 2 km đầu, 4.500 VND cho mỗi km vượt quá) và thêm một lớp nhận dữ liệu từ thiết bị theo đơn vị **mét**.
 
 <div class="tkh-callout tkh-callout--example">
 <span class="tkh-callout-title">Thử trước khi đọc</span>
@@ -79,11 +79,11 @@ Một phiên thật, nhập lần lượt `n`, `n`, `p metres`, `s`, `n`, `n`, `
 (Pdb) 2500 m => 25500 VND
 ```
 
-Từ Python 3.13, `pdb` dừng ngay tại dòng gọi `breakpoint()` (dòng `-> breakpoint()` đầu tiên ở trên); bản cũ hơn dừng ở dòng kế tiếp. `metres` đúng là 2500. Nhưng `divisor` là 500, nên 2500 mét thành **5 km** thay vì 2,5 km. Lỗi nằm ở hằng số đổi đơn vị, đúng chỗ một bước nhỏ trước công thức cước; đọc code công thức tính cước một trăm lần cũng không thấy. Sửa bằng cách dùng `METRES_PER_KM = 1000` ở mọi nơi, và thêm một kiểm tra hồi quy cố định: 2500 mét phải ra 14.250. `--verify` của lab giữ cả hai chiều: bản đúng ra 14.250, bản `--buggy` tái hiện đúng 25.500.
+Từ Python 3.13, `pdb` dừng ngay tại dòng gọi `breakpoint()` (dòng `-> breakpoint()` đầu tiên ở trên); bản cũ hơn dừng ở dòng kế tiếp. `metres` đúng là 2500. Nhưng `divisor` là 500, nên 2500 mét thành **5 km** thay vì 2,5 km. Lỗi nằm ở hằng số đổi đơn vị, một bước nhỏ ngay trước công thức cước, nên có đọc code công thức tính cước một trăm lần cũng không thấy. Sửa bằng cách dùng `METRES_PER_KM = 1000` ở mọi nơi, và thêm một regression test cố định: 2500 mét phải ra 14.250. `--verify` của lab kiểm tra cả hai chiều: bản đúng ra 14.250, bản `--buggy` tái hiện đúng 25.500.
 
 ## Đọc traceback từ dưới lên
 
-Khi chương trình ném exception mà không ai bắt, Python in **traceback**. Quy tắc đọc: bắt đầu từ **dòng cuối**. Dòng cuối cho loại exception và thông điệp; ngay phía trên là dòng code đã `raise`; càng đi lên là các hàm đã gọi tới đó, cho tới lời gọi đầu tiên ở trên cùng. Chạy lab với cờ `--unhandled` để không có `except` nào chặn:
+Khi chương trình ném exception mà không ai bắt, Python in **traceback**. Quy tắc đọc: bắt đầu từ **dòng cuối**. Dòng cuối ghi loại exception và thông điệp; ngay phía trên là dòng code đã `raise`; càng đi lên là các hàm đã gọi tới đó, cho tới lời gọi đầu tiên ở trên cùng. Chạy lab với cờ `--unhandled` để không có `except` nào chặn:
 
 ```bash
 uv run --project examples/toi-noi-python/08-exception-debug-logging examples/toi-noi-python/08-exception-debug-logging/main.py -100 --unhandled
@@ -109,7 +109,7 @@ Traceback (most recent call last):
 fare.DistanceOutOfRangeError: khoảng cách ngoài miền 0..100 km: -0.1
 ```
 
-Các dấu `~` và `^` dưới mỗi dòng là Python chỉ ra biểu thức đang chạy khi lỗi xảy ra; frame `<module>` là lời gọi đầu tiên của script. Đọc từ dưới lên: exception là `DistanceOutOfRangeError`, khoảng cách -0,1 km; nó bị `raise` ở `calculate_fare`, được gọi từ `quote_from_metres`, được gọi từ `run_once`. Ba frame đầu (`<module>`, `main`, `demo`) chỉ là khung của script; frame đáng đọc nhất là ba frame cuối. Traceback chỉ cho biết **nơi từ chối**; câu hỏi tiếp theo là ai đưa -0,1 km vào hàm.
+Các dấu `~` và `^` dưới mỗi dòng do Python thêm vào để chỉ biểu thức đang chạy khi lỗi xảy ra; frame `<module>` là lời gọi đầu tiên của script. Đọc từ dưới lên: exception là `DistanceOutOfRangeError`, khoảng cách -0,1 km; exception bị `raise` ở `calculate_fare`, hàm này do `quote_from_metres` gọi, và hàm đó lại do `run_once` gọi. Ba frame đầu (`<module>`, `main`, `demo`) chỉ là khung của script; frame đáng đọc nhất là ba frame cuối. Traceback chỉ cho biết **nơi từ chối**; câu hỏi tiếp theo là ai đưa -0,1 km vào hàm.
 
 <figure class="tkh-fig">
 <div class="tkh-fig-box">
@@ -142,18 +142,18 @@ def handle_request(raw_metres: str, *, trip_id: str = "TN-0001", buggy: bool = F
 ```
 
 - `try` chỉ bao đoạn có thể ném lỗi mà ta định xử lý; càng rộng, càng dễ bắt nhầm lỗi của dòng khác.
-- `except` chọn **đúng loại** exception tầng này biết cách đáp ứng. Python duyệt các `except` từ trên xuống và dùng khối đầu tiên khớp, nên lớp con phải đứng trước lớp cha.
+- `except` chọn **đúng loại** exception mà tầng này biết cách xử lý. Python duyệt các `except` từ trên xuống và dùng khối đầu tiên khớp, nên lớp con phải đứng trước lớp cha.
 - `else` chạy khi `try` không có exception. Việc ghi log thành công đặt ở đây, thay vì trong `try`, để lỗi của chính dòng log không bị `except` phía trên nuốt nhầm.
-- `finally` chạy dù `try` thành công, dù có lỗi bị bắt, dù có `return` giữa chừng. Nó dành cho dọn dẹp (đóng file, nhả khoá). Nó không đảm bảo chạy khi tiến trình bị buộc dừng.
+- `finally` chạy dù `try` thành công, dù có lỗi bị bắt, dù có `return` giữa chừng. Khối này dành cho việc dọn dẹp (đóng file, nhả khoá), nhưng không đảm bảo chạy khi tiến trình bị buộc dừng.
 
 <figure class="tkh-fig">
 <div class="tkh-fig-box">
 <svg viewBox="0 0 880 300" role="img" aria-label="Hình 2. Luồng try, except, else, finally. Không có lỗi thì chạy else rồi finally. Có lỗi khớp một nhánh except thì chạy nhánh đó rồi finally."><defs><marker id="py08-2-arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10 z" class="f-phys"/></marker></defs><rect x="20" y="110" width="170" height="80" rx="10" class="f-phys-soft s-phys"/><text x="34" y="140" class="t-b">try</text><text x="34" y="165" class="t-small">quote_from_metres</text><rect x="320" y="20" width="230" height="80" rx="10" class="f-warn-soft s-warn"/><text x="334" y="50" class="t-b">except đúng loại</text><text x="334" y="75" class="t-small">có lỗi, khớp một nhánh</text><rect x="320" y="200" width="230" height="80" rx="10" class="f-phys-soft s-phys"/><text x="334" y="230" class="t-b">else</text><text x="334" y="255" class="t-small">không có lỗi</text><rect x="680" y="110" width="180" height="80" rx="10" class="f-pk-soft s-pk"/><text x="694" y="140" class="t-b">finally</text><text x="694" y="165" class="t-small">luôn chạy</text><path d="M190 135 L320 70" class="f-none s-warn" stroke-width="2" marker-end="url(#py08-2-arrow)"/><path d="M190 165 L320 230" class="f-none s-phys" stroke-width="2" marker-end="url(#py08-2-arrow)"/><path d="M550 60 L680 130" class="f-none s-warn" stroke-width="2" marker-end="url(#py08-2-arrow)"/><path d="M550 240 L680 170" class="f-none s-phys" stroke-width="2" marker-end="url(#py08-2-arrow)"/><text x="190" y="88" class="t-small">exception</text><text x="190" y="215" class="t-small">thành công</text></svg>
 </div>
-<figcaption>Hình 2. Luồng try, except, else, finally. Mọi nhánh đều kết thúc ở finally; nếu exception không khớp except nào, nó vẫn chạy finally rồi tiếp tục bay lên tầng gọi.</figcaption>
+<figcaption>Hình 2. Luồng try, except, else, finally. Mọi nhánh đều kết thúc ở finally; nếu exception không khớp except nào, finally vẫn chạy rồi exception tiếp tục truyền lên tầng gọi.</figcaption>
 </figure>
 
-Hai điều cần tránh. Một: `except:` trần hoặc `except Exception:` rồi tiếp tục như không có gì. Cả hai bắt lỗi lập trình (`NameError`, `TypeError`) lẫn lỗi dữ liệu và gộp vào cùng một nhánh; `except:` trần còn bắt cả `KeyboardInterrupt` và `SystemExit`, nghĩa là chặn luôn Ctrl+C và `sys.exit()`, còn `except Exception` thì không. Hai: `except Exception: return 0` biến lỗi thành báo giá miễn phí, nhập nhằng ba trạng thái (miễn phí thật, đầu vào sai, hệ thống hỏng). Hàm tính cước nhận khoảng cách âm là vi phạm hợp đồng, nên ném lỗi ở đó là đúng.
+Hai điều cần tránh. Một: `except:` trần hoặc `except Exception:` rồi tiếp tục như không có gì. Cả hai bắt lỗi lập trình (`NameError`, `TypeError`) lẫn lỗi dữ liệu và gộp vào cùng một nhánh; `except:` trần còn bắt cả `KeyboardInterrupt` và `SystemExit`, nghĩa là chặn luôn Ctrl+C và `sys.exit()`, còn `except Exception` thì không. Hai: `except Exception: return 0` biến lỗi thành báo giá miễn phí, nhập nhằng ba trạng thái (miễn phí thật, đầu vào sai, hệ thống hỏng). Khi hàm tính cước nhận khoảng cách âm, đó là vi phạm hợp đồng, nên ném lỗi ở đó là đúng.
 
 ## Exception tuỳ biến, `raise from` và chaining
 
@@ -167,7 +167,7 @@ class DistanceOutOfRangeError(FareError): ...
 class DeviceDataError(FareError): ...
 ```
 
-Kế thừa `ValueError` giúp code cũ đang bắt `ValueError` vẫn bắt được lỗi mới, trong khi tầng gọi có thể chọn mức chính xác: `except DistanceOutOfRangeError` cho một ca cụ thể, hay `except FareError` cho mọi lỗi nghiệp vụ. Thông điệp lỗi ghi giá trị nhìn thấy, không chứa dữ liệu nhạy cảm.
+Kế thừa `ValueError` giúp code cũ đang bắt `ValueError` vẫn bắt được lỗi mới, trong khi tầng gọi có thể chọn mức độ chi tiết phù hợp: `except DistanceOutOfRangeError` cho một trường hợp cụ thể, hay `except FareError` cho mọi lỗi nghiệp vụ. Thông điệp lỗi ghi giá trị quan sát được, không chứa dữ liệu nhạy cảm.
 
 Khi bắt một lỗi cấp thấp rồi ném lỗi có ý nghĩa nghiệp vụ hơn, dùng `raise ... from exc` để **giữ nguyên nhân**:
 
@@ -208,7 +208,7 @@ abc m => DEVICE_ERROR
 
 ## `assert` không dùng cho validation
 
-`assert điều_kiện, "thông điệp"` ném `AssertionError` khi điều kiện sai. Nó phục vụ khẳng định điều lập trình viên tin là luôn đúng (bất biến nội bộ). Điểm mấu chốt: khi chạy Python với cờ `-O`, mọi `assert` bị **bỏ qua**. Hàm `unsafe_guard` trong lab cố ý dùng `assert` để kiểm tra đầu vào và chứng minh điều đó:
+`assert điều_kiện, "thông điệp"` ném `AssertionError` khi điều kiện sai. Lệnh này dùng để khẳng định điều lập trình viên tin là luôn đúng (bất biến nội bộ). Điểm mấu chốt: khi chạy Python với cờ `-O`, mọi `assert` bị **bỏ qua**. Hàm `unsafe_guard` trong lab cố ý dùng `assert` để kiểm tra đầu vào và chứng minh điều đó:
 
 ```bash
 uv run --directory examples/toi-noi-python/08-exception-debug-logging python -O -c "from fare import unsafe_guard; print(unsafe_guard(-5))"
@@ -225,11 +225,11 @@ Lệnh thứ hai ra traceback (trích dòng cuối) và không in `-5`:
 AssertionError: khoảng cách phải >= 0
 ```
 
-Cùng một đầu vào, với `-O` hàm chấp nhận -5 km và trả về như hợp lệ. Vì thế dữ liệu đến từ bên ngoài (người dùng, thiết bị, file) phải được kiểm bằng `if ... raise` như `calculate_fare()` làm. Trong `calculate_fare()` vẫn có một dòng `assert total >= BASE_FARE`: đó là kiểm tra điều ta tin là đúng, và nếu nó bị bỏ qua thì hành vi đúng của hàm không đổi. `--verify` xác nhận cả hai hành vi bằng hai tiến trình con.
+Cùng một đầu vào, với `-O` hàm chấp nhận -5 km và trả về như hợp lệ. Vì thế dữ liệu đến từ bên ngoài (người dùng, thiết bị, file) phải được kiểm tra bằng `if ... raise` như `calculate_fare()` làm. Trong `calculate_fare()` vẫn có một dòng `assert total >= BASE_FARE`: đó là kiểm tra điều ta tin là đúng, và nếu nó bị bỏ qua thì hành vi đúng của hàm không đổi. `--verify` xác nhận cả hai hành vi bằng hai tiến trình con.
 
 ## Logging cho người vận hành
 
-`print` đủ cho bài tập, nhưng service chạy lúc nửa đêm cần **log**: có thời điểm, mức độ, nơi phát sinh, và có thể bật tắt không cần sửa code. Quy tắc chuẩn của thư viện `logging`: mỗi module lấy logger riêng bằng `logger = logging.getLogger(__name__)`; chỉ **điểm vào của chương trình** cấu hình `basicConfig`, các module thư viện không tự cấu hình. Trong lab, `main.py` làm việc đó. Lưu ý `basicConfig` không làm gì nếu root logger đã có handler (ví dụ một thư viện đã cấu hình trước); khi đó thêm `force=True` để cấu hình lại:
+`print` đủ cho bài tập, nhưng service chạy lúc nửa đêm cần **log**: có thời điểm, mức độ, nơi phát sinh, và có thể bật tắt mà không cần sửa code. Quy tắc chuẩn của thư viện `logging`: mỗi module lấy logger riêng bằng `logger = logging.getLogger(__name__)`; chỉ **điểm vào của chương trình** cấu hình `basicConfig`, các module thư viện không tự cấu hình. Trong lab, `main.py` làm việc đó. Lưu ý `basicConfig` không làm gì nếu root logger đã có handler (ví dụ một thư viện đã cấu hình trước); khi đó thêm `force=True` để cấu hình lại:
 
 ```python
 # main.py
@@ -255,7 +255,7 @@ Chạy với mức mặc định `INFO` và mức `DEBUG` cho cùng đầu vào 
 2500 m => 14250 VND
 ```
 
-Cột thứ ba là tên logger, nhờ `getLogger(__name__)` nên biết dòng log đến từ module nào. Với mức `INFO`, các dòng `DEBUG` ẩn đi. Nếu sự cố đầu bài xảy ra ở môi trường thật, log `INFO` chỉ ghi `báo giá thành công total=25500`: một dòng ghi nhận **thành công**, không có dấu hiệu lỗi. Bật `DEBUG` tạm thời thì dòng `quote_from_metres metres=2500 km=5 ...` làm lệch đơn vị lộ ra ngay.
+Cột thứ ba là tên logger, nhờ `getLogger(__name__)` nên biết dòng log đến từ module nào. Với mức `INFO`, các dòng `DEBUG` ẩn đi. Nếu sự cố đầu bài xảy ra ở môi trường thật, log `INFO` chỉ ghi `báo giá thành công total=25500`: một dòng ghi nhận **thành công**, không có dấu hiệu lỗi. Bật `DEBUG` tạm thời thì dòng `quote_from_metres metres=2500 km=5 ...` cho thấy ngay chỗ lệch đơn vị.
 
 Một số quy ước:
 
@@ -264,7 +264,7 @@ Một số quy ước:
 - Trong khối `except`, `logger.exception("...")` ghi mức `ERROR` kèm traceback hiện hành. Ngoài `except`, nó vẫn ghi mức `ERROR` nhưng không có traceback thật: log chỉ có dòng `NoneType: None` gây nhầm lẫn, nên chỉ gọi nó trong `except`.
 - **Không đưa dữ liệu nhạy cảm vào log**: số điện thoại, giấy tờ, token, số thẻ. Log đi qua nhiều hệ thống và nhiều người đọc. Ghi mã tương quan như `TN-0001` hay `CU-001`; nếu bắt buộc ghi định danh, che bớt như hàm `mask_phone("0912345678")` của lab trả về `09******78`.
 
-Phân biệt hai vai trò: **exception là tín hiệu điều khiển luồng**, buộc tầng gọi quyết định (từ chối, thử lại, dừng); **log là bản ghi cho người vận hành**, không đổi hành vi chương trình. Bắt exception rồi chỉ `logger.error` và chạy tiếp thường là che lỗi bằng cách khác. Bắt ở ranh giới, ghi log rồi trả mã kết quả có nghĩa như `REJECT` là hợp lý, vì tầng này đã quyết định.
+Phân biệt hai vai trò: **exception là tín hiệu điều khiển luồng**, buộc tầng gọi quyết định (từ chối, thử lại, dừng); **log là bản ghi cho người vận hành**, không đổi hành vi chương trình. Bắt exception rồi chỉ `logger.error` và chạy tiếp thường là che lỗi bằng cách khác. Bắt ở ranh giới, ghi log rồi trả mã kết quả có ý nghĩa như `REJECT` là hợp lý, vì tầng này đã quyết định.
 
 | Hiện tượng | Kiểm tra trước |
 | --- | --- |
@@ -272,7 +272,7 @@ Phân biệt hai vai trò: **exception là tín hiệu điều khiển luồng**
 | Traceback chỉ thấy chỗ `raise` | Đi ngược chuỗi gọi: ai truyền giá trị này; `p` giá trị bằng `pdb` |
 | Log không hiện dòng `DEBUG` | Đã gọi `basicConfig` với `level=DEBUG` chưa; logger khác có đặt mức riêng không |
 | Log không có traceback | Có dùng `logger.exception` trong `except` hay chỉ `logger.error` |
-| Validation biến mất khi triển khai | Có dùng `assert` để kiểm đầu vào không; chạy bản production có thể thêm `-O` |
+| Validation biến mất khi triển khai | Có dùng `assert` để kiểm tra đầu vào không; chạy bản production có thể thêm `-O` |
 
 ## Chạy, kiểm chứng và giới hạn của ví dụ
 
@@ -282,9 +282,9 @@ uv run --project $L $L/main.py
 uv run --project $L $L/main.py --verify
 ```
 
-Lệnh đầu chạy ba ca: 2500 mét (14250 VND), -100 mét (REJECT) và `abc` (DEVICE_ERROR, log có traceback chaining). Lệnh thứ hai chạy 21 kiểm tra: bảng cước, bản `--buggy` tái hiện 25.500, từng loại exception đúng lớp, `__cause__`, số dòng log theo mức, hành vi `assert` với `-O`. Kết quả cuối là `OK 21/21`; có ca sai thì in tên ca, dòng `FAIL n/21` và thoát với mã 1.
+Lệnh đầu chạy ba trường hợp: 2500 mét (14250 VND), -100 mét (REJECT) và `abc` (DEVICE_ERROR, log có traceback chaining). Lệnh thứ hai chạy 21 kiểm tra: bảng cước, bản `--buggy` tái hiện 25.500, từng loại exception đúng lớp, `__cause__`, số dòng log theo mức, hành vi `assert` với `-O`. Kết quả cuối là `OK 21/21`; có kiểm tra nào sai thì in tên kiểm tra đó, dòng `FAIL n/21` và thoát với mã 1.
 
-Lab dùng chuỗi mét tự sinh và một lỗi có chủ đích; lỗi thật không tự giới thiệu bằng cờ. Log ghi ra stderr bằng `basicConfig`; service thật dùng log có cấu trúc (JSON), gom về hệ thống tập trung và gắn mã tương quan theo từng yêu cầu. Không để `breakpoint()` trong code triển khai, vì nó chặn tiến trình chờ nhập lệnh. `--verify` là bộ kiểm tra tự viết cho lab, chưa phải kiểm thử có khung: bài 10 giới thiệu `pytest` (kể cả `pytest.raises` cho các ca ném lỗi) và áp dụng nó cho chính sách cước.
+Lab dùng chuỗi mét tự sinh và một lỗi có chủ đích; lỗi thật không tự giới thiệu bằng cờ. Log ghi ra stderr bằng `basicConfig`; service thật dùng log có cấu trúc (JSON), gom về hệ thống tập trung và gắn mã tương quan theo từng yêu cầu. Không để `breakpoint()` trong code triển khai, vì nó chặn tiến trình chờ nhập lệnh. `--verify` là bộ kiểm tra tự viết cho lab, chưa phải kiểm thử dùng framework: bài 10 giới thiệu `pytest` (kể cả `pytest.raises` cho các test case ném lỗi) và áp dụng nó cho chính sách cước.
 
 **Bài tập:** thiết bị gửi `"2,5"` (dấu phẩy, kiểu địa phương) thay vì `"2500"`. Hàm `quote_from_metres("2,5")` hiện ném lỗi gì, ở dòng nào, và `handle_request` trả gì? Có nên đoán `"2,5"` là 2,5 km không?
 

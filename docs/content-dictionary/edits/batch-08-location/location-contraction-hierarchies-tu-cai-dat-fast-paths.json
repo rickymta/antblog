@@ -1,0 +1,269 @@
+{
+ "file": "location-contraction-hierarchies-tu-cai-dat-fast-paths.md",
+ "edits": [
+  {
+   "old": "và vì sao CH theo nút không mang chi phí rẽ.",
+   "new": "và giải thích vì sao CH theo nút không mang chi phí rẽ.",
+   "reason": "Câu tóm tắt thiếu động từ",
+   "severity": "medium"
+  },
+  {
+   "old": "Cùng 10.000 cặp, bằng Contraction Hierarchies (CH) tự cài của lab với trung vị 6,2 µs mỗi cặp, là khoảng 0,06 giây.",
+   "new": "Cùng 10.000 cặp đó, dùng Contraction Hierarchies (CH) tự cài của lab với trung vị 6,2 µs mỗi cặp thì mất khoảng 0,06 giây.",
+   "reason": "Câu thiếu động từ, giọng dịch máy",
+   "severity": "medium"
+  },
+  {
+   "old": "Hai phép nhân đơn giản từ số đo, và cả hai số đo lấy khi máy đang chịu tải rất nặng,",
+   "new": "Đây là hai phép nhân đơn giản từ số đo, và cả hai số đo đều lấy khi máy đang chịu tải rất nặng,",
+   "reason": "Câu thiếu chủ ngữ",
+   "severity": "medium"
+  },
+  {
+   "old": "engine của lab không được tuyên bố thay thế OSRM hay Valhalla",
+   "new": "lab không tuyên bố engine này thay thế được OSRM hay Valhalla",
+   "reason": "Bỏ câu bị động kiểu tiếng Anh",
+   "severity": "medium"
+  },
+  {
+   "old": "câu trả lời khác, và bài 27 bàn tới.",
+   "new": "câu trả lời sẽ khác, và bài 27 bàn tới chuyện đó.",
+   "reason": "Câu cụt",
+   "severity": "low"
+  },
+  {
+   "old": "Điều kiện «từng đi qua `v`» được kiểm bằng **tìm kiếm nhân chứng** (witness search)",
+   "new": "Ta kiểm điều kiện «từng đi qua `v`» bằng **tìm kiếm nhân chứng** (witness search)",
+   "reason": "Chuyển câu bị động sang chủ động",
+   "severity": "low"
+  },
+  {
+   "old": "kiểm thứ tự, shortcut và truy vấn ở Hình 2",
+   "new": "kiểm tra thứ tự, shortcut và truy vấn ở Hình 2",
+   "reason": "Lược mất chữ «tra»",
+   "severity": "medium"
+  },
+  {
+   "old": "thứ tự và shortcut là output của <code>Ch::build</code>, kiểm bằng test trong <code>ch.rs</code>",
+   "new": "thứ tự và shortcut là kết quả của <code>Ch::build</code>, được kiểm bằng test trong <code>ch.rs</code>",
+   "reason": "Từ tiếng Anh thông thường, câu cụt",
+   "severity": "medium"
+  },
+  {
+   "old": "Chọn hạng làm chỉ số cho phép «cung đi lên» chỉ là so sánh hai số nguyên.",
+   "new": "Chọn hạng làm chỉ số thì việc kiểm tra «cung đi lên» chỉ còn là so sánh hai số nguyên.",
+   "reason": "Câu mơ hồ, thiếu danh từ chính",
+   "severity": "medium"
+  },
+  {
+   "old": "Có hai chỗ cần để ý. Một: `limit` chặn",
+   "new": "Có hai chỗ cần để ý. Thứ nhất, `limit` chặn",
+   "reason": "Cách liệt kê kiểu dịch máy",
+   "severity": "low"
+  },
+  {
+   "old": "Hai: `witness` dùng `Labels` có phiên bản của bài 21 nên chạy rất nhiều lần không phải khởi tạo lại mảng.",
+   "new": "Thứ hai, `witness` tái dùng `Labels` có đánh dấu phiên bản của bài 21, nên chạy rất nhiều lần mà không phải khởi tạo lại mảng.",
+   "reason": "Diễn đạt gượng, câu cụt",
+   "severity": "medium"
+  },
+  {
+   "old": "sớm sẽ đẻ ra rất nhiều shortcut",
+   "new": "sớm sẽ sinh ra rất nhiều shortcut",
+   "reason": "Từ quá khẩu ngữ",
+   "severity": "low"
+  },
+  {
+   "old": "(nút có láng giềng đã co ở mức cao thì nên co muộn)",
+   "new": "(nút có láng giềng đã co ở độ sâu lớn thì nên co muộn)",
+   "reason": "«ở mức cao» mơ hồ",
+   "severity": "low"
+  },
+  {
+   "old": "Hệ số `2` ưu tiên chênh lệch cạnh hơn hai số kia",
+   "new": "Hệ số `2` khiến chênh lệch cạnh có trọng số lớn hơn hai số kia",
+   "reason": "Câu gượng, thiếu rõ nghĩa",
+   "severity": "medium"
+  },
+  {
+   "old": "và dùng **cập nhật lười** cho phần còn lại: khi lấy nút ra, tính lại độ ưu tiên; nếu tệ hơn đỉnh hàng đợi thì đẩy lại, chưa co.",
+   "new": "và dùng **cập nhật lười** cho phần còn lại, nghĩa là khi lấy nút ra thì tính lại độ ưu tiên, và nếu tệ hơn đỉnh hàng đợi thì đẩy nút lại vào hàng đợi mà chưa co.",
+   "reason": "Hai dấu hai chấm liên tiếp, câu cụt",
+   "severity": "medium"
+  },
+  {
+   "old": "Đây là chỗ CH có lợi.",
+   "new": "Đây là chỗ CH phát huy lợi thế.",
+   "reason": "Diễn đạt tự nhiên hơn",
+   "severity": "low"
+  },
+  {
+   "old": "Lý lẽ này chỉ cần «không bao giờ thiếu shortcut»",
+   "new": "Lập luận này chỉ cần điều kiện «không bao giờ thiếu shortcut»",
+   "reason": "Câu thiếu danh từ",
+   "severity": "low"
+  },
+  {
+   "old": "Tổng hai khoá vì thế không còn chặn dưới được đường chưa thấy:",
+   "new": "Tổng hai khoá vì thế không còn là cận dưới cho độ dài của đường chưa thấy:",
+   "reason": "Cụm tự ghép, nghe cụt",
+   "severity": "medium"
+  },
+  {
+   "old": "mỗi chiều chỉ tiếp tục chừng nào khoá nhỏ nhất của nó còn nhỏ hơn μ",
+   "new": "mỗi chiều chỉ tiếp tục chừng nào khoá nhỏ nhất trong hàng đợi của chiều đó còn nhỏ hơn μ",
+   "reason": "Làm rõ «khoá» là khoá trong hàng đợi",
+   "severity": "medium"
+  },
+  {
+   "old": "khoá đã đạt μ không thể cho đường ngắn hơn",
+   "new": "khoá đã đạt μ thì không thể cho ra đường ngắn hơn",
+   "reason": "Câu thiếu liên kết",
+   "severity": "low"
+  },
+  {
+   "old": "Hai chiều còn xử lý b và c phía ngược, không cải thiện, và dừng.",
+   "new": "Hai chiều còn xử lý b và c phía ngược nhưng không cải thiện được μ, rồi dừng.",
+   "reason": "Câu cụt, thiếu tân ngữ",
+   "severity": "low"
+  },
+  {
+   "old": "cho đường a, c, e, f dài 9, đúng bằng Dijkstra.",
+   "new": "cho đường a, c, e, f dài 9, đúng bằng kết quả của Dijkstra.",
+   "reason": "Thiếu danh từ chính",
+   "severity": "medium"
+  },
+  {
+   "old": "Lab kiểm ba lớp trên đồ thị HCM",
+   "new": "Lab kiểm tra ba lớp trên đồ thị HCM",
+   "reason": "Lược mất chữ «tra»",
+   "severity": "medium"
+  },
+  {
+   "old": "Đây là so với một cài đặt CH",
+   "new": "Đây là phép so với một cài đặt CH",
+   "reason": "Thiếu danh từ chính",
+   "severity": "medium"
+  },
+  {
+   "old": "Kiểm: tổng trọng số cạnh bằng chi phí báo cáo",
+   "new": "Cách kiểm tra: tổng trọng số cạnh bằng chi phí báo cáo",
+   "reason": "Lược mất danh từ, từ cụt",
+   "severity": "medium"
+  },
+  {
+   "old": "mỗi truy vấn chạy nóng một lần trước khi bấm giờ",
+   "new": "mỗi truy vấn chạy khởi động một lần trước khi bấm giờ",
+   "reason": "Cách nói gượng",
+   "severity": "low"
+  },
+  {
+   "old": "Thời gian trung bình của Dijkstra trên CH cộng giải nén là 311 lần.",
+   "new": "Về thời gian trung bình, Dijkstra gấp 311 lần CH cộng giải nén.",
+   "reason": "Câu cụt, khó hiểu",
+   "severity": "high"
+  },
+  {
+   "old": "nghĩa là dựng lại CH khi bản đồ đổi là chấp nhận được;",
+   "new": "nghĩa là dựng lại CH mỗi khi bản đồ đổi vẫn chấp nhận được;",
+   "reason": "Câu gượng",
+   "severity": "low"
+  },
+  {
+   "old": "Một: chênh lệch số cung đến từ",
+   "new": "Thứ nhất, chênh lệch số cung đến từ",
+   "reason": "Cách liệt kê kiểu dịch máy",
+   "severity": "low"
+  },
+  {
+   "old": "Hai: với `fast_paths`, phần lớn",
+   "new": "Thứ hai, với `fast_paths`, phần lớn",
+   "reason": "Cách liệt kê kiểu dịch máy",
+   "severity": "low"
+  },
+  {
+   "old": "Bộ nhớ 8,53 so với 17,94 MB so hai thứ khác phương pháp",
+   "new": "Bộ nhớ 8,53 so với 17,94 MB là so sánh hai thứ khác phương pháp đo",
+   "reason": "Thiếu động từ, câu tối nghĩa",
+   "severity": "high"
+  },
+  {
+   "old": "nên chỉ biết cỡ. Còn «chậm hơn 1,46 lần» không phải so sánh công bằng",
+   "new": "nên chỉ cho biết cỡ. Còn «chậm hơn 1,46 lần» không phải là phép so sánh công bằng",
+   "reason": "Thiếu động từ",
+   "severity": "medium"
+  },
+  {
+   "old": "CH của lab dựng trên `View`, tức đồ thị **theo nút** của bài 21 (comment đầu hàm",
+   "new": "CH của lab dựng trên `View`, tức kiểu đồ thị **theo nút** của bài 21 (chú thích đầu hàm",
+   "reason": "Giải thích `View`, bỏ từ tiếng Anh thông thường",
+   "severity": "medium"
+  },
+  {
+   "old": "mà shortcut đã gộp hai cạnh thành một cung mất thông tin đó.",
+   "new": "mà shortcut gộp hai cạnh thành một cung nên làm mất thông tin đó.",
+   "reason": "Câu thiếu liên kết",
+   "severity": "medium"
+  },
+  {
+   "old": "Truy vấn CH có thể trả đường quay ngược miễn phí tại một nút, hoặc rẽ vào chỗ OSM cấm, vì nó không biết gì về chuyện đó.",
+   "new": "Truy vấn CH có thể trả về đường quay ngược miễn phí tại một nút, hoặc rẽ vào chỗ OSM cấm, vì CH không biết gì về chuyện đó.",
+   "reason": "Bỏ «nó» chỉ sự vật trừu tượng",
+   "severity": "medium"
+  },
+  {
+   "old": "chỉ mô hình việc đi vòng",
+   "new": "chỉ mô hình hoá việc đi vòng",
+   "reason": "Thiếu động từ sau «chỉ»",
+   "severity": "high"
+  },
+  {
+   "old": "ước thời gian thấp hơn trung bình 80,7 s",
+   "new": "ước lượng thời gian thấp hơn trung bình 80,7 s",
+   "reason": "Cụm cụt",
+   "severity": "low"
+  },
+  {
+   "old": "cái cần nhớ là CH trả lời nhanh một mô hình thô hơn",
+   "new": "cái cần nhớ là CH trả lời nhanh trên một mô hình thô hơn",
+   "reason": "Thiếu giới từ",
+   "severity": "medium"
+  },
+  {
+   "old": "là hướng khác; lab **không** làm nó.",
+   "new": "là một hướng khác; lab **không** làm hướng này.",
+   "reason": "Bỏ «nó» chỉ sự vật trừu tượng",
+   "severity": "medium"
+  },
+  {
+   "old": "lựa chọn đó đổi cả `u_turns` lẫn km rỗng đo được.",
+   "new": "lựa chọn đó làm thay đổi cả `u_turns` lẫn km rỗng đo được.",
+   "reason": "Câu cụt",
+   "severity": "low"
+  },
+  {
+   "old": "dùng lại, và `Ch::save` và `Ch::load` làm việc đó",
+   "new": "dùng lại, còn `Ch::save` và `Ch::load` làm việc đó",
+   "reason": "Lặp «và»",
+   "severity": "low"
+  },
+  {
+   "old": "không được dùng nguyên xi cho truy vấn CH",
+   "new": "không thể dùng nguyên vẹn cho truy vấn CH",
+   "reason": "Từ quá khẩu ngữ",
+   "severity": "low"
+  },
+  {
+   "old": "khoá nhỏ nhất của nó đã không nhỏ hơn μ",
+   "new": "khoá nhỏ nhất của nó không còn nhỏ hơn μ",
+   "reason": "Phủ định kép gượng",
+   "severity": "low"
+  },
+  {
+   "old": "ở đồ thị lớn thì có (432.115 cung của lab",
+   "new": "ở đồ thị lớn thì có đổi (432.115 cung của lab",
+   "reason": "Câu thiếu động từ",
+   "severity": "medium"
+  }
+ ]
+}

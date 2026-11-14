@@ -1,7 +1,7 @@
 ---
 slug: location-h3-geohash-chi-muc-luoi-k-ring
 title: "H3 và geohash: chia thành phố thành ô để tìm nhanh"
-summary: "Bài 08: chia TP.HCM thành ô bằng geohash và H3 (h3o), đo lỗi biên ô của geohash, k-ring của H3, chọn độ phân giải theo bán kính tìm kiếm và biết khi nào lưới hơn cây."
+summary: "Bài 08: chia TP.HCM thành ô bằng geohash và H3 (h3o), đo lỗi biên ô của geohash, k-ring của H3, chọn độ phân giải theo bán kính tìm kiếm và biết khi nào lưới tốt hơn cây."
 category: location-routing
 level: intermediate
 tags: [toi-noi, location, rust, h3, geohash, spatial-index, k-ring]
@@ -10,17 +10,17 @@ language: vi
 
 Một tài xế đứng ở vĩ độ 10,722650, kinh độ 106,690000. Một khách đứng ở 10,722700, 106,690000, phía bắc anh ta **5,56 m**. Hệ thống chia thành phố thành ô geohash 6 ký tự (ô rộng 1,2 km, cao 610 m) và tìm tài xế «cùng ô với khách». Kết quả: không thấy ai. Hai người nằm ở hai ô khác nhau, vì đường biên ô nằm đúng giữa họ.
 
-Lỗi biên ô là lý do không ai nên tìm tài xế bằng cách so sánh tiền tố geohash. Mọi lưới đều có biên ô, kể cả H3 của Uber; cái H3 đổi được là cách quét láng giềng đều hơn, và nó cũng có điều kiện sử dụng. Đây là bài 08 của lộ trình **Nền tảng định vị** qua [Tới Nơi](/articles/du-an-mau-toi-noi). Bài dùng khoảng cách của [bài 04](/articles/location-khoang-cach-haversine-equirectangular-sai-so) và là một trong hai nền tảng của [bài 09](/articles/location-tim-tai-xe-gan-nhat-bon-cach-co-so-do), nơi lưới H3 được đặt cạnh R-tree và Redis. Mọi con số trong bài là trên dữ liệu mô phỏng, seed 20261106.
+Lỗi biên ô là lý do không ai nên tìm tài xế bằng cách so sánh tiền tố geohash. Mọi lưới đều có biên ô, kể cả H3 của Uber; điều H3 cải thiện được là cách quét láng giềng đều hơn, và H3 cũng có giới hạn khi áp dụng. Đây là bài 08 của lộ trình **Nền tảng định vị** qua [Tới Nơi](/articles/du-an-mau-toi-noi). Bài dùng khoảng cách của [bài 04](/articles/location-khoang-cach-haversine-equirectangular-sai-so) và là một trong hai nền tảng của [bài 09](/articles/location-tim-tai-xe-gan-nhat-bon-cach-co-so-do), nơi lưới H3 được đặt cạnh R-tree và Redis. Mọi con số trong bài là kết quả đo trên dữ liệu mô phỏng, seed 20261106.
 
 <div class="tkh-callout tkh-callout--example">
 <span class="tkh-callout-title">Thử trước khi đọc</span>
-<p>Hai điểm cách nhau 5,56 m có geohash độ dài 8 là <code>w3gugzcr</code> và <code>w3gv5b12</code>. Chúng chung bao nhiêu ký tự đầu? Tìm bằng «cùng tiền tố 6 ký tự» có thấy nhau không?</p>
+<p>Hai điểm cách nhau 5,56 m có geohash độ dài 8 là <code>w3gugzcr</code> và <code>w3gv5b12</code>. Chúng chung bao nhiêu ký tự đầu? Nếu tìm bằng «cùng tiền tố 6 ký tự» thì hai điểm có thấy nhau không?</p>
 <details><summary>Xem đáp án</summary><p>Chung <b>3 ký tự</b> (<code>w3g</code>), nên không thấy nhau ở độ dài 4 trở lên. Muốn thấy phải quét thêm 8 ô láng giềng: cả ở độ dài 5, 6 và 7, điểm B đều nằm trong 8 láng giềng của ô chứa A.</p></details>
 </div>
 
 ## Geohash: đan xen bit, và đường biên không tránh được
 
-Geohash mã hoá một điểm thành chuỗi ký tự bằng cách luân phiên chia đôi khoảng kinh độ rồi khoảng vĩ độ: bit 1 nếu điểm nằm ở nửa trên, bit 0 nếu nửa dưới, gom năm bit thành một ký tự base32. Chuỗi càng dài, ô càng nhỏ; hai điểm trong cùng một ô dài thì chung tiền tố. Đó là cái hay (tiền tố làm khoá, làm chỉ mục theo văn bản) và cũng là cái dở: hai điểm sát nhau nhưng nằm hai bên một đường chia **ở mức thô** (một trong những bit đầu của chuỗi) có thể chung rất ít ký tự.
+Geohash mã hoá một điểm thành chuỗi ký tự bằng cách luân phiên chia đôi khoảng kinh độ rồi khoảng vĩ độ: bit 1 nếu điểm nằm ở nửa trên, bit 0 nếu nửa dưới, gom năm bit thành một ký tự base32. Chuỗi càng dài, ô càng nhỏ; hai điểm trong cùng một ô dài thì chung tiền tố. Đó là ưu điểm (tiền tố làm khoá, làm chỉ mục theo văn bản) và cũng là nhược điểm: hai điểm sát nhau nhưng nằm hai bên một đường chia **ở mức thô** (một trong những bit đầu của chuỗi) có thể chung rất ít ký tự.
 
 `examples/toi-noi-location/rust/crates/geo-core/src/geohash.rs`
 
@@ -65,7 +65,7 @@ Kích thước ô tại Bến Thành (lat 10,7725), đo bằng haversine trên h
 | 7 | 150,0 | 152,7 |
 | 8 | 37,5 | 19,1 |
 
-Lab quét hai đường trong bbox (lat = 10,78 theo kinh độ, và lng = 106,69 theo vĩ độ) với bước 0,00005° (cỡ 5,5 m), mã hoá geohash độ dài 8 cho từng cặp điểm liền kề và đếm số lần hai điểm khác ô. Có **1.456** lần, phân theo độ dài tiền tố chung: 3 ký tự 1 lần, 4 ký tự 7 lần, 5 ký tự 39 lần, 6 ký tự 201 lần, 7 ký tự 1.208 lần. Tức là 47 lần hai điểm cách nhau chừng 5,5 m mà chung dưới 6 ký tự. Cặp tệ nhất là cặp đầu bài.
+Lab quét hai đường trong bbox (lat = 10,78 theo kinh độ, và lng = 106,69 theo vĩ độ) với bước 0,00005° (cỡ 5,5 m), mã hoá geohash độ dài 8 cho từng cặp điểm liền kề và đếm số lần hai điểm khác ô. Có **1.456** lần, phân theo độ dài tiền tố chung: 3 ký tự 1 lần, 4 ký tự 7 lần, 5 ký tự 39 lần, 6 ký tự 201 lần, 7 ký tự 1.208 lần. Tức là có 47 lần hai điểm cách nhau chừng 5,5 m mà chung dưới 6 ký tự. Cặp tệ nhất là cặp đầu bài.
 
 <figure class="tkh-fig">
 <div class="tkh-fig-box">
@@ -74,7 +74,7 @@ Lab quét hai đường trong bbox (lat = 10,78 theo kinh độ, và lng = 106,6
 <figcaption>Hình 1. Hai ô geohash 6 (w3gugz phía nam, w3gv5b phía bắc) và cặp điểm A, B cách nhau 5,56 m ở hai bên đường biên. Vẽ từ <code>loc08-geohash-bien.geojson</code>; chỉ có ô geohash và hai điểm, không có dữ liệu bản đồ.</figcaption>
 </figure>
 
-Cách chữa chuẩn là quét thêm **tám ô láng giềng**. Với cặp trên, B nằm trong 8 láng giềng của A ở độ dài 5, 6 và 7, nên quét chín ô thì thấy. Lab cũng thấy H3 res 8, 9, 10 xếp A và B vào cùng một ô, nhưng đó chỉ là may của riêng cặp này: H3 cũng có biên ô, và bảng dưới cho thấy chỉ quét một ô H3 thì bỏ sót nhiều không kém. Nhưng chín ô cũng chưa đủ khi bán kính tìm lớn hơn cạnh ô; phần bảng đo bên dưới có số.
+Cách chữa chuẩn là quét thêm **tám ô láng giềng**. Với cặp trên, B nằm trong 8 láng giềng của A ở độ dài 5, 6 và 7, nên quét chín ô thì thấy. Lab cũng thấy H3 res 8, 9, 10 xếp A và B vào cùng một ô, nhưng đó chỉ là may của riêng cặp này: H3 cũng có biên ô, và bảng dưới cho thấy chỉ quét một ô H3 thì bỏ sót nhiều không kém. Chín ô cũng chưa đủ khi bán kính tìm lớn hơn cạnh ô; phần bảng đo bên dưới có số.
 
 ## H3: ô lục giác và k-ring
 
@@ -104,7 +104,7 @@ pub fn k_ring(cell: CellIndex, k: u32) -> Vec<CellIndex> {
 }
 ```
 
-Hình 2 vẽ k-ring 2 ở độ phân giải 9 quanh Bến Thành, từ chính file GeoJSON lab xuất ra. Với riêng điểm hỏi này, đường tròn bán kính 300 m nằm trọn trong 7 ô của vòng 0 và vòng 1. Điểm hỏi sát góc ô thì không, nên trên toàn mẫu k = 1 vẫn bỏ sót 0,20%.
+Hình 2 vẽ k-ring 2 ở độ phân giải 9 quanh Bến Thành, từ chính file GeoJSON mà lab xuất ra. Với riêng điểm hỏi này, đường tròn bán kính 300 m nằm trọn trong 7 ô của vòng 0 và vòng 1. Điểm hỏi sát góc ô thì không, nên trên toàn mẫu k = 1 vẫn bỏ sót 0,20%.
 
 <figure class="tkh-fig">
 <div class="tkh-fig-box">
@@ -125,7 +125,7 @@ Hình 2 vẽ k-ring 2 ở độ phân giải 9 quanh Bến Thành, từ chính f
 
 ## Chọn độ phân giải theo bán kính tìm
 
-Câu hỏi thực tế: tìm đích trong bán kính r quanh điểm hỏi, cần quét mấy vòng? Lab thử bằng cách bốc 200.000 cặp (điểm hỏi, đích), đích cách điểm hỏi một khoảng đều trong [0, r] theo hướng ngẫu nhiên, rồi đếm số lần đích **không nằm** trong tập ô được quét. Với H3, «k cần thiết» của một cặp chính là khoảng cách lưới giữa hai ô:
+Câu hỏi thực tế: tìm đích trong bán kính r quanh điểm hỏi, cần quét mấy vòng? Lab thử bằng cách lấy ngẫu nhiên 200.000 cặp (điểm hỏi, đích), đích cách điểm hỏi một khoảng cách phân bố đều trong [0, r] theo hướng ngẫu nhiên, rồi đếm số lần đích **không nằm** trong tập ô được quét. Với H3, «k cần thiết» của một cặp chính là khoảng cách lưới giữa hai ô:
 
 `examples/toi-noi-location/rust/labs/src/bin/loc08_h3.rs`
 
@@ -144,10 +144,10 @@ Câu hỏi thực tế: tìm đích trong bán kính r quanh điểm hỏi, cầ
 <div class="tkh-fig-box">
 <svg viewBox="0 0 880 422" role="img" aria-label="Hình 3. Tỉ lệ bỏ sót đích cách điểm hỏi tối đa 300 mét: geohash 6 một ô bỏ sót 22,08 phần trăm, chín ô 0; geohash 7 chín ô vẫn bỏ sót 17,86; H3 độ phân giải 9 cần k bằng 2 để về 0."><text x="20.0" y="28.0" class="t-b">Bỏ sót khi tìm đích trong bán kính 300 m (200.000 mẫu mỗi dòng, mô phỏng, seed 20261106)</text><text x="20.0" y="64.0">geohash 6 · 1 ô</text><rect x="230" y="52" width="114.816" height="15" class="f-warn" stroke-width="0"/><text x="352.8" y="64.0" class="t-mono">22,08%</text><text x="20.0" y="90.0">geohash 6 · 9 ô</text><rect x="230" y="78" width="1.5" height="15" class="f-warn" stroke-width="0"/><text x="239.5" y="90.0" class="t-mono">0,00%</text><text x="20.0" y="116.0">geohash 7 · 1 ô</text><rect x="230" y="104" width="395.564" height="15" class="f-warn" stroke-width="0"/><text x="633.6" y="116.0" class="t-mono">76,07%</text><text x="20.0" y="142.0">geohash 7 · 9 ô</text><rect x="230" y="130" width="92.872" height="15" class="f-warn" stroke-width="0"/><text x="330.9" y="142.0" class="t-mono">17,86%</text><text x="20.0" y="168.0">H3 res 8 · k=0 (1 ô)</text><rect x="230" y="156" width="97.292" height="15" class="f-pk" stroke-width="0"/><text x="335.3" y="168.0" class="t-mono">18,71%</text><text x="20.0" y="194.0">H3 res 8 · k=1 (7 ô)</text><rect x="230" y="182" width="1.5" height="15" class="f-pk" stroke-width="0"/><text x="239.5" y="194.0" class="t-mono">0,00%</text><text x="20.0" y="220.0">H3 res 9 · k=0 (1 ô)</text><rect x="230" y="208" width="240.552" height="15" class="f-pk" stroke-width="0"/><text x="478.6" y="220.0" class="t-mono">46,26%</text><text x="20.0" y="246.0">H3 res 9 · k=1 (7 ô)</text><rect x="230" y="234" width="1.5" height="15" class="f-pk" stroke-width="0"/><text x="239.5" y="246.0" class="t-mono">0,20%</text><text x="20.0" y="272.0">H3 res 9 · k=2 (19 ô)</text><rect x="230" y="260" width="1.5" height="15" class="f-pk" stroke-width="0"/><text x="239.5" y="272.0" class="t-mono">0,00%</text><text x="20.0" y="298.0">H3 res 10 · k=1 (7 ô)</text><rect x="230" y="286" width="187.408" height="15" class="f-pk" stroke-width="0"/><text x="425.4" y="298.0" class="t-mono">36,04%</text><text x="20.0" y="324.0">H3 res 10 · k=2 (19 ô)</text><rect x="230" y="312" width="15.964" height="15" class="f-pk" stroke-width="0"/><text x="254.0" y="324.0" class="t-mono">3,07%</text><text x="20.0" y="350.0">H3 res 10 · k=3 (37 ô)</text><rect x="230" y="338" width="1.5" height="15" class="f-pk" stroke-width="0"/><text x="239.5" y="350.0" class="t-mono">0,00%</text><path d="M230.0 44.0 L230.0 362.0" class="f-none s-line" stroke-width="1"/><text x="230.0" y="380.0" class="t-small" text-anchor="middle">0%</text><text x="750.0" y="380.0" class="t-small" text-anchor="middle">100%</text><rect x="560" y="370" width="14" height="10" class="f-warn" stroke-width="0"/><text x="580.0" y="380.0" class="t-small">geohash</text><rect x="650" y="370" width="14" height="10" class="f-pk" stroke-width="0"/><text x="670.0" y="380.0" class="t-small">H3</text></svg>
 </div>
-<figcaption>Hình 3. Tỉ lệ bỏ sót khi đích cách điểm hỏi tối đa 300 m, theo cách chia ô và số ô quét. Số từ output của <code>loc08_h3</code>.</figcaption>
+<figcaption>Hình 3. Tỉ lệ bỏ sót khi đích cách điểm hỏi tối đa 300 m, theo cách chia ô và số ô quét. Số liệu lấy từ kết quả chạy của <code>loc08_h3</code>.</figcaption>
 </figure>
 
-Hình 3 cho một quy tắc đơn giản: **ô cần lớn hơn nhiều so với bán kính, hoặc vòng quét phải rộng ra**. Geohash 6 (ô 1,2 km × 0,6 km) bỏ sót 7,69% đích cách 100 m, 22,08% cách 300 m, 60,88% cách 1 km nếu chỉ quét một ô; quét chín ô đưa về 0% ở 100 m và 300 m nhưng vẫn bỏ sót 3,93% ở 1 km. Geohash 7 (ô 150 m) chín ô vẫn bỏ sót 17,86% ở 300 m và 74,93% ở 1 km. H3 thì:
+Hình 3 cho một quy tắc đơn giản: **ô cần lớn hơn nhiều so với bán kính, hoặc vòng quét phải rộng ra**. Geohash 6 (ô 1,2 km × 0,6 km) bỏ sót 7,69% đích cách 100 m, 22,08% cách 300 m, 60,88% cách 1 km nếu chỉ quét một ô; quét chín ô đưa về 0% ở 100 m và 300 m nhưng vẫn bỏ sót 3,93% ở 1 km. Geohash 7 (ô 150 m) quét chín ô vẫn bỏ sót 17,86% ở 300 m và 74,93% ở 1 km. H3 thì:
 
 | Res | r (m) | k nhỏ nhất | Số ô | Diện tích ô quét / hình tròn |
 |---:|---:|---:|---:|---:|
@@ -161,15 +161,15 @@ Hình 3 cho một quy tắc đơn giản: **ô cần lớn hơn nhiều so với
 | 10 | 300 | 3 | 37 | 2,0 |
 | 10 | 1.000 | quá 8 vòng | – | – |
 
-(«k nhỏ nhất» là k nhỏ nhất cho 0 bỏ sót trong 200.000 mẫu, thử tới k = 8.) Cột này không phải ngẫu nhiên, và có thể tính trước. Đích nằm ở ô cách từ k + 1 bước trở lên thì tâm hai ô cách nhau ít nhất 1,5·(k + 1)·e; điểm hỏi và đích mỗi bên lệch khỏi tâm ô của mình tối đa `e`. Vậy mọi đích gần hơn **(1,5·k − 0,5)·e** chắc chắn nằm trong k-ring k. Với `e` đo tại HCM, k nhỏ nhất thoả (1,5·k − 0,5)·e ≥ r cho đúng mọi dòng của bảng: res 9 có k = 1 bảo đảm 216 m, k = 2 bảo đảm 539 m, nên r = 300 m cần k = 2; res 10 với r = 1 km cần k = 9, tức quá 8 vòng. Đây là ước lượng trên lưới phẳng đều, đối chiếu với mẫu đo chứ không phải chứng minh chặt trên mặt cầu.
+(«k nhỏ nhất» là k nhỏ nhất cho 0 bỏ sót trong 200.000 mẫu, thử tới k = 8.) Cột này không phải ngẫu nhiên, và có thể tính trước. Đích nằm ở ô cách từ k + 1 bước trở lên thì tâm hai ô cách nhau ít nhất 1,5·(k + 1)·e; điểm hỏi và đích mỗi bên lệch khỏi tâm ô của mình tối đa `e`. Vậy mọi đích gần hơn **(1,5·k − 0,5)·e** chắc chắn nằm trong k-ring k. Với `e` đo tại HCM, k nhỏ nhất thoả (1,5·k − 0,5)·e ≥ r khớp đúng với mọi dòng của bảng: res 9 có k = 1 bảo đảm 216 m, k = 2 bảo đảm 539 m, nên r = 300 m cần k = 2; res 10 với r = 1 km cần k = 9, tức quá 8 vòng. Đây là ước lượng trên lưới phẳng đều, đối chiếu với mẫu đo chứ không phải chứng minh chặt trên mặt cầu.
 
-Đọc bảng: res 9 với r = 300 m quét 19 ô, diện tích gấp 7,1 lần hình tròn, bỏ sót 0,20% nếu chỉ lấy vòng 1. Res 10 vừa khít hơn (2,0 lần) nhưng cần 37 ô, và ở 1 km quá 8 vòng. Độ phân giải tốt là độ phân giải có cạnh ô cỡ bán kính hay dùng.
+Đọc bảng: res 9 với r = 300 m quét 19 ô, diện tích gấp 7,1 lần hình tròn, bỏ sót 0,20% nếu chỉ lấy vòng 1. Res 10 vừa khít hơn (2,0 lần) nhưng cần 37 ô, và ở 1 km quá 8 vòng. Độ phân giải tốt là độ phân giải có cạnh ô cỡ bán kính tìm kiếm thường dùng.
 
-## Chi phí tính ô, và khi nào lưới hơn cây
+## Chi phí tính ô, và khi nào lưới tốt hơn cây
 
-Tính ô cho một điểm không đắt, nhưng cũng không miễn phí. Trung vị 5 lần của 1.000.000 điểm, `--release`: ở lần chạy cuối `H3 cell_of` res 9 tốn 456,7 ns mỗi điểm, `geohash::encode` độ dài 7 tốn 281,8 ns, `k_ring(1)` 176,1 ns mỗi ô. **Các con số này đo khi máy chịu tải nặng** và dao động mạnh: qua các lần chạy `cell_of` từ 401,6 đến 1.217,9 ns, `encode` từ 281,8 đến 1.008,5 ns. Chỉ kết luận được là cả hai cùng cỡ vài trăm ns. Geohash của lab cấp phát một `String` mỗi lần mã hoá nên không nhanh hơn H3 rõ rệt dù công thức đơn giản hơn.
+Tính ô cho một điểm không đắt, nhưng cũng không miễn phí. Trung vị 5 lần của 1.000.000 điểm, `--release`: ở lần chạy cuối `H3 cell_of` res 9 tốn 456,7 ns mỗi điểm, `geohash::encode` độ dài 7 tốn 281,8 ns, `k_ring(1)` 176,1 ns mỗi ô. **Các con số này đo khi máy chịu tải nặng** và dao động mạnh: qua các lần chạy `cell_of` từ 401,6 đến 1.217,9 ns, `encode` từ 281,8 đến 1.008,5 ns. Chỉ có thể kết luận rằng cả hai cùng cỡ vài trăm ns. Geohash của lab cấp phát một `String` mỗi lần mã hoá nên không nhanh hơn H3 rõ rệt dù công thức đơn giản hơn.
 
-Khi nào lưới hơn cây? `H3Buckets` của bài 09 giữ một danh sách tài xế cho mỗi ô; truy vấn mở rộng từng vòng quanh điểm hỏi tới khi đủ k người và người thứ k đã gần hơn khoảng cách an toàn của vòng tiếp theo.
+Khi nào lưới tốt hơn cây? `H3Buckets` của bài 09 giữ một danh sách tài xế cho mỗi ô; truy vấn mở rộng từng vòng quanh điểm hỏi tới khi đủ k người và người thứ k đã gần hơn khoảng cách an toàn của vòng tiếp theo.
 
 `examples/toi-noi-location/rust/crates/driver-store/src/h3_buckets.rs`
 
@@ -200,9 +200,9 @@ Khi nào lưới hơn cây? `H3Buckets` của bài 09 giữ một danh sách tà
     }
 ```
 
-Khoảng cách an toàn chính là công thức vừa tính. Hệ số 0,8 là biên do lab chọn cho độ méo của lưới, không có chứng minh trong bài, nhưng kết quả truy vấn khớp quét toàn bộ 100,0% ở cả ba quy mô của bảng bài 09. Tài xế di chuyển, nên chi phí cập nhật quan trọng: đổi ô là chuyển giỏ, và chỉ khoảng 7,1–7,4% lần cập nhật ở res 9 làm tài xế đổi ô (xe đi 0–40 km/h, báo vị trí 4 giây một lần). Phần còn lại chỉ ghi vị trí mới. Cây phải xoá rồi chèn lại mỗi lần. Đổi lại lưới cần chọn độ phân giải khớp mật độ: ở 250.000 tài xế, res 8 có p50 truy vấn 81,0 µs còn res 9 chỉ 18,0 µs (đo khi máy chịu tải nặng), vì ô res 8 chứa nhiều tài xế hơn (bài 09).
+Khoảng cách an toàn chính là công thức vừa tính. Hệ số 0,8 là biên do lab chọn cho độ méo của lưới, không có chứng minh trong bài, nhưng kết quả truy vấn khớp quét toàn bộ 100,0% ở cả ba quy mô của bảng bài 09. Tài xế di chuyển, nên chi phí cập nhật quan trọng: đổi ô nghĩa là chuyển tài xế sang giỏ của ô mới, và chỉ khoảng 7,1–7,4% số lần cập nhật ở res 9 làm tài xế đổi ô (xe đi 0–40 km/h, báo vị trí 4 giây một lần). Phần còn lại chỉ ghi vị trí mới. Cây phải xoá rồi chèn lại mỗi lần. Đổi lại lưới cần chọn độ phân giải khớp mật độ: ở 250.000 tài xế, res 8 có p50 truy vấn 81,0 µs còn res 9 chỉ 18,0 µs (đo khi máy chịu tải nặng), vì ô res 8 chứa nhiều tài xế hơn (bài 09).
 
-Tóm lại: lưới hơn cây khi điểm di chuyển liên tục và câu hỏi là «ai ở quanh đây» (tài xế). Cây hơn lưới khi phần tử là đoạn đường cố định và câu hỏi là «đoạn nào gần nhất» (bài 07). Ô còn là khoá tự nhiên để chia kho vị trí và bộ nhớ đệm theo vùng, điều mà các bài sau dùng tới.
+Tóm lại: lưới tốt hơn cây khi điểm di chuyển liên tục và câu hỏi là «ai ở quanh đây» (tài xế). Cây tốt hơn lưới khi phần tử là đoạn đường cố định và câu hỏi là «đoạn nào gần nhất» (bài 07). Ô còn là khoá tự nhiên để chia kho vị trí và bộ nhớ đệm theo vùng, điều mà các bài sau dùng tới.
 
 ## Chạy ví dụ và kiểm chứng
 
@@ -213,7 +213,7 @@ export PATH="$HOME/.rustup/toolchains/stable-aarch64-apple-darwin/bin:$PATH"
 cargo run -q --release --manifest-path examples/toi-noi-location/rust/Cargo.toml -p labs --bin loc08_h3
 ```
 
-Cấu hình: `--release`, Apple M1 Max, seed 20261106, 200.000 mẫu mỗi ô trong bảng, điểm hỏi trong lat 10,73–10,83 / lng 106,63–106,75. Lab ghi `results/geojson/loc08-geohash-bien.geojson` và `loc08-h3-kring.geojson`. Output rút gọn:
+Cấu hình: `--release`, Apple M1 Max, seed 20261106, 200.000 mẫu mỗi ô trong bảng, điểm hỏi trong lat 10,73–10,83 / lng 106,63–106,75. Lab ghi `results/geojson/loc08-geohash-bien.geojson` và `loc08-h3-kring.geojson`. Kết quả in ra, rút gọn:
 
 ```text
 cặp tệ nhất (tiền tố chung ngắn nhất = 3 ký tự):
@@ -227,15 +227,15 @@ cặp tệ nhất (tiền tố chung ngắn nhất = 3 ký tự):
        9      300     46.26%      0.20%      0.00%           2       19        7.1
 ```
 
-Các tỉ lệ bỏ sót và kích thước ô là số đếm và số hình học, tái lập từng chữ số với cùng seed. Chỉ phần chi phí tính ô là số thời gian. Test của `geo-core` có `k_ring_sizes` (kiểm 1, 7, 19 ô) và `boundary_has_six_vertices_in_hcm`; test của `driver-store` kiểm H3 res 8 và 9 khớp quét toàn bộ trên 3.000 điểm và 200 truy vấn ngẫu nhiên; tất cả chạy trong `bash examples/toi-noi-location/verify-p01.sh`.
+Các tỉ lệ bỏ sót và kích thước ô là số đếm và số hình học, tái lập từng chữ số với cùng seed. Chỉ phần chi phí tính ô là số đo thời gian. Test của `geo-core` có `k_ring_sizes` (kiểm tra 1, 7, 19 ô) và `boundary_has_six_vertices_in_hcm`; test của `driver-store` kiểm tra H3 res 8 và 9 khớp quét toàn bộ trên 3.000 điểm và 200 truy vấn ngẫu nhiên; tất cả chạy trong `bash examples/toi-noi-location/verify-p01.sh`.
 
 ## Giới hạn của ví dụ
 
 - **Geohash tối giản.** `neighbors` lấy tâm ô cộng trừ kích thước rồi mã hoá lại; chỉ đúng ở vùng xa cực và xa kinh tuyến 180, đủ cho Việt Nam.
 - **Độ phủ k-ring đo bằng mẫu.** «k nhỏ nhất» là thực nghiệm trên 200.000 mẫu và các bán kính 100 m, 300 m, 1 km; công thức (1,5·k − 0,5)·e chỉ là ước lượng trên lưới phẳng khớp với mẫu, và chưa thử các bán kính khác.
-- **Hệ số 0,8 của `H3Buckets` là kinh nghiệm**, chưa có chứng minh; truy vấn gần ô ngũ giác dùng cách phụ (đĩa trừ đĩa) mà bài không kiểm riêng.
+- **Hệ số 0,8 của `H3Buckets` là kinh nghiệm**, chưa có chứng minh; truy vấn gần ô ngũ giác dùng cách dự phòng (đĩa trừ đĩa) mà bài không kiểm riêng.
 - **Mật độ đều và tải đơn giản.** Điểm hỏi rải đều trong bbox; thực tế tài xế dồn về vài điểm nóng, khiến ô res 8 chứa nhiều người hơn mức trung bình.
-- **Chưa phủ đa giác.** Chưa dùng H3 để phủ một vùng (khu vực cấm đón, sân bay), chỉ dùng cho điểm.
+- **Chưa phủ vùng đa giác bằng H3.** Chưa dùng H3 để phủ một vùng (khu vực cấm đón, sân bay), chỉ dùng cho điểm.
 - **Chi phí tính ô** đo khi máy tải nặng, và có phần cấp phát `String` của geohash.
 
 ## Bài tập

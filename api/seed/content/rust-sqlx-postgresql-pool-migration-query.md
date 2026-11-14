@@ -1,16 +1,16 @@
 ---
 slug: rust-sqlx-postgresql-pool-migration-query
 title: "sqlx với PostgreSQL: pool, migration và query kiểm tra lúc biên dịch"
-summary: "Bài 23: dựng PgPool đọc TOI_NOI_PG_URL, chạy migration bằng sqlx::migrate!, ghi và đọc bút toán TN-0001 bằng query!/query_as!, build offline với .sqlx, và mapping i64, NUMERIC, TIMESTAMPTZ."
+summary: "Bài 23: dựng PgPool lấy URL từ TOI_NOI_PG_URL, chạy migration bằng sqlx::migrate!, ghi và đọc bút toán TN-0001 bằng query!/query_as!, build offline với .sqlx, và mapping i64, NUMERIC, TIMESTAMPTZ."
 category: rust-intermediate
 level: intermediate
 tags: [rust, toi-noi, ledger, sqlx, postgresql, migration]
 language: vi
 ---
 
-Đến bài 22, sổ cái của Tới Nơi vẫn sống trong bộ nhớ: tắt process là mất bút toán. Muốn trả lời Payment rằng «`JE-000001` đã ghi», bút toán phải nằm trong PostgreSQL, và code ghi nó phải đúng cả khi người sửa schema quên code đang đọc cột nào.
+Đến bài 22, sổ cái của Tới Nơi vẫn sống trong bộ nhớ: tắt process là mất bút toán. Muốn trả lời Payment rằng «`JE-000001` đã ghi», bút toán phải nằm trong PostgreSQL, và code ghi nó phải đúng cả khi người sửa schema quên rằng code đang đọc cột nào.
 
-Đây là bài 23 của lộ trình **Rust trung bình qua [Tới Nơi](/articles/du-an-mau-toi-noi)**. Bài dùng sqlx 0.9 với PostgreSQL chạy sẵn bằng Docker Compose của repo, dựng pool, chạy migration, ghi rồi đọc lại bút toán `TN-0001` (25.500 / 5.100 / 20.400), và cho compiler kiểm câu SQL trước khi chương trình chạy.
+Đây là bài 23 của lộ trình **Rust trung bình qua [Tới Nơi](/articles/du-an-mau-toi-noi)**. Bài dùng sqlx 0.9 với PostgreSQL chạy sẵn bằng Docker Compose của repo, dựng pool, chạy migration, ghi rồi đọc lại bút toán `TN-0001` (25.500 / 5.100 / 20.400), và cho compiler kiểm tra câu SQL trước khi chương trình chạy.
 
 <div class="tkh-callout tkh-callout--example">
 <span class="tkh-callout-title">Thử trước khi đọc</span>
@@ -20,15 +20,15 @@ language: vi
 
 ## sqlx là gì, và không phải là gì?
 
-sqlx **không phải ORM**. Không có `DbContext`, không change tracking, không sinh SQL từ biểu thức, không lazy loading. Bạn viết SQL, sqlx gửi đi, đọc kết quả thành kiểu Rust. So với driver trần, nó thêm ba thứ: pool kết nối, migration và macro kiểm tra câu SQL lúc biên dịch.
+sqlx **không phải ORM**. Không có `DbContext`, không change tracking, không sinh SQL từ biểu thức, không lazy loading. Bạn viết SQL, sqlx gửi đi, đọc kết quả thành kiểu Rust. So với driver trần, sqlx thêm ba thứ: pool kết nối, migration và macro kiểm tra câu SQL lúc biên dịch.
 
-Người quen Dapper sẽ thấy gần hơn người quen EF Core: SQL của bạn, kiểu của bạn, thêm phần kiểm lúc biên dịch. Với sổ cái, câu `insert` của bút toán nên là thứ ta đọc được từng chữ. Muốn so với cách EF Core ánh xạ tiền và UTC, đọc [bài EF Core 10 và PostgreSQL](/articles/dotnet10-efcore-postgresql-mapping-migration) của loạt C#.
+Người quen Dapper sẽ thấy gần hơn người quen EF Core: SQL của bạn, kiểu của bạn, thêm phần kiểm tra lúc biên dịch. Với sổ cái, câu `insert` của bút toán nên là thứ ta đọc được từng chữ. Muốn so sánh với cách EF Core ánh xạ tiền và UTC, đọc [bài EF Core 10 và PostgreSQL](/articles/dotnet10-efcore-postgresql-mapping-migration) của loạt C#.
 
 Lab dùng lại `ledger-core` của bài 20 qua `path`, không sao chép, và chỉ tạo ba bảng: `accounts`, `journal_entries`, `postings`.
 
 ## Pool: bao nhiêu kết nối, chờ bao lâu?
 
-Mở một kết nối PostgreSQL tốn thời gian (bắt tay TCP, xác thực), và máy chủ chỉ nhận số kết nối giới hạn (mặc định của PostgreSQL là 100, mọi service cộng lại). `PgPool` giữ sẵn một nhóm kết nối và cho mượn từng cái. Hai tham số cần chọn có chủ ý, vì mặc định của sqlx là `max_connections = 10` và `acquire_timeout = 30 s`:
+Mở một kết nối PostgreSQL tốn thời gian (bắt tay TCP, xác thực), và máy chủ chỉ nhận một số kết nối có giới hạn (mặc định của PostgreSQL là 100, mọi service cộng lại). `PgPool` giữ sẵn một nhóm kết nối và cho mượn từng cái. Hai tham số cần chọn có chủ ý, vì mặc định của sqlx là `max_connections = 10` và `acquire_timeout = 30 s`:
 
 ```rust
 // src/db.rs
@@ -51,7 +51,7 @@ pub fn pool_options(max_connections: u32, acquire_timeout: Duration) -> PgPoolOp
 <figcaption>Hình 1. Pool cho mượn kết nối. Cả năm kết nối đang bận nên task F chờ: nó nhận kết nối khi có task trả lại, hoặc nhận <code>PoolTimedOut</code> khi hết <code>acquire_timeout</code>.</figcaption>
 </figure>
 
-URL lấy từ biến môi trường `TOI_NOI_PG_URL`, không nằm trong source; thiếu biến thì lab thoát với mã 1 và nói cách bật Compose, không báo xanh giả. Để các lần chạy song song không đè lên nhau, mỗi ca tạo schema `lab_<uuid>` rồi buộc mọi kết nối của pool vào đó:
+URL lấy từ biến môi trường `TOI_NOI_PG_URL`, không nằm trong source; thiếu biến thì lab thoát với mã 1 và nói cách bật Compose, không báo xanh giả. Để các lần chạy song song không đè lên nhau, mỗi test case tạo schema `lab_<uuid>` rồi buộc mọi kết nối của pool vào đó:
 
 ```rust
 // src/db.rs (rút gọn, trong LabSchema::create)
@@ -64,7 +64,7 @@ let pool = pool_options(MAX_CONNECTIONS, ACQUIRE_TIMEOUT)
 
 `options` đi vào startup message của PostgreSQL, nên **mỗi** kết nối trong pool đều có `search_path` đúng; đặt bằng một câu `SET` trên một kết nối thì các kết nối còn lại không có.
 
-Câu `create schema` phải ghép tên vào chuỗi, và sqlx 0.9 không nhận `String` ghép động nếu không bọc: `sqlx::raw_sql(sqlx::AssertSqlSafe(format!("create schema {name}")))`. `AssertSqlSafe` chỉ là cam kết của người viết rằng chuỗi không chứa dữ liệu ngoài, nó không thoát ký tự gì; ở đây tên do lab tự sinh từ uuid. Bài 24 có lỗi biên dịch cụ thể.
+Câu `create schema` phải ghép tên vào chuỗi, và sqlx 0.9 không nhận `String` ghép động nếu không bọc: `sqlx::raw_sql(sqlx::AssertSqlSafe(format!("create schema {name}")))`. `AssertSqlSafe` chỉ là cam kết của người viết rằng chuỗi không chứa dữ liệu ngoài, và lớp bọc này không thoát ký tự nào; ở đây tên do lab tự sinh từ uuid. Bài 24 có lỗi biên dịch cụ thể.
 
 Lab chứng minh `acquire_timeout` bằng một pool một kết nối:
 
@@ -103,14 +103,14 @@ create table postings (
 );
 ```
 
-File không ghi tên schema: bảng nằm ở schema đầu tiên trong `search_path`, nên cùng file chạy được trong `lab_<uuid>` của từng ca và trong `lab_23_prepare` ở mục sau. Chạy migration từ code chỉ một dòng; macro `migrate!` nhúng nội dung các file vào binary lúc biên dịch:
+File không ghi tên schema: bảng nằm ở schema đầu tiên trong `search_path`, nên cùng file chạy được trong `lab_<uuid>` của từng test case và trong `lab_23_prepare` ở mục sau. Chạy migration từ code chỉ cần một dòng; macro `migrate!` nhúng nội dung các file vào binary lúc biên dịch:
 
 ```rust
 // src/db.rs (rút gọn)
 sqlx::migrate!("./migrations").run(&pool).await?;
 ```
 
-Binary tự mang schema theo, không cần thư mục SQL khi triển khai. Hai lưu ý. Một, proc macro trên Rust stable không báo được cargo theo dõi cả một thư mục (tài liệu `migrate!` nói rõ điều này và gợi ý `sqlx migrate build-script`), nên lab có `build.rs` một dòng in `cargo:rerun-if-changed=migrations`. Thử thật: có dòng này, thêm file migration thì `cargo build` biên dịch lại; bỏ `build.rs` thì cargo báo `Finished` ngay và binary vẫn mang bộ migration cũ. Hai, **không sửa file migration đã áp dụng**: thêm một dòng vào file rồi chạy lại, `sqlx migrate run` từ chối với `migration 20261106000001 was previously applied but has been modified`. Muốn đổi schema, thêm file mới.
+Binary tự mang schema theo, không cần thư mục SQL khi triển khai. Hai lưu ý. Thứ nhất, proc macro trên Rust stable không báo cho cargo biết cần theo dõi cả một thư mục (tài liệu `migrate!` nói rõ điều này và gợi ý `sqlx migrate build-script`), nên lab có `build.rs` một dòng in `cargo:rerun-if-changed=migrations`. Thử thật: có dòng này, thêm file migration thì `cargo build` biên dịch lại; bỏ `build.rs` thì cargo báo `Finished` ngay và binary vẫn mang bộ migration cũ. Thứ hai, **không sửa file migration đã áp dụng**: thêm một dòng vào file rồi chạy lại, `sqlx migrate run` từ chối với `migration 20261106000001 was previously applied but has been modified`. Muốn đổi schema, thêm file mới.
 
 ## query! kiểm tra lúc biên dịch bằng cách nào?
 
@@ -166,7 +166,7 @@ pub fn entry_pk(id: EntryId) -> Result<i64> {
 }
 ```
 
-Cách này chạy đúng (có unit test khứ hồi) nhưng buộc khoá chính vào định dạng hiển thị. Code thật nên thêm vào `ledger-core` một hàm đổi thẳng sang `i64`.
+Cách này chạy đúng (có unit test khứ hồi) nhưng buộc khoá chính (primary key) phụ thuộc vào định dạng hiển thị. Code thật nên thêm vào `ledger-core` một hàm đổi thẳng sang `i64`.
 
 Đọc xong, lab dựng lại bút toán bằng `JournalEntry::try_new` của `ledger-core`, nên dữ liệu từ database cũng phải qua kiểm tra tổng bằng 0. Thử làm hỏng hai chỗ rồi hoàn lại. Đổi `amount_dong` thành `amount` trong câu SQL:
 
@@ -190,7 +190,7 @@ error[E0308]: mismatched types
    |         expected `i64`, found `&str`
 ```
 
-Đổi trường `amount_dong: i64` thành `i32` thì `query_as!` báo `the trait bound i32: From<i64> is not satisfied`. Cả ba lỗi dừng ở `cargo build`, trước khi có bất kỳ bút toán nào bị ghi sai. Con số `3854` ở cuối thông điệp đầu không phải số dòng của file Rust; vị trí trong file nằm ở dòng `-->`. Đó là dòng trong mã nguồn C của PostgreSQL, trường `L` của thông báo lỗi, được sqlx 0.9 nối vào cuối: `psql` với `VERBOSITY=verbose` in `errorMissingColumn, parse_relation.c:3854` trên bản 18.6. Đổi phiên bản server thì số đổi theo, đừng dựa vào nó.
+Đổi trường `amount_dong: i64` thành `i32` thì `query_as!` báo `the trait bound i32: From<i64> is not satisfied`. Cả ba lỗi dừng ở `cargo build`, trước khi có bất kỳ bút toán nào bị ghi sai. Con số `3854` ở cuối thông báo lỗi đầu tiên không phải số dòng của file Rust; vị trí trong file nằm ở dòng `-->`. Đó là dòng trong mã nguồn C của PostgreSQL, trường `L` của thông báo lỗi, được sqlx 0.9 nối vào cuối: `psql` với `VERBOSITY=verbose` in `errorMissingColumn, parse_relation.c:3854` trên bản 18.6. Đổi phiên bản server thì số đổi theo, đừng dựa vào nó.
 
 Hậu tố trong `as "balance!"` nói với macro rằng cột biểu thức này không NULL; macro không đoán được nullability của `sum(...)` nên mặc định bọc `Option`. Cột lấy thẳng từ bảng thì đọc từ schema: `posted_at` là `timestamptz not null` nên là giá trị trần.
 
@@ -205,7 +205,7 @@ Hậu tố trong `as "balance!"` nói với macro rằng cột biểu thức nà
 
 Nếu mọi lần `cargo build` đều cần PostgreSQL, CI và người mới clone repo sẽ vướng ngay từ đầu. sqlx giải bằng chế độ offline: `cargo sqlx prepare` ghi mỗi câu `query!` thành một file JSON trong `.sqlx/` (lab có 7 file). Commit thư mục đó; `SQLX_OFFLINE=true` cho macro đọc file thay vì kết nối.
 
-Vì macro kiểm theo schema có thật, cần một database có sẵn bảng **lúc biên dịch**. Lab không dùng `public` và không dùng schema `lab_<uuid>` (nó mất sau mỗi ca), mà dùng một schema cố định `lab_23_prepare`, tạo rồi dọn sau khi prepare. `DATABASE_URL` có thêm `options=-c search_path=lab_23_prepare` để macro tìm bảng trong đó:
+Vì macro kiểm tra theo schema thật, cần một database có sẵn bảng **lúc biên dịch**. Lab không dùng `public` và không dùng schema `lab_<uuid>` (schema này mất sau mỗi test case), mà dùng một schema cố định `lab_23_prepare`, tạo rồi dọn sau khi prepare. `DATABASE_URL` có thêm `options=-c search_path=lab_23_prepare` để macro tìm bảng trong đó:
 
 ```bash
 export TOI_NOI_PG_URL='postgres://toi_noi:toi_noi_lab@127.0.0.1:5433/toi_noi_rust_lab'
@@ -229,7 +229,7 @@ Lệnh kết thúc bằng `Finished`; không có `DATABASE_URL` thì macro khôn
 error: `SQLX_OFFLINE=true` but there is no cached data for this query, run `cargo sqlx prepare` to update the query cache or unset `SQLX_OFFLINE`
 ```
 
-Ở CI nên có thêm một job có database chạy `cargo sqlx prepare --check`, để lỡ ai sửa câu SQL mà quên làm mới `.sqlx` thì pipeline đỏ ngay.
+Ở CI nên có thêm một job có database chạy `cargo sqlx prepare --check`, phòng khi ai đó sửa câu SQL mà quên làm mới `.sqlx` thì pipeline đỏ ngay.
 
 ## i64, NUMERIC và TIMESTAMPTZ map sang gì?
 
@@ -243,7 +243,7 @@ Kiểu cột do PostgreSQL báo, kiểu Rust do macro chọn, và hai bên khớ
 | `numeric` | `rust_decimal::Decimal` | cần feature `rust_decimal`; kết quả của `sum(bigint)` |
 | `timestamptz` | `time::OffsetDateTime` | feature `time` (hoặc `chrono`); không có `jiff` |
 
-VND không có phần lẻ nên `Money` là `i64` đồng (xem [bài 3](/articles/rust-kieu-so-tien-vnd-i64-decimal)), và cột tương ứng là `bigint`. `i32` không đủ: giá trị lớn nhất của nó là 2.147.483.647, tức chỉ hơn 84.000 chuyến `TN-0001` cộng lại (25.500 đồng mỗi chuyến) là tràn. Cột `int` chỉ gãy khi sổ đã lớn, lúc sửa đắt nhất. Lab cho thấy hai lớp phòng thủ: PostgreSQL từ chối phép tính tràn, và sqlx từ chối đọc `bigint` vào `i32` ngay cả khi giá trị nhỏ:
+VND không có phần lẻ nên `Money` là `i64` đồng (xem [bài 3](/articles/rust-kieu-so-tien-vnd-i64-decimal)), và cột tương ứng là `bigint`. `i32` không đủ: giá trị lớn nhất của nó là 2.147.483.647, tức chỉ cần hơn 84.000 chuyến `TN-0001` cộng lại (25.500 đồng mỗi chuyến) là tràn. Cột `int` chỉ gãy khi sổ đã lớn, lúc sửa tốn kém nhất. Lab cho thấy hai lớp phòng thủ: PostgreSQL từ chối phép tính tràn, và sqlx từ chối đọc `bigint` vào `i32` ngay cả khi giá trị nhỏ:
 
 ```text
 error returned from database: integer out of range at line 827
@@ -252,7 +252,7 @@ error occurred while decoding column 0: mismatched types; Rust type `i32` (as SQ
 
 Cái bẫy `NUMERIC` thường gặp là `sum()`: tổng của cột `bigint` trong PostgreSQL có kiểu `numeric`, không phải `bigint`. Số dư cần quay lại `Money`, nên lab ép `sum(amount_dong)::bigint` để nhận `i64`; tổng giá trị luân chuyển giữ nguyên `numeric` và đọc thành `Decimal`, in ra `51000` (25.500 + 5.100 + 20.400).
 
-`TIMESTAMPTZ` thì khác: PostgreSQL luôn lưu UTC, và sqlx 0.9 đọc nó thành `time::OffsetDateTime` hoặc `chrono::DateTime<Utc>`. Cả hai crate đều là tuỳ chọn qua feature; sqlx không có feature `jiff`, trong khi cả loạt dùng `jiff` cho thời gian ([bài 8](/articles/rust-string-str-ngay-gio-dinh-dang-tien)). Cách gọn là đổi ở biên, một hàm nhỏ qua nano giây epoch:
+`TIMESTAMPTZ` thì khác: PostgreSQL luôn lưu UTC, và sqlx 0.9 đọc nó thành `time::OffsetDateTime` hoặc `chrono::DateTime<Utc>`. Cả hai crate đều là tuỳ chọn qua feature; sqlx không có feature `jiff`, trong khi cả loạt dùng `jiff` cho thời gian ([bài 8](/articles/rust-string-str-ngay-gio-dinh-dang-tien)). Cách gọn là đổi kiểu ở biên, bằng một hàm nhỏ đi qua nano giây epoch:
 
 ```rust
 // src/mapping.rs
@@ -299,7 +299,7 @@ query() sai tên cột chỉ lỗi lúc chạy: true
 int4 tràn ở 2.147.483.647, bigint thì không: true
 ```
 
-`--verify` chạy cùng kịch bản, kiểm mọi giá trị trên rồi in `VERIFY OK`; sai thì mã thoát 1. `cargo test` có 8 ca integration (mỗi ca một schema riêng nên chạy song song được) và 3 unit test. Biến SQLSTATE `23505` thành «trả lại bút toán cũ» là việc của bài 24.
+`--verify` chạy cùng kịch bản, kiểm tra mọi giá trị trên rồi in `VERIFY OK`; sai thì mã thoát 1. `cargo test` có 8 test case integration (mỗi test case một schema riêng nên chạy song song được) và 3 unit test. Biến SQLSTATE `23505` thành «trả lại bút toán cũ» là việc của bài 24.
 
 <div class="tkh-callout tkh-callout--warn">
 <span class="tkh-callout-title">Giới hạn của ví dụ</span>
@@ -307,7 +307,7 @@ int4 tràn ở 2.147.483.647, bigint thì không: true
 
 **Bài tập:** bổ sung cột ghi chú `memo text` (cho phép NULL) cho `journal_entries`. Cần làm gì với migration? Câu `query!("select idempotency_key, memo from journal_entries")` cho `memo` kiểu gì? Sau khi sửa, build offline ở CI còn xanh không?
 
-<details><summary>Xem lời giải</summary><p>Không sửa file cũ (sẽ bị <code>previously applied but has been modified</code>); thêm file mới, ví dụ <code>20261107000001_them_memo.sql</code> với <code>alter table journal_entries add column memo text;</code>. Cột cho phép NULL nên macro sinh <code>Option&lt;String&gt;</code> cho <code>memo</code>. Câu <code>query!</code> mới chưa có trong <code>.sqlx</code>, nên build offline đỏ cho tới khi chạy lại <code>sqlx migrate run</code> và <code>cargo sqlx prepare</code> trên schema <code>lab_23_prepare</code> rồi commit thư mục <code>.sqlx</code>. Câu cũ không đổi băm nên không bị ảnh hưởng.</p></details>
+<details><summary>Xem lời giải</summary><p>Không sửa file cũ (sẽ bị <code>previously applied but has been modified</code>); thêm file mới, ví dụ <code>20261107000001_them_memo.sql</code> với <code>alter table journal_entries add column memo text;</code>. Cột cho phép NULL nên macro sinh <code>Option&lt;String&gt;</code> cho <code>memo</code>. Câu <code>query!</code> mới chưa có trong <code>.sqlx</code>, nên build offline đỏ cho tới khi chạy lại <code>sqlx migrate run</code> và <code>cargo sqlx prepare</code> trên schema <code>lab_23_prepare</code> rồi commit thư mục <code>.sqlx</code>. Câu cũ không đổi mã băm nên không bị ảnh hưởng.</p></details>
 
 Bài trước: [bài 22](/articles/rust-send-sync-arc-mutex-channel-concurrency). Bài tiếp: [bài 24](/articles/rust-transaction-isolation-append-only-idempotency-key).
 

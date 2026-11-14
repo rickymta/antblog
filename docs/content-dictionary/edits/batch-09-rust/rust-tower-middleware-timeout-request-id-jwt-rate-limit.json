@@ -1,0 +1,137 @@
+{
+ "file": "rust-tower-middleware-timeout-request-id-jwt-rate-limit.md",
+ "edits": [
+  {
+   "old": "các bẫy axum gặp phải",
+   "new": "các bẫy thường gặp khi dùng axum",
+   "reason": "Chủ ngữ sai: axum không 'gặp' bẫy",
+   "severity": "medium"
+  },
+  {
+   "old": "nhưng tự chứa:",
+   "new": "nhưng đọc độc lập được:",
+   "reason": "Calque 'self-contained'",
+   "severity": "medium"
+  },
+  {
+   "old": "chỉ route đã có lúc gọi mới được bọc",
+   "new": "chỉ những route đã tồn tại vào thời điểm gọi layer mới được bọc",
+   "reason": "Câu tối nghĩa",
+   "severity": "high"
+  },
+  {
+   "old": "nên gọi ba lần cho thứ tự đảo",
+   "new": "nên gọi liên tiếp ba lần sẽ cho thứ tự đảo ngược",
+   "reason": "Câu cụt",
+   "severity": "medium"
+  },
+  {
+   "old": "ASP.NET Core cùng quy tắc:",
+   "new": "ASP.NET Core theo cùng quy tắc:",
+   "reason": "Thiếu động từ",
+   "severity": "medium"
+  },
+  {
+   "old": "Che header phải đứng trước mọi lớp ghi log.",
+   "new": "Lớp che header phải đứng trước mọi lớp ghi log.",
+   "reason": "Thiếu danh từ chủ ngữ",
+   "severity": "medium"
+  },
+  {
+   "old": "cố định trả header cho cả origin lạ",
+   "new": "với giá trị cố định thì trả header cho cả origin lạ",
+   "reason": "Cụm 'cố định' đứng một mình khó hiểu",
+   "severity": "medium"
+  },
+  {
+   "old": "Quan trọng là ghi vào OpenAPI của bài 32.",
+   "new": "Điều quan trọng là ghi mã đã chọn vào OpenAPI của bài 32.",
+   "reason": "Thiếu tân ngữ",
+   "severity": "medium"
+  },
+  {
+   "old": "Timeout không nói handler đã commit hay chưa.",
+   "new": "Timeout không cho biết handler đã commit hay chưa.",
+   "reason": "Cách nói tự nhiên hơn",
+   "severity": "medium"
+  },
+  {
+   "old": "nên lab không dựng ca này.",
+   "new": "nên lab không dựng trường hợp này.",
+   "reason": "'ca' khẩu ngữ",
+   "severity": "low"
+  },
+  {
+   "old": "Hai bẫy `--verify` đã chặn.",
+   "new": "Có hai bẫy mà `--verify` đã chặn.",
+   "reason": "Câu thiếu động từ",
+   "severity": "medium"
+  },
+  {
+   "old": "`Claims` của lab còn khai `aud` không phải `Option`.",
+   "new": "`Claims` của lab còn khai báo `aud` với kiểu không phải `Option`.",
+   "reason": "Câu dịch máy, thiếu danh từ 'kiểu'",
+   "severity": "high"
+  },
+  {
+   "old": "là lớp cho kiểu claims để `aud` tuỳ chọn",
+   "new": "là lớp kiểm tra dành cho kiểu claims có `aud` tuỳ chọn",
+   "reason": "Câu cụt",
+   "severity": "medium"
+  },
+  {
+   "old": "kiểm không token nào của bảng xuất hiện trong log",
+   "new": "kiểm tra rằng không token nào của bảng xuất hiện trong log",
+   "reason": "Câu thiếu từ nối",
+   "severity": "high"
+  },
+  {
+   "old": "Nó chỉ che header:",
+   "new": "Lớp này chỉ che header:",
+   "reason": "'Nó' chỉ vật trừu tượng, mơ hồ",
+   "severity": "medium"
+  },
+  {
+   "old": "Extractor cài `FromRequestParts`: axum chạy nó trước thân handler, nó trả lỗi thì thân handler không chạy.",
+   "new": "Extractor cài đặt `FromRequestParts`: axum chạy extractor trước thân handler, và nếu nó trả lỗi thì thân handler không chạy.",
+   "reason": "'cài' gượng, hai mệnh đề nối cụt",
+   "severity": "medium"
+  },
+  {
+   "old": "chạy xong thân hàm mới được vào",
+   "new": "chạy xong thì thân hàm mới được chạy",
+   "reason": "Diễn đạt ngược trình tự",
+   "severity": "high"
+  },
+  {
+   "old": "hai route cho tới 2 + 2 request",
+   "new": "hai route cho tối đa 2 + 2 request đồng thời",
+   "reason": "'cho tới' dùng gượng",
+   "severity": "medium"
+  },
+  {
+   "old": "Nó là cầu chì bảo vệ process, không công bằng giữa các client.",
+   "new": "Nó là cầu chì bảo vệ process, không đảm bảo công bằng giữa các client.",
+   "reason": "Câu cụt",
+   "severity": "medium"
+  },
+  {
+   "old": "span rớt khỏi log",
+   "new": "span bị mất khỏi log",
+   "reason": "'rớt' khẩu ngữ",
+   "severity": "low"
+  },
+  {
+   "old": "máy quá chậm có thể phải nới",
+   "new": "máy quá chậm thì có thể phải nới các mốc thời gian",
+   "reason": "Thiếu tân ngữ",
+   "severity": "medium"
+  },
+  {
+   "old": "không xoay vòng, không kiểm <code>iss</code>",
+   "new": "không xoay vòng, không kiểm tra <code>iss</code>",
+   "reason": "Động từ cụt",
+   "severity": "low"
+  }
+ ]
+}

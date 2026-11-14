@@ -1,0 +1,143 @@
+{
+ "file": "python-fastapi-http-endpoint-bao-gia.md",
+ "edits": [
+  {
+   "old": "xuất bản endpoint báo giá",
+   "new": "đưa báo giá lên thành endpoint",
+   "reason": "«Xuất bản» là calque của publish",
+   "severity": "medium"
+  },
+  {
+   "old": "HTTP là chữ chạy trên TCP.",
+   "new": "HTTP là giao thức chạy trên TCP.",
+   "reason": "«Chữ» dùng sai nghĩa",
+   "severity": "high"
+  },
+  {
+   "old": "và nó tự là một ASGI app: `__call__`",
+   "new": "và bản thân nó là một ASGI app: `__call__`",
+   "reason": "Dịch gượng, tránh «nó tự là»",
+   "severity": "medium"
+  },
+  {
+   "old": "Phản hồi có `Decimal` ra JSON là **chuỗi** (`\"14250\"`), nên",
+   "new": "Trong phản hồi, `Decimal` được ghi ra JSON dưới dạng **chuỗi** (`\"14250\"`), nên",
+   "reason": "Câu thiếu động từ, khó hiểu",
+   "severity": "medium"
+  },
+  {
+   "old": "body đã được parse và kiểm bằng `QuoteRequest`;",
+   "new": "body đã được parse và kiểm tra bằng `QuoteRequest`;",
+   "reason": "Từ cụt",
+   "severity": "low"
+  },
+  {
+   "old": "Bảy ca lỗi chạy qua app, kèm một route không tồn tại và một method sai (trích section 3 của output):",
+   "new": "Bảy test case lỗi chạy qua app, kèm một route không tồn tại và một method sai (trích mục 3 của output):",
+   "reason": "Thống nhất test case; từ Anh lọt vào văn xuôi",
+   "severity": "medium"
+  },
+  {
+   "old": "nói thẳng thì nó **ngược chiều chữ RFC 9110** ở cả hai phía:",
+   "new": "nói thẳng thì nó **ngược với câu chữ của RFC 9110** ở cả hai phía:",
+   "reason": "«Chữ» dùng gượng",
+   "severity": "high"
+  },
+  {
+   "old": "Đây là chọn lựa thiết kế và",
+   "new": "Đây là một lựa chọn thiết kế và",
+   "reason": "Từ tự nhiên hơn",
+   "severity": "low"
+  },
+  {
+   "old": "nên 150 km mới là ca điển hình của 422,",
+   "new": "nên 150 km mới là trường hợp điển hình của 422,",
+   "reason": "Thống nhất cách gọi, tránh «ca»",
+   "severity": "low"
+  },
+  {
+   "old": "Lab giữ quy ước trên vì nó cho client phân biệt",
+   "new": "Lab giữ quy ước trên vì quy ước này cho client phân biệt",
+   "reason": "Tránh «nó» chỉ sự vật trừu tượng",
+   "severity": "low"
+  },
+  {
+   "old": "để vẽ trang tài liệu thử gọi được.",
+   "new": "để vẽ trang tài liệu cho phép gọi thử.",
+   "reason": "Trật tự từ kiểu tiếng Anh",
+   "severity": "medium"
+  },
+  {
+   "old": "ba chỗ đặc tả nói chưa đủ:",
+   "new": "ba chỗ đặc tả chưa nói đủ:",
+   "reason": "Trật tự từ",
+   "severity": "low"
+  },
+  {
+   "old": "nên đổi tên hàm Python vô tình đổi tên trong SDK.",
+   "new": "nên việc đổi tên hàm Python vô tình đổi luôn tên trong SDK.",
+   "reason": "Câu thiếu chủ ngữ",
+   "severity": "medium"
+  },
+  {
+   "old": "theo cách tuỳ vào chữ `async`:",
+   "new": "theo cách tuỳ vào từ khoá `async`:",
+   "reason": "«Chữ» dùng sai nghĩa",
+   "severity": "medium"
+  },
+  {
+   "old": "Việc nặng CPU thì chữ `async` nào cũng không cứu:",
+   "new": "Việc nặng CPU thì có dùng `async` hay không cũng không cứu được:",
+   "reason": "Dịch gượng",
+   "severity": "high"
+  },
+  {
+   "old": "Kiểm toàn bộ bằng `--verify`,",
+   "new": "Kiểm tra toàn bộ bằng `--verify`,",
+   "reason": "Từ cụt",
+   "severity": "low"
+  },
+  {
+   "old": "39 ca gồm:",
+   "new": "39 test case gồm:",
+   "reason": "Thống nhất test case",
+   "severity": "medium"
+  },
+  {
+   "old": "không kiểm số tuyệt đối.",
+   "new": "không kiểm tra số tuyệt đối.",
+   "reason": "Từ cụt",
+   "severity": "low"
+  },
+  {
+   "old": "<p>Báo giá và bộ đếm <code>quote_id</code> nằm trong bộ nhớ của tiến trình. Mất khi restart;",
+   "new": "<p>Báo giá và bộ đếm <code>quote_id</code> nằm trong bộ nhớ của tiến trình. Dữ liệu mất khi restart;",
+   "reason": "Câu thiếu chủ ngữ",
+   "severity": "medium"
+  },
+  {
+   "old": "(có ca trong <code>--verify</code>)",
+   "new": "(có test case trong <code>--verify</code>)",
+   "reason": "Thống nhất test case",
+   "severity": "medium"
+  },
+  {
+   "old": "nên request qua pydantic,",
+   "new": "nên request đi qua pydantic,",
+   "reason": "Câu thiếu động từ",
+   "severity": "low"
+  },
+  {
+   "old": "Với handler tính toán ngắn như này,",
+   "new": "Với handler tính toán ngắn như thế này,",
+   "reason": "Khẩu ngữ",
+   "severity": "medium"
+  },
+  {
+   "old": "kiểm QuoteRequest, gọi calculate_fare",
+   "new": "kiểm tra QuoteRequest, gọi calculate_fare",
+   "reason": "Từ cụt",
+   "severity": "low"
+  }
+ ]
+}

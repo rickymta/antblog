@@ -1,0 +1,143 @@
+{
+  "file": "python-repository-unit-of-work-sqlalchemy.md",
+  "edits": [
+    {
+      "old": "Unit of Work bao một Session",
+      "new": "Unit of Work bọc một Session",
+      "reason": "Động từ chính xác hơn",
+      "severity": "low"
+    },
+    {
+      "old": "Đủ để chứng minh thứ tự log, validate, transaction.",
+      "new": "Cách đó đủ để chứng minh thứ tự log, validate, transaction.",
+      "reason": "Câu thiếu chủ ngữ",
+      "severity": "medium"
+    },
+    {
+      "old": "bởi RV-002, và không ai nhận lỗi",
+      "new": "do RV-002 ghi, và không ai nhận lỗi",
+      "reason": "Bỏ 'bởi' kiểu Anh",
+      "severity": "medium"
+    },
+    {
+      "old": "Nó chỉ có năm thao tác",
+      "new": "Port này chỉ có năm thao tác",
+      "reason": "Tránh 'Nó' chỉ vật trừu tượng đầu câu",
+      "severity": "medium"
+    },
+    {
+      "old": "sẽ nổ ngay thay vì âm thầm phát thêm",
+      "new": "sẽ báo lỗi ngay thay vì lặng lẽ phát thêm",
+      "reason": "'nổ' khẩu ngữ; calque 'âm thầm'",
+      "severity": "medium"
+    },
+    {
+      "old": "nên không có N+1 mà không hay",
+      "new": "nên không thể có N+1 mà không ai hay",
+      "reason": "Thiếu chủ thể, cụt",
+      "severity": "medium"
+    },
+    {
+      "old": "đó cũng là chỗ bẫy ở mục sau nằm",
+      "new": "đó cũng là nơi cái bẫy ở mục sau xuất hiện",
+      "reason": "Trật tự từ gượng",
+      "severity": "medium"
+    },
+    {
+      "old": "Nó giữ `begin()` cũ và thêm",
+      "new": "Port này giữ `begin()` cũ và thêm",
+      "reason": "Tránh 'Nó' đầu câu",
+      "severity": "medium"
+    },
+    {
+      "old": "test cho hai thread cùng đứng trong",
+      "new": "test chạy hai thread cùng đứng trong",
+      "reason": "'test cho' dịch máy",
+      "severity": "medium"
+    },
+    {
+      "old": "không thừa kế Context",
+      "new": "không kế thừa Context",
+      "reason": "Từ quen dùng",
+      "severity": "low"
+    },
+    {
+      "old": "thay vì âm thầm mở transaction",
+      "new": "thay vì lặng lẽ mở transaction",
+      "reason": "Calque 'silently'",
+      "severity": "low"
+    },
+    {
+      "old": "Test cô lập hiện tượng:",
+      "new": "Một test riêng cô lập hiện tượng này:",
+      "reason": "Câu cụt, thiếu chủ ngữ",
+      "severity": "medium"
+    },
+    {
+      "old": "mỗi lần `flush` ghi hàng là một version",
+      "new": "mỗi lần `flush` ghi hàng thì version tăng thêm một",
+      "reason": "Câu cụt, khó hiểu",
+      "severity": "medium"
+    },
+    {
+      "old": "Số câu được đếm bằng event `before_cursor_execute` của engine, ở ba cỡ",
+      "new": "Ta đếm số câu bằng event `before_cursor_execute` của engine, ở ba cỡ",
+      "reason": "Bỏ bị động",
+      "severity": "medium"
+    },
+    {
+      "old": "để lại lỗ trong dãy",
+      "new": "để lại khoảng trống trong dãy",
+      "reason": "'lỗ' tự ghép",
+      "severity": "medium"
+    },
+    {
+      "old": "nếu không nối được thì báo bằng lệnh khởi động chứ không bỏ qua",
+      "new": "nếu không nối được thì báo lỗi kèm lệnh khởi động chứ không bỏ qua",
+      "reason": "Câu mơ hồ",
+      "severity": "medium"
+    },
+    {
+      "old": "hay lỗ trong sequence",
+      "new": "hay khoảng trống trong sequence",
+      "reason": "'lỗ' tự ghép",
+      "severity": "low"
+    },
+    {
+      "old": "Lab in lời nhắc ba service là adapter giả",
+      "new": "Lab in lời nhắc rằng ba service đang dùng adapter giả",
+      "reason": "Thiếu động từ",
+      "severity": "medium"
+    },
+    {
+      "old": "Schema `lab69` bị xoá khi chạy xong. Kiểm các kết quả trên:",
+      "new": "Lab xoá schema `lab69` khi chạy xong. Kiểm tra các kết quả trên:",
+      "reason": "Bỏ bị động; lược chữ 'tra'",
+      "severity": "medium"
+    },
+    {
+      "old": "33 ca: repository",
+      "new": "33 test case: repository",
+      "reason": "Thống nhất 'test case'",
+      "severity": "low"
+    },
+    {
+      "old": "và các ca HTTP",
+      "new": "và các test case HTTP",
+      "reason": "Thống nhất 'test case'",
+      "severity": "low"
+    },
+    {
+      "old": "Output do một lần chạy chung với nhiều tác vụ khác của máy",
+      "new": "Output này đến từ một lần chạy cùng lúc với nhiều tác vụ khác trên máy",
+      "reason": "Dịch máy",
+      "severity": "medium"
+    },
+    {
+      "old": "Lấy hồ sơ đang mở của một tài xế nên đặt ở repository",
+      "new": "Thao tác lấy hồ sơ đang mở của một tài xế nên đặt ở repository",
+      "reason": "Thiếu danh từ chủ ngữ",
+      "severity": "medium"
+    }
+  ]
+}

@@ -1,0 +1,203 @@
+{
+  "file": "python-fastapi-dependency-middleware-settings-logging.md",
+  "edits": [
+    {
+      "old": "Thứ duy nhất hỗ trợ cầm được là mã yêu cầu hiện trên màn hình lỗi.",
+      "new": "Bộ phận hỗ trợ chỉ có trong tay mã yêu cầu hiện trên màn hình lỗi.",
+      "reason": "Câu thiếu chủ ngữ, «cầm được» theo nghĩa bóng khó hiểu",
+      "severity": "high"
+    },
+    {
+      "old": "cấu hình kiểm ngay lúc khởi động",
+      "new": "cấu hình được kiểm tra ngay lúc khởi động",
+      "reason": "Thiếu chữ «tra», câu cụt",
+      "severity": "medium"
+    },
+    {
+      "old": "Lab của bài này tự chứa: nó mang theo hợp đồng",
+      "new": "Lab của bài này chạy độc lập: lab mang theo hợp đồng",
+      "reason": "«Tự chứa» là calque; «nó» chỉ vật trừu tượng",
+      "severity": "medium"
+    },
+    {
+      "old": "Một request làm mở bao nhiêu phiên?",
+      "new": "Một request mở ra bao nhiêu phiên?",
+      "reason": "Cấu trúc «làm mở» gượng",
+      "severity": "low"
+    },
+    {
+      "old": "Bài chạy cả hai ca, và thêm một bẫy",
+      "new": "Bài chạy cả hai test case, và thêm một bẫy",
+      "reason": "Thống nhất thuật ngữ test case",
+      "severity": "low"
+    },
+    {
+      "old": "(mã yêu cầu, đo giờ, một dòng log)",
+      "new": "(mã yêu cầu, đo thời gian, một dòng log)",
+      "reason": "«Đo giờ» gượng, nghĩa là đo thời gian xử lý",
+      "severity": "medium"
+    },
+    {
+      "old": "gán request_id, đo giờ",
+      "new": "gán request_id, đo thời gian",
+      "reason": "Thống nhất với văn xuôi: đo thời gian",
+      "severity": "low"
+    },
+    {
+      "old": "đọc một lần, kiểm ngay",
+      "new": "đọc một lần, kiểm tra ngay",
+      "reason": "Thiếu chữ «tra»",
+      "severity": "low"
+    },
+    {
+      "old": "Chết ngay khi khởi động tốt hơn chạy với TTL báo giá 5 giây.",
+      "new": "Dừng ngay khi khởi động còn tốt hơn chạy với TTL báo giá 5 giây.",
+      "reason": "Khẩu ngữ, thiếu từ so sánh «còn»",
+      "severity": "medium"
+    },
+    {
+      "old": "Lab chưa có bí mật nào.",
+      "new": "Lab chưa có giá trị bí mật nào.",
+      "reason": "«Bí mật» thiếu danh từ chính (secret)",
+      "severity": "medium"
+    },
+    {
+      "old": "Dòng đầu là ca có",
+      "new": "Dòng đầu là test case có",
+      "reason": "Thống nhất thuật ngữ test case",
+      "severity": "low"
+    },
+    {
+      "old": "thiếu ca này thì chưa chứng minh được",
+      "new": "thiếu test case này thì chưa chứng minh được",
+      "reason": "Thống nhất thuật ngữ test case",
+      "severity": "low"
+    },
+    {
+      "old": "Mặc định có lợi vì nhiều dependency con cùng cần «khách hiện tại» thì chỉ kiểm một lần.",
+      "new": "Mặc định này có lợi: khi nhiều dependency con cùng cần «khách hiện tại», chỉ phải kiểm một lần.",
+      "reason": "Câu ghép sai cấu trúc «vì … thì»",
+      "severity": "medium"
+    },
+    {
+      "old": "nó báo (trích",
+      "new": "lệnh này báo (trích",
+      "reason": "Tránh «nó» chỉ vật trừu tượng đầu vế",
+      "severity": "low"
+    },
+    {
+      "old": "Mỗi lỗi 500 rò một phiên là kiểu sự cố làm cạn pool kết nối sau vài giờ.",
+      "new": "Mỗi lỗi 500 làm rò một phiên là kiểu sự cố khiến pool kết nối cạn sau vài giờ.",
+      "reason": "«Rò một phiên» dịch gượng từ leak",
+      "severity": "medium"
+    },
+    {
+      "old": "Giá trị của nó ở đây là cho thấy chỗ cắm",
+      "new": "Giá trị của nó ở đây là cho thấy điểm thay thế",
+      "reason": "«Chỗ cắm» là dịch sát plug-in point, gượng",
+      "severity": "medium"
+    },
+    {
+      "old": "handler chỉ bổ sung kiểm theo vai trò",
+      "new": "handler chỉ bổ sung bước kiểm tra theo vai trò",
+      "reason": "Thiếu danh từ «bước», «kiểm» cụt",
+      "severity": "medium"
+    },
+    {
+      "old": "vì ngoài mọi request",
+      "new": "vì nằm ngoài mọi request",
+      "reason": "Thiếu động từ",
+      "severity": "low"
+    },
+    {
+      "old": "làm rò rỉ phiên hiện ngay lúc tắt",
+      "new": "cho thấy các phiên bị rò rỉ ngay lúc tắt",
+      "reason": "Cụm «phiên hiện ngay» tối nghĩa",
+      "severity": "high"
+    },
+    {
+      "old": "đo giờ, ghi một dòng log",
+      "new": "đo thời gian, ghi một dòng log",
+      "reason": "«Đo giờ» gượng",
+      "severity": "medium"
+    },
+    {
+      "old": "Đừng phản chiếu bừa header của client.",
+      "new": "Đừng dùng lại bừa header của client.",
+      "reason": "«Phản chiếu» là calque của reflect",
+      "severity": "medium"
+    },
+    {
+      "old": "Chuỗi 200 ký tự hay có dấu cách đưa thẳng vào log và header có thể chèn dòng log giả hoặc làm phình header.",
+      "new": "Chuỗi 200 ký tự hoặc chuỗi có dấu cách mà đưa thẳng vào log và header thì có thể chèn dòng log giả hoặc làm phình header.",
+      "reason": "Câu thiếu điều kiện rõ ràng, khó đọc",
+      "severity": "medium"
+    },
+    {
+      "old": "Câu cho client là câu chung, tên lớp và traceback chỉ ở log",
+      "new": "Thông báo gửi cho client là câu chung chung; tên lớp và traceback chỉ nằm trong log",
+      "reason": "Câu cụt, thiếu danh từ",
+      "severity": "medium"
+    },
+    {
+      "old": "một sự cố thành hai bản ghi, một JSON và một văn bản; hãy chọn giữ cái nào trước khi lên production",
+      "new": "một sự cố sinh ra hai bản ghi, một dạng JSON và một dạng văn bản thuần; hãy chọn giữ bản nào trước khi lên production",
+      "reason": "Thiếu động từ, danh từ chính",
+      "severity": "medium"
+    },
+    {
+      "old": "trùng header, kiểm bằng",
+      "new": "trùng với header, kiểm bằng",
+      "reason": "Thiếu giới từ",
+      "severity": "low"
+    },
+    {
+      "old": "đề nghị pure ASGI middleware nếu cần",
+      "new": "khuyên dùng pure ASGI middleware khi cần",
+      "reason": "«Đề nghị» là calque của recommend",
+      "severity": "medium"
+    },
+    {
+      "old": "đo đủ cần pure ASGI middleware, còn lab giữ",
+      "new": "muốn đo đủ thì cần pure ASGI middleware, còn lab giữ",
+      "reason": "Câu thiếu quan hệ điều kiện",
+      "severity": "medium"
+    },
+    {
+      "old": "chưa gồm truyền thân response",
+      "new": "chưa gồm thời gian truyền thân response",
+      "reason": "Thiếu danh từ chính",
+      "severity": "medium"
+    },
+    {
+      "old": "làm nhãn dashboard được",
+      "new": "dùng làm nhãn trên dashboard được",
+      "reason": "Cụm cụt",
+      "severity": "medium"
+    },
+    {
+      "old": "hoặc executor tự dựng, không sao chép ngữ cảnh",
+      "new": "hoặc executor tự dựng; hai cách này không sao chép ngữ cảnh",
+      "reason": "Thiếu chủ ngữ cho vế sau",
+      "severity": "medium"
+    },
+    {
+      "old": "Mỗi sự cố ra hai traceback",
+      "new": "Mỗi sự cố sinh ra hai traceback",
+      "reason": "Thiếu động từ rõ nghĩa",
+      "severity": "low"
+    },
+    {
+      "old": "chưa có bộ thu gom hay khử thông tin cá nhân",
+      "new": "chưa có bộ thu gom log hay bước loại bỏ thông tin cá nhân",
+      "reason": "Thiếu danh từ; «khử» gượng",
+      "severity": "medium"
+    },
+    {
+      "old": "đừng so tuyệt đối",
+      "new": "đừng so sánh số tuyệt đối",
+      "reason": "Thiếu động từ/danh từ",
+      "severity": "low"
+    }
+  ]
+}

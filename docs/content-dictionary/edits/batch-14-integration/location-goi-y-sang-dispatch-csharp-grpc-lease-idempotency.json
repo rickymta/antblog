@@ -1,0 +1,11 @@
+{
+  "file": "location-goi-y-sang-dispatch-csharp-grpc-lease-idempotency.md",
+  "edits": [
+    {
+      "old": "có lỗi đua luồng",
+      "new": "có race condition",
+      "reason": "Theo terminology.json (race-condition) và lựa chọn của python-r4, misc-r1: «lỗi đua» thành «race condition».",
+      "severity": "low"
+    }
+  ]
+}

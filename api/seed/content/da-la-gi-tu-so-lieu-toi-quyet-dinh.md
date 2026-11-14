@@ -21,15 +21,15 @@ Nếu chỉ vẽ hai cột 120 và 180, ta đã có một biểu đồ đúng s�
 
 Trong series này, **Data Analysis** là quá trình làm rõ câu hỏi, kiểm tra và xử lý dữ liệu, tìm những đặc điểm có ý nghĩa rồi diễn giải chúng để hỗ trợ quyết định. **Data Analyst** là người làm công việc đó; developer, BA hay người vận hành cũng có thể thực hiện một phần hoạt động phân tích.
 
-Một phép tính đúng chưa bảo đảm trả lời đúng câu hỏi. Tính tổng số lượt huỷ có thể giúp dự tính khối lượng cần xử lý. Tính tỷ lệ huỷ trên số lượt được nhận giúp mô tả kết quả đón khách trong một cohort — nhóm lượt cùng thuộc điều kiện và khoảng thời gian đã định. Hai cách đo có thể dẫn tới hai nhận xét khác nhau mà không mâu thuẫn.
+Một phép tính đúng chưa bảo đảm trả lời đúng câu hỏi. Tính tổng số lượt huỷ có thể giúp dự tính khối lượng cần xử lý. Tính tỷ lệ huỷ trên số lượt được nhận giúp mô tả kết quả đón khách trong một cohort — nhóm lượt cùng thoả điều kiện và nằm trong khoảng thời gian đã định. Hai cách đo có thể dẫn tới hai nhận xét khác nhau mà không mâu thuẫn.
 
 Theo [Microsoft Learn về vai trò DA](https://learn.microsoft.com/en-us/training/career-paths/data-analyst/), công việc này bao gồm phối hợp với các bên liên quan, khảo sát và làm sạch dữ liệu, biến đổi, mô hình hoá và trình bày kết quả. Vì vậy, dashboard chỉ là một dạng đầu ra. Một phân tích có ích cũng có thể kết thúc bằng thông báo “chưa đủ bằng chứng, cần sửa cách ghi nhận trước”.
 
 ## 2. Cùng đọc một bộ số liệu của Tới Nơi
 
-**Toàn bộ số dưới đây là giả lập riêng cho DA-P01, không lấy từ baseline BA và không phải dữ liệu production.** Chỉ xét dịch vụ đặt xe tại khu vực A. W1 và W2 là hai tuần liên tiếp; lượt được xếp vào tuần theo lần tài xế nhận đầu tiên, dùng múi giờ Asia/Ho_Chi_Minh. Mỗi lượt chỉ xuất hiện một lần trong bảng tổng hợp.
+**Toàn bộ số dưới đây là giả lập riêng cho DA-P01, không lấy từ baseline BA và không phải dữ liệu production.** Chỉ xét dịch vụ đặt xe tại khu vực A. W1 và W2 là hai tuần liên tiếp; lượt được xếp vào tuần theo thời điểm tài xế nhận lần đầu, dùng múi giờ Asia/Ho_Chi_Minh. Mỗi lượt chỉ xuất hiện một lần trong bảng tổng hợp.
 
-Trong bài tập, đã chờ đủ kết quả của các lượt ở cả hai tuần và xác nhận không thiếu/trùng bản ghi. Đây là điều kiện được cấp để luyện đọc số; khi làm thật, DA phải kiểm tra điều kiện ấy.
+Trong bài tập, đã chờ đủ kết quả của các lượt ở cả hai tuần và xác nhận không thiếu hoặc trùng bản ghi. Đây là điều kiện bài tập cho sẵn để luyện đọc số; khi làm thật, DA phải kiểm tra điều kiện ấy.
 
 | Kỳ | Lượt được nhận | Huỷ trước đón | Tỷ lệ huỷ trước đón |
 |---|---:|---:|---:|
@@ -52,7 +52,7 @@ Không thể lấy 180 chia 1.000 vì tử số và mẫu số thuộc hai cohor
 
 ### Tỷ lệ chung chưa kể hết câu chuyện
 
-Giả sử cùng bộ dữ liệu đã đối soát được chia thành giờ cao điểm và các giờ còn lại. Hai nhóm loại trừ nhau và bao phủ toàn bộ cohort; lịch phân loại giống nhau ở hai tuần.
+Giả sử cùng bộ dữ liệu đã đối soát được chia thành giờ cao điểm và các giờ còn lại. Hai nhóm không giao nhau và gộp lại đủ toàn bộ cohort; lịch phân loại giống nhau ở hai tuần.
 
 | Nhóm | W1: được nhận | W1: huỷ | W1: tỷ lệ | W2: được nhận | W2: huỷ | W2: tỷ lệ |
 |---|---:|---:|---:|---:|---:|---:|
@@ -60,7 +60,7 @@ Giả sử cùng bộ dữ liệu đã đối soát được chia thành giờ c
 | Còn lại | 500 | 40 | 8% | 750 | 45 | 6% |
 | Tổng | 1.000 | 120 | 12% | 1.500 | 180 | 12% |
 
-Trong khi tỷ lệ chung đứng yên, tỷ lệ quan sát ở cao điểm tăng **2 điểm phần trăm**, còn nhóm giờ khác giảm 2 điểm phần trăm. Đây là phát hiện đáng điều tra. Nó chưa chứng minh cao điểm gây huỷ, chưa xác định nguyên nhân và chưa chứng minh chênh lệch sẽ lặp lại ở tuần sau.
+Trong khi tỷ lệ chung đứng yên, tỷ lệ quan sát ở cao điểm tăng **2 điểm phần trăm**, còn nhóm giờ khác giảm 2 điểm phần trăm. Đây là phát hiện đáng điều tra. Phát hiện này chưa chứng minh cao điểm gây huỷ, chưa xác định nguyên nhân và chưa chứng minh chênh lệch sẽ lặp lại ở tuần sau.
 
 Khi đọc bảng, hãy cộng lại các nhóm trước: 135 + 45 = 180 và 750 + 750 = 1.500. Bước đơn giản này giúp phát hiện lỗi chia nhóm hoặc lấy nhầm tập dữ liệu trước khi kể một câu chuyện hấp dẫn.
 
@@ -71,7 +71,7 @@ Khi đọc bảng, hãy cộng lại các nhóm trước: 135 + 45 = 180 và 750
 | Dữ liệu | Các số đếm theo tuần và khung giờ | Nguồn, phạm vi, đơn vị và độ đầy đủ |
 | Thông tin | Tỷ lệ chung cùng là 12%; cao điểm từ 16% lên 18% | Phép tính phải khớp định nghĩa |
 | Insight phục vụ quyết định | Chỉ nhìn tỷ lệ chung sẽ bỏ qua diễn biến ngược chiều giữa các khung giờ | Phát hiện có ích nhưng chưa phải nguyên nhân |
-| Hành động đề xuất | Ưu tiên kiểm tra các ca huỷ cao điểm, dữ liệu thời gian đón và thay đổi ghi nhận | Cần owner, phạm vi và cách kiểm chứng |
+| Hành động đề xuất | Ưu tiên kiểm tra các ca huỷ cao điểm, dữ liệu thời gian đón và thay đổi ghi nhận | Cần người phụ trách, phạm vi và cách kiểm chứng |
 
 Một insight tốt phải làm rõ điều người ra quyết định cần chú ý. Câu “W2 có 180 lượt huỷ” chỉ nhắc lại số. Câu “cần tách khung giờ trước khi quyết định can thiệp toàn khu vực” nối số liệu với lựa chọn tiếp theo.
 
@@ -79,9 +79,9 @@ Hành động đầu tiên không nhất thiết là ra mắt tính năng. Nhóm
 
 ## 4. Những câu hỏi dữ liệu này chưa trả lời
 
-Ta chưa biết cao điểm có mưa nhiều hơn, thiếu tài xế, có chiến dịch khuyến mãi, thay chính sách phí hay ứng dụng ghi nhận trạng thái khác trước hay không. Ta cũng chưa có phân bố thời gian đón, dữ liệu lý do huỷ đã xác minh hoặc chi phí hỗ trợ.
+Ta chưa biết liệu cao điểm có mưa nhiều hơn, thiếu tài xế, có chiến dịch khuyến mãi, đổi chính sách phí hay ứng dụng ghi nhận trạng thái khác trước hay không. Ta cũng chưa có phân bố thời gian đón, dữ liệu lý do huỷ đã xác minh hoặc chi phí hỗ trợ.
 
-Ví dụ, có người nói “huỷ tăng vì tài xế đến chậm”. Đó là **giả thuyết**, chưa phải kết luận. Cần kiểm tra nguồn thời gian, nhóm so sánh và những yếu tố đồng thời tác động. Ngay cả khi hai đại lượng biến động cùng nhau, quan hệ đó vẫn chưa đủ để kết luận nhân quả.
+Ví dụ, có người nói “huỷ tăng vì tài xế đến chậm”. Đó là **giả thuyết**, chưa phải kết luận. Cần kiểm tra nguồn thời gian, nhóm so sánh và những yếu tố cùng tác động. Ngay cả khi hai đại lượng biến động cùng nhau, quan hệ đó vẫn chưa đủ để kết luận nhân quả.
 
 [NIST mô tả EDA](https://www.itl.nist.gov/div898/handbook/eda/section1/eda11.htm) như cách khám phá cấu trúc, ngoại lệ và giả định của dữ liệu. Tinh thần phù hợp với bài này là xem dữ liệu đang nói gì trước khi ép nó chứng minh câu chuyện ban đầu.
 
@@ -91,7 +91,7 @@ Một bản nháp dùng được cho cuộc trao đổi với vận hành:
 
 > Trong cohort lượt đặt xe được nhận ở A, số huỷ trước đón tăng từ 120 lên 180 khi tổng lượt được nhận tăng từ 1.000 lên 1.500. Tỷ lệ chung quan sát được không đổi ở 12%. Tuy nhiên, nhóm cao điểm tăng từ 16% lên 18%, còn nhóm giờ khác giảm từ 8% xuống 6%. Đề xuất ưu tiên kiểm tra dữ liệu và các ca cao điểm trước khi chọn phương án can thiệp. Chưa đủ bằng chứng quy nguyên nhân cho điểm đón hoặc dự báo hiệu quả của chat.
 
-Kèm theo đoạn nhận định là bảng nguồn, công thức và ba việc cần làm: vận hành xác nhận định nghĩa khung giờ; DA kiểm tra thêm các tuần và phân nhóm; người sở hữu dữ liệu xác nhận có thay đổi tracking hay không. Đây là đề xuất phân công trong bài tập, chưa phải công việc đã được duyệt.
+Kèm theo đoạn nhận định là bảng nguồn, công thức và ba việc cần làm: vận hành xác nhận định nghĩa khung giờ; DA kiểm tra thêm các tuần và phân nhóm; người phụ trách dữ liệu xác nhận có thay đổi cách ghi nhận hay không. Đây là đề xuất phân công trong bài tập, chưa phải công việc đã được duyệt.
 
 Không nên viết “dịch vụ ổn vì tỷ lệ không đổi”. Tỷ lệ huỷ chưa đại diện cho toàn bộ chất lượng: thời gian đón, khiếu nại hay thu nhập tài xế có thể thay đổi. Số ca huỷ tuyệt đối tăng cũng có thể tạo thêm nhu cầu xử lý; cần dữ liệu riêng trước khi quy đổi thành số nhân viên hỗ trợ.
 
@@ -99,9 +99,9 @@ Không nên viết “dịch vụ ổn vì tỷ lệ không đổi”. Tỷ lệ
 
 - **Đọc số đếm như tỷ lệ:** luôn hỏi mẫu số có thay đổi không.
 - **Chỉ nhìn trung bình chung:** phân nhóm theo câu hỏi có cơ sở, rồi đối soát lại tổng.
-- **Gọi phần trăm là điểm phần trăm:** từ 16% lên 18% là tăng 2 điểm phần trăm, hay tăng 12,5% tương đối.
+- **Nhầm phần trăm với điểm phần trăm:** từ 16% lên 18% là tăng 2 điểm phần trăm, hay tăng 12,5% tương đối.
 - **Đổi phát hiện thành nguyên nhân:** dùng nhãn giả thuyết khi chưa có bằng chứng phù hợp.
-- **Chọn công cụ trước câu hỏi:** bảng tính đủ để kiểm tra phép tính này; chưa có căn cứ phải mua warehouse.
+- **Chọn công cụ trước câu hỏi:** bảng tính đủ để kiểm tra phép tính này; chưa có căn cứ phải mua kho dữ liệu (data warehouse).
 
 ## 7. Bài tập và tự kiểm tra
 

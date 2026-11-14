@@ -1,0 +1,191 @@
+{
+ "file": "rust-refund-reversal-chargeback-but-toan-dao-maker-checker.md",
+ "edits": [
+  {
+   "old": "Ba, ở dữ liệu, cho ai đó đi đường vòng với key khác:",
+   "new": "Ba, ở tầng dữ liệu, chặn trường hợp ai đó đi đường vòng bằng key khác:",
+   "reason": "Mệnh đề thứ ba thiếu vị ngữ, người đọc phải đoán lớp này chặn gì.",
+   "severity": "high"
+  },
+  {
+   "old": "Không đảo được hai lần nhờ ba lớp.",
+   "new": "Việc không đảo được hai lần nhờ ba lớp bảo vệ.",
+   "reason": "Câu thiếu chủ ngữ rõ ràng.",
+   "severity": "medium"
+  },
+  {
+   "old": "Nó không phải ảnh gương của bút toán nào: ba dòng khách, doanh thu, tài xế không đổi dấu đúng capture hay split.",
+   "new": "Nó không phải bản đảo dấu của bút toán nào: ba dòng khách, doanh thu, tài xế không trùng với capture hay split khi đổi dấu.",
+   "reason": "\"ảnh gương\" là dịch từng chữ; câu sau cụt.",
+   "severity": "medium"
+  },
+  {
+   "old": "khác nhau ở người khởi xướng và liên kết.",
+   "new": "khác nhau ở người khởi xướng và ở liên kết tới bút toán gốc.",
+   "reason": "\"liên kết\" thiếu bổ ngữ, nghe cụt.",
+   "severity": "medium"
+  },
+  {
+   "old": "Bấm hai lần không được tạo bản thứ hai:",
+   "new": "Bấm hai lần cũng không tạo ra bản thứ hai:",
+   "reason": "Cách nói gượng, dịch từng chữ.",
+   "severity": "medium"
+  },
+  {
+   "old": "kiểm tra bất biến (tổng bằng 0) vẫn do `JournalEntry` làm.",
+   "new": "việc kiểm tra bất biến (tổng bằng 0) vẫn do `JournalEntry` đảm nhiệm.",
+   "reason": "Danh từ hoá cho tự nhiên hơn.",
+   "severity": "low"
+  },
+  {
+   "old": "làm tròn nửa lên, không `f64`:",
+   "new": "làm tròn nửa lên và không dùng `f64`:",
+   "reason": "Cụm cụt thiếu động từ.",
+   "severity": "medium"
+  },
+  {
+   "old": "dòng 0 đồng bị bỏ vì `CHECK (amount_dong <> 0)`.",
+   "new": "dòng 0 đồng không được ghi vì `CHECK (amount_dong <> 0)` không cho phép.",
+   "reason": "Làm rõ lý do dòng 0 đồng không vào sổ.",
+   "severity": "medium"
+  },
+  {
+   "old": "Cuộc đua dựng bằng `Barrier`, không `sleep`.",
+   "new": "Race condition được dựng bằng `Barrier` chứ không dùng `sleep`.",
+   "reason": "Câu cụt thiếu động từ.",
+   "severity": "medium"
+  },
+  {
+   "old": "Ai thắng thì tuỳ lần chạy, nhưng tổng hoàn luôn là 15.000. Hình vẽ T1 thắng.",
+   "new": "Bên nào thắng tuỳ lần chạy, nhưng tổng hoàn luôn là 15.000. Trong hình, T1 thắng.",
+   "reason": "\"Hình vẽ T1 thắng\" gượng; \"Ai thắng\" nên nói rõ chủ thể.",
+   "severity": "medium"
+  },
+  {
+   "old": "cả hai cùng đọc 25.500 và cùng qua kiểm;",
+   "new": "cả hai cùng đọc 25.500 và cùng qua bước kiểm tra;",
+   "reason": "\"qua kiểm\" là cụm tự ghép.",
+   "severity": "medium"
+  },
+  {
+   "old": "Duyệt lặp lại idempotent theo hai cách:",
+   "new": "Duyệt lặp lại vẫn idempotent nhờ hai lớp:",
+   "reason": "Câu thiếu động từ nối, giọng dịch máy.",
+   "severity": "medium"
+  },
+  {
+   "old": "khoá dòng yêu cầu xếp hàng hai checker cùng bấm,",
+   "new": "khoá dòng yêu cầu bắt hai checker cùng bấm phải xếp hàng,",
+   "reason": "Cụm \"xếp hàng hai checker\" khó hiểu.",
+   "severity": "medium"
+  },
+  {
+   "old": "Lab thử duyệt lại bởi cùng người, bởi người khác, và đồng thời:",
+   "new": "Lab thử duyệt lại do cùng người, do người khác, và đồng thời:",
+   "reason": "\"bởi\" kiểu tiếng Anh.",
+   "severity": "low"
+  },
+  {
+   "old": "Rust báo lỗi dễ hiểu, còn `UPDATE` thẳng để người duyệt trùng người tạo vẫn bị",
+   "new": "Rust báo lỗi dễ hiểu; còn nếu ai đó `UPDATE` thẳng để người duyệt trùng người tạo thì vẫn bị",
+   "reason": "Câu thiếu chủ ngữ cho hành động UPDATE.",
+   "severity": "medium"
+  },
+  {
+   "old": "Dấu vết này chỉ là cố gắng tối đa,",
+   "new": "Dấu vết này chỉ được ghi theo kiểu cố gắng hết mức (best effort),",
+   "reason": "\"cố gắng tối đa\" là calque của best effort.",
+   "severity": "medium"
+  },
+  {
+   "old": "Nghiệp vụ thật đòi cạnh mà mô hình ban đầu chưa nghĩ tới;",
+   "new": "Nghiệp vụ thật đòi hỏi một cạnh mà mô hình ban đầu chưa tính đến;",
+   "reason": "Câu cụt, thiếu từ.",
+   "severity": "medium"
+  },
+  {
+   "old": "tiền nền tảng nợ VíXanh trong khi ví tài xế vẫn giữ 20.400.",
+   "new": "khoản tiền nền tảng nợ VíXanh trong khi ví tài xế vẫn giữ 20.400.",
+   "reason": "Thiếu danh từ chính.",
+   "severity": "low"
+  },
+  {
+   "old": "đòi lại là quyết định khi có kết luận.",
+   "new": "việc đòi lại là quyết định được đưa ra khi có kết luận.",
+   "reason": "Câu thiếu chủ ngữ danh từ hoá.",
+   "severity": "medium"
+  },
+  {
+   "old": "Hàng một tái dùng `refund_split`.",
+   "new": "Hàng một dùng lại `refund_split`.",
+   "reason": "\"tái dùng\" gượng.",
+   "severity": "low"
+  },
+  {
+   "old": "Thu hồi hoặc hoàn một phần khi tài xế đã rút hết tiền để lại số dư âm.",
+   "new": "Thu hồi hoặc hoàn một phần khi tài xế đã rút hết tiền sẽ để lại số dư âm.",
+   "reason": "Câu thiếu vị ngữ, phải đoán ý.",
+   "severity": "high"
+  },
+  {
+   "old": "nhưng chưa có khấu trừ hay đòi nợ.",
+   "new": "nhưng chưa có cơ chế khấu trừ hay đòi nợ.",
+   "reason": "Thiếu danh từ chính.",
+   "severity": "low"
+  },
+  {
+   "old": "**Hoàn tiền chồng chargeback.**",
+   "new": "**Hoàn tiền chồng lên chargeback.**",
+   "reason": "Cụm cụt, thiếu từ nối.",
+   "severity": "medium"
+  },
+  {
+   "old": "**Một người quyết.**",
+   "new": "**Một người quyết định.**",
+   "reason": "Tiêu đề in đậm cụt, khó hiểu.",
+   "severity": "high"
+  },
+  {
+   "old": "thêm mã thì compiler chỉ chỗ phải sửa)",
+   "new": "thêm mã thì compiler chỉ ra chỗ phải sửa)",
+   "reason": "Thiếu từ \"ra\".",
+   "severity": "low"
+  },
+  {
+   "old": "Có mã thay vì ghi chú tự do thì báo cáo gom được theo nguyên nhân.",
+   "new": "Dùng mã thay vì ghi chú tự do thì báo cáo có thể gom theo nguyên nhân.",
+   "reason": "Câu thiếu động từ.",
+   "severity": "medium"
+  },
+  {
+   "old": "thực tế, ai được duyệt là dữ liệu phân quyền,",
+   "new": "trong thực tế, người được phép duyệt là dữ liệu phân quyền,",
+   "reason": "\"ai được duyệt\" gượng, nghe như bị duyệt.",
+   "severity": "medium"
+  },
+  {
+   "old": "Thiếu `TOI_NOI_PG_URL` thì lab fail rõ.",
+   "new": "Thiếu `TOI_NOI_PG_URL` thì lab báo lỗi rõ ràng.",
+   "reason": "\"fail\" là từ tiếng Anh thông thường.",
+   "severity": "medium"
+  },
+  {
+   "old": "`--verify` kiểm từng giá trị in ở trên;",
+   "new": "`--verify` kiểm tra từng giá trị đã in ở trên;",
+   "reason": "\"kiểm\" cụt, \"in\" thiếu từ.",
+   "severity": "medium"
+  },
+  {
+   "old": "ghi bù một khoản mất dấu nguyên nhân, đều khó đối soát.",
+   "new": "ghi bù một khoản làm mất dấu nguyên nhân, đều khó đối soát.",
+   "reason": "Thiếu động từ.",
+   "severity": "medium"
+  },
+  {
+   "old": "và một cuộc đua ba checker bằng `Barrier`",
+   "new": "và một race condition giữa ba checker dựng bằng `Barrier`",
+   "reason": "terminology.json: race condition giữ tiếng Anh, tránh \"cuộc đua\"; thống nhất trong bài và phần",
+   "severity": "medium"
+  }
+ ]
+}

@@ -1,18 +1,18 @@
 ---
 slug: location-go-goroutine-channel-nhap-mon-cho-ingest
 title: "Go đủ dùng cho ingest: goroutine, channel, context và race detector"
-summary: "Bài 11: Go tối thiểu để đọc location-ingest, đối chiếu tokio và Rust: goroutine, channel có đệm, select, context, errgroup; tái hiện một data race mất hơn nửa số đếm rồi để -race bắt."
+summary: "Bài 11: Go tối thiểu để đọc location-ingest, đối chiếu tokio và Rust: goroutine, channel có đệm, select, context, errgroup; tái hiện một data race làm mất hơn nửa số đếm rồi để cờ -race phát hiện."
 category: location-routing
 level: intermediate
 tags: [toi-noi, location, go, goroutine, channel, context, errgroup, race-detector]
 language: vi
 ---
 
-Lúc cao điểm, 25.000 tài xế của Tới Nơi mở kết nối giữ suốt ca và mỗi 4 giây gửi một điểm GPS, tổng cộng khoảng 6.250 điểm mỗi giây. Phía nhận cần giữ ngần ấy kết nối, kiểm tra từng điểm, đẩy vào hàng đợi rồi trả ack, và không được kẹt khi Kafka chậm. Đây là việc của `location-ingest`, và ở loạt này nó viết bằng Go.
+Lúc cao điểm, 25.000 tài xế của Tới Nơi mở kết nối giữ suốt ca và mỗi 4 giây gửi một điểm GPS, tổng cộng khoảng 6.250 điểm mỗi giây. Phía nhận cần giữ ngần ấy kết nối, kiểm tra từng điểm, đẩy vào hàng đợi rồi trả ack, và không được kẹt khi Kafka chậm. Đây là việc của `location-ingest`, và ở loạt này dịch vụ đó được viết bằng Go.
 
-Blog chưa có loạt Go riêng, nên bài này dạy Go vừa đủ để đọc và sửa được `location-ingest` và `tracking-hub` ở các bài sau. Giả định bạn đã biết chút Rust: chỗ nào Go khác Rust thì bài nói thẳng. Phần cuối bài tái hiện một lỗi mà mọi người viết Go đều gặp, data race, để thấy nó trông ra sao khi không có công cụ bắt.
+Blog chưa có loạt Go riêng, nên bài này dạy Go vừa đủ để đọc và sửa được `location-ingest` và `tracking-hub` ở các bài sau. Giả định bạn đã biết chút Rust: chỗ nào Go khác Rust thì bài nói thẳng. Phần cuối bài tái hiện một lỗi mà mọi người viết Go đều gặp, data race, để thấy nó trông ra sao khi không có công cụ phát hiện.
 
-Đây là bài 11 của lộ trình **Nền tảng định vị** qua [Tới Nơi](/articles/du-an-mau-toi-noi). Vì sao service này viết bằng Go mà không phải Rust nằm ở [bài ADR](/articles/location-adr-rust-go-python-csharp-ranh-gioi-service); bài này không nhắc lại lập luận đó, chỉ dùng kết luận của nó.
+Đây là bài 11 của lộ trình **Nền tảng định vị** qua [Tới Nơi](/articles/du-an-mau-toi-noi). Lý do service này viết bằng Go chứ không phải Rust nằm ở [bài ADR](/articles/location-adr-rust-go-python-csharp-ranh-gioi-service); bài này không nhắc lại lập luận đó, chỉ dùng kết luận của nó.
 
 <div class="tkh-callout tkh-callout--example">
 <span class="tkh-callout-title">Thử trước khi đọc</span>
@@ -22,9 +22,9 @@ Blog chưa có loạt Go riêng, nên bài này dạy Go vừa đủ để đọ
 
 ## Go xuất hiện ở đâu trong service định vị
 
-Hai chương trình Go của loạt: `location-ingest` nhận lô GPS từ app tài xế qua WebSocket, và `tracking-hub` đẩy vị trí tài xế tới khách. Cả hai có chung một hình dạng: **rất nhiều kết nối nhàn rỗi, mỗi kết nối làm một việc nhỏ lặp đi lặp lại, và giữa chúng là hàng đợi có giới hạn**. Mất một điểm GPS không làm lệch một đồng tiền nào (kiến trúc §10 xếp vị trí vào telemetry tạm thời), nên đánh đổi của Go, có bộ gom rác và không có kiểm tra data race lúc biên dịch, chấp nhận được ở đây. Thuật toán nặng trên đường nóng, như bám đường và định tuyến, vẫn ở Rust.
+Hai chương trình Go của loạt: `location-ingest` nhận lô GPS từ app tài xế qua WebSocket, và `tracking-hub` đẩy vị trí tài xế tới khách. Cả hai có chung một hình dạng: **rất nhiều kết nối nhàn rỗi, mỗi kết nối làm một việc nhỏ lặp đi lặp lại, và giữa chúng là hàng đợi có giới hạn**. Mất một điểm GPS không làm lệch một đồng tiền nào (kiến trúc §10 xếp vị trí vào telemetry tạm thời), nên cái giá phải đánh đổi của Go (có bộ gom rác, không kiểm tra data race lúc biên dịch) là chấp nhận được ở đây. Thuật toán nặng trên đường nóng, như bám đường và định tuyến, vẫn ở Rust.
 
-Mô hình của Go cho loại bài toán này là **mỗi kết nối một goroutine** và viết code theo kiểu tuần tự, chặn thẳng: đọc một khung, xử lý, ghi ack, lặp lại. Runtime của Go lo việc đưa hàng chục nghìn goroutine lên vài chục luồng hệ điều hành. Với tokio bạn cũng làm được điều tương tự, nhưng phải đánh dấu `async` ở mọi hàm trên đường gọi và cẩn thận không chặn runtime; Go không có sự phân biệt hàm `async` với hàm thường.
+Mô hình của Go cho loại bài toán này là **mỗi kết nối một goroutine** và viết code theo kiểu tuần tự, chặn trực tiếp: đọc một khung, xử lý, ghi ack, lặp lại. Runtime của Go lo việc đưa hàng chục nghìn goroutine lên vài chục luồng hệ điều hành. Với tokio bạn cũng làm được điều tương tự, nhưng phải đánh dấu `async` ở mọi hàm trên đường gọi và cẩn thận không chặn runtime; Go không phân biệt hàm `async` với hàm thường.
 
 | Việc | Go | Rust (tokio) |
 | --- | --- | --- |
@@ -38,7 +38,7 @@ Mô hình của Go cho loại bài toán này là **mỗi kết nối một goro
 | Lỗi | giá trị `error` trả về | `Result<T, E>` |
 | An toàn dữ liệu chung | quy ước, kiểm lúc chạy bằng `-race` | `Send`/`Sync`, kiểm lúc biên dịch |
 
-Hàng cuối là khác biệt quan trọng nhất và là lý do bài này có một mục riêng về race detector. Safe Rust từ chối biên dịch chương trình truy cập dữ liệu chung không đồng bộ; Go biên dịch mọi thứ và chỉ có công cụ kiểm lúc chạy. Phía C#, cùng ý tưởng nằm ở [bài cancellation](/articles/csharp-async-await-cancellation) (`CancellationToken` đóng vai `context`) và [bài concurrency](/articles/csharp-concurrency-thread-safety) (check-then-act, `lock`).
+Hàng cuối là điểm khác biệt quan trọng nhất và là lý do bài này có một mục riêng về race detector. Safe Rust từ chối biên dịch chương trình truy cập dữ liệu chung mà không đồng bộ hoá; Go biên dịch mọi thứ và chỉ có công cụ kiểm tra lúc chạy. Phía C#, cùng ý tưởng nằm ở [bài cancellation](/articles/csharp-async-await-cancellation) (`CancellationToken` đóng vai `context`) và [bài concurrency](/articles/csharp-concurrency-thread-safety) (check-then-act, `lock`).
 
 ## Goroutine và channel qua một pipeline nhỏ
 
@@ -52,7 +52,7 @@ Lab của bài là một pipeline ba stage, chạy trên dữ liệu do simulato
 <figcaption>Hình 1. Ba stage nối bằng hai channel có đệm 64. Stage 1 và 2 nghe chung một <code>ctx</code>; stage 3 chỉ dừng khi <code>ch2</code> đóng. Nhờ vậy một lỗi ở đâu đó vẫn dừng được cả cây.</figcaption>
 </figure>
 
-Stage 1 sinh điểm. Điều đáng đọc là hai thứ: `defer close(ch1)` và `select`.
+Stage 1 sinh điểm. Có hai chỗ đáng đọc: `defer close(ch1)` và `select`.
 
 Tệp `examples/toi-noi-location/go/cmd/loc11_nhap_mon/pipeline.go` (dòng 39–65):
 
@@ -88,9 +88,9 @@ Tệp `examples/toi-noi-location/go/cmd/loc11_nhap_mon/pipeline.go` (dòng 39–
 
 Vài điểm cần nhớ khi đọc đoạn trên nếu bạn đến từ Rust:
 
-- **`go func() { ... }()`** (ở đây qua `g.Go`) khởi một goroutine; không có `JoinHandle` trả về, nên việc chờ phải dùng `WaitGroup` hoặc `errgroup`.
+- **`go func() { ... }()`** (ở đây qua `g.Go`) khởi chạy một goroutine; không có `JoinHandle` trả về, nên việc chờ phải dùng `WaitGroup` hoặc `errgroup`.
 - **Channel có đệm 64** là hàng đợi giới hạn: khi đầy, `ch1 <- ev` chặn goroutine gửi. Đây chính là backpressure ở mức nhỏ nhất, giống `mpsc::channel(64)` gọi `send().await`. Bài 13 sẽ nói vì sao ở cổng vào của ingest ta **không** muốn chặn kiểu này.
-- **Người gửi đóng channel**, không phải người nhận. `defer close(ch1)` chạy khi hàm kết thúc dù bằng `return nil` hay `return ctx.Err()`. Gửi vào channel đã đóng là panic, nên mỗi channel chỉ nên có một chủ đóng.
+- **Người gửi đóng channel**, không phải người nhận. `defer close(ch1)` chạy khi hàm kết thúc dù bằng `return nil` hay `return ctx.Err()`. Gửi vào channel đã đóng là panic, nên mỗi channel chỉ nên có một bên đóng.
 - **`select`** chờ nhiều khả năng cùng lúc. Ở đây: hoặc gửi được `ev`, hoặc `ctx.Done()` đóng. Thiếu nhánh thứ hai thì khi stage sau đã thoát, stage này kẹt vĩnh viễn ở `ch1 <- ev` (goroutine bị rò, không ai thu hồi).
 - **Biến vòng lặp** `step`, `d` được cấp mới cho mỗi vòng từ Go 1.22 (module của lab khai báo `go 1.27.1`), nên closure bên trong an toàn khi chạy sau vòng lặp. Trước 1.22 đây là một cái bẫy kinh điển.
 
@@ -136,9 +136,9 @@ Tệp `examples/toi-noi-location/go/cmd/loc11_nhap_mon/pipeline.go` (dòng 69–
 	})
 ```
 
-Bốn worker cùng đọc `ch1` (`for ev := range ch1` tự thoát khi `ch1` đóng và cạn). Các bộ đếm `seen`, `res.validated` dùng `atomic` vì nhiều goroutine cùng cộng. Còn `res.perCity`, một `map` bình thường, **không có khoá** vì chỉ goroutine ở stage 3 đụng vào nó: dữ liệu có một chủ duy nhất, những người khác gửi tin nhắn tới chủ đó qua channel. Đây là cách mà Go khuyên (chia sẻ bộ nhớ bằng cách giao tiếp, đừng giao tiếp bằng cách chia sẻ bộ nhớ), và `location-ingest` dùng đúng kiểu này: trạng thái kiểm tra của mỗi tài xế sống trong biến cục bộ của goroutine giữ kết nối đó (bài 12).
+Bốn worker cùng đọc `ch1` (`for ev := range ch1` tự thoát khi `ch1` đóng và cạn). Các bộ đếm `seen`, `res.validated` dùng `atomic` vì nhiều goroutine cùng cộng. Còn `res.perCity`, một `map` bình thường, **không có khoá** vì chỉ goroutine ở stage 3 đụng vào nó: dữ liệu có một chủ duy nhất, các goroutine khác gửi thông điệp tới goroutine sở hữu đó qua channel. Đây là cách mà Go khuyên (chia sẻ bộ nhớ bằng cách giao tiếp, đừng giao tiếp bằng cách chia sẻ bộ nhớ), và `location-ingest` dùng đúng kiểu này: trạng thái kiểm tra của mỗi tài xế sống trong biến cục bộ của goroutine giữ kết nối đó (bài 12).
 
-Một chi tiết khác với Rust: gửi con trỏ `ev` qua channel **không chuyển quyền sở hữu**. Sau `ch2 <- ev`, worker vẫn còn cầm con trỏ và compiler không cấm nó ghi tiếp. Quy ước "gửi xong là không đụng nữa" chỉ nằm trong đầu người viết, và đó là loại lỗi mà mục race detector bên dưới sinh ra để bắt.
+Một chi tiết khác với Rust: gửi con trỏ `ev` qua channel **không chuyển quyền sở hữu**. Sau `ch2 <- ev`, worker vẫn còn cầm con trỏ và trình biên dịch không cấm worker ghi tiếp. Quy ước "gửi xong là không đụng nữa" chỉ nằm trong đầu người viết, và đó là loại lỗi mà mục race detector bên dưới sinh ra để bắt.
 
 Dòng `g.Go(func() error { wg.Wait(); close(ch2); return nil })` ở giữa đáng để ý. `ch2` có bốn người gửi, nên không worker nào được tự đóng nó; một goroutine riêng chờ cả bốn xong rồi mới đóng. Đóng sớm thì worker còn lại gửi vào channel đã đóng và panic.
 
@@ -164,7 +164,7 @@ func runPipeline(timeoutMs, failAt int) result {
 	t0 := time.Now()
 ```
 
-Ba cách chạy, output thật của lab (chi tiết lệnh ở mục chạy ví dụ):
+Ba cách chạy, kết quả chạy thật của lab (chi tiết lệnh ở mục chạy ví dụ):
 
 ```text
 $ go -C examples/toi-noi-location/go run ./cmd/loc11_nhap_mon pipeline
@@ -185,7 +185,7 @@ Hai điều rút ra:
 1. **Hết hạn và lỗi đi cùng một đường.** Ở `timeout`, `context.WithTimeout` đóng `ctx.Done()` sau 40 ms; ở `fail`, worker trả lỗi ở điểm thứ 700 và `errgroup` huỷ `ctx`. Trong cả hai, stage 1 thoát qua nhánh `<-ctx.Done()` và `defer close(ch1)` đóng channel; worker thoát ở `select` của mình hoặc khi `ch1` cạn; goroutine chờ `wg.Wait()` đóng `ch2`, và stage 3 hết vòng `range` mà không hề nhìn `ctx`. `g.Wait()` trả lỗi đầu tiên để `report` phân biệt bằng `errors.Is(r.err, context.DeadlineExceeded)`. Không stage nào cần biết lý do dừng.
 2. **Số điểm đã qua mỗi stage khi bị huỷ là không xác định.** Lần `fail` có `sinh=729 kiểm=704 gom=701`: 28 điểm đã sinh mà không tới cuối, gồm 25 điểm chưa qua bước kiểm (còn trong `ch1` hoặc trong tay worker) và 3 điểm đã kiểm nhưng rơi vào nhánh `ctx.Done()` thay vì `ch2`. Số này đổi mỗi lần chạy, nên test của lab (`main_test.go`) chỉ khẳng định `generated < 10000` và có lỗi, không khẳng định một con số. Bài viết cũng không được coi số này là hằng số.
 
-So với C# thì `ctx` đóng vai `CancellationToken`, nhưng Go quy ước ctx là tham số đầu tiên của mọi hàm có thể chặn, nên không có hàm nào quên nhận tín hiệu huỷ nếu tuân thủ quy ước. Nhận `ctx` thôi chưa đủ: huỷ trong Go là hợp tác, hàm phải tự kiểm `ctx.Done()` hoặc gọi thứ có kiểm. `time.Sleep` hay một lệnh `ch <- ev` trần không dừng giữa chừng.
+So với C# thì `ctx` đóng vai `CancellationToken`, nhưng Go quy ước ctx là tham số đầu tiên của mọi hàm có thể chặn, nên không có hàm nào quên nhận tín hiệu huỷ nếu tuân thủ quy ước. Nhận `ctx` thôi chưa đủ: huỷ trong Go mang tính hợp tác, tức hàm phải tự kiểm tra `ctx.Done()` hoặc gọi hàm khác có kiểm tra. `time.Sleep` hay một lệnh `ch <- ev` trần không dừng giữa chừng.
 
 ## Data race: lỗi không báo gì
 
@@ -227,7 +227,7 @@ Chạy không có `-race`, lab in:
 race-bad: đếm được 270093, đúng phải là 800000 (mất 529907)
 ```
 
-Mất hơn một nửa mà không lỗi nào, và con số thay đổi mỗi lần chạy: đây là lần chạy duy nhất được ghi lại. Một service ghi bộ đếm kiểu này sẽ báo sai mà không ai biết. Thêm `-race`, Go chèn mã theo dõi mọi truy cập bộ nhớ và so sánh thứ tự truy cập giữa các goroutine. Báo cáo (rút gọn đường dẫn thành `...`):
+Mất hơn một nửa mà không có lỗi nào, và con số thay đổi mỗi lần chạy: đây là lần chạy duy nhất được ghi lại. Một service ghi bộ đếm kiểu này sẽ báo sai mà không ai biết. Khi thêm `-race`, Go chèn mã theo dõi mọi truy cập bộ nhớ và so sánh thứ tự truy cập giữa các goroutine. Báo cáo (rút gọn đường dẫn thành `...`):
 
 ```text
 WARNING: DATA RACE
@@ -240,11 +240,11 @@ Previous write at 0x00c0001140b8 by goroutine 14:
       .../cmd/loc11_nhap_mon/race.go:25 +0x98
 ```
 
-Báo cáo chỉ đúng dòng 25, hai goroutine liên quan, và nơi chúng được tạo. Một lần chạy `-race` khác cho `Found 2 data race(s)` (một khối đọc với ghi, một khối ghi với ghi) và `exit status 66`. Chương trình thoát mã 66, còn `go run` bọc ngoài trả mã 1; đằng nào cũng khác không, nên CI thất bại khi có race. Hai lưu ý khi dùng:
+Báo cáo chỉ ra đúng dòng 25, hai goroutine liên quan, và nơi chúng được tạo. Một lần chạy `-race` khác cho `Found 2 data race(s)` (một khối đọc với ghi, một khối ghi với ghi) và `exit status 66`. Chương trình thoát mã 66, còn `go run` bọc ngoài trả mã 1; đằng nào cũng khác không, nên CI thất bại khi có race. Hai lưu ý khi dùng:
 
-- `-race` chỉ báo race **xảy ra trong lần chạy đó**. Đường code không được test chạm tới thì không được kiểm, nên một lần chạy sạch không chứng minh là không có race. Vì vậy lab đặt `-race` cho `go test`, và test của hàng đợi, hub, ingest đều chạy với cờ này.
-- `-race` chỉ bắt truy cập bộ nhớ không đồng bộ. Lỗi logic như kiểm tra rồi hành động qua hai lần khoá riêng, deadlock hay goroutine rò đều nằm ngoài tầm của nó.
-- Tài liệu của Go ghi rằng cờ này làm tăng đáng kể bộ nhớ và thời gian chạy, nên bản dựng dùng để đo hiệu năng ở các bài sau **không** bật `-race`; nó chỉ dùng cho test và cho lab bài này.
+- `-race` chỉ báo race **xảy ra trong lần chạy đó**. Đoạn mã mà test không chạy tới thì không được kiểm tra, nên một lần chạy sạch không chứng minh là không có race. Vì vậy lab đặt `-race` cho `go test`, và test của hàng đợi, hub, ingest đều chạy với cờ này.
+- `-race` chỉ bắt truy cập bộ nhớ không được đồng bộ hoá. Lỗi logic như kiểm tra rồi hành động qua hai lần khoá riêng, deadlock hay goroutine rò đều nằm ngoài tầm của nó.
+- Tài liệu của Go ghi rằng cờ này làm tăng đáng kể bộ nhớ và thời gian chạy, nên bản dựng dùng để đo hiệu năng ở các bài sau **không** bật `-race`; cờ này chỉ dùng cho test và cho lab của bài này.
 
 Ba cách sửa, đều chạy dưới `-race` và đều ra đúng 800.000:
 
@@ -282,11 +282,11 @@ Tệp `examples/toi-noi-location/go/cmd/loc11_nhap_mon/race.go` (dòng 36–46 v
 	fmt.Printf("channel: đếm được %d, muốn %d\n", <-done, want)
 ```
 
-Mutex bảo vệ vùng tới hạn; `atomic.Int64` làm đúng một phép cộng không thể xen; channel với một goroutine sở hữu bộ đếm là cách thứ ba, và cũng là kiểu của stage 3 ở trên. Chọn thế nào cho ingest? Bộ đếm nóng như số lô, số điểm dùng `atomic`; cấu trúc nhiều trường như hàng đợi dùng mutex (bài 13); trạng thái riêng của từng kết nối thì không chia sẻ gì cả. Safe Rust chặn lỗi này ngay lúc biên dịch: `count++` từ nhiều thread không qua `Mutex` hay `Atomic*` không compile được. Đổi lại Go cho bạn goroutine rẻ và code chặn thẳng, và công cụ `-race` đủ tốt để làm chốt chặn trong CI.
+Mutex bảo vệ vùng tới hạn; `atomic.Int64` làm đúng một phép cộng không thể xen; channel với một goroutine sở hữu bộ đếm là cách thứ ba, và cũng là kiểu của stage 3 ở trên. Chọn thế nào cho ingest? Bộ đếm bị nhiều goroutine ghi liên tục, như số lô và số điểm, dùng `atomic`; cấu trúc nhiều trường như hàng đợi dùng mutex (bài 13); trạng thái riêng của từng kết nối thì không chia sẻ gì cả. Safe Rust chặn lỗi này ngay lúc biên dịch: `count++` từ nhiều thread không qua `Mutex` hay `Atomic*` sẽ không biên dịch được. Bù lại, Go cho bạn goroutine rẻ và code chặn trực tiếp, và công cụ `-race` đủ tốt để làm chốt chặn trong CI.
 
 ## Chạy ví dụ và kiểm chứng
 
-Từ gốc repository (Go 1.27.1, không cần Docker, Kafka hay mạng):
+Từ thư mục gốc của repo (Go 1.27.1, không cần Docker, Kafka hay mạng):
 
 ```bash
 go -C examples/toi-noi-location/go run ./cmd/loc11_nhap_mon pipeline
@@ -306,11 +306,11 @@ atomic:  đếm được 800000, muốn 800000
 channel: đếm được 800000, muốn 800000
 ```
 
-`pipeline` chạy dưới `-race` cũng in `sinh=10000 kiểm=10000 gom=10000` và `hoàn tất, không lỗi`. Số đếm (10.000, 800.000) tái lập được; số `270093`, `1242`, `729` thì không, vì chúng phụ thuộc cách hệ điều hành xếp lịch goroutine. Script `examples/toi-noi-location/verify-p02-go.sh` chạy lại phần này và kiểm hai điều: `race-bad` dưới `-race` phải in `WARNING: DATA RACE`, và `race-fixed` phải ra 800.000.
+`pipeline` chạy dưới `-race` cũng in `sinh=10000 kiểm=10000 gom=10000` và `hoàn tất, không lỗi`. Số đếm (10.000, 800.000) tái lập được; số `270093`, `1242`, `729` thì không, vì chúng phụ thuộc cách hệ điều hành xếp lịch goroutine. Script `examples/toi-noi-location/verify-p02-go.sh` chạy lại phần này và kiểm tra hai điều: `race-bad` dưới `-race` phải in `WARNING: DATA RACE`, và `race-fixed` phải ra 800.000.
 
 <div class="tkh-callout tkh-callout--warn">
 <span class="tkh-callout-title">Giới hạn của ví dụ</span>
-<p>Đây là bộ nhập môn, không phải lab hiệu năng: bài không đo thông lượng hay độ trễ của pipeline. Mỗi số trong bài là một lần chạy. Pipeline dùng validator ở dạng tối thiểu (từng điểm riêng lẻ, không so với điểm trước), vì validator đầy đủ cần trạng thái theo tài xế và sẽ ở bài 14. Bài cũng bỏ qua phần của Go mà ingest không cần: generics chỉ xuất hiện lúc đọc hàng đợi ở bài 13, còn interface, module và con trỏ ta sẽ gặp khi đọc code chứ không học riêng.</p>
+<p>Đây là bộ nhập môn, không phải lab hiệu năng: bài không đo thông lượng hay độ trễ của pipeline. Mỗi số trong bài là kết quả của một lần chạy. Pipeline dùng validator ở dạng tối thiểu (từng điểm riêng lẻ, không so với điểm trước), vì validator đầy đủ cần trạng thái theo tài xế và sẽ ở bài 14. Bài cũng bỏ qua phần của Go mà ingest không cần: generics chỉ xuất hiện lúc đọc hàng đợi ở bài 13, còn interface, module và con trỏ ta sẽ gặp khi đọc code chứ không học riêng.</p>
 </div>
 
 ## Bài tập
@@ -319,11 +319,11 @@ channel: đếm được 800000, muốn 800000
 
 <details><summary>Xem lời giải</summary><p>Có bốn worker cùng gửi vào <code>ch2</code>. Worker xong đầu tiên đóng channel; ba worker còn lại tiếp tục <code>ch2 &lt;- ev</code> vào channel đã đóng và chương trình panic (<code>send on closed channel</code>). Quy tắc: channel có nhiều người gửi thì phải có một bên thứ ba biết tất cả đã gửi xong mới đóng. Goroutine chờ <code>wg.Wait()</code> chính là bên thứ ba đó.</p></details>
 
-**Bài 2.** Thay `count++` trong `raceBad` bằng `atomic.AddInt64` trên biến `int64` thì có đủ để `-race` im lặng và kết quả đúng không? Còn nếu mỗi goroutine tự giữ một biến cục bộ rồi cuối cùng cộng tổng, thì sao?
+**Bài 2.** Thay `count++` trong `raceBad` bằng `atomic.AddInt64` trên biến `int64` thì có đủ để `-race` không báo gì và kết quả đúng không? Còn nếu mỗi goroutine tự giữ một biến cục bộ rồi cuối cùng cộng tổng, thì sao?
 
-<details><summary>Xem lời giải</summary><p>Cả hai đều đúng và không có race. <code>atomic.AddInt64</code> làm đọc-cộng-ghi thành một thao tác không thể xen, nên kết quả 800.000. Cách thứ hai tránh chia sẻ ngay từ đầu: mỗi goroutine cộng vào biến riêng (không race), rồi gom các tổng riêng sau khi <code>wg.Wait()</code> hoặc qua channel. Cách thứ hai thường nhanh hơn vì không có truy cập chung nào, nhưng bài không đo nên đây là lập luận chứ không phải số liệu. Phải tự chạy rồi mới kết luận.</p></details>
+<details><summary>Xem lời giải</summary><p>Cả hai đều đúng và không có race. <code>atomic.AddInt64</code> biến chuỗi đọc-cộng-ghi thành một thao tác không thể xen, nên kết quả 800.000. Cách thứ hai tránh chia sẻ ngay từ đầu: mỗi goroutine cộng vào biến riêng (không race), rồi gom các tổng riêng sau khi <code>wg.Wait()</code> hoặc qua channel. Cách thứ hai thường nhanh hơn vì không có truy cập chung nào, nhưng bài không đo nên đây là lập luận chứ không phải số liệu. Phải tự chạy rồi mới kết luận.</p></details>
 
-**Bài 3.** Trong `runPipeline`, stage 1 có `case <-ctx.Done(): return ctx.Err()`. Bỏ nhánh này và để chỉ có `ch1 <- ev` thì kịch bản `fail` kết thúc ra sao?
+**Bài 3.** Trong `runPipeline`, stage 1 có `case <-ctx.Done(): return ctx.Err()`. Bỏ nhánh này và chỉ giữ lại `ch1 <- ev` thì kịch bản `fail` kết thúc ra sao?
 
 <details><summary>Xem lời giải</summary><p>Khi worker báo lỗi và thoát, các worker còn lại cũng thoát qua <code>ctx.Done()</code> nên không còn ai đọc <code>ch1</code>. Stage 1 gửi tiếp cho tới khi đệm 64 đầy rồi kẹt vĩnh viễn ở <code>ch1 &lt;- ev</code>; <code>g.Wait()</code> không bao giờ trả về vì chờ stage 1. Chương trình treo thay vì dừng. Đây là lý do mọi thao tác gửi hay nhận có thể chặn đều phải đi cùng <code>select</code> với <code>ctx.Done()</code>.</p></details>
 

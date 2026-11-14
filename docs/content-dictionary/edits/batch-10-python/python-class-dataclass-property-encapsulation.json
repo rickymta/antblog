@@ -1,0 +1,119 @@
+{
+"file": "python-class-dataclass-property-encapsulation.md",
+"edits": [
+{
+"old": "với advance() từ chối chuyển sai.",
+"new": "với advance() từ chối chuyển trạng thái không hợp lệ.",
+"reason": "\"chuyển sai\" cụt, thiếu danh từ",
+"severity": "medium"
+},
+{
+"old": "thì không còn biết dòng nào gây ra.",
+"new": "thì không còn biết dòng nào gây ra lỗi.",
+"reason": "thiếu tân ngữ, phải đoán ý",
+"severity": "medium"
+},
+{
+"old": "Code trong `main.py` của lab 11.",
+"new": "Đó là code trong `main.py` của lab 11.",
+"reason": "câu cụt, thiếu chủ ngữ và động từ",
+"severity": "medium"
+},
+{
+"old": "Class thường cũng cho hai điều bất ngờ:",
+"new": "Class thường còn có hai hành vi gây bất ngờ:",
+"reason": "\"cho hai điều\" là giọng dịch máy",
+"severity": "medium"
+},
+{
+"old": "là phần dễ sai nhất mà chẳng có nghiệp vụ gì.",
+"new": "là phần dễ sai nhất nhưng không chứa nghiệp vụ nào.",
+"reason": "câu gượng",
+"severity": "medium"
+},
+{
+"old": "Khác biệt là `driver_id` và `status` nằm sau property nên chúng không nhận từ constructor:",
+"new": "Khác biệt là `driver_id` và `status` được truy cập qua property nên constructor không nhận hai trường này:",
+"reason": "\"nằm sau property\" gượng, câu thiếu chủ ngữ cho vế sau",
+"severity": "high"
+},
+{
+"old": "không bị kiểm lúc chạy;",
+"new": "không bị kiểm tra lúc chạy;",
+"reason": "\"kiểm\" cụt",
+"severity": "medium"
+},
+{
+"old": "giải thích cách có đối tượng hash được bằng `frozen=True`.",
+"new": "giải thích cách tạo đối tượng hash được bằng `frozen=True`.",
+"reason": "\"cách có đối tượng\" gượng",
+"severity": "medium"
+},
+{
+"old": "Nó phục vụ hai việc trong `Trip`:",
+"new": "Decorator này phục vụ hai việc trong `Trip`:",
+"reason": "\"Nó\" đầu câu chỉ sự vật trừu tượng",
+"severity": "medium"
+},
+{
+"old": "`status` là **lối đọc chỉ đọc** vào `_status`.",
+"new": "`status` là **lối truy cập chỉ đọc** tới `_status`.",
+"reason": "\"lối đọc chỉ đọc\" lặp từ",
+"severity": "medium"
+},
+{
+"old": "được hỗ trợ bởi cấu trúc: không có setter,",
+"new": "và được cấu trúc code hỗ trợ: không có setter,",
+"reason": "bị động kiểu tiếng Anh",
+"severity": "low"
+},
+{
+"old": "Chuyển sang `cancelled` ghi nhận ở đây là một bước thường như các bước khác;",
+"new": "Việc chuyển sang `cancelled` được ghi nhận ở đây như một bước thường, giống các bước khác;",
+"reason": "câu thiếu chủ ngữ rõ ràng",
+"severity": "medium"
+},
+{
+"old": "con số này của một cấu hình cụ thể",
+"new": "con số này đo trên một cấu hình cụ thể",
+"reason": "\"con số này của\" cụt",
+"severity": "medium"
+},
+{
+"old": "như `weakref` phải xin riêng.",
+"new": "như `weakref` phải khai báo riêng.",
+"reason": "\"xin riêng\" là calque",
+"severity": "low"
+},
+{
+"old": "khi số lượng đối tượng nhỏ lên tới hàng triệu.",
+"new": "khi có tới hàng triệu đối tượng nhỏ.",
+"reason": "\"nhỏ lên tới\" mơ hồ, khó hiểu",
+"severity": "high"
+},
+{
+"old": "`advance` từ chối chuyển sai và nhận chuyến thiếu tài xế, và đối tượng giữ nguyên.",
+"new": "`advance` từ chối bước chuyển sai và việc nhận chuyến thiếu tài xế, còn đối tượng giữ nguyên.",
+"reason": "câu thiếu danh từ, lặp \"và\"",
+"severity": "medium"
+},
+{
+"old": "các ca từ chối ở `__post_init__`)",
+"new": "các test case từ chối ở `__post_init__`)",
+"reason": "thống nhất test case",
+"severity": "low"
+},
+{
+"old": "Việc thay đồng hồ bằng đối tượng tiêm vào được là chủ đề bài 14.",
+"new": "Việc dùng đồng hồ được inject là chủ đề của bài 14.",
+"reason": "\"tiêm vào\" là dịch từng chữ của inject",
+"severity": "medium"
+},
+{
+"old": "Nó chỉ trả lời về <i>bảng chuyển</i>,",
+"new": "Hàm này chỉ trả lời về <i>bảng chuyển</i>,",
+"reason": "\"Nó\" đầu câu mơ hồ",
+"severity": "medium"
+}
+]
+}

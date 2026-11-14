@@ -8,9 +8,9 @@ tags: [python, toi-noi, collections, dict]
 language: vi
 ---
 
-Điều phối của [Tới Nơi](/articles/du-an-mau-toi-noi) cần trả lời bốn câu hỏi nhỏ trong vài mili-giây: chuyến nào đang chờ, tài xế `DR-002` là ai, tài xế nào vừa đang online vừa đủ điều kiện nhận chuyến, và chuyến nào được gán trước. Cả bốn đều là "một đống phần tử", nhưng mỗi câu cần một cấu trúc dữ liệu khác nhau.
+Điều phối của [Tới Nơi](/articles/du-an-mau-toi-noi) cần trả lời bốn câu hỏi nhỏ trong vài mili-giây: chuyến nào đang chờ, tài xế `DR-002` là ai, tài xế nào vừa online vừa đủ điều kiện nhận chuyến, và chuyến nào được gán trước. Cả bốn đều là «một đống phần tử», nhưng mỗi câu cần một cấu trúc dữ liệu khác nhau.
 
-Đây là bài 05 của lộ trình **Python cơ bản qua Tới Nơi**. Bạn đã biết hàm, vòng lặp và điều kiện từ bài 03; hôm nay ta gom dữ liệu vào bốn cấu trúc dựng sẵn của Python, nhìn rõ cái giá của từng cấu trúc, rồi dừng lại ở một cái bẫy kinh điển: hai tên cùng trỏ vào một list. Ai đã đọc bài C# về [generics và collections](/articles/csharp-generics-collections) sẽ thấy bốn lựa chọn quen thuộc (`List`, `Dictionary`, `HashSet`, `Queue`), nhưng cách Python làm khác ở vài chỗ quan trọng.
+Đây là bài 05 của lộ trình **Python cơ bản qua Tới Nơi**. Bạn đã biết hàm, vòng lặp và điều kiện từ bài 03; hôm nay ta gom dữ liệu vào bốn cấu trúc có sẵn của Python, nhìn rõ cái giá của từng cấu trúc, rồi dừng lại ở một cái bẫy kinh điển: hai tên cùng trỏ vào một list. Ai đã đọc bài C# về [generics và collections](/articles/csharp-generics-collections) sẽ thấy bốn lựa chọn quen thuộc (`List`, `Dictionary`, `HashSet`, `Queue`), nhưng cách Python làm khác ở vài chỗ quan trọng.
 
 <div class="tkh-callout tkh-callout--example">
 <span class="tkh-callout-title">Thử trước khi đọc</span>
@@ -20,7 +20,7 @@ language: vi
 
 ## Bốn thao tác, bốn cấu trúc
 
-Chọn cấu trúc bắt đầu từ thao tác chính, không phải từ thói quen. Cần giữ thứ tự và lấy theo vị trí: **list**. Cần tìm theo mã: **dict**. Cần biết «đã có chưa» và loại trùng: **set**. Cần lấy từ đầu hàng ra: **deque**. Còn **tuple** là bản ghi nhỏ bất biến, dùng làm khoá ghép hoặc gói vài giá trị đi cùng nhau; nó không phải thao tác thứ năm mà là cách đóng gói dữ liệu cho bốn cấu trúc kia. Cho cả bốn dùng chung list thì ở 6 phần tử vẫn chạy đúng, nhưng với 25.000 tài xế online thì mỗi lần «tìm tài xế theo mã» quét cả list sẽ chậm rõ rệt.
+Chọn cấu trúc bắt đầu từ thao tác chính, không phải từ thói quen. Cần giữ thứ tự và lấy theo vị trí: **list**. Cần tìm theo mã: **dict**. Cần biết «đã có chưa» và loại trùng: **set**. Cần lấy từ đầu hàng ra: **deque**. Còn **tuple** là bản ghi nhỏ bất biến, dùng làm khoá ghép hoặc gói vài giá trị đi cùng nhau; nó không phải thao tác thứ năm mà là cách đóng gói dữ liệu cho bốn cấu trúc kia. Nếu dùng list cho cả bốn việc thì ở 6 phần tử vẫn chạy đúng, nhưng với 25.000 tài xế online thì mỗi lần «tìm tài xế theo mã» quét cả list sẽ chậm rõ rệt.
 
 <figure class="tkh-fig">
 <div class="tkh-fig-box">
@@ -29,7 +29,7 @@ Chọn cấu trúc bắt đầu từ thao tác chính, không phải từ thói 
 <figcaption>Hình 1. Bốn cấu trúc chạy song song theo bốn thao tác chính, không phải một chuỗi biến đổi từ cấu trúc này sang cấu trúc khác.</figcaption>
 </figure>
 
-Bảng sau tóm tắt cái giá của từng thao tác. Các độ phức tạp là trung bình theo tài liệu và cách cài đặt phổ biến của CPython, đủ để chọn đúng cấu trúc; không phải cam kết cho mọi phiên bản hay mọi dữ liệu.
+Bảng sau tóm tắt cái giá của từng thao tác. Các độ phức tạp ở đây là giá trị trung bình, theo tài liệu và cách cài đặt phổ biến của CPython, đủ để chọn đúng cấu trúc; không phải cam kết cho mọi phiên bản hay mọi dữ liệu.
 
 | Cấu trúc | Thao tác phù hợp | Cái giá |
 | --- | --- | --- |
@@ -71,13 +71,13 @@ queue_view.insert(0, "TN-0000")  # chèn đầu: dịch cả list
 by_fare = [t.id for t in sorted(TRIPS, key=lambda t: (-t.fare, t.id))]
 ```
 
-`sorted` trả về list mới, còn `list.sort()` sắp xếp tại chỗ và trả `None`. Tham số `key` nhận một hàm trả về giá trị để so sánh. Ở đây khoá `(-t.fare, t.id)` là một tuple: cước giảm dần, hai chuyến cùng cước thì mã tăng dần. Kết quả thật của lab:
+`sorted` trả về list mới, còn `list.sort()` sắp xếp tại chỗ và trả `None`. Tham số `key` nhận một hàm trả về giá trị để so sánh. Ở đây khoá `(-t.fare, t.id)` là một tuple: cước giảm dần, hai chuyến cùng cước thì mã tăng dần. Kết quả chạy thật của lab:
 
 ```text
 theo cước  : ['TN-0001', 'TN-0004', 'TN-0003', 'TN-0006', 'TN-0002', 'TN-0005']
 ```
 
-Tuple khác list ở chỗ không thêm, bớt hay gán lại phần tử được. Gán `pickup[0] = 0.0` cho tuple ném `TypeError`. Bất biến này đem lại ba lợi ích: một bản ghi không bị sửa nhầm ở nơi khác, tuple hash được nên dùng làm khoá dict, và đọc code biết ngay đây là "một bộ giá trị cố định". Unpack giúp đọc tuple gọn:
+Tuple khác list ở chỗ không thể thêm, bớt hay gán lại phần tử. Gán `pickup[0] = 0.0` cho tuple ném `TypeError`. Bất biến này đem lại ba lợi ích: một bản ghi không bị sửa nhầm ở nơi khác, tuple hash được nên dùng làm khoá dict, và đọc code biết ngay đây là "một bộ giá trị cố định". Unpack (tách phần tử) giúp đọc tuple gọn hơn:
 
 ```python
 trip_id, city, *_rest = TRIPS[0]   # 'TN-0001', 'SG'; *_rest nhận phần còn lại
@@ -89,7 +89,7 @@ for t in TRIPS:
     by_city_service[key] = by_city_service.get(key, 0) + 1
 ```
 
-Python không ép kiểu phần tử như `List<string>` của C#: một list có thể trộn `str` và `int`. Gợi ý kiểu như `list[str]` giúp trình kiểm tra tĩnh (mypy, ta học ở bài 12) và người đọc, nhưng interpreter không chặn khi bạn thêm sai kiểu lúc chạy.
+Python không ép kiểu phần tử như `List<string>` của C#: một list có thể trộn `str` và `int`. Type hint như `list[str]` giúp trình kiểm tra tĩnh (mypy, ta học ở bài 12) và người đọc, nhưng interpreter không chặn khi bạn thêm sai kiểu lúc chạy.
 
 ## Dict và set: tìm theo khoá, hỏi «có không»
 
@@ -107,7 +107,7 @@ shifts.setdefault("DR-001", []).append("chiều")   # khóa đã có: không t�
 pairs = [(code, d["city"]) for code, d in DRIVERS.items()]
 ```
 
-`setdefault` lấy giá trị nếu khoá có, còn chưa có thì chèn giá trị mặc định rồi trả về. Chú ý rằng đối số mặc định `[]` được tạo mỗi lần gọi dù khoá đã có; với giá trị đắt, dùng `defaultdict` ở mục sau. Lab in:
+`setdefault` lấy giá trị nếu khoá có, còn chưa có thì chèn giá trị mặc định rồi trả về. Chú ý rằng đối số mặc định `[]` được tạo mỗi lần gọi dù khoá đã có; với giá trị tốn kém khi tạo, dùng `defaultdict` ở mục sau. Lab in:
 
 ```text
 setdefault : {'DR-001': ['sáng', 'chiều']} | thứ tự: ['DR-001', 'DR-002', 'DR-003']
@@ -125,7 +125,7 @@ sorted(online - eligible)   # ['DR-001']                  online nhưng chưa đ
 sorted(online ^ eligible)   # ['DR-001', 'DR-003']        đúng một trong hai
 ```
 
-Ta luôn bọc kết quả bằng `sorted()` khi in, vì thứ tự duyệt set không được ngôn ngữ đảm bảo (với chuỗi, nó còn thay đổi giữa các lần chạy do băm chuỗi được xáo ngẫu nhiên). Đừng viết logic phụ thuộc thứ tự một set. Lợi thế lớn của set là `x in s` trung bình O(1). Lab có chế độ `--bench`; trên máy tác giả, tìm phần tử cuối của 20.000 mã 500 lần mất khoảng 83 ms với list và khoảng 0,016 ms với set (số đo thay đổi theo máy, chỉ nên đọc theo tỷ lệ).
+Ta luôn bọc kết quả bằng `sorted()` khi in, vì thứ tự duyệt set không được ngôn ngữ đảm bảo (với chuỗi, nó còn thay đổi giữa các lần chạy do băm chuỗi được xáo ngẫu nhiên). Đừng viết logic phụ thuộc vào thứ tự của một set. Lợi thế lớn của set là `x in s` trung bình O(1). Lab có chế độ `--bench`; trên máy tác giả, tìm phần tử cuối của 20.000 mã 500 lần mất khoảng 83 ms với list và khoảng 0,016 ms với set (kết quả đo thay đổi theo máy, chỉ nên đọc theo tỷ lệ).
 
 ## Mutability, alias và hashability
 
@@ -137,7 +137,7 @@ Hai khái niệm này giải thích phần lớn lỗi «sao dữ liệu tự đ
 <div class="tkh-fig-box">
 <svg viewBox="0 0 880 250" role="img" aria-label="Hai tên a và b cùng trỏ vào một đối tượng list chứa TN-0001, TN-0002 và TN-0003; không có list thứ hai."><defs><marker id="py05-1-arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10 z" class="f-pk"/></marker></defs><rect x="40" y="35" width="170" height="64" rx="10" class="f-pk-soft s-pk"/><text x="58" y="62" class="t-b t-mono">a</text><text x="58" y="82" class="t-small">tên (biến)</text><rect x="40" y="145" width="170" height="64" rx="10" class="f-pk-soft s-pk"/><text x="58" y="172" class="t-b t-mono">b = a</text><text x="58" y="192" class="t-small">chỉ thêm một tên</text><path d="M210 67 L450 105" class="f-none s-pk" stroke-width="2" marker-end="url(#py05-1-arrow)"/><path d="M210 177 L450 140" class="f-none s-pk" stroke-width="2" marker-end="url(#py05-1-arrow)"/><rect x="455" y="70" width="380" height="100" rx="10" class="f-warn-soft s-warn"/><text x="473" y="98" class="t-b">một đối tượng list</text><text x="473" y="124" class="t-mono">["TN-0001", "TN-0002", "TN-0003"]</text><text x="473" y="150" class="t-small">b.append("TN-0003") làm đổi cái nhìn qua a</text><text x="455" y="205" class="t-small">Bản sao thật cần: a.copy() hoặc copy.deepcopy(a)</text></svg>
 </div>
-<figcaption>Hình 2. Alias: hai tên, một list. Hộp có viền đậm đánh dấu chỗ phải trả giá, nơi một sửa đổi ảnh hưởng mọi tên đang trỏ tới.</figcaption>
+<figcaption>Hình 2. Alias: hai tên, một list. Hộp có viền đậm đánh dấu chỗ phải trả giá, nơi một lần sửa đổi ảnh hưởng đến mọi tên đang trỏ tới.</figcaption>
 </figure>
 
 `copy()` làm bản sao nông: lớp ngoài mới, phần tử bên trong vẫn dùng chung. Với dict chứa list, bản sao nông và bản gốc vẫn chia sẻ list bên trong; `copy.deepcopy` sao chép toàn bộ đồ thị đối tượng.
@@ -156,7 +156,7 @@ deep["trips"].append("TN-0009")     # original không đổi
 
 Đầu ra thật: `original_trips: ['TN-0001', 'TN-0003']`, `shallow_shares: True`, `deep_shares: False`. Một cái bẫy cùng họ là tham số mặc định mutable như `def f(x=[])`: list mặc định được tạo một lần và dùng chung cho mọi lần gọi. C# cũng có alias với kiểu tham chiếu như `List<T>`; Python làm điều đó với mọi đối tượng, kể cả khi bạn không để ý.
 
-**Hashability.** Dict và set cần băm khoá để tìm trong O(1). Một đối tượng hash được khi giá trị băm không đổi trong suốt đời nó; vì vậy list, dict, set (sửa được) không hash được, còn str, số, tuple chứa toàn phần tử hash được thì có. Ngay cả tuple cũng thất bại khi bên trong có list:
+**Hashability.** Dict và set cần băm khoá để tìm trong O(1). Một đối tượng hash được khi giá trị băm không đổi trong suốt vòng đời của nó; vì vậy list, dict, set (sửa được) không hash được, còn str, số, tuple chứa toàn phần tử hash được thì có. Ngay cả tuple cũng không hash được khi bên trong có list:
 
 ```text
 {'tuple': True, 'str': True, 'list': False, 'tuple_with_list': False}
@@ -166,7 +166,7 @@ deep["trips"].append("TN-0009")     # original không đổi
 
 ## `collections`: đếm, gom và xếp hàng
 
-Ba công cụ trong module `collections` giải bài toán nào cũng gặp ở Tới Nơi. **`Counter`** đếm phần tử, khoá vắng trả `0` thay vì `KeyError`. **`defaultdict(list)`** tự tạo list rỗng khi gặp khoá mới, thay cho mẫu `setdefault`. **`deque`** là hàng đợi hai đầu, `popleft()` O(1).
+Ba công cụ trong module `collections` giải những bài toán lúc nào cũng gặp ở Tới Nơi. **`Counter`** đếm phần tử, khoá vắng trả `0` thay vì `KeyError`. **`defaultdict(list)`** tự tạo list rỗng khi gặp khoá mới, thay cho mẫu `setdefault`. **`deque`** là hàng đợi hai đầu, `popleft()` O(1).
 
 ```python
 per_city = Counter(t.city for t in TRIPS)     # đếm chuyến theo thành phố
@@ -199,11 +199,11 @@ served      : ['TN-0005', 'TN-0006']
 
 Mọi cấu trúc trong bài chỉ sống trong RAM của một process. Tắt chương trình là mất hết. Không có transaction: nếu chương trình dừng giữa lúc đã thêm chuyến vào `trips` nhưng chưa cập nhật `by_driver`, hai cấu trúc lệch nhau và không ai rollback. Hai process (hai worker) mỗi bên có tập `online` riêng và không thấy dữ liệu của nhau, nên có thể cùng giao một chuyến cho hai tài xế.
 
-Vì thế `set` chống trùng trong bài chưa phải idempotency. Chống xử lý trùng cho thanh toán cần khoá lưu bền và ràng buộc unique của database (loạt PostgreSQL của blog). Hàng đợi `deque` cũng chưa có xác nhận (ack) hay giao lại sau khi crash; hệ thống thật dùng hàng đợi bền có ack như RabbitMQ, hoặc Kafka (một log commit theo offset, nơi consumer tự quản vị trí đọc). Ví dụ ở đây dùng 6 chuyến và một luồng thực thi để học cú pháp, không phải thiết kế kho dữ liệu cho 25.000 tài xế online.
+Vì thế `set` chống trùng trong bài chưa phải là idempotency (xử lý lặp không đổi kết quả). Chống xử lý trùng cho thanh toán cần khoá lưu bền và ràng buộc unique của database (loạt PostgreSQL của blog). Hàng đợi `deque` cũng chưa có xác nhận (ack) hay giao lại sau khi crash; hệ thống thật dùng hàng đợi bền có ack như RabbitMQ, hoặc Kafka (một log commit theo offset, nơi consumer tự quản vị trí đọc). Ví dụ ở đây dùng 6 chuyến và một luồng thực thi để học cú pháp, không phải thiết kế kho dữ liệu cho 25.000 tài xế online.
 
 | Hiện tượng | Kiểm tra trước |
 | --- | --- |
-| Sửa một list mà list khác cũng đổi | Có phải `b = a`, hoặc `copy()` nông với list lồng nhau; đổi sang `deepcopy` hoặc dựng cấu trúc mới |
+| Sửa một list mà list khác cũng đổi | Có phải do `b = a`, hoặc do `copy()` nông với list lồng nhau; đổi sang `deepcopy` hoặc dựng cấu trúc mới |
 | `TypeError: unhashable type: 'list'` | Đang dùng list/dict/set làm khoá hoặc phần tử set; đổi sang tuple hoặc chuỗi |
 | `KeyError` khi tra tài xế | Dùng `d[key]` với khoá vắng; chọn `.get()` nếu vắng là bình thường |
 | Thứ tự in của set thay đổi giữa các lần chạy | Set không đảm bảo thứ tự; dùng `sorted(s)` khi cần in |

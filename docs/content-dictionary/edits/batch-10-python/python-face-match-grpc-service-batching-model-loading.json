@@ -1,0 +1,281 @@
+{
+ "file": "python-face-match-grpc-service-batching-model-loading.md",
+ "edits": [
+  {
+   "old": "deadline hai đầu, hàng chờ có giới hạn",
+   "new": "deadline ở cả hai đầu, hàng chờ có giới hạn",
+   "reason": "Thiếu từ nối",
+   "severity": "low"
+  },
+  {
+   "old": "Số đo thật kèm tải máy.",
+   "new": "Số liệu đo thật kèm tải máy.",
+   "reason": "Cách nói gượng",
+   "severity": "low"
+  },
+  {
+   "old": "Service kyc-face viết bằng Python làm bước này",
+   "new": "Service kyc-face, viết bằng Python, đảm nhận bước này",
+   "reason": "Câu lủng củng",
+   "severity": "low"
+  },
+  {
+   "old": "Điều đó đổi ba câu hỏi:",
+   "new": "Điều đó đặt ra ba câu hỏi:",
+   "reason": "Dịch gượng",
+   "severity": "high"
+  },
+  {
+   "old": "khi client bỏ đi thì việc đã chạy trên thread ra sao",
+   "new": "khi client bỏ đi thì phần việc đang chạy trên thread ra sao",
+   "reason": "Câu cụt",
+   "severity": "medium"
+  },
+  {
+   "old": "Bài kế thừa deadline",
+   "new": "Bài này kế thừa deadline",
+   "reason": "Thiếu chủ ngữ",
+   "severity": "low"
+  },
+  {
+   "old": "Lab đếm đúng ca này:",
+   "new": "Lab đếm đúng trường hợp này:",
+   "reason": "Dùng từ thông thường thay cho ca",
+   "severity": "medium"
+  },
+  {
+   "old": "phải chặn việc phí",
+   "new": "phải chặn việc lãng phí",
+   "reason": "Cụm cụt",
+   "severity": "medium"
+  },
+  {
+   "old": "kiểm định dạng và kích thước trước khi giải mã điểm ảnh",
+   "new": "kiểm tra định dạng và kích thước trước khi giải mã điểm ảnh",
+   "reason": "Dễ hiểu nhầm kiểm định/dạng",
+   "severity": "medium"
+  },
+  {
+   "old": "đổi căn chỉnh hay tiền xử lý thì không.",
+   "new": "đổi căn chỉnh hay tiền xử lý thì không so được.",
+   "reason": "Câu thiếu vị ngữ",
+   "severity": "medium"
+  },
+  {
+   "old": "và chỗ cuối cùng nó không rời đi được nữa: khi thread đã chạy.",
+   "new": "và điểm cuối cùng mà từ đó nó không rời đi được nữa: khi thread đã chạy.",
+   "reason": "Câu cụt",
+   "severity": "medium"
+  },
+  {
+   "old": "Nó chạy thử đúng hai cỡ batch",
+   "new": "Warm-up chạy thử đúng hai cỡ batch",
+   "reason": "Nó mơ hồ ở đầu câu",
+   "severity": "medium"
+  },
+  {
+   "old": "Thứ đo rõ là ảnh hỏng, trong tiến trình con mới:",
+   "new": "Thứ đo được rõ ràng là thời gian xử lý ảnh hỏng trong một tiến trình con mới:",
+   "reason": "Câu thiếu danh từ",
+   "severity": "medium"
+  },
+  {
+   "old": "Future còn treo khi worker bị huỷ được giải bằng",
+   "new": "Future còn treo khi worker bị huỷ sẽ được hoàn tất với",
+   "reason": "Dịch máy của resolved",
+   "severity": "medium"
+  },
+  {
+   "old": "Ca kiểm bắt đầu tắt khi một lời gọi 400 ms đang chạy:",
+   "new": "Test case này bắt đầu tắt server khi một lời gọi 400 ms đang chạy:",
+   "reason": "Thống nhất test case",
+   "severity": "medium"
+  },
+  {
+   "old": "đặt tất cả hoặc không cái nào, vì một",
+   "new": "hoặc đặt tất cả, hoặc không đặt cái nào, vì một",
+   "reason": "Câu cụt",
+   "severity": "medium"
+  },
+  {
+   "old": "lúc kiểm chỗ và lúc đặt",
+   "new": "lúc kiểm tra chỗ và lúc đặt",
+   "reason": "Thiếu chữ tra",
+   "severity": "low"
+  },
+  {
+   "old": "Cửa sổ chờ đổi độ trễ lấy thông lượng. Nó sinh lợi",
+   "new": "Cửa sổ chờ đánh đổi độ trễ lấy thông lượng. Cách này sinh lợi",
+   "reason": "Nó mơ hồ ở đầu câu",
+   "severity": "medium"
+  },
+  {
+   "old": "để kiểm bền khi máy bận",
+   "new": "để phép kiểm vẫn ổn định khi máy bận",
+   "reason": "Cụm tự ghép",
+   "severity": "medium"
+  },
+  {
+   "old": "số CPU chỉ đọc theo bậc độ lớn",
+   "new": "các số đo trên CPU chỉ đọc được theo bậc độ lớn",
+   "reason": "Cụm cụt",
+   "severity": "medium"
+  },
+  {
+   "old": "Với thread suy luận có bốn trường hợp, dựng bằng",
+   "new": "Với thread suy luận, ta có bốn trường hợp, dựng bằng",
+   "reason": "Câu thiếu chủ ngữ",
+   "severity": "medium"
+  },
+  {
+   "old": "## Deadline hai đầu, hàng chờ đầy",
+   "new": "## Deadline ở cả hai đầu, hàng chờ đầy",
+   "reason": "Thiếu từ nối",
+   "severity": "low"
+  },
+  {
+   "old": "Ca (a): B xếp hàng sau A",
+   "new": "Trường hợp (a): B xếp hàng sau A",
+   "reason": "Dùng từ thông thường thay cho ca",
+   "severity": "medium"
+  },
+  {
+   "old": "Ca (b) là câu hỏi đầu bài",
+   "new": "Trường hợp (b) là câu hỏi đầu bài",
+   "reason": "Dùng từ thông thường thay cho ca",
+   "severity": "medium"
+  },
+  {
+   "old": "Ca (c): ngân sách",
+   "new": "Trường hợp (c): ngân sách",
+   "reason": "Dùng từ thông thường thay cho ca",
+   "severity": "medium"
+  },
+  {
+   "old": "Ca (d) thử riêng batcher",
+   "new": "Trường hợp (d) thử riêng batcher",
+   "reason": "Dùng từ thông thường thay cho ca",
+   "severity": "medium"
+  },
+  {
+   "old": "Mốc tuyệt đối đó đổi từ",
+   "new": "Mốc tuyệt đối đó được quy đổi từ",
+   "reason": "Thiếu động từ rõ nghĩa",
+   "severity": "high"
+  },
+  {
+   "old": "nên thấy chỉ còn 1 chỗ vẫn bị từ chối",
+   "new": "nên nếu chỉ còn 1 chỗ thì vẫn bị từ chối",
+   "reason": "Câu cụt",
+   "severity": "medium"
+  },
+  {
+   "old": "cũng giữ hàng cho các lời gọi",
+   "new": "cũng giữ hàng chờ cho các lời gọi",
+   "reason": "Thiếu danh từ",
+   "severity": "low"
+  },
+  {
+   "old": "với hai cơ chế làm lời gọi bị",
+   "new": "cùng hai cơ chế khiến lời gọi bị",
+   "reason": "Câu gượng",
+   "severity": "medium"
+  },
+  {
+   "old": "đến nhanh hơn event loop nhận chúng ra khỏi lõi",
+   "new": "đến nhanh hơn tốc độ event loop lấy chúng ra khỏi lõi",
+   "reason": "Câu thiếu danh từ",
+   "severity": "low"
+  },
+  {
+   "old": "Dấu khác nhau:",
+   "new": "Hai cơ chế để lại dấu khác nhau:",
+   "reason": "Câu cụt",
+   "severity": "medium"
+  },
+  {
+   "old": "Cấu hình hai (hàng chờ 5.000): hết",
+   "new": "Cấu hình hai (hàng chờ 5.000): không còn",
+   "reason": "Cách nói gượng",
+   "severity": "medium"
+  },
+  {
+   "old": "40.000): hết",
+   "new": "40.000): không còn",
+   "reason": "Cách nói gượng",
+   "severity": "medium"
+  },
+  {
+   "old": "nâng ngưỡng chỉ đổi chỗ chờ",
+   "new": "nâng ngưỡng chỉ làm lời gọi chuyển sang chờ ở chỗ khác",
+   "reason": "Câu cụt",
+   "severity": "medium"
+  },
+  {
+   "old": "Số đổi mỗi lần chạy, ở tải",
+   "new": "Số liệu đổi mỗi lần chạy, ở tải",
+   "reason": "Câu cụt",
+   "severity": "medium"
+  },
+  {
+   "old": "không do mình huỷ như một dạng quá tải và lùi dần, và giữ tổng số lời gọi đang bay (cộng mọi client) dưới sức server",
+   "new": "mà chính mình không huỷ như một dạng quá tải, rồi lùi dần, đồng thời giữ tổng số lời gọi đang bay (cộng mọi client) dưới sức chịu tải của server",
+   "reason": "Câu dài, khó hiểu",
+   "severity": "high"
+  },
+  {
+   "old": "chỉ để hiểu cơ chế: nó đẩy lời gọi",
+   "new": "chỉ để hiểu cơ chế: việc này chuyển lời gọi",
+   "reason": "Nó mơ hồ, calque đẩy",
+   "severity": "medium"
+  },
+  {
+   "old": "Cuối cùng, cái giá của suy luận chạy ngay trên event loop.",
+   "new": "Cuối cùng là cái giá của việc chạy suy luận ngay trên event loop.",
+   "reason": "Câu thiếu vị ngữ",
+   "severity": "medium"
+  },
+  {
+   "old": "luôn thêm CPU cuối làm đường lùi",
+   "new": "luôn thêm CPU vào cuối danh sách làm đường lùi",
+   "reason": "Câu cụt",
+   "severity": "medium"
+  },
+  {
+   "old": "chỉ kiểm bất biến: file sinh khớp",
+   "new": "chỉ kiểm tra bất biến: file sinh ra khớp",
+   "reason": "Thiếu chữ tra, cụm cụt",
+   "severity": "medium"
+  },
+  {
+   "old": "mã lỗi mỗi loại đầu vào sai",
+   "new": "mã lỗi cho từng loại đầu vào sai",
+   "reason": "Cách nói gượng",
+   "severity": "low"
+  },
+  {
+   "old": "số lần bỏ qua, suy luận phí, bị từ chối;",
+   "new": "số lần bỏ qua, số lần suy luận phí, số lần bị từ chối;",
+   "reason": "Thiếu danh từ",
+   "severity": "medium"
+  },
+  {
+   "old": "Nó không kiểm tốc độ:",
+   "new": "Lệnh này không kiểm tra tốc độ:",
+   "reason": "Nó mơ hồ ở đầu câu",
+   "severity": "medium"
+  },
+  {
+   "old": "căn chỉnh và kiểm chất lượng trước",
+   "new": "căn chỉnh và kiểm tra chất lượng trước",
+   "reason": "Thiếu chữ tra",
+   "severity": "low"
+  },
+  {
+   "old": "Số đo lấy trên máy dùng chung rất bận",
+   "new": "Số liệu đo lấy trên máy dùng chung rất bận",
+   "reason": "Cách nói gượng",
+   "severity": "low"
+  }
+ ]
+}

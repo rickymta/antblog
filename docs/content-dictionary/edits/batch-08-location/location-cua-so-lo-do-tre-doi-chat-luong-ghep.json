@@ -1,0 +1,197 @@
+{
+  "file": "location-cua-so-lo-do-tre-doi-chat-luong-ghep.md",
+  "edits": [
+    {
+      "old": "Ngày thường cửa sổ chỉ thêm chờ, kết quả rỗng; cao điểm 30 s giảm cả chờ 13,7 s lẫn km rỗng 327,9 m. Cửa sổ thích ứng không thắng cố định.",
+      "new": "Ngày thường cửa sổ chỉ làm khách chờ thêm, kết quả rỗng; cao điểm 30 s giảm cả thời gian chờ 13,7 s lẫn km rỗng 327,9 m. Cửa sổ thích ứng không thắng được cửa sổ cố định.",
+      "reason": "Câu cụt, thiếu chủ ngữ và danh từ (chờ thêm, thời gian chờ, cửa sổ cố định)",
+      "severity": "high"
+    },
+    {
+      "old": "Bài dùng phép gán Hungarian của bài 42 trong lô và cách đọc",
+      "new": "Bài dùng phép gán Hungarian của bài 42, chạy theo lô, và cách đọc",
+      "reason": "Cụm 'trong lô' cụt, dễ hiểu nhầm là thuộc về bài 42",
+      "severity": "medium"
+    },
+    {
+      "old": "Mọi số đo là **trên dữ liệu mô phỏng**, đồ thị HCM",
+      "new": "Mọi số đo đều lấy **trên dữ liệu mô phỏng**, với đồ thị HCM",
+      "reason": "Câu thiếu động từ, ghép cụm rời",
+      "severity": "medium"
+    },
+    {
+      "old": "`BatchMatcher` cài hợp đồng này với hai kiểu cửa sổ",
+      "new": "`BatchMatcher` cài đặt hợp đồng này với hai kiểu cửa sổ",
+      "reason": "'cài' cụt, thiếu chữ 'đặt'",
+      "severity": "low"
+    },
+    {
+      "old": "Quy tắc thích ứng, đặt **trước khi đo** và không chỉnh theo kết quả:",
+      "new": "Quy tắc thích ứng được đặt **trước khi đo** và không chỉnh theo kết quả:",
+      "reason": "Câu thiếu động từ chính",
+      "severity": "medium"
+    },
+    {
+      "old": "và kết quả ở mục «Mô hình huỷ làm đổi kết luận».",
+      "new": "và kết quả nằm ở mục «Mô hình huỷ làm đổi kết luận».",
+      "reason": "Thiếu động từ",
+      "severity": "medium"
+    },
+    {
+      "old": "Cửa sổ cố định cũng được chọn một cái theo cùng tiêu chí để có bản so sánh chi tiết.",
+      "new": "Cũng theo tiêu chí đó, lab chọn một cửa sổ cố định để làm bản so sánh chi tiết.",
+      "reason": "Cấu trúc 'một cái' gượng, giọng dịch máy",
+      "severity": "medium"
+    },
+    {
+      "old": "In đậm là khoảng không chứa 0.",
+      "new": "Chữ in đậm là khoảng không chứa 0.",
+      "reason": "Thiếu danh từ chính",
+      "severity": "low"
+    },
+    {
+      "old": "cột km rỗng không có ý nghĩa ở bốn hàng đầu.**",
+      "new": "cột km rỗng không có ý nghĩa thống kê ở bốn hàng đầu.**",
+      "reason": "Làm rõ 'không có ý nghĩa' là về thống kê",
+      "severity": "medium"
+    },
+    {
+      "old": "và không thấy lợi ích km rỗng. Chỉ ở 60 s km rỗng giảm 56,6 m (và km rỗng tổng trên mỗi khách 39,8 m), kèm huỷ −0,0050 và +1,1 chuyến, trả bằng 30,7 s chờ thêm trung bình.",
+      "new": "và không thấy lợi ích nào về km rỗng. Chỉ ở 60 s km rỗng mới giảm 56,6 m (và km rỗng tổng trên mỗi khách giảm 39,8 m), kèm huỷ −0,0050 và +1,1 chuyến, đổi lại phải trả 30,7 s chờ thêm trung bình.",
+      "reason": "Câu cụt, thiếu động từ 'giảm', cụm 'trả bằng' gượng",
+      "severity": "high"
+    },
+    {
+      "old": "km rỗng không vùng nào đổi",
+      "new": "km rỗng không đổi ở vùng nào",
+      "reason": "Trật tự từ kiểu tiếng Anh",
+      "severity": "low"
+    },
+    {
+      "old": "một dấu sao không lặp lại như vậy nên coi là may rủi cho tới khi chạy lại.",
+      "new": "một dấu sao không lặp lại như vậy nên được coi là may rủi cho tới khi chạy lại.",
+      "reason": "Thiếu chủ ngữ ngầm, câu cụt",
+      "severity": "low"
+    },
+    {
+      "old": "Đây là kết quả rỗng, và nó khớp với bài 42: lô 1,64 khách thì gần như không có gì để tối ưu, nên giây đợi thêm không mua được gì đo thấy được.",
+      "new": "Đây là kết quả rỗng, và kết quả này khớp với bài 42: lô 1,64 khách thì gần như không có gì để tối ưu, nên mấy giây đợi thêm không mang lại lợi ích nào đo được.",
+      "reason": "Tránh 'nó' chỉ sự vật trừu tượng; cụm 'không mua được gì đo thấy được' gượng",
+      "severity": "medium"
+    },
+    {
+      "old": "khách đều thiệt, mức khác nhau theo độ dài cửa sổ;",
+      "new": "khách đều thiệt, mức thiệt khác nhau tuỳ độ dài cửa sổ;",
+      "reason": "Thiếu danh từ chính",
+      "severity": "low"
+    },
+    {
+      "old": "Hiệu của `wait_s` trừ hiệu của `pickup_eta_s` cho phần giữ thêm trong cửa sổ:",
+      "new": "Lấy hiệu của `wait_s` trừ hiệu của `pickup_eta_s` sẽ ra phần giữ thêm trong cửa sổ:",
+      "reason": "Câu thiếu động từ, phải đoán ý",
+      "severity": "high"
+    },
+    {
+      "old": "cơ chế hợp lý là lô lớn cho Hungarian nhiều lựa chọn hơn, dù lab không tách riêng. Lợi hơn thiệt 13,7 s.",
+      "new": "lời giải thích hợp lý là lô lớn cho Hungarian nhiều lựa chọn hơn, dù lab không tách riêng. Tính chung, phần lợi vượt phần thiệt 13,7 s.",
+      "reason": "Câu cụt thiếu chủ ngữ và vế so sánh",
+      "severity": "high"
+    },
+    {
+      "old": "Một, `wait_s` chỉ tính trên chuyến hoàn thành,",
+      "new": "Thứ nhất, `wait_s` chỉ tính trên chuyến hoàn thành,",
+      "reason": "Cách đếm ý kiểu dịch máy",
+      "severity": "low"
+    },
+    {
+      "old": "không thấy đợi lâu hơn cứu thêm khách nào.",
+      "new": "không thấy việc đợi lâu hơn giữ thêm được khách nào.",
+      "reason": "Câu cụt, phải đoán ý",
+      "severity": "medium"
+    },
+    {
+      "old": "ở xe thưa, 60 s đã vượt quá chỗ cái lợi đủ bù cái hại.",
+      "new": "ở bộ xe thưa, 60 s đã vượt quá điểm mà cái lợi còn bù được cái hại.",
+      "reason": "Cụm 'chỗ cái lợi đủ bù' khó hiểu",
+      "severity": "medium"
+    },
+    {
+      "old": "Cố định 30 s tốt hơn rõ ở km rỗng",
+      "new": "Cố định 30 s tốt hơn rõ rệt về km rỗng",
+      "reason": "Trật tự và giới từ kiểu tiếng Anh",
+      "severity": "low"
+    },
+    {
+      "old": "nên chỉ nói được là thích ứng không thắng.",
+      "new": "nên chỉ có thể nói là thích ứng không thắng được.",
+      "reason": "Câu cụt",
+      "severity": "low"
+    },
+    {
+      "old": "không phải cỡ 30–60 s là chỗ lợi lớn.",
+      "new": "chứ không phải cỡ 30–60 s, nơi có lợi lớn.",
+      "reason": "Câu thiếu liên từ, đọc không mượt",
+      "severity": "medium"
+    },
+    {
+      "old": "cùng đường cong (0,5 từ 180 s tới 900 s)",
+      "new": "dùng cùng đường cong (0,5 từ 180 s tới 900 s)",
+      "reason": "Thiếu động từ",
+      "severity": "low"
+    },
+    {
+      "old": "**việc cao điểm 30 s đáng đợi chỉ được chứng minh dưới giả định huỷ-từ-lúc-gán.**",
+      "new": "**việc đáng đợi 30 s ở cao điểm chỉ được chứng minh dưới giả định huỷ-từ-lúc-gán.**",
+      "reason": "Cụm tự ghép 'việc cao điểm 30 s đáng đợi' khó hiểu",
+      "severity": "high"
+    },
+    {
+      "old": "có sống sót khi khách bỏ vì đợi hay không.",
+      "new": "có còn đứng vững khi khách bỏ vì đợi hay không.",
+      "reason": "Ẩn dụ dịch từ 'survive' nghe gượng",
+      "severity": "low"
+    },
+    {
+      "old": "Output đầy đủ ở `examples/toi-noi-location/results/p05.md`.",
+      "new": "Kết quả đầy đủ nằm ở `examples/toi-noi-location/results/p05.md`.",
+      "reason": "Từ tiếng Anh thông thường, thiếu động từ",
+      "severity": "low"
+    },
+    {
+      "old": "để kiểm bất biến, không tái lập các số trên.",
+      "new": "để kiểm tra các bất biến, không tái lập các số trên.",
+      "reason": "'kiểm' lược mất chữ 'tra'",
+      "severity": "medium"
+    },
+    {
+      "old": "Mô hình huỷ, kiên nhẫn 300 s và nhu cầu là giả định.",
+      "new": "Mô hình huỷ, ngưỡng kiên nhẫn 300 s và nhu cầu đều là giả định.",
+      "reason": "Thiếu danh từ chính, danh sách ghép cụt",
+      "severity": "medium"
+    },
+    {
+      "old": "Nó bỏ qua km rỗng và hết kiên nhẫn;",
+      "new": "Tiêu chí này bỏ qua km rỗng và hết kiên nhẫn;",
+      "reason": "Tránh 'nó' chỉ sự vật trừu tượng",
+      "severity": "low"
+    },
+    {
+      "old": "(trừ 56,6 mét)",
+      "new": "(−56,6 mét)",
+      "reason": "'trừ' dễ đọc nhầm thành 'ngoại trừ'",
+      "severity": "medium"
+    },
+    {
+      "old": "và đường đi xuống theo độ dài cửa sổ.",
+      "new": "và đường nối các chấm đi xuống khi cửa sổ dài hơn.",
+      "reason": "Cụm cụt, thiếu chủ thể",
+      "severity": "medium"
+    },
+    {
+      "old": "Ở thường, cả hai làm khách chờ thêm.",
+      "new": "Ở bộ thường, cả hai làm khách chờ thêm.",
+      "reason": "Thiếu danh từ chính (bộ)",
+      "severity": "low"
+    }
+  ]
+}

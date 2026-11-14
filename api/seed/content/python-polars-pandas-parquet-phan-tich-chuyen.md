@@ -1,7 +1,7 @@
 ---
 slug: python-polars-pandas-parquet-phan-tich-chuyen
 title: "polars, pandas và Parquet: phân tích 2 triệu chuyến mỗi ngày"
-summary: "Bài 29: sinh 2 triệu chuyến giả, so CSV với Parquet, truy vấn lazy bằng polars, đặt pandas cạnh nhau về thời gian và bộ nhớ, và bẫy tràn Int32. Có số đo thật và lab chạy được."
+summary: "Bài 29: sinh 2 triệu chuyến giả, so CSV với Parquet, truy vấn lazy bằng polars, đặt pandas cạnh polars để so thời gian và bộ nhớ, và bẫy tràn Int32. Có số đo thật và lab chạy được."
 category: python-intermediate
 level: intermediate
 tags: [python, toi-noi, polars, pandas, parquet]
@@ -37,9 +37,9 @@ df = pl.DataFrame(
 )
 ```
 
-- **Thời điểm lưu UTC, aware.** Giờ cao điểm tính theo giờ Việt Nam bằng `convert_time_zone("Asia/Ho_Chi_Minh")` lúc truy vấn, đúng quy ước lưu UTC hiển thị theo múi giờ.
+- **Thời điểm lưu UTC, aware.** Giờ cao điểm tính theo giờ Việt Nam bằng `convert_time_zone("Asia/Ho_Chi_Minh")` lúc truy vấn, đúng quy ước lưu UTC, hiển thị theo múi giờ.
 - **Thành phố, dịch vụ, trạng thái là `Enum`.** Mỗi cột chỉ có vài giá trị; lưu chỉ số thay vì lặp lại chuỗi, vừa nhỏ vừa nhanh. Trạng thái chỉ có `completed` và `cancelled` (2 trong 8 trạng thái chuyến): đây là file các chuyến **đã kết thúc**, không có chuyến đang chạy.
-- **Mã dài hơn quen thuộc.** `trip_id` có 7 chữ số (`TN-0000001`) và `driver_id` có 5 chữ số (`DR-21651`), khác `TN-0001` và `DR-001` ở các bài trước, vì 2 triệu chuyến mỗi ngày và 25.000 tài xế cần nhiều chữ số hơn.
+- **Mã dài hơn mã quen thuộc.** `trip_id` có 7 chữ số (`TN-0000001`) và `driver_id` có 5 chữ số (`DR-21651`), khác `TN-0001` và `DR-001` ở các bài trước, vì 2 triệu chuyến mỗi ngày và 25.000 tài xế cần nhiều chữ số hơn.
 - **Khoảng cách tính bằng mét, kiểu số nguyên, và cước tính bằng số nguyên.** Tiền không đi qua `float`. Công thức cước của loạt bài, 12.000 + (phần vượt 2 km) × 4.500, làm tròn nửa lên, viết lại bằng số nguyên mét:
 
 ```python
@@ -49,9 +49,9 @@ def fare_vnd(distance_m: pl.Expr) -> pl.Expr:
     return (12_000 + (extra_m * 9 + 1) // 2).cast(pl.Int64).alias("fare_vnd")
 ```
 
-Phần vượt (m) × 4.500 / 1.000 chính là phần vượt × 9 / 2; làm tròn nửa lên của số dương `x / 2` là `(x + 1) // 2`. Lab không tin công thức này mà so với bản `Decimal` của bài 03 (`calculate_fare`) trên 1.000 dòng mẫu và các ca biên 0, 2, 2,5, 5 km (12.000, 12.000, 14.250, 25.500); `--verify` kiểm cả hai.
+Phần vượt (m) × 4.500 / 1.000 chính là phần vượt × 9 / 2; làm tròn nửa lên của số dương `x / 2` là `(x + 1) // 2`. Lab không tin công thức này mà so với bản `Decimal` của bài 03 (`calculate_fare`) trên 1.000 dòng mẫu và các test case biên 0, 2, 2,5, 5 km (12.000, 12.000, 14.250, 25.500); `--verify` kiểm tra cả hai.
 
-Dữ liệu là giả, và **giờ cao điểm trong đó do chính bộ sinh gài sẵn** (trọng số lớn quanh 8 giờ và 18 giờ). Mục đích của lab là kiểm chứng đường ống phân tích tìm lại đúng đỉnh đã gài, không phải khám phá điều gì về nhu cầu thật.
+Dữ liệu là giả, và **giờ cao điểm trong đó do chính bộ sinh gài sẵn** (trọng số lớn quanh 8 giờ và 18 giờ). Mục đích của lab là kiểm chứng pipeline phân tích tìm lại đúng đỉnh đã gài, không phải khám phá điều gì về nhu cầu thật.
 
 ## CSV và Parquet: cùng dữ liệu, hai cách xếp byte
 
@@ -77,14 +77,14 @@ Kết quả, trích từ lần chạy cuối (polars 2.1.0, pandas 3.1.1, numpy 
 [3] Đọc bằng polars (trung vị 5 lần, file đang nằm trong page cache của hệ điều hành): CSV 0.342 s; Parquet 0.033 s; Parquet chỉ 2 cột 0.008 s
 ```
 
-Parquet nhỏ hơn 6,9 lần, đọc nhanh hơn cỡ một bậc (0,342 s so với 0,033 s), và đọc đúng hai cột `city`, `fare_vnd` mất 0,008 giây. Hai lý do chính: dữ liệu cùng một cột giống nhau nên nén tốt (thành phố chỉ có sáu giá trị), và file lưu từng cột riêng nên bỏ qua được cột không cần. File này gồm 16 *row group*, các khối dòng mà trong mỗi khối dữ liệu lại xếp theo cột; mỗi khối có thống kê riêng (như giá trị nhỏ nhất, lớn nhất) để bộ đọc có thể bỏ qua cả khối khi điều kiện lọc cho phép. Còn một khác biệt nữa dễ bị bỏ qua: **Parquet nhớ kiểu**. Cùng DataFrame, đọc lại từ hai file (trích):
+Parquet nhỏ hơn 6,9 lần, đọc nhanh hơn cỡ một bậc (0,342 s so với 0,033 s), và đọc đúng hai cột `city`, `fare_vnd` mất 0,008 giây. Hai lý do chính: các giá trị trong cùng một cột lặp lại nhiều nên nén tốt (thành phố chỉ có sáu giá trị), và file lưu từng cột riêng nên bỏ qua được cột không cần. File này gồm 16 *row group*, các khối dòng mà trong mỗi khối dữ liệu lại xếp theo cột; mỗi khối có thống kê riêng (như giá trị nhỏ nhất, lớn nhất) để bộ đọc có thể bỏ qua cả khối khi điều kiện lọc cho phép. Còn một khác biệt nữa dễ bị bỏ qua: **Parquet giữ lại kiểu dữ liệu**. Cùng DataFrame, đọc lại từ hai file (trích):
 
 ```text
 kiểu cột đọc lại từ CSV:      {'requested_at': Datetime(time_unit='us', time_zone='UTC'), 'city': String, 'service': String, 'status': String, 'distance_m': Int64, 'duration_s': Int64, 'fare_vnd': Int64, ...}
 kiểu cột đọc lại từ Parquet:  {'requested_at': Datetime(time_unit='us', time_zone='UTC'), 'city': Enum(categories=['Hà Nội', 'TP.HCM', ...]), 'service': Enum(...), 'status': Enum(...), 'distance_m': Int32, 'duration_s': Int32, 'fare_vnd': Int64, ...}
 ```
 
-Từ CSV, `city` trở về `String` và hai cột `Int32` trở về `Int64`: ta phải khai báo lại kiểu mỗi lần đọc (và thời điểm chỉ về đúng nhờ `try_parse_dates=True`, tức phải đoán chuỗi). Parquet mang theo cả `Enum` lẫn múi giờ. Đó là một lý do thực tế để chọn Parquet cho dữ liệu trao đổi giữa các service Python, ngoài chuyện nhỏ và nhanh. Hạn chế: Parquet không đọc được bằng mắt, không `grep` được, và khó sửa tay một dòng.
+Từ CSV, `city` trở về `String` và hai cột `Int32` trở về `Int64`: ta phải khai báo lại kiểu mỗi lần đọc (và thời điểm chỉ đọc về đúng nhờ `try_parse_dates=True`, tức là phải đoán từ chuỗi). Parquet mang theo cả `Enum` lẫn múi giờ. Đó là một lý do thực tế để chọn Parquet cho dữ liệu trao đổi giữa các service Python, ngoài chuyện nhỏ và nhanh. Hạn chế: Parquet không đọc được bằng mắt, không `grep` được, và khó sửa tay một dòng.
 
 ## Truy vấn lazy: chỉ đọc phần cần
 
@@ -146,7 +146,7 @@ Giờ cao điểm (giờ địa phương) là 8 hoặc 18, đúng đỉnh đã g
 
 ## pandas đặt cạnh polars
 
-Cùng truy vấn bằng pandas (`ride_revenue_pandas`) là eager: mỗi dòng code dựng một bảng trung gian.
+Cùng truy vấn đó viết bằng pandas (`ride_revenue_pandas`) thì là eager: mỗi dòng code dựng một bảng trung gian.
 
 ```python
 def ride_revenue_pandas(df: pd.DataFrame) -> pd.DataFrame:
@@ -160,7 +160,7 @@ def ride_revenue_pandas(df: pd.DataFrame) -> pd.DataFrame:
     ...
 ```
 
-Dòng đầu tiên đã tạo một bản sao của mọi cột cho các dòng khớp, kể cả cột không dùng. `--verify` xác nhận hai engine ra cùng 144 nhóm (sau khi đưa về cùng kiểu cột: pandas trả `category` còn polars trả `Enum`). Còn chi phí? Mỗi kịch bản chạy trong một tiến trình riêng, ba lần, lấy thời gian trung vị và bộ nhớ RSS lớn nhất. Kịch bản eager đo tách hai bước, đọc rồi truy vấn; kịch bản lazy chỉ có một con số tổng vì kế hoạch gộp đọc và truy vấn. Trích từ lần đo chốt (load average của máy nêu ngay trong output):
+Dòng đầu tiên đã tạo một bản sao của mọi cột cho các dòng khớp, kể cả cột không dùng. `--verify` xác nhận hai engine ra cùng 144 nhóm (sau khi đưa về cùng kiểu cột: pandas trả `category` còn polars trả `Enum`). Còn chi phí thì sao? Mỗi kịch bản chạy trong một tiến trình riêng, ba lần, lấy thời gian trung vị và bộ nhớ RSS lớn nhất. Kịch bản eager đo tách hai bước, đọc rồi truy vấn; kịch bản lazy chỉ có một con số tổng vì kế hoạch gộp đọc và truy vấn. Trích từ lần đo chốt (load average của máy nêu ngay trong output):
 
 ```text
 [6] pandas đọc Parquet 0.038 s; trong RAM 116 MiB (polars: 86 MiB)
@@ -178,9 +178,9 @@ Dòng đầu tiên đã tạo một bản sao của mọi cột cho các dòng k
     load average sau khi đo (1/5/15 phút): 50.04 47.72 43.82
 ```
 
-**Máy lúc đo rất bận**: load average 64,15 (1 phút) trên 10 lõi lúc bắt đầu đo, 50,04 lúc kết thúc, vì máy còn các phiên làm việc khác chạy song song; đây là lần đo chốt lúc không có tiến trình nào của chính loạt bài này chạy, nhưng máy không bao giờ rảnh hẳn. Vì vậy chỉ đọc thứ bậc lớn, không đọc chênh lệch nhỏ. Hai con số 0,038 s ở `[6]` và 0,072 s ở cột `đọc` của `pandas_parquet` cũng không so với nhau được: `[6]` là trung vị 5 lần đọc lặp trong tiến trình đã khởi động, `[7]` là lần đọc đầu trong tiến trình mới.
+**Máy lúc đo rất bận**: load average 64,15 (1 phút) trên 10 lõi lúc bắt đầu đo, 50,04 lúc kết thúc, vì máy còn các phiên làm việc khác chạy song song; đây là lần đo chốt lúc không có tiến trình nào của chính loạt bài này chạy, nhưng máy không bao giờ rảnh hẳn. Vì vậy chỉ nên đọc theo bậc độ lớn, không đọc chênh lệch nhỏ. Hai con số 0,038 s ở `[6]` và 0,072 s ở cột `đọc` của `pandas_parquet` cũng không thể so sánh trực tiếp với nhau: `[6]` là trung vị 5 lần đọc lặp trong tiến trình đã khởi động, `[7]` là lần đọc đầu trong tiến trình mới.
 
-Dòng `baseline` chỉ import thư viện: 153 MiB là nền cố định, nên «bộ nhớ thêm» của mỗi kịch bản là con số trừ đi nền. Gọn lại:
+Dòng `baseline` chỉ import thư viện: 153 MiB là nền cố định, nên «bộ nhớ thêm» của mỗi kịch bản là con số sau khi trừ đi phần nền. Gọn lại:
 
 | Kịch bản | Thời gian: tổng (đọc + truy vấn) | RSS thêm so với nền |
 | --- | --- | --- |
@@ -193,7 +193,7 @@ Dòng `baseline` chỉ import thư viện: 153 MiB là nền cố định, nên 
 - **Kết luận được.** Khoảng cách lớn nhất, pandas đọc CSV 0,58 s so với polars quét Parquet 0,04 s (cỡ một bậc, gần 16 lần) và 592 MiB so với 78 MiB bộ nhớ thêm, vượt xa độ nhiễu của máy bận. Với polars, truy vấn trên bảng đã nằm trong RAM chỉ mất 0,01 s; `polars_csv` gần như toàn là thời gian đọc CSV.
 - **Không kết luận được.** Thứ bậc giữa các biến thể sít nhau, như `polars_csv` (0,29 s) với `scan_csv` (0,31 s): các lần chạy trước của chính lab này cho hai biến thể đổi chỗ cho nhau (`scan_csv` 0,26 s và `polars_csv` 0,27 s ở một lần, 0,48 s và 0,36 s ở lần khác). Cũng không quy được phần nhanh của `scan_parquet` cho riêng việc chọn cột hay riêng việc lọc, vì lab không đo từng tối ưu riêng; ta chỉ thấy kế hoạch có `PROJECT 5/9 COLUMNS`, `SELECTION` và RSS thêm nhỏ (78 MiB), khớp với một kế hoạch chỉ đọc một phần dữ liệu.
 
-Ở 2 triệu dòng mọi kịch bản đều dưới một giây, sự khác biệt chưa gây đau; nó gây đau khi truy vấn chạy trăm lần mỗi ngày hoặc dữ liệu lớn hơn. Mọi lần đo đều đọc file nằm trong page cache; đọc từ đĩa lạnh chậm hơn, nhất là CSV 176 MiB.
+Ở 2 triệu dòng mọi kịch bản đều dưới một giây, sự khác biệt chưa thành vấn đề; nó thành vấn đề khi truy vấn chạy trăm lần mỗi ngày hoặc dữ liệu lớn hơn. Mọi lần đo đều đọc file nằm trong page cache; đọc từ đĩa lạnh chậm hơn, nhất là CSV 176 MiB.
 
 Ngoại suy tuyến tính lên 730 triệu dòng mỗi năm (chỉ là phép nhân, không phải đo):
 
@@ -201,17 +201,17 @@ Ngoại suy tuyến tính lên 730 triệu dòng mỗi năm (chỉ là phép nh�
 [8] Ngoại suy tuyến tính lên 730 triệu dòng/năm: CSV 63 GiB, Parquet 9.1 GiB, polars trong RAM 31 GiB
 ```
 
-Một năm dữ liệu trong RAM (31 GiB cho polars, nhiều hơn cho pandas) vượt phần lớn máy; nên chia theo ngày thành nhiều file Parquet và chỉ quét phần cần, việc của bài 65. Kịch bản `polars_streaming` là một nấc trung gian: engine streaming xử lý theo từng lô thay vì nạp cả bảng, và `--verify` xác nhận nó cho đúng cùng kết quả (ở kích cỡ này RSS của nó, 229 MiB, gần bằng `scan_parquet` thường (231 MiB), nên chưa thấy tiết kiệm thêm).
+Một năm dữ liệu trong RAM (31 GiB cho polars, nhiều hơn cho pandas) vượt quá dung lượng RAM của phần lớn máy; nên chia theo ngày thành nhiều file Parquet và chỉ quét phần cần, đó là việc của bài 65. Kịch bản `polars_streaming` là một nấc trung gian: engine streaming xử lý theo từng lô thay vì nạp cả bảng, và `--verify` xác nhận nó cho đúng cùng kết quả (ở kích cỡ này RSS của nó, 229 MiB, gần bằng `scan_parquet` thường (231 MiB), nên chưa thấy tiết kiệm thêm).
 
 ## Khi nào không nên dùng pandas, và bẫy cộng dồn
 
-pandas không hỏng. Nó là cầu nối của cả hệ sinh thái: scikit-learn (bài 57), matplotlib và đa số thư viện phân tích nhận hoặc trả DataFrame của pandas. Với dữ liệu nhỏ và thao tác tương tác, nó thoải mái hơn. Ranh giới nên chọn polars là:
+pandas không hỏng. pandas là cầu nối của cả hệ sinh thái: scikit-learn (bài 57), matplotlib và đa số thư viện phân tích nhận hoặc trả DataFrame của pandas. Với dữ liệu nhỏ và thao tác tương tác, pandas dùng thoải mái hơn. Ranh giới để chọn polars là:
 
 - Dữ liệu từ vài trăm MiB trở lên hoặc truy vấn lặp lại: cần kế hoạch lazy, đọc chọn lọc và đa luồng.
 - Dữ liệu lớn hơn RAM, hoặc sắp lớn lên: `scan_parquet` với streaming trước khi nghĩ tới cluster.
 - Pipeline cần kiểu rõ ràng và tái lập (Enum, aware datetime, số nguyên đúng kích cỡ), không muốn đoán kiểu mỗi lần đọc.
 
-Chuyển qua lại ở biên là chuyện thường: `df.to_pandas()` khi đưa sang sklearn, và ngược lại `pl.from_pandas(...)`. Lab dùng `pl.from_pandas` trong `--verify`, và pandas đọc Parquet qua pyarrow nên lab cài sẵn thư viện này.
+Chuyển qua lại ở ranh giới với thư viện khác là chuyện thường: `df.to_pandas()` khi đưa sang sklearn, và ngược lại `pl.from_pandas(...)`. Lab dùng `pl.from_pandas` trong `--verify`, và pandas đọc Parquet qua pyarrow nên lab cài sẵn thư viện này.
 
 Còn một bẫy đã cắn ngay trong lúc viết lab: kiểu số nguyên hẹp. `Int32` cho `distance_m` tiết kiệm bộ nhớ, nhưng chỉ an toàn **khi không ai cộng cột đó trên cả bảng**, mà tổng quãng đường cả ngày là phép cộng rất tự nhiên. Polars cộng `Int32` vẫn ra `Int32` và quay vòng khi vượt 2.147.483.647, không báo lỗi. Lab giữ `distance_m` ở `Int32` có chủ ý để cho thấy (polars 2.1.0):
 
@@ -221,7 +221,7 @@ Còn một bẫy đã cắn ngay trong lúc viết lab: kiểu số nguyên hẹ
     Tổng cước chuyến completed (VND): ép Int32 -> -547,871,422; Int64 -> 46,696,768,834
 ```
 
-Dòng đầu là minh hoạ tối thiểu. Dòng thứ hai nguy hiểm hơn: **kết quả sai là một số dương trông hợp lý** (1,69 tỷ mét thay vì 10,28 tỷ) và không có dấu hiệu nào báo sai; nó chỉ là phần dư của tổng đúng khi chia cho 2^32. Cách phòng: `cast(pl.Int64)` trước khi cộng, như `df["distance_m"].cast(pl.Int64).sum()`, hoặc chọn `Int64` ngay từ đầu cho cột có thể bị cộng (`fare_vnd` là `Int64` vì lý do đó). pandas không mắc bẫy này vì tự nâng kiểu khi cộng (ta đã thử `Series` `int32` hai số 2 tỷ: ra 4.000.000.000); đó là khác biệt về mặc định, và nó dễ bị bỏ sót khi chuyển pipeline từ pandas sang polars. `--verify` kiểm cả hai tổng: bản `Int64` so với tổng tính độc lập bằng numpy, bản `Int32` so với phần dư theo modulo 2^32.
+Dòng đầu là minh hoạ tối thiểu. Dòng thứ hai nguy hiểm hơn: **kết quả sai là một số dương trông hợp lý** (1,69 tỷ mét thay vì 10,28 tỷ) và không có dấu hiệu nào báo là sai; số này chỉ là phần dư của tổng đúng khi chia cho 2^32. Cách phòng: `cast(pl.Int64)` trước khi cộng, như `df["distance_m"].cast(pl.Int64).sum()`, hoặc chọn `Int64` ngay từ đầu cho cột có thể bị cộng (`fare_vnd` là `Int64` vì lý do đó). pandas không mắc bẫy này vì tự nâng kiểu khi cộng (ta đã thử `Series` `int32` hai số 2 tỷ: ra 4.000.000.000); đó là khác biệt về mặc định, và sự khác biệt này dễ bị bỏ sót khi chuyển pipeline từ pandas sang polars. `--verify` kiểm cả hai tổng: bản `Int64` so với tổng tính độc lập bằng numpy, bản `Int32` so với phần dư theo modulo 2^32.
 
 ## Chạy và kiểm chứng
 
@@ -232,7 +232,7 @@ uv run --project examples/toi-noi-python/29-polars-pandas-parquet examples/toi-n
 uv run --project examples/toi-noi-python/29-polars-pandas-parquet examples/toi-noi-python/29-polars-pandas-parquet/main.py --verify
 ```
 
-Lệnh đầu in báo cáo như các khối trên; lệnh thứ hai kiểm 17 bất biến và in (output lần chạy cuối, Python 3.14.7):
+Lệnh đầu in báo cáo như các khối trên; lệnh thứ hai kiểm tra 17 bất biến và in (output lần chạy cuối, Python 3.14.7):
 
 ```text
 OK 17/17
@@ -250,7 +250,7 @@ Các bất biến gồm: số dòng, đủ 6 thành phố và 3 dịch vụ, mã
 
 <div class="tkh-callout tkh-callout--warn">
 <span class="tkh-callout-title">Giới hạn của ví dụ so với production</span>
-<p>Dữ liệu sinh bằng numpy, không có dòng thiếu, trùng, lệch múi giờ hay mã thành phố lạ như dữ liệu thật; mã chuyến và mã tài xế dài hơn dạng <code>TN-0001</code>, <code>DR-001</code> của các bài trước. Số đo là một máy macOS Apple silicon 10 lõi đang rất bận (load average 64,15 trên 10 lõi lúc bắt đầu đo), file nằm trong page cache; đừng dùng làm cam kết hiệu năng. Ngoại suy 730 triệu dòng là phép nhân tuyến tính, thực tế còn phụ thuộc phân vùng và nén. Một file Parquet duy nhất cũng chưa phải kiến trúc kho dữ liệu: không phân vùng theo ngày, không ghi tăng dần, không idempotent; những thứ đó thuộc bài 65. Cuối cùng, phân tích ở đây là mô tả, không phải dự đoán; mô hình dự đoán nằm ở phần sau của lộ trình.</p>
+<p>Dữ liệu sinh bằng numpy, không có dòng thiếu, trùng, lệch múi giờ hay mã thành phố lạ như dữ liệu thật; mã chuyến và mã tài xế dài hơn dạng <code>TN-0001</code>, <code>DR-001</code> của các bài trước. Số đo lấy từ một máy macOS Apple silicon 10 lõi đang rất bận (load average 64,15 trên 10 lõi lúc bắt đầu đo), file nằm trong page cache; đừng dùng làm cam kết hiệu năng. Ngoại suy 730 triệu dòng là phép nhân tuyến tính, thực tế còn phụ thuộc phân vùng và nén. Một file Parquet duy nhất cũng chưa phải kiến trúc kho dữ liệu: không phân vùng theo ngày, không ghi tăng dần, không idempotent; những thứ đó thuộc bài 65. Cuối cùng, phân tích ở đây là mô tả, không phải dự đoán; mô hình dự đoán nằm ở phần sau của lộ trình.</p>
 </div>
 
 **Bài tập:** (1) Hãy tìm 5 tài xế có nhiều chuyến `completed` nhất trong ngày bằng truy vấn lazy trên file Parquet. Nếu hai tài xế bằng số chuyến thì xếp theo mã. (2) Vì sao ta không cần sửa `ride_revenue_lazy` khi bảng có thêm 20 cột mới, và việc đó khác pandas thế nào?
@@ -269,7 +269,7 @@ top = (
 )
 ```
 
-<p>Kết quả trên dữ liệu của lab (đã chạy): DR-23037 108 chuyến, DR-15222 107, DR-01838 104, DR-13549 103, DR-23213 102. (2) Bộ tối ưu chỉ chọn những cột mà truy vấn nhắc tới, nên 20 cột thêm vào không được đọc từ file; <code>PROJECT 5/9 COLUMNS</code> sẽ thành <code>PROJECT 5/29 COLUMNS</code> (đã thử trên file thêm 20 cột). Với <code>pd.read_parquet(path)</code> không có tham số <code>columns</code>, pandas đọc hết 29 cột vào RAM rồi mới lọc; muốn tiết kiệm phải nhớ liệt kê cột tay.</p></details>
+<p>Kết quả trên dữ liệu của lab (đã chạy): DR-23037 108 chuyến, DR-15222 107, DR-01838 104, DR-13549 103, DR-23213 102. (2) Bộ tối ưu chỉ chọn những cột mà truy vấn nhắc tới, nên 20 cột thêm vào không được đọc từ file; <code>PROJECT 5/9 COLUMNS</code> sẽ thành <code>PROJECT 5/29 COLUMNS</code> (đã thử trên file thêm 20 cột). Với <code>pd.read_parquet(path)</code> không có tham số <code>columns</code>, pandas đọc hết 29 cột vào RAM rồi mới lọc; muốn tiết kiệm phải nhớ liệt kê cột bằng tay.</p></details>
 
 Bài trước: [bài 28](/articles/python-integration-test-testcontainers-fixture). Bài tiếp: [bài 30](/articles/python-numpy-pillow-opencv-tien-xu-ly-anh).
 

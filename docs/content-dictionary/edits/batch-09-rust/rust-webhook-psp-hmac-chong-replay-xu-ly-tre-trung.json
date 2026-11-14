@@ -1,0 +1,143 @@
+{
+ "file": "rust-webhook-psp-hmac-chong-replay-xu-ly-tre-trung.md",
+ "edits": [
+  {
+   "old": "không đánh rơi thông báo đến sai thứ tự",
+   "new": "không làm mất thông báo đến lệch thứ tự",
+   "reason": "Đánh rơi là cách nói ẩn dụ gượng",
+   "severity": "low"
+  },
+  {
+   "old": "khác một byte là ra thẻ khác",
+   "new": "khác một byte là ra giá trị HMAC khác",
+   "reason": "Thẻ dễ hiểu nhầm là thẻ thanh toán; đây là tag của HMAC",
+   "severity": "high"
+  },
+  {
+   "old": "thẻ bắt đầu `51f0ae52…`",
+   "new": "giá trị HMAC bắt đầu `51f0ae52…`",
+   "reason": "Thẻ dễ hiểu nhầm là thẻ thanh toán",
+   "severity": "high"
+  },
+  {
+   "old": "Phải ký trên byte vì đi vòng qua serde thì không trả lại đúng byte ban đầu",
+   "new": "Phải ký trên byte vì nếu đi vòng qua serde thì không lấy lại được đúng byte ban đầu",
+   "reason": "Câu dịch máy, thiếu điều kiện",
+   "severity": "medium"
+  },
+  {
+   "old": "và thẻ cũ không còn khớp",
+   "new": "và giá trị HMAC cũ không còn khớp",
+   "reason": "Thẻ dễ hiểu nhầm là thẻ thanh toán",
+   "severity": "high"
+  },
+  {
+   "old": "đều ra ngoài bằng cùng một `401`",
+   "new": "đều trả về cùng một `401`",
+   "reason": "Calque, nghe gượng",
+   "severity": "medium"
+  },
+  {
+   "old": "log không chứa khoá hay thẻ tính được",
+   "new": "log không chứa khoá hay giá trị HMAC tính được",
+   "reason": "Thẻ dễ hiểu nhầm là thẻ thanh toán",
+   "severity": "high"
+  },
+  {
+   "old": "mọi thứ nằm trong app đều trích ra được",
+   "new": "mọi thứ nằm trong app đều có thể bị trích xuất",
+   "reason": "Câu cụt, giọng dịch máy",
+   "severity": "medium"
+  },
+  {
+   "old": "## So sánh thẻ bằng `==` có sao không?",
+   "new": "## So sánh giá trị HMAC bằng `==` có sao không?",
+   "reason": "Thẻ dễ hiểu nhầm là thẻ thanh toán",
+   "severity": "high"
+  },
+  {
+   "old": "nên thời gian so phụ thuộc số byte đầu đoán đúng",
+   "new": "nên thời gian so phụ thuộc vào số byte đầu tiên đoán đúng",
+   "reason": "Thiếu giới từ, khó đọc",
+   "severity": "medium"
+  },
+  {
+   "old": "từng byte của thẻ. Qua mạng",
+   "new": "từng byte của giá trị HMAC. Qua mạng",
+   "reason": "Thẻ dễ hiểu nhầm là thẻ thanh toán",
+   "severity": "high"
+  },
+  {
+   "old": "với thẻ giả đúng sẵn vài byte đầu, và cho `verify_slice` nhận cùng thẻ giả đó",
+   "new": "với giá trị giả đúng sẵn vài byte đầu, và cho `verify_slice` nhận cùng giá trị giả đó",
+   "reason": "Thẻ dễ hiểu nhầm là thẻ thanh toán",
+   "severity": "high"
+  },
+  {
+   "old": "độ dài thẻ được kiểm trước",
+   "new": "độ dài giá trị HMAC được kiểm trước",
+   "reason": "Thẻ dễ hiểu nhầm là thẻ thanh toán",
+   "severity": "high"
+  },
+  {
+   "old": "thì mọi webhook thật thành «cũ»",
+   "new": "thì mọi webhook thật bị coi là «cũ»",
+   "reason": "Câu thiếu động từ rõ ràng",
+   "severity": "medium"
+  },
+  {
+   "old": "Số tiền webhook khác cước đã biết: đánh dấu ",
+   "new": "Khi số tiền trong webhook khác cước đã biết, ta đánh dấu ",
+   "reason": "Vế đầu thiếu động từ",
+   "severity": "medium"
+  },
+  {
+   "old": "Lab giả định VíXanh coi mọi 2xx là đã giao",
+   "new": "Lab giả định VíXanh coi mọi 2xx là đã nhận",
+   "reason": "Webhook được nhận, không phải được giao",
+   "severity": "medium"
+  },
+  {
+   "old": "Có một cuộc đua. Webhook kiểm `payments` (chưa có)",
+   "new": "Ở đây có một race condition. Webhook kiểm tra `payments` (chưa có)",
+   "reason": "Thống nhất thuật ngữ race condition; thiếu chữ tra",
+   "severity": "medium"
+  },
+  {
+   "old": "Hai lần ra 0 mới là điều đáng nhớ: cuộc đua không lộ ở mọi lần chạy",
+   "new": "Điều đáng nhớ là hai lần cho kết quả 0: race condition không lộ ra ở mọi lần chạy",
+   "reason": "Câu khó hiểu; thống nhất race condition",
+   "severity": "high"
+  },
+  {
+   "old": "sau lần thứ hai ta trả tên bảng về",
+   "new": "sau lần thứ hai ta đổi tên bảng lại như cũ",
+   "reason": "Cách nói gượng",
+   "severity": "low"
+  },
+  {
+   "old": "để không bị bắt tốn CPU",
+   "new": "để kẻ gửi không ép được hệ thống tốn CPU",
+   "reason": "Dịch máy",
+   "severity": "medium"
+  },
+  {
+   "old": "Lab chưa ghi khoá nào khớp",
+   "new": "Lab chưa ghi lại khoá nào khớp",
+   "reason": "Thiếu động từ rõ nghĩa",
+   "severity": "low"
+  },
+  {
+   "old": "khi thẻ đúng? Vì sao",
+   "new": "khi giá trị HMAC đúng? Vì sao",
+   "reason": "Thẻ dễ hiểu nhầm là thẻ thanh toán",
+   "severity": "high"
+  },
+  {
+   "old": "cách viết khác của cùng một thẻ",
+   "new": "cách viết khác của cùng một giá trị HMAC",
+   "reason": "Thẻ dễ hiểu nhầm là thẻ thanh toán",
+   "severity": "high"
+  }
+ ]
+}

@@ -1,0 +1,29 @@
+{
+  "file": "python-numpy-pillow-opencv-tien-xu-ly-anh.md",
+  "edits": [
+    {
+      "old": "Có output thật",
+      "new": "Có kết quả chạy thật",
+      "reason": "Thống nhất với lựa chọn của các phần rust-r1, rust-r2, location-r4, python-r1: «Output thật» thành «Kết quả chạy thật»; bài cùng loạt đã dùng cách này.",
+      "severity": "low"
+    },
+    {
+      "old": "lớn. Output thật (trích):",
+      "new": "lớn. Kết quả chạy thật (trích):",
+      "reason": "Thống nhất với lựa chọn của các phần rust-r1, rust-r2, location-r4, python-r1: «Output thật» thành «Kết quả chạy thật»; bài cùng loạt đã dùng cách này.",
+      "severity": "low"
+    },
+    {
+      "old": "hàng. Output thật (trích):",
+      "new": "hàng. Kết quả chạy thật (trích):",
+      "reason": "Thống nhất với lựa chọn của các phần rust-r1, rust-r2, location-r4, python-r1: «Output thật» thành «Kết quả chạy thật»; bài cùng loạt đã dùng cách này.",
+      "severity": "low"
+    },
+    {
+      "old": "Output thật",
+      "new": "Kết quả chạy thật",
+      "reason": "Thống nhất với lựa chọn của các phần rust-r1, rust-r2, location-r4, python-r1: «Output thật» thành «Kết quả chạy thật»; bài cùng loạt đã dùng cách này.",
+      "severity": "low"
+    }
+  ]
+}

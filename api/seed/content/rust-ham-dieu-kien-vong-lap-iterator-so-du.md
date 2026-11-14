@@ -30,16 +30,16 @@ fn fare(distance_km: u32) -> i64 {
 }
 ```
 
-`distance_km: u32` nghĩa là số km nguyên, không âm. Gọi `fare(-1)` không biên dịch được: rustc báo ``E0600: cannot apply unary operator `-` to type `u32` ``. Bài [điều kiện, vòng lặp và phương thức trong C#](/articles/csharp-dieu-kien-vong-lap-phuong-thuc) chặn khoảng cách âm lúc chạy bằng exception; ở đây kiểu chặn trước một nửa. Nửa còn lại, khoảng cách quá lớn, vẫn cần kiểm tra bằng logic. Giá trị âm đến từ bên ngoài (JSON, database) phải được chuyển sang `u32` và xử lý khi chuyển thất bại, nội dung bài 07.
+`distance_km: u32` nghĩa là số km nguyên, không âm. Gọi `fare(-1)` không biên dịch được: rustc báo ``E0600: cannot apply unary operator `-` to type `u32` ``. Bài [điều kiện, vòng lặp và phương thức trong C#](/articles/csharp-dieu-kien-vong-lap-phuong-thuc) chặn khoảng cách âm lúc chạy bằng exception; ở đây kiểu dữ liệu chặn trước được một nửa. Nửa còn lại, khoảng cách quá lớn, vẫn cần kiểm tra bằng logic. Giá trị âm đến từ bên ngoài (JSON, database) phải được chuyển sang `u32`, còn việc xử lý khi chuyển thất bại là nội dung của bài 07.
 
 Hai điều khác với C# cần nhớ:
 
-- Không có tham số mặc định. Muốn "tuỳ chọn" thì nói trong kiểu, ví dụ `surcharge: Option<i64>` và gọi `fare_with_surcharge(5, None)`. Phụ phí trong lab chỉ minh hoạ chữ ký, chưa là quy tắc nghiệp vụ của Tới Nơi.
-- Không có overload theo số hay kiểu tham số cho hàm thường. Hai hàm khác nhau thì khác tên. Đa hình theo kiểu dùng trait, nằm ở phần sau của loạt bài.
+- Không có tham số mặc định. Muốn "tuỳ chọn" thì thể hiện điều đó trong kiểu, ví dụ `surcharge: Option<i64>` và gọi `fare_with_surcharge(5, None)`. Phụ phí trong lab chỉ minh hoạ chữ ký, chưa phải là quy tắc nghiệp vụ của Tới Nơi.
+- Không có nạp chồng (overload) theo số lượng hay kiểu tham số cho hàm thường. Hai hàm khác nhau thì khác tên. Muốn đa hình theo kiểu thì dùng trait, nội dung này nằm ở phần sau của loạt bài.
 
 ## Dòng cuối không có dấu chấm phẩy nghĩa là gì?
 
-Rust phân biệt **câu lệnh** (làm một việc, không có giá trị) và **biểu thức** (có giá trị). Một khối `{ ... }` là biểu thức; giá trị của nó là biểu thức cuối cùng **không có `;`**. Thêm `;` thì dòng đó thành câu lệnh và khối trả `()`.
+Rust phân biệt **câu lệnh** (làm một việc, không có giá trị) và **biểu thức** (có giá trị). Một khối `{ ... }` là biểu thức; giá trị của nó là biểu thức cuối cùng **không có `;`**. Thêm `;` thì dòng đó thành câu lệnh và khối trả về `()`.
 
 ```rust
 // src/main.rs
@@ -85,7 +85,7 @@ fn fare_loop(distance_km: u32) -> i64 {
 }
 ```
 
-Cách 2 là `fare` ở trên: một phép tính, không biến `mut`. Ví dụ chọn quy ước rõ ràng, giống bài C#: chuyến 0 km vẫn thu giá cơ bản, nên `fare(0) = 12.000` (`--verify` kiểm giá trị này). `saturating_sub` cho `0` khi `distance_km` nhỏ hơn 2 thay vì tràn số.
+Cách 2 là `fare` ở trên: một phép tính, không biến `mut`. Ví dụ này chọn quy ước rõ ràng, giống bài C# tương ứng: chuyến 0 km vẫn thu giá cơ bản, nên `fare(0) = 12.000` (`--verify` kiểm tra giá trị này). `saturating_sub` cho `0` khi `distance_km` nhỏ hơn 2 thay vì tràn số.
 
 <figure class="tkh-fig">
 <div class="tkh-fig-box">
@@ -94,7 +94,7 @@ Cách 2 là `fare` ở trên: một phép tính, không biến `mut`. Ví dụ c
 <figcaption>Hình 1. Hàm <code>fare</code>: 2 km đầu trả giá cơ bản, mỗi km vượt cộng 4.500. Cả hai cách viết cho cùng kết quả.</figcaption>
 </figure>
 
-`loop` với `break` mang giá trị hợp khi chưa biết trước số vòng. Ví dụ: tìm km nhỏ nhất làm cước vượt 30.000.
+`loop` với `break` mang giá trị phù hợp khi chưa biết trước số vòng. Ví dụ: tìm km nhỏ nhất làm cước vượt 30.000.
 
 ```rust
 // src/main.rs
@@ -109,11 +109,11 @@ fn first_km_over_loop(limit: i64) -> u32 {
 }
 ```
 
-Kết quả là 7, vì `fare(6) = 30.000` chưa vượt còn `fare(7) = 34.500`. Lab có thêm bản `while fare(km) <= limit` cho cùng kết quả; `while` gọn hơn khi điều kiện dừng nằm gọn trong một biểu thức.
+Kết quả là 7, vì `fare(6) = 30.000` chưa vượt còn `fare(7) = 34.500`. Lab có thêm bản `while fare(km) <= limit` cho cùng kết quả; `while` gọn hơn khi điều kiện dừng gói trọn trong một biểu thức.
 
 ## iter, iter_mut hay into_iter: ai giữ dữ liệu?
 
-Iterator là thứ có phương thức `next()` trả `Some(phần_tử)` hoặc `None` khi hết. Ba cách lấy iterator từ `Vec<Posting>` khác nhau ở quyền sở hữu, tiếp nối bài 04:
+Iterator là đối tượng có phương thức `next()`, trả về `Some(phần_tử)` hoặc `None` khi đã hết. Ba cách lấy iterator từ `Vec<Posting>` khác nhau ở quyền sở hữu, tiếp nối bài 04:
 
 | Cách gọi | Phần tử nhận được | Sau khi duyệt |
 | --- | --- | --- |
@@ -132,7 +132,7 @@ for p in reversal.iter_mut() {
 }
 ```
 
-Cộng số dư driver qua cả `JE-000001` và `JE-000002` được 0. Còn `into_iter` biến dãy thành đầu vào của một đường ống rồi bỏ nó đi. Dùng lại biến sau đó là lỗi thật. Thử riêng trong một crate nhỏ (bản rút gọn), rustc báo:
+Cộng số dư driver qua cả `JE-000001` và `JE-000002` cho kết quả 0. Còn `into_iter` biến dãy thành đầu vào của một đường ống rồi bỏ dãy gốc đi. Dùng lại biến sau đó là lỗi thật. Thử riêng trong một crate nhỏ, rustc báo (bản rút gọn):
 
 ```text
 error[E0382]: borrow of moved value: `postings`
@@ -188,9 +188,9 @@ fn balance_of(postings: &[Posting], account: &str) -> i64 {
 }
 ```
 
-`&[Posting]` là tham chiếu mượn tới một dãy; bài 09 nói kỹ về slice. `|p| p.amount` là **closure**: hàm vô danh, tham số nằm giữa hai dấu `|`. `filter` nhận closure trả `bool`; `map` nhận closure biến mỗi phần tử thành giá trị mới. Closure đọc được biến xung quanh nó, ở đây là `account`. Cú pháp `.sum::<i64>()` chỉ rõ kiểu tổng, vì `sum` có thể trả nhiều kiểu số khác nhau. Ở vị trí trả về của `balance_of`, chữ ký `-> i64` cũng đủ để suy ra, nhưng `let total = ….sum();` đứng một mình bị rustc từ chối với E0283 `type annotations needed`.
+`&[Posting]` là tham chiếu mượn tới một dãy; bài 09 nói kỹ về slice. `|p| p.amount` là **closure**: hàm vô danh, tham số nằm giữa hai dấu `|`. `filter` nhận closure trả `bool`; `map` nhận closure biến mỗi phần tử thành giá trị mới. Closure đọc được biến xung quanh nó, ở đây là `account`. Cú pháp `.sum::<i64>()` chỉ rõ kiểu tổng, vì `sum` có thể trả nhiều kiểu số khác nhau. Ở vị trí trả về của `balance_of`, chữ ký `-> i64` cũng đủ để suy ra kiểu, nhưng `let total = ….sum();` đứng một mình bị rustc từ chối với E0283 `type annotations needed`.
 
-Cùng họ adapter còn vài công cụ lab đã chạy: `fold(0_i64, |acc, p| acc + p.amount)` cộng dồn với giá trị khởi đầu tự chọn, `count()` đếm phần tử, `max_by_key(|p| p.amount)` trả `Option` của phần tử lớn nhất, `enumerate()` thêm số thứ tự và `zip` ghép hai dãy theo cặp. Cuối cùng `collect::<Vec<_>>()` gom kết quả vào `Vec`; dấu `_` để compiler suy kiểu phần tử.
+Cùng họ adapter còn có vài công cụ mà lab đã chạy: `fold(0_i64, |acc, p| acc + p.amount)` cộng dồn với giá trị khởi đầu tự chọn, `count()` đếm phần tử, `max_by_key(|p| p.amount)` trả về `Option` chứa phần tử lớn nhất, `enumerate()` thêm số thứ tự và `zip` ghép hai dãy theo cặp. Cuối cùng `collect::<Vec<_>>()` gom kết quả vào `Vec`; dấu `_` để compiler tự suy ra kiểu phần tử.
 
 ```rust
 // src/main.rs
@@ -228,7 +228,7 @@ let mut checked = 0;
 println!("sau khi chỉ dựng filter: closure đã chạy {checked} lần");
 ```
 
-Output thật: `sau khi chỉ dựng filter: closure đã chạy 0 lần`. Sau khi thêm `.count()` vào một đường ống mới, bộ đếm lên 3 và `count` trả 2 posting dương. Nếu bạn viết `v.iter().map(...)` rồi bỏ đó, rustc cảnh báo ``unused `Map` that must be used`` kèm ghi chú `iterators are lazy and do nothing unless consumed`.
+Kết quả chạy thật: `sau khi chỉ dựng filter: closure đã chạy 0 lần`. Sau khi thêm `.count()` vào một đường ống mới, bộ đếm lên 3 và `count` trả về 2, đúng số posting dương. Nếu bạn viết `v.iter().map(...)` rồi không dùng tới, rustc cảnh báo ``unused `Map` that must be used`` kèm ghi chú `iterators are lazy and do nothing unless consumed`.
 
 Đây cũng là ý của [LINQ và deferred execution](/articles/csharp-linq-deferred-execution) trong C#: `Where` và `Select` mô tả truy vấn, `ToList` hay `Sum` mới thực thi. Điểm khác: iterator Rust bị tiêu thụ trong một lượt, vì `sum` lấy `self` theo giá trị. Muốn duyệt lần hai thì gọi `iter()` lại, không có chuyện một biến truy vấn chạy lại nhiều lần như `IEnumerable`. Iterator không hứa nhanh hơn vòng `for`; chọn theo độ rõ, đo khi cần.
 
@@ -243,7 +243,7 @@ Output thật: `sau khi chỉ dựng filter: closure đã chạy 0 lần`. Sau k
 
 <div class="tkh-callout tkh-callout--warn">
 <span class="tkh-callout-title">Giới hạn của ví dụ</span>
-<p>Số dư ở đây là phép duyệt qua <code>Vec</code> trong bộ nhớ, với tài khoản cho trước và <code>i64</code> trần thay cho <code>Money</code>. Chưa có chặn tràn số (<code>sum</code> trên <code>i64</code> theo quy tắc tràn số ở bài 03, sổ cái thật phải dùng <code>checked_add</code>), chưa có map tài khoản → số dư, chưa có lưu trữ và đồng thời. Bút toán trong lab bỏ <code>psp:vixanh:clearing</code> cho gọn. Sổ cái production không tính lại số dư bằng cách duyệt toàn bộ dòng mỗi lần: các bài sau về schema và projection xử lý việc này.</p>
+<p>Số dư ở đây là phép duyệt qua <code>Vec</code> trong bộ nhớ, với tài khoản cho trước và <code>i64</code> thuần thay cho <code>Money</code>. Chưa có cơ chế chặn tràn số (<code>sum</code> trên <code>i64</code> tuân theo quy tắc tràn số ở bài 03, nên sổ cái thật phải dùng <code>checked_add</code>), chưa có map từ tài khoản sang số dư, chưa có lưu trữ, chưa xử lý đồng thời. Bút toán trong lab bỏ <code>psp:vixanh:clearing</code> cho gọn. Sổ cái production không tính lại số dư bằng cách duyệt toàn bộ dòng mỗi lần: các bài sau về schema và projection xử lý việc này.</p>
 </div>
 
 ## Chạy ví dụ và kiểm chứng
@@ -255,7 +255,7 @@ cargo run --manifest-path examples/toi-noi-rust/06-ham-vong-lap-iterator/Cargo.t
 cargo run --manifest-path examples/toi-noi-rust/06-ham-vong-lap-iterator/Cargo.toml -- --verify
 ```
 
-Output thật của lệnh đầu (rút gọn, chỉ giữ phần số dư; các dòng cước và lazy đã trích ở trên):
+Kết quả chạy thật của lệnh đầu (rút gọn, chỉ giữ phần số dư; các dòng cước và lazy đã trích ở trên):
 
 ```text
 #1 JE-000001  -25500 customer:CU-001
@@ -272,7 +272,7 @@ posting lớn nhất: driver:DR-001 (20400)
 
 Lệnh sau in thêm `VERIFY OK (11 kiểm tra)` và thoát với mã 0; kiểm tra nào sai thì in `FAIL: <tên>` ra stderr và thoát với mã 1. Các kiểm tra gồm cước 0, 2, 5, 7 km, `fare_loop` trùng `fare` từ 0 đến 50 km, `loop` trùng `while`, số dư từng tài khoản và tổng mọi posting bằng 0.
 
-**Bài tập:** viết `fn fare_between(from_km: u32, to_km: u32) -> i64` trả tổng cước **phần km vượt** của các km từ `from_km` đến `to_km` (gồm cả hai đầu), chỉ bằng một iterator, không có biến `mut`. Với `from_km = 1`, `to_km = 5` kết quả phải là 13.500. Sau đó thử: nếu bỏ `.sum::<i64>()` ở `balance_of`, compiler phàn nàn gì?
+**Bài tập:** viết `fn fare_between(from_km: u32, to_km: u32) -> i64` trả về tổng cước **phần km vượt** của các km từ `from_km` đến `to_km` (gồm cả hai đầu), chỉ bằng một iterator, không có biến `mut`. Với `from_km = 1`, `to_km = 5` kết quả phải là 13.500. Sau đó thử: nếu bỏ `.sum::<i64>()` ở `balance_of`, compiler phàn nàn gì?
 
 <details><summary>Xem lời giải</summary>
 

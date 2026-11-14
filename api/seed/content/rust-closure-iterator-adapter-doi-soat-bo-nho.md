@@ -1,7 +1,7 @@
 ---
 slug: rust-closure-iterator-adapter-doi-soat-bo-nho
 title: "Closure, iterator adapter và lazy evaluation: đối soát trong bộ nhớ"
-summary: "Bài 15: đối soát sổ cái với sao kê VíXanh giả theo external_ref bằng closure Fn/FnMut/FnOnce, iterator adapter, group-by thủ công và collect; chứng minh iterator lazy bằng inspect, đối chiếu LINQ."
+summary: "Bài 15: đối soát sổ cái với sao kê VíXanh giả lập theo external_ref bằng closure Fn/FnMut/FnOnce, iterator adapter, group-by thủ công và collect; chứng minh iterator lazy bằng inspect, so sánh với LINQ."
 category: rust-beginner
 level: beginner
 tags: [rust, toi-noi, ledger, closure, iterator, reconciliation]
@@ -20,7 +20,7 @@ Cuối ngày, VíXanh gửi sao kê năm dòng; sổ cái của Tới Nơi có b
 
 ## Đối soát là so hai danh sách theo khoá, không theo vị trí
 
-Khoá khớp là `external_ref`, mã giao dịch của VíXanh. Lab đặt nó vào `idempotency_key` của bút toán thu qua VíXanh, dạng `psp:vixanh:<external_ref>`, để có sẵn khoá mà chưa cần thêm trường mới. Đây là quy ước riêng của lab đối soát, không thay `trip:TN-0001:capture` của các bài khác; sổ thật giữ key theo chuyến và lưu `external_ref` ở trường riêng. Dấu giữ như bước capture của [bài 13](/articles/rust-double-entry-journal-entry-posting): ví khách âm, `psp:vixanh:clearing` dương. Bút toán chia `trip:TN-0001:split` (bước 2 của bài 13) là chuyển nội bộ, sao kê VíXanh không có, nên không đối soát.
+Khoá dùng để khớp là `external_ref`, mã giao dịch của VíXanh. Lab đặt nó vào `idempotency_key` của bút toán thu qua VíXanh, dạng `psp:vixanh:<external_ref>`, để có sẵn khoá mà chưa cần thêm trường mới. Đây là quy ước riêng của lab đối soát, không thay `trip:TN-0001:capture` của các bài khác; sổ thật giữ key theo chuyến và lưu `external_ref` ở trường riêng. Dấu của các posting giống bước capture của [bài 13](/articles/rust-double-entry-journal-entry-posting): ví khách âm, `psp:vixanh:clearing` dương. Bút toán chia `trip:TN-0001:split` (bước 2 của bài 13) là chuyển nội bộ, sao kê VíXanh không có, nên không đối soát.
 
 Thuật toán có ba bước (Hình 1): cộng tiền theo khoá ở từng phía, hợp hai tập khoá, phân loại từng khoá. Phải cộng trước khi so vì sao kê có thể chia một khoá thành nhiều dòng: `VX-1002` là 25.000 và 15.000.
 
@@ -33,7 +33,7 @@ Thuật toán có ba bước (Hình 1): cộng tiền theo khoá ở từng phí
 
 ## `Fn`, `FnMut`, `FnOnce`: closure làm gì với biến nó bắt?
 
-Closure là hàm vô danh dùng được biến ở quanh nó (biến được bắt, captured). Compiler cài trait cho closure tuỳ cách nó dùng các biến đó:
+Closure là hàm vô danh dùng được biến ở quanh nó (biến được bắt, captured). Compiler tự cho closure implement trait tương ứng, tuỳ cách closure dùng các biến đó:
 
 | Trait | Closure làm gì với biến bắt được | Gọi được | Trong lab |
 | --- | --- | --- | --- |
@@ -41,7 +41,7 @@ Closure là hàm vô danh dùng được biến ở quanh nó (biến được b
 | `FnMut` | Sửa biến bắt được | Nhiều lần, lần lượt | `\|_, l, p\| if l != p { mismatched += 1 }` |
 | `FnOnce` | Chuyển (move) biến bắt được ra ngoài | Đúng một lần | `move \|\| note` (trả `note` đi) |
 
-Mọi closure đều là `FnOnce`; không move biến ra thì là `FnMut`; không sửa biến nữa thì là `Fn`. Hàm nhận closure nên đòi ít nhất có thể: `visit_common` gọi closure nhiều lần nên không nhận `FnOnce`, nhưng không gọi đồng thời nên chỉ đòi `FnMut`; nhờ đó người gọi đếm được ref lệch.
+Mọi closure đều là `FnOnce`; không move biến ra thì là `FnMut`; không sửa biến nữa thì là `Fn`. Hàm nhận closure nên đòi hỏi ít nhất có thể: `visit_common` gọi closure nhiều lần nên không nhận `FnOnce`, nhưng không gọi đồng thời nên chỉ đòi `FnMut`; nhờ đó người gọi đếm được ref lệch.
 
 ```rust
 // src/reconcile.rs
@@ -66,7 +66,7 @@ visit_common(&ours, &theirs, |_, l, p| {
 println!("FnMut   : {mismatched} ref có ở cả hai phía nhưng lệch số tiền");
 ```
 
-`visit` phải khai báo `mut` vì gọi một `FnMut` là mượn nó mutably. Truyền closure sửa biến vào chỗ đòi `Fn` (như `key_of` của `group_by` ở phần sau) là lỗi E0594 (đã thử, rút gọn):
+`visit` phải khai báo `mut` vì gọi một `FnMut` là mượn nó để ghi. Truyền closure sửa biến vào chỗ đòi `Fn` (như `key_of` của `group_by` ở phần sau) là lỗi E0594 (đã thử, rút gọn):
 
 ```text
 error[E0594]: cannot assign to `seen`, as it is a captured variable in a `Fn` closure
@@ -88,7 +88,7 @@ note: this value implements `FnOnce`, which causes it to be moved when called
 
 ## Bắt theo tham chiếu hay `move`?
 
-Mặc định closure bắt biến theo cách nhẹ nhất đủ dùng: đọc thì mượn `&`, sửa thì mượn `&mut`, move ra thì lấy luôn. Từ khoá `move` ép mọi biến thành bản sở hữu của closure. Nó **không** quyết định `Fn`, `FnMut` hay `FnOnce`, chỉ quyết định biến được mượn hay được lấy đi. Cần `move` khi closure sống lâu hơn hàm tạo ra nó, như khi trả closure về:
+Mặc định closure bắt biến theo cách nhẹ nhất đủ dùng: đọc thì mượn `&`, sửa thì mượn `&mut`, move ra thì lấy luôn. Từ khoá `move` ép mọi biến thành bản sở hữu của closure. Từ khoá này **không** quyết định `Fn`, `FnMut` hay `FnOnce`, chỉ quyết định biến được mượn hay được lấy đi. Cần `move` khi closure sống lâu hơn hàm tạo ra nó, như khi trả closure về:
 
 ```rust
 // src/reconcile.rs
@@ -97,7 +97,7 @@ pub fn at_least(min: Money) -> impl Fn(&LedgerRecord) -> bool {
 }
 ```
 
-Bỏ `move`, closure mượn `min`, mà `min` mất khi hàm kết thúc. Compiler từ chối (E0373) và chỉ chỗ sửa:
+Nếu bỏ `move`, closure sẽ mượn `min`, mà `min` mất khi hàm kết thúc. Compiler từ chối (E0373) và chỉ chỗ sửa:
 
 ```text
 error[E0373]: closure may outlive the current function, but it borrows `min`, which is owned by the current function
@@ -131,7 +131,7 @@ pub fn parse_statement(text: &str) -> Result<Vec<PspRecord>, StatementError> {
 }
 ```
 
-Thứ tự adapter có nghĩa: đổi chỗ `enumerate` và `skip` thì số dòng báo lỗi lệch một. Phía sổ cái, `LedgerRecord::from_entry` trả `Result<Option<_>, _>`, còn `filter_map` cần `Option`. `transpose` đổi `Result<Option<T>, E>` thành `Option<Result<T, E>>`: `None` bị bỏ, `Some(Err(..))` đi tiếp cho `collect` bắt:
+Thứ tự adapter quan trọng: đổi chỗ `enumerate` và `skip` thì số dòng báo lỗi lệch một. Phía sổ cái, `LedgerRecord::from_entry` trả `Result<Option<_>, _>`, còn `filter_map` cần `Option`. `transpose` đổi `Result<Option<T>, E>` thành `Option<Result<T, E>>`: `None` bị bỏ, `Some(Err(..))` đi tiếp cho `collect` bắt:
 
 ```rust
 // src/reconcile.rs
@@ -143,11 +143,11 @@ pub fn ledger_records(ledger: &Ledger) -> Result<Vec<LedgerRecord>, LedgerError>
 }
 ```
 
-`collect` vào `Result<Vec<_>, _>` chạy hết nếu mọi phần tử là `Ok`, và dừng ở `Err` đầu tiên rồi trả đúng lỗi đó. Sao kê có dòng `VX-2,12a` cho `dòng 3: số tiền không hợp lệ ("12a")`, không phải một `Vec` thiếu dòng.
+`collect` vào `Result<Vec<_>, _>` chạy hết nếu mọi phần tử là `Ok`, và dừng ở `Err` đầu tiên rồi trả đúng lỗi đó. Sao kê có dòng `VX-2,12a` cho ra `dòng 3: số tiền không hợp lệ ("12a")`, không phải một `Vec` thiếu dòng.
 
 ## Group-by thủ công và ba đích của `collect`
 
-`Iterator` không có `group_by` (`slice::chunk_by` chỉ gom các dòng liền kề); viết tay chỉ vài dòng với `entry` của bài 09, dùng `or_default()` thay `or_insert`:
+`Iterator` không có `group_by` (`slice::chunk_by` chỉ gom các dòng liền kề); viết tay chỉ vài dòng với `entry` của bài 09, dùng `or_default()` thay cho `or_insert`:
 
 ```rust
 // src/reconcile.rs
@@ -165,7 +165,7 @@ where
 }
 ```
 
-`key_of` chỉ đọc `item` nên `Fn` là đủ. Cộng từng nhóm dùng `try_fold` (như `fold` nhưng dừng khi gặp `Err`) để kiểm tràn số, rồi `collect` vào `Result<HashMap<_, _>, _>`:
+`key_of` chỉ đọc `item` nên `Fn` là đủ. Cộng từng nhóm dùng `try_fold` (như `fold` nhưng dừng khi gặp `Err`) để kiểm tra tràn số, rồi `collect` vào `Result<HashMap<_, _>, _>`:
 
 ```rust
 // src/reconcile.rs
@@ -185,7 +185,7 @@ fn sum_groups<T>(
 }
 ```
 
-Lab có ba đích `collect`: `Result<Vec<_>, _>` cho kết quả có thể lỗi, `Result<HashMap<_, _>, _>` cho tổng theo ref, `BTreeMap` cho báo cáo cần thứ tự ổn định. Báo cáo dùng `BTreeSet` hợp hai tập khoá nên luôn sắp theo `external_ref`:
+Lab có ba đích `collect`: `Result<Vec<_>, _>` cho kết quả có thể lỗi, `Result<HashMap<_, _>, _>` cho tổng theo ref, `BTreeMap` cho báo cáo cần thứ tự ổn định. Báo cáo dùng `BTreeSet` để hợp hai tập khoá, nên luôn được sắp theo `external_ref`:
 
 ```rust
 // src/reconcile.rs (rút gọn)
@@ -204,7 +204,7 @@ let findings: BTreeMap<String, Finding> = refs
     .collect();
 ```
 
-`collect` vào `HashMap` từ dữ liệu có khoá trùng thì giá trị sau âm thầm thay giá trị trước, không có lỗi. Test `collect_into_hashmap_keeps_last_duplicate_key` ghi lại hành vi này; vì vậy ta gom nhóm rồi cộng, không `collect` thẳng dòng sao kê vào map.
+`collect` vào `HashMap` từ dữ liệu có khoá trùng thì giá trị sau ghi đè giá trị trước mà không báo lỗi. Test `collect_into_hashmap_keeps_last_duplicate_key` ghi lại hành vi này; vì vậy ta gom nhóm rồi cộng, không `collect` thẳng dòng sao kê vào map.
 
 Còn `zip`. Hàm `positional_ref_clashes` ghép sổ và sao kê theo vị trí để cho thấy cách làm sai: sao kê có thêm một dòng `VX-1002` nên các cặp sau đó lệch một bước, và `VX-1005` không có cặp vì `zip` dừng ở danh sách ngắn hơn:
 
@@ -217,7 +217,7 @@ Hai cặp này là báo động giả, còn `VX-1005` thiếu bên ta không xu�
 
 ## Lazy: iterator không chạy cho đến khi có người kéo
 
-Adapter chỉ ghi "sẽ làm gì" vào một giá trị iterator. Việc chỉ xảy ra khi bước tiêu thụ gọi `next()`, và mỗi `next()` kéo ngược từ cuối đường ống về đầu, dừng khi có một phần tử qua hết các bước. Lab chứng minh bằng `inspect`, adapter chạy closure cho mỗi phần tử đi qua mà không đổi nó:
+Adapter chỉ ghi "sẽ làm gì" vào một giá trị iterator. Việc đó chỉ xảy ra khi bước tiêu thụ gọi `next()`, và mỗi `next()` kéo ngược từ cuối đường ống về đầu, dừng khi có một phần tử qua hết các bước. Lab chứng minh bằng `inspect`, adapter chạy closure cho mỗi phần tử đi qua mà không đổi phần tử đó:
 
 ```rust
 // src/main.rs (rút gọn)
@@ -235,7 +235,7 @@ for call in 1..=3 {
 }
 ```
 
-Output thật:
+Kết quả chạy thật:
 
 ```text
 Dựng chuỗi inspect → filter → map (chưa tiêu thụ):
@@ -256,12 +256,12 @@ Dựng chuỗi inspect → filter → map (chưa tiêu thụ):
 <div class="tkh-fig-box">
 <svg viewBox="0 0 880 256" role="img" aria-label="Hình 2. Đường ống iterator gồm iter, inspect, filter, map và bước tiêu thụ. Dựng chuỗi mà không gọi next thì inspect chạy 0 lần; lấy phần tử khớp đầu tiên chạy 2 lần; collect toàn bộ chạy 4 lần."><defs><marker id="rust-closure-iterator-adapter-doi-soat-bo-nho-1-a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10 z" class="f-phys"/></marker></defs><rect x="20" y="20" width="150" height="50" rx="8" class="f-phys-soft s-phys"/><text x="36" y="50" class="t-mono">records.iter()</text><rect x="200" y="20" width="150" height="50" rx="8" class="f-phys-soft s-phys"/><text x="216" y="50" class="t-mono">inspect(…)</text><rect x="380" y="20" width="150" height="50" rx="8" class="f-phys-soft s-phys"/><text x="396" y="50" class="t-mono">filter(|r| big(r))</text><rect x="560" y="20" width="150" height="50" rx="8" class="f-phys-soft s-phys"/><text x="576" y="50" class="t-mono">map(…ref)</text><rect x="740" y="20" width="120" height="50" rx="8" class="f-pk-soft s-pk"/><text x="756" y="50" class="t-mono">next()/collect</text><path d="M170 45 L198 45" class="f-none s-phys" stroke-width="2" marker-end="url(#rust-closure-iterator-adapter-doi-soat-bo-nho-1-a)"/><path d="M350 45 L378 45" class="f-none s-phys" stroke-width="2" marker-end="url(#rust-closure-iterator-adapter-doi-soat-bo-nho-1-a)"/><path d="M530 45 L558 45" class="f-none s-phys" stroke-width="2" marker-end="url(#rust-closure-iterator-adapter-doi-soat-bo-nho-1-a)"/><path d="M710 45 L738 45" class="f-none s-phys" stroke-width="2" marker-end="url(#rust-closure-iterator-adapter-doi-soat-bo-nho-1-a)"/><path d="M800 72 L800 92 L95 92 L95 74" class="f-none s-pk dash" stroke-width="2" marker-end="url(#rust-closure-iterator-adapter-doi-soat-bo-nho-1-a)"/><text x="330" y="86" class="t-small">pull: mỗi next() kéo ngược từ phải sang trái</text><rect x="20" y="112" width="840" height="38" rx="8" class="f-phys-soft s-phys"/><text x="36" y="136" class="t-b">Chỉ dựng chuỗi</text><text x="260" y="136" class="t-small">không ai gọi next() · inspect chạy 0 lần</text><rect x="20" y="158" width="840" height="38" rx="8" class="f-pk-soft s-pk"/><text x="36" y="182" class="t-b">next() lần 1</text><text x="260" y="182" class="t-small">inspect VX-1001, VX-1002 · dừng ở VX-1002 · chạy 2 lần</text><rect x="20" y="204" width="840" height="38" rx="8" class="f-warn-soft s-warn"/><text x="36" y="228" class="t-b">collect() toàn bộ</text><text x="260" y="228" class="t-small">duyệt cả 4 dòng sổ · inspect chạy 4 lần, kết quả nằm sẵn trong một Vec</text></svg>
 </div>
-<figcaption>Hình 2. Cùng một đường ống, ba cách tiêu thụ cho ba số lần <code>inspect</code> khác nhau. Con số 0, 2, 4 do <code>lazy_probe</code> trả về và <code>--verify</code> kiểm.</figcaption>
+<figcaption>Hình 2. Cùng một đường ống, ba cách tiêu thụ cho ba số lần <code>inspect</code> khác nhau. Con số 0, 2, 4 do <code>lazy_probe</code> trả về và <code>--verify</code> kiểm tra.</figcaption>
 </figure>
 
-Lazy cho hai điều: chỉ trả công cho phần cần dùng (`next()` đầu tiên duyệt hai dòng thay vì bốn), và không tạo `Vec` trung gian. Quy tắc: `collect` một lần ở cuối, sát chỗ tiêu thụ.
+Lazy mang lại hai lợi ích: chỉ tốn công cho phần cần dùng (`next()` đầu tiên duyệt hai dòng thay vì bốn), và không tạo `Vec` trung gian. Quy tắc: `collect` một lần ở cuối, sát chỗ tiêu thụ.
 
-`lazy_probe` đếm bằng closure `FnMut` sửa một biến đếm. Iterator còn được dùng về sau thì vẫn đang mượn mutably biến đó, nên đọc biến ở giữa là lỗi E0502 (đã thử):
+`lazy_probe` đếm bằng closure `FnMut` sửa một biến đếm. Iterator còn được dùng về sau thì vẫn đang mượn để ghi biến đó, nên đọc biến ở giữa là lỗi E0502 (đã thử):
 
 ```text
 error[E0502]: cannot borrow `seen` as immutable because it is also borrowed as mutable
@@ -287,21 +287,21 @@ pub fn entries_with_id(&self) -> impl Iterator<Item = (String, &JournalEntry)> {
 }
 ```
 
-Người gọi chỉ thấy "một iterator của `(String, &JournalEntry)`", nên cài đặt đổi được mà API không đổi. Từ edition 2024, `impl Trait` ở vị trí trả về tự bắt mọi lifetime trong phạm vi, gồm của `&self`, nên không cần `+ '_`.
+Người gọi chỉ thấy "một iterator của `(String, &JournalEntry)`", nên có thể đổi phần cài đặt mà API không đổi. Từ edition 2024, `impl Trait` ở vị trí trả về tự bắt mọi lifetime trong phạm vi, gồm của `&self`, nên không cần `+ '_`.
 
-## Với người từ C#: LINQ và iterator adapter
+## Với người quen dùng C#: LINQ và iterator adapter
 
-LINQ và iterator adapter cùng một ý tưởng. Phía C#, xem [bài generics và collections](/articles/csharp-generics-collections).
+LINQ và iterator adapter có chung một ý tưởng. Phía C#, xem [bài generics và collections](/articles/csharp-generics-collections).
 
 | Việc | LINQ (C#) | Iterator Rust trong lab |
 | --- | --- | --- |
 | Lọc | `Where(r => r.Amount >= min)` | `.filter(\|r\| r.amount >= min)` |
 | Biến đổi | `Select` | `.map` |
 | Gom nhóm | `GroupBy(r => r.ExternalRef)`, hoãn chạy | `group_by` viết tay, chạy ngay, trả `HashMap<K, Vec<T>>` |
-| Ra từ điển | `ToDictionary`, ném `ArgumentException` khi trùng khoá | `collect::<HashMap<_, _>>()`, giữ giá trị cuối |
+| Thu thành từ điển | `ToDictionary`, ném `ArgumentException` khi trùng khoá | `collect::<HashMap<_, _>>()`, giữ giá trị cuối |
 | Gom một giá trị | `Aggregate` | `fold`, `try_fold` |
 
-Giống nhau: `Where`/`Select` hoãn chạy đến `foreach` hay `ToList()`, như adapter đến `collect`. Khác nhau: Rust bắt chọn mượn hay `move`, còn lambda C# bắt chính biến nên mọi nơi cùng thấy thay đổi; iterator Rust đi một lượt (bước tiêu thụ nhận `self`), còn truy vấn LINQ duyệt lại sẽ chạy lại từ đầu; lỗi trong đường ống là `Result`, không phải exception.
+Giống nhau: `Where`/`Select` hoãn chạy đến `foreach` hay `ToList()`, như adapter đến `collect`. Khác nhau: Rust buộc người viết chọn giữa mượn và `move`, còn lambda C# bắt chính biến nên mọi nơi cùng thấy thay đổi; iterator Rust đi một lượt (bước tiêu thụ nhận `self`), còn truy vấn LINQ duyệt lại sẽ chạy lại từ đầu; lỗi trong đường ống là `Result`, không phải exception.
 
 ## Chạy ví dụ và kiểm chứng
 
@@ -349,16 +349,16 @@ inspect chạy: dựng = 0, next đầu tiên = 2, collect = 4
   dòng 3: số tiền không hợp lệ ("12a")
 ```
 
-`JE-000002` (`trip:TN-0001:split`) vắng ở phía sổ cái vì `filter_map` bỏ nó: khoá không có tiền tố `psp:vixanh:`. `-- --verify` kiểm các giá trị trên, in `VERIFY OK` với exit code 0; sai thì thoát mã 1. `cargo test` chạy 30 unit test, 4 integration test và 2 doc test.
+`JE-000002` (`trip:TN-0001:split`) vắng ở phía sổ cái vì `filter_map` bỏ nó: khoá không có tiền tố `psp:vixanh:`. `-- --verify` kiểm tra các giá trị trên, in `VERIFY OK` với exit code 0; sai thì thoát mã 1. `cargo test` chạy 30 unit test, 4 integration test và 2 doc test.
 
 <div class="tkh-callout tkh-callout--warn">
 <span class="tkh-callout-title">Giới hạn của ví dụ</span>
-<p>Đối soát thật đọc sao kê hàng trăm nghìn dòng, so theo ngày chốt và múi giờ, xử lý phí PSP, hoàn tiền, chargeback, dung sai làm tròn, và chạy lại được khi sao kê đến muộn. Lab chỉ có một ngày, một PSP, khớp đúng từng đồng, dữ liệu trong bộ nhớ, và chưa xử lý chênh lệch.</p>
+<p>Đối soát thật đọc sao kê hàng trăm nghìn dòng, so theo ngày chốt và múi giờ, xử lý phí PSP, hoàn tiền, chargeback, dung sai làm tròn, và chạy lại được khi sao kê đến muộn. Lab chỉ xét một ngày, một PSP, yêu cầu khớp đúng từng đồng, dữ liệu nằm trong bộ nhớ, và chưa xử lý chênh lệch.</p>
 </div>
 
 **Bài tập:** viết hàm `within_tolerance(tolerance: Money)` trả closure `impl Fn(Money, Money) -> bool`, coi hai số tiền là khớp nếu lệch không quá `tolerance`. Với dung sai 500, `VX-1003` (31.500 so với 31.000) có còn bị báo lệch không? Vì sao không viết `(a.dong() - b.dong()).abs()`?
 
-<details><summary>Xem lời giải</summary><p><code>move |a, b| a.checked_sub(b).is_some_and(|d| d.dong().unsigned_abs() &lt;= tolerance.dong().unsigned_abs())</code>, bọc trong <code>impl Fn(Money, Money) -> bool</code>; <code>move</code> là bắt buộc vì <code>tolerance</code> là tham số cục bộ. Chênh của <code>VX-1003</code> đúng bằng 500 nên dung sai 500 coi là khớp, dung sai 499 thì vẫn báo (bản chạy thử cho <code>true</code> và <code>false</code>). Phép trừ trần có thể tràn <code>i64</code>, và <code>abs()</code> của <code>i64::MIN</code> cũng tràn (panic ở debug); <code>checked_sub</code> cộng <code>unsigned_abs</code> tránh cả hai, còn <code>None</code> thì trả <code>false</code>.</p></details>
+<details><summary>Xem lời giải</summary><p><code>move |a, b| a.checked_sub(b).is_some_and(|d| d.dong().unsigned_abs() &lt;= tolerance.dong().unsigned_abs())</code>, bọc trong <code>impl Fn(Money, Money) -> bool</code>; <code>move</code> là bắt buộc vì <code>tolerance</code> là tham số cục bộ. Chênh của <code>VX-1003</code> đúng bằng 500 nên dung sai 500 coi là khớp, dung sai 499 thì vẫn báo (bản chạy thử cho <code>true</code> và <code>false</code>). Phép trừ không kiểm tra có thể tràn <code>i64</code>, và <code>abs()</code> của <code>i64::MIN</code> cũng tràn (panic ở debug); <code>checked_sub</code> cộng <code>unsigned_abs</code> tránh cả hai, còn <code>None</code> thì trả <code>false</code>.</p></details>
 
 Bài trước: [bài 14](/articles/rust-typestate-may-trang-thai-thanh-toan). Bài tiếp: [bài 16](/articles/rust-box-rc-arc-refcell-smart-pointer).
 

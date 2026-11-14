@@ -58,7 +58,7 @@ Slice pattern trên `&[&str]` vừa tách mã vừa bắt phần `<id>`. Chạy 
   wallet:CU-001           (ngoài sơ đồ, không mở được)
 ```
 
-Vì sao đáng chặn? `store::post` tự mở tài khoản khi gặp mã mới nên khoá ngoại không cản được: gõ nhầm `custmer:CU-001` sẽ mở một tài khoản mới và tiền nằm đó, không ai nhìn. Chart từ chối mã ngoài sơ đồ; test `account_outside_the_chart_is_rejected_without_trace` kiểm không còn dòng nào trong `accounts` hay `journal_entries`.
+Vì sao đáng chặn? `store::post` tự mở tài khoản khi gặp mã mới nên khoá ngoại không cản được: gõ nhầm `custmer:CU-001` sẽ mở một tài khoản mới và tiền nằm đó, không ai để ý. Chart từ chối mã ngoài sơ đồ; test `account_outside_the_chart_is_rejected_without_trace` kiểm không còn dòng nào trong `accounts` hay `journal_entries`.
 
 ## Số dư của mỗi loại đọc sang ngôn ngữ kế toán thế nào?
 
@@ -71,7 +71,7 @@ Từ [bài 13](/articles/rust-double-entry-journal-entry-posting), sổ của lo
 | revenue | phần nền tảng đã kiếm | bất thường: hoàn nhiều hơn đã kiếm | số dư bên có |
 | expense | chi phí đã phát sinh | bất thường: hoàn nhiều hơn đã chi | số dư bên nợ |
 
-Phép ánh xạ chỉ có nghĩa trên số dư: cùng dấu dương, +25.500 ở clearing là số dư bên nợ, còn +5.100 ở `platform:revenue` là số dư bên có.
+Phép ánh xạ chỉ có ý nghĩa với số dư: cùng dấu dương, +25.500 ở clearing là số dư bên nợ, còn +5.100 ở `platform:revenue` là số dư bên có.
 
 ## Dòng tiền một chuyến chạy qua clearing ra sao?
 
@@ -84,7 +84,7 @@ Bước 1, **capture**: VíXanh thu 25.500 của khách, tiền nằm ở `psp:v
 <figcaption>Hình 2. Hai bút toán nối nhau qua <code>psp:vixanh:clearing</code>. Sau bước 1 tiền nằm ở clearing, sau bước 2 clearing về 0.</figcaption>
 </figure>
 
-Cả hai dựng bằng `JournalEntryBuilder` của `ledger-core`, nên không tồn tại khi lệch. Phí đến từ `default_policy()` của [bài 11](/articles/rust-trait-generics-chinh-sach-phi-lam-tron), không tính tay:
+Cả hai dựng bằng `JournalEntryBuilder` của `ledger-core`, nên không tạo được khi lệch. Phí đến từ `default_policy()` của [bài 11](/articles/rust-trait-generics-chinh-sach-phi-lam-tron), không tính tay:
 
 ```rust
 // src/flows.rs (rút gọn: bỏ chú thích)
@@ -186,7 +186,7 @@ Hai bên được phép lệch nhau, và đó là chỗ metric cần soi. Paymen
 
 ## Làm sao biết sổ đang đúng hay sai? Bốn metric bằng SQL
 
-Mỗi metric là một truy vấn chỉ đọc trong `src/metrics.rs`. Thời gian vào qua tham số `as_of` do người gọi truyền, nên kết quả không phụ thuộc đồng hồ máy.
+Mỗi metric là một truy vấn chỉ đọc trong `src/metrics.rs`. Mốc thời gian được truyền vào qua tham số `as_of` do người gọi truyền, nên kết quả không phụ thuộc đồng hồ máy.
 
 | Metric | Sổ đúng khi | Cần vì |
 | --- | --- | --- |
@@ -215,7 +215,7 @@ HAVING SUM(p.amount_dong) <> 0
    AND MIN(e.posted_at) <= $1::text::timestamptz - make_interval(days => $2);
 ```
 
-`LEFT JOIN` ở truy vấn đầu để bút toán không có posting nào cũng hiện ra. Truy vấn thứ hai gom theo tham chiếu chuyến hoặc đơn: cặp capture và chia có tổng clearing bằng 0 thì biến mất. Trên sổ gồm `TN-0001`, `DL-0001` và `TN-0002` (mới capture, chưa chia), cả bốn metric sạch:
+`LEFT JOIN` ở truy vấn đầu giúp bút toán không có posting nào vẫn hiện ra. Truy vấn thứ hai gom theo tham chiếu chuyến hoặc đơn: cặp capture và chia có tổng clearing bằng 0 thì biến mất. Trên sổ gồm `TN-0001`, `DL-0001` và `TN-0002` (mới capture, chưa chia), cả bốn metric sạch:
 
 ```text
 Báo cáo:
@@ -227,7 +227,7 @@ Báo cáo:
   clearing đang giữ 16.500 VND của TN-0002 (mới 15 giờ, chưa quá hạn)
 ```
 
-Clearing giữ tiền không phải lỗi; giữ quá lâu mới là lỗi, nên N là chính sách, chọn theo chu kỳ đối soát với VíXanh. Rồi lab cài ba sự cố: `TN-0003` capture từ 20/10 mà chưa chia; `TN-0004` lệch -500 nhờ tắt trigger rồi bật lại; `driver:DR-009` bị trừ 5.000 khi chưa có tiền (bút toán cân nên trigger không phản đối). Đây là cài lỗi có chủ đích, đại diện cho import hàng loạt hay SQL tay.
+Clearing giữ tiền không phải lỗi; giữ quá lâu mới là lỗi, nên N là chính sách, chọn theo chu kỳ đối soát với VíXanh. Rồi lab gài ba sự cố: `TN-0003` capture từ 20/10 mà chưa chia; `TN-0004` lệch -500 nhờ tắt trigger rồi bật lại; `driver:DR-009` bị trừ 5.000 khi chưa có tiền (bút toán cân nên trigger không phản đối). Đây là việc gài lỗi có chủ đích, đại diện cho import hàng loạt hay SQL tay.
 
 ```text
 Báo cáo (ví khách được phép âm):
@@ -241,7 +241,7 @@ Báo cáo (ví khách được phép âm):
     psp:vixanh:clearing trip:TN-0003  21.000 VND, 16 ngày
 ```
 
-Mỗi sự cố bị đúng một metric nói tên. Tổng toàn sổ chỉ cho biết có lệch, truy vấn đầu chỉ ra bút toán nào.
+Mỗi sự cố bị đúng một metric chỉ ra. Tổng toàn sổ chỉ cho biết có lệch, truy vấn đầu chỉ ra bút toán nào.
 
 **Khi nào `customer:<id>` âm là bình thường?** Trong lab, khách trả qua VíXanh theo từng chuyến, ví không được nạp trước, nên `customer:<id>` là tài khoản biên: tiền vào hệ thống hiện ra là số âm ở ví khách. `customer:CU-001` -84.000 là tổng khách đã trả (25.500 + 25.500 + 33.000). Truy vấn thứ ba vì thế có cờ `customer_may_be_negative`. Tắt cờ, cùng sổ đó báo thêm ba ví khách:
 
@@ -252,9 +252,9 @@ Mỗi sự cố bị đúng một metric nói tên. Tổng toàn sổ chỉ cho 
   driver:DR-009 (liability)  -5.000 VND
 ```
 
-Ví tài xế không có ngoại lệ ở cả hai chế độ: số âm nghĩa là nền tảng đã trả tiền chưa có.
+Ví tài xế không có ngoại lệ ở cả hai chế độ: số âm nghĩa là nền tảng đã trả ra khoản tiền mà ví chưa có.
 
-Mô hình nạp ví đổi biên: ví khách phải không âm nên tắt cờ, còn clearing mang số âm. Mục 10 của lab chạy sổ đó (nạp từ 20/10) và cho thấy hai metric viết cho mô hình trả theo chuyến báo nhầm:
+Mô hình nạp ví đổi tài khoản biên: ví khách phải không âm nên ta tắt cờ, còn clearing mang số âm. Mục 10 của lab chạy sổ đó (nạp từ 20/10) và cho thấy hai metric viết cho mô hình trả theo chuyến báo nhầm:
 
 ```text
   số dư âm bất thường:          1

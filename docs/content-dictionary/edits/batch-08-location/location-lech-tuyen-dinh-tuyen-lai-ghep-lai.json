@@ -1,0 +1,185 @@
+{
+  "file": "location-lech-tuyen-dinh-tuyen-lai-ghep-lai.md",
+  "edits": [
+    {
+      "old": "ngân sách thông báo và biên chỉ ghép lại khi lợi đủ lớn.",
+      "new": "ngân sách thông báo và chỉ ghép lại khi lợi vượt một biên đủ lớn.",
+      "reason": "«biên chỉ ghép lại» cụt, lược mất động từ",
+      "severity": "medium"
+    },
+    {
+      "old": "đổi luôn tài xế, và cả khách lẫn tài xế bị làm phiền",
+      "new": "đổi luôn tài xế, khiến cả khách lẫn tài xế bị làm phiền",
+      "reason": "Hai chữ «và» nối lủng củng",
+      "severity": "medium"
+    },
+    {
+      "old": "Số đo là trên dữ liệu mô phỏng, đồ thị HCM",
+      "new": "Các số đo lấy trên dữ liệu mô phỏng, đồ thị HCM",
+      "reason": "Giọng dịch máy",
+      "severity": "low"
+    },
+    {
+      "old": "chỗ bám đường dễ gán nhầm nhất.",
+      "new": "nơi bộ bám đường dễ gán nhầm nhất.",
+      "reason": "«chỗ bám đường» cụt, thiếu chủ thể",
+      "severity": "medium"
+    },
+    {
+      "old": "lab **không** có quay đầu giữa đường, cấm rẽ, hay lệch cố ý.",
+      "new": "lab **không** mô phỏng quay đầu giữa đường, cấm rẽ, hay lệch cố ý.",
+      "reason": "«có quay đầu» gượng, thiếu động từ đúng nghĩa",
+      "severity": "medium"
+    },
+    {
+      "old": "Đọc mọi con số phía dưới với giới hạn đó.",
+      "new": "Hãy đọc mọi con số bên dưới với giới hạn đó.",
+      "reason": "«phía dưới» kiểu dịch, câu mệnh lệnh cụt",
+      "severity": "low"
+    },
+    {
+      "old": "là một máy trạng thái nhỏ, thuần (không đọc",
+      "new": "là một máy trạng thái nhỏ và thuần tuý (không đọc",
+      "reason": "«thuần» đứng một mình nghe cụt",
+      "severity": "low"
+    },
+    {
+      "old": "**và** nó cách polyline của tuyến quá ngưỡng `off_dist_m`; ngưỡng này nuốt nhầm lẫn giữa hai đường song song sát nhau.",
+      "new": "**và** điểm đó cách polyline của tuyến quá ngưỡng `off_dist_m`; ngưỡng này loại bỏ nhầm lẫn giữa hai đường song song sát nhau.",
+      "reason": "«nó» mơ hồ; «nuốt nhầm lẫn» dùng nghĩa lạ",
+      "severity": "high"
+    },
+    {
+      "old": "Cấu hình được chọn trên tập chỉnh là `k_off = 3`",
+      "new": "Cấu hình được chọn trên tập chỉnh tham số là `k_off = 3`",
+      "reason": "«tập chỉnh» tự ghép, cụt",
+      "severity": "medium"
+    },
+    {
+      "old": "Cấu hình được chọn vì báo nhầm 1,0% và 0,0% trên tập chỉnh, nhưng 2,5% trên tập báo cáo đã vượt ngưỡng 2% đặt trước.",
+      "new": "Cấu hình được chọn vì có tỉ lệ báo nhầm 1,0% và 0,0% trên tập chỉnh tham số, nhưng trên tập báo cáo tỉ lệ này là 2,5%, đã vượt ngưỡng 2% đặt trước.",
+      "reason": "Câu lược chủ ngữ, phải đoán ý",
+      "severity": "high"
+    },
+    {
+      "old": "Tỉ lệ phát hiện theo độ dài đoạn lạc cũng đáng nhìn:",
+      "new": "Tỉ lệ phát hiện theo độ dài đoạn lạc cũng đáng xem xét:",
+      "reason": "«đáng nhìn» gượng",
+      "severity": "low"
+    },
+    {
+      "old": "Đoạn lạc dưới 50 m không bao giờ bị cấu hình chọn báo (0/12), và 50 đến 150 m chỉ phát hiện 78,0%.",
+      "new": "Cấu hình đã chọn không bao giờ báo đoạn lạc dưới 50 m (0/12), còn với đoạn 50 đến 150 m thì chỉ phát hiện được 78,0%.",
+      "reason": "Câu bị động rối, vế sau thiếu chủ ngữ",
+      "severity": "medium"
+    },
+    {
+      "old": "**Cấu hình «đã chọn» chỉ tốt với giả định nhiễu mà nó được chọn trên đó.**",
+      "new": "**Cấu hình «đã chọn» chỉ tốt với giả định nhiễu đã dùng để chọn nó.**",
+      "reason": "Trật tự từ kiểu tiếng Anh, khó hiểu",
+      "severity": "medium"
+    },
+    {
+      "old": "giữ 0,5%, với phát hiện 87,0% và độ trễ p50 16 s.",
+      "new": "giữ tỉ lệ báo nhầm ở 0,5%, với tỉ lệ phát hiện 87,0% và độ trễ p50 16 s.",
+      "reason": "Lược mất danh từ chính",
+      "severity": "medium"
+    },
+    {
+      "old": "trả bằng phát hiện 87,0%.</figcaption>",
+      "new": "đổi lại tỉ lệ phát hiện là 87,0%.</figcaption>",
+      "reason": "«trả bằng phát hiện» cụt, thiếu danh từ",
+      "severity": "medium"
+    },
+    {
+      "old": "định tuyến lại phía server rẻ tới mức chi phí tính toán không phải lý do để đẩy việc xuống ứng dụng.",
+      "new": "định tuyến lại phía server rẻ tới mức chi phí tính toán không phải lý do để chuyển việc xuống ứng dụng.",
+      "reason": "Calque «đẩy việc xuống»",
+      "severity": "medium"
+    },
+    {
+      "old": "Lý lẽ nghiêng về server là bản đồ và chính sách nằm ở server và hai bên cần cùng một tuyến,",
+      "new": "Lý lẽ nghiêng về server là vì bản đồ và chính sách nằm ở server, và hai bên cần cùng một tuyến,",
+      "reason": "Thiếu quan hệ từ, câu khó đọc",
+      "severity": "medium"
+    },
+    {
+      "old": "và khách chỉ được báo khi ETA đổi từ 60 giây.",
+      "new": "và khách chỉ được báo khi ETA đổi từ 60 giây trở lên.",
+      "reason": "Thiếu «trở lên», cách nói cụt",
+      "severity": "low"
+    },
+    {
+      "old": "và chỉ 1,8% lần báo đổi ETA từ 60 giây.",
+      "new": "và chỉ 1,8% lần báo có ETA đổi từ 60 giây trở lên.",
+      "reason": "Cụm «lần báo đổi ETA» mơ hồ, thiếu «trở lên»",
+      "severity": "medium"
+    },
+    {
+      "old": "Đây là phần dễ làm hại nhất.",
+      "new": "Đây là phần dễ gây hại nhất.",
+      "reason": "«làm hại» gượng",
+      "severity": "low"
+    },
+    {
+      "old": "nhưng tài xế đã lệch **đã chạy một đoạn rỗng**",
+      "new": "nhưng tài xế bị lệch tuyến **đã chạy một đoạn rỗng**",
+      "reason": "Lặp «đã», thiếu danh từ «tuyến»",
+      "severity": "medium"
+    },
+    {
+      "old": "Chính sách `guarded` dùng: biên lợi tối thiểu",
+      "new": "Chính sách `guarded` dùng các tham số sau: biên lợi tối thiểu",
+      "reason": "«dùng:» cụt, thiếu tân ngữ",
+      "severity": "medium"
+    },
+    {
+      "old": "Các cột lợi vì thế bị thổi lên; phần so được là hành vi tương đối giữa các chính sách.",
+      "new": "Các cột lợi vì thế bị phóng đại; phần có thể so sánh được là hành vi tương đối giữa các chính sách.",
+      "reason": "Ẩn dụ «thổi lên» khó hiểu; «phần so được» cụt",
+      "severity": "high"
+    },
+    {
+      "old": "có nhãn `km/sk` trong output nhưng code chia cho số lần đổi, tức km mỗi lần đổi.",
+      "new": "có nhãn `km/sk` trong kết quả in ra nhưng code chia cho số lần đổi, tức là km mỗi lần đổi.",
+      "reason": "Từ tiếng Anh thông thường lọt vào văn xuôi",
+      "severity": "low"
+    },
+    {
+      "old": "Lab không đủ để nói lợi của khách có bù được thiệt của tài xế trong vận hành thật không.",
+      "new": "Lab không đủ cơ sở để nói liệu lợi ích của khách có bù được thiệt hại của tài xế trong vận hành thật hay không.",
+      "reason": "Câu cụt, thiếu danh từ",
+      "severity": "medium"
+    },
+    {
+      "old": "Phần mở đầu của output:",
+      "new": "Phần mở đầu của kết quả in ra:",
+      "reason": "Từ tiếng Anh thông thường lọt vào văn xuôi",
+      "severity": "low"
+    },
+    {
+      "old": "không ước lượng được giá trị của ghép lại trong vận hành.",
+      "new": "không ước lượng được giá trị của việc ghép lại trong vận hành.",
+      "reason": "Thiếu «việc» khiến cụm cụt",
+      "severity": "medium"
+    },
+    {
+      "old": "là một cách giải thích có thể cho việc `k_off = 3` vẫn báo nhầm",
+      "new": "là một cách giải thích khả dĩ cho việc `k_off = 3` vẫn báo nhầm",
+      "reason": "«giải thích có thể» gượng",
+      "severity": "low"
+    },
+    {
+      "old": "Chỉ ra điều kiện nào quyết định.",
+      "new": "Hãy chỉ ra điều kiện nào quyết định kết quả.",
+      "reason": "Câu mệnh lệnh cụt, thiếu tân ngữ",
+      "severity": "low"
+    },
+    {
+      "old": "Còn thiếu mô hình việc tài xế cũ làm sau khi bị rút chuyến,",
+      "new": "Còn thiếu mô hình hoá việc tài xế cũ làm gì sau khi bị rút chuyến,",
+      "reason": "«mô hình việc» tự ghép, cụt",
+      "severity": "medium"
+    }
+  ]
+}

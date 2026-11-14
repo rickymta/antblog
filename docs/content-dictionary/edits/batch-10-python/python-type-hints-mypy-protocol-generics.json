@@ -1,0 +1,125 @@
+{
+ "file": "python-type-hints-mypy-protocol-generics.md",
+ "edits": [
+  {
+   "old": "nên phải kiểm lúc chạy (bài 15 giới thiệu cách làm). Bài này đưa vào **type hint**",
+   "new": "nên phải kiểm tra lúc chạy (bài 15 giới thiệu cách làm). Bài này đưa vào **type hint**",
+   "reason": "\"kiểm\" cụt; \"đưa vào\" là calque của introduce",
+   "severity": "medium"
+  },
+  {
+   "old": "interpreter không dùng nó để kiểm đối số.",
+   "new": "interpreter không dùng nó để kiểm tra đối số.",
+   "reason": "\"kiểm\" cụt",
+   "severity": "low"
+  },
+  {
+   "old": "`status` chỉ là `str` và các field công khai, không mang máy trạng thái 8 trạng thái của bài 11.",
+   "new": "`status` chỉ là `str`, các field đều công khai, và lớp không mang máy trạng thái 8 trạng thái của bài 11.",
+   "reason": "liệt kê lẫn lộn, thiếu động từ cho vế sau",
+   "severity": "medium"
+  },
+  {
+   "old": "**interpreter lưu annotation nhưng không kiểm**.",
+   "new": "**interpreter lưu annotation nhưng không kiểm tra**.",
+   "reason": "\"kiểm\" cụt",
+   "severity": "low"
+  },
+  {
+   "old": "Từ bài 02, ta đã dùng hint nhẹ nhàng; bài này là lúc cho một công cụ thực sự dùng chúng.",
+   "new": "Từ bài 02, ta đã dùng hint ở mức đơn giản; bài này là lúc để một công cụ thực sự khai thác chúng.",
+   "reason": "\"nhẹ nhàng\" là calque của lightly",
+   "severity": "medium"
+  },
+  {
+   "old": "Nó không thuộc bản cài Python mà là gói riêng;",
+   "new": "mypy không thuộc bản cài Python mà là gói riêng;",
+   "reason": "\"Nó\" đầu câu chỉ sự vật",
+   "severity": "medium"
+  },
+  {
+   "old": "Hai công cụ có thể không đồng ý ở một số ca biên.",
+   "new": "Hai công cụ có thể cho kết quả khác nhau ở một số trường hợp biên.",
+   "reason": "\"không đồng ý\" là calque của disagree; \"ca biên\" khẩu ngữ",
+   "severity": "medium"
+  },
+  {
+   "old": "Thứ nhất là **cận trên** `T: SupportsFare`",
+   "new": "Thứ nhất là **giới hạn trên (upper bound)** `T: SupportsFare`",
+   "reason": "\"cận trên\" gượng, nên kèm thuật ngữ gốc",
+   "severity": "medium"
+  },
+  {
+   "old": "Không muốn buộc `Trip` và `QuoteLine` (dòng báo giá) cùng kế thừa một lớp cha.",
+   "new": "Ta không muốn buộc `Trip` và `QuoteLine` (dòng báo giá) cùng kế thừa một lớp cha.",
+   "reason": "câu thiếu chủ ngữ",
+   "severity": "high"
+  },
+  {
+   "old": "Sự khác biệt so với lớp cha thường: hợp đồng nằm ở **nơi dùng**, người viết `Trip`",
+   "new": "Khác với kế thừa lớp cha thông thường, hợp đồng nằm ở **nơi dùng**: người viết `Trip`",
+   "reason": "\"lớp cha thường\" cụt, câu thiếu động từ",
+   "severity": "medium"
+  },
+  {
+   "old": "và dùng nó để tiêm phụ thuộc.",
+   "new": "và dùng nó để inject phụ thuộc.",
+   "reason": "\"tiêm\" là dịch từng chữ của inject",
+   "severity": "medium"
+  },
+  {
+   "old": "ta khai báo được bì thư dùng chung cho mọi loại sự kiện:",
+   "new": "ta khai báo được một envelope dùng chung cho mọi loại sự kiện:",
+   "reason": "\"bì thư\" dịch từng chữ của envelope, lệch với tên `Envelope` trong code",
+   "severity": "medium"
+  },
+  {
+   "old": "không có dòng nào kiểm điều đó lúc chạy.",
+   "new": "không có dòng nào kiểm tra điều đó lúc chạy.",
+   "reason": "\"kiểm\" cụt",
+   "severity": "low"
+  },
+  {
+   "old": "mypy xanh không thay được việc kiểm dữ liệu tại biên hệ thống. Thử không gán biến trung gian",
+   "new": "mypy xanh không thay được việc kiểm tra dữ liệu tại biên hệ thống. Nếu thử không gán biến trung gian",
+   "reason": "\"kiểm\" cụt; câu thiếu quan hệ điều kiện",
+   "severity": "medium"
+  },
+  {
+   "old": "Cách làm thật là kiểm dữ liệu ngay khi nhận,",
+   "new": "Cách làm thật là kiểm tra dữ liệu ngay khi nhận,",
+   "reason": "\"kiểm\" cụt",
+   "severity": "low"
+  },
+  {
+   "old": "(PEP 649, bổ sung bởi PEP 749)",
+   "new": "(PEP 649, được PEP 749 bổ sung)",
+   "reason": "bị động \"bởi\" kiểu tiếng Anh",
+   "severity": "low"
+  },
+  {
+   "old": "Lười không có nghĩa tên không cần tồn tại:",
+   "new": "«Lười» không có nghĩa là tên không cần tồn tại:",
+   "reason": "thiếu hệ từ, dễ đọc nhầm",
+   "severity": "medium"
+  },
+  {
+   "old": "Module `annotationlib` cho chọn dạng đọc.",
+   "new": "Module `annotationlib` cho phép chọn dạng đọc.",
+   "reason": "thiếu động từ",
+   "severity": "medium"
+  },
+  {
+   "old": "annotation lười đọc bằng `Format.VALUE`,",
+   "new": "annotation lười được đọc bằng `Format.VALUE`,",
+   "reason": "thiếu từ nối",
+   "severity": "low"
+  },
+  {
+   "old": "Quên xử lý `None`: kiểm `is None` trước khi trả,",
+   "new": "Quên xử lý `None`: kiểm tra `is None` trước khi trả,",
+   "reason": "\"kiểm\" cụt",
+   "severity": "low"
+  }
+ ]
+}

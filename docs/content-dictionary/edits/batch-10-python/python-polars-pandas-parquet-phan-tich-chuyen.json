@@ -1,0 +1,149 @@
+{
+  "file": "python-polars-pandas-parquet-phan-tich-chuyen.md",
+  "edits": [
+    {
+      "old": "đặt pandas cạnh nhau về thời gian và bộ nhớ",
+      "new": "đặt pandas cạnh polars để so thời gian và bộ nhớ",
+      "reason": "Câu cụt, thiếu đối tượng so sánh",
+      "severity": "medium"
+    },
+    {
+      "old": "đúng quy ước lưu UTC hiển thị theo múi giờ.",
+      "new": "đúng quy ước lưu UTC, hiển thị theo múi giờ.",
+      "reason": "Thiếu dấu ngăn, câu khó đọc",
+      "severity": "low"
+    },
+    {
+      "old": "**Mã dài hơn quen thuộc.**",
+      "new": "**Mã dài hơn mã quen thuộc.**",
+      "reason": "Lược mất danh từ",
+      "severity": "medium"
+    },
+    {
+      "old": "và các ca biên 0, 2, 2,5, 5 km",
+      "new": "và các test case biên 0, 2, 2,5, 5 km",
+      "reason": "Thống nhất test case",
+      "severity": "medium"
+    },
+    {
+      "old": "`--verify` kiểm cả hai.",
+      "new": "`--verify` kiểm tra cả hai.",
+      "reason": "Từ cụt",
+      "severity": "low"
+    },
+    {
+      "old": "kiểm chứng đường ống phân tích tìm lại đúng đỉnh đã gài",
+      "new": "kiểm chứng pipeline phân tích tìm lại đúng đỉnh đã gài",
+      "reason": "«Đường ống» là calque của pipeline, bài dùng «pipeline» ở mục sau",
+      "severity": "medium"
+    },
+    {
+      "old": "dữ liệu cùng một cột giống nhau nên nén tốt",
+      "new": "các giá trị trong cùng một cột lặp lại nhiều nên nén tốt",
+      "reason": "«Giống nhau» sai ý, dữ liệu chỉ lặp lại nhiều",
+      "severity": "medium"
+    },
+    {
+      "old": "**Parquet nhớ kiểu**",
+      "new": "**Parquet giữ lại kiểu dữ liệu**",
+      "reason": "Calque của «remembers types»",
+      "severity": "medium"
+    },
+    {
+      "old": "(và thời điểm chỉ về đúng nhờ `try_parse_dates=True`, tức phải đoán chuỗi)",
+      "new": "(và thời điểm chỉ đọc về đúng nhờ `try_parse_dates=True`, tức là phải đoán từ chuỗi)",
+      "reason": "Cụm tự ghép nghe cụt",
+      "severity": "medium"
+    },
+    {
+      "old": "Cùng truy vấn bằng pandas (`ride_revenue_pandas`) là eager:",
+      "new": "Cùng truy vấn đó viết bằng pandas (`ride_revenue_pandas`) thì là eager:",
+      "reason": "Câu thiếu động từ",
+      "severity": "medium"
+    },
+    {
+      "old": "Còn chi phí? Mỗi kịch bản",
+      "new": "Còn chi phí thì sao? Mỗi kịch bản",
+      "reason": "Câu cụt",
+      "severity": "low"
+    },
+    {
+      "old": "Vì vậy chỉ đọc thứ bậc lớn, không đọc chênh lệch nhỏ.",
+      "new": "Vì vậy chỉ nên đọc theo bậc độ lớn, không đọc chênh lệch nhỏ.",
+      "reason": "Dịch gượng",
+      "severity": "medium"
+    },
+    {
+      "old": "cũng không so với nhau được:",
+      "new": "cũng không thể so sánh trực tiếp với nhau:",
+      "reason": "Câu dịch sát, nặng",
+      "severity": "medium"
+    },
+    {
+      "old": "là con số trừ đi nền. Gọn lại:",
+      "new": "là con số sau khi trừ đi phần nền. Gọn lại:",
+      "reason": "Câu cụt",
+      "severity": "low"
+    },
+    {
+      "old": "sự khác biệt chưa gây đau; nó gây đau khi truy vấn chạy",
+      "new": "sự khác biệt chưa thành vấn đề; nó thành vấn đề khi truy vấn chạy",
+      "reason": "Calque của «pain»",
+      "severity": "medium"
+    },
+    {
+      "old": "vượt phần lớn máy; nên chia theo ngày thành nhiều file Parquet và chỉ quét phần cần, việc của bài 65.",
+      "new": "vượt quá dung lượng RAM của phần lớn máy; nên chia theo ngày thành nhiều file Parquet và chỉ quét phần cần, đó là việc của bài 65.",
+      "reason": "Câu thiếu thành phần",
+      "severity": "medium"
+    },
+    {
+      "old": "pandas không hỏng. Nó là cầu nối của cả hệ sinh thái:",
+      "new": "pandas không hỏng. pandas là cầu nối của cả hệ sinh thái:",
+      "reason": "Tránh «Nó» đầu câu",
+      "severity": "low"
+    },
+    {
+      "old": "Với dữ liệu nhỏ và thao tác tương tác, nó thoải mái hơn. Ranh giới nên chọn polars là:",
+      "new": "Với dữ liệu nhỏ và thao tác tương tác, pandas dùng thoải mái hơn. Ranh giới để chọn polars là:",
+      "reason": "Tránh «Nó» đầu câu; dịch gượng",
+      "severity": "medium"
+    },
+    {
+      "old": "Chuyển qua lại ở biên là chuyện thường:",
+      "new": "Chuyển qua lại ở ranh giới với thư viện khác là chuyện thường:",
+      "reason": "«Ở biên» là calque của «at the boundary»",
+      "severity": "medium"
+    },
+    {
+      "old": "và không có dấu hiệu nào báo sai; nó chỉ là phần dư",
+      "new": "và không có dấu hiệu nào báo là sai; số này chỉ là phần dư",
+      "reason": "Đại từ mơ hồ",
+      "severity": "low"
+    },
+    {
+      "old": "đó là khác biệt về mặc định, và nó dễ bị bỏ sót khi",
+      "new": "đó là khác biệt về mặc định, và sự khác biệt này dễ bị bỏ sót khi",
+      "reason": "Đại từ mơ hồ",
+      "severity": "low"
+    },
+    {
+      "old": "lệnh thứ hai kiểm 17 bất biến",
+      "new": "lệnh thứ hai kiểm tra 17 bất biến",
+      "reason": "Từ cụt",
+      "severity": "low"
+    },
+    {
+      "old": "Số đo là một máy macOS Apple silicon 10 lõi",
+      "new": "Số đo lấy từ một máy macOS Apple silicon 10 lõi",
+      "reason": "Câu thiếu động từ",
+      "severity": "medium"
+    },
+    {
+      "old": "muốn tiết kiệm phải nhớ liệt kê cột tay.",
+      "new": "muốn tiết kiệm phải nhớ liệt kê cột bằng tay.",
+      "reason": "Từ cụt",
+      "severity": "low"
+    }
+  ]
+}

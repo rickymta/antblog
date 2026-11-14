@@ -1,0 +1,11 @@
+{
+  "file": "location-nhieu-diem-dung-chen-2-opt-doi-chieu-ortools.md",
+  "edits": [
+    {
+      "old": "OR-Tools, thời gian tường",
+      "new": "OR-Tools, thời gian thực tế",
+      "reason": "«Thời gian tường» là dịch từng chữ của wall-clock time; rust-r5 đã chốt «thời gian thực tế (wall-clock)» ở bài tổng hợp, location-r3 cũng sửa cụm này.",
+      "severity": "low"
+    }
+  ]
+}

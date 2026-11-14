@@ -1,0 +1,191 @@
+{
+  "file": "rust-van-hanh-so-cai-slo-alert-doi-soat-runbook-replay.md",
+  "edits": [
+    {
+      "old": "SLO gợi ý §14.1 thành SLI bằng SQL và Kafka, burn rate đa cửa sổ bằng hàm thuần,",
+      "new": "biến SLO gợi ý ở §14.1 thành SLI đo bằng SQL và Kafka, burn rate đa cửa sổ tính bằng hàm thuần,",
+      "reason": "Summary thiếu động từ, câu cụt",
+      "severity": "high"
+    },
+    {
+      "old": "Bài này không dạy lại Rust hay nghiệp vụ. Nó biến",
+      "new": "Bài này không dạy lại Rust hay nghiệp vụ. Bài biến",
+      "reason": "Tránh \"Nó\" chỉ sự vật trừu tượng đầu câu",
+      "severity": "medium"
+    },
+    {
+      "old": "cửa sổ 1 giờ mới 3,333 nên im lặng.",
+      "new": "cửa sổ 1 giờ mới đạt 3,333 nên luật không bắn.",
+      "reason": "\"Im lặng\" là calque; nói rõ luật không bắn",
+      "severity": "medium"
+    },
+    {
+      "old": "và mượn mục tiêu 99,9% của dòng trên, đó là lựa chọn của lab",
+      "new": "và mượn mục tiêu 99,9% của dòng trên; đây là lựa chọn của lab",
+      "reason": "Nối câu bằng dấu phẩy chưa chuẩn",
+      "severity": "low"
+    },
+    {
+      "old": "Lab đo bảy thứ. Năm thứ đọc từ PostgreSQL:",
+      "new": "Lab đo bảy chỉ số. Năm chỉ số đọc từ PostgreSQL:",
+      "reason": "\"Thứ\" mơ hồ, nên gọi đúng là chỉ số",
+      "severity": "medium"
+    },
+    {
+      "old": "Hai thứ đọc từ Kafka:",
+      "new": "Hai chỉ số đọc từ Kafka:",
+      "reason": "Thống nhất cách gọi",
+      "severity": "medium"
+    },
+    {
+      "old": "nên về mặt kiểu nó không có cách nào sửa sổ.",
+      "new": "nên xét về kiểu dữ liệu, hàm này không có cách nào sửa sổ.",
+      "reason": "Dịch sát \"in terms of type\"; \"nó\" mơ hồ",
+      "severity": "medium"
+    },
+    {
+      "old": "Ngưỡng tính từ phần ngân sách chịu mất trong cửa sổ dài, trên kỳ 720 giờ:",
+      "new": "Ngưỡng được tính từ phần ngân sách chấp nhận mất trong cửa sổ dài, trên kỳ 720 giờ:",
+      "reason": "Câu cụt, thiếu động từ",
+      "severity": "medium"
+    },
+    {
+      "old": "143 lỗi thì luật 1 giờ im lặng; một cú nhoáng 20% không đủ để page.",
+      "new": "143 lỗi thì luật 1 giờ không bắn; một đợt lỗi thoáng qua 20% không đủ để page.",
+      "reason": "\"Im lặng\" và \"cú nhoáng\" gượng",
+      "severity": "medium"
+    },
+    {
+      "old": "Dòng của `reconciliation-mismatch` là ví dụ đầy đủ nhất:",
+      "new": "Đoạn xử lý của `reconciliation-mismatch` là ví dụ đầy đủ nhất:",
+      "reason": "\"Dòng của\" mơ hồ",
+      "severity": "low"
+    },
+    {
+      "old": "Ca diễn tập kiểm số bút toán và `head` hash chain trước và sau alert phải y hệt.",
+      "new": "Ca diễn tập kiểm tra số bút toán và `head` của hash chain: trước và sau alert phải y hệt nhau.",
+      "reason": "Câu cụt, thiếu động từ rõ nghĩa",
+      "severity": "medium"
+    },
+    {
+      "old": "message hỏng hẳn ở lại DLQ và mở việc",
+      "new": "message hỏng hẳn ở lại DLQ và mở ticket xử lý",
+      "reason": "\"Mở việc\" dịch gượng",
+      "severity": "medium"
+    },
+    {
+      "old": "không có lịch sử sạch pha loãng cửa sổ dài;",
+      "new": "không có lịch sử sạch để pha loãng cửa sổ dài;",
+      "reason": "Câu thiếu từ nối",
+      "severity": "medium"
+    },
+    {
+      "old": "kèm `psp_refs` và `recon_adjustments` ghi kỳ gốc, lý do.",
+      "new": "kèm `psp_refs` và `recon_adjustments` ghi lại kỳ gốc và lý do.",
+      "reason": "Câu cụt",
+      "severity": "low"
+    },
+    {
+      "old": "rồi thấy `vx_ch_0503` thiếu.",
+      "new": "rồi phát hiện thiếu `vx_ch_0503`.",
+      "reason": "Trật tự từ kiểu tiếng Anh",
+      "severity": "low"
+    },
+    {
+      "old": "và vì sao nó không cần cơ chế idempotency riêng?",
+      "new": "và vì sao không cần cơ chế idempotency riêng?",
+      "reason": "Bỏ \"nó\" thừa",
+      "severity": "low"
+    },
+    {
+      "old": "Công cụ replay của lab ép năm điều.",
+      "new": "Công cụ replay của lab áp đặt năm ràng buộc.",
+      "reason": "\"Ép năm điều\" gượng",
+      "severity": "medium"
+    },
+    {
+      "old": "ca diễn tập kiểm group chính vẫn ở 6,",
+      "new": "ca diễn tập xác nhận group chính vẫn ở 6,",
+      "reason": "\"Kiểm\" đứng một mình nghe cụt",
+      "severity": "low"
+    },
+    {
+      "old": "test thay `Sleeper` bằng bản chỉ ghi lại lần xin chờ.",
+      "new": "test thay `Sleeper` bằng bản chỉ ghi lại các lần yêu cầu chờ.",
+      "reason": "\"Lần xin chờ\" gượng",
+      "severity": "medium"
+    },
+    {
+      "old": "Cùng phép kiểm dữ liệu và cùng hai lớp idempotency với lần chạy thật, chỉ đọc, phân loại sẽ ghi, đã xử lý, hỏng.",
+      "new": "Dùng cùng phép kiểm dữ liệu và cùng hai lớp idempotency như lần chạy thật; chỉ đọc và phân loại thành ba nhóm: sẽ ghi, đã xử lý, hỏng.",
+      "reason": "Câu thiếu động từ, liệt kê cụt",
+      "severity": "high"
+    },
+    {
+      "old": "không phải deploy thật.",
+      "new": "không phải triển khai thật.",
+      "reason": "Từ tiếng Anh thông thường lọt vào văn xuôi",
+      "severity": "medium"
+    },
+    {
+      "old": "tin JSON hỏng ở lại DLQ, xin chờ một lần 200 ms.",
+      "new": "message JSON hỏng ở lại DLQ, và có một lần yêu cầu chờ 200 ms.",
+      "reason": "Thống nhất \"message\"; \"xin chờ\" gượng",
+      "severity": "medium"
+    },
+    {
+      "old": "Database tạm và file bị xoá kể cả khi lỗi; ca kiểm cả hai đã mất.",
+      "new": "Database tạm và file đều bị xoá kể cả khi lỗi; ca kiểm tra xác nhận cả hai đã mất.",
+      "reason": "Câu cụt, không rõ \"cả hai\" chỉ gì",
+      "severity": "high"
+    },
+    {
+      "old": "con số cụ thể do người chịu trách nhiệm nghiệp vụ chọn và diễn tập restore trên dữ liệu thật đo ra.",
+      "new": "con số cụ thể do người chịu trách nhiệm nghiệp vụ chọn, và được xác định qua diễn tập restore trên dữ liệu thật.",
+      "reason": "Câu thiếu động từ, khó hiểu",
+      "severity": "high"
+    },
+    {
+      "old": "Kiểm alert bắn đúng mức, tới đúng người",
+      "new": "Kiểm tra alert bắn đúng mức và tới đúng người",
+      "reason": "\"Kiểm\" đứng một mình nghe cụt",
+      "severity": "low"
+    },
+    {
+      "old": "Làm theo bảng runbook, không làm tắt",
+      "new": "Làm theo bảng runbook, không bỏ bước",
+      "reason": "\"Làm tắt\" dịch gượng",
+      "severity": "medium"
+    },
+    {
+      "old": "Kiểm dấu vân tay sổ: tổng 0, số dư, hash chain",
+      "new": "Kiểm tra dấu vân tay sổ: tổng 0, số dư, hash chain",
+      "reason": "\"Kiểm\" đứng một mình nghe cụt",
+      "severity": "low"
+    },
+    {
+      "old": "Ghi điều runbook thiếu, sửa bảng",
+      "new": "Ghi lại những gì runbook còn thiếu, rồi sửa bảng",
+      "reason": "Câu cụt thiếu động từ",
+      "severity": "medium"
+    },
+    {
+      "old": "Chạy không tham số in từng dòng đã đo; trích đoạn:",
+      "new": "Chạy không tham số sẽ in từng dòng đã đo; đây là một đoạn trích:",
+      "reason": "Câu cụt",
+      "severity": "low"
+    },
+    {
+      "old": "việc chờ giữa hai message kiểm bằng `Sleeper` ghi lại",
+      "new": "việc chờ giữa hai message được kiểm bằng `Sleeper` ghi lại",
+      "reason": "Câu cụt thiếu từ nối",
+      "severity": "medium"
+    },
+    {
+      "old": "Mỗi ca có schema, topic và group riêng, dọn cuối ca.",
+      "new": "Mỗi test case có schema, topic và group riêng, được dọn khi chạy xong.",
+      "reason": "\"Cuối ca\" cụt",
+      "severity": "low"
+    }
+  ]
+}

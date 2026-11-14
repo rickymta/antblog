@@ -1,0 +1,179 @@
+{
+ "file": "rust-box-rc-arc-refcell-smart-pointer.md",
+ "edits": [
+  {
+   "old": "cho sửa qua tham chiếu chung, Arc",
+   "new": "để sửa dữ liệu qua tham chiếu chung, Arc",
+   "reason": "Câu cụt: thiếu danh từ và động từ",
+   "severity": "medium"
+  },
+  {
+   "old": "Vi phạm là panic <code>RefCell already borrowed</code>, hoặc <code>Err</code> nếu",
+   "new": "Vi phạm sẽ gây panic <code>RefCell already borrowed</code>, hoặc trả <code>Err</code> nếu",
+   "reason": "Cụt, thiếu động từ",
+   "severity": "low"
+  },
+  {
+   "old": "Viết thẳng, compiler không biết",
+   "new": "Nếu viết thẳng, compiler không biết",
+   "reason": "Thiếu liên từ điều kiện",
+   "severity": "medium"
+  },
+  {
+   "old": "move `RawStatement` là 4.096 byte, move `Box<RawStatement>` là 8 byte và không chạm vào heap",
+   "new": "move `RawStatement` sao chép 4.096 byte, còn move `Box<RawStatement>` sao chép 8 byte và không chạm vào heap",
+   "reason": "'move là 4.096 byte' cụt, thiếu động từ",
+   "severity": "high"
+  },
+  {
+   "old": "Trên cước 25.500 VND, lab in:",
+   "new": "Với cước 25.500 VND, lab in:",
+   "reason": "Tự nhiên hơn",
+   "severity": "low"
+  },
+  {
+   "old": "Giá của `Box<dyn>`:",
+   "new": "Cái giá của `Box<dyn>`:",
+   "reason": "Thiếu 'cái'",
+   "severity": "low"
+  },
+  {
+   "old": "Tập chính sách đóng và biết trước thì",
+   "new": "Nếu tập chính sách đã đóng và biết trước thì",
+   "reason": "Thiếu liên từ điều kiện",
+   "severity": "medium"
+  },
+  {
+   "old": "chọn `dyn` khi tập kiểu mở rộng được.",
+   "new": "chọn `dyn` khi tập kiểu có thể mở rộng thêm.",
+   "reason": "Gượng",
+   "severity": "low"
+  },
+  {
+   "old": "và bộ nhớ rò.",
+   "new": "và bộ nhớ bị rò.",
+   "reason": "Thiếu 'bị'",
+   "severity": "low"
+  },
+  {
+   "old": "Lab chứng minh bằng một `Weak` quan sát.",
+   "new": "Lab chứng minh bằng một `Weak` dùng để quan sát.",
+   "reason": "Cụm cụt",
+   "severity": "medium"
+  },
+  {
+   "old": "**interior mutability**: sửa bên trong giá trị đang chỉ có `&`.",
+   "new": "**interior mutability** (khả năng thay đổi từ bên trong): sửa giá trị bên trong dù chỉ đang có `&`.",
+   "reason": "Thuật ngữ chưa giải nghĩa ở lần đầu; câu gượng",
+   "severity": "medium"
+  },
+  {
+   "old": "khác ở chỗ được đếm **lúc chạy**, và vi phạm là panic.",
+   "new": "khác ở chỗ việc đếm diễn ra **lúc chạy**, và vi phạm thì panic.",
+   "reason": "Bị động gượng",
+   "severity": "medium"
+  },
+  {
+   "old": "Lỗi sau viết cố ý trong",
+   "new": "Đoạn code sau được cố ý viết sai trong",
+   "reason": "Câu cụt",
+   "severity": "medium"
+  },
+  {
+   "old": "Lúc dòng 25 xin mượn ghi, một mượn đọc vẫn đang mở.",
+   "new": "Lúc dòng 25 xin mượn để ghi, lần mượn đọc trước vẫn đang mở.",
+   "reason": "'xin mượn ghi' cụt",
+   "severity": "medium"
+  },
+  {
+   "old": "Hai cách sửa. Thu hẹp guard:",
+   "new": "Có hai cách sửa. Một là thu hẹp guard:",
+   "reason": "Câu cụt",
+   "severity": "low"
+  },
+  {
+   "old": "Hoặc trả lỗi thay vì panic:",
+   "new": "Hai là trả lỗi thay vì panic:",
+   "reason": "Nối với 'Một là'",
+   "severity": "low"
+  },
+  {
+   "old": "Cái giá của `RefCell` thấy ở kích thước",
+   "new": "Cái giá của `RefCell` thể hiện ở kích thước",
+   "reason": "Tự nhiên hơn",
+   "severity": "low"
+  },
+  {
+   "old": "Bốn chuyến, mỗi chuyến ghi từ một luồng",
+   "new": "Ví dụ gồm bốn chuyến, mỗi chuyến ghi từ một luồng",
+   "reason": "Câu thiếu động từ",
+   "severity": "medium"
+  },
+  {
+   "old": "lab đổi nó thành",
+   "new": "lab đổi lỗi này thành",
+   "reason": "'nó' mơ hồ",
+   "severity": "low"
+  },
+  {
+   "old": "Câu đầu tiên: có thật cần không?",
+   "new": "Câu hỏi đầu tiên: có thật sự cần không?",
+   "reason": "Thiếu danh từ",
+   "severity": "medium"
+  },
+  {
+   "old": "Mặc định vẫn là ownership thường cộng borrow.",
+   "new": "Mặc định vẫn là ownership thường kết hợp với borrow.",
+   "reason": "Gượng",
+   "severity": "low"
+  },
+  {
+   "old": "Với người từ C#, xem thêm",
+   "new": "Với người quen dùng C#, xem thêm",
+   "reason": "Gượng",
+   "severity": "low"
+  },
+  {
+   "old": "tham chiếu do GC quản, chia sẻ tự do, không phải nghĩ ai là chủ",
+   "new": "tham chiếu do GC quản lý, chia sẻ tự do, không cần nghĩ xem ai là chủ",
+   "reason": "'quản' cụt",
+   "severity": "medium"
+  },
+  {
+   "old": "Service thật nên cho đúng một nơi sở hữu",
+   "new": "Service thật nên để đúng một nơi sở hữu",
+   "reason": "'cho' gượng",
+   "severity": "medium"
+  },
+  {
+   "old": "Lệnh đầu in từng nhóm ví dụ. Phần chưa trích ở trên:",
+   "new": "Lệnh đầu in ra từng nhóm ví dụ; dưới đây là phần chưa trích ở trên:",
+   "reason": "Câu cụt",
+   "severity": "medium"
+  },
+  {
+   "old": "kiểm các giá trị trên và bắt panic",
+   "new": "kiểm tra các giá trị trên và bắt panic",
+   "reason": "'kiểm' cụt",
+   "severity": "medium"
+  },
+  {
+   "old": "vì thông điệp có thể đổi theo phiên bản Rust",
+   "new": "vì thông báo lỗi có thể đổi theo phiên bản Rust",
+   "reason": "Thông báo lỗi, không phải thông điệp",
+   "severity": "low"
+  },
+  {
+   "old": "để panic không bắt, thoát mã 101",
+   "new": "để panic không bị bắt, thoát mã 101",
+   "reason": "Thiếu 'bị'",
+   "severity": "medium"
+  },
+  {
+   "old": "<code>RefCell</code> không cài <code>Sync</code> vì",
+   "new": "<code>RefCell</code> không implement <code>Sync</code> vì",
+   "reason": "'cài' gượng",
+   "severity": "low"
+  }
+ ]
+}

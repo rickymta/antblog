@@ -1,7 +1,7 @@
 ---
 slug: python-scikit-learn-lightgbm-imbalanced-cross-validation
 title: "scikit-learn và LightGBM: huấn luyện trên dữ liệu mất cân bằng"
-summary: "Bài 57: huấn luyện bộ chấm điểm gian lận bằng scikit-learn Pipeline và LightGBM: cross-validation theo thời gian, class weight, calibration, ngưỡng theo chi phí, lưu mô hình bằng joblib kèm metadata. Đo lặp trên 3 seed."
+summary: "Bài 57: huấn luyện bộ chấm điểm gian lận bằng scikit-learn Pipeline và LightGBM: cross-validation theo thời gian, class weight, calibration, ngưỡng theo chi phí, lưu mô hình bằng joblib kèm metadata. Kết quả đo được lặp lại trên 3 seed."
 category: python-advanced
 level: advanced
 tags: [python, toi-noi, fraud, scikit-learn, lightgbm]
@@ -10,17 +10,17 @@ language: vi
 
 Rule engine ở [bài 56](/articles/python-rule-engine-scoring-strategy-explainability) cho điểm đọc được lý do, nhưng bỏ sót nhiều chuyến mà dấu vết nằm ở tổ hợp nhiều tín hiệu yếu. Mô hình học trên 30 đặc trưng của bài 55 là bước tiếp theo, và «chạy được trên notebook» chưa phải thứ [Tới Nơi](/articles/du-an-mau-toi-noi) đưa lên production. Service fraud-scoring cần huấn luyện lại định kỳ, lưu thành file, nạp lại ở nơi phục vụ, và trả ra một con số mà người duyệt và người vận hành đọc được. Trên dữ liệu 98 % chuyến sạch, ba câu hỏi nảy ra ngay: chia dữ liệu thế nào để số đo đáng tin, có cần «cân bằng» hai lớp không, và con số mô hình trả về có phải xác suất không.
 
-Đây là bài 57 của lộ trình **Python nâng cao qua Tới Nơi**. Bạn cần quen luật chấm điểm ở bài 56, 30 đặc trưng ở [bài 55](/articles/python-feature-engineering-tu-event-kafka) và PR-AUC ở [bài 54](/articles/python-fraud-toi-noi-bai-toan-nhan-du-lieu-metric). Dữ liệu là tổng hợp nên số đo chỉ nói về bộ này; điểm rủi ro là đầu vào cho người duyệt, không phải quyết định khoá tài khoản. LightGBM có wheel cho Python 3.14 (kiểm ngày 06/11/2026, bản 4.7.0); riêng macOS cần thêm `brew install libomp`. Mọi bước dùng nhãn **cuối cùng**, trừ một bước nói rõ; kết luận về thứ bậc được lặp trên ba seed của bộ sinh.
+Đây là bài 57 của lộ trình **Python nâng cao qua Tới Nơi**. Bạn cần quen luật chấm điểm ở bài 56, 30 đặc trưng ở [bài 55](/articles/python-feature-engineering-tu-event-kafka) và PR-AUC ở [bài 54](/articles/python-fraud-toi-noi-bai-toan-nhan-du-lieu-metric). Dữ liệu là tổng hợp nên số đo chỉ nói về bộ này; điểm rủi ro là đầu vào cho người duyệt, không phải quyết định khoá tài khoản. LightGBM có wheel cho Python 3.14 (kiểm ngày 06/11/2026, bản 4.7.0); riêng macOS cần thêm `brew install libomp`. Mọi bước dùng nhãn **cuối cùng**, trừ một bước nói rõ; kết luận về thứ bậc được kiểm lại bằng cách chạy lặp trên ba seed của bộ sinh.
 
 <div class="tkh-callout tkh-callout--example">
 <span class="tkh-callout-title">Thử trước khi đọc</span>
 <p>Ở train, số chuyến sạch gấp 48,7 lần số chuyến gian lận. Ta đặt <code>scale_pos_weight</code> bằng 48,7 để «cân bằng» hai lớp. So với không đặt trọng số, PR-AUC trên valid tăng, giảm hay gần như không đổi? Và xác suất trung bình mô hình trả về so với tỉ lệ gian lận thật 1,71 % của valid ra sao?</p>
-<details><summary>Xem đáp án</summary><p><b>PR-AUC gần như không đổi</b> (0,885 ở cả hai), nhưng <b>xác suất bị đẩy lên</b>: trung bình 0,0143 khi không trọng số, 0,0339 khi có, gần gấp đôi tỉ lệ thật. Số chuyến vượt ngưỡng 0,5 tăng từ 848 lên 1.800 trong khi precision ở 0,5 tụt từ 0,927 xuống 0,566. Trọng số lớp không làm mô hình xếp hạng giỏi hơn; nó dịch xác suất, và mục «Trọng số lớp» đo từng bước.</p></details>
+<details><summary>Xem đáp án</summary><p><b>PR-AUC gần như không đổi</b> (0,885 ở cả hai), nhưng <b>xác suất bị đẩy lên</b>: trung bình 0,0143 khi không trọng số, 0,0339 khi có, gần gấp đôi tỉ lệ thật. Số chuyến vượt ngưỡng 0,5 tăng từ 848 lên 1.800 trong khi precision ở 0,5 tụt từ 0,927 xuống 0,566. Trọng số lớp không làm mô hình xếp hạng giỏi hơn; nó làm dịch chuyển xác suất, và mục «Trọng số lớp» đo từng bước.</p></details>
 </div>
 
 ## Pipeline: chọn đặc trưng theo tên, rồi mô hình
 
-Mô hình huấn luyện xong phải đi cùng bước chuẩn bị đầu vào của nó, nếu không nơi phục vụ sẽ đưa nó dữ liệu khác với lúc học. `Pipeline` của scikit-learn gói hai thứ vào một đối tượng, và `ColumnTransformer` ở đầu pipeline chọn **đúng 30 cột theo tên**, bỏ cột khác (`model.py`, trích):
+Mô hình huấn luyện xong phải đi cùng bước chuẩn bị đầu vào của nó, nếu không, nơi phục vụ sẽ đưa vào mô hình dữ liệu khác với lúc học. `Pipeline` của scikit-learn gói hai thứ vào một đối tượng, và `ColumnTransformer` ở đầu pipeline chọn **đúng 30 cột theo tên**, bỏ cột khác (`model.py`, trích):
 
 ```python
 def make_pipeline(estimator, *, scale: bool = False, features: Sequence[str] = FEATURES) -> Pipeline:
@@ -31,7 +31,7 @@ def make_pipeline(estimator, *, scale: bool = False, features: Sequence[str] = F
     return Pipeline([("select", select), ("model", estimator)])
 ```
 
-`scale=True` thêm `log1p` và chuẩn hoá cho mô hình tuyến tính; cây quyết định không cần vì `log1p` đơn điệu. Hồi quy logistic qua pipeline này là mốc so sánh của bài, và cũng là lúc kiểm pipeline giữ lời hứa «chọn theo tên» (trích):
+`scale=True` thêm `log1p` và chuẩn hoá cho mô hình tuyến tính; cây quyết định không cần vì `log1p` đơn điệu. Hồi quy logistic qua pipeline này là mốc so sánh của bài, và cũng là dịp kiểm tra xem pipeline có giữ đúng lời hứa «chọn theo tên» (trích):
 
 ```text
 hồi quy logistic (log1p + StandardScaler, 30 đặc trưng, 0.4 giây): PR-AUC 0.836, ROC-AUC 0.991 trên valid
@@ -39,7 +39,7 @@ hồi quy logistic (log1p + StandardScaler, 30 đặc trưng, 0.4 giây): PR-AUC
 bỏ cột speed_kmh: ValueError: columns are missing: {'speed_kmh'}
 ```
 
-Đưa cả bảng 35 cột hay đảo thứ tự cột đều cho dự đoán giống hệt, và thiếu một đặc trưng thì lỗi to chứ không đoán. Hai tính chất đó chặn lỗi khó thấy nhất của phục vụ mô hình: cột lệch vị trí vì ai đó đổi thứ tự trong truy vấn, hay nhãn lọt vào đầu vào.
+Đưa cả bảng 35 cột hay đảo thứ tự cột đều cho dự đoán giống hệt, và thiếu một đặc trưng thì báo lỗi rõ ràng chứ không tự đoán. Hai tính chất đó chặn những lỗi khó thấy nhất khi phục vụ mô hình: cột lệch vị trí vì ai đó đổi thứ tự trong truy vấn, hay nhãn lọt vào đầu vào.
 
 ## Cross-validation theo thời gian
 
@@ -59,7 +59,7 @@ def time_folds(day, *, n_splits=4, test_days=5, gap_days=2, end_day=30):
 <figcaption>Hình 1. Bố trí theo thời gian của bài: mô hình gốc, bộ hiệu chỉnh, khoảng bỏ trống và valid chỉ để đo; bốn fold cross-validation chỉ train trên quá khứ và bỏ hai ngày sát test.</figcaption>
 </figure>
 
-Hai ngày bỏ trống **không** làm nhãn chín: chúng nhỏ hơn mọi trung vị độ trễ nhãn của bài 54 (3, 6, 8 và 16 ngày), và lab dùng nhãn cuối cùng ở mọi fold. Nếu mỗi fold chỉ được biết nhãn có sẵn lúc bắt đầu cửa sổ test, ta chỉ biết một phần gian lận của phần train (trích):
+Hai ngày bỏ trống **không** giúp nhãn về kịp: chúng nhỏ hơn mọi trung vị độ trễ nhãn của bài 54 (3, 6, 8 và 16 ngày), và lab dùng nhãn cuối cùng ở mọi fold. Nếu mỗi fold chỉ được biết nhãn có sẵn lúc bắt đầu cửa sổ test, ta chỉ biết một phần gian lận của phần train (trích):
 
 ```text
   test từ ngày 10: biết 179 trong 401 chuyến gian lận (45%)
@@ -96,9 +96,9 @@ train cố định                  0.807     0.758     0.731     0.763
 train mở rộng (như trên)       0.807     0.822     0.818     0.864
 ```
 
-Train mở rộng cải thiện dần (0,807 lên 0,864) còn train cố định tụt xuống 0,731 đến 0,763, nên lượng train là yếu tố chính của khoảng dao động. Vì sao mô hình cố định tụt theo thời gian thì lab chưa đo nguyên nhân. Một lần chia là ít: hai mô hình chênh vài phần nghìn trên một lần chia chưa chắc khác nhau.
+Train mở rộng cải thiện dần (0,807 lên 0,864) còn train cố định tụt xuống 0,731 đến 0,763, nên lượng train là yếu tố chính của khoảng dao động. Lab chưa đo nguyên nhân khiến mô hình cố định tụt theo thời gian. Một lần chia là ít: hai mô hình chênh vài phần nghìn trên một lần chia chưa chắc khác nhau.
 
-Cross-validation ngẫu nhiên (`StratifiedKFold`, 5 fold) cho trung bình 0,831, so với 0,828 của bốn fold theo thời gian (hai dòng trong đầu ra của lab). Hai số này khác nhau ở **hai** biến, cỡ train (80.017 so với 26.693 đến 76.528 chuyến) và cách chia, nên không so thẳng để kết luận về cách chia; và cũng không so thẳng được với PR-AUC 0,885 trên valid ở mục sau, vì fold train nhỏ hơn.
+Cross-validation ngẫu nhiên (`StratifiedKFold`, 5 fold) cho trung bình 0,831, so với 0,828 của bốn fold theo thời gian (hai dòng trong đầu ra của lab). Hai số này khác nhau ở **hai** biến, cỡ train (80.017 so với 26.693 đến 76.528 chuyến) và cách chia, nên không thể so trực tiếp để kết luận về cách chia, và cũng không so trực tiếp được với PR-AUC 0,885 trên valid ở mục sau, vì fold train nhỏ hơn.
 
 ## Trọng số lớp: đổi một biến
 
@@ -111,14 +111,14 @@ Câu hỏi đầu bài đo ba giá trị của `scale_pos_weight` (1, 7 và 48,7
              48.7   0.885    0.994   0.0333  0.0095        0.0339     1,800     0.566   0.893
 ```
 
-PR-AUC đi ngang ở 0,885 đến 0,887: trọng số lớp không làm mô hình xếp hạng chuyến tốt hơn. Cái đổi là **thang xác suất**: `p` trung bình tăng từ 0,0143 lên 0,0339 khi tỉ lệ thật là 0,0171, logloss xấu đi từ 0,0195 lên 0,0333 và Brier từ 0,0050 lên 0,0095. Ở ngưỡng 0,5 số chuyến bị gắn cờ tăng từ 848 lên 1.800, recall từ 0,689 lên 0,893 và precision tụt từ 0,927 xuống 0,566. Lab kiểm xem hiệu ứng đó có phải chỉ là hạ ngưỡng không: lấy từ mô hình **không** trọng số đúng chừng ấy chuyến điểm cao nhất (trích):
+PR-AUC đi ngang ở 0,885 đến 0,887: trọng số lớp không làm mô hình xếp hạng chuyến tốt hơn. Thứ thay đổi là **thang xác suất**: `p` trung bình tăng từ 0,0143 lên 0,0339 khi tỉ lệ thật là 0,0171, logloss xấu đi từ 0,0195 lên 0,0333 và Brier từ 0,0050 lên 0,0095. Ở ngưỡng 0,5 số chuyến bị gắn cờ tăng từ 848 lên 1.800, recall từ 0,689 lên 0,893 và precision tụt từ 0,927 xuống 0,566. Lab kiểm xem hiệu ứng đó có phải chỉ là hạ ngưỡng không: lấy từ mô hình **không** trọng số đúng chừng ấy chuyến có điểm cao nhất (trích):
 
 ```text
   scale_pos_weight=  7.0 gắn cờ 1,093 chuyến (ngưỡng 0.5): precision 0.815, recall 0.781; không trọng số, 1,093 chuyến điểm cao nhất: precision 0.818, recall 0.784
   scale_pos_weight= 48.7 gắn cờ 1,800 chuyến (ngưỡng 0.5): precision 0.566, recall 0.893; không trọng số, 1,800 chuyến điểm cao nhất: precision 0.568, recall 0.896
 ```
 
-Hai cách cho precision và recall khác nhau không quá 0,01 trong lần đo này. Muốn bắt nhiều hơn, hạ ngưỡng trên mô hình không trọng số, và giữ xác suất trung thực. Lab chỉ đo ba giá trị, một seed, trên bộ dữ liệu này; trọng số có thể có ích khi lớp hiếm quá ít để cây học, và `is_unbalance` hay `class_weight` là hai cách khai báo khác mà lab không đo.
+Precision và recall của hai cách chênh nhau không quá 0,01 trong lần đo này. Muốn bắt nhiều hơn, hạ ngưỡng trên mô hình không trọng số, và giữ xác suất trung thực. Lab chỉ đo ba giá trị, một seed, trên bộ dữ liệu này; trọng số có thể có ích khi lớp hiếm quá ít để cây học, và `is_unbalance` hay `class_weight` là hai cách khai báo khác mà lab không đo.
 
 ## Calibration: p có đáng gọi là xác suất không
 
@@ -132,7 +132,7 @@ def fit_calibrated(x, y, day, *, cal_start_day=22, method="sigmoid", **lgbm_over
     return base, cal
 ```
 
-Hai phần liền nhau, không có khoảng bỏ, nên chuyến cuối của phần gốc có nhãn chưa chín và bộ hiệu chỉnh thừa hưởng điều đó. Tỉ lệ gian lận cũng khác nhau: 1,87 % ở phần gốc, 2,39 % ở bộ hiệu chỉnh (639 trên 26.737 chuyến) và 1,71 % ở valid. Phương pháp **sigmoid** được chọn trước khi đọc valid: bộ hiệu chỉnh chỉ có 639 chuyến gian lận, hàm hai tham số đơn điệu ít rủi ro hơn bậc thang của isotonic. Bảng dưới in cả hai để thấy cái giá của isotonic:
+Hai phần liền nhau, không có khoảng bỏ, nên chuyến cuối của phần gốc có nhãn chưa về đủ và bộ hiệu chỉnh cũng chịu ảnh hưởng đó. Tỉ lệ gian lận cũng khác nhau: 1,87 % ở phần gốc, 2,39 % ở bộ hiệu chỉnh (639 trên 26.737 chuyến) và 1,71 % ở valid. Phương pháp **sigmoid** được chọn trước khi đọc valid: bộ hiệu chỉnh chỉ có 639 chuyến gian lận, hàm hai tham số đơn điệu ít rủi ro hơn bậc thang của isotonic. Bảng dưới in cả hai để thấy cái giá của isotonic:
 
 ```text
 mô hình                             PR-AUC  logloss   Brier  p trung bình     ECE  số mức điểm
@@ -164,7 +164,7 @@ Bảng độ tin cậy trên valid cho mô hình không trọng số, mỗi dòn
 <figcaption>Hình 2. Độ tin cậy trên valid (trục log). Mô hình không trọng số, chưa hiệu chỉnh, dự đoán quá thấp ở các khoảng giữa; trọng số 48,7 làm dự đoán quá cao; sigmoid đưa điểm về gần đường chéo.</figcaption>
 </figure>
 
-Mô hình chưa hiệu chỉnh sai theo hướng **thấp**: ở khoảng 0,1 đến 0,5, `p` trung bình 0,2254 nhưng 46,6 % số chuyến gian lận thật. Mô hình có trọng số sai theo hướng ngược lại: ở khoảng 0,5 đến 1, `p` trung bình 0,864 mà chỉ 68,3 % gian lận thật (lab in thêm một dòng cho mô hình này, bài lược bớt). Không có quy tắc «mô hình luôn quá tự tin».
+Mô hình chưa hiệu chỉnh sai theo hướng **thấp**: ở khoảng 0,1 đến 0,5, `p` trung bình 0,2254 nhưng 46,6 % số chuyến là gian lận thật. Mô hình có trọng số sai theo hướng ngược lại: ở khoảng 0,5 đến 1, `p` trung bình 0,864 mà chỉ 68,3 % số chuyến là gian lận thật (lab in thêm một dòng cho mô hình này, bài lược bớt). Không có quy tắc «mô hình luôn quá tự tin».
 
 Toàn bộ các bước trên dùng nhãn cuối cùng. Bước tiếp theo của lab dùng **nhãn biết tại ngày 40** (chuyến gian lận có `label_known_at` chưa tới thì coi là sạch) cho cả huấn luyện lẫn hiệu chỉnh, vẫn đo trên valid bằng nhãn cuối:
 
@@ -175,11 +175,11 @@ nhãn cuối cùng                       0.884        0.0172  0.0019   1,203    
 nhãn biết ở ngày 40                  0.876        0.0143  0.0052     959             20,049,819             0.478
 ```
 
-Với nhãn biết sớm, `p` trung bình xuống 0,0143 (gian lận chưa có nhãn bị dạy là sạch), ECE từ 0,0019 lên 0,0052, chi phí lên 20,05 triệu VND (so với 18,59 triệu) và PR-AUC của `collusion`, loại có độ trễ nhãn dài nhất, tụt từ 0,592 xuống 0,478. Đây là một seed; hướng thì khớp với bài 54.
+Với nhãn biết sớm, `p` trung bình xuống 0,0143 (gian lận chưa có nhãn bị dạy là sạch), ECE từ 0,0019 lên 0,0052, chi phí lên 20,05 triệu VND (so với 18,59 triệu) và PR-AUC của `collusion`, loại có độ trễ nhãn dài nhất, tụt từ 0,592 xuống 0,478. Đây là kết quả của một seed; chiều hướng thì khớp với bài 54.
 
 ## Ngưỡng theo chi phí, và mô hình bắt được gì
 
-Mô hình chi phí của lab (từ bài 54, đã sửa cho đúng): **chi phí = 8.000 VND × số chuyến gắn cờ + (tiền chuyến + 20.000 VND) × số chuyến gian lận bỏ sót**. Phí duyệt tính cho mọi chuyến gắn cờ, kể cả gian lận thật. Hai giả định: gắn cờ chặn hết thiệt hại (người duyệt không sai), và `amount_vnd` đại diện cho thiệt hại (với `promo_abuse`, thiệt hại thật chỉ là phần giảm giá). Gắn cờ một chuyến tốn 8.000 chắc chắn và tránh được `p × (tiền + 20.000)` kỳ vọng, nên với `p` đã hiệu chỉnh quyết định có công thức:
+Mô hình chi phí của lab (từ bài 54, đã sửa cho đúng): **chi phí = 8.000 VND × số chuyến gắn cờ + (tiền chuyến + 20.000 VND) × số chuyến gian lận bỏ sót**. Phí duyệt tính cho mọi chuyến gắn cờ, kể cả gian lận thật. Hai giả định: gắn cờ chặn hết thiệt hại (người duyệt không sai), và `amount_vnd` đại diện cho thiệt hại (với `promo_abuse`, thiệt hại thật chỉ là phần giảm giá). Gắn cờ một chuyến tốn 8.000 chắc chắn và tránh được `p × (tiền + 20.000)` kỳ vọng, nên với `p` đã hiệu chỉnh, quyết định gắn cờ theo công thức sau:
 
 ```python
 def expected_cost_flag(p, amount_vnd):
@@ -209,9 +209,9 @@ Quy tắc chi phí kỳ vọng (18,59 triệu VND) và ngưỡng chọn bằng d
   123             1.96% / 2.45% / 1.91%          0.892      0.885    0.0039       0.0021       20,988,993    22,123,359    5.4%
 ```
 
-Ở cả ba seed sigmoid giảm ECE (khoảng 0,004 xuống 0,002) và `p` chưa hiệu chỉnh cho chi phí cao hơn, nhưng mức chênh dao động từ 2,5 đến 8,5 %: hiệu chỉnh thường có ích chứ không hứa một con số. Cột «PR gốc<22» còn cho biết giữ tám ngày cho hiệu chỉnh tốn bao nhiêu so với học trên toàn bộ train: 0,001, 0,012 và 0,007 PR-AUC, tức vài phần nghìn đến hơn một phần trăm. Công suất cố định 1 % (667 chuyến) tốn 27,72 triệu vì còn 485 chuyến gian lận lọt; xem 1 % chuyến là quá ít khi valid có 1,71 % gian lận.
+Ở cả ba seed sigmoid giảm ECE (khoảng 0,004 xuống 0,002) và `p` chưa hiệu chỉnh cho chi phí cao hơn, nhưng mức chênh dao động từ 2,5 đến 8,5 %: hiệu chỉnh thường có ích nhưng không đảm bảo một mức cải thiện cố định. Cột «PR gốc<22» còn cho biết giữ tám ngày dành cho hiệu chỉnh làm mất bao nhiêu so với học trên toàn bộ train: 0,001, 0,012 và 0,007 PR-AUC, tức vài phần nghìn đến hơn một phần trăm. Công suất duyệt cố định 1 % (667 chuyến) tốn 27,72 triệu vì còn 485 chuyến gian lận lọt lưới; xem 1 % chuyến là quá ít khi valid có 1,71 % gian lận.
 
-Tách theo loại, LightGBM đã hiệu chỉnh so với hồi quy logistic (cùng train ngày dưới 22), trên ba seed:
+Tách theo loại gian lận, ta so LightGBM đã hiệu chỉnh với hồi quy logistic (cùng train ngày dưới 22), trên ba seed:
 
 ```text
 loại                 seed 42          seed 7        seed 123
@@ -221,11 +221,11 @@ promo_abuse    0.731 / 0.696   0.744 / 0.732   0.751 / 0.727
 collusion      0.592 / 0.401   0.379 / 0.227   0.613 / 0.213
 ```
 
-Mô hình hơn rõ ở `gps_spoof` và `collusion` ở cả ba seed; ở `ghost_trip` và `promo_abuse` chênh nhỏ (seed 7, `promo_abuse`: 0,744 so với 0,732). `collusion` cũng dao động mạnh giữa các seed (0,379 đến 0,613), nên một con số đơn lẻ về loại này không đáng tin. Tám đặc trưng có tổng gain lớn nhất là `dev_customers_7d` (16,9 %), `drv_jump_speed_kmh` (14,6 %), `route_ratio`, `start_pickup_gap_km`, `duration_s`, `dev_newuser_7d`, `pair_trips_7d`, `discount_ratio`. Gain là mức mô hình dùng đặc trưng khi huấn luyện, không phải lý do của từng dự đoán; đó là việc của SHAP, bài 61.
+Mô hình vượt trội rõ ở `gps_spoof` và `collusion` ở cả ba seed; ở `ghost_trip` và `promo_abuse` chênh nhỏ (seed 7, `promo_abuse`: 0,744 so với 0,732). `collusion` cũng dao động mạnh giữa các seed (0,379 đến 0,613), nên một con số đơn lẻ về loại này không đáng tin. Tám đặc trưng có tổng gain lớn nhất là `dev_customers_7d` (16,9 %), `drv_jump_speed_kmh` (14,6 %), `route_ratio`, `start_pickup_gap_km`, `duration_s`, `dev_newuser_7d`, `pair_trips_7d`, `discount_ratio`. Gain là mức mô hình dùng đặc trưng khi huấn luyện, không phải lý do của từng dự đoán; đó là việc của SHAP, bài 61.
 
 ## Lưu mô hình: joblib, metadata và những gì có thể sai
 
-`joblib.dump` ghi mô hình đã hiệu chỉnh ra file, nhưng người nạp còn cần biết nó học từ đâu, dùng đặc trưng nào, đạt bao nhiêu và chạy được trên phiên bản thư viện nào. `save_model` ghi `model.joblib` và `model_meta.json`, mỗi file qua file tạm rồi `os.replace` nên người đọc không thấy file dở. Hai file vẫn là hai thao tác: nếu tiến trình chết giữa chừng, `load_model` thấy sha256 lệch. Lab thử cả ghi và nạp:
+`joblib.dump` ghi mô hình đã hiệu chỉnh ra file, nhưng người nạp còn cần biết nó học từ đâu, dùng đặc trưng nào, đạt bao nhiêu và chạy được trên phiên bản thư viện nào. `save_model` ghi `model.joblib` và `model_meta.json`, mỗi file được ghi qua file tạm rồi `os.replace`, nên người đọc không thấy file ghi dở. Hai file vẫn là hai thao tác: nếu tiến trình chết giữa chừng, `load_model` thấy sha256 lệch. Lab thử cả ghi và nạp:
 
 ```text
 đã ghi out/model.joblib (345 KiB) và out/model_meta.json; model_version = fraud-lgbm-1796fba0
@@ -233,12 +233,12 @@ khóa của metadata: artifact, created_at, data, decision, feature_list, librar
 nạp lại: 66,704 dự đoán giống hệt lúc huấn luyện = True; score_one(chuyến đầu valid) = 0.001522 (hàng loạt: 0.001522); ngưỡng trong meta 0.149
 ```
 
-Metadata có `model_version` (`fraud-lgbm-` cộng tám ký tự đầu của sha256), `feature_list` theo đúng thứ tự, khoảng ngày của từng phần dữ liệu và loại nhãn, siêu tham số, ngưỡng và giả định chi phí, `metrics_valid` và `metrics_valid_by_type`, phiên bản thư viện, và `reference_distribution`: với mỗi đặc trưng, các mốc phân vị và tỉ lệ dòng mỗi khoảng trên dữ liệu huấn luyện, để bài 60 tính PSI mà không cần giữ lại dữ liệu. `load_model` trả `ScoringModel`:
+Metadata có `model_version` (`fraud-lgbm-` cộng tám ký tự đầu của sha256), `feature_list` theo đúng thứ tự, khoảng ngày của từng phần dữ liệu và loại nhãn, siêu tham số, ngưỡng và giả định chi phí, `metrics_valid` và `metrics_valid_by_type`, phiên bản thư viện, và `reference_distribution`: với mỗi đặc trưng, các mốc phân vị và tỉ lệ dòng trong mỗi khoảng trên dữ liệu huấn luyện, để bài 60 tính PSI mà không cần giữ lại dữ liệu. `load_model` trả `ScoringModel`:
 
 - `predict_proba(df)` chọn cột theo `meta["feature_list"]` chứ không theo `FEATURES` hiện tại, nên mô hình cũ với bộ đặc trưng khác vẫn nạp được; cột thừa bị bỏ.
-- `score_one(dict)` và `predict_proba` từ chối `None`, `NaN`, vô cực, chuỗi và thiếu khoá bằng `ModelInputError`, thay vì để LightGBM âm thầm coi `NaN` là «thiếu».
+- `score_one(dict)` và `predict_proba` từ chối `None`, `NaN`, vô cực, chuỗi và thiếu khoá bằng `ModelInputError`, thay vì để LightGBM ngầm coi `NaN` là «thiếu».
 - `threshold` (ngưỡng chọn trên bộ hiệu chỉnh) và `flag(p, amount)` (quy tắc chi phí kỳ vọng).
-- `booster` và `preprocess` cho SHAP ở bài 61; `contributions(df)` cho tổng mỗi dòng khớp điểm thô (log-odds) **trước hiệu chỉnh**, nên SHAP giải thích điểm thô chứ không phải `p`.
+- `booster` và `preprocess` cho SHAP ở bài 61; `contributions(df)` cho ra tổng mỗi dòng khớp với điểm thô (log-odds) **trước hiệu chỉnh**, nên SHAP giải thích điểm thô chứ không phải `p`.
 
 ```text
 đóng góp từng đặc trưng (pred_contrib): tổng mỗi dòng khớp điểm thô trước hiệu chỉnh, lệch lớn nhất 1.0e-13 trên 200 chuyến (đây là log-odds của LightGBM, không phải p)
@@ -280,7 +280,7 @@ Kiểm chứng: OK 45/45
 25 passed in 27.25s
 ```
 
-`--verify` kiểm 45 bất biến: pipeline bỏ cột thừa và không phụ thuộc thứ tự cột; fold theo thời gian không train trên tương lai; train cố định tụt theo thời gian còn train mở rộng thì không; trọng số lớp gần như không đổi PR-AUC nhưng đẩy xác suất trung bình lên; sigmoid giảm logloss và ECE ở cả ba seed; nhãn biết ở ngày 40 làm chi phí cao hơn; ngưỡng chi phí rẻ hơn không làm gì; mô hình lưu nạp lại cho dự đoán giống hệt; đầu vào xấu và file sửa bị từ chối. Có ca sai thì lab in tên ca, `FAIL n/m` (n là số ca đạt) và thoát với mã 1, kể cả khi không có `--verify`. Nó không ghim số tuyệt đối hay tốc độ.
+`--verify` kiểm 45 bất biến: pipeline bỏ cột thừa và không phụ thuộc thứ tự cột; fold theo thời gian không train trên tương lai; train cố định tụt theo thời gian còn train mở rộng thì không; trọng số lớp gần như không đổi PR-AUC nhưng đẩy xác suất trung bình lên; sigmoid giảm logloss và ECE ở cả ba seed; nhãn biết ở ngày 40 làm chi phí cao hơn; ngưỡng chi phí rẻ hơn so với việc không làm gì; mô hình lưu nạp lại cho dự đoán giống hệt; đầu vào xấu và file sửa bị từ chối. Có test case sai thì lab in tên test case, `FAIL n/m` (n là số test case đạt) và thoát với mã 1, kể cả khi không có `--verify`. Bước kiểm chứng không ghim số tuyệt đối hay tốc độ.
 
 | Hiện tượng | Kiểm tra trước |
 |---|---|
@@ -292,12 +292,12 @@ Kiểm chứng: OK 45/45
 
 <div class="tkh-callout tkh-callout--warn">
 <span class="tkh-callout-title">Giới hạn của ví dụ so với production</span>
-<p>Dữ liệu là tổng hợp (200.000 chuyến, 60 ngày) nên PR-AUC 0,885 không đại diện cho dữ liệu thật; ta tự sinh dữ liệu nên mô hình học tốt không chứng minh gì ngoài bộ này. Bộ sinh có hai tạo tác ảnh hưởng mọi valid của phần 07: chuyến sạch dùng <code>NEWUSER50</code> giảm từ 7,8 % xuống 0,9 % theo thời gian vì quần thể khách gần như cố định, và tài khoản gian lận không dùng mã nào ngoài <code>NEWUSER50</code> của <code>promo_abuse</code>, nên <code>cust_promo_share_30d</code> lớn hơn 0 là dấu hiệu «sạch». Kết luận thứ bậc được đo trên ba seed nhưng với một cách chia và siêu tham số gần như mặc định (31 lá, tốc độ học 0,1). Mô hình chi phí giả định gắn cờ chặn hết thiệt hại và dùng <code>amount_vnd</code> làm thiệt hại. Nhãn là nhãn cuối cùng, trừ bước so sánh với nhãn biết ở ngày 40. Lab chưa đo độ trễ dự đoán (bài 59), chưa có registry và drift (bài 60), chưa giải thích từng dự đoán (bài 61). Đã chạy với Python 3.14.7, lightgbm 4.7.0, scikit-learn 1.9.1, numpy 2.5.4, polars 2.1.0, joblib 1.6.0.</p>
+<p>Dữ liệu là tổng hợp (200.000 chuyến, 60 ngày) nên PR-AUC 0,885 không đại diện cho dữ liệu thật; ta tự sinh dữ liệu nên mô hình học tốt không chứng minh gì ngoài bộ này. Bộ sinh có hai tạo tác ảnh hưởng đến mọi valid của phần 07: chuyến sạch dùng <code>NEWUSER50</code> giảm từ 7,8 % xuống 0,9 % theo thời gian vì quần thể khách gần như cố định, và tài khoản gian lận không dùng mã nào ngoài <code>NEWUSER50</code> của <code>promo_abuse</code>, nên <code>cust_promo_share_30d</code> lớn hơn 0 là dấu hiệu «sạch». Kết luận thứ bậc được đo trên ba seed nhưng với một cách chia và siêu tham số gần như mặc định (31 lá, tốc độ học 0,1). Mô hình chi phí giả định gắn cờ chặn hết thiệt hại và dùng <code>amount_vnd</code> làm thiệt hại. Nhãn là nhãn cuối cùng, trừ bước so sánh với nhãn biết ở ngày 40. Lab chưa đo độ trễ dự đoán (bài 59), chưa có registry và drift (bài 60), chưa giải thích từng dự đoán (bài 61). Đã chạy với Python 3.14.7, lightgbm 4.7.0, scikit-learn 1.9.1, numpy 2.5.4, polars 2.1.0, joblib 1.6.0.</p>
 </div>
 
 **Bài tập:** (1) Theo quy tắc chi phí kỳ vọng, ngưỡng `p` để gắn cờ một chuyến 30.000 VND là bao nhiêu? Một chuyến 120.000 VND thì sao, và vì sao ngưỡng đổi theo giá chuyến? (2) Bộ hiệu chỉnh có 2,39 % gian lận. Nếu ngoài đời tỉ lệ đó tăng gấp đôi, thành 4,78 %, một chuyến mô hình cho `p = 0,1` thực sự đáng nghi bao nhiêu, giả sử mô hình vẫn xếp hạng như cũ và chỉ tỉ lệ nền đổi?
 
-<details><summary>Xem lời giải</summary><p>(1) Gắn cờ tốn 8.000 chắc chắn, bỏ sót tốn tiền chuyến cộng 20.000, nên gắn cờ khi p × (tiền + 20.000) &gt; 8.000, tức p &gt; 8.000 / (tiền + 20.000). Chuyến 30.000 VND: 8.000 / 50.000 = <b>0,16</b>. Chuyến 120.000 VND: 8.000 / 140.000 = <b>0,057</b>. Chuyến đắt thì bỏ sót tốn hơn nên chấp nhận gắn cờ ở xác suất thấp hơn. Ngưỡng chung chọn trên bộ hiệu chỉnh (0,149 trong lab) là trung bình hoá của việc đó. (2) Odds ban đầu: 0,0239 / 0,9761 = 0,0245; odds mới: 0,0478 / 0,9522 = 0,0502, gấp <b>2,05</b> lần. Với <code>p = 0,1</code> (odds 0,111), odds mới là 0,111 × 2,05 = 0,228, tức p ≈ <b>0,19</b>. Mô hình đã hiệu chỉnh trên tỉ lệ cũ sẽ đánh giá thấp mọi chuyến; sửa bằng hiệu chỉnh lại trên dữ liệu gần, hoặc nhân odds theo tỉ lệ nền mới, và theo dõi tỉ lệ nền để biết lúc nào phải làm (bài 60).</p></details>
+<details><summary>Xem lời giải</summary><p>(1) Gắn cờ tốn 8.000 chắc chắn, bỏ sót tốn tiền chuyến cộng 20.000, nên gắn cờ khi p × (tiền + 20.000) &gt; 8.000, tức p &gt; 8.000 / (tiền + 20.000). Chuyến 30.000 VND: 8.000 / 50.000 = <b>0,16</b>. Chuyến 120.000 VND: 8.000 / 140.000 = <b>0,057</b>. Chuyến đắt thì bỏ sót tốn hơn nên chấp nhận gắn cờ ở xác suất thấp hơn. Ngưỡng chung chọn trên bộ hiệu chỉnh (0,149 trong lab) là mức trung bình của các ngưỡng riêng theo giá chuyến như vậy. (2) Odds ban đầu: 0,0239 / 0,9761 = 0,0245; odds mới: 0,0478 / 0,9522 = 0,0502, gấp <b>2,05</b> lần. Với <code>p = 0,1</code> (odds 0,111), odds mới là 0,111 × 2,05 = 0,228, tức p ≈ <b>0,19</b>. Mô hình đã hiệu chỉnh trên tỉ lệ cũ sẽ đánh giá thấp mọi chuyến; sửa bằng hiệu chỉnh lại trên dữ liệu gần, hoặc nhân odds theo tỉ lệ nền mới, và theo dõi tỉ lệ nền để biết lúc nào phải làm (bài 60).</p></details>
 
 Bài trước: [bài 56](/articles/python-rule-engine-scoring-strategy-explainability). Bài tiếp: [bài 58](/articles/python-networkx-graph-cau-ket-tai-xe-khach).
 

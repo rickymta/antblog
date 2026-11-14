@@ -8,7 +8,7 @@ tags: [python, toi-noi, sqlalchemy, postgresql, alembic]
 language: vi
 ---
 
-[Tới Nơi](/articles/du-an-mau-toi-noi) giao cho Python những service có dữ liệu riêng: chấm điểm gian lận, phân tích, OCR giấy tờ. Nhưng đến bài 23 mọi thứ ta viết vẫn sống trong bộ nhớ, tắt tiến trình là mất hết chuyến. Muốn một service Python giữ được chuyến, ta cần PostgreSQL, cùng loại database mà các bài C# đã dùng, và một cách nói chuyện với nó sao cho không phải viết SQL tay cho từng thao tác, đồng thời hình dạng bảng không trôi khỏi code theo thời gian.
+[Tới Nơi](/articles/du-an-mau-toi-noi) giao cho Python những service có dữ liệu riêng: chấm điểm gian lận, phân tích, OCR giấy tờ. Nhưng đến bài 23 mọi thứ ta viết vẫn sống trong bộ nhớ, tắt tiến trình là mất hết chuyến. Muốn một service Python giữ được chuyến, ta cần PostgreSQL, cùng loại database mà các bài C# đã dùng, và một cách nói chuyện với nó sao cho không phải viết SQL tay cho từng thao tác, đồng thời hình dạng bảng không lệch khỏi code theo thời gian.
 
 Bài này dựng đúng phần đó bằng **SQLAlchemy 2** (ánh xạ và truy vấn), **psycopg 3** (driver) và **Alembic** (migration), chạy trên PostgreSQL dùng chung của loạt bài. Bài 25 sẽ dùng nền này để đặt chuyến an toàn khi nhiều người ghi cùng lúc.
 
@@ -24,8 +24,8 @@ Bài này dựng đúng phần đó bằng **SQLAlchemy 2** (ánh xạ và truy 
 
 Khi người ta nói «dùng SQLAlchemy với PostgreSQL», thực ra có ba lớp xếp chồng, và biết lớp nào làm việc gì giúp đọc lỗi nhanh hơn.
 
-- **psycopg 3** là driver: lớp duy nhất nói giao thức PostgreSQL, gửi câu SQL đi và nhận hàng về.
-- **SQLAlchemy Core** gồm `Engine` (giữ connection pool) và bộ xây câu SQL từ biểu thức Python. Nó cho ta tạo `select(...)` thay vì nối chuỗi.
+- **psycopg 3** là driver: lớp duy nhất nói giao thức PostgreSQL, gửi câu SQL đi và nhận các dòng kết quả về.
+- **SQLAlchemy Core** gồm `Engine` (giữ connection pool) và bộ xây câu SQL từ biểu thức Python. Bộ xây câu SQL này cho ta tạo `select(...)` thay vì nối chuỗi.
 - **SQLAlchemy ORM** ánh xạ class sang bảng, và đưa `Session` vào: một đơn vị làm việc theo dõi object nào đã đổi để ghi xuống database.
 
 <figure class="tkh-fig">
@@ -68,13 +68,13 @@ class Trip(Base):
     )
 ```
 
-Một vài quyết định đáng nhìn kỹ, vì chúng là chỗ mapping thường sai âm thầm:
+Một vài quyết định đáng nhìn kỹ, vì chúng là chỗ mapping thường sai mà không báo lỗi:
 
-- **`Mapped[str | None]` là cột cho phép NULL**, còn `Mapped[str]` là `NOT NULL`. Annotation quyết định ràng buộc, không chỉ gợi ý cho trình soát kiểu. `driver_id` nullable vì chuyến mới chưa có tài xế.
+- **`Mapped[str | None]` là cột cho phép NULL**, còn `Mapped[str]` là `NOT NULL`. Annotation quyết định ràng buộc, không chỉ là gợi ý cho công cụ kiểm tra kiểu. `driver_id` nullable vì chuyến mới chưa có tài xế.
 - **Tiền và khoảng cách dùng `Numeric`, tương ứng `Decimal`**, không dùng `Float` (bài 02). Lab đọc lại `fare` ra `Decimal('14250')` và `distance_km` ra `Decimal('2.500')`: scale của cột được giữ.
 - **`StrEnum` lưu thành VARCHAR chứa giá trị** (`"picked_up"`), không lưu tên thành viên (`"PICKED_UP"`). `values_callable` làm việc này, và `native_enum=False` tránh kiểu `ENUM` của PostgreSQL vốn khó sửa bằng migration khi thêm trạng thái. Đổi lại cột chỉ là VARCHAR(16) **không có ràng buộc CHECK**: ORM chặn giá trị lạ ở phía Python, nhưng một câu `INSERT` ghi thẳng `status = 'bogus'` vẫn lọt (lab thử và PostgreSQL nhận). Muốn database cũng chặn, ta thêm `CheckConstraint` riêng.
 - **`DateTime(timezone=True)` là `timestamptz`**: PostgreSQL lưu một thời điểm tuyệt đối và trả về `datetime` có offset. Ta luôn ghi giờ UTC aware (bài 04); khi hiển thị đổi sang `Asia/Ho_Chi_Minh`.
-- **Schema `lab24` đặt ở `MetaData`**, nên không class nào phải lặp lại. Khoá ngoại ta ghi đủ tên có schema (`lab24.customers.customer_id`).
+- **Schema `lab24` đặt ở `MetaData`**, nên không class nào phải lặp lại tên schema. Khoá ngoại ta ghi đủ tên có schema (`lab24.customers.customer_id`).
 
 `Trip` ở đây là **mô hình lưu trữ**, không phải `Trip` dataclass có hành vi và máy trạng thái của [bài 11](/articles/python-class-dataclass-property-encapsulation). Gộp hai thứ làm một là một lựa chọn kiến trúc; [bài 69](/articles/python-repository-unit-of-work-sqlalchemy) sẽ bàn việc tách repository khỏi domain.
 
@@ -98,7 +98,7 @@ stmt = (
 print(str(stmt.compile(dialect=pg_psycopg.dialect())))
 ```
 
-Nhìn SQL sinh ra là kỹ năng bắt buộc khi dùng ORM. Có hai cách. `stmt.compile(dialect=...)` (lab dùng `psycopg.dialect()` từ `sqlalchemy.dialects.postgresql`) cho chuỗi SQL không cần kết nối; `create_engine(url, echo=True)` in từng câu thật mỗi lần chạy (đó chỉ là cách bật logger `sqlalchemy.engine` ở mức INFO, lab bật logger đó nhưng gom lại để đếm). Output của lab (trích, đã bỏ khoảng trắng cuối dòng):
+Nhìn SQL sinh ra là kỹ năng bắt buộc khi dùng ORM. Có hai cách. `stmt.compile(dialect=...)` (lab dùng `psycopg.dialect()` từ `sqlalchemy.dialects.postgresql`) cho chuỗi SQL không cần kết nối; `create_engine(url, echo=True)` in từng câu thật mỗi lần chạy (thực chất đó chỉ là cách bật logger `sqlalchemy.engine` ở mức INFO; lab cũng bật logger này, nhưng gom các câu lại để đếm). Output của lab (trích, đã bỏ khoảng trắng cuối dòng):
 
 ```text
 SELECT lab24.trips.trip_id, lab24.trips.customer_id, lab24.trips.driver_id, lab24.trips.service, lab24.trips.distance_km, lab24.trips.fare, lab24.trips.status, lab24.trips.created_at
@@ -118,7 +118,7 @@ Cuối cùng là bẫy kinh điển **N+1**. Quan hệ `Customer.trips` mặc đ
 
 ## Alembic: migration là lịch sử lược đồ có thể review
 
-`create_all` chỉ tạo bảng chưa có, nên không đủ khi lược đồ thay đổi. **Alembic** lưu mỗi thay đổi thành một file **revision** nằm trong git, có `upgrade()` và `downgrade()`, và ghi revision hiện tại vào bảng `alembic_version` của database. Cách làm việc là: sửa `models.py`, để Alembic **so** models với database thật và đề xuất migration, đọc kỹ, sửa tay nếu cần, rồi áp dụng.
+`create_all` chỉ tạo bảng chưa có, nên không đủ khi lược đồ thay đổi. **Alembic** lưu mỗi thay đổi thành một file **revision** nằm trong git, có `upgrade()` và `downgrade()`, và ghi revision hiện tại vào bảng `alembic_version` của database. Quy trình làm việc là: sửa `models.py`, để Alembic **so** models với database thật và đề xuất migration, đọc kỹ, sửa tay nếu cần, rồi áp dụng.
 
 <figure class="tkh-fig">
 <div class="tkh-fig-box">
@@ -157,7 +157,7 @@ INFO  [alembic.autogenerate.compare.tables] Detected added table 'lab24.customer
 INFO  [alembic.autogenerate.compare.tables] Detected added table 'lab24.trips'
 ```
 
-File sinh ra được đọc lại và gọn hoá, vì autogenerate chỉ là **bản nháp**. Nó không đoán được ý định (đổi tên cột trông giống xoá một cột rồi thêm cột khác), không thấy mọi thay đổi (ví dụ giá trị `server_default` mặc định không được so sánh), và không biết dữ liệu hiện có. Revision `0001` (trích):
+Ta đọc lại file sinh ra rồi gọn hoá nó, vì autogenerate chỉ là **bản nháp**. Autogenerate không đoán được ý định (đổi tên cột trông giống xoá một cột rồi thêm cột khác), không thấy mọi thay đổi (ví dụ giá trị `server_default` mặc định không được so sánh), và không biết dữ liệu hiện có. Revision `0001` (trích):
 
 ```python
 def upgrade() -> None:
@@ -190,7 +190,7 @@ INFO  [alembic.runtime.migration] Running upgrade 0001 -> 0002, index trips by c
 
 (trích: đã bỏ hai dòng `Context impl` và `Will assume transactional DDL`). `alembic current` in `0002 (head)`. Muốn bỏ hẳn schema khi thử xong, chạy `main.py --cleanup` (lệnh này `DROP SCHEMA lab24 CASCADE`). Alembic coi DDL của PostgreSQL là transactional, và theo mặc định cả lệnh `upgrade` là **một** transaction: nếu `0002` lỗi thì bảng của `0001` cũng bị rollback, không để lại nửa chừng (đặt `transaction_per_migration=True` trong `context.configure` nếu muốn mỗi revision một transaction). Thêm `--sql` vào `upgrade` sẽ in SQL của các revision mà không kết nối, để đưa cho người review database trước khi chạy thật. Lưu ý output đó không có `CREATE SCHEMA lab24`, vì chỉ chế độ online của `env.py` tạo schema: khi chạy kịch bản offline, schema phải có sẵn.
 
-Lệnh quan trọng cuối cùng là `alembic check`: nó so `models.py` với database sau khi áp dụng và thoát với mã khác 0 nếu còn lệch, nên rất hợp để chạy trong CI. Lab gọi nó ở dạng `command.check(cfg)`. Khi ta thử thêm `rating: Mapped[int | None] = mapped_column(SmallInteger)` vào `Trip` mà quên viết migration, nó báo `New upgrade operations detected: [('add_column', 'lab24', 'trips', Column('rating', SmallInteger(), ...))]`, và `create_all` thì im lặng bỏ qua cột mới: chính xác điều câu hỏi đầu bài nói.
+Lệnh quan trọng cuối cùng là `alembic check`: nó so `models.py` với database sau khi áp dụng và thoát với mã khác 0 nếu còn lệch, nên rất hợp để chạy trong CI. Lab gọi nó ở dạng `command.check(cfg)`. Khi ta thử thêm `rating: Mapped[int | None] = mapped_column(SmallInteger)` vào `Trip` mà quên viết migration, nó báo `New upgrade operations detected: [('add_column', 'lab24', 'trips', Column('rating', SmallInteger(), ...))]`, và `create_all` thì bỏ qua cột mới mà không báo gì: đúng như điều câu hỏi đầu bài nêu.
 
 ## Async engine: cùng mô hình, quy tắc khác
 
@@ -204,9 +204,9 @@ async with AsyncSession(engine) as session:
     customer.trips  # tải lười cần I/O ngầm, mà coroutine không được phép chặn
 ```
 
-Có hai điều lab ghi lại. Thứ nhất, `sqlalchemy.ext.asyncio` cần thư viện `greenlet`; lần chạy đầu của ta thiếu nó và dừng với `ImportError: The SQLAlchemy asyncio module requires that the Python 'greenlet' library is installed`, nên dependency phải khai báo là `sqlalchemy[asyncio]`. Thứ hai, chạm `customer.trips` trong ngữ cảnh async ném `MissingGreenlet` (SQLAlchemy bọc nó trong `StatementError`, lỗi gốc nằm ở `.orig`). Tải lười tức là «phát SQL ở chỗ không có dấu hiệu gì trong code», mà trong coroutine mọi I/O phải có `await` (bài 21). Cách đúng là nói trước cho truy vấn tải luôn quan hệ: `.options(selectinload(Customer.trips))`; lab xác nhận cách này trả `TN-0001,TN-0002` cho `CU-001`.
+Có hai điều lab ghi lại. Thứ nhất, `sqlalchemy.ext.asyncio` cần thư viện `greenlet`; lần chạy đầu của ta thiếu nó và dừng với `ImportError: The SQLAlchemy asyncio module requires that the Python 'greenlet' library is installed`, nên dependency phải khai báo là `sqlalchemy[asyncio]`. Thứ hai, chạm `customer.trips` trong ngữ cảnh async ném `MissingGreenlet` (SQLAlchemy bọc nó trong `StatementError`, lỗi gốc nằm ở `.orig`). Tải lười tức là «phát SQL ở chỗ không có dấu hiệu gì trong code», mà trong coroutine mọi I/O phải có `await` (bài 21). Cách đúng là yêu cầu truy vấn tải kèm quan hệ ngay từ đầu: `.options(selectinload(Customer.trips))`; lab xác nhận cách này trả `TN-0001,TN-0002` cho `CU-001`.
 
-Chọn async khi cả service đã async; nó không làm một câu SQL chạy nhanh hơn, chỉ cho luồng khác tiếp tục trong lúc chờ. Với script hay job tuần tự, engine đồng bộ đơn giản và ít bẫy hơn.
+Chọn async khi cả service đã async; nó không làm một câu SQL chạy nhanh hơn, chỉ cho coroutine khác tiếp tục chạy trong lúc chờ. Với script hay job tuần tự, engine đồng bộ đơn giản và ít bẫy hơn.
 
 ## Chạy và kiểm chứng
 
@@ -235,7 +235,7 @@ upgrade head -> revision 0002, index còn: ['ix_trips_customer_created']
 OK 27/27
 ```
 
-Vài điểm đáng đọc. Phần «Cột trips trong PostgreSQL» là kết quả hỏi **catalog của database** (`inspect(engine)`), không hỏi lại model: đây là cách chứng minh mapping và bảng thật khớp. Khoá ngoại sai (`CU-999`) không bị Python chặn mà bị PostgreSQL từ chối với SQLSTATE `23503`, và `exc.orig.sqlstate` cho ta mã đó; ràng buộc nằm ở database chứ không chỉ ở code. Cặp `downgrade -1` rồi `upgrade head` cho thấy migration đi được hai chiều và dữ liệu còn nguyên (lab đếm lại 4 chuyến). `--verify` chạy 27 kiểm tra; đạt thì in `OK 27/27`, sai thì in tên ca và `FAIL n/m` (n là số ca đạt) với exit 1. Nếu chưa bật PostgreSQL, nó in `FAIL: không nối được PostgreSQL tại <url> ...` và exit 1. Phiên bản đã chạy: Python 3.14.7, SQLAlchemy 2.1.8, psycopg 3.3.8, Alembic 1.20.1, PostgreSQL 17.11.
+Vài điểm đáng đọc. Phần «Cột trips trong PostgreSQL» là kết quả hỏi **catalog của database** (`inspect(engine)`), không hỏi lại model: đây là cách chứng minh mapping và bảng thật khớp. Khoá ngoại sai (`CU-999`) không bị Python chặn mà bị PostgreSQL từ chối với SQLSTATE `23503`, và `exc.orig.sqlstate` cho ta mã đó; ràng buộc nằm ở database chứ không chỉ ở code. Cặp `downgrade -1` rồi `upgrade head` cho thấy migration đi được hai chiều và dữ liệu còn nguyên (lab đếm lại 4 chuyến). `--verify` chạy 27 kiểm tra; đạt thì in `OK 27/27`, sai thì in tên test case và `FAIL n/m` (n là số test case đạt) với exit 1. Nếu chưa bật PostgreSQL, nó in `FAIL: không nối được PostgreSQL tại <url> ...` và exit 1. Phiên bản đã chạy: Python 3.14.7, SQLAlchemy 2.1.8, psycopg 3.3.8, Alembic 1.20.1, PostgreSQL 17.11.
 
 | Hiện tượng | Kiểm tra trước |
 | --- | --- |

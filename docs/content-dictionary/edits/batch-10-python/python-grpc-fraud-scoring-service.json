@@ -1,0 +1,21 @@
+{"file":"python-grpc-fraud-scoring-service.md","edits":[
+{"old":"Ở giờ cao điểm (khoảng 70 chuyến mỗi giây)","new":"Vào giờ cao điểm (khoảng 70 chuyến mỗi giây)","reason":"Giới từ tự nhiên hơn","severity":"low"},
+{"old":"Điểm trả về là đầu vào cho người duyệt,","new":"Điểm số mà service trả về là đầu vào cho người duyệt,","reason":"Câu cụt, thiếu chủ thể","severity":"medium"},
+{"old":"deadline mặc định không có, đặt tường minh và truyền sang server","new":"mặc định không có deadline, client đặt rõ ràng và deadline truyền sang server","reason":"«tường minh» là calque; câu đảo trật tự","severity":"medium"},
+{"old":"API công khai cho ứng dụng khách, nơi người ta muốn `curl` và cache: giữ REST.","new":"Còn API công khai cho ứng dụng khách, nơi người ta muốn dùng `curl` và cache, thì giữ REST.","reason":"Câu cụt, thiếu động từ và liên từ","severity":"medium"},
+{"old":"khoảng chênh này có nghĩa, nhưng đừng kỳ vọng thần kỳ:","new":"khoảng chênh này đáng kể, nhưng đừng kỳ vọng quá cao:","reason":"«có nghĩa» là calque của significant; «thần kỳ» gượng","severity":"medium"},
+{"old":"bên gửi phiên bản mới thêm field số 15,","new":"bên gửi dùng phiên bản mới thêm field số 15,","reason":"Thiếu động từ","severity":"medium"},
+{"old":"Servicer là một lớp kế thừa khung sinh ra,","new":"Servicer là một lớp kế thừa khung do công cụ sinh ra,","reason":"Thiếu chủ thể của «sinh ra»","severity":"low"},
+{"old":"Kiểm đầu vào ở server dù client đã có kiểu:","new":"Server vẫn kiểm tra đầu vào dù client đã có kiểu:","reason":"Câu cụt, thiếu chủ ngữ","severity":"medium"},
+{"old":"Kết quả năm ca gọi thường, trích output:","new":"Kết quả của năm ca gọi bình thường, trích output:","reason":"«gọi thường» cụt","severity":"low"},
+{"old":"để bỏ qua việc đắt tiền khi ngân sách đã quá ngắn.","new":"để bỏ qua bước tốn kém khi thời gian còn lại đã quá ngắn.","reason":"«ngân sách» và «việc đắt tiền» là calque, mơ hồ","severity":"high"},
+{"old":"Có thể, nếu còn ngân sách và lời gọi idempotent","new":"Có thể, nếu còn đủ thời gian và lời gọi idempotent","reason":"«ngân sách» dùng cho thời gian là calque","severity":"medium"},
+{"old":"Bắn cùng lúc lên một channel, chạy trên máy này","new":"Bắn cùng lúc trên một channel, chạy trên máy này","reason":"Giới từ gượng","severity":"low"},
+{"old":"`Semaphore` 200 ở client (`self._slots` ở trên) cứu được trong lab","new":"`Semaphore` 200 ở client (`self._slots` ở trên) giải quyết được vấn đề trong lab","reason":"«cứu được» khẩu ngữ, thiếu tân ngữ","severity":"low"},
+{"old":"Nhiều bản Dispatch cộng lại sẽ dính đúng như vậy.","new":"Nhiều bản Dispatch chạy cùng lúc sẽ gặp đúng tình huống này.","reason":"«dính» khẩu ngữ, «cộng lại» mơ hồ","severity":"low"},
+{"old":"kể cả cái server không bao giờ trả lời.","new":"kể cả lời gọi mà server không bao giờ trả lời.","reason":"«cái» chỉ vật mơ hồ","severity":"medium"},
+{"old":"Phần đo thời gian của lần chạy thường (máy","new":"Phần đo thời gian của lần chạy bình thường (máy","reason":"«chạy thường» cụt","severity":"low"},
+{"old":"Thí nghiệm bắn 2.000 lời gọi cùng lúc, ba cấu hình (cùng lần chạy, cùng tải máy):","new":"Thí nghiệm bắn 2.000 lời gọi cùng lúc với ba cấu hình (cùng lần chạy, cùng tải máy):","reason":"Câu cụt, thiếu giới từ","severity":"medium"},
+{"old":"Lab thiếu health check, reflection và retry khai báo","new":"Lab chưa có health check, reflection và retry khai báo","reason":"«thiếu» đứng trước danh từ nghe cụt","severity":"low"},
+{"old":"nếu còn ngân sách thời gian.","new":"nếu còn đủ thời gian.","reason":"calque «ngân sách thời gian»","severity":"medium"}
+]}

@@ -1,16 +1,16 @@
 ---
 slug: rust-aggregate-invariant-optimistic-locking-for-update
 title: "Aggregate, invariant và concurrency: version, optimistic locking, FOR UPDATE"
-summary: "Bài 53: aggregate Account giữ hạn mức rút trong domain; optimistic locking bằng version so với SELECT FOR UPDATE, retry có giới hạn và jitter, thứ tự khoá theo id tránh deadlock 40P01, kiểm bằng N task Barrier trên PostgreSQL."
+summary: "Bài 53: aggregate Account giữ hạn mức rút trong domain; optimistic locking bằng version so với SELECT FOR UPDATE, retry có giới hạn và jitter, thứ tự khoá theo id tránh deadlock 40P01, kiểm chứng bằng N task dùng Barrier trên PostgreSQL."
 category: rust-advanced
 level: advanced
 tags: [rust, toi-noi, ledger, postgresql, concurrency, aggregate]
 language: vi
 ---
 
-Tài xế `DR-001` có 150.000 VND trong ví và hạn mức rút 100.000 mỗi kỳ. Hai thiết bị gần như cùng lúc gửi lệnh rút 20.400 (phần tiền chuyến `TN-0001`); mỗi lệnh đọc ví, kiểm hạn mức, rồi ghi. Chạy lần lượt thì đúng. Chồng nhau thì mỗi bút toán vẫn cân, nhưng ví đã sai.
+Tài xế `DR-001` có 150.000 VND trong ví và hạn mức rút 100.000 mỗi kỳ. Hai thiết bị gần như cùng lúc gửi lệnh rút 20.400 (phần tiền chuyến `TN-0001`); mỗi lệnh đọc ví, kiểm hạn mức, rồi ghi. Chạy lần lượt thì kết quả đúng. Chạy chồng nhau thì từng bút toán vẫn cân, nhưng số dư ví đã sai.
 
-Đây là bài 53 của lộ trình **Rust nâng cao qua [Tới Nơi](/articles/du-an-mau-toi-noi)**. Bài 52 đặt [command handler](/articles/rust-command-handler-pipeline-domain-event-khong-framework) quanh một transaction, chưa thử lại khi xung đột. Bài 24 cho thấy [write skew phá hạn mức rút](/articles/rust-transaction-isolation-append-only-idempotency-key) và để ngỏ hướng khoá dòng; bài 42 dùng `FOR UPDATE` cho [hold](/articles/rust-hold-capture-void-so-du-kha-dung). Bài này đặt cạnh nhau: invariant sống ở đâu, version hay khoá, và hai ví thì khoá theo thứ tự nào.
+Đây là bài 53 của lộ trình **Rust nâng cao qua [Tới Nơi](/articles/du-an-mau-toi-noi)**. Bài 52 đặt [command handler](/articles/rust-command-handler-pipeline-domain-event-khong-framework) quanh một transaction, chưa có bước thử lại khi xảy ra xung đột. Bài 24 cho thấy [write skew phá hạn mức rút](/articles/rust-transaction-isolation-append-only-idempotency-key) và để ngỏ hướng khoá hàng; bài 42 dùng `FOR UPDATE` cho [hold](/articles/rust-hold-capture-void-so-du-kha-dung). Bài này đặt các hướng đó cạnh nhau để so sánh: invariant nằm ở đâu, dùng version hay khoá, và hai ví thì khoá theo thứ tự nào.
 
 <div class="tkh-callout tkh-callout--example">
 <span class="tkh-callout-title">Thử trước khi đọc</span>
@@ -45,7 +45,7 @@ fn spend(&mut self, amount: Money) -> Result<(), AccountError> {
 
 Trường của `Account` là private: code ngoài module chỉ đổi được qua `withdraw`, `transfer_to`, `receive`, còn `restore` kiểm lại invariant khi nạp từ database. Module không có `async` hay `sqlx`, nên unit test không cần database.
 
-Hạn mức cần chỗ lưu, nên lab thêm bảng `account_limits`. Bảng này chỉ của bài 53, nằm ngoài bốn bảng chuẩn của bài 25. `CHECK (withdrawn_dong <= withdraw_limit_dong)` bắt được giá trị vô lý nhưng, như mục sau sẽ thấy, không bắt được cuộc đua.
+Hạn mức cần chỗ lưu, nên lab thêm bảng `account_limits`. Bảng này chỉ dùng trong bài 53, không thuộc bốn bảng chuẩn của bài 25. `CHECK (withdrawn_dong <= withdraw_limit_dong)` bắt được giá trị vô lý nhưng, như mục sau sẽ thấy, không bắt được race condition.
 
 `JournalEntry` cũng là aggregate, theo kiểu bất biến. Invariant của nó (ít nhất hai posting, tổng bằng 0) được kiểm lúc dựng ([bài 13](/articles/rust-double-entry-journal-entry-posting)) và bằng trigger lúc commit ([bài 25](/articles/rust-schema-so-cai-accounts-journal-postings-partition)). Không ai sửa bút toán sau khi ghi, nên không có hai người sửa chồng nhau và `journal_entries` không có cột `version`. Lab thử sửa thì sổ tự từ chối:
 
@@ -53,11 +53,11 @@ Hạn mức cần chỗ lưu, nên lab thêm bảng `account_limits`. Bảng nà
 UPDATE journal_entries: SQLSTATE TN001; UPDATE postings: SQLSTATE TN001
 ```
 
-Chống ghi trùng bút toán là việc của `idempotency_key` unique, không phải của version. Ở loạt C#, [aggregate Trip](/articles/dotnet10-ddd-bounded-context-aggregate) cũng bảo vệ invariant bằng hành vi; phần còn lại là chuyện qua được cuộc đua.
+Chống ghi trùng bút toán là việc của `idempotency_key` unique, không phải của version. Ở loạt C#, [aggregate Trip](/articles/dotnet10-ddd-bounded-context-aggregate) cũng bảo vệ invariant bằng hành vi; phần còn lại là chuyện vượt qua race condition.
 
 ## Read-modify-write mất cập nhật như thế nào?
 
-Lịch đầu là lịch cố định dựng bằng `Notify`, không phải may rủi: A nạp ví (150.000, version 1), B nạp thêm 50.000 và commit (200.000, version 2), rồi A mới ghi số nó tính từ bản cũ.
+Thứ tự chạy ở đây được dựng cố định bằng `Notify`, không phải do may rủi: A nạp ví (150.000, version 1), B nạp thêm 50.000 và commit (200.000, version 2), rồi A mới ghi con số A tính từ bản cũ.
 
 <figure class="tkh-fig">
 <div class="tkh-fig-box">
@@ -73,14 +73,14 @@ không khóa : 1 lần thử, rút được; số dư lưu 129.600 VND, số dư
 optimistic : 2 lần thử, rút được; số dư lưu 179.600 VND, số dư theo posting 179.600 VND; tổng số dư mọi tài khoản 0 VND, lệch projection []
 ```
 
-Sổ đóng kín nên tổng số dư mọi tài khoản phải bằng 0, và `account_balances` phải bằng tổng posting của từng tài khoản. Bản không khoá phá cả hai: 50.000 của B còn trong posting nhưng biến khỏi projection. Cùng lỗi ở quy mô tám task:
+Sổ đóng kín nên tổng số dư mọi tài khoản phải bằng 0, và `account_balances` phải bằng tổng posting của từng tài khoản. Bản không khoá phá cả hai: 50.000 của B còn trong posting nhưng biến mất khỏi projection. Cùng lỗi ở quy mô tám task:
 
 ```text
 không khóa : 8 ok, 0 bị từ chối, 0 hết lượt; số lần thử [1, 1, 1, 1, 1, 1, 1, 1]; số dư 129.600 VND, đã rút 20.400 VND, version 9
              tổng số dư mọi tài khoản 142.800 VND, lệch projection ["driver:DR-001"], chi quá hạn mức [("driver:DR-001", 163200, 100000)]
 ```
 
-`account_limits` ghi `withdrawn = 20.400`, nằm trong hạn mức, nên `CHECK` im lặng: mỗi task ghi một con số riêng lẻ hợp lệ. Hạn mức bị vượt chỉ lộ ra khi cộng posting (163.200). `Barrier` đặt sau bước nạp bảo đảm cả tám task đọc cùng một bản cũ.
+`account_limits` ghi `withdrawn = 20.400`, nằm trong hạn mức, nên `CHECK` không báo gì: mỗi task ghi một con số riêng lẻ hợp lệ. Hạn mức bị vượt chỉ lộ ra khi cộng posting (163.200). `Barrier` đặt sau bước nạp bảo đảm cả tám task đọc cùng một bản cũ.
 
 ## Optimistic locking: 0 dòng là xung đột, rồi thử lại
 
@@ -103,9 +103,9 @@ if done.rows_affected() == 0 {
 }
 ```
 
-`rows_affected() == 0` là toàn bộ cơ chế phát hiện. Ở READ COMMITTED nó đúng vì: nếu bên kia đã sửa hàng nhưng chưa commit, `UPDATE` của ta chờ khoá hàng; khi bên kia commit, PostgreSQL đánh giá lại `WHERE` trên bản mới, thấy `version` không khớp và trả 0 dòng. Ở [loạt C#](/articles/dotnet10-transaction-concurrency-idempotency), EF đưa concurrency token vào `WHERE` thay ta; không ORM thì tự viết. Nguyên tắc giống nhau: mọi đường ghi tăng version, và sau xung đột phải đọc lại chứ không ghi đè cho hết lỗi.
+`rows_affected() == 0` là toàn bộ cơ chế phát hiện. Ở READ COMMITTED, cơ chế này đúng vì: nếu bên kia đã sửa hàng nhưng chưa commit, `UPDATE` của ta chờ khoá hàng; khi bên kia commit, PostgreSQL đánh giá lại `WHERE` trên bản mới, thấy `version` không khớp và trả 0 dòng. Ở [loạt C#](/articles/dotnet10-transaction-concurrency-idempotency), EF đưa concurrency token vào `WHERE` thay ta; không ORM thì tự viết. Nguyên tắc giống nhau: mọi đường ghi tăng version, và sau xung đột phải đọc lại chứ không ghi đè cho hết lỗi.
 
-Đường ghi chuẩn của bài 25 cộng dồn `account_balances` bằng upsert và tăng `version`, nên writer ngoài aggregate như lệnh nạp ví của B vẫn bị phát hiện. Writer nào quên tăng `version` thì cơ chế này mất tác dụng trong im lặng.
+Đường ghi chuẩn của bài 25 cộng dồn `account_balances` bằng upsert và tăng `version`, nên writer ngoài aggregate như lệnh nạp ví của B vẫn bị phát hiện. Writer nào quên tăng `version` thì cơ chế này mất tác dụng mà không báo gì.
 
 Xung đột là lỗi tạm thời, nên cần vòng thử lại. `retry_serializable` của bài 24 chỉ xử lý `40001` và ghi rõ chưa xử lý `40P01`; vòng dưới gộp cả ba loại:
 
@@ -135,7 +135,7 @@ loop {
 }
 ```
 
-Mỗi lần thử mở transaction mới và nạp lại aggregate, vì domain phải quyết định lại: sau xung đột hạn mức có thể đã hết, và lỗi trả về là `LimitExceeded`. Số lần thử có giới hạn, hết thì trả `RetriesExhausted`. Thời gian chờ ngẫu nhiên trong `[0, min(trần, cơ sở × 2^(lần-1))]`, để các task vừa va nhau không thử lại cùng nhịp. Lỗi nghiệp vụ không bao giờ thử lại.
+Mỗi lần thử mở transaction mới và nạp lại aggregate, vì domain phải quyết định lại: sau xung đột hạn mức có thể đã hết, và lỗi trả về là `LimitExceeded`. Số lần thử có giới hạn, hết thì trả `RetriesExhausted`. Thời gian chờ là một số ngẫu nhiên trong `[0, min(trần, cơ sở × 2^(lần-1))]`, để các task vừa va nhau không thử lại cùng nhịp. Lỗi nghiệp vụ không bao giờ thử lại.
 
 ## Cần bao nhiêu lần thử khi nhiều task tranh một ví?
 
@@ -148,7 +148,7 @@ FOR UPDATE : 4 ok, 4 bị từ chối, 0 hết lượt; số lần thử [1, 1, 
              tổng số dư mọi tài khoản 0 VND, lệch projection [], chi quá hạn mức []
 ```
 
-Đúng bốn lần rút, sổ cân, projection khớp posting. Số lần thử đổi giữa các lần chạy (`--verify` chỉ kiểm đúng một task qua ngay lần đầu và không task nào quá 5 lần).
+Đúng bốn lần rút, sổ cân, projection khớp posting. Số lần thử khác nhau giữa các lần chạy (`--verify` chỉ kiểm đúng một task qua ngay lần đầu và không task nào quá 5 lần).
 
 <figure class="tkh-fig">
 <div class="tkh-fig-box">
@@ -157,7 +157,7 @@ FOR UPDATE : 4 ok, 4 bị từ chối, 0 hết lượt; số lần thử [1, 1, 
 <figcaption>Hình 2. Số lần thử của tám task tranh một ví, một lần chạy. Mốc nét đứt là cận do số commit thành công đặt ra.</figcaption>
 </figure>
 
-Phân bố phụ thuộc vào độ tranh chấp. `--measure` cho mười sáu task đều thành công (số tiền nhỏ, hạn mức lớn), mỗi dòng trên một schema mới (rút gọn: bỏ cột `ms` và năm dòng `FOR UPDATE` còn lại, dòng nào cũng toàn 1 lần thử):
+Phân bố phụ thuộc vào độ tranh chấp. `--measure` chạy mười sáu task, tất cả đều thành công (số tiền nhỏ, hạn mức lớn), mỗi dòng trên một schema mới (rút gọn: bỏ cột `ms` và năm dòng `FOR UPDATE` còn lại, dòng nào cũng toàn 1 lần thử):
 
 ```text
 máy: 23:41  up 35 days, 15:25, 1 user, load averages: 139.75 154.24 127.61
@@ -171,7 +171,7 @@ optimistic      8    1  1→1 2→1 3→1 4→1 5→1 6→2 7→1               
 FOR UPDATE     16    1  1→16                                             16    1
 ```
 
-Số đo trên máy viết bài (load average khoảng 100 đến 207, rất tải), không phải SLA. Bốn task mỗi ví: tổng 40 ở mọi lần đo, là quan sát chứ không phải bảo đảm. Mười sáu task trên một ví, qua sáu lần chạy: tổng từ 82 đến 129, tối đa từ 9 đến 16 lần thử; cận trên là 1+2+…+16 = 136, vì task commit thứ k xung đột tối đa k−1 lần. Chi phí của optimistic locking tăng cỡ bình phương số task trên một hàng nóng, và gần bằng không khi các task rơi vào hàng khác nhau.
+Các số đo này lấy trên máy viết bài (load average khoảng 100 đến 207, máy chịu tải rất cao), không phải cam kết SLA. Với bốn task mỗi ví, tổng là 40 ở mọi lần đo; đây là quan sát chứ không phải bảo đảm. Mười sáu task trên một ví, qua sáu lần chạy: tổng từ 82 đến 129, tối đa từ 9 đến 16 lần thử; cận trên là 1+2+…+16 = 136, vì task commit thứ k xung đột tối đa k−1 lần. Chi phí của optimistic locking tăng cỡ bình phương số task trên một hàng nóng, và gần bằng không khi các task rơi vào hàng khác nhau.
 
 ## FOR UPDATE: xếp hàng thay vì thử lại
 
@@ -195,7 +195,7 @@ let limits = sqlx::query(
 .ok_or_else(|| StoreError::NoAccount(id.to_string()))?;
 ```
 
-Hàm đọc hai câu thay vì một `JOIN`, và có lý do. Bản đầu của lab gộp thành `account_balances b JOIN account_limits l ... FOR UPDATE OF b` và tám task cho ra bảy lần rút thành công, tổng 142.800, vượt hạn mức; lần thứ tám chỉ bị chặn vì thiếu số dư (thí nghiệm riêng, chạy lại đều ra bảy, không nằm trong `--verify`). Lab giữ lại lỗi ở dạng một người chờ: A khoá ví và rút 20.400 nhưng chưa commit, B nạp bằng từng cách và bị chặn (lab đợi tới khi `pg_stat_activity` báo B đang chờ khoá, không đoán bằng thời gian), rồi A commit.
+Hàm này đọc bằng hai câu lệnh thay vì một `JOIN`, và có lý do. Bản đầu của lab gộp thành `account_balances b JOIN account_limits l ... FOR UPDATE OF b` và tám task cho ra bảy lần rút thành công, tổng 142.800, vượt hạn mức; lần thứ tám chỉ bị chặn vì thiếu số dư (thí nghiệm riêng, chạy lại đều ra bảy, không nằm trong `--verify`). Lab giữ lại lỗi ở dạng một người chờ: A khoá ví và rút 20.400 nhưng chưa commit, B nạp ví theo từng cách truy vấn và bị chặn (lab đợi tới khi `pg_stat_activity` báo B đang chờ khoá, không đoán bằng thời gian), rồi A commit.
 
 ```text
 đúng là: số dư 129.600 VND, đã rút 20.400 VND (A vừa commit)
@@ -204,16 +204,16 @@ JOIN, FOR UPDATE OF b, l  : người chờ thấy số dư 129.600 VND, đã rú
 hai câu (lock rồi đọc)    : người chờ thấy số dư 129.600 VND, đã rút 20.400 VND
 ```
 
-[Tài liệu READ COMMITTED](https://www.postgresql.org/docs/current/transaction-iso.html#XACT-READ-COMMITTED) nói đúng chuyện này: sau khi chờ, câu lệnh đánh giá lại `WHERE`, khoá và trả bản mới của chính hàng đó, nhưng không thấy tác động của bên kia lên hàng khác. Mã nguồn PostgreSQL gọi bước này là EvalPlanQual: bảng không có trong `FOR UPDATE OF` giữ nguyên hàng đã đọc từ snapshot cũ. Nên số dư mới đi cùng số đã rút cũ, và hạn mức thủng. Khoá cả hai bảng thì hàng `l` cũng được đọc lại. Khoá trước rồi đọc ở câu riêng cũng đúng, vì ở READ COMMITTED câu thứ hai có snapshot mới; lab chọn cách này cho dễ nhìn. Bài 42 từng gặp đúng hiện tượng này với `SUM` đi cùng khoá.
+[Tài liệu READ COMMITTED](https://www.postgresql.org/docs/current/transaction-iso.html#XACT-READ-COMMITTED) nói đúng chuyện này: sau khi chờ, câu lệnh đánh giá lại `WHERE`, khoá và trả bản mới của chính hàng đó, nhưng không thấy tác động của bên kia lên hàng khác. Mã nguồn PostgreSQL gọi bước này là EvalPlanQual: bảng không có trong `FOR UPDATE OF` giữ nguyên hàng đã đọc từ snapshot cũ. Vì vậy số dư mới đi cùng số đã rút cũ, và hạn mức bị vượt. Khoá cả hai bảng thì hàng `l` cũng được đọc lại. Khoá trước rồi đọc ở câu riêng cũng đúng, vì ở READ COMMITTED câu thứ hai có snapshot mới; lab chọn cách này cho dễ nhìn. Bài 42 từng gặp đúng hiện tượng này với `SUM` đi cùng khoá.
 
-Thí nghiệm `FOR UPDATE` không đặt được `Barrier` sau bước nạp, vì task đầu giữ khoá nên các task sau không bao giờ tới barrier; nó chỉ kiểm bất biến sau khi chạy.
+Thí nghiệm `FOR UPDATE` không đặt được `Barrier` sau bước nạp, vì task đầu giữ khoá nên các task sau không bao giờ tới barrier; thí nghiệm này chỉ kiểm invariant sau khi chạy.
 
 Chọn cái nào tuỳ đặc điểm hàng:
 
 | Tình huống | Optimistic (`version`) | `FOR UPDATE` |
 |---|---|---|
-| Ít tranh chấp (đa số ví không bị chạm đồng thời) | Không giữ khoá, hầu như không có retry | Khoá không tốn, nhưng giữ khoá suốt transaction |
-| Một hàng nóng nhiều người cùng chạm | Retry tăng nhanh, có thể hết lượt | Xếp hàng, không retry, thông lượng một hàng tuần tự |
+| Ít tranh chấp (đa số ví không bị chạm đồng thời) | Không giữ khoá, hầu như không có retry | Bản thân việc khoá không tốn, nhưng khoá bị giữ suốt transaction |
+| Một hàng nóng nhiều người cùng chạm | Retry tăng nhanh, có thể hết lượt | Xếp hàng, không retry, thông lượng trên một hàng là tuần tự |
 | Transaction gọi dịch vụ ngoài khi đang giữ hàng | Không treo ai, nhưng làm lại cả việc khi xung đột | Giữ khoá suốt lúc gọi, chặn mọi người sau |
 | Hai ví trong một bút toán | Hai điều kiện version, retry cả hai; `UPDATE` vẫn giữ khoá hàng tới commit nên ghi ngược thứ tự vẫn có thể `40P01` | Phải khoá đúng thứ tự (mục sau) |
 
@@ -225,11 +225,11 @@ FOR UPDATE SKIP LOCKED: ["customer:CU-002"]
 FOR UPDATE NOWAIT    : SQLSTATE 55P03
 ```
 
-`SELECT` thường không bị khoá chặn (MVCC). `NOWAIT` báo `55P03` ngay thay vì chờ. `SKIP LOCKED` lặng lẽ bỏ hàng đang bị khoá: đúng cho job nhặt việc như job hết hạn hold ở bài 42, vì dòng bị bỏ lại sẽ được lượt sau nhặt; sai cho lệnh rút, vì ví đang bận nghĩa là lệnh bị bỏ qua trong im lặng.
+`SELECT` thường không bị khoá chặn (MVCC). `NOWAIT` báo `55P03` ngay thay vì chờ. `SKIP LOCKED` bỏ qua hàng đang bị khoá mà không báo gì: đúng cho job nhặt việc như job hết hạn hold ở bài 42, vì dòng bị bỏ lại sẽ được lượt sau nhặt; sai cho lệnh rút, vì ví đang bận nghĩa là lệnh bị bỏ qua mà không ai biết.
 
 ## Khoá hai ví: deadlock thật và thứ tự khoá
 
-Chuyển ví sang ví đổi cả hai aggregate trong một bút toán, vì tổng bằng 0 là invariant của sổ chứ không của ví nào. Lời khuyên quen thuộc của DDD là mỗi transaction chỉ đổi một aggregate; ở đây nó nhường chỗ, và cái giá là phải khoá hai hàng. [Lab DDD của loạt C#](/articles/dotnet10-ddd-bounded-context-aggregate) không gặp cảnh này vì chỉ có một root và tham chiếu tài xế bằng ID. `transfer_once` khoá bằng `FOR UPDATE` theo `LockOrder`:
+Chuyển ví sang ví đổi cả hai aggregate trong một bút toán, vì tổng bằng 0 là invariant của sổ chứ không của ví nào. Lời khuyên quen thuộc của DDD là mỗi transaction chỉ đổi một aggregate; ở đây lời khuyên ấy phải nhường chỗ, và cái giá là phải khoá hai hàng. [Lab DDD của loạt C#](/articles/dotnet10-ddd-bounded-context-aggregate) không gặp cảnh này vì chỉ có một root và tham chiếu tài xế bằng ID. `transfer_once` khoá bằng `FOR UPDATE` theo `LockOrder`:
 
 ```rust
 // src/store.rs, hàm transfer_once (rút gọn: bỏ chú thích và đoạn ghi)
@@ -260,7 +260,7 @@ khóa theo id, không retry:                2 ok, 0 deadlock; số lần thử [
 nạn nhân chưa ROLLBACK: 1 bên vẫn khóa đủ hai hàng; nạn nhân nhận 40P01, lệnh kế của nó SQLSTATE 25P02
 ```
 
-Đây là `40P01` thật. PostgreSQL chỉ kiểm vòng chờ sau khi một phiên đã chờ khoá đủ `deadlock_timeout` (1 giây, giá trị mặc định, trên server của lab), rồi huỷ một bên để bên kia đi tiếp. Tài liệu nói bên nào bị huỷ thì khó đoán: chạy lại lab, dòng đầu ra cả 45.000/55.000 lẫn 53.000/47.000, nên `--verify` chỉ kiểm «một ok, một deadlock». Dòng ba là cách sửa gốc: khoá id nhỏ trước, bất kể chiều chuyển.
+Đây là `40P01` thật. PostgreSQL chỉ kiểm vòng chờ sau khi một phiên đã chờ khoá đủ `deadlock_timeout` (1 giây, giá trị mặc định, trên server của lab), rồi huỷ một bên để bên kia đi tiếp. Tài liệu nói khó đoán trước bên nào bị huỷ: chạy lại lab, dòng đầu cho ra cả 45.000/55.000 lẫn 53.000/47.000, nên `--verify` chỉ kiểm «một ok, một deadlock». Dòng ba là cách sửa gốc: khoá id nhỏ trước, bất kể chiều chuyển.
 
 Dòng năm tách hai việc hay bị gộp. Khoá của nạn nhân được nhả ngay lúc server huỷ transaction: bên kia khoá đủ hai hàng trong khi nạn nhân chưa gửi gì. Nhưng kết nối của nạn nhân nhận `25P02` cho tới khi có `ROLLBACK`, nên `in_tx` vẫn phải `ROLLBACK`. Vòng thử lại coi `40P01` là lỗi tạm thời và mở transaction mới.
 
@@ -277,16 +277,16 @@ cargo test --manifest-path examples/toi-noi-rust/53-aggregate-concurrency/Cargo.
 cargo run --manifest-path examples/toi-noi-rust/53-aggregate-concurrency/Cargo.toml -- --measure
 ```
 
-`--verify` chạy các thí nghiệm ở trên và thêm `VERIFY OK` khi mọi kiểm tra qua; `cargo test` chạy 9 unit test và 13 test tích hợp. Mỗi thí nghiệm có schema `lab_<uuid>` riêng, dọn khi xong. Không kiểm tra nào assert thời gian. `--measure` tách riêng vì số liệu đổi mỗi lần chạy.
+`--verify` chạy các thí nghiệm ở trên và thêm `VERIFY OK` khi mọi kiểm tra qua; `cargo test` chạy 9 unit test và 13 test tích hợp. Mỗi thí nghiệm có schema `lab_<uuid>` riêng, dọn khi xong. Không kiểm tra nào assert thời gian. `--measure` tách riêng vì số liệu thay đổi mỗi lần chạy.
 
 <div class="tkh-callout tkh-callout--warn">
 <span class="tkh-callout-title">Giới hạn của ví dụ</span>
-<p>Hạn mức chưa có chu kỳ (đóng kỳ, đặt lại <code>withdrawn</code> chưa làm). <code>bank:payout:clearing</code> được cộng dồn ở cuối transaction nhưng vẫn là hàng nóng mà mọi lần rút phải tuần tự qua khi commit; production thường tách hoặc gộp theo lô. Key trùng là lỗi, không phải replay. <code>Barrier</code> chỉ là cách dàn lịch của lab, và pool không được nhỏ hơn số task đứng ở một barrier. <code>Account::restore</code> từ chối số dư âm nên aggregate này chỉ hợp với ví đã nạp, không hợp với <code>customer:&lt;id&gt;</code> đang làm tài khoản biên của bài 41. Chỉ thử READ COMMITTED.</p>
+<p>Hạn mức chưa có chu kỳ (chưa làm phần đóng kỳ và đặt lại <code>withdrawn</code>). <code>bank:payout:clearing</code> được cộng dồn ở cuối transaction nhưng vẫn là hàng nóng mà mọi lần rút phải tuần tự qua khi commit; production thường tách hoặc gộp theo lô. Key trùng là lỗi, không phải replay. <code>Barrier</code> chỉ là cách dựng thứ tự chạy của lab, và pool không được nhỏ hơn số task đứng ở một barrier. <code>Account::restore</code> từ chối số dư âm nên aggregate này chỉ hợp với ví đã nạp, không hợp với <code>customer:&lt;id&gt;</code> đang làm tài khoản biên của bài 41. Chỉ thử READ COMMITTED.</p>
 </div>
 
 **Bài tập:** đổi mỗi lần rút thành 20.000 trong thí nghiệm tám task optimistic (hạn mức vẫn 100.000, ví vẫn 150.000). Có bao nhiêu task thành công, `RetryPolicy::lab()` (6 lần) có đủ không, và số dư cuối là bao nhiêu?
 
-<details><summary>Xem lời giải</summary><p>Hạn mức bao gồm biên, nên 5 × 20.000 = 100.000 được rút: 5 task thành công, 3 bị <code>LimitExceeded</code>. Có năm commit nên tối đa 6 lần thử; 6 vừa đủ (chạy thử ra như <code>[1, 2, 3, 4, 5, 6, 6, 6]</code>, không task nào hết lượt). Số dư cuối 50.000 VND, đã rút 100.000 VND, version 6. <code>max_attempts</code> nhỏ hơn 6 thì task chậm chân có thể nhận <code>RetriesExhausted</code>.</p></details>
+<details><summary>Xem lời giải</summary><p>Hạn mức tính cả giá trị biên, nên 5 × 20.000 = 100.000 được rút: 5 task thành công, 3 bị <code>LimitExceeded</code>. Có năm commit nên tối đa 6 lần thử; 6 vừa đủ (chạy thử ra như <code>[1, 2, 3, 4, 5, 6, 6, 6]</code>, không task nào hết lượt). Số dư cuối 50.000 VND, đã rút 100.000 VND, version 6. <code>max_attempts</code> nhỏ hơn 6 thì task chậm chân có thể nhận <code>RetriesExhausted</code>.</p></details>
 
 Bài trước: [bài 52](/articles/rust-command-handler-pipeline-domain-event-khong-framework). Bài tiếp: [bài 54](/articles/rust-use-case-thanh-toan-chuyen-end-to-end).
 

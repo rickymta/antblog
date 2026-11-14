@@ -1,0 +1,11 @@
+{
+  "file": "rust-vi-sao-so-cai-toi-noi-chon-rust.md",
+  "edits": [
+    {
+      "old": "để kiểm từng giá trị",
+      "new": "để kiểm tra từng giá trị",
+      "reason": "Vòng 2 thống nhất «kiểm» đứng một mình thành «kiểm tra»; chữ «kiểm» này do chính đề xuất vòng 2 đưa vào.",
+      "severity": "low"
+    }
+  ]
+}

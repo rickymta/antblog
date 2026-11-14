@@ -1,14 +1,14 @@
 ---
 slug: rust-tonic-grpc-get-balance-post-entry-interop-dotnet
 title: "gRPC với tonic: GetBalance và PostEntry cho service C# gọi"
-summary: "Bài 35: ledger.proto với số tiền int64, sinh code bằng tonic-prost-build, server tonic map LedgerError sang Status, deadline và interceptor, client .NET Grpc.Net.Client chạy thật, và bảng chọn gRPC hay REST."
+summary: "Bài 35: ledger.proto với số tiền int64, sinh code bằng tonic-prost-build, server tonic ánh xạ LedgerError sang Status, deadline và interceptor, client .NET Grpc.Net.Client chạy thật, và bảng chọn gRPC hay REST."
 category: rust-intermediate
 level: intermediate
 tags: [rust, toi-noi, ledger, tonic, grpc, dotnet]
 language: vi
 ---
 
-Sau chuyến `TN-0001`, service Payment viết bằng C# cần ghi bút toán thu cước vào sổ cái và hỏi lại số dư của tài xế `DR-001`. Hai bên khác ngôn ngữ, khác nhóm, và hiểu sai đơn vị tiền là loại lỗi đắt nhất. Cái cần là một hợp đồng viết đúng một lần, rồi cả hai phía sinh code từ đó.
+Sau chuyến `TN-0001`, service Payment viết bằng C# cần ghi bút toán thu cước vào sổ cái và hỏi lại số dư của tài xế `DR-001`. Hai bên khác ngôn ngữ, khác nhóm, và hiểu sai đơn vị tiền là loại lỗi đắt nhất. Điều cần có là một hợp đồng viết đúng một lần, rồi cả hai phía sinh code từ đó.
 
 Đây là bài 35 của lộ trình **Rust trung bình qua [Tới Nơi](/articles/du-an-mau-toi-noi)**. Lab dùng lại `ledger-core` của [bài 20](/articles/rust-tong-hop-ledger-core-cargo-doc-workspace) và cách ghi idempotent của [bài 24](/articles/rust-transaction-isolation-append-only-idempotency-key). Sổ cái có hai cửa: HTTP ở [bài 31](/articles/rust-axum-http-endpoint-ghi-but-toan-tra-so-du) và [bài 34](/articles/rust-axum-api-test-oneshot-hop-dong-bff), gRPC ở bài này.
 
@@ -45,7 +45,7 @@ message PostEntryRequest { string idempotency_key = 1; repeated Posting postings
 message PostEntryResponse { string entry_id = 1; bool replayed = 2; }
 ```
 
-Vì sao `int64` mà không `double`? Đồng Việt Nam không có phần lẻ, nên `int64` khớp `Money(i64)` của [bài 3](/articles/rust-kieu-so-tien-vnd-i64-decimal). `double` có 53 bit định trị, nên không phải số nguyên nào lớn hơn 2^53 cũng đi qua nó nguyên vẹn: lab in `9007199254740993` qua `f64` thành `9007199254740992`, lệch một đồng. Số dư thật còn xa mức đó, nhưng hợp đồng nói "số nguyên" thì không ai phải suy luận về độ lớn. Số trường (`= 1`, `= 2`) mới là danh tính của trường trên dây: đổi tên an toàn, đổi hay tái dùng số thì không.
+Vì sao `int64` mà không `double`? Đồng Việt Nam không có phần lẻ, nên `int64` khớp `Money(i64)` của [bài 3](/articles/rust-kieu-so-tien-vnd-i64-decimal). `double` có 53 bit định trị, nên không phải số nguyên nào lớn hơn 2^53 cũng đi qua nó nguyên vẹn: lab in `9007199254740993` qua `f64` thành `9007199254740992`, lệch một đồng. Số dư thật còn xa mức đó, nhưng hợp đồng nói "số nguyên" thì không ai phải suy luận về độ lớn. Số trường (`= 1`, `= 2`) mới là định danh của trường trên dây: đổi tên an toàn, đổi hay tái dùng số thì không.
 
 Cái giá của `int64` nằm ở JSON: ánh xạ chuẩn của proto3 viết nó thành chuỗi, nên log, gateway hay công cụ debug đọc qua JSON sẽ thấy `"20400"`.
 
@@ -84,11 +84,11 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 }
 ```
 
-Code sinh ra nằm trong `OUT_DIR`, không commit; `src/lib.rs` kéo vào bằng `tonic::include_proto!("ledger.v1")` (tên gói trong proto). Từ đó có trait `ledger_server::Ledger` để hiện thực và `ledger_client::LedgerClient` để gọi.
+Code sinh ra nằm trong `OUT_DIR`, không commit; `src/lib.rs` kéo vào bằng `tonic::include_proto!("ledger.v1")` (tên gói trong proto). Từ đó có trait `ledger_server::Ledger` để triển khai và `ledger_client::LedgerClient` để gọi.
 
 ## Server tonic: handler mỏng, nghiệp vụ ở `ledger-core`
 
-Handler chỉ làm ba việc: đổi message sang kiểu miền, gọi kho, đổi kết quả hoặc lỗi sang message và `Status`. Bất biến (ít nhất hai posting, tổng bằng 0) do `JournalEntry::try_new` của `ledger-core` kiểm, không viết lại ở tầng gRPC. Kho là một trait nhỏ với hai adapter: `PgStore` (sqlx, schema `lab_<uuid>`) và `MemoryStore`. `--verify` chạy trên PostgreSQL thật; adapter bộ nhớ dùng trong test và kịch bản deadline.
+Handler chỉ làm ba việc: đổi message sang kiểu thuộc miền nghiệp vụ, gọi kho, đổi kết quả hoặc lỗi sang message và `Status`. Bất biến (ít nhất hai posting, tổng bằng 0) do `JournalEntry::try_new` của `ledger-core` kiểm, không viết lại ở tầng gRPC. Kho là một trait nhỏ với hai adapter: `PgStore` (sqlx, schema `lab_<uuid>`) và `MemoryStore`. `--verify` chạy trên PostgreSQL thật; adapter bộ nhớ dùng trong test và kịch bản deadline.
 
 ```rust
 // src/service.rs (rút gọn)
@@ -123,7 +123,7 @@ Server::builder()
     .serve_with_incoming_shutdown(TcpListenerStream::new(listener), async { let _ = rx.await; })
 ```
 
-**Interceptor** chạy trước handler trên metadata của request, như middleware ở mức gRPC ([bài 33](/articles/rust-tower-middleware-timeout-request-id-jwt-rate-limit) làm việc này cho HTTP). Một closure `FnMut(Request<()>) -> Result<Request<()>, Status>` tự là `Interceptor`, và phải `Clone` vì tonic nhân bản service cho mỗi kết nối. Interceptor của lab kiểm `authorization`, đọc `x-request-id` (thiếu thì sinh UUID) và `grpc-timeout`, rồi đặt vào `extensions` cho handler:
+**Interceptor** chạy trước handler trên metadata của request, như middleware ở mức gRPC ([bài 33](/articles/rust-tower-middleware-timeout-request-id-jwt-rate-limit) làm việc này cho HTTP). Một closure `FnMut(Request<()>) -> Result<Request<()>, Status>` tự nó đã là `Interceptor`, và phải `Clone` vì tonic nhân bản service cho mỗi kết nối. Interceptor của lab kiểm `authorization`, đọc `x-request-id` (thiếu thì sinh UUID) và `grpc-timeout`, rồi đặt vào `extensions` cho handler:
 
 ```rust
 // src/interceptor.rs (rút gọn: bỏ khai báo hàm, gộp dòng)
@@ -161,7 +161,7 @@ Client quyết định có gửi lại hay không dựa vào mã của `Status`,
 | Hết pool, mất kết nối | `UNAVAILABLE` | Tạm thời, gửi lại với backoff |
 | Lỗi SQL, dữ liệu lạ | `INTERNAL` | Lỗi server; không lộ tên bảng ra dây |
 
-Replay không phải lỗi: ghi lại cùng key và cùng nội dung trả `OK` với `replayed = true` (REST dùng 200 thay vì 201), để client thử lại sau timeout nhận kết quả như lần đầu. Và một lỗi có thể mang mã khác nhau theo RPC: tài khoản chưa mở là `FAILED_PRECONDITION` khi ghi, `NOT_FOUND` khi đọc, nên `get_balance` đổi mã trước khi dùng `From<StoreError>`.
+Replay không phải lỗi: ghi lại cùng key và cùng nội dung trả `OK` với `replayed = true` (REST dùng 200 thay vì 201), để client thử lại sau timeout nhận kết quả như lần đầu. Ngoài ra, một lỗi có thể mang mã khác nhau tuỳ theo RPC: tài khoản chưa mở là `FAILED_PRECONDITION` khi ghi, `NOT_FOUND` khi đọc, nên `get_balance` đổi mã trước khi dùng `From<StoreError>`.
 
 ```rust
 // src/status.rs (rút gọn)
@@ -179,13 +179,13 @@ impl From<StoreError> for Status {
 }
 ```
 
-Adapter PostgreSQL nhận ra `ABORTED` qua SQLSTATE: `classify_sqlx` coi `40001` (serialization failure) và `40P01` (deadlock) là tranh chấp. **`ABORTED` chỉ được kiểm bằng test đơn vị**: một test nhận SQLSTATE, một test map `StoreError::Aborted` sang mã. Lab ghi ở READ COMMITTED và cập nhật số dư theo thứ tự tài khoản cố định nên không sinh ra xung đột thật; chưa có lời gọi nào nhận `ABORTED` qua dây.
+Adapter PostgreSQL nhận ra `ABORTED` qua SQLSTATE: `classify_sqlx` coi `40001` (serialization failure) và `40P01` (deadlock) là tranh chấp. **`ABORTED` chỉ được kiểm bằng test đơn vị**: một test nhận SQLSTATE, một test ánh xạ `StoreError::Aborted` sang mã. Lab ghi ở READ COMMITTED và cập nhật số dư theo thứ tự tài khoản cố định nên không sinh ra xung đột thật; chưa có lời gọi nào nhận `ABORTED` qua dây.
 
 ## Deadline: client đặt, server thấy và dừng
 
 Client tonic đặt deadline bằng `request.set_timeout(Duration::from_millis(300))`; tonic ghi nó vào header `grpc-timeout` dạng `300000u` (micro giây). Interceptor đọc header này, và lab giả lập một kho chậm 1200 ms để xem server có dừng không và client nhận mã nào.
 
-Trên tonic 0.14.9, nếu chỉ dựa vào tầng timeout có sẵn, mã hết giờ là `CANCELLED`. Tầng `GrpcTimeout` nằm ở cả server lẫn client của tonic, và `status.rs` của tonic đổi `TimeoutExpired` thành `Status::cancelled("Timeout expired")`. [Tài liệu gRPC về deadline](https://grpc.io/docs/guides/deadlines/) nói client hết hạn thì thấy `DEADLINE_EXCEEDED`, còn server tự huỷ call với `CANCELLED`. Ở tonic, mã của server đi thẳng ra dây, và chính client tonic cũng báo `CANCELLED`. Việc dừng vẫn đúng (future của handler bị thả), nhưng client phân biệt hai mã sẽ xử lý sai.
+Trên tonic 0.14.9, nếu chỉ dựa vào tầng timeout có sẵn, mã hết giờ là `CANCELLED`. Tầng `GrpcTimeout` nằm ở cả server lẫn client của tonic, và `status.rs` của tonic đổi `TimeoutExpired` thành `Status::cancelled("Timeout expired")`. [Tài liệu gRPC về deadline](https://grpc.io/docs/guides/deadlines/) nói client hết hạn thì thấy `DEADLINE_EXCEEDED`, còn server tự huỷ call với `CANCELLED`. Ở tonic, mã của server đi thẳng ra dây, và chính client tonic cũng báo `CANCELLED`. Việc dừng vẫn đúng (future của handler bị thả), nhưng client nào phân biệt hai mã này sẽ xử lý sai.
 
 Lab để handler tự đếm ngược: lấy `grpc-timeout`, trừ dự trữ 25 ms, bọc việc gọi kho trong `tokio::time::timeout`. Hết giờ thì future của kho bị thả và client nhận `DEADLINE_EXCEEDED`.
 
@@ -228,9 +228,9 @@ handler bị hủy giữa chừng: 1, chạy hết: 0
 
 Dòng "đối chứng" gọi lại request đó với deadline 5 s trên cùng server chậm và nhận `OK`: lỗi ở lần đầu là do deadline, không do server hỏng. Dòng "peer không trả lời" gọi vào một socket không bao giờ đáp, nên `CANCELLED` ở đó do chính client tonic sinh.
 
-Handler tự đếm là một cuộc đua, không phải bảo đảm: nó bắt đầu sau cả hai bộ đếm của tonic, nên nếu scheduler trễ hơn khoảng dự trữ thì tonic thắng và client lại thấy `CANCELLED`. Điều đó đã xảy ra một lần khi dự trữ còn 10 ms và máy đang bận biên dịch. Với 25 ms, 36 lần `--verify` (12 tiến trình song song, ba vòng) đều ra `DEADLINE_EXCEEDED`, nhưng lần chậm nhất là 297 ms, chỉ còn dư 3 ms. Vì vậy dòng này có thể đỏ trên máy quá tải, và trên mạng thật dự trữ còn phải trừ độ trễ đường truyền. Việc dừng không phụ thuộc cuộc đua này, chỉ mã trả về là có.
+Handler tự đếm là một race condition, không phải bảo đảm: nó bắt đầu sau cả hai bộ đếm của tonic, nên nếu scheduler trễ hơn khoảng dự trữ thì tonic thắng và client lại thấy `CANCELLED`. Điều đó đã xảy ra một lần khi dự trữ còn 10 ms và máy đang bận biên dịch. Với 25 ms, 36 lần `--verify` (12 tiến trình song song, ba vòng) đều ra `DEADLINE_EXCEEDED`, nhưng lần chậm nhất là 297 ms, chỉ còn dư 3 ms. Vì vậy dòng này có thể đỏ trên máy quá tải, và trên mạng thật dự trữ còn phải trừ độ trễ đường truyền. Việc dừng không phụ thuộc race condition này, chỉ mã trả về mới phụ thuộc vào nó.
 
-Kịch bản deadline chạy trên kho bộ nhớ. Với PostgreSQL, thả future là thả `Transaction` chưa commit, tức rollback như [bài 26](/articles/rust-repository-unit-of-work-trait-transaction); lab này không dựng lại ca đó.
+Kịch bản deadline chạy trên kho bộ nhớ. Với PostgreSQL, thả future là thả `Transaction` chưa commit, tức rollback như [bài 26](/articles/rust-repository-unit-of-work-trait-transaction); lab này không dựng lại trường hợp đó.
 
 ## Client .NET thật gọi vào server Rust
 
@@ -262,7 +262,7 @@ Console.WriteLine($"JSON proto3: {JsonFormatter.Default.Format(balance)}");
 
 Trên .NET SDK 10.0.401, địa chỉ `http://` chạy HTTP/2 không TLS mà không cần `AppContext` switch nào. Công tắc `System.Net.Http.SocketsHttpHandler.Http2UnencryptedSupport`, theo [tài liệu Microsoft](https://learn.microsoft.com/aspnet/core/grpc/troubleshoot), chỉ cần cho .NET Core 3.x; từ .NET 5 chỉ cần `Grpc.Net.Client` 2.32.0 trở lên. Ở production, kênh nội bộ nên là TLS hoặc mTLS.
 
-`cargo run -- --with-dotnet` khởi động server Rust trên PostgreSQL, lấy cổng thật rồi chạy `dotnet run` với cổng đó. Output thật; dòng `[C#]` do tiến trình .NET in:
+`cargo run -- --with-dotnet` khởi động server Rust trên PostgreSQL, lấy cổng thật rồi chạy `dotnet run` với cổng đó. Kết quả chạy thật; dòng `[C#]` do tiến trình .NET in:
 
 ```text
 server Rust nghe ở http://127.0.0.1:52376; chạy: dotnet run --project dotnet-client -- http://127.0.0.1:52376
@@ -275,7 +275,7 @@ server Rust nghe ở http://127.0.0.1:52376; chạy: dotnet run --project dotnet
 [C#] cùng key, khác nội dung: AlreadyExists
 ```
 
-Khớp với phía Rust: `JE-000001`, replay ở lần hai, số dư tài xế 20.400 đồng, `x-request-id` đi và về, ba mã lỗi đúng bảng. Dòng JSON trả lời câu hỏi mở bài: `"balanceDong": "20400"`, một chuỗi. Cổng `52376` đổi mỗi lần chạy.
+Khớp với phía Rust: `JE-000001`, replay ở lần hai, số dư tài xế 20.400 đồng, `x-request-id` đi và về, ba mã lỗi khớp với bảng. Dòng JSON trả lời câu hỏi mở bài: `"balanceDong": "20400"`, một chuỗi. Cổng `52376` đổi mỗi lần chạy.
 
 Lệnh đó còn gọi hai server chậm với deadline 300 ms, ba lần trên cùng kết nối:
 
@@ -290,7 +290,7 @@ Lệnh đó còn gọi hai server chậm với deadline 300 ms, ba lần trên c
 [C#] lần 3: DeadlineExceeded, chi tiết "hết deadline ở server", 278 ms
 ```
 
-`Grpc.Net.Client` cũng tự đếm deadline: chi tiết rỗng là mã do nó sinh, chi tiết có chữ là mã server gửi. Lần 1 chậm hơn (nhiều khả năng do mở kết nối) nên bộ đếm của client thắng; từ lần 2, `CANCELLED` của server về trước. Nếu không có handler tự đếm, code C# chỉ bắt `DeadlineExceeded` sẽ bỏ sót phần lớn ca hết giờ. Thời gian đo trên máy viết bài, không phải SLA.
+`Grpc.Net.Client` cũng tự đếm deadline: chi tiết rỗng là mã do nó sinh, chi tiết có chữ là mã server gửi. Lần 1 chậm hơn (nhiều khả năng do mở kết nối) nên bộ đếm của client thắng; từ lần 2, `CANCELLED` của server về trước. Nếu không có handler tự đếm, code C# chỉ bắt `DeadlineExceeded` sẽ bỏ sót phần lớn trường hợp hết giờ. Thời gian đo trên máy viết bài, không phải SLA.
 
 ## gRPC hay REST trong Tới Nơi?
 
@@ -304,7 +304,7 @@ Sổ cái mở cả hai cửa. Quy tắc ở đây: nội bộ giữa service th
 | Cần OpenAPI cho đối tác đọc tài liệu | REST | Hợp đồng ở [bài 32](/articles/rust-validation-problem-details-openapi-utoipa); tiền trong JSON phải quy ước rõ |
 | Cache HTTP, kiểm bằng `curl` khi sự cố | REST | Hạ tầng web hiểu sẵn |
 
-Cái giá của gRPC là công cụ: khó đọc payload nhị phân bằng mắt, và phải quản lý phiên bản proto giữa các nhóm. Nếu chỉ một nhóm gọi, vài lần mỗi giờ, REST với OpenAPI vẫn đơn giản hơn.
+Cái giá của gRPC nằm ở công cụ: khó đọc payload nhị phân bằng mắt, và phải quản lý phiên bản proto giữa các nhóm. Nếu chỉ một nhóm gọi, vài lần mỗi giờ, REST với OpenAPI vẫn đơn giản hơn.
 
 ## Chạy ví dụ và kiểm chứng
 
@@ -337,13 +337,13 @@ x-request-id           -> server thấy req-lab-0001, trả lại req-lab-0001
 dọn schema lab_bafcc5fad1f84f2bb8ac8d14df6dbc99: đã xoá
 ```
 
-Tiếp theo là bảng lỗi sang `Status`, hai khối deadline, rồi dòng `VERIFY OK`; tên schema đổi mỗi lần chạy.  `cargo test` chạy 15 test: 8 test đơn vị (parse `grpc-timeout`, ngân sách deadline, interceptor, bảng mã, SQLSTATE) và 7 test tích hợp (cùng một kịch bản trên kho bộ nhớ và PostgreSQL, ba ca deadline, tám lời gọi đồng thời cùng key, cộng phép thử `int64` qua `f64` không cần mạng). Client C# không nằm trong `--verify` hay `cargo test` vì cần .NET SDK; `--with-dotnet` chạy nó và thoát mã khác 0 nếu `dotnet` lỗi.
+Tiếp theo là bảng ánh xạ lỗi sang `Status`, hai khối deadline, rồi dòng `VERIFY OK`; tên schema đổi mỗi lần chạy.  `cargo test` chạy 15 test: 8 test đơn vị (parse `grpc-timeout`, ngân sách deadline, interceptor, bảng mã, SQLSTATE) và 7 test tích hợp (cùng một kịch bản trên kho bộ nhớ và PostgreSQL, ba test case deadline, tám lời gọi đồng thời cùng key, cộng phép thử `int64` qua `f64` không cần mạng). Client C# không nằm trong `--verify` hay `cargo test` vì cần .NET SDK; `--with-dotnet` chạy nó và thoát mã khác 0 nếu `dotnet` lỗi.
 
-Test đồng thời dạy một điều: mã bút toán không nhất thiết là `JE-000001`. Cột identity của PostgreSQL cấp số cho cả lần `INSERT` thua `ON CONFLICT`, nên bút toán thắng có thể mang số 2 trở lên. Test chỉ khẳng định tám lời gọi thấy cùng một mã và bảng có một dòng.
+Test đồng thời dạy một điều: mã bút toán không nhất thiết là `JE-000001`. Cột tự tăng (identity) của PostgreSQL cấp số cho cả lần `INSERT` thua `ON CONFLICT`, nên bút toán thắng có thể mang số 2 trở lên. Test chỉ khẳng định tám lời gọi thấy cùng một mã và bảng có một dòng.
 
 <div class="tkh-callout tkh-callout--warn">
 <span class="tkh-callout-title">Giới hạn của ví dụ</span>
-<p>Token là chuỗi tĩnh so sánh bằng <code>==</code> (không hằng thời gian), không phải JWT hay mTLS; kênh là HTTP/2 không TLS trên <code>127.0.0.1</code>. Chưa có reflection, health check, chi tiết lỗi có cấu trúc (<code>google.rpc.ErrorInfo</code>), retry policy, streaming hay kiểm tương thích proto giữa các phiên bản. <code>as_of</code> là giờ server khi trả lời, chưa phải mốc của truy vấn số dư. Deadline được kiểm trên kho bộ nhớ chậm giả lập, không phải truy vấn PostgreSQL thật; <code>ABORTED</code> chưa từng đi qua dây. Nhiều nhóm cần kho proto riêng và quy trình đổi hợp đồng.</p>
+<p>Token là chuỗi tĩnh so sánh bằng <code>==</code> (không phải so sánh hằng thời gian), không phải JWT hay mTLS; kênh là HTTP/2 không TLS trên <code>127.0.0.1</code>. Chưa có reflection, health check, chi tiết lỗi có cấu trúc (<code>google.rpc.ErrorInfo</code>), retry policy, streaming hay kiểm tương thích proto giữa các phiên bản. <code>as_of</code> là giờ server khi trả lời, chưa phải mốc của truy vấn số dư. Deadline được kiểm trên kho bộ nhớ chậm giả lập, không phải truy vấn PostgreSQL thật; <code>ABORTED</code> chưa từng đi qua dây. Khi có nhiều nhóm thì cần kho proto riêng và quy trình đổi hợp đồng.</p>
 </div>
 
 **Bài tập:** `PostEntry` vào tài khoản chưa mở hiện trả `FAILED_PRECONDITION`. Một đồng nghiệp muốn đổi thành `NOT_FOUND`. Nêu một lập luận cho mỗi bên, và liệt kê những chỗ phải sửa nếu đổi.

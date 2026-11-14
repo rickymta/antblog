@@ -13,55 +13,55 @@ language: vi
 <div class="tkh-callout tkh-callout--example">
 <span class="tkh-callout-title">Thử trước khi đọc</span>
 <p>Đưa TripId và CustomerId làm metric tag có tiện tra từng request mà không có cái giá nào không?</p>
-<details><summary>Xem đáp án</summary><p>Không. Tag có số giá trị tăng theo dữ liệu làm cardinality bùng nổ; metric cần dimensions có giới hạn, trace/log có chính sách riêng.</p></details>
+<details><summary>Xem đáp án</summary><p>Không. Tag có số giá trị tăng theo dữ liệu sẽ làm cardinality bùng nổ; metric cần dimension có giới hạn, còn trace/log có chính sách riêng.</p></details>
 </div>
 
 ## Từ một status 500 tới đường request cụ thể
 
-Log một câu “lỗi database” chưa cho biết request nào, use case nào và đoạn nào chậm. Trace nối các span có quan hệ nhân quả; metric cho biết phân bố/tần suất; log ghi sự kiện có cấu trúc. Chúng bổ sung nhau và không thay debugger hoặc test.
+Một dòng log “lỗi database” chưa cho biết request nào, use case nào và đoạn nào chậm. Trace nối các span có quan hệ nhân quả; metric cho biết phân bố và tần suất; log ghi sự kiện có cấu trúc. Chúng bổ sung nhau và không thay thế được debugger hoặc test.
 
-Service dùng nguồn ToiNoi.Trips cho handler và các điểm database đã chọn. Instrumentation ASP.NET tạo span HTTP, HttpClient hỗ trợ propagation khi có lời gọi ra ngoài. Lab không có dependency Python/Rust/Go chạy thật để khẳng định đã trace toàn hệ thống đa ngôn ngữ.
+Service dùng nguồn ToiNoi.Trips cho handler và các điểm database đã chọn. Instrumentation ASP.NET tạo span HTTP, HttpClient hỗ trợ propagation khi có lời gọi ra ngoài. Lab không có thành phần phụ thuộc Python/Rust/Go chạy thật để khẳng định đã trace toàn hệ thống đa ngôn ngữ.
 
-Test gửi traceparent cố định, quan sát cùng TraceId ở CreateTrip và db.commit. Đây là bằng chứng propagation qua pipeline local, không phải ảnh dashboard cloud đã được thu từ production.
+Test gửi traceparent cố định, quan sát cùng TraceId ở CreateTrip và db.commit. Đây là bằng chứng propagation qua pipeline local, không phải ảnh chụp dashboard cloud thu từ production.
 
-## ActivitySource cần người nghe
+## ActivitySource cần listener
 
-StartActivity có thể trả null khi không có listener/sampling phù hợp. Code dùng ?. khi gắn tag/status. OpenTelemetry provider đăng ký source là một người nghe; test còn dùng ActivityListener để quan sát độc lập mà không cần gửi telemetry ra ngoài.
+StartActivity có thể trả null khi không có listener/sampling phù hợp. Code dùng ?. khi gắn tag/status. OpenTelemetry provider đăng ký source chính là một listener; test còn dùng ActivityListener để quan sát độc lập mà không cần gửi telemetry ra ngoài.
 
-TelemetryBehavior bọc validation/handler, đo thời gian bằng Stopwatch và đánh dấu Error khi lỗi truyền lên. Các span repository/commit chỉ mô tả điểm đang đo; duration db.commit bao đường SaveChanges của adapter, không tự là thời gian CPU thuần của PostgreSQL.
+TelemetryBehavior bọc validation/handler, đo thời gian bằng Stopwatch và đánh dấu Error khi lỗi truyền lên. Các span repository/commit chỉ mô tả điểm đang đo; duration db.commit bao trùm đường SaveChanges của adapter, không đồng nghĩa với thời gian CPU thuần của PostgreSQL.
 
-Không bật SQL parameter/body/token logging để “trace cho đủ”. Các thông tin nhạy cảm phải có chính sách thu thập, redaction và retention; trace ID giúp nối sự kiện mà không cần nhét dữ liệu khách vào mọi tag.
+Không bật việc log tham số SQL, body hay token để “trace cho đủ”. Các thông tin nhạy cảm phải có chính sách thu thập, che giấu dữ liệu (redaction) và thời gian lưu giữ (retention); trace ID giúp nối sự kiện mà không cần nhét dữ liệu khách vào mọi tag.
 
 <figure class="tkh-fig">
 <div class="tkh-fig-box">
-<svg viewBox="0 0 880 220" role="img" aria-label="Hình 1. Propagation được test qua pipeline local; chưa là trace xuyên các service cloud thật."><defs><marker id="cs37-0-a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0 0 L10 5 L0 10 z" class="f-phys"/></marker></defs><rect x="20" y="65" width="260" height="85" rx="10" class="f-phys-soft s-phys"/><text x="34" y="95" class="t-b">HTTP traceparent</text><text x="34" y="123" class="t-small">Context từ caller</text><path d="M280 108 L305 108" class="f-none s-phys" stroke-width="2" marker-end="url(#cs37-0-a)"/><rect x="305" y="65" width="260" height="85" rx="10" class="f-phys-soft s-phys"/><text x="319" y="95" class="t-b">CreateTrip span</text><text x="319" y="123" class="t-small">Use case local</text><path d="M565 108 L590 108" class="f-none s-phys" stroke-width="2" marker-end="url(#cs37-0-a)"/><rect x="590" y="65" width="260" height="85" rx="10" class="f-phys-soft s-phys"/><text x="604" y="95" class="t-b">db.commit span</text><text x="604" y="123" class="t-small">Cùng TraceId</text></svg>
+<svg viewBox="0 0 880 220" role="img" aria-label="Hình 1. Propagation được test qua pipeline local; chưa phải là trace xuyên các service cloud thật."><defs><marker id="cs37-0-a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0 0 L10 5 L0 10 z" class="f-phys"/></marker></defs><rect x="20" y="65" width="260" height="85" rx="10" class="f-phys-soft s-phys"/><text x="34" y="95" class="t-b">HTTP traceparent</text><text x="34" y="123" class="t-small">Context từ caller</text><path d="M280 108 L305 108" class="f-none s-phys" stroke-width="2" marker-end="url(#cs37-0-a)"/><rect x="305" y="65" width="260" height="85" rx="10" class="f-phys-soft s-phys"/><text x="319" y="95" class="t-b">CreateTrip span</text><text x="319" y="123" class="t-small">Use case local</text><path d="M565 108 L590 108" class="f-none s-phys" stroke-width="2" marker-end="url(#cs37-0-a)"/><rect x="590" y="65" width="260" height="85" rx="10" class="f-phys-soft s-phys"/><text x="604" y="95" class="t-b">db.commit span</text><text x="604" y="123" class="t-small">Cùng TraceId</text></svg>
 </div>
-<figcaption>Hình 1. Propagation được test qua pipeline local; chưa là trace xuyên các service cloud thật.</figcaption>
+<figcaption>Hình 1. Propagation được test qua pipeline local; chưa phải là trace xuyên các service cloud thật.</figcaption>
 </figure>
 
 ## Metric cần đơn vị và cardinality rõ
 
-trips.requests là counter số request application, trips.request.duration là histogram ms. Tag operation lấy từ một tập kiểu request được đăng ký, không lấy từ ID chuyến, URL tuỳ ý hoặc idempotency key.
+trips.requests là counter đếm số request của application, trips.request.duration là histogram ms. Tag operation lấy từ một tập kiểu request được đăng ký, không lấy từ ID chuyến, URL tuỳ ý hoặc idempotency key.
 
-Counter có tính cả request bị validator từ chối theo thứ tự behavior hiện tại; không tự là số chuyến đã commit thành công. Nếu cần metric committed trips, đặt nó tại một mốc được định nghĩa khác và test theo semantics đó.
+Với thứ tự behavior hiện tại, counter tính cả request bị validator từ chối, nên không phải là số chuyến đã commit thành công. Nếu cần metric committed trips, đặt nó ở một mốc được định nghĩa riêng và test theo đúng ngữ nghĩa đó.
 
-Test MeterListener kiểm cả counter/duration và tên tag. Nó không chứng minh backend metric giữ mọi sample, dashboard tính percentile đúng hoặc sampling production phù hợp. Query/report ở hệ quan sát cần được review với đơn vị và aggregation tương ứng.
+Test MeterListener kiểm tra cả counter, duration và tên tag. Test này không chứng minh backend metric giữ mọi sample, dashboard tính percentile đúng hoặc sampling production phù hợp. Query và report ở hệ thống quan sát cần được review cùng đơn vị và phép gộp (aggregation) tương ứng.
 
 ## Export có cấu hình và phạm vi tin cậy
 
-Mặc định Telemetry:Export=false nên lab không gửi dữ liệu đi. Khi bật, OTLP exporter dùng endpoint được cấu hình/trust trong môi trường. Collector, TLS, auth, sampling và retention là hạ tầng cần thiết kế, không hard-code một endpoint public trong source.
+Mặc định Telemetry:Export=false nên lab không gửi dữ liệu đi. Khi bật, OTLP exporter dùng endpoint đã được cấu hình và tin cậy trong môi trường. Collector, TLS, auth, sampling và retention là hạ tầng cần thiết kế, không hard-code một endpoint public trong source.
 
-Logging OpenTelemetry giữ scope và trạng thái có cấu trúc, không thu body/Authorization. Cùng resource service.name nối dữ liệu nhưng không tự đồng bộ thời gian hay chữa instrument thiếu. Thay đổi version dịch vụ/image nên được phản ánh trong metadata release theo quy ước đội.
+Logging OpenTelemetry giữ scope và trạng thái có cấu trúc, không thu body/Authorization. Việc dùng chung resource service.name giúp nối dữ liệu nhưng không tự đồng bộ thời gian hay bổ sung instrument còn thiếu. Khi đổi phiên bản dịch vụ hoặc image, nên phản ánh thay đổi đó trong metadata release theo quy ước của đội.
 
 **Bài tập:** nếu chỉ thu span HTTP mà thiếu span handler, có thể biết SQL cụ thể chậm ở đâu không? Một counter request tăng có chứng minh transaction commit không?
 
-<details><summary>Xem đáp án</summary><p>Không đủ chi tiết để quy nguyên nhân; phải đo đúng các ranh giới cần quan sát. Counter hiện tại đếm request đi vào behavior, không cam kết commit thành công.</p></details>
+<details><summary>Xem đáp án</summary><p>Không đủ chi tiết để xác định nguyên nhân; phải đo đúng các ranh giới cần quan sát. Counter hiện tại đếm request đi vào behavior, không cam kết commit thành công.</p></details>
 
 <figure class="tkh-fig">
 <div class="tkh-fig-box">
-<svg viewBox="0 0 880 220" role="img" aria-label="Hình 2. Ba tín hiệu có hợp đồng riêng; không dùng ID khách làm dimensions metric vô hạn."><defs><marker id="cs37-1-a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0 0 L10 5 L0 10 z" class="f-phys"/></marker></defs><rect x="20" y="65" width="260" height="85" rx="10" class="f-phys-soft s-phys"/><text x="34" y="95" class="t-b">Trace</text><text x="34" y="123" class="t-small">Quan hệ + thời gian</text><rect x="305" y="65" width="260" height="85" rx="10" class="f-phys-soft s-phys"/><text x="319" y="95" class="t-b">Metric</text><text x="319" y="123" class="t-small">Tập hợp + phân bố</text><rect x="590" y="65" width="260" height="85" rx="10" class="f-phys-soft s-phys"/><text x="604" y="95" class="t-b">Log</text><text x="604" y="123" class="t-small">Sự kiện có cấu trúc</text></svg>
+<svg viewBox="0 0 880 220" role="img" aria-label="Hình 2. Ba tín hiệu có hợp đồng riêng; không dùng ID khách làm dimension của metric có số giá trị vô hạn."><defs><marker id="cs37-1-a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0 0 L10 5 L0 10 z" class="f-phys"/></marker></defs><rect x="20" y="65" width="260" height="85" rx="10" class="f-phys-soft s-phys"/><text x="34" y="95" class="t-b">Trace</text><text x="34" y="123" class="t-small">Quan hệ + thời gian</text><rect x="305" y="65" width="260" height="85" rx="10" class="f-phys-soft s-phys"/><text x="319" y="95" class="t-b">Metric</text><text x="319" y="123" class="t-small">Tập hợp + phân bố</text><rect x="590" y="65" width="260" height="85" rx="10" class="f-phys-soft s-phys"/><text x="604" y="95" class="t-b">Log</text><text x="604" y="123" class="t-small">Sự kiện có cấu trúc</text></svg>
 </div>
-<figcaption>Hình 2. Ba tín hiệu có hợp đồng riêng; không dùng ID khách làm dimensions metric vô hạn.</figcaption>
+<figcaption>Hình 2. Ba tín hiệu có hợp đồng riêng; không dùng ID khách làm dimension của metric có số giá trị vô hạn.</figcaption>
 </figure>
 
 ## Code và kiểm chứng
@@ -72,7 +72,7 @@ Thiết lập `TOI_NOI_PG` cho database local riêng `toi_noi_dotnet_lab` theo R
 dotnet test examples/toi-noi-dotnet/31-38-trip-service/Tests
 ```
 
-Fixture dùng schema GUID riêng, không xoá database; JWT dùng khoá ngẫu nhiên trong test và vẫn đi qua handler xác thực thật. Test không tự skip khi thiếu PostgreSQL. Docker/CI/cloud spec xem README service và cloud/README.md để biết phạm vi, prerequisites và phần chưa được triển khai thật.
+Fixture dùng schema GUID riêng, không xoá database; JWT dùng khoá ngẫu nhiên trong test và vẫn đi qua handler xác thực thật. Test không tự bỏ qua khi thiếu PostgreSQL. Docker/CI/cloud spec xem README service và cloud/README.md để biết phạm vi, điều kiện tiên quyết và phần chưa triển khai thật.
 
 ### Pipeline.cs — 31-38-trip-service/Application/Pipeline.cs
 

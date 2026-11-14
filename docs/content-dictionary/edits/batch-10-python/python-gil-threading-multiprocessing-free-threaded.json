@@ -1,0 +1,16 @@
+{"file":"python-gil-threading-multiprocessing-free-threaded.md","edits":[
+{"old":"và chờ thời gian giảm mười lần; nó không giảm.","new":"và chờ thời gian giảm mười lần, nhưng thời gian không giảm.","reason":"«nó» mơ hồ, đại từ chỉ sự vật trừu tượng","severity":"medium"},
+{"old":"Ảnh là «ảnh xám giả» 2.000.000 điểm (cỡ một ảnh thẻ quét)","new":"Ảnh là «ảnh xám giả» 2.000.000 điểm ảnh (cỡ một ảnh thẻ quét)","reason":"«điểm» cụt, thiếu danh từ","severity":"medium"},
+{"old":"`concurrent.futures` cho cả ba mô hình cùng một giao diện,","new":"`concurrent.futures` cung cấp cho cả ba mô hình cùng một giao diện,","reason":"«cho» thiếu động từ, giọng dịch máy","severity":"medium"},
+{"old":"Hợp với I/O và mã C nhả GIL.","new":"Phù hợp với I/O và mã C nhả GIL.","reason":"«Hợp với» khẩu ngữ","severity":"low"},
+{"old":"đúng loại và thông điệp, (`--verify` kiểm cả hai).","new":"đúng loại và thông điệp (`--verify` kiểm cả hai).","reason":"Thừa dấu phẩy trước ngoặc","severity":"low"},
+{"old":"không bao giờ đạt gấp mười một lõi P kể cả khi máy rảnh.","new":"không bao giờ đạt gấp mười lần tốc độ của một lõi P kể cả khi máy rảnh.","reason":"Câu thiếu chữ, đọc thành «mười một lõi»","severity":"high"},
+{"old":"ta chỉ khẳng định thứ bậc lớn (vài lần), không chênh nhỏ. Output đầy đủ:","new":"ta chỉ khẳng định các chênh lệch lớn (cỡ vài lần), không khẳng định chênh lệch nhỏ. Kết quả in ra đầy đủ:","reason":"Câu cụt thiếu động từ, từ tiếng Anh lọt vào văn xuôi","severity":"medium"},
+{"old":"cùng bậc với một ảnh (khoảng 0,2 s),","new":"cùng cỡ với thời gian xử lý một ảnh (khoảng 0,2 s),","reason":"«cùng bậc với một ảnh» thiếu danh từ","severity":"low"},
+{"old":"Nó không kiểm tốc độ nào, vì tỉ lệ đổi theo tải máy:","new":"Lệnh này không kiểm tra tốc độ nào, vì tỉ lệ đổi theo tải máy:","reason":"Tránh «Nó» ở đầu câu, «kiểm» cụt","severity":"medium"},
+{"old":"chưa có quyết định biến nó thành mặc định.","new":"chưa có quyết định đặt nó làm bản mặc định.","reason":"«biến thành» gượng","severity":"low"},
+{"old":"chênh nhau trong nhiễu, nên không kết luận được","new":"chênh nhau trong phạm vi nhiễu đo, nên không kết luận được","reason":"«trong nhiễu» cụt","severity":"low"},
+{"old":"truyền cho worker một khoá nhỏ (`page_id`, đường dẫn storage)","new":"truyền cho worker một định danh nhỏ (`page_id`, đường dẫn storage)","reason":"«khoá» dễ nhầm với khoá đồng bộ (lock) trong bài về GIL","severity":"medium"},
+{"old":"vòng lặp nhị phân hoá là bài toán chủ ý đơn giản,","new":"vòng lặp nhị phân hoá là bài toán được cố tình làm đơn giản,","reason":"«chủ ý đơn giản» gượng","severity":"medium"},
+{"old":"nên có thể nhỏ hơn <code>os.cpu_count()</code>; nó không phản ánh","new":"nên có thể nhỏ hơn <code>os.cpu_count()</code>; hàm này không phản ánh","reason":"Tránh «nó» mơ hồ giữa hai hàm","severity":"medium"}
+]}

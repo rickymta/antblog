@@ -8,11 +8,11 @@ tags: [csharp, dotnet, dotnet-10, toi-noi]
 language: vi
 ---
 
-Đây là **bài 11** trong loạt **C# và .NET 10 qua [Tới Nơi](/articles/du-an-mau-toi-noi)**. Các ví dụ target `net10.0`; code trong repository và các đoạn đầy đủ dưới đây dùng cùng implementation được chạy kiểm chứng.
+Đây là **bài 11** trong loạt **C# và .NET 10 qua [Tới Nơi](/articles/du-an-mau-toi-noi)**. Các ví dụ target `net10.0`; code trong repository và các đoạn đầy đủ dưới đây dùng cùng một bản cài đặt đã được chạy kiểm chứng.
 
 <div class="tkh-callout tkh-callout--example">
 <span class="tkh-callout-title">Thử trước khi đọc</span>
-<p>Đổi string? thành string có ngăn null xuất hiện ở runtime không?</p>
+<p>Đổi string? thành string có ngăn được null xuất hiện ở runtime không?</p>
 <details><summary>Xem đáp án</summary><p>Không. Annotation phục vụ phân tích của compiler; dữ liệu bên ngoài và code bỏ qua cảnh báo vẫn có thể đưa null vào.</p></details>
 </div>
 
@@ -22,15 +22,15 @@ Trong Tới Nơi, query có thể không tìm thấy chuyến. Nếu tìm thấy
 
 Sau [bài 10](/articles/csharp-linq-deferred-execution), ta dùng một read model nhỏ: TripView có Id và DriverId. Kiểu của kết quả query là `TripView?`; kiểu của trường driver là `string?`. Hai dấu hỏi ở hai tầng khác nhau diễn đạt hai lý do thiếu khác nhau.
 
-Null không phải lỗi trong mọi trường hợp. “Chưa có tài xế” là trạng thái dự kiến. Việc cần làm là diễn đạt nó rõ và không dereference một tham chiếu thiếu. Còn chuỗi trắng cần được nhận diện riêng, không tự biến thành một tài xế hợp lệ.
+Null không phải lỗi trong mọi trường hợp. “Chưa có tài xế” là trạng thái dự kiến. Việc cần làm là diễn đạt trạng thái đó cho rõ ràng và không dereference một tham chiếu null. Còn chuỗi trắng cần được nhận diện riêng, không tự biến thành một tài xế hợp lệ.
 
 ## Compiler biết gì và không biết gì?
 
-Project đã bật Nullable=enable từ bài đầu. `string?` cho biết tham chiếu có thể null; `string` bày tỏ kỳ vọng không null. Compiler phân tích luồng để cảnh báo khi ta dùng một giá trị có thể null mà chưa kiểm tra. Nó không tạo một loại object khác hay thêm guard runtime vào mọi property.
+Project đã bật Nullable=enable từ bài đầu. `string?` cho biết tham chiếu có thể null; `string` thể hiện kỳ vọng không null. Compiler phân tích luồng để cảnh báo khi ta dùng một giá trị có thể null mà chưa kiểm tra. Compiler không tạo một loại object khác hay thêm guard runtime vào mọi property.
 
-Toán tử `!` chỉ nói với compiler rằng người viết nhận trách nhiệm tại vị trí đó; nó không biến null thành object. `trip!.Id` vẫn có thể ném NullReferenceException. Dùng nó để dập toàn bộ cảnh báo biến thiết kế nullable thành trang trí.
+Toán tử `!` chỉ nói với compiler rằng người viết nhận trách nhiệm tại vị trí đó; nó không biến null thành object. `trip!.Id` vẫn có thể ném NullReferenceException. Nếu dùng nó để dập toàn bộ cảnh báo, thiết kế nullable sẽ thành đồ trang trí.
 
-Với `decimal?`, dấu hỏi lại là `Nullable<decimal>`, một value type có trạng thái không có giá trị. Đừng đọc .Value khi chưa biết có dữ liệu. Pattern có thể kiểm tra và dùng giá trị cùng lúc; hai cơ chế nullable reference và nullable value chia sẻ cú pháp quen nhưng không giống cách biểu diễn.
+Với `decimal?`, dấu hỏi lại là `Nullable<decimal>`, một value type có trạng thái không có giá trị. Đừng đọc .Value khi chưa biết có dữ liệu. Pattern có thể kiểm tra và dùng giá trị cùng lúc; hai cơ chế nullable reference và nullable value dùng chung cú pháp quen thuộc nhưng cách biểu diễn không giống nhau.
 
 <figure class="tkh-fig">
 <div class="tkh-fig-box">
@@ -41,19 +41,19 @@ Với `decimal?`, dấu hỏi lại là `Nullable<decimal>`, một value type c�
 
 ## Switch expression mô tả các trường hợp
 
-Describe dùng switch expression: mỗi nhánh gồm pattern, dấu => và kết quả. Nhánh null đứng đầu; property pattern `{ DriverId: null }` nhận một object tồn tại nhưng thiếu driver. Nhánh có `var driver` lấy giá trị property và dùng when để từ chối chuỗi trắng. Dấu `_` hứng trường hợp còn lại.
+Describe dùng switch expression: mỗi nhánh gồm pattern, dấu => và kết quả. Nhánh null đứng đầu; property pattern `{ DriverId: null }` khớp với một object tồn tại nhưng thiếu driver. Nhánh có `var driver` lấy giá trị property và dùng when để từ chối chuỗi trắng. Dấu `_` hứng trường hợp còn lại.
 
-Property pattern không match null ở object gốc, nên nhánh thứ hai không vô tình dereference một TripView thiếu. Pattern `is null` không gọi toán tử == tuỳ biến của kiểu. Khi một kiểu overload equality, khác biệt này có thể quan trọng.
+Property pattern không match null ở object gốc, nên nhánh thứ hai không vô tình dereference một TripView null. Pattern `is null` không gọi toán tử == tuỳ biến của kiểu. Khi một kiểu overload toán tử equality, khác biệt này có thể quan trọng.
 
-Thứ tự nhánh là một phần logic. Nếu đặt nhánh bắt rộng lên trước, compiler có thể báo nhánh sau không thể tới, hoặc ý nghĩa phân loại bị thay đổi. Hãy đọc bảng ca trước khi rút gọn switch; ngắn hơn không tự dễ hiểu hơn.
+Thứ tự nhánh là một phần logic. Nếu đặt nhánh bắt rộng lên trước, compiler có thể báo nhánh sau không thể chạy tới (unreachable), hoặc làm thay đổi ý nghĩa phân loại. Hãy đọc bảng các trường hợp trước khi rút gọn switch; ngắn hơn không đồng nghĩa với dễ hiểu hơn.
 
-## Relational pattern không thay quy tắc domain
+## Relational pattern không thay thế quy tắc domain
 
-DescribeDistance phân biệt null, số trong đoạn 0–100 và số ngoài đoạn. `>= 0m and <= 100m` kết hợp hai relational pattern. Khi distance null, nó không match quan hệ số; nhánh null diễn đạt điều đó rõ ràng.
+DescribeDistance phân biệt null, số trong đoạn 0–100 và số ngoài đoạn. `>= 0m and <= 100m` kết hợp hai relational pattern. Khi distance là null, pattern này không match phép so sánh số; nhánh null diễn đạt điều đó rõ ràng.
 
-Hàm Describe chỉ tạo lời giải thích cho read model. Nó không cho phép đổi trực tiếp trạng thái Trip entity từ bài 06. Khi xây aggregate sau này, hành vi vẫn phải bảo vệ invariant, kể cả UI đã phân loại dữ liệu trước đó.
+Hàm Describe chỉ tạo lời giải thích cho read model. Hàm này không cho phép thay đổi trực tiếp trạng thái của entity Trip ở bài 06. Khi xây aggregate sau này, hành vi vẫn phải bảo vệ invariant, kể cả khi UI đã phân loại dữ liệu từ trước.
 
-Nullable giúp hợp đồng rõ hơn giữa các module và các service đa ngôn ngữ, nhưng annotation C# không tự trở thành schema bắt buộc bên Python/Go/Rust. Ranh giới JSON/OpenAPI cần khai báo bắt buộc/nullable và kiểm tra thực tế.
+Nullable giúp hợp đồng giữa các module và các service đa ngôn ngữ rõ ràng hơn, nhưng annotation của C# không tự trở thành schema bắt buộc ở phía Python/Go/Rust. Ranh giới JSON/OpenAPI cần khai báo bắt buộc/nullable và kiểm tra thực tế.
 
 <figure class="tkh-fig">
 <div class="tkh-fig-box">
@@ -62,20 +62,20 @@ Nullable giúp hợp đồng rõ hơn giữa các module và các service đa ng
 <figcaption>Hình 2. Ba trường hợp của DriverId không có cùng ý nghĩa; không gom thành chuỗi rỗng.</figcaption>
 </figure>
 
-## Các ca cần giữ lại khi sửa code
+## Các test case cần giữ lại khi sửa code
 
-Bộ --verify kiểm tra chuyến null, driver null, driver hợp lệ, driver rỗng, khoảng trắng, khoảng cách thiếu và các biên 0/100. Không dùng NullReferenceException như cơ chế dò xem chuyến có tồn tại hay không.
+Nhánh --verify kiểm tra chuyến null, driver null, driver hợp lệ, driver rỗng, khoảng trắng, khoảng cách thiếu và các biên 0/100. Đừng dùng NullReferenceException làm cơ chế dò xem chuyến có tồn tại hay không.
 
 | Dữ liệu | Ý nghĩa |
 | --- | --- |
 | TripView null | Không tìm thấy chuyến |
 | TripView có DriverId null | Đang tìm tài xế |
 | DriverId = DR-1 | Đã có tài xế để hiển thị |
-| DriverId trắng/rỗng | Dữ liệu lỗi cần quan sát |
+| DriverId trắng/rỗng | Dữ liệu lỗi cần theo dõi |
 
-**Bài tập:** thêm một trường hợp driver là tab và xuống dòng. Có cần thêm một nhánh cho từng ký tự trắng không? Nếu caller dùng null! thì annotation có cứu được runtime không?
+**Bài tập:** thêm một trường hợp driver là tab và xuống dòng. Có cần thêm một nhánh cho từng ký tự trắng không? Nếu người gọi dùng null! thì annotation có bảo vệ được runtime không?
 
-<details><summary>Xem đáp án</summary><p>IsNullOrWhiteSpace đã bao gồm các trường hợp trắng đó; kiểm tra lại bằng ca cụ thể thay vì thêm nhiều nhánh. null! chỉ bỏ cảnh báo tại chỗ dùng, không tạo dữ liệu và không thêm guard.</p></details>
+<details><summary>Xem đáp án</summary><p>IsNullOrWhiteSpace đã bao gồm các trường hợp trắng đó; kiểm tra lại bằng test case cụ thể thay vì thêm nhiều nhánh. null! chỉ bỏ cảnh báo tại chỗ dùng, không tạo dữ liệu và không thêm guard.</p></details>
 
 ## Chạy ví dụ và kiểm chứng
 
@@ -85,7 +85,7 @@ Từ thư mục gốc repository:
 dotnet run --project examples/toi-noi-dotnet/11-nullable-patterns -- --verify
 ```
 
-Lệnh --verify chạy các ca cố định trên chính code minh hoạ; sai kỳ vọng sẽ trả exit code thất bại. Không cần package NuGet bổ sung.
+Lệnh --verify chạy các test case cố định trên chính code minh hoạ; nếu sai kỳ vọng sẽ trả về exit code thất bại. Không cần package NuGet bổ sung.
 
 ### Program.cs — 11-nullable-patterns/Program.cs
 

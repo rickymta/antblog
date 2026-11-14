@@ -1,0 +1,221 @@
+{
+ "file": "location-self-host-osrm-valhalla-hay-map-provider.md",
+ "edits": [
+  {
+   "old": "So ba hướng định tuyến theo tiêu chí, chưa chạy OSRM hay Valhalla thật, port RoutingProvider để thay adapter, dự phòng chim bay có số đo, và kế hoạch đo trước khi chọn.",
+   "new": "So ba hướng định tuyến theo tiêu chí, nói rõ lab chưa chạy OSRM hay Valhalla thật, giữ port RoutingProvider để thay adapter, đo dự phòng chim bay, và lập kế hoạch đo trước khi chọn.",
+   "reason": "Tóm tắt là chuỗi cụm danh từ thiếu động từ",
+   "severity": "high"
+  },
+  {
+   "old": "và để hở những thứ khác.",
+   "new": "và bỏ ngỏ những thứ khác.",
+   "reason": "Từ gượng",
+   "severity": "low"
+  },
+  {
+   "old": "Nó ghi tiêu chí, ghi những gì lab đã đo và chưa đo",
+   "new": "Bài này ghi tiêu chí, ghi những gì lab đã đo và chưa đo",
+   "reason": "Bỏ «nó» chỉ sự vật trừu tượng",
+   "severity": "medium"
+  },
+  {
+   "old": "và qua bộ kiểm tra hợp đồng với 0 vi phạm",
+   "new": "và vượt qua bộ kiểm tra hợp đồng với 0 vi phạm",
+   "reason": "Thiếu động từ",
+   "severity": "medium"
+  },
+  {
+   "old": "nên nó chỉ kiểm tra mã dựng URL và đọc JSON.",
+   "new": "nên phép thử chỉ kiểm tra được mã dựng URL và đọc JSON.",
+   "reason": "Bỏ «nó», rõ nghĩa hơn",
+   "severity": "medium"
+  },
+  {
+   "old": "không có server nào trong hai cái đó",
+   "new": "không có server nào trong hai hệ thống đó",
+   "reason": "Từ thông tục",
+   "severity": "low"
+  },
+  {
+   "old": "của hai hệ thống đó là các điều chưa đo.",
+   "new": "của hai hệ thống đó đều là những điều chưa đo.",
+   "reason": "Câu cụt",
+   "severity": "low"
+  },
+  {
+   "old": "CH và ma trận thì nhanh mà không có chi phí rẽ, A* theo cạnh thì có chi phí rẽ, phía đường mà chậm hơn nhiều bậc.",
+   "new": "CH và ma trận thì nhanh nhưng không có chi phí rẽ, A* theo cạnh thì có chi phí rẽ và phía đường nhưng chậm hơn nhiều bậc.",
+   "reason": "Liên từ «mà» gây khó hiểu",
+   "severity": "medium"
+  },
+  {
+   "old": "Đó là lý do quyết định này cần được ghi lại thay vì ngầm hiểu.",
+   "new": "Đó là lý do cần ghi lại quyết định này thay vì ngầm hiểu.",
+   "reason": "Bỏ câu bị động",
+   "severity": "low"
+  },
+  {
+   "old": "Bạn tự vận hành, tự chọn bản đồ OSM và cập nhật nó.",
+   "new": "Bạn tự vận hành, tự chọn bản đồ OSM và tự cập nhật bản đồ đó.",
+   "reason": "Bỏ «nó»",
+   "severity": "medium"
+  },
+  {
+   "old": "Lab chưa chạy cái nào trong hai cái này.",
+   "new": "Lab chưa chạy hệ thống nào trong hai hệ thống này.",
+   "reason": "Từ thông tục",
+   "severity": "medium"
+  },
+  {
+   "old": "có thể có dữ liệu kẹt xe thực mà",
+   "new": "có thể có dữ liệu kẹt xe thật mà",
+   "reason": "Thống nhất «kẹt xe thật»",
+   "severity": "low"
+  },
+  {
+   "old": "toạ độ khách và tài xế được gửi ra ngoài, và tính phụ thuộc",
+   "new": "việc gửi toạ độ khách và tài xế ra ngoài, và tính phụ thuộc",
+   "reason": "Danh sách không song song",
+   "severity": "medium"
+  },
+  {
+   "old": "Điều cần nhấn: ba hướng",
+   "new": "Điều cần nhấn mạnh: ba hướng",
+   "reason": "Lược chữ",
+   "severity": "medium"
+  },
+  {
+   "old": "nhằm làm kiểu kết hợp đó rẻ hơn.",
+   "new": "nhằm làm cho kiểu kết hợp đó rẻ hơn.",
+   "reason": "Thiếu chữ",
+   "severity": "medium"
+  },
+  {
+   "old": "| Chính là lý do cho port bên dưới |",
+   "new": "| Chính là lý do có lớp port bên dưới |",
+   "reason": "Cách nói gượng",
+   "severity": "high"
+  },
+  {
+   "old": "cache theo ô H3 của dịch vụ gRPC lưu kết quả của engine của lab.",
+   "new": "cache theo ô H3 của dịch vụ gRPC lưu kết quả do engine của lab tính.",
+   "reason": "Lặp «của» gây rối",
+   "severity": "medium"
+  },
+  {
+   "old": "Nếu sau này adapter provider cắm vào cùng đường, việc cache kết quả của provider phải được kiểm tra lại với điều khoản trước khi dùng.",
+   "new": "Nếu sau này adapter của provider nối vào cùng luồng gọi đó, phải kiểm tra lại việc cache kết quả của provider theo điều khoản trước khi dùng.",
+   "reason": "Dịch máy, bị động",
+   "severity": "medium"
+  },
+  {
+   "old": "trong câu trả lời để bên gọi biết đáp án là tính thật hay ước lượng.",
+   "new": "trong câu trả lời giúp bên gọi biết đáp án là tính thật hay ước lượng.",
+   "reason": "Câu thiếu động từ chính",
+   "severity": "low"
+  },
+  {
+   "old": "chuyển hai bên gọi đó sang trait trước;",
+   "new": "chuyển hai bên gọi đó sang dùng trait trước;",
+   "reason": "Thiếu động từ",
+   "severity": "low"
+  },
+  {
+   "old": "Bộ kiểm tra hợp đồng `contract_violations` là thứ giữ port trung thực: nó chạy cho mọi adapter, kiểm thời gian dương,",
+   "new": "Bộ kiểm tra hợp đồng `contract_violations` là thứ giữ cho port đáng tin: bộ này chạy cho mọi adapter, kiểm tra thời gian dương,",
+   "reason": "Dịch gượng, bỏ «nó», lược chữ",
+   "severity": "medium"
+  },
+  {
+   "old": "nên việc khớp gần tuyệt đối chỉ chứng minh mã dựng URL và đọc JSON hoạt động; nó không nói gì về OSRM thật.",
+   "new": "nên việc khớp gần tuyệt đối chỉ chứng minh mã dựng URL và đọc JSON hoạt động; kết quả này không nói gì về OSRM thật.",
+   "reason": "Bỏ «nó»",
+   "severity": "medium"
+  },
+  {
+   "old": "(cách nút 5–30 m nên phải snap), hồ sơ ô tô, và chạy:",
+   "new": "(cách nút 5–30 m nên phải snap), dùng hồ sơ ô tô, và chạy:",
+   "reason": "Thiếu động từ",
+   "severity": "low"
+  },
+  {
+   "old": "Hai lưu ý. Một: engine của lab",
+   "new": "Hai lưu ý. Thứ nhất, engine của lab",
+   "reason": "Cách liệt kê kiểu dịch máy",
+   "severity": "low"
+  },
+  {
+   "old": "Hai: bài học thực tế là",
+   "new": "Thứ hai, bài học thực tế là",
+   "reason": "Cách liệt kê kiểu dịch máy",
+   "severity": "low"
+  },
+  {
+   "old": "Lab cũng thử chuỗi: adapter chính giả lập «down» lỗi thì trả lời đến từ `straight-line`",
+   "new": "Lab cũng thử chuỗi dự phòng: khi adapter chính được giả lập lỗi «down», câu trả lời đến từ `straight-line`",
+   "reason": "Dịch gượng fallback chain, câu cụt",
+   "severity": "high"
+  },
+  {
+   "old": "adapter chính `own-engine` sống thì trả lời `Routed`",
+   "new": "khi adapter chính `own-engine` còn hoạt động thì câu trả lời là `Routed`",
+   "reason": "Cách nói thông tục, câu cụt",
+   "severity": "medium"
+  },
+  {
+   "old": "Lab **không tuyên bố** nó thay được OSRM hay Valhalla.",
+   "new": "Lab **không tuyên bố** engine này thay được OSRM hay Valhalla.",
+   "reason": "Bỏ «nó»",
+   "severity": "low"
+  },
+  {
+   "old": "**Số hiệu chỉnh dự phòng là giữa hai mô hình**",
+   "new": "**Số hiệu chỉnh dự phòng là độ lệch giữa hai mô hình**",
+   "reason": "Câu thiếu danh từ",
+   "severity": "medium"
+  },
+  {
+   "old": "**Port chưa được dùng bởi simulator hay dịch vụ gRPC.**",
+   "new": "**Simulator và dịch vụ gRPC chưa dùng port.**",
+   "reason": "Bỏ câu bị động",
+   "severity": "medium"
+  },
+  {
+   "old": "**Ma trận qua adapter chỉ được kiểm bằng ô 1×1**",
+   "new": "**Ma trận qua adapter chỉ được kiểm tra bằng ô 1×1**",
+   "reason": "Lược chữ",
+   "severity": "low"
+  },
+  {
+   "old": "**Không có đo thời gian**",
+   "new": "**Không đo thời gian**",
+   "reason": "Cách nói gượng",
+   "severity": "low"
+  },
+  {
+   "old": "ghi ba chỉ số bạn đo,",
+   "new": "ghi ba chỉ số bạn sẽ đo,",
+   "reason": "Câu cụt",
+   "severity": "low"
+  },
+  {
+   "old": "Đòi nghiêm ngặt sẽ báo vi phạm giả.",
+   "new": "Đòi nghiêm ngặt như vậy sẽ báo vi phạm giả.",
+   "reason": "Câu cụt",
+   "severity": "low"
+  },
+  {
+   "old": "Dung sai 60 m cho phép hai hướng snap mà vẫn bắt được",
+   "new": "Dung sai 60 m cho phép cả hai đầu bị snap mà vẫn bắt được",
+   "reason": "«hai hướng snap» mơ hồ",
+   "severity": "medium"
+  },
+  {
+   "old": "Phiên bản và hồ sơ xe mà bạn dùng phải kiểm lại trong tài liệu hiện hành.",
+   "new": "Cần kiểm lại phiên bản và hồ sơ xe bạn dùng trong tài liệu hiện hành.",
+   "reason": "Câu gượng",
+   "severity": "low"
+  }
+ ]
+}

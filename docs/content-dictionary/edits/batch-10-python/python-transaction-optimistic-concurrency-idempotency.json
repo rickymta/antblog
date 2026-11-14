@@ -1,0 +1,20 @@
+{"file":"python-transaction-optimistic-concurrency-idempotency.md","edits":[
+{"old":"bài này làm cho việc ghi **đúng** khi có nhiều người ghi cùng lúc.","new":"bài này bảo đảm việc ghi **đúng** khi có nhiều người ghi cùng lúc.","reason":"«làm cho việc ghi đúng» dịch gượng.","severity":"medium"},
+{"old":"commit khi khối kết thúc êm","new":"commit khi khối kết thúc không có lỗi","reason":"«êm» là khẩu ngữ, không hợp văn kỹ thuật.","severity":"medium"},
+{"old":"cho một exception nổ ra, rồi hỏi database:","new":"cho phát sinh một exception, rồi hỏi database:","reason":"«nổ ra» khẩu ngữ, gượng.","severity":"low"},
+{"old":"khi ghi chuyến xong ta phải gọi một service khác (thanh toán, chấm điểm), đừng giữ transaction mở trong lúc chờ;","new":"nếu sau khi ghi chuyến ta còn phải gọi một service khác (thanh toán, chấm điểm) thì đừng giữ transaction mở trong lúc chờ;","reason":"Câu thiếu quan hệ điều kiện, phải đoán ý.","severity":"high"},
+{"old":"thay vì lặng lẽ ghi đè.","new":"thay vì ghi đè mà không báo gì.","reason":"Calque «lặng lẽ».","severity":"medium"},
+{"old":"Chỉ hai mã được thử lại:","new":"Ta chỉ thử lại với hai mã:","reason":"Tránh câu bị động.","severity":"medium"},
+{"old":"và số lần thử bị chặn, vì retry vô hạn","new":"và số lần thử có giới hạn, vì retry vô hạn","reason":"«bị chặn» gượng, thiếu rõ nghĩa.","severity":"low"},
+{"old":"mà không có gì để phản đối.","new":"mà không có gì ngăn lại.","reason":"Giọng dịch máy («nothing to object»).","severity":"medium"},
+{"old":"Đây là hình dạng check-then-act của bài","new":"Đây là mẫu check-then-act của bài","reason":"Thống nhất cách gọi «mẫu» như bài trước.","severity":"low"},
+{"old":"và chỉ trả giá (đọc lại) khi có.","new":"và chỉ trả giá (đọc lại) khi có người chen vào.","reason":"Câu cụt, thiếu chủ ngữ.","severity":"high"},
+{"old":"cho cùng một kết quả bền, không tạo thêm hiệu ứng.","new":"cho ra cùng một kết quả đã lưu, không tạo thêm hiệu ứng phụ.","reason":"«kết quả bền» không rõ nghĩa; «hiệu ứng» cần là hiệu ứng phụ.","severity":"medium"},
+{"old":"nhưng nó chỉ là tối ưu cho trường hợp thường gặp","new":"nhưng đó chỉ là bước tối ưu cho trường hợp thường gặp","reason":"Tránh «nó» chỉ sự vật trừu tượng; thêm danh từ chính.","severity":"low"},
+{"old":"Kiểm bằng các ca sau.","new":"Ta kiểm bằng các test case sau.","reason":"Thiếu chủ ngữ; thống nhất «test case».","severity":"medium"},
+{"old":"Với ca đồng thời,","new":"Với test case đồng thời,","reason":"Thống nhất «test case».","severity":"medium"},
+{"old":"Ca «cùng khoá khác nội dung» bị từ chối","new":"Test case «cùng khoá khác nội dung» bị từ chối","reason":"Thống nhất «test case».","severity":"medium"},
+{"old":"Ca đồng thời: một thread tạo chuyến","new":"Test case đồng thời: một thread tạo chuyến","reason":"Thống nhất «test case».","severity":"medium"},
+{"old":"sai thì in tên ca, `FAIL n/m` (n là số ca đạt)","new":"sai thì in tên test case, `FAIL n/m` (n là số test case đạt)","reason":"Thống nhất «test case».","severity":"medium"},
+{"old":"các ca xen kẽ được dựng bằng điểm chèn","new":"các test case xen kẽ dựng bằng điểm chèn","reason":"Thống nhất «test case»; bỏ bị động.","severity":"medium"}
+]}

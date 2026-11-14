@@ -1,0 +1,143 @@
+{
+ "file": "nhom-cau-truc-structural.md",
+ "edits": [
+  {
+   "old": "cả hai hàm đều vỡ.",
+   "new": "cả hai hàm đều không còn chạy đúng.",
+   "reason": "Văn nói mơ hồ, nói rõ hàm không còn đúng",
+   "severity": "medium"
+  },
+  {
+   "old": "- **An toàn hay trong suốt.** Ở đây",
+   "new": "- **Chọn an toàn hay trong suốt.** Ở đây",
+   "reason": "Dịch gượng, thiếu động từ",
+   "severity": "medium"
+  },
+  {
+   "old": "Kiểm tay: combo",
+   "new": "Tính tay: combo",
+   "reason": "«Kiểm tay» là cụm tự ghép, nghe cụt",
+   "severity": "medium"
+  },
+  {
+   "old": "Câu hỏi đó trả lời ở đâu trong cây?",
+   "new": "Câu trả lời nằm ở đâu trong cây?",
+   "reason": "Trật tự kiểu tiếng Anh",
+   "severity": "medium"
+  },
+  {
+   "old": "thì phải kiểm vòng lúc lưu.",
+   "new": "thì phải kiểm tra xem có vòng hay không lúc lưu.",
+   "reason": "«Kiểm vòng» là cụm cụt",
+   "severity": "medium"
+  },
+  {
+   "old": "đổi chỗ cho nhau là đổi tiền.",
+   "new": "đổi chỗ cho nhau thì số tiền đổi theo.",
+   "reason": "Câu cụt, đọc phải đoán ý",
+   "severity": "medium"
+  },
+  {
+   "old": "bọc một `HttpClient` để thêm thử lại, thêm log, thêm đo thời gian.",
+   "new": "bọc một `HttpClient` để thêm cơ chế thử lại, thêm log, thêm đo thời gian.",
+   "reason": "«Thêm thử lại» thiếu danh từ chính",
+   "severity": "medium"
+  },
+  {
+   "old": "**Danh tính**: `a !== a.inner`",
+   "new": "**Danh tính đối tượng**: `a !== a.inner`",
+   "reason": "Thiếu danh từ, thống nhất với bảng so sánh bên dưới",
+   "severity": "low"
+  },
+  {
+   "old": "nếu `dispatch.enqueue` lỗi, nó trả lại tiền dù",
+   "new": "nếu `dispatch.enqueue` lỗi, đoạn code này vẫn trả lại tiền dù",
+   "reason": "«Nó» chỉ sự vật trừu tượng ở đầu mệnh đề",
+   "severity": "medium"
+  },
+  {
+   "old": "Một lớp `PlaceTripFacade` đưa ra đúng một hàm",
+   "new": "Một lớp `PlaceTripFacade` cung cấp đúng một hàm",
+   "reason": "Calque của «expose»",
+   "severity": "low"
+  },
+  {
+   "old": "hoặc một «use case» trong kiến trúc phân tầng",
+   "new": "hoặc một «ca sử dụng» (use case) trong kiến trúc phân tầng",
+   "reason": "Thống nhất «ca sử dụng» trong cả bài",
+   "severity": "medium"
+  },
+  {
+   "old": "Tách trạng thái của marker làm hai:",
+   "new": "Tách trạng thái của marker thành hai phần:",
+   "reason": "Diễn đạt tự nhiên hơn",
+   "severity": "low"
+  },
+  {
+   "old": "rồi bắn đồng thời 1.000 lượt xem menu",
+   "new": "rồi gửi đồng thời 1.000 lượt xem menu",
+   "reason": "Từ khẩu ngữ",
+   "severity": "low"
+  },
+  {
+   "old": "cả 100 lượt đều trượt cache và cùng đập xuống database",
+   "new": "cả 100 lượt đều không trúng cache và cùng dồn xuống database",
+   "reason": "«Trượt cache» và «đập xuống» là khẩu ngữ/calque",
+   "severity": "medium"
+  },
+  {
+   "old": "tầng đó phải trả được tiền của nó.",
+   "new": "tầng đó phải xứng đáng với chi phí mà nó gây ra.",
+   "reason": "Calque của «pay for itself»",
+   "severity": "medium"
+  },
+  {
+   "old": "ba lần, ra cùng số)",
+   "new": "ba lần, cho cùng kết quả)",
+   "reason": "«Ra cùng số» là khẩu ngữ",
+   "severity": "low"
+  },
+  {
+   "old": "đổi đơn vị đúng (phút hay giây, km hay mét)",
+   "new": "quy đổi đúng đơn vị (phút hay giây, km hay mét)",
+   "reason": "Trật tự từ kiểu tiếng Anh",
+   "severity": "medium"
+  },
+  {
+   "old": "Ý tưởng — hai trục tách nhau, ghép lúc chạy — vẫn nguyên.",
+   "new": "Ý tưởng — hai trục tách nhau, ghép lúc chạy — vẫn được giữ nguyên.",
+   "reason": "Thiếu động từ",
+   "severity": "low"
+  },
+  {
+   "old": "thì giảm trên số lớn hơn (12.925 đ",
+   "new": "thì giảm trên số tiền lớn hơn (12.925 đ",
+   "reason": "Thiếu danh từ chính",
+   "severity": "medium"
+  },
+  {
+   "old": "Tiền đã giữ được trả lại trước khi lỗi lan ra ngoài.",
+   "new": "Hệ thống trả lại tiền đã giữ trước khi lỗi lan ra ngoài.",
+   "reason": "Chuyển bị động sang chủ động",
+   "severity": "medium"
+  },
+  {
+   "old": "là hai hệ khác nhau; facade",
+   "new": "là hai hệ thống khác nhau; facade",
+   "reason": "«Hai hệ» cụt",
+   "severity": "low"
+  },
+  {
+   "old": "(máy chết giữa hai bước)",
+   "new": "(máy chủ chết giữa hai bước)",
+   "reason": "«Máy chết» mơ hồ",
+   "severity": "low"
+  },
+  {
+   "old": "dựng một cửa duy nhất cho chuỗi việc rối rắm",
+   "new": "dựng một cửa duy nhất che đi chuỗi việc rối rắm",
+   "reason": "Diễn đạt tự nhiên hơn",
+   "severity": "low"
+  }
+ ]
+}

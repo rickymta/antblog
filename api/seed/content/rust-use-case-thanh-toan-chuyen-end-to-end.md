@@ -1,7 +1,7 @@
 ---
 slug: rust-use-case-thanh-toan-chuyen-end-to-end
 title: "Use case thanh toán chuyến end-to-end"
-summary: "Bài 54: ghép P05 thành một luồng chạy thật trên PostgreSQL và Kafka. TripCompleted và PaymentCaptured đến lệch thứ tự vẫn ra cùng sổ hai bút toán; có khuyến mãi, hoàn một phần, abort giữa chừng, đối soát clearing."
+summary: "Bài 54: ghép P05 thành một luồng chạy thật trên PostgreSQL và Kafka. TripCompleted và PaymentCaptured đến lệch thứ tự vẫn cho ra cùng sổ hai bút toán; có khuyến mãi, hoàn một phần, abort giữa chừng, đối soát clearing."
 category: rust-advanced
 level: advanced
 tags: [rust, toi-noi, ledger, use-case, kafka, postgresql]
@@ -10,17 +10,17 @@ language: vi
 
 Chuyến `TN-0001` hoàn thành lúc 08:31. Booking phát `TripCompleted`, Payment phát `PaymentCaptured`: hai service, hai topic, không ai hứa cái nào đến trước. Có lần tiền đến trước chuyến ba giây, có lần một sự kiện đến hai lần, có lần ledger chết đúng lúc đang ghi. Bài này lắp các mảnh của P05 thành một luồng chạy thật trên PostgreSQL và Kafka, rồi dựng từng tình huống bằng test.
 
-Đây là bài 54 của lộ trình **Rust nâng cao qua [Tới Nơi](/articles/du-an-mau-toi-noi)**, nối tiếp [bài 53](/articles/rust-aggregate-invariant-optimistic-locking-for-update). Lab là workspace bốn crate như [bài 51](/articles/rust-hexagonal-clean-workspace-crates-port-adapter), dùng lại `ledger-core` của [bài 20](/articles/rust-tong-hop-ledger-core-cargo-doc-workspace) qua path dependency, không sang lab nào khác.
+Đây là bài 54 của lộ trình **Rust nâng cao qua [Tới Nơi](/articles/du-an-mau-toi-noi)**, nối tiếp [bài 53](/articles/rust-aggregate-invariant-optimistic-locking-for-update). Lab là workspace bốn crate như [bài 51](/articles/rust-hexagonal-clean-workspace-crates-port-adapter), dùng lại `ledger-core` của [bài 20](/articles/rust-tong-hop-ledger-core-cargo-doc-workspace) qua path dependency, không cần đến lab nào khác.
 
 <div class="tkh-callout tkh-callout--example">
 <span class="tkh-callout-title">Thử trước khi đọc</span>
-<p><code>PaymentCaptured</code> của <code>TN-0001</code> đến trước <code>TripCompleted</code> ba giây. Ledger có nên ghi bút toán capture ngay, vì tiền đã thu thật? Nếu không, nó đang thiếu gì?</p>
-<details><summary>Xem đáp án</summary><p>Không nên. <code>PaymentCaptured</code> chỉ có <code>paymentId</code>, <code>tripId</code>, <code>amountDong</code>, <code>externalRef</code> và <code>occurredAt</code>: không có mã khách, mã tài xế hay cước. Ledger không biết trừ ví ai và không kiểm được số thu có khớp cước. Nó phải nhớ dữ kiện, chưa ghi gì, và chỉ ghi khi đủ.</p></details>
+<p><code>PaymentCaptured</code> của <code>TN-0001</code> đến trước <code>TripCompleted</code> ba giây. Ledger có nên ghi bút toán capture ngay, vì tiền đã thu thật? Nếu không, ledger còn thiếu gì?</p>
+<details><summary>Xem đáp án</summary><p>Không nên. <code>PaymentCaptured</code> chỉ có <code>paymentId</code>, <code>tripId</code>, <code>amountDong</code>, <code>externalRef</code> và <code>occurredAt</code>: không có mã khách, mã tài xế hay cước. Ledger không biết trừ ví ai và không kiểm được số thu có khớp cước. Ledger phải nhớ dữ kiện, chưa ghi gì, và chỉ ghi khi đủ.</p></details>
 </div>
 
 ## Luồng này ghép những bài nào, và bỏ những bài nào?
 
-Hình 1 là đường đi của một chuyến. Bảng dưới nói mỗi bước lấy gì từ bài nào; phần bỏ quan trọng như phần lấy, vì đó là điều lab chưa chứng minh.
+Hình 1 là đường đi của một chuyến. Bảng dưới nói mỗi bước lấy gì từ bài nào; phần bỏ qua quan trọng không kém phần lấy, vì đó là điều lab chưa chứng minh.
 
 <figure class="tkh-fig">
 <div class="tkh-fig-box">
@@ -34,21 +34,21 @@ Hình 1 là đường đi của một chuyến. Bảng dưới nói mỗi bướ
 | Chia crate | `domain` ← `application` ← `infrastructure` ← `api`; port là trait trả `impl Future + Send`; test đọc `Cargo.toml` để chặn `tokio`, `sqlx` vào `domain` (chỉ thấy phụ thuộc trực tiếp; bài 51 đọc `cargo metadata`). Một port `PaymentStore` thay ba port. Bỏ feature `kafka`, `Clock`, `EventPublisher` (outbox nằm trong `commit`); kho bộ nhớ chỉ còn trong unit test | [51](/articles/rust-hexagonal-clean-workspace-crates-port-adapter) |
 | Lệnh và handler | Giữ dispatch generic và sự kiện domain do aggregate sinh, rút còn enum `Command` và một hàm `handle` generic trên `PaymentStore`. Bỏ trait `Command`/`CommandHandler` với `Output` liên kết và ba lớp `Validated`, `Traced`, `Transactional` | [52](/articles/rust-command-handler-pipeline-domain-event-khong-framework) |
 | Khoá lạc quan | Chỉ lấy mẫu, không lấy `Account` hay `account_limits`: `trip_payments.version`, `UPDATE ... WHERE version = $n`, thêm nhánh tạo bằng `unique_violation` mà bài 53 không có. Đọc lại ngay, tối đa 8 lần, không có jitter như `with_retry`; `40P01` thì consumer xử lý lại message. Số dư vẫn cộng dồn kiểu bài 25 | [53](/articles/rust-aggregate-invariant-optimistic-locking-for-update) |
-| Tính phí | `default_policy()` 20%, nửa ra xa 0: 5.100 và 20.400 | [11](/articles/rust-trait-generics-chinh-sach-phi-lam-tron), [20](/articles/rust-tong-hop-ledger-core-cargo-doc-workspace) |
+| Tính phí | `default_policy()` 20%, làm tròn nửa ra xa 0: 5.100 và 20.400 | [11](/articles/rust-trait-generics-chinh-sach-phi-lam-tron), [20](/articles/rust-tong-hop-ledger-core-cargo-doc-workspace) |
 | Hai bút toán | `JournalEntryBuilder`, dấu dòng tiền, key `capture` rồi `split` qua clearing | [13](/articles/rust-double-entry-journal-entry-posting), [41](/articles/rust-bai-toan-so-cai-chart-of-accounts-dong-tien-chuyen) |
 | Ghi idempotent | `ON CONFLICT DO NOTHING` rồi so nội dung; trigger cấm UPDATE và DELETE | [24](/articles/rust-transaction-isolation-append-only-idempotency-key) |
 | Schema | bốn bảng chuẩn, `02_balance_check.sql` giống từng byte bản lab 25, `account_balances` là projection | [25](/articles/rust-schema-so-cai-accounts-journal-postings-partition) |
 | Kafka | tạo topic rồi chờ có leader, commit offset sau khi DB commit | [36](/articles/rust-kafka-rdkafka-consumer-producer-schema) |
 | Outbox | ghi cùng transaction, relay `SKIP LOCKED`, at-least-once. Bỏ inbox | [37](/articles/rust-outbox-inbox-idempotent-consumer) |
 | Khung đủ vòng | Kafka vào, PostgreSQL, Kafka ra. Đổi ba dòng thành hai bước; bài 40 giả lập cái chết bằng cách huỷ task, ở đây là tiến trình con `abort` thật | [40](/articles/rust-tong-hop-ledger-api-postgresql-kafka-end-to-end) |
-| Khuyến mãi | `platform:treasury`, `platform:promo-wallet`, khoá dòng ngân sách campaign | [45](/articles/rust-khuyen-mai-tro-gia-but-toan-nhieu-ben-ngan-sach) |
+| Khuyến mãi | `platform:treasury`, `platform:promo-wallet`, khoá hàng ngân sách của campaign | [45](/articles/rust-khuyen-mai-tro-gia-but-toan-nhieu-ben-ngan-sach) |
 | Hoàn một phần | chia theo tổng luỹ kế, key `trip:<id>:refund:<n>`, không đặt `reversal_of`. Bỏ maker-checker, đảo toàn phần, chargeback | [43](/articles/rust-refund-reversal-chargeback-but-toan-dao-maker-checker) |
 | Đối soát | so theo dòng clearing và `external_ref` qua `psp_refs`, bốn loại kết luận. Bỏ `DATE_SHIFT` và đọc CSV | [47](/articles/rust-doi-soat-psp-sao-ke-csv-khop-lech-bao-cao) |
 | Không dùng | hold ([42](/articles/rust-hold-capture-void-so-du-kha-dung)): chuyến trả qua VíXanh, không giữ chỗ trong ví; payout ([44](/articles/rust-vi-tai-xe-chia-tien-payout-theo-lo)); chia nhiều bên ([46](/articles/rust-lam-tron-chia-tien-largest-remainder-khong-mat-dong)); đóng kỳ ([48](/articles/rust-so-du-theo-thoi-diem-snapshot-dong-ky)); rebuild projection ([49](/articles/rust-event-sourcing-co-chung-muc-projection-replay)), lab chỉ đối chiếu số dư với posting; hash chain và role ([50](/articles/rust-audit-append-only-hash-chain-phan-quyen-pii)) | 42, 44, 46, 48, 49, 50 |
 
 ## Ai nhớ dữ kiện đến sớm, và vì sao thứ tự không còn quan trọng?
 
-Aggregate `TripPayment` là một dòng mỗi chuyến trong `trip_payments` (cột `state` jsonb, cột `version`), có ba ngăn: dữ kiện chuyến, thu tiền, khuyến mãi. Dữ kiện trùng hệt thì bỏ qua, khác nội dung thì từ chối, mới thì lưu rồi gọi `advance`:
+Aggregate `TripPayment` là một dòng cho mỗi chuyến trong `trip_payments` (cột `state` jsonb, cột `version`), có ba ngăn: dữ kiện chuyến, thu tiền, khuyến mãi. Dữ kiện trùng hệt thì bỏ qua, khác nội dung thì từ chối, mới thì lưu rồi gọi `advance`:
 
 ```rust
 // crates/domain/src/payment.rs (rút gọn: bỏ đoạn dựng hai bút toán)
@@ -69,9 +69,9 @@ fn advance(&mut self, events: &mut Vec<DomainEvent>) -> Result<(), DomainError> 
 }
 ```
 
-`advance` chỉ nhìn trạng thái hiện tại nên không có nhánh «nếu capture đến trước». Test `every_arrival_order_settles_the_same` thử sáu hoán vị của ba dữ kiện: trạng thái cuối và tập bút toán phải y hệt. Cho `record_trip` bỏ `advance`, test đỏ ở hoán vị `[1, 2, 0]`.
+`advance` chỉ nhìn trạng thái hiện tại nên không có nhánh «nếu capture đến trước». Test `every_arrival_order_settles_the_same` thử sáu hoán vị của ba dữ kiện: trạng thái cuối và tập bút toán phải y hệt. Nếu bỏ lời gọi `advance` khỏi `record_trip`, test đỏ ở hoán vị `[1, 2, 0]`.
 
-Đường Kafka kiểm lại hai lần chạy thật: phát dữ kiện đầu, đợi bộ đếm `handled` lên 1, nhìn aggregate, rồi mới phát dữ kiện thứ hai:
+Đường Kafka được kiểm lại bằng hai lần chạy thật: phát dữ kiện đầu, đợi bộ đếm `handled` lên 1, xem trạng thái aggregate, rồi mới phát dữ kiện thứ hai:
 
 ```text
 -- chuyến xong trước
@@ -80,13 +80,13 @@ fn advance(&mut self, events: &mut Vec<DomainEvent>) -> Result<(), DomainError> 
      PaymentCaptured đến trước (version 1): chờ TripCompleted; sổ còn 0 bút toán
 ```
 
-Cả hai lần cho `JE-000001` (`capture`) rồi `JE-000002` (`split`); test so ảnh chụp sổ và danh sách `LedgerEntryPosted` của hai lần: phải bằng nhau.
+Cả hai lần đều cho ra `JE-000001` (`capture`) rồi `JE-000002` (`split`); test so ảnh chụp sổ và danh sách `LedgerEntryPosted` của hai lần: phải bằng nhau.
 
-Phép so số thu với cước trừ khuyến mãi có hệ quả cố ý: số thu lệch thì không ghi gì. `TN-0004` có cước 25.500, VíXanh báo thu 24.000: sổ không đổi, aggregate nói rõ nó chờ gì. `TN-0002` thu 20.500 vì có mã giảm 5.000, quyết định khuyến mãi đến sau hai sự kiện kia và chính nó làm hai vế bằng nhau. Đoán «chắc là có khuyến mãi» thì một khoản thu sai sẽ thành doanh thu sai.
+Phép so số thu với cước trừ khuyến mãi có hệ quả cố ý: số thu lệch thì không ghi gì. `TN-0004` có cước 25.500, VíXanh báo thu 24.000: sổ không đổi, aggregate nói rõ nó chờ gì. `TN-0002` thu 20.500 vì có mã giảm 5.000, quyết định khuyến mãi đến sau hai sự kiện kia và chính quyết định đó làm hai vế bằng nhau. Đoán «chắc là có khuyến mãi» thì một khoản thu sai sẽ thành doanh thu sai.
 
-Lab không có bảng `inbox` của [bài 37](/articles/rust-outbox-inbox-idempotent-consumer): aggregate nhớ dữ kiện nào đã nhận nên tự nhận ra bản trùng, kể cả bản khác nội dung mà inbox khoá theo `event_id` bỏ qua im lặng (bài tập cuối bài 40).
+Lab không có bảng `inbox` của [bài 37](/articles/rust-outbox-inbox-idempotent-consumer): aggregate nhớ dữ kiện nào đã nhận nên tự nhận ra bản trùng, kể cả bản khác nội dung mà inbox khoá theo `event_id` bỏ qua mà không báo (bài tập cuối bài 40).
 
-Aggregate chờ này có giá: thêm một bảng trạng thái, thêm jsonb phải đọc được qua các lần đổi cấu trúc, và thêm trạng thái kẹt phải theo dõi. Nếu Payment gộp sẵn mã khách, mã tài xế và cước vào `PaymentCaptured`, ledger chỉ cần một sự kiện và không nên dựng nó.
+Aggregate chờ này có giá: thêm một bảng trạng thái, thêm dữ liệu jsonb mà các lần đổi cấu trúc về sau vẫn phải đọc được, và thêm trạng thái kẹt cần theo dõi. Nếu Payment gộp sẵn mã khách, mã tài xế và cước vào `PaymentCaptured`, ledger chỉ cần một sự kiện và không nên dựng aggregate chờ này.
 
 ## Hai dữ kiện cùng đến thì ai thắng?
 
@@ -134,7 +134,7 @@ for attempt in 1..=MAX_ATTEMPTS {
 <figcaption>Hình 2. Pha tạo: bên thua nhận <code>unique_violation</code> rồi đọc lại. Pha cập nhật thay <code>INSERT</code> bằng <code>UPDATE ... WHERE version = 1</code>: bên thua thấy 0 dòng khớp.</figcaption>
 </figure>
 
-Cuộc đua dựng bằng `Gated`, decorator của `PaymentStore`: `load` đầu tiên của mỗi bên chờ nhau ở `Barrier`, nên cả hai chắc chắn đọc xong version cũ trước khi ai commit.
+Race condition được dựng bằng `Gated`, decorator của `PaymentStore`: `load` đầu tiên của mỗi bên chờ nhau ở `Barrier`, nên cả hai chắc chắn đọc xong version cũ trước khi ai commit.
 
 ```rust
 // crates/api/src/gated.rs
@@ -147,7 +147,7 @@ async fn load(&self, trip_id: &str) -> Result<Option<Loaded>, StoreError> {
 }
 ```
 
-Hai pha, mỗi pha mười vòng: pha 1 đua tạo, pha 2 đua cập nhật (aggregate đã có version 1, `PaymentCaptured` 20.500 và khuyến mãi 5.000 cùng đọc nó). Bên thắng đổi giữa các vòng nên test chỉ kiểm bất biến:
+Hai pha, mỗi pha mười vòng: pha 1 đua tạo, pha 2 đua cập nhật (aggregate đã có version 1, `PaymentCaptured` 20.500 và khuyến mãi 5.000 cùng đọc nó). Bên thắng thay đổi giữa các vòng nên test chỉ kiểm invariant:
 
 ```text
 pha 1, tạo: 10 vòng, hai lệnh cùng thấy «chưa có aggregate» rồi cùng commit
@@ -157,13 +157,13 @@ pha 2, cập nhật: 10 vòng, aggregate đã có version 1; PaymentCaptured 20.
 toàn sổ: 51 bút toán, 0 bút toán lệch, tổng 0, projection khớp, ngân sách 50.000 dùng hết đúng 10 lần
 ```
 
-(Rút gọn: bỏ dòng đếm bên thắng của pha 1.) Pha 2 có mặt vì bản đầu chỉ có pha 1 vẫn xanh khi bỏ điều kiện `version = $3`: cuộc đua tạo không đi qua câu `UPDATE`. Giờ bỏ điều kiện đó thì test đỏ với `pha 2, vòng 0: 0 lần thua version, mong đúng 1`; không dịch `unique_violation` thì pha 1 đỏ với `duplicate key value violates unique constraint`.
+(Rút gọn: bỏ dòng đếm bên thắng của pha 1.) Pha 2 được thêm vào vì bản đầu chỉ có pha 1 và test vẫn xanh khi bỏ điều kiện `version = $3`: race condition khi tạo không đi qua câu `UPDATE`. Giờ bỏ điều kiện đó thì test đỏ với `pha 2, vòng 0: 0 lần thua version, mong đúng 1`; không dịch `unique_violation` thì pha 1 đỏ với `duplicate key value violates unique constraint`.
 
-[Use case đặt chuyến của loạt C#](/articles/dotnet10-use-case-dat-chuyen-end-to-end) có cùng hình dạng: validate, handler, một ranh giới commit, outbox, receipt chống replay, và ca hai tài xế cùng nhận cho một 200 và một 409. Khác ở nguồn lệnh: ở đó là HTTP nên bên thua ca nhận chuyến nhận 409 và tự quyết; ở đây là Kafka, không ai để trả 409, nên bên thua đọc lại và làm tiếp. Đường tạo chuyến bên đó gần hơn: thua constraint của receipt thì rollback rồi đọc kết quả đã commit, cùng dáng với bên thua `unique_violation` ở đây. Việc của receipt do aggregate làm: cùng key khác nội dung thì `DomainError::Conflict` thay cho 409.
+[Use case đặt chuyến của loạt C#](/articles/dotnet10-use-case-dat-chuyen-end-to-end) có cùng hình dạng: validate, handler, một ranh giới commit, outbox, receipt chống replay, và kịch bản hai tài xế cùng nhận chuyến cho ra một 200 và một 409. Khác ở nguồn lệnh: ở đó là HTTP nên bên thua trong kịch bản nhận chuyến nhận 409 và tự quyết; ở đây là Kafka, không ai để trả 409, nên bên thua đọc lại và làm tiếp. Đường tạo chuyến bên đó giống hơn: bên thua constraint của receipt thì rollback rồi đọc kết quả đã commit, cùng dáng với bên thua `unique_violation` ở đây. Vai trò của receipt ở đây do aggregate đảm nhận: cùng key khác nội dung thì `DomainError::Conflict` thay cho 409.
 
 ## Hai bút toán thay một: bài 40 khác bài này ở đâu?
 
-`ledger-api` của [bài 40](/articles/rust-tong-hop-ledger-api-postgresql-kafka-end-to-end) ghi một bút toán ba dòng (khách -25.500, doanh thu 5.100, tài xế 20.400) với key `trip:TN-0001:capture`. Bài này theo [bài 41](/articles/rust-bai-toan-so-cai-chart-of-accounts-dong-tien-chuyen): capture đưa tiền khách sang `psp:vixanh:clearing`, split chia từ clearing:
+`ledger-api` của [bài 40](/articles/rust-tong-hop-ledger-api-postgresql-kafka-end-to-end) ghi một bút toán ba dòng (khách -25.500, doanh thu 5.100, tài xế 20.400) với key `trip:TN-0001:capture`. Bài này làm theo [bài 41](/articles/rust-bai-toan-so-cai-chart-of-accounts-dong-tien-chuyen): capture đưa tiền khách sang `psp:vixanh:clearing`, split chia từ clearing:
 
 ```text
 JE-000001 trip:TN-0001:capture: customer:CU-001 -25.500 VND, psp:vixanh:clearing 25.500 VND
@@ -171,12 +171,12 @@ JE-000002 trip:TN-0001:split: psp:vixanh:clearing -25.500 VND, platform:revenue 
 số dư: customer -25.500, clearing 0, revenue 5.100, driver 20.400; aggregate version 2
 ```
 
-Chuyển dạng có bốn tác động, tác động đầu đắt nhất.
+Việc chuyển dạng có bốn hệ quả, và hệ quả đầu tiên đắt nhất.
 
 - **Key cũ mang nội dung mới.** Cùng `trip:TN-0001:capture` nhưng hai dòng thay vì ba. Trên sổ đã có bút toán ba dòng, capture hai dòng bị từ chối (`idempotency_key trip:TN-0001:capture đã dùng cho bút toán khác nội dung`) và aggregate rollback theo, không nhớ `PaymentCaptured`. Consumer coi đó là lỗi vĩnh viễn và bỏ message. Sổ đang chạy dạng ba dòng cần key mới hoặc migration, chủ đề của [bài 56](/articles/rust-feature-flag-config-migration-expand-contract).
 - **Hai sự kiện thay một.** Muốn biết «đã thu» thì đọc `capture`, muốn biết tài xế nhận bao nhiêu thì đọc `split`.
-- **Có dòng để đối soát.** Dòng clearing +25.500 của `capture` so được với sao kê VíXanh; dạng ba dòng không có.
-- **Khoảng «đã thu, chưa chia» chưa quan sát được.** Hai bút toán nằm trong một transaction nên không ai thấy clearing ở +25.500; tách thành hai transaction chỉ có nghĩa khi split phải chờ điều gì đó, như một quyết định phí. Lợi còn lại là key riêng để hoàn hay đảo từng bước.
+- **Có dòng để đối soát.** Dòng clearing +25.500 của `capture` so được với sao kê VíXanh; dạng ba dòng không có dòng nào như vậy.
+- **Khoảng thời gian «đã thu, chưa chia» chưa quan sát được.** Hai bút toán nằm trong một transaction nên không ai thấy clearing ở +25.500; tách thành hai transaction chỉ có nghĩa khi split phải chờ điều gì đó, như một quyết định phí. Lợi ích còn lại là có key riêng để hoàn hoặc đảo từng bước.
 
 Nhánh khuyến mãi dùng hai tài khoản của [bài 45](/articles/rust-khuyen-mai-tro-gia-but-toan-nhieu-ben-ngan-sach), `platform:treasury` và `platform:promo-wallet`. `TN-0002` có mã giảm 5.000 do nền tảng chịu; phí tính trên cước gốc nên doanh thu vẫn 5.100 và tài xế vẫn 20.400:
 
@@ -188,13 +188,13 @@ doanh thu 5.100 - chi phí khuyến mãi 5.000 = 100; ngân sách còn 5.000; cl
 TN-0003 xin 6.000 khi ngân sách còn 5.000: BudgetExhausted, không có aggregate, không có bút toán
 ```
 
-Bút toán dùng ngân sách khoá dòng số dư campaign (`FOR UPDATE`) trong cùng transaction, nên hết ngân sách thì không để lại dấu vết nào. Hoàn một phần theo tổng luỹ kế của [bài 43](/articles/rust-refund-reversal-chargeback-but-toan-dao-maker-checker): hoàn 10.000 là 2.000 phí cộng 8.000 từ tài xế, key `trip:TN-0001:refund:1`, không đặt `reversal_of` vì nó không phải ảnh gương của bút toán nào; gửi lại không ghi thêm, xin 16.000 khi chỉ còn 15.500 thì từ chối. Chuyến có khuyến mãi chưa hoàn được.
+Bút toán dùng ngân sách khoá hàng số dư của campaign (`FOR UPDATE`) trong cùng transaction, nên hết ngân sách thì không để lại dấu vết nào. Hoàn một phần theo tổng luỹ kế của [bài 43](/articles/rust-refund-reversal-chargeback-but-toan-dao-maker-checker): hoàn 10.000 là 2.000 phí cộng 8.000 từ tài xế, key `trip:TN-0001:refund:1`, không đặt `reversal_of` vì nó không phải bút toán đảo của bút toán nào; gửi lại không ghi thêm, xin 16.000 khi chỉ còn 15.500 thì từ chối. Chuyến có khuyến mãi chưa hoàn được.
 
 ## Chết giữa chừng và sự kiện trùng: chuyện gì còn lại?
 
-Sự kiện trùng đi qua chính aggregate: mỗi loại hai lần, thêm một `TripCompleted` đổi cước 26.000. Test đợi `handled` lên 5 rồi kiểm: 2 message trùng không làm gì, 1 message đổi nội dung bị từ chối (chỉ ghi log, chưa có DLQ), sổ vẫn hai bút toán.
+Sự kiện trùng đi qua chính aggregate: mỗi loại hai lần, thêm một `TripCompleted` có cước đổi thành 26.000. Test đợi `handled` lên 5 rồi kiểm: 2 message trùng không làm gì, 1 message đổi nội dung bị từ chối (chỉ ghi log, chưa có DLQ), sổ vẫn hai bút toán.
 
-Chết giữa chừng không giả lập trong process: tiến trình con `trip-payment serve` tự gọi `std::process::abort()` ở message chốt sổ, tại một trong hai điểm chọn trước quanh `COMMIT`; tiến trình chính kiểm hiện trường rồi chạy service mới cùng consumer group. Không có `Drop`, không có `ROLLBACK` từ client, nhưng cũng không phải `kill` từ bên ngoài ở thời điểm ngẫu nhiên.
+Lab không giả lập việc chết giữa chừng ngay trong process: tiến trình con `trip-payment serve` tự gọi `std::process::abort()` ở message chốt sổ, tại một trong hai điểm chọn trước quanh `COMMIT`; tiến trình chính kiểm hiện trường rồi chạy service mới cùng consumer group. Không có `Drop`, không có `ROLLBACK` từ client, nhưng cũng không phải `kill` từ bên ngoài ở thời điểm ngẫu nhiên.
 
 <figure class="tkh-fig">
 <div class="tkh-fig-box">
@@ -220,7 +220,7 @@ chạy lại: message giao lại bị aggregate nhận ra là trùng (noops 1, g
 kết quả cuối: đúng 2 bút toán, đúng 2 LedgerEntryPosted, driver:DR-001 20.400, y hệt luồng không chết
 ```
 
-Ca chết trước `COMMIT` để lại `0 bút toán, 0 dòng outbox, aggregate version 1`, rồi lần chạy lại ghi mới 2 bút toán. Đưa `commit_message` lên trước khi xử lý thì cả hai ca đỏ sau hạn chót `quá 60s mà chưa thấy: message giao lại được xử lý`; ở ca trước `COMMIT` bút toán mất vĩnh viễn.
+Ca chết trước `COMMIT` để lại `0 bút toán, 0 dòng outbox, aggregate version 1`, rồi lần chạy lại ghi mới 2 bút toán. Nếu đưa `commit_message` lên trước bước xử lý thì cả hai ca đỏ sau hạn chót `quá 60s mà chưa thấy: message giao lại được xử lý`; ở ca trước `COMMIT` bút toán mất vĩnh viễn.
 
 ## Đối soát cuối luồng: so theo dòng clearing
 
@@ -233,7 +233,7 @@ FROM psp_refs r JOIN postings p ON p.entry_id = r.entry_id AND p.account_id = 'p
 GROUP BY r.external_ref ORDER BY r.external_ref
 ```
 
-Phân loại là hàm thuần trong `domain`: gom mỗi phía theo ref, cộng tiền, so hai tổng. Lab chốt sổ `TN-0001` và `TN-0002`, hoàn 10.000 cho `TN-0001` (không đụng clearing), đối soát với sao kê dựng từ hai ref đó, rồi bóp méo sao kê:
+Hàm phân loại là hàm thuần trong `domain`: gom mỗi phía theo ref, cộng tiền, so hai tổng. Lab chốt sổ `TN-0001` và `TN-0002`, hoàn 10.000 cho `TN-0001` (không đụng clearing), đối soát với sao kê dựng từ hai ref đó, rồi bóp méo sao kê:
 
 ```text
 dòng clearing của bút toán capture: vx_ch_0001 25.500 VND, vx_ch_0002 20.500 VND
@@ -245,7 +245,7 @@ sao kê đúng: 2 ref MATCHED; số dư clearing 0 (đối soát so theo dòng, 
 
 ## Chạy ví dụ và kiểm chứng
 
-Hạ tầng và biến môi trường theo `examples/toi-noi-rust/infra/README.md`. Từ gốc repository:
+Hạ tầng và biến môi trường lấy theo `examples/toi-noi-rust/infra/README.md`. Từ gốc repository:
 
 ```bash
 export TOI_NOI_PG_URL='postgres://toi_noi:toi_noi_lab@127.0.0.1:5433/toi_noi_rust_lab'
@@ -255,16 +255,16 @@ cargo run  --manifest-path examples/toi-noi-rust/54-trip-payment-use-case/Cargo.
 cargo test --manifest-path examples/toi-noi-rust/54-trip-payment-use-case/Cargo.toml
 ```
 
-`--verify` chạy chín kịch bản, mỗi kịch bản một schema `lab_<uuid>` và bộ topic `lab.54.<uuid>.*` riêng, dọn cuối ca kể cả khi lỗi; sai hoặc thiếu biến môi trường thì thoát mã 1. `cargo test` chạy 31 test: 15 của `domain`, 3 của `application` với kho trong bộ nhớ, 13 của `api` gồm 11 kịch bản thật và hai test kiến trúc (`domain`, `application` không khai báo `tokio`, `sqlx`, `rdkafka`; trigger cân bút toán giống từng byte bản lab 25). Không test nào assert thời gian.
+`--verify` chạy chín kịch bản, mỗi kịch bản một schema `lab_<uuid>` và bộ topic `lab.54.<uuid>.*` riêng, dọn khi kịch bản kết thúc, kể cả khi lỗi; sai hoặc thiếu biến môi trường thì thoát với mã 1. `cargo test` chạy 31 test: 15 của `domain`, 3 của `application` với kho trong bộ nhớ, 13 của `api` gồm 11 kịch bản thật và hai test kiến trúc (`domain`, `application` không khai báo `tokio`, `sqlx`, `rdkafka`; trigger cân bút toán giống từng byte bản lab 25). Không test nào assert thời gian.
 
 <div class="tkh-callout tkh-callout--warn">
 <span class="tkh-callout-title">Giới hạn của ví dụ</span>
-<p>Luồng để học, không phải service deploy được. Hai điểm chết là hai điểm chọn trước, tiến trình tự <code>abort</code>, không phải kill ngẫu nhiên; khe hở khác quanh hai điểm đó chưa được thử. Chưa có HTTP hay gRPC.</p></div>
+<p>Luồng này dùng để học, không phải service có thể deploy. Hai điểm chết là hai điểm chọn trước, tiến trình tự <code>abort</code>, không phải kill ngẫu nhiên; khe hở khác quanh hai điểm đó chưa được thử. Chưa có HTTP hay gRPC.</p></div>
 
 ## Lab đơn giản hoá điều gì so với production?
 
 - **Không DLQ.** Message hỏng, đổi nội dung hay vi phạm key chỉ bị ghi log rồi bỏ; dữ kiện mất khỏi luồng.
-- **Chờ không có hạn.** Aggregate chờ vô thời hạn và không ai báo; production cần metric «chờ quá N phút» như bốn metric của bài 41. Domain cũng không có đồng hồ: `postedAt` do database gán.
+- **Chờ không có hạn.** Aggregate chờ vô thời hạn và không có cảnh báo nào; production cần metric «chờ quá N phút» như bốn metric của bài 41. Domain cũng không có đồng hồ: `postedAt` do database gán.
 - **Không hold, payout, đóng kỳ, hash chain, phân quyền.** Lab chạy bằng một role PostgreSQL.
 - **Một consumer, một partition mỗi topic.** Hai instance cùng group và rebalance chưa dựng; tranh chấp version chỉ dựng bằng `Barrier`.
 - **Đối soát một lần.** Sao kê là mảng trong bộ nhớ, không phải CSV streaming hay job định kỳ.

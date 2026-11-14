@@ -1,14 +1,14 @@
 ---
 slug: python-decorator-context-manager
 title: "Decorator và context manager: retry, đo thời gian, transaction"
-summary: "Bài 17: closure, functools.wraps, decorator có tham số retry và timed, thứ tự chồng decorator; @contextmanager, class và ExitStack cho transaction giả. Kiểm thử bằng FakeTimer, không ngủ thật."
+summary: "Bài 17: closure, functools.wraps, decorator có tham số retry và timed, thứ tự chồng decorator; @contextmanager, class và ExitStack cho transaction giả. Kiểm thử bằng FakeTimer, không dùng sleep thật."
 category: python-beginner
 level: beginner
 tags: [python, toi-noi, decorator, context-manager]
 language: vi
 ---
 
-Dịch vụ báo giá mà [Tới Nơi](/articles/du-an-mau-toi-noi) gọi qua mạng thỉnh thoảng trả lỗi 503, tức là «tạm thời không phục vụ»,. Điều phối muốn thử lại vài lần trước khi báo lỗi cho khách, và muốn ghi lại mỗi lần gọi mất bao lâu. Ở bước gán tài xế còn một việc khác: ghi `driver_id` vào chuyến, đổi trạng thái sang `accepted` và tăng số chuyến đang mở của tài xế. Ba thao tác này phải xong cả ba hoặc không đổi gì; thao tác thứ ba lỗi mà hai thao tác đầu đã ghi thì dữ liệu hỏng âm thầm.
+Dịch vụ báo giá mà [Tới Nơi](/articles/du-an-mau-toi-noi) gọi qua mạng thỉnh thoảng trả lỗi 503, tức là «tạm thời không phục vụ». Bộ phận điều phối muốn thử lại vài lần trước khi báo lỗi cho khách, và muốn ghi lại mỗi lần gọi mất bao lâu. Ở bước gán tài xế còn một việc khác: ghi `driver_id` vào chuyến, đổi trạng thái sang `accepted` và tăng số chuyến đang mở của tài xế. Ba thao tác này phải xong cả ba hoặc không đổi gì; thao tác thứ ba lỗi mà hai thao tác đầu đã ghi thì dữ liệu hỏng mà không ai hay.
 
 Bài này dùng hai công cụ của Python để tách «hành vi bao quanh» khỏi nghiệp vụ thay vì chép `try/except` vào mọi nơi gọi: **decorator** bọc cả một hàm, **context manager** bọc một khối lệnh.
 
@@ -22,7 +22,7 @@ Bài này dùng hai công cụ của Python để tách «hành vi bao quanh» k
 
 ## Hàm bọc hàm, khối `with` bọc khối lệnh
 
-Decorator là một hàm nhận một hàm và trả về một hàm. Dòng `@deco` đặt trên `def f` chỉ là cú pháp rút gọn cho `f = deco(f)` viết ngay sau khi `def` chạy xong; nó khả thi vì hàm là đối tượng bình thường (PEP 318 đưa cú pháp `@` vào ngôn ngữ).
+Decorator là một hàm nhận một hàm và trả về một hàm. Dòng `@deco` đặt trên `def f` chỉ là cú pháp rút gọn cho `f = deco(f)` viết ngay sau khi `def` chạy xong; cách này khả thi vì hàm là đối tượng bình thường (PEP 318 đưa cú pháp `@` vào ngôn ngữ).
 
 Context manager là đối tượng có hai phương thức `__enter__` và `__exit__`. Câu lệnh `with` gọi `__enter__` trước khối lệnh và **luôn** gọi `__exit__` khi rời khối (miễn `__enter__` đã chạy xong), dù khối kết thúc bình thường, `return`, `break` hay có exception.
 
@@ -55,7 +55,7 @@ fixed = [lambda i=i: i for i in range(3)]   # i=i chốt giá trị ngay lúc đ
 
 Ba lambda của `late` dùng chung một ô `i`; lúc gọi, vòng lặp đã xong và `i` bằng 2. Giá trị mặc định của tham số được tính ngay lúc `lambda` được tạo, nên `fixed` giữ riêng từng số. Bài 18 có cách sạch hơn là `functools.partial`.
 
-Bây giờ là decorator đầu tiên: ghi lại tên mỗi hàm được gọi. Phiên bản đầu quên một chi tiết:
+Bây giờ đến decorator đầu tiên: ghi lại tên mỗi hàm được gọi. Phiên bản đầu quên một chi tiết:
 
 ```python
 def record_naive[**P, R](func: Callable[P, R]) -> Callable[P, R]:
@@ -72,9 +72,9 @@ def record[**P, R](func: Callable[P, R]) -> Callable[P, R]:
     return wrapper
 ```
 
-Phần `[**P, R]` là cú pháp generic của PEP 695 (Python 3.12 trở lên): `P` là `ParamSpec` giúp trình kiểm kiểu biết hàm sau khi bọc vẫn có chữ ký gốc.
+Phần `[**P, R]` là cú pháp generic của PEP 695 (Python 3.12 trở lên): `P` là `ParamSpec` giúp công cụ kiểm tra kiểu biết hàm sau khi bọc vẫn có chữ ký gốc.
 
-Áp hai decorator lên cùng hàm `price_trip` (có docstring «Báo giá một chuyến theo chính sách chuẩn.»), ta thấy khác biệt:
+Áp hai decorator lên cùng hàm `price_trip` (có docstring «Báo giá một chuyến theo chính sách chuẩn.»), ta thấy sự khác biệt:
 
 ```text
 naive_name              : wrapper
@@ -84,11 +84,11 @@ good_doc                : Báo giá một chuyến theo chính sách chuẩn.
 good_wrapped_is_original: True
 ```
 
-Thiếu `wraps`, hàm sau khi bọc tự xưng là `wrapper` và mất docstring, nên mọi dòng log hay công cụ dựa vào `__name__` và `__doc__` (như `help()`) đều đọc nhầm. `functools.wraps` tự nó là một decorator có tham số. Nó sao chép `__module__`, `__name__`, `__qualname__`, `__doc__`, `__type_params__` và `__annotate__` (hàm tính annotation lười của Python 3.14; danh sách in được từ `functools.WRAPPER_ASSIGNMENTS`), cập nhật `__dict__`, và gắn `__wrapped__` trỏ về hàm gốc; `inspect.signature` đi theo `__wrapped__` để báo đúng chữ ký ban đầu. Thói quen nên có: mọi decorator bọc hàm đều dùng `@functools.wraps(func)`.
+Thiếu `wraps`, hàm sau khi bọc tự xưng là `wrapper` và mất docstring, nên mọi dòng log hay công cụ dựa vào `__name__` và `__doc__` (như `help()`) đều đọc nhầm. `functools.wraps` tự nó là một decorator có tham số. Hàm này sao chép `__module__`, `__name__`, `__qualname__`, `__doc__`, `__type_params__` và `__annotate__` (hàm tính annotation lười của Python 3.14; danh sách in được từ `functools.WRAPPER_ASSIGNMENTS`), cập nhật `__dict__`, và gắn `__wrapped__` trỏ về hàm gốc; `inspect.signature` đi theo `__wrapped__` để báo đúng chữ ký ban đầu. Thói quen nên có: mọi decorator bọc hàm đều dùng `@functools.wraps(func)`.
 
 ## `retry` và `timed`: decorator có tham số
 
-`@retry(times=3, delay=0.5)` khác `@record` ở chỗ có ngoặc và đối số. Python tính `retry(times=3, delay=0.5)` trước; kết quả phải là một decorator thật sự, rồi mới áp lên hàm. Vì vậy decorator có tham số có **ba tầng hàm**: tầng ngoài nhận cấu hình, tầng giữa nhận hàm, tầng trong là `wrapper` chạy mỗi lần gọi.
+`@retry(times=3, delay=0.5)` khác `@record` ở chỗ có ngoặc và đối số. Python tính `retry(times=3, delay=0.5)` trước; kết quả đó phải là một decorator thật sự, rồi Python mới áp nó lên hàm. Vì vậy decorator có tham số có **ba tầng hàm**: tầng ngoài nhận cấu hình, tầng giữa nhận hàm, tầng trong là `wrapper` chạy mỗi lần gọi.
 
 ```python
 def retry[**P, R](times: int = 3, delay: float = 0.0, backoff: float = 1.0, *,
@@ -114,7 +114,7 @@ def retry[**P, R](times: int = 3, delay: float = 0.0, backoff: float = 1.0, *,
     return decorator
 ```
 
-(Bản rút gọn; bản lab có docstring và kiểm `times >= 1`.) Bốn quyết định đáng nói. Một, `times` là **tổng số lần gọi** tính cả lần đầu, nên `times=3` là một lần gọi và tối đa hai lần thử lại. Hai, chỉ lỗi trong `on` mới được thử lại; mặc định là `PricingUnavailable`, lớp ta đặt cho lỗi tạm thời của dịch vụ báo giá. Ba, hết lượt thì `raise` trần, giữ nguyên exception và traceback gốc. Bốn, quên ngoặc là lỗi dễ mắc: viết `@retry` trần thì hàm bị truyền vào chỗ của `times`. Không có dòng kiểm tra đầu hàm, lỗi chỉ bung ra xa chỗ gây ra; có dòng đó, nó bung ngay lúc import.
+(Bản rút gọn; bản lab có docstring và kiểm tra `times >= 1`.) Bốn quyết định đáng nói. Một, `times` là **tổng số lần gọi** tính cả lần đầu, nên `times=3` là một lần gọi đầu cộng với tối đa hai lần thử lại. Hai, chỉ lỗi trong `on` mới được thử lại; mặc định là `PricingUnavailable`, lớp ta đặt cho lỗi tạm thời của dịch vụ báo giá. Ba, hết lượt thì `raise` trần, giữ nguyên exception và traceback gốc. Bốn, quên ngoặc là lỗi dễ mắc: viết `@retry` trần thì hàm bị truyền vào chỗ của `times`. Không có dòng kiểm tra đầu hàm, lỗi chỉ xuất hiện ở xa chỗ gây ra; có dòng đó, lỗi xuất hiện ngay lúc import.
 
 Để kiểm thử mà không chờ thật, `retry` nhận `timer`. Lab có `SystemTimer` (dùng `time.sleep`) và `FakeTimer`, nơi `sleep` chỉ ghi lại thời lượng và cộng vào thời gian đã trôi. `FlakyPricing` là dịch vụ giả: `fail_first` lần gọi đầu ném `PricingUnavailable`, mỗi lần gọi tốn 0,2 giây trên đồng hồ giả. Kết quả thật của ba tình huống:
 
@@ -132,9 +132,9 @@ domain_sleeps           : []
 bare_error              : retry cần ngoặc: viết @retry(...) hoặc @retry(), không viết @retry trần
 ```
 
-Với `delay=0.5, backoff=2.0`, hai lần chờ là 0,5 giây rồi 1,0 giây. Lần gọi thứ ba thành công, trả 14.250 VND cho chuyến 2,5 km. Khi dịch vụ hỏng cả ba lần (`backoff` mặc định bằng 1), `PricingUnavailable` lần ba tới tay người gọi nguyên vẹn sau hai lần chờ 0,5 giây. Còn `ValueError` của khoảng cách 150 km không nằm trong `on`, nên hàm chỉ được gọi **một** lần, không chờ gì. Ba ca chạy tức thì vì `FakeTimer` không ngủ; với `time.sleep` thật, riêng hai ca đầu đã tốn 2,5 giây mỗi lần chạy test.
+Với `delay=0.5, backoff=2.0`, hai lần chờ là 0,5 giây rồi 1,0 giây. Lần gọi thứ ba thành công, trả 14.250 VND cho chuyến 2,5 km. Khi dịch vụ hỏng cả ba lần (`backoff` mặc định bằng 1), `PricingUnavailable` lần ba tới tay người gọi nguyên vẹn sau hai lần chờ 0,5 giây. Còn `ValueError` của khoảng cách 150 km không nằm trong `on`, nên hàm chỉ được gọi **một** lần, không chờ gì. Ba test case chạy tức thì vì `FakeTimer` không ngủ; với `time.sleep` thật, riêng hai test case đầu đã tốn 2,5 giây mỗi lần chạy test.
 
-Decorator thứ hai, `timed`, ghi thời gian mỗi lần gọi. Nó dùng `finally` để vẫn ghi khi hàm ném lỗi:
+Decorator thứ hai, `timed`, ghi thời gian mỗi lần gọi. Decorator này dùng `finally` để vẫn ghi cả khi hàm ném lỗi:
 
 ```python
 def timed(*, timer: Timer = SYSTEM_TIMER, label: str | None = None):
@@ -151,7 +151,7 @@ def timed(*, timer: Timer = SYSTEM_TIMER, label: str | None = None):
     return decorator
 ```
 
-(Bỏ chú thích kiểu và cả `[**P, R]` cho vừa khổ; bản lab có đủ.) Khi chồng nhiều decorator, **thứ tự quyết định điều được đo**. `@a` trên `@b` trên `def f` nghĩa là `f = a(b(f))`: lời gọi đi vào wrapper của `a`, rồi của `b`, rồi mới tới `f`. Lab dựng hai thứ tự bằng lời gọi hàm thường (nhắc lại `@` chỉ là cú pháp) trên cùng dịch vụ lỗi hai lần:
+(Đoạn code này bỏ chú thích kiểu và cả `[**P, R]` cho vừa khổ; bản lab có đủ.) Khi chồng nhiều decorator, **thứ tự quyết định điều được đo**. `@a` trên `@b` trên `def f` nghĩa là `f = a(b(f))`: lời gọi đi vào wrapper của `a`, rồi của `b`, rồi mới tới `f`. Lab dựng hai thứ tự bằng lời gọi hàm thường (nhắc lại `@` chỉ là cú pháp) trên cùng dịch vụ lỗi hai lần:
 
 ```python
 quote = timing(retrying(backend.price))   # timed ngoài, retry trong
@@ -172,7 +172,7 @@ timed_inside  : ['INFO price mất 0.200 s', 'INFO price mất 0.200 s', 'INFO p
 
 Con số nào đúng tuỳ câu hỏi: khách chờ báo giá bao lâu thì đo ở ngoài (2,100 giây = 3 × 0,2 + 0,5 + 1,0); dịch vụ chậm bao nhiêu mỗi lần gọi thì đo ở trong, không lẫn thời gian ta tự chờ.
 
-Về retry: nó chỉ an toàn khi thao tác **idempotent**, tức gọi thêm lần nữa không đổi kết quả. Báo giá là đọc nên an toàn; tạo chuyến hay thu tiền thì không, vì lần gọi «lỗi» có thể đã thực hiện xong trước khi mạng đứt. Loạt C# bàn chuyện này trong bài [cache, timeout, retry và rate limiting](/articles/dotnet10-cache-timeout-retry-rate-limit); phía Python là chủ đề bài 25.
+Về retry: cơ chế này chỉ an toàn khi thao tác **idempotent**, tức gọi thêm lần nữa không đổi kết quả. Báo giá là đọc nên an toàn; tạo chuyến hay thu tiền thì không, vì lần gọi «lỗi» có thể đã thực hiện xong trước khi mạng đứt. Loạt C# bàn chuyện này trong bài [cache, timeout, retry và rate limiting](/articles/dotnet10-cache-timeout-retry-rate-limit); phía Python là chủ đề bài 25.
 
 ## Context manager: transaction giả bằng `@contextmanager`
 
@@ -188,7 +188,7 @@ def assign_driver_no_tx(db, trip_id, driver_id):
 
 Gọi với tài xế `DR-999` không tồn tại, hai dòng đầu đã ghi xong khi dòng ba ném `KeyError`: chuyến `TN-0002` nằm lại ở `accepted` với tài xế không có thật. Trạng thái dở dang như vậy là loại hỏng dữ liệu khó lần ra nhất.
 
-`contextlib.contextmanager` cho phép viết context manager bằng một **generator có đúng một `yield`**: đoạn trước `yield` đóng vai `__enter__`, giá trị được `yield` gán cho biến sau `as`, đoạn sau `yield` đóng vai `__exit__`. Nếu thân `with` ném exception, nó được ném lại ngay tại dòng `yield`, nên `try/except` bao quanh `yield` bắt được.
+`contextlib.contextmanager` cho phép viết context manager bằng một **generator có đúng một `yield`**: đoạn trước `yield` đóng vai `__enter__`, giá trị được `yield` gán cho biến sau `as`, đoạn sau `yield` đóng vai `__exit__`. Nếu thân `with` ném exception, exception đó được ném lại ngay tại dòng `yield`, nên `try/except` bao quanh `yield` bắt được.
 
 ```python
 @contextmanager
@@ -232,7 +232,7 @@ tx_logs                     : ['INFO commit', 'INFO rollback']
 trip2_without_tx            : {'status': 'accepted', 'driver_id': 'DR-999'}
 ```
 
-Bản có `transaction` để `TN-0002` nguyên trạng `requested` và `db` bằng đúng bản chụp trước đó; bản không có để lại trạng thái dở dang. Transaction chỉ bảo đảm «cả khối hoặc không gì», không tự kiểm tra việc có nên làm khối đó không (xem bài tập 2).
+Bản có `transaction` để `TN-0002` nguyên trạng `requested` và `db` bằng đúng bản chụp trước đó; bản không có để lại trạng thái dở dang. Transaction chỉ bảo đảm «hoặc cả khối, hoặc không gì cả», không tự kiểm tra việc có nên làm khối đó không (xem bài tập 2).
 
 ## Class, `ExitStack` và các bẫy
 
@@ -253,7 +253,7 @@ class DriverLock:
         self.busy.discard(self.driver_id)    # trả chỗ dù thân with có lỗi hay không
 ```
 
-`__exit__` nhận ba đối số mô tả exception đang bay (cả ba là `None` nếu khối kết thúc êm). Giá trị trả về quyết định số phận exception: trả **giá trị đúng** (như `True`) là «đã xử lý» và exception bị nuốt; trả `None` hoặc `False` thì nó tiếp tục bay. `DriverLock` trả `None` vì ta chỉ dọn dẹp, không che lỗi. Muốn nuốt lỗi có chủ ý, dùng `contextlib.suppress(KeyError)`: chỉ đúng loại chỉ định bị nuốt, dòng sau chỗ lỗi trong khối không chạy, còn `ValueError` vẫn bay lên.
+`__exit__` nhận ba đối số mô tả exception đang lan truyền (cả ba là `None` nếu khối kết thúc êm). Giá trị trả về quyết định số phận exception: trả **giá trị đúng** (như `True`) là «đã xử lý» và exception bị nuốt; trả `None` hoặc `False` thì exception tiếp tục truyền lên. `DriverLock` trả `None` vì ta chỉ dọn dẹp, không che lỗi. Muốn nuốt lỗi có chủ ý, dùng `contextlib.suppress(KeyError)`: chỉ đúng loại chỉ định bị nuốt, dòng sau chỗ lỗi trong khối không chạy, còn `ValueError` vẫn truyền lên.
 
 Khi số tài nguyên chỉ biết lúc chạy (giữ chỗ cho cả danh sách tài xế của một lô), ta không viết sẵn được số `with` lồng nhau. `ExitStack` gom chúng lại:
 
@@ -273,7 +273,7 @@ leaky   : ['open']
 safe    : ['open', 'close']
 ```
 
-Dòng `close` của `leaky` bị bỏ qua: tài nguyên rò.
+Dòng `close` của `leaky` bị bỏ qua: tài nguyên bị rò rỉ.
 
 Chọn dạng nào? Generator với `@contextmanager` gọn khi logic là «chuẩn bị, trao giá trị, dọn dẹp». Class hợp khi đối tượng cần thêm phương thức ngoài `with`, cần xét loại exception trong `__exit__`, hoặc cần kế thừa.
 
@@ -287,7 +287,7 @@ Chọn dạng nào? Generator với `@contextmanager` gọn khi logic là «chu�
 
 <div class="tkh-callout tkh-callout--warn">
 <span class="tkh-callout-title">Giới hạn so với production</span>
-<p>Transaction trong bài chỉ là sao chép cả dict rồi ghi đè: một process, một luồng, không cách ly giữa hai người ghi, không bền khi tiến trình chết, và chi phí sao chép tăng theo dữ liệu. Transaction thật nằm ở database (bài 24, 25). <code>retry</code> chưa có jitter (ngẫu nhiên hoá thời gian chờ để nhiều client không thử lại cùng lúc), chưa giới hạn tổng thời gian, và chỉ hợp với thao tác idempotent; <code>FakeTimer</code> không mô phỏng timeout giữa chừng một lời gọi. <code>DriverLock</code> chỉ an toàn khi dùng tuần tự trong một luồng, vì <code>in busy</code> rồi <code>add</code> không nguyên tử; nhiều luồng cần <code>threading.Lock</code> (bài 23), nhiều server cần khoá phân tán hoặc ràng buộc ở database. Số tài xế, số chuyến và độ trễ 0,2 giây đều là số giả.</p>
+<p>Transaction trong bài chỉ là sao chép cả dict rồi ghi đè: một process, một luồng, không có cách ly giữa hai bên cùng ghi, không bền khi tiến trình chết, và chi phí sao chép tăng theo dữ liệu. Transaction thật nằm ở database (bài 24, 25). <code>retry</code> chưa có jitter (ngẫu nhiên hoá thời gian chờ để nhiều client không thử lại cùng lúc), chưa giới hạn tổng thời gian, và chỉ hợp với thao tác idempotent; <code>FakeTimer</code> không mô phỏng timeout giữa chừng một lời gọi. <code>DriverLock</code> chỉ an toàn khi dùng tuần tự trong một luồng, vì <code>in busy</code> rồi <code>add</code> không nguyên tử; nhiều luồng cần <code>threading.Lock</code> (bài 23), nhiều server cần khoá phân tán hoặc ràng buộc ở database. Số tài xế, số chuyến và độ trễ 0,2 giây đều là số giả.</p>
 </div>
 
 ## Chạy và kiểm chứng
@@ -299,13 +299,13 @@ uv run --project examples/toi-noi-python/17-decorator-context-manager examples/t
 uv run --project examples/toi-noi-python/17-decorator-context-manager examples/toi-noi-python/17-decorator-context-manager/main.py --verify
 ```
 
-Lệnh đầu in từng nhóm kết quả mà bài đã trích (closure, `wraps`, retry, thứ tự decorator, transaction, lock và `ExitStack`, thứ tự thoát), chạy dưới một giây và không phụ thuộc máy vì không đo thời gian thật. Lệnh thứ hai kiểm 21 ca gồm đúng những hành vi trên: từ late binding, `wraps`, ba tình huống retry và hai thứ tự chồng, đến commit, rollback, trả chỗ khi lỗi, `ExitStack`, `suppress` và bẫy thiếu `finally`. Kết quả cuối:
+Lệnh đầu in từng nhóm kết quả mà bài đã trích (closure, `wraps`, retry, thứ tự decorator, transaction, lock và `ExitStack`, thứ tự thoát), chạy dưới một giây và không phụ thuộc máy vì không đo thời gian thật. Lệnh thứ hai kiểm tra 21 test case gồm đúng những hành vi trên: từ late binding, `wraps`, ba tình huống retry và hai thứ tự chồng, đến commit, rollback, trả chỗ khi lỗi, `ExitStack`, `suppress` và bẫy thiếu `finally`. Kết quả cuối:
 
 ```text
 OK 21/21
 ```
 
-Sai ca nào, chương trình in tên ca đó cùng `FAIL n/21` và thoát với mã 1.
+Test case nào sai, chương trình in tên test case đó cùng `FAIL n/21` và thoát với mã 1.
 
 **Bài tập 1:** Viết `timed_block(label, timer)` bằng `@contextmanager` để đo thời gian một khối lệnh (thay vì cả hàm), ghi log kể cả khi khối ném lỗi. Vì sao phải có `finally`?
 

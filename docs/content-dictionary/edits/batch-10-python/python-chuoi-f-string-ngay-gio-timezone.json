@@ -1,0 +1,125 @@
+{
+ "file": "python-chuoi-f-string-ngay-gio-timezone.md",
+ "edits": [
+  {
+   "old": "Gán vào một vị trí sẽ lỗi:",
+   "new": "Gán giá trị vào một vị trí trong chuỗi sẽ gây lỗi:",
+   "reason": "Câu thiếu danh từ và động từ rõ nghĩa",
+   "severity": "medium"
+  },
+  {
+   "old": "Bất biến không có nghĩa biến không gán lại được.",
+   "new": "Bất biến không có nghĩa là biến không thể gán lại.",
+   "reason": "Câu thiếu từ nối, khó đọc",
+   "severity": "medium"
+  },
+  {
+   "old": "ở cả đọc lẫn ghi thay vì tin mặc định của máy,",
+   "new": "ở cả khi đọc lẫn khi ghi thay vì tin vào mặc định của máy,",
+   "reason": "Động từ làm danh từ nghe cụt",
+   "severity": "medium"
+  },
+  {
+   "old": "Còn dấu phân cách tiền Việt.",
+   "new": "Giờ đến dấu phân cách trong số tiền Việt.",
+   "reason": "Câu cụt, thiếu vị ngữ",
+   "severity": "medium"
+  },
+  {
+   "old": "nó trả `False` một cách âm thầm,",
+   "new": "nó trả `False` mà không báo gì,",
+   "reason": "Calque âm thầm (style guide mục 4)",
+   "severity": "medium"
+  },
+  {
+   "old": "kiểm một lần ở biên bằng một hàm dùng chung.",
+   "new": "kiểm tra một lần ở ranh giới hệ thống bằng một hàm dùng chung.",
+   "reason": "Lược chữ tra; biên là từ tự ghép",
+   "severity": "medium"
+  },
+  {
+   "old": "vì tên này mang theo quy tắc lịch sử của vùng:",
+   "new": "vì tên này mang theo quy tắc lịch sử của vùng đó:",
+   "reason": "Làm rõ chỉ định",
+   "severity": "low"
+  },
+  {
+   "old": "thay vì cộng tay 7 giờ,",
+   "new": "thay vì cộng thủ công 7 giờ,",
+   "reason": "Cộng tay là cách nói khẩu ngữ",
+   "severity": "low"
+  },
+  {
+   "old": "gắn nhãn khác đổi giờ",
+   "new": "gắn nhãn khác với đổi giờ",
+   "reason": "Tiêu đề thiếu từ nối",
+   "severity": "medium"
+  },
+  {
+   "old": "Hai phương thức này hay bị dùng lẫn.",
+   "new": "Hai phương thức này hay bị dùng lẫn lộn.",
+   "reason": "Động từ lẫn đứng một mình nghe cụt",
+   "severity": "low"
+  },
+  {
+   "old": "`\"06/11/2026 08:30\"` bỏ mất offset.",
+   "new": "`\"06/11/2026 08:30\"`, vì dạng này bỏ mất offset.",
+   "reason": "Câu thiếu liên kết lý do",
+   "severity": "medium"
+  },
+  {
+   "old": "Trừ hai datetime aware cho `timedelta`,",
+   "new": "Trừ hai datetime aware cho ra `timedelta`,",
+   "reason": "Thiếu động từ, câu cụt",
+   "severity": "low"
+  },
+  {
+   "old": "trên giá trị UTC, nó thành ngày 5/11.",
+   "new": "trên giá trị UTC, chuyến này bị xếp vào ngày 5/11.",
+   "reason": "Nó mơ hồ, chủ ngữ là chuyến",
+   "severity": "medium"
+  },
+  {
+   "old": "không cần nó để làm bài tập.",
+   "new": "bạn không cần đến ví dụ này để làm bài tập.",
+   "reason": "Nó mơ hồ",
+   "severity": "low"
+  },
+  {
+   "old": "với 39 ca:",
+   "new": "với 39 test case:",
+   "reason": "Thống nhất test case theo bảng thuật ngữ",
+   "severity": "low"
+  },
+  {
+   "old": "file round-trip,",
+   "new": "ghi rồi đọc lại file (round-trip),",
+   "reason": "Cụm round-trip không giải thích",
+   "severity": "low"
+  },
+  {
+   "old": "và ba ca bị từ chối bằng",
+   "new": "và ba test case bị từ chối bằng",
+   "reason": "Thống nhất test case",
+   "severity": "low"
+  },
+  {
+   "old": "Nếu có ca sai, lab in tên ca rồi",
+   "new": "Nếu có test case sai, lab in tên test case rồi",
+   "reason": "Thống nhất test case",
+   "severity": "low"
+  },
+  {
+   "old": "Giờ lệch 7 tiếng giữa máy này và máy kia",
+   "new": "Giờ lệch 7 tiếng giữa hai máy",
+   "reason": "Thống nhất đơn vị giờ trong bài",
+   "severity": "low"
+  },
+  {
+   "old": "image container tối giản",
+   "new": "container image tối giản",
+   "reason": "Trật tự từ kiểu ngược; thuật ngữ đúng là container image",
+   "severity": "medium"
+  }
+ ]
+}
