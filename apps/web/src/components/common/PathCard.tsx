@@ -9,7 +9,9 @@ import { api, type LearningPathCard } from '@tkh/shared';
 import { formatDuration } from '../../lib/format';
 import { useReadArticles } from '../../lib/reading';
 import { btnPrimary, btnSecondary, card } from '../../lib/ui';
+import { learningPathCover } from '../../lib/path-cover';
 import { articleHref } from './ArticleCard';
+import { Cover } from './Cover';
 
 export const pathHref = (slug: string) => `/learning-paths/${encodeURIComponent(slug)}`;
 
@@ -86,20 +88,25 @@ export function PathCard({ path }: { path: LearningPathCard }) {
 
   return (
     <>
-      <article className={`relative flex h-full flex-col gap-2 p-4 hover:border-primary ${card}`}>
-        <h3 className="text-base leading-snug font-semibold text-ink">
-          <Link href={pathHref(path.slug)} prefetch={false} aria-haspopup="dialog"
-            className="after:absolute after:inset-0 hover:text-primary-ink focus-visible:after:rounded-card focus-visible:after:ring-2 focus-visible:after:ring-primary"
-            onClick={event => {
-              if (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey || !dialog.current) return;
-              event.preventDefault();
-              dialog.current.showModal();
-              setOpen(true);
-            }}>
-            {path.title}
-          </Link>
-        </h3>
-        <p className="mt-auto text-sm text-muted">{t(`common.levels.${path.level}`)} · {t('common.lessonCount', { count: path.articleCount, n: path.articleCount })}</p>
+      <article className={`relative flex h-full flex-col overflow-hidden hover:border-primary ${card}`}>
+        <div className="aspect-video overflow-hidden border-b border-line">
+          <Cover src={learningPathCover(path.slug)} category={path.category ?? { name: { vi: path.title, en: path.title }, color: '#2563EB', icon: 'code' }} />
+        </div>
+        <div className="flex flex-1 flex-col gap-2 p-4">
+          <h3 className="text-base leading-snug font-semibold text-ink">
+            <Link href={pathHref(path.slug)} prefetch={false} aria-haspopup="dialog"
+              className="after:absolute after:inset-0 hover:text-primary-ink focus-visible:after:rounded-card focus-visible:after:ring-2 focus-visible:after:ring-inset focus-visible:after:ring-primary"
+              onClick={event => {
+                if (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey || !dialog.current) return;
+                event.preventDefault();
+                dialog.current.showModal();
+                setOpen(true);
+              }}>
+              {path.title}
+            </Link>
+          </h3>
+          <p className="mt-auto text-sm text-muted">{t(`common.levels.${path.level}`)} · {t('common.lessonCount', { count: path.articleCount, n: path.articleCount })}</p>
+        </div>
       </article>
       <dialog ref={dialog} aria-labelledby={titleId} onClose={() => setOpen(false)}
         className="fixed inset-0 m-auto max-h-[90dvh] w-[calc(100%-2rem)] max-w-xl overflow-y-auto overscroll-contain rounded-card border border-line bg-surface p-0 text-ink shadow-xl backdrop:bg-black/50">
