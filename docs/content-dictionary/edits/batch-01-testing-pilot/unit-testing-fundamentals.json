@@ -1,0 +1,23 @@
+{"file":"unit-testing-fundamentals.md","edits":[
+{"old":"Năm ca đầu tiên là điểm khởi đầu","new":"Năm test case đầu tiên là điểm khởi đầu","reason":"Thống nhất \"test case\" thay cho \"ca\".","severity":"medium"},
+{"old":"| Ca | Dữ liệu","new":"| Test case | Dữ liệu","reason":"Thống nhất \"test case\".","severity":"low"},
+{"old":"Ca đầu tiên thể hiện đầy đủ AAA","new":"Test case đầu tiên thể hiện đầy đủ AAA","reason":"Thống nhất \"test case\".","severity":"medium"},
+{"old":"Ở ca mưa, assertion","new":"Ở test case có mưa, assertion","reason":"Thống nhất \"test case\"; \"ca mưa\" là cụm cụt.","severity":"medium"},
+{"old":"Năm ca chưa kiểm voucher","new":"Năm test case chưa kiểm voucher","reason":"Thống nhất \"test case\".","severity":"medium"},
+{"old":"với từng ca ngay trong ca đó","new":"với từng test case ngay trong test case đó","reason":"Thống nhất \"test case\".","severity":"medium"},
+{"old":"Thêm ca xe máy 2 km","new":"Thêm test case xe máy 2 km","reason":"Thống nhất \"test case\".","severity":"low"},
+{"old":"trong các ca đã chạy","new":"trong các test case đã chạy","reason":"Thống nhất \"test case\".","severity":"low"},
+{"old":"tính nhất quán trong ca đó","new":"tính nhất quán trong test case đó","reason":"Thống nhất \"test case\".","severity":"low"},
+{"old":"Thêm ca ô tô và mức sàn","new":"Thêm test case ô tô và cước tối thiểu","reason":"Thống nhất \"test case\" và \"cước tối thiểu\" (không xen \"mức sàn\").","severity":"medium"},
+{"old":"phép nâng lên mức sàn","new":"phép nâng lên cước tối thiểu","reason":"Một khái niệm một tên: cước tối thiểu.","severity":"medium"},
+{"old":"bỏ mức sàn","new":"bỏ cước tối thiểu","reason":"Một khái niệm một tên.","severity":"medium"},
+{"old":"thấp hơn mức sàn 15.000","new":"thấp hơn cước tối thiểu 15.000","reason":"Một khái niệm một tên.","severity":"medium"},
+{"old":"phần kết hợp mưa với cao điểm đáng kiểm tra trước","new":"phần xử lý kết hợp phụ phí trời mưa với cao điểm nên được kiểm tra trước","reason":"Cụm \"kết hợp mưa\" cụt, thiếu danh từ; \"đáng kiểm tra\" gượng.","severity":"medium"},
+{"old":"Giữ bản thử nghiệm cạnh bài giúp các lab khác tiếp tục dùng quy tắc chuẩn","new":"Giữ bản luyện tập ngay cạnh bài để các lab khác vẫn dùng quy tắc chuẩn","reason":"Câu gượng, trật tự kiểu Anh.","severity":"medium"},
+{"old":"thành phần thời gian và chỗ lắp ráp","new":"thành phần thời gian và cách các thành phần ghép nối với nhau","reason":"\"chỗ lắp ráp\" là dịch từng chữ.","severity":"medium"},
+{"old":"ngoài phần LO nêu trên","new":"ngoài các mục tiêu học tập (LO) nêu trên","reason":"Viết tắt LO chưa được giải nghĩa.","severity":"low"},
+{"old":"trả một bảng chi tiết cước. Nó không","new":"trả về một bảng chi tiết cước. Hàm này không","reason":"Tránh \"Nó\" chỉ sự vật ở đầu câu; nhắc lại danh từ.","severity":"medium"},
+{"old":"chưa được năm test này kiểm chứng","new":"năm test này chưa kiểm chứng","reason":"Bỏ bị động kiểu Anh.","severity":"low"},
+{"old":"Nhanh là yêu cầu tương đối với vòng phản hồi của nhóm","new":"Độ nhanh chỉ là yêu cầu tương đối, so với vòng phản hồi của nhóm","reason":"Câu gượng, thiếu danh từ.","severity":"low"},
+{"old":"mỗi failure cần được đọc ở tên quy tắc, expected và actual trước khi sửa assertion","new":"với mỗi failure, hãy đọc tên quy tắc, expected và actual trước khi sửa assertion","reason":"Bỏ bị động, \"đọc ở\" gượng.","severity":"medium"}
+]}

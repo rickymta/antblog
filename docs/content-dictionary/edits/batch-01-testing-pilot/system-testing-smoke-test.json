@@ -1,0 +1,137 @@
+{
+  "file": "system-testing-smoke-test.md",
+  "edits": [
+    {
+      "old": "Smoke test là bộ kiểm nhỏ trả lời một câu hỏi duy nhất: build này có đáng để đội kiểm thử chuyên sâu tiếp không. Chọn ba case từ rủi ro cho Tới Nơi — health, chặn truy cập vô danh, đặt → hoàn tất → thu tiền — chạy qua API và PGlite, đọc thất bại và viết quyết định có bằng chứng.",
+      "new": "Smoke test là bộ kiểm thử nhỏ trả lời một câu hỏi duy nhất: build này có đáng để đội tiếp tục kiểm thử chuyên sâu không. Bài chọn ba test case theo rủi ro của Tới Nơi — health, chặn truy cập vô danh, đặt → hoàn tất → thu tiền — chạy qua API và PGlite, rồi hướng dẫn đọc kết quả thất bại và viết quyết định có bằng chứng.",
+      "reason": "Câu tóm tắt thiếu chủ ngữ (Chọn ba case...), 'bộ kiểm' cụt danh từ, 'kiểm thử chuyên sâu tiếp' trật tự gượng, thống nhất 'test case'. (đã chỉnh khi duyệt)",
+      "severity": "high"
+    },
+    {
+      "old": "họ sẽ ghi nhận đi ghi nhận lại cùng một lỗi nền dưới hàng chục cái tên khác nhau",
+      "new": "họ sẽ báo đi báo lại cùng một lỗi nền dưới hàng chục tiêu đề khác nhau",
+      "reason": "Lặp 'ghi nhận' gượng, 'cái tên' khẩu ngữ không hợp văn bản kỹ thuật.",
+      "severity": "low"
+    },
+    {
+      "old": "hàng trăm ca voucher",
+      "new": "hàng trăm test case voucher",
+      "reason": "Thống nhất 'test case', không xen 'ca'.",
+      "severity": "medium"
+    },
+    {
+      "old": "3 smoke case SM-01…03 — health, chặn danh tính thiếu, đặt → nhận → hoàn tất → đọc lại → kiểm thu tiền",
+      "new": "3 test case smoke SM-01…03 — health, chặn yêu cầu thiếu danh tính, đặt → nhận → hoàn tất → đọc lại → kiểm tra số tiền đã thu",
+      "reason": "'kiểm thu tiền' tự ghép, 'chặn danh tính thiếu' trật tự kiểu Anh, thống nhất 'test case'.",
+      "severity": "high"
+    },
+    {
+      "old": "Trả build về ngay",
+      "new": "Trả lại bản build ngay",
+      "reason": "Trật tự và cách nói gượng, đồng nhất 'bản build'.",
+      "severity": "low"
+    },
+    {
+      "old": "ghi rõ ca nào bị loại và sẽ được kiểm ở đâu",
+      "new": "ghi rõ test case nào bị loại và sẽ được kiểm thử ở đâu",
+      "reason": "Thống nhất 'test case', không dùng 'ca'.",
+      "severity": "medium"
+    },
+    {
+      "old": "hành trình đi xuyên API và kho dữ liệu",
+      "new": "hành trình đi qua API và kho dữ liệu",
+      "reason": "'đi xuyên' dịch từng chữ từ 'end-to-end/through'.",
+      "severity": "medium"
+    },
+    {
+      "old": "Nó thường chạy ngay sau build hoặc deploy",
+      "new": "Smoke test thường chạy ngay sau build hoặc deploy",
+      "reason": "Tránh 'Nó' chỉ sự vật trừu tượng ở đầu câu (style guide mục 4).",
+      "severity": "medium"
+    },
+    {
+      "old": "các case của nó có thể nằm ở cấp API",
+      "new": "các test case của smoke có thể nằm ở cấp API",
+      "reason": "Tránh 'nó', thống nhất 'test case'.",
+      "severity": "medium"
+    },
+    {
+      "old": "cơ chế chặn truy cập vô danh có thể quan trọng đủ để nằm trong smoke",
+      "new": "cơ chế chặn truy cập vô danh có thể đủ quan trọng để nằm trong smoke",
+      "reason": "Trật tự từ kiểu tiếng Anh (important enough).",
+      "severity": "low"
+    },
+    {
+      "old": "Chạy lại đúng ca từng báo defect",
+      "new": "Chạy lại đúng test case từng báo defect",
+      "reason": "Thống nhất 'test case'.",
+      "severity": "medium"
+    },
+    {
+      "old": "mỗi ca bị loại khỏi smoke phải có",
+      "new": "mỗi test case bị loại khỏi smoke phải có",
+      "reason": "Thống nhất 'test case'.",
+      "severity": "medium"
+    },
+    {
+      "old": "Case cần 10 phút hay khó chẩn đoán khi đỏ thì không hợp smoke.",
+      "new": "Test case cần 10 phút để chạy hay khó chẩn đoán khi đỏ thì không hợp với smoke.",
+      "reason": "Câu thiếu động từ cho 10 phút; thống nhất 'test case'.",
+      "severity": "medium"
+    },
+    {
+      "old": "Không chọn chỉ vì case chạy nhanh",
+      "new": "Không chọn chỉ vì test case chạy nhanh",
+      "reason": "Thống nhất 'test case'.",
+      "severity": "low"
+    },
+    {
+      "old": "Mọi case reset seed và dựng Express app mới",
+      "new": "Mỗi test case đều reset seed và dựng Express app mới",
+      "reason": "Thống nhất 'test case'.",
+      "severity": "low"
+    },
+    {
+      "old": "không có case bị skip, exit code 0",
+      "new": "không có test case nào bị bỏ qua, exit code 0",
+      "reason": "'skip' có từ Việt tự nhiên (style guide mục 6); thống nhất 'test case'.",
+      "severity": "medium"
+    },
+    {
+      "old": "SM-03 — hành trình đi xuyên tiền",
+      "new": "SM-03 — hành trình đặt xe đến thu tiền",
+      "reason": "'đi xuyên tiền' là cụm tự ghép, khó hiểu.",
+      "severity": "high"
+    },
+    {
+      "old": "Suite trong bài phù hợp gate kiểm mã: các thành phần được lắp ráp trong một tiến trình.",
+      "new": "Suite trong bài phù hợp với gate kiểm tra mã nguồn: các thành phần được lắp ráp và chạy trong cùng một tiến trình.",
+      "reason": "Thiếu 'với', 'kiểm mã' cụt, 'lắp ráp' dịch từng chữ (assembled). (đã chỉnh khi duyệt)",
+      "severity": "medium"
+    },
+    {
+      "old": "loại các case trùng rủi ro hoặc chuyển sang suite sâu",
+      "new": "loại các test case trùng rủi ro hoặc chuyển sang suite kiểm thử chuyên sâu",
+      "reason": "'suite sâu' cụt danh từ chính; thống nhất 'test case'.",
+      "severity": "medium"
+    },
+    {
+      "old": "Đo p95 thời gian suite qua nhiều lần chạy",
+      "new": "Đo p95 của thời gian chạy suite qua nhiều lần chạy",
+      "reason": "Cụm danh từ xếp chồng kiểu Anh, thiếu từ nối.",
+      "severity": "low"
+    },
+    {
+      "old": "không chứng minh backup/restore hay tồn tại sau sự cố máy",
+      "new": "không chứng minh được backup/restore hay việc dữ liệu còn tồn tại sau sự cố máy",
+      "reason": "Vế sau thiếu chủ thể: 'tồn tại' của cái gì.",
+      "severity": "medium"
+    },
+    {
+      "old": "chuyến tồn tại nhưng không được xem trả",
+      "new": "chuyến tồn tại nhưng người gọi không được phép xem thì trả",
+      "reason": "Câu thiếu chủ thể và từ nối, dễ đọc nhầm.",
+      "severity": "medium"
+    }
+  ]
+}

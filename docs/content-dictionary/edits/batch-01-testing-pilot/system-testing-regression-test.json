@@ -1,0 +1,83 @@
+{
+  "file": "system-testing-regression-test.md",
+  "edits": [
+    {
+      "old": "chọn ca nào để phát hiện",
+      "new": "chọn test case nào để phát hiện",
+      "reason": "Thống nhất 'test case'",
+      "severity": "medium"
+    },
+    {
+      "old": "Ca dùng để review không sai",
+      "new": "Test case dùng để review không sai",
+      "reason": "Thống nhất 'test case'",
+      "severity": "medium"
+    },
+    {
+      "old": "Candidate sai là hàm",
+      "new": "Bản refactor lỗi là hàm",
+      "reason": "Từ tiếng Anh thông thường; thống nhất 'phiên bản' (đã chỉnh khi duyệt)",
+      "severity": "medium"
+    },
+    {
+      "old": "không phải một «loại cú pháp» khác",
+      "new": "không phải một kiểu viết test khác",
+      "reason": "Cụm tự ghép 'loại cú pháp', không rõ nghĩa (đã chỉnh khi duyệt)",
+      "severity": "high"
+    },
+    {
+      "old": "chạy mọi case — có thể",
+      "new": "chạy mọi test case — có thể",
+      "reason": "Thống nhất 'test case'",
+      "severity": "low"
+    },
+    {
+      "old": "dựng **hệ thống bộ nhớ mới**",
+      "new": "dựng **một hệ thống mới chạy trong bộ nhớ**",
+      "reason": "Cụm tự ghép 'hệ thống bộ nhớ', thiếu động từ/giới từ",
+      "severity": "medium"
+    },
+    {
+      "old": "App bộ nhớ bỏ sau ca",
+      "new": "App chạy trong bộ nhớ, bỏ sau ca",
+      "reason": "Cụm tự ghép, thiếu động từ",
+      "severity": "medium"
+    },
+    {
+      "old": "dùng kho bộ nhớ và đồng hồ",
+      "new": "dùng kho dữ liệu trong bộ nhớ và đồng hồ",
+      "reason": "Cụm tự ghép 'kho bộ nhớ'",
+      "severity": "medium"
+    },
+    {
+      "old": "Không xoá âm thầm.",
+      "new": "Không xoá khỏi gate mà không báo lại.",
+      "reason": "Calque 'không âm thầm' theo style guide",
+      "severity": "medium"
+    },
+    {
+      "old": "rủi ro tiền cao chỉ vì dữ liệu thời gian chạy của một lần đo",
+      "new": "rủi ro cao về tiền chỉ vì thời gian chạy trong một lần đo",
+      "reason": "Cụm tự ghép, trật tự từ kiểu tiếng Anh",
+      "severity": "medium"
+    },
+    {
+      "old": "trên hai máy khác Node",
+      "new": "trên hai môi trường dùng phiên bản Node khác nhau",
+      "reason": "Câu thiếu danh từ, dễ hiểu nhầm",
+      "severity": "medium"
+    },
+    {
+      "old": "giảm suite bằng cách loại trùng",
+      "new": "giảm suite bằng cách loại các test case trùng",
+      "reason": "Thiếu danh từ chính",
+      "severity": "low"
+    },
+    {
+      "old": "đẩy đội tới việc tắt gate",
+      "new": "khiến đội phải tắt gate",
+      "reason": "Giọng dịch máy",
+      "severity": "low"
+    }
+  ]
+}

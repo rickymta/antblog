@@ -1,14 +1,14 @@
 ---
 slug: system-testing-smoke-test
 title: "Smoke Test: bản build có đủ tốt để bắt đầu kiểm thử chuyên sâu?"
-summary: "Smoke test là bộ kiểm nhỏ trả lời một câu hỏi duy nhất: build này có đáng để đội kiểm thử chuyên sâu tiếp không. Chọn ba case từ rủi ro cho Tới Nơi — health, chặn truy cập vô danh, đặt → hoàn tất → thu tiền — chạy qua API và PGlite, đọc thất bại và viết quyết định có bằng chứng."
+summary: "Smoke test là bộ kiểm thử nhỏ trả lời một câu hỏi duy nhất: build này có đáng để đội tiếp tục kiểm thử chuyên sâu không. Bài chọn ba test case theo rủi ro của Tới Nơi — health, chặn truy cập vô danh, đặt → hoàn tất → thu tiền — chạy qua API và PGlite, rồi hướng dẫn đọc kết quả thất bại và viết quyết định có bằng chứng."
 category: testing
 level: beginner
 tags: [testing, sys-01, smoke-test, build-verification, release-gate, api-testing, pglite, vitest, test-oracle]
 language: vi
 ---
 
-Thứ Hai, Tới Nơi vừa đóng gói bản build mới. Trang chủ vẫn mở, `/api/health` vẫn trả 200 — nhưng câu lệnh ghi chuyến không còn khớp schema. Nếu đội kiểm thử lao ngay vào hàng trăm ca voucher, họ sẽ ghi nhận đi ghi nhận lại cùng một lỗi nền dưới hàng chục cái tên khác nhau, và mất nửa ngày mới hiểu ra. Bài này trả lời: **làm sao chọn vài phép kiểm đại diện để quyết định trong vài giây rằng build đủ tốt để kiểm tiếp, hay phải trả về sửa** — và vì sao "health xanh" chưa bao giờ đủ cho câu hỏi đó.
+Thứ Hai, Tới Nơi vừa đóng gói bản build mới. Trang chủ vẫn mở, `/api/health` vẫn trả 200 — nhưng câu lệnh ghi chuyến không còn khớp schema. Nếu đội kiểm thử lao ngay vào hàng trăm test case voucher, họ sẽ báo đi báo lại cùng một lỗi nền dưới hàng chục tiêu đề khác nhau, và mất nửa ngày mới hiểu ra. Bài này trả lời: **làm sao chọn vài phép kiểm đại diện để quyết định trong vài giây rằng build đủ tốt để kiểm tiếp, hay phải trả về sửa** — và vì sao "health xanh" chưa bao giờ đủ cho câu hỏi đó.
 
 <div class="tkh-callout">
 <span class="tkh-callout-title">Thông tin bài · SYS-01</span>
@@ -18,7 +18,7 @@ Thứ Hai, Tới Nơi vừa đóng gói bản build mới. Trang chủ vẫn m�
 <tr><th scope="row">Cấp độ</th><td>Beginner — tester mới biết HTTP và TypeScript cơ bản; mục 6 dành cho QA/SDET thiết kế release gate</td></tr>
 <tr><th scope="row">Test level / hướng kiểm</th><td>Smoke là cách chọn phạm vi suite, không phải một test level; ở bài này các case chạy qua API với kho dữ liệu thật của lab (PGlite)</td></tr>
 <tr><th scope="row">Bài cần đọc trước</th><td><a href="/articles/du-an-mau-toi-noi">Dự án mẫu Tới Nơi</a> · <a href="/articles/tong-quan-5-test-level-istqb">TEST-011 Tổng quan 5 test level</a></td></tr>
-<tr><th scope="row">Thực hành</th><td>Lab (code): 3 smoke case SM-01…03 — health, chặn danh tính thiếu, đặt → nhận → hoàn tất → đọc lại → kiểm thu tiền (R-API-15, R-API-03, R-STATE-02, R-PAY-03) — <code>examples/toi-noi-testing/articles/system-testing-smoke-test/</code></td></tr>
+<tr><th scope="row">Thực hành</th><td>Lab (code): 3 test case smoke SM-01…03 — health, chặn yêu cầu thiếu danh tính, đặt → nhận → hoàn tất → đọc lại → kiểm tra số tiền đã thu (R-API-15, R-API-03, R-STATE-02, R-PAY-03) — <code>examples/toi-noi-testing/articles/system-testing-smoke-test/</code></td></tr>
 <tr><th scope="row">Nguồn chính</th><td>ISTQB CTFL v4.0.1 (thuật ngữ test level/type, confirmation/regression); Grafana k6 Load test types (đối chiếu nghĩa "smoke" trong hiệu năng); <code>SPEC.md</code> của lab</td></tr>
 </tbody>
 </table>
@@ -33,7 +33,7 @@ Tới Nơi là ứng dụng gọi xe, giao bưu kiện và đồ ăn. Lab của 
 Mỗi lần có build mới, đội có hai lựa chọn tốn kém nếu chọn sai:
 
 - **Kiểm thử chuyên sâu ngay**: nếu build hỏng ở tầng nền (không ghi được chuyến, không thu được tiền), mọi ca chức năng phía sau đều đỏ với cùng một nguyên nhân. Thời gian điều tra bị nhân lên, báo cáo lỗi trùng lặp.
-- **Trả build về ngay**: nếu không có bằng chứng cụ thể, developer nhận một câu "build hỏng" không tái hiện được.
+- **Trả lại bản build ngay**: nếu không có bằng chứng cụ thể, developer nhận một câu "build hỏng" không tái hiện được.
 
 Smoke test là bước nhỏ ở giữa: vài phép kiểm chọn lọc, chạy nhanh, cho ra quyết định *tiếp tục* hoặc *dừng* kèm bằng chứng tái hiện được.
 
@@ -46,20 +46,20 @@ Bạn cần đọc được request/response HTTP (method, status code, JSON bod
 Sau bài này, bạn có thể:
 
 1. Phân biệt health/liveness, readiness, smoke, sanity, confirmation và regression bằng câu hỏi mỗi loại trả lời.
-2. Chọn smoke case từ rủi ro và test basis, ghi rõ ca nào bị loại và sẽ được kiểm ở đâu.
-3. Viết một hành trình đi xuyên API và kho dữ liệu với oracle độc lập (không dùng code đang kiểm để tính expected).
+2. Chọn smoke case từ rủi ro và test basis, ghi rõ test case nào bị loại và sẽ được kiểm thử ở đâu.
+3. Viết một hành trình đi qua API và kho dữ liệu với oracle độc lập (không dùng code đang kiểm để tính expected).
 4. Phân loại một thất bại là *blocked* (môi trường) hay *failed* (sản phẩm), và viết quyết định có phạm vi kết luận rõ.
 
 ## 2. Khái niệm và những điều dễ nhầm
 
 ### 2.1. Smoke test là gì
 
-Trong series này, **smoke test** là một bộ kiểm tra nhỏ nhắm vào các khả năng thiết yếu của một build hoặc một môi trường. Nó thường chạy ngay sau build hoặc deploy, trước vòng kiểm thử sâu. Giá trị chính không nằm ở việc tìm nhiều lỗi, mà ở việc **phát hiện sớm những lỗi khiến phần còn lại của vòng kiểm thử trở nên vô nghĩa**.
+Trong series này, **smoke test** là một bộ kiểm tra nhỏ nhắm vào các khả năng thiết yếu của một build hoặc một môi trường. Smoke test thường chạy ngay sau build hoặc deploy, trước vòng kiểm thử sâu. Giá trị chính không nằm ở việc tìm nhiều lỗi, mà ở việc **phát hiện sớm những lỗi khiến phần còn lại của vòng kiểm thử trở nên vô nghĩa**.
 
 Ba hệ quả của định nghĩa này:
 
-- **Smoke không phải một test level.** Theo CTFL v4.0.1, test level là component, component integration, system, system integration và acceptance. Smoke là cách *chọn phạm vi* một suite; các case của nó có thể nằm ở cấp API, UI hay tích hợp. Ở bài này, case chạy qua API và chạm kho dữ liệu thật của lab.
-- **Không bắt buộc chỉ có happy path.** Một hành trình "đặt xe thành công" là xương sống, nhưng cơ chế chặn truy cập vô danh có thể quan trọng đủ để nằm trong smoke: nếu nó hỏng, mọi kết quả phân quyền phía sau đều không đáng tin.
+- **Smoke không phải một test level.** Theo CTFL v4.0.1, test level là component, component integration, system, system integration và acceptance. Smoke là cách *chọn phạm vi* một suite; các test case của smoke có thể nằm ở cấp API, UI hay tích hợp. Ở bài này, case chạy qua API và chạm kho dữ liệu thật của lab.
+- **Không bắt buộc chỉ có happy path.** Một hành trình "đặt xe thành công" là xương sống, nhưng cơ chế chặn truy cập vô danh có thể đủ quan trọng để nằm trong smoke: nếu nó hỏng, mọi kết quả phân quyền phía sau đều không đáng tin.
 - **Smoke xanh cho phép kiểm tiếp, không cho phép release.** Đây là câu dễ quên nhất.
 
 ### 2.2. Bảng phân biệt
@@ -70,7 +70,7 @@ Ba hệ quả của định nghĩa này:
 | Readiness | Instance có đủ điều kiện nhận traffic không? | Kiểm dependency thiết yếu (DB, cấu hình) theo thiết kế |
 | Smoke | Các khả năng thiết yếu có dùng được không? | Báo giá, đặt, nhận, hoàn tất, lưu và thu tiền |
 | Sanity | Thay đổi cụ thể có hợp lý để kiểm tiếp không? | Sau sửa voucher, kiểm lỗi gốc và vùng liên quan |
-| Confirmation | Lỗi đã sửa có còn tái hiện không? | Chạy lại đúng ca từng báo defect |
+| Confirmation | Lỗi đã sửa có còn tái hiện không? | Chạy lại đúng test case từng báo defect |
 | Regression | Thay đổi có làm hỏng phần đang hoạt động không? | Voucher sửa xong nhưng tổng thanh toán bị sai |
 
 Lưu ý dòng health: trong lab, route `/api/health` chỉ trả `{ "status": "ok" }` mà **không chạm vào cơ sở dữ liệu** (đúng R-API-15, dùng cho giám sát và để công cụ kiểm thử chờ máy chủ). Nghĩa là health xanh chỉ chứng minh tiến trình đang phản hồi HTTP — đúng tình huống mở bài: health xanh, ghi chuyến hỏng.
@@ -82,7 +82,7 @@ Lưu ý dòng health: trong lab, route `/api/health` chỉ trả `{ "status": "o
 
 ### 2.3. Ưu và nhược điểm
 
-Smoke cho phản hồi nhanh, rẻ, dễ tự động hoá và tạo một điểm quyết định rõ trong pipeline. Đổi lại, nó cố ý bỏ qua phần lớn rủi ro: biên, tổ hợp, lỗi hiếm, phi chức năng. Một smoke suite "phình" theo thời gian sẽ mất đúng giá trị duy nhất của nó — tốc độ. Vì vậy mỗi ca bị loại khỏi smoke phải có **nơi kiểm thay thế**, không phải được miễn.
+Smoke cho phản hồi nhanh, rẻ, dễ tự động hoá và tạo một điểm quyết định rõ trong pipeline. Đổi lại, nó cố ý bỏ qua phần lớn rủi ro: biên, tổ hợp, lỗi hiếm, phi chức năng. Một smoke suite "phình" theo thời gian sẽ mất đúng giá trị duy nhất của nó — tốc độ. Vì vậy mỗi test case bị loại khỏi smoke phải có **nơi kiểm thay thế**, không phải được miễn.
 
 ## 3. Thiết kế từ rủi ro và test basis
 
@@ -105,9 +105,9 @@ Với mỗi ứng viên, hỏi:
 
 1. **Nếu hỏng, nó có chặn hoạt động cốt lõi không?** Không đặt được chuyến hay không thu được tiền thì vòng kiểm nào phía sau cũng vô nghĩa.
 2. **Nó có đi qua thành phần dễ hỏng của build mới không?** Mapping DB, cấu hình bảng giá, middleware xác thực — những chỗ thay đổi thường xuyên.
-3. **Chi phí chạy và điều tra có hợp với một gate không?** Case cần 10 phút hay khó chẩn đoán khi đỏ thì không hợp smoke.
+3. **Chi phí chạy và điều tra có hợp với một gate không?** Test case cần 10 phút để chạy hay khó chẩn đoán khi đỏ thì không hợp với smoke.
 
-Không chọn chỉ vì case chạy nhanh hoặc đã có sẵn.
+Không chọn chỉ vì test case chạy nhanh hoặc đã có sẵn.
 
 ### 3.3. Bảng case
 
@@ -117,7 +117,7 @@ Không chọn chỉ vì case chạy nhanh hoặc đã có sẵn.
 | SM-02 | R-API-03; mất chặn truy cập | Như trên | `POST /api/quotes` báo giá hợp lệ, **không** gửi `x-user` | 401, `error.code = UNAUTHENTICATED` | Không cần |
 | SM-03 | R-STATE-02, R-PAY-03, R-FARE-01…08; đường tiền bị đứt | Seed có C001, D101; đồng hồ 09:00 VN 04/11/2026; không mưa | Báo giá 5 km xe máy → đặt bằng VíXanh → D101 nhận → arrive → pickup → start → complete → đọc lại | Giá 35.000; chuyến `completed`/`paid` qua API và repository; ví được gọi đúng 1 lần với khoá `trip:<id>:fare`, tổng 35.000 | Reset seed ở case kế tiếp |
 
-Mọi case reset seed và dựng Express app mới; PGlite được đóng sau cả suite.
+Mỗi test case đều reset seed và dựng Express app mới; PGlite được đóng sau cả suite.
 
 ### 3.4. Những gì cố ý bỏ ra ngoài
 
@@ -131,7 +131,7 @@ Mọi case reset seed và dựng Express app mới; PGlite được đóng sau c
 ### 3.5. Tiêu chí bắt đầu và kết thúc
 
 - **Entry criteria**: dependency đã cài theo lockfile; SPEC và seed đúng phiên bản; không dùng dữ liệu production.
-- **Exit criteria (bài tập)**: cả ba case pass, không có case bị skip, exit code 0.
+- **Exit criteria (bài tập)**: cả ba case pass, không có test case nào bị bỏ qua, exit code 0.
 
 Exit criteria này cho phép **kiểm tiếp**, không cho phép release production.
 
@@ -214,7 +214,7 @@ it('SM-02 · R-API-03: thao tác nghiệp vụ thiếu danh tính bị chặn', 
 
 SM-01 dùng `toEqual` vì hợp đồng health nhỏ và cố định. SM-02 gửi một báo giá **hợp lệ** nhưng thiếu header: nếu body sai, ta không biết 4xx đến từ xác thực hay validation. Theo R-VALID-01, xác thực được kiểm trước định dạng đầu vào, nên mã phải là `UNAUTHENTICATED`. Assert cả mã lỗi chứ không chỉ status 401.
 
-### 4.4. SM-03 — hành trình đi xuyên tiền
+### 4.4. SM-03 — hành trình đặt xe đến thu tiền
 
 Luồng chia ba đoạn. **Đoạn 1 — báo giá**, phát hiện cấu hình giá lệch:
 
@@ -315,7 +315,7 @@ Ví dụ khi xanh: "Ba case pass. Đường health, chặn người dùng vô da
 
 ### 6.1. Gate trước và sau triển khai
 
-Suite trong bài phù hợp gate kiểm mã: các thành phần được lắp ráp trong một tiến trình. **Post-deploy smoke** thì phải gọi base URL thật của một môi trường cô lập, để phủ routing, TLS, biến môi trường và đúng artifact đang chạy. Khi đó phải ghi build ID và config version — kết quả của build cũ không phải bằng chứng cho build mới. Một pipeline hợp lý:
+Suite trong bài phù hợp với gate kiểm tra mã nguồn: các thành phần được lắp ráp và chạy trong cùng một tiến trình. **Post-deploy smoke** thì phải gọi base URL thật của một môi trường cô lập, để phủ routing, TLS, biến môi trường và đúng artifact đang chạy. Khi đó phải ghi build ID và config version — kết quả của build cũ không phải bằng chứng cho build mới. Một pipeline hợp lý:
 
 ```text
 build → smoke trong tiến trình (bài này) → deploy staging → post-deploy smoke
@@ -334,7 +334,7 @@ Lab reset toàn bộ DB — không bao giờ làm vậy trên staging dùng chun
 
 ### 6.4. Ngân sách thời gian
 
-Giả sử nhóm đặt mục tiêu nội bộ "smoke dưới hai phút" — đây là **giả định thiết kế**, không phải chuẩn chung. Đo p95 thời gian suite qua nhiều lần chạy, loại các case trùng rủi ro hoặc chuyển sang suite sâu. Theo dõi tỷ lệ báo động giả và số sự cố lọt qua gate để điều chỉnh; đừng dùng tổng số test làm thước đo chất lượng.
+Giả sử nhóm đặt mục tiêu nội bộ "smoke dưới hai phút" — đây là **giả định thiết kế**, không phải chuẩn chung. Đo p95 của thời gian chạy suite qua nhiều lần chạy, loại các test case trùng rủi ro hoặc chuyển sang suite kiểm thử chuyên sâu. Theo dõi tỷ lệ báo động giả và số sự cố lọt qua gate để điều chỉnh; đừng dùng tổng số test làm thước đo chất lượng.
 
 ### 6.5. Chứng minh test biết bắt lỗi (thí nghiệm đề xuất)
 
@@ -355,7 +355,7 @@ Một test chưa từng đỏ là một test chưa được chứng minh. Đề 
 
 <div class="tkh-callout tkh-callout--warn">
 <span class="tkh-callout-title">Ba case xanh chưa chứng minh</span>
-<p>Suite dùng PGlite một kết nối: chưa kiểm concurrency PostgreSQL nhiều kết nối, độ bền sau restart, trình duyệt, mạng ngoài, JWT, nhà cung cấp thanh toán thật hay khả năng chịu tải. Header <code>x-user</code> là giản lược danh tính của lab (R-API-03), không phải bảo mật production. Đọc lại qua repository trong cùng phiên DB chứng minh dữ liệu ghi/đọc được ở phiên đó, không chứng minh backup/restore hay tồn tại sau sự cố máy.</p>
+<p>Suite dùng PGlite một kết nối: chưa kiểm concurrency PostgreSQL nhiều kết nối, độ bền sau restart, trình duyệt, mạng ngoài, JWT, nhà cung cấp thanh toán thật hay khả năng chịu tải. Header <code>x-user</code> là giản lược danh tính của lab (R-API-03), không phải bảo mật production. Đọc lại qua repository trong cùng phiên DB chứng minh dữ liệu ghi/đọc được ở phiên đó, không chứng minh được backup/restore hay việc dữ liệu còn tồn tại sau sự cố máy.</p>
 </div>
 
 ### 7.3. Đánh đổi chi phí và phạm vi
@@ -377,7 +377,7 @@ Mỗi case thêm vào smoke tăng độ phủ nhưng tăng thời gian và số 
 
 <details>
 <summary><b>Lời giải gợi ý</b></summary>
-<p>Theo R-API-05, chuyến tồn tại nhưng không được xem trả <b>404 <code>TRIP_NOT_FOUND</code></b> — giống hệt chuyến không tồn tại, để không lộ sự tồn tại. Giữ trong smoke hay không phụ thuộc rủi ro của release: nếu build đụng tới middleware phân quyền hay truy vấn chuyến, đáng thêm; nếu không, để nó ở suite bảo mật (SYS-10).</p>
+<p>Theo R-API-05, chuyến tồn tại nhưng người gọi không được phép xem thì trả <b>404 <code>TRIP_NOT_FOUND</code></b> — giống hệt chuyến không tồn tại, để không lộ sự tồn tại. Giữ trong smoke hay không phụ thuộc rủi ro của release: nếu build đụng tới middleware phân quyền hay truy vấn chuyến, đáng thêm; nếu không, để nó ở suite bảo mật (SYS-10).</p>
 </details>
 
 **Bài 3 (nâng cao).** Thiết kế post-deploy smoke cho staging có nhiều worker và nhiều đội cùng dùng.

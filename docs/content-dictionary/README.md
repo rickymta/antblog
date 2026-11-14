@@ -12,6 +12,9 @@ Hai việc dùng chung một nền: **bảng thuật ngữ chuẩn**. Bảng nà
 | Tệp | Nội dung |
 |---|---|
 | [`01-content-review.md`](01-content-review.md) | Quy trình và quy tắc rà soát nội dung (giai đoạn 0) |
+| [`review-prompt.md`](review-prompt.md) | Mẫu prompt cho agent rà soát một bài, và các lệnh áp dụng/duyệt |
+| [`technical-notes.md`](technical-notes.md) | Các chỗ nghi sai kỹ thuật phát hiện khi rà soát, chờ tác giả xử lý |
+| [`edits/`](edits/) | Hồ sơ đề xuất đã áp theo từng đợt (kèm lý do của từng chỗ sửa) |
 | [`style-guide.md`](style-guide.md) | Văn phong tiếng Việt cho bài kỹ thuật, kèm ví dụ sai → đúng |
 | [`terminology.md`](terminology.md) | Cách dùng và quy tắc của bảng thuật ngữ; dữ liệu nằm ở `api/seed/terminology.json` |
 | [`02-glossary-feature.md`](02-glossary-feature.md) | Đặc tả kỹ thuật tính năng từ điển keyword (giai đoạn 1–5) |
@@ -38,9 +41,9 @@ Giai đoạn 0c và 1–2 có thể chạy song song **sau khi 0a đã chốt**,
 
 | Giai đoạn | Trạng thái |
 |---|---|
-| 0a | Đã khảo sát xong ([báo cáo](survey-2026-11.md)). Đã chốt chính tả kiểu huỷ/khoá. Còn chờ chốt: "test case" hay "ca kiểm thử", và "phiên bản" thay cho "version" |
+| 0a | Đã khảo sát xong ([báo cáo](survey-2026-11.md)). Đã chốt: chính tả kiểu huỷ/khoá, "test case", "phiên bản" |
 | 0b | Đã có `npm run content:lint`, kèm `--fix` cho các rule chắc chắn |
-| 0c | Đợt đầu: đã sửa mọi lỗi mức cao lặp lại trên toàn site, chuẩn hoá chính tả huỷ/khoá và sửa các ví dụ đã nêu. Chưa rà từng bài |
+| 0c | Đã sửa mọi lỗi mức cao lặp lại trên toàn site và chuẩn hoá chính tả huỷ/khoá. Đợt thử rà từng bài: 8/79 bài nhóm testing, 137 chỗ sửa ([hồ sơ](edits/batch-01-testing-pilot/)). Chỗ nghi lỗi kỹ thuật ghi ở [technical-notes.md](technical-notes.md) |
 | 1–5 | Chưa làm |
 
 ## Ràng buộc chung

@@ -18,7 +18,8 @@
     "categories:tree": "tsx scripts/category-tree.ts",
     "categories:content": "tsx scripts/category-content.ts",
     "programming:structure": "tsx scripts/programming-structure.ts",
-    "content:lint": "tsx scripts/content-lint.ts"
+    "content:lint": "tsx scripts/content-lint.ts",
+    "content:apply": "tsx scripts/content-apply.ts"
   },
   "dependencies": {
     "bcryptjs": "3.0.3",

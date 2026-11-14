@@ -54,9 +54,13 @@ Mỗi đợt xử lý một nhóm chủ đề, khoảng 20–70 bài. Thứ tự
 
 Khối lượng khoảng 15 MB Markdown, quá lớn để rà hoàn toàn bằng tay. Cách làm:
 
-- Mỗi tác vụ AI xử lý **một bài**. Đầu vào gồm bài viết, `terminology.json` và `style-guide.md`. Đầu ra là bài đã sửa, kèm danh sách thay đổi có lý do.
-- Ràng buộc trong prompt: chỉ sửa văn xuôi; giữ nguyên Markdown, HTML, khối code và frontmatter (trừ `title`/`summary`).
-- Có bước kiểm tra máy sau mỗi bài: so sánh khối code và liên kết giữa bản gốc và bản sửa phải trùng khớp tuyệt đối. Bài nào lệch thì loại bản sửa và làm lại.
+- Mỗi tác vụ AI xử lý **một bài**, theo [mẫu prompt](review-prompt.md). AI **không** sửa bài, mà trả về danh sách đề xuất dạng `{old, new, reason, severity}`.
+- Bước áp dụng do `npm run content:apply` thực hiện, với các chốt an toàn trong `api/seed/contentEdits.ts`:
+  - `old` phải khớp nguyên văn và xuất hiện đúng một lần, trên một dòng.
+  - Không được chạm vào khối code hay frontmatter (trừ `title`/`summary`).
+  - Inline code, thẻ HTML, liên kết và URL phải giữ nguyên.
+  - Sau khi sửa, kiểm tra lại toàn tệp: các khối code giữ nguyên, số dòng không đổi, frontmatter vẫn đọc được. Nếu không đạt thì huỷ toàn bộ thay đổi của tệp đó.
+- Agent tự chạy `--dry-run` để sửa các đề xuất bị từ chối trước khi bàn giao.
 - Model nhỏ (Haiku) dùng cho khảo sát và dò lỗi. Việc viết lại câu nên dùng model mạnh hơn, vì đó là phần cần cảm nhận ngôn ngữ.
 
 ## Đo tiến độ

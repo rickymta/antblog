@@ -119,7 +119,17 @@
       "use": "test case",
       "keepEnglish": true,
       "glossary": true,
-      "definition": "Một tình huống kiểm thử cụ thể gồm điều kiện đầu, dữ liệu vào, các bước thực hiện và kết quả mong đợi."
+      "definition": "Một tình huống kiểm thử cụ thể gồm điều kiện đầu, dữ liệu vào, các bước thực hiện và kết quả mong đợi.",
+      "note": "Thống nhất \"test case\" (chốt 11/2026); không xen \"ca kiểm thử\", \"ca\", \"case\" trong cùng bài",
+      "avoid": [
+        { "text": "ca kiểm thử", "severity": "low" }
+      ]
+    },
+    {
+      "id": "version",
+      "use": "phiên bản",
+      "english": "version",
+      "note": "Văn xuôi dùng \"phiên bản\" (chốt 11/2026); giữ \"version\" trong tên trường, cấu hình, tên sản phẩm. Không có rule lint vì cần ngữ cảnh"
     }
   ],
   "patterns": [

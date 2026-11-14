@@ -1,0 +1,65 @@
+{
+  "file": "walkthrough.md",
+  "edits": [
+    {
+      "old": "có cao điểm, mưa (R-FOOD-04)",
+      "new": "có tính phụ phí cao điểm và phụ phí trời mưa (R-FOOD-04)",
+      "reason": "Cụm cụt thiếu danh từ; đơn mẫu 09:00 và không mưa nên dễ đọc nhầm là đang áp dụng.",
+      "severity": "high"
+    },
+    {
+      "old": "có cao điểm, mưa, tối thiểu 15.000 đ",
+      "new": "có phụ phí cao điểm, phụ phí trời mưa, mức tối thiểu 15.000 đ",
+      "reason": "Lược mất danh từ chính (phụ phí, mức).",
+      "severity": "medium"
+    },
+    {
+      "old": "Vận hành tưởng voucher giảm cả phí giao",
+      "new": "bộ phận vận hành tưởng voucher giảm cả phí giao",
+      "reason": "Thiếu chủ thể rõ ràng (style guide §2). (đã chỉnh khi duyệt)",
+      "severity": "medium"
+    },
+    {
+      "old": "do người khác tác giả (thường là QA) chuẩn bị",
+      "new": "do người không phải tác giả (thường là QA) chuẩn bị",
+      "reason": "Cụm 'người khác tác giả' là trật tự kiểu tiếng Anh, gượng.",
+      "severity": "medium"
+    },
+    {
+      "old": "gắn vào đúng bước dễ hiểu sai",
+      "new": "gắn vào những bước dễ bị hiểu sai",
+      "reason": "Câu thiếu tự nhiên, thiếu từ nối.",
+      "severity": "medium"
+    },
+    {
+      "old": "nó không nhắm tối đa số defect",
+      "new": "walkthrough không nhắm tới việc tìm tối đa số defect",
+      "reason": "Tránh 'nó' chỉ sự vật trừu tượng; thêm động từ cho đủ nghĩa.",
+      "severity": "medium"
+    },
+    {
+      "old": "Rủi ro cuối không phải defect của tài liệu — nó là lý do",
+      "new": "Rủi ro cuối không phải defect của tài liệu mà là lý do",
+      "reason": "Tránh 'nó' ở đầu mệnh đề, câu gọn hơn.",
+      "severity": "low"
+    },
+    {
+      "old": "người vừa trình bày vừa ghi chép sẽ bỏ sót",
+      "new": "người vừa trình bày vừa ghi chép sẽ dễ bỏ sót",
+      "reason": "Tự nhiên hơn, tránh khẳng định tuyệt đối.",
+      "severity": "low"
+    },
+    {
+      "old": "Tác giả lái né chỗ yếu",
+      "new": "Tác giả né tránh chỗ yếu",
+      "reason": "'lái né' là cụm tự ghép.",
+      "severity": "low"
+    },
+    {
+      "old": "chúng chỉ kiểm điều SPEC đã viết",
+      "new": "chúng chỉ kiểm tra những điều SPEC đã viết",
+      "reason": "'kiểm' cụt, thiếu chữ 'tra'.",
+      "severity": "low"
+    }
+  ]
+}

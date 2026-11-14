@@ -8,7 +8,7 @@ tags: [testing, istqb, ctfl, test-024, static-testing, review, walkthrough, giao
 language: vi
 ---
 
-BA vừa viết xong luồng giao đồ ăn. Developer Pricing hiểu «tiền món tối thiểu 30.000 đ» là sau voucher, Vận hành tưởng voucher giảm cả phí giao, còn hai bạn mới vào chưa biết đơn đồ ăn đi qua những trạng thái nào. Một buổi **walkthrough** — tác giả dẫn cả nhóm đi qua tài liệu từng bước — giải quyết cả ba chuyện trong 60 phút. Bài này trả lời: walkthrough khác các loại review khác ở đâu, khi nào nên chọn, và chuẩn bị một buổi như thế nào để nó không biến thành buổi thuyết trình một chiều.
+BA vừa viết xong luồng giao đồ ăn. Developer Pricing hiểu «tiền món tối thiểu 30.000 đ» là sau voucher, bộ phận vận hành tưởng voucher giảm cả phí giao, còn hai bạn mới vào chưa biết đơn đồ ăn đi qua những trạng thái nào. Một buổi **walkthrough** — tác giả dẫn cả nhóm đi qua tài liệu từng bước — giải quyết cả ba chuyện trong 60 phút. Bài này trả lời: walkthrough khác các loại review khác ở đâu, khi nào nên chọn, và chuẩn bị một buổi như thế nào để nó không biến thành buổi thuyết trình một chiều.
 
 <div class="tkh-callout">
 <span class="tkh-callout-title">Thông tin bài · TEST-024</span>
@@ -102,7 +102,7 @@ Mục 3.2.2 (dựa trên ISO/IEC 20246) mô tả năm hoạt động; review cà
 | Communication and analysis | chính là buổi họp: tác giả dẫn, mọi người hỏi; scribe ghi anomaly, câu hỏi, ý tưởng và người nhận |
 | Fixing and reporting | tác giả sửa tài liệu; defect thật được ghi lại để theo dõi; gửi biên bản |
 
-Về vai trò (3.2.3): ở walkthrough, **tác giả** thường kiêm luôn review leader và người điều phối buổi họp. Syllabus chỉ cấm tác giả làm review leader hoặc scribe ở **inspection**, nên walkthrough cho phép. Vẫn nên có một **scribe** khác tác giả — người vừa trình bày vừa ghi chép sẽ bỏ sót.
+Về vai trò (3.2.3): ở walkthrough, **tác giả** thường kiêm luôn review leader và người điều phối buổi họp. Syllabus chỉ cấm tác giả làm review leader hoặc scribe ở **inspection**, nên walkthrough cho phép. Vẫn nên có một **scribe** khác tác giả — người vừa trình bày vừa ghi chép sẽ dễ bỏ sót.
 
 ### 2.4. Thuật ngữ Anh – Việt
 
@@ -117,7 +117,7 @@ Về vai trò (3.2.3): ở walkthrough, **tác giả** thường kiêm luôn rev
 
 <div class="tkh-callout">
 <span class="tkh-callout-title">Ngoài syllabus ISTQB · cách làm thường gặp</span>
-<p>Không có trong CTFL nhưng phổ biến: <b>dẫn đọc bằng một ví dụ cụ thể</b> («đơn mẫu» đi qua từng bước — gần với scenario-based reviewing); <b>điểm dừng có câu hỏi soạn sẵn</b> do người khác tác giả (thường là QA) chuẩn bị; <b>time-box</b> 45–60 phút cho một luồng — khớp yếu tố «review từng phần nhỏ» của CTFL 3.2.5.</p>
+<p>Không có trong CTFL nhưng phổ biến: <b>dẫn đọc bằng một ví dụ cụ thể</b> («đơn mẫu» đi qua từng bước — gần với scenario-based reviewing); <b>điểm dừng có câu hỏi soạn sẵn</b> do người không phải tác giả (thường là QA) chuẩn bị; <b>time-box</b> 45–60 phút cho một luồng — khớp yếu tố «review từng phần nhỏ» của CTFL 3.2.5.</p>
 </div>
 
 ## 3. Tình huống kiểm thử tại Tới Nơi
@@ -135,7 +135,7 @@ Business rules mà tài liệu phải phản ánh đúng:
 | R-FOOD-01 | Khách trả = (tiền món − tiền giảm voucher) + phí giao |
 | R-FOOD-02 | 1–20 dòng món; đơn giá bội số 1.000 đ trong [1.000; 5.000.000]; số lượng [1; 50] |
 | R-FOOD-03 | Tiền món < 30.000 đ ⇒ `SUBTOTAL_TOO_LOW`; đúng 30.000 đ hợp lệ |
-| R-FOOD-04 | Phí giao theo công thức xe máy của R-FARE trên quãng đường **quán → khách**, có cao điểm, mưa, tối thiểu 15.000 đ, làm tròn lên 1.000 đ; **voucher không trừ vào phí giao** |
+| R-FOOD-04 | Phí giao theo công thức xe máy của R-FARE trên quãng đường **quán → khách**, có phụ phí cao điểm, phụ phí trời mưa, mức tối thiểu 15.000 đ, làm tròn lên 1.000 đ; **voucher không trừ vào phí giao** |
 | R-FOOD-05 | Voucher tính trên **tiền món**; điều kiện tối thiểu so với tiền món |
 | R-FOOD-06 | Chỉ nhận `vehicle` bỏ trống hoặc `bike`; gửi `car` ⇒ `VALIDATION_ERROR` |
 | liên quan | R-QUOTE-04 (giá chốt theo báo giá), R-CANCEL-01/03 (phí huỷ 10.000 đ cho mọi đơn đồ ăn), R-STATE-02 (vòng đời chuyến) |
@@ -156,7 +156,7 @@ Lab là bản MVP modular monolith: không Kafka, không có service quán; đơ
 | Không ai nghĩ tới khách huỷ khi món đã làm | quán chịu thiệt, tranh chấp với Vận hành |
 | Hai bạn mới không hiểu vòng đời đơn | viết test sai trạng thái ở sprint sau |
 
-Rủi ro cuối không phải defect của tài liệu — nó là lý do walkthrough có mục tiêu **đào tạo**, thứ informal review không nhắm tới.
+Rủi ro cuối không phải defect của tài liệu mà là lý do walkthrough có mục tiêu **đào tạo**, thứ informal review không nhắm tới.
 
 ## 4. Phân tích kỹ thuật
 
@@ -174,7 +174,7 @@ CTFL 3.2.4 nói chọn loại review dựa trên mục tiêu, cộng với nhu c
 
 ### 4.2. Thiết kế buổi: dẫn đọc bằng một đơn mẫu
 
-Thay vì đọc tài liệu từ trên xuống, BA đi **một đơn cụ thể** qua bảy bước: khách C001 ở SG đặt cơm tấm sườn 45.000 đ và trà đá 5.000 đ, quán cách nhà 3,2 km, 09:00 sáng (ngoài cao điểm), trời không mưa, nhập mã `FOOD15`. QA chuẩn bị sẵn tám câu hỏi, gắn vào đúng bước dễ hiểu sai.
+Thay vì đọc tài liệu từ trên xuống, BA đi **một đơn cụ thể** qua bảy bước: khách C001 ở SG đặt cơm tấm sườn 45.000 đ và trà đá 5.000 đ, quán cách nhà 3,2 km, 09:00 sáng (ngoài cao điểm), trời không mưa, nhập mã `FOOD15`. QA chuẩn bị sẵn tám câu hỏi, gắn vào những bước dễ bị hiểu sai.
 
 <figure class="tkh-fig">
 <div class="tkh-fig-box">
@@ -261,7 +261,7 @@ Câu trả lời ở cột cuối lấy từ SPEC; số liệu là đơn mẫu �
 | Q2 | 1 | Ngưỡng 30.000 đ so với tiền món trước hay sau voucher? | hai nhóm đang hiểu khác nhau | trước voucher: món 30.000 đ dùng `GIAM20` giảm 6.000 đ vẫn hợp lệ |
 | Q3 | 2 | Voucher có trừ vào phí giao không? | ảnh hưởng trực tiếp tiền tài xế | không (R-FOOD-04); phí giao đơn mẫu 27.000 đ dù có `FOOD15` |
 | Q4 | 2 | Điều kiện tối thiểu của voucher so với tiền món hay với tổng đơn? | dễ lấy «tổng» theo thói quen | tiền món (R-FOOD-05): món 49.000 đ + phí giao 27.000 đ ⇒ `VOUCHER_MIN_AMOUNT` với `FOOD15` (tối thiểu 50.000 đ) |
-| Q5 | 2 | Phí giao tính trên quãng đường nào, có cao điểm và mưa không? | người mới hay nghĩ phí giao cố định | quán → khách, công thức xe máy: 12.000 + 4.500 × 3,2 = 26.400 ⇒ làm tròn 27.000 đ; có cao điểm, mưa (R-FOOD-04) |
+| Q5 | 2 | Phí giao tính trên quãng đường nào, có cao điểm và mưa không? | người mới hay nghĩ phí giao cố định | quán → khách, công thức xe máy: 12.000 + 4.500 × 3,2 = 26.400 ⇒ làm tròn 27.000 đ; có tính phụ phí cao điểm và phụ phí trời mưa (R-FOOD-04) |
 | Q6 | 2 | Đơn đồ ăn lớn có chọn ô tô được không? | Vận hành hỏi cho tiệc công ty | không: `car` ⇒ `VALIDATION_ERROR` (R-FOOD-06) — ghi nhận thành ý tưởng cho bản sau |
 | Q7 | 7 | Tổng 69.500 đ có làm tròn không? Khách trả tiền mặt thì thu bao nhiêu? | app có thể tự làm tròn | SPEC không làm tròn tổng (R-FOOD-01) ⇒ 50.000 − 7.500 + 27.000 = 69.500 đ; **cách thu 500 đ tiền mặt chưa có quy định** ⇒ anomaly |
 | Q8 | 5 | Khách huỷ khi tài xế đã tới quán, món đã làm — ai chịu? | quán mất tiền món | SPEC chỉ nói phí huỷ 10.000 đ khi `arriving` (R-CANCEL-01/03); **quán có được bù không — SPEC im lặng** ⇒ anomaly |
@@ -302,7 +302,7 @@ npx vitest run articles/walkthrough --reporter=verbose
       Tests  8 passed (8)
 ```
 
-Kết quả thực tế khớp kết quả mong đợi ở bảng 5.2. Tám test xanh không thay được buổi walkthrough: chúng chỉ kiểm điều SPEC đã viết, còn WT-02 và WT-03 vẫn nằm trên bàn PO.
+Kết quả thực tế khớp kết quả mong đợi ở bảng 5.2. Tám test xanh không thay được buổi walkthrough: chúng chỉ kiểm tra những điều SPEC đã viết, còn WT-02 và WT-03 vẫn nằm trên bàn PO.
 
 ## 6. Góc nhìn nâng cao
 
@@ -311,14 +311,14 @@ Kết quả thực tế khớp kết quả mong đợi ở bảng 5.2. Tám test
 | Sai lầm | Vì sao hỏng | Cách chữa |
 |---|---|---|
 | Walkthrough thành buổi thuyết trình | tác giả nói 55 phút, không ai hỏi ⇒ chỉ còn mục tiêu «đào tạo» | câu hỏi soạn sẵn ở điểm dừng; người chuẩn bị không phải tác giả |
-| Tác giả lái né chỗ yếu | tác giả dẫn nên chọn thứ tự; vô thức đi nhanh qua phần mình không chắc | cho scribe/QA chọn đơn mẫu, gồm cả đường lỗi |
+| Tác giả né tránh chỗ yếu | tác giả dẫn nên chọn thứ tự; vô thức đi nhanh qua phần mình không chắc | cho scribe/QA chọn đơn mẫu, gồm cả đường lỗi |
 | Phạm vi quá lớn | cả tài liệu giao hàng 40 trang trong một buổi | một luồng mỗi buổi (CTFL 3.2.5: review từng phần nhỏ) |
 | Không ghi biên bản | câu hỏi mở biến mất sau buổi | scribe ghi anomaly, người nhận, trạng thái |
 | Người mới ngại hỏi | «đồng thuận» giả | hỏi thẳng người mới diễn đạt lại công thức |
 
 ### 6.2. Giới hạn
 
-- **Thiên kiến của tác giả** là cái giá của «tác giả dẫn». Trên cùng một tài liệu, walkthrough thường tìm được ít defect hơn inspection — nó không nhắm tối đa số defect.
+- **Thiên kiến của tác giả** là cái giá của «tác giả dẫn». Trên cùng một tài liệu, walkthrough thường tìm được ít defect hơn inspection — walkthrough không nhắm tới việc tìm tối đa số defect.
 - Walkthrough không thay **thiết kế test**: tám câu hỏi là điểm khởi đầu cho test condition, còn kỹ thuật thiết kế test (giá trị biên cho Q1, bảng quyết định cho Q2–Q4) thuộc Series 04.
 - **Walkthrough từ xa, ghi hình rồi để người xem hỏi sau** (cách làm ngành, ngoài syllabus) giữ được mục tiêu đào tạo nhưng mất phần hỏi–đáp tại chỗ — chỗ walkthrough mạnh nhất.
 

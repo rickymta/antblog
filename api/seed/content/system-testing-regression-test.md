@@ -8,7 +8,7 @@ tags: [testing, sys-06, regression-testing, impact-analysis, test-selection, tes
 language: vi
 ---
 
-Đội Tới Nơi muốn dọn code tính cước: phụ phí trời mưa và phụ phí khối lượng bưu kiện «trông giống nhau», vậy gom về một chỗ cho gọn. Reviewer chạy thử chuyến xe máy 5 km lúc 9 giờ sáng trời mưa: 43.000 đồng, đúng như trước. Refactor được duyệt. Đến trưa, khách đặt xe lúc 11:30 trời mưa bị tính 54.000 thay vì 52.000 — phụ phí trời mưa đã lén đi vào phần bị nhân hệ số cao điểm. Ca dùng để review không sai, nó chỉ **không có khả năng** lộ ra lỗi này. Bài này trả lời: **sau một thay đổi, chọn ca nào để phát hiện hành vi cũ bị hỏng, oracle lấy từ đâu, và làm sao biết bộ regression thực sự bắt được lỗi** — chứ không chỉ đếm được nhiều test xanh.
+Đội Tới Nơi muốn dọn code tính cước: phụ phí trời mưa và phụ phí khối lượng bưu kiện «trông giống nhau», vậy gom về một chỗ cho gọn. Reviewer chạy thử chuyến xe máy 5 km lúc 9 giờ sáng trời mưa: 43.000 đồng, đúng như trước. Refactor được duyệt. Đến trưa, khách đặt xe lúc 11:30 trời mưa bị tính 54.000 thay vì 52.000 — phụ phí trời mưa đã lén đi vào phần bị nhân hệ số cao điểm. Test case dùng để review không sai, nó chỉ **không có khả năng** lộ ra lỗi này. Bài này trả lời: **sau một thay đổi, chọn test case nào để phát hiện hành vi cũ bị hỏng, oracle lấy từ đâu, và làm sao biết bộ regression thực sự bắt được lỗi** — chứ không chỉ đếm được nhiều test xanh.
 
 <div class="tkh-callout">
 <span class="tkh-callout-title">Thông tin bài · SYS-06</span>
@@ -34,7 +34,7 @@ Refactor giả định gom phí mưa vào chung chỗ với phí khối lượng
 
 <div class="tkh-callout tkh-callout--warn">
 <span class="tkh-callout-title">Lỗi giả lập phục vụ học tập</span>
-<p>Hàm <code>calculateFare</code> trong lab hiện tính đúng thứ tự. Bài <b>không</b> khẳng định repository từng có refactor sai hay đã sửa một bug thật. Candidate sai là hàm <code>buggyRainRefactor</code> đặt ngay trong file test của bài; mã sản phẩm ở <code>src/</code> không bị thay đổi, không có build lỗi nào được deploy.</p>
+<p>Hàm <code>calculateFare</code> trong lab hiện tính đúng thứ tự. Bài <b>không</b> khẳng định repository từng có refactor sai hay đã sửa một bug thật. Bản refactor lỗi là hàm <code>buggyRainRefactor</code> đặt ngay trong file test của bài; mã sản phẩm ở <code>src/</code> không bị thay đổi, không có build lỗi nào được deploy.</p>
 </div>
 
 ### 1.2. Đối tượng và điều kiện tiên quyết
@@ -58,7 +58,7 @@ Sau bài này, bạn có thể:
 
 **Regression testing** kiểm xem một thay đổi có gây hậu quả bất lợi cho hành vi vốn đang đúng hay không. Thay đổi không chỉ là code: cấu hình, schema, dependency, môi trường, dữ liệu tham chiếu (bảng giá, voucher seed) đều có thể gây regression. Bài [Confirmation Testing và Regression Testing](/articles/confirmation-testing-va-regression-testing) đã trình bày khái niệm theo CTFL v4.0.1; ở đây ta tập trung vào câu hỏi thực hành: **chọn gì, kiểm bằng oracle nào, và tin kết quả tới đâu.**
 
-Test regression không phải một «loại cú pháp» khác. Ca functional RG-04 viết cho R-FARE-03/05 trở thành regression khi được chạy để đánh giá ảnh hưởng của refactor. Điều quyết định vai trò là **mục đích chạy**, không phải thư mục chứa test.
+Test regression không phải một kiểu viết test khác. Ca functional RG-04 viết cho R-FARE-03/05 trở thành regression khi được chạy để đánh giá ảnh hưởng của refactor. Điều quyết định vai trò là **mục đích chạy**, không phải thư mục chứa test.
 
 ### 2.2. Bốn hoạt động dễ nhầm
 
@@ -69,7 +69,7 @@ Test regression không phải một «loại cú pháp» khác. Ca functional RG
 | Confirmation | Lỗi đã báo còn tái hiện không? | Mã có khoảng trắng dùng được sau sửa |
 | Regression | Hành vi khác có bị hỏng bởi thay đổi? | Refactor cước làm sai phí giao đồ ăn lúc cao điểm |
 
-Confirmation pass không chứng minh vùng khác an toàn. Ngược lại, regression không bắt buộc chạy mọi case — có thể chọn theo impact và rủi ro, **miễn là công bố phần bỏ lại**. «Full regression» chỉ có nghĩa là chạy đầy đủ **suite đã định nghĩa**, không phải đã kiểm mọi hành vi có thể có của sản phẩm.
+Confirmation pass không chứng minh vùng khác an toàn. Ngược lại, regression không bắt buộc chạy mọi test case — có thể chọn theo impact và rủi ro, **miễn là công bố phần bỏ lại**. «Full regression» chỉ có nghĩa là chạy đầy đủ **suite đã định nghĩa**, không phải đã kiểm mọi hành vi có thể có của sản phẩm.
 
 ### 2.3. Expected change hay regression?
 
@@ -202,7 +202,7 @@ Test assert từng thành phần, không chỉ tổng: nếu voucher bị áp nh
 | RG-03 | R-FARE-04 · hệ số độc lập | Hàm thuần | bike 5 km, cao điểm, khô | 44.000 | Không cần |
 | RG-04 | R-FARE-03/05 · tương tác | Hàm thuần | bike 5 km, cao điểm, mưa | 52.000 | Không cần |
 | RG-05 | Khả năng phân biệt fault | Fixture trong file test | Chạy candidate sai ở thường/mưa và cao điểm/mưa; chạy hàm thật | 43.000; 54.000 ≠ 52.000; hàm thật 52.000 | Không cần |
-| RG-06 | R-FARE-09 · ride qua API | App mới; 11:30 VN 04/11/2026; SG mưa; C001; GIAM20 chưa dùng | POST báo giá ride 7,4 km + GIAM20 | beforeDiscount 64.625; discount 12.925; total 52.000 | App bộ nhớ bỏ sau ca |
+| RG-06 | R-FARE-09 · ride qua API | App mới; 11:30 VN 04/11/2026; SG mưa; C001; GIAM20 chưa dùng | POST báo giá ride 7,4 km + GIAM20 | beforeDiscount 64.625; discount 12.925; total 52.000 | App chạy trong bộ nhớ, bỏ sau ca |
 | RG-07 | R-PARCEL-03/04 · parcel | Như trên | POST báo giá parcel 6 kg, bike 5 km | parcelSurcharge 2.000; base 36.500; afterPeak 45.625; rain 8.000; total 54.000 | Như trên |
 | RG-08 | R-FOOD-04/05 · food | Như trên; FOOD15 chưa dùng | POST báo giá food 60.000 đ, 5 km + FOOD15 | itemsDiscount 9.000; deliveryFee 52.000; total 103.000; fare.discount 0 | Như trên |
 
@@ -225,7 +225,7 @@ Nó tắt cờ `raining` rồi nhét 8.000 vào `parcelSurcharge` — trường 
 
 ### 5.3. Môi trường và độc lập giữa ca
 
-Các ca hàm thuần không có state bên ngoài. Mỗi ca API dựng **hệ thống bộ nhớ mới** trong `beforeEach`: đồng hồ cố định 11:30 giờ VN ngày 04/11/2026 (trong khung cao điểm R-FARE-04), Sài Gòn đang mưa, dữ liệu seed gồm C001, GIAM20, FOOD15. Không có DB dùng chung cần dọn; không chia sẻ instance giữa ca. Nhờ vậy thứ tự chạy không ảnh hưởng kết quả, và chạy lẻ một ca cũng cho cùng kết quả.
+Các ca hàm thuần không có state bên ngoài. Mỗi ca API dựng **một hệ thống mới chạy trong bộ nhớ** trong `beforeEach`: đồng hồ cố định 11:30 giờ VN ngày 04/11/2026 (trong khung cao điểm R-FARE-04), Sài Gòn đang mưa, dữ liệu seed gồm C001, GIAM20, FOOD15. Không có DB dùng chung cần dọn; không chia sẻ instance giữa ca. Nhờ vậy thứ tự chạy không ảnh hưởng kết quả, và chạy lẻ một ca cũng cho cùng kết quả.
 
 ### 5.4. Entry và exit criteria
 
@@ -326,7 +326,7 @@ Expected 50 tests. Đây là nhóm SYS-01…04 và SYS-06, **không phải** to�
 
 <div class="tkh-callout tkh-callout--warn">
 <span class="tkh-callout-title">8 lượt xanh chưa nói gì</span>
-<p>Lab không sửa sản phẩm, không chạy một build lỗi đỏ rồi sửa xanh, không chạy mutation engine nên <b>không có mutation score</b>. RG-05 chỉ chứng minh <b>một</b> fault cụ thể bị oracle phân biệt. Các ca API dùng kho bộ nhớ và đồng hồ/thời tiết giả; bằng chứng SQL nằm ở SYS-04, bằng chứng trình duyệt ở SYS-05 (lần chạy SYS-06 không chạy lại browser vì không đổi UI hay cấu hình). Chưa kiểm phí huỷ, ô tô, cước tối thiểu với voucher lớn, hiệu năng, provider thanh toán thật hay lựa chọn test tự động theo diff.</p>
+<p>Lab không sửa sản phẩm, không chạy một build lỗi đỏ rồi sửa xanh, không chạy mutation engine nên <b>không có mutation score</b>. RG-05 chỉ chứng minh <b>một</b> fault cụ thể bị oracle phân biệt. Các ca API dùng kho dữ liệu trong bộ nhớ và đồng hồ/thời tiết giả; bằng chứng SQL nằm ở SYS-04, bằng chứng trình duyệt ở SYS-05 (lần chạy SYS-06 không chạy lại browser vì không đổi UI hay cấu hình). Chưa kiểm phí huỷ, ô tô, cước tối thiểu với voucher lớn, hiệu năng, provider thanh toán thật hay lựa chọn test tự động theo diff.</p>
 </div>
 
 ## 7. Gate, báo cáo và xử lý failure
@@ -374,7 +374,7 @@ Gộp ca trùng chỉ khi chúng bảo vệ **cùng rủi ro** và giữ đượ
 
 ### 9.1. Selection, prioritization và minimization
 
-Ba quyết định khác nhau: **selection** chọn ca cần chạy cho thay đổi này; **prioritization** đổi thứ tự để tín hiệu quan trọng đến sớm; **minimization** giảm suite bằng cách loại trùng. Selection dựa trên coverage code có thể bỏ sót tác động qua cấu hình, schema, dữ liệu seed hay dependency động — ví dụ đổi phần trăm của GIAM20 trong seed không chạm dòng code nào. Kết hợp mapping yêu cầu–ca, lịch sử lỗi và một suite nền luôn chạy. Đừng loại một ca chậm nhưng bảo vệ rủi ro tiền cao chỉ vì dữ liệu thời gian chạy của một lần đo.
+Ba quyết định khác nhau: **selection** chọn ca cần chạy cho thay đổi này; **prioritization** đổi thứ tự để tín hiệu quan trọng đến sớm; **minimization** giảm suite bằng cách loại các test case trùng. Selection dựa trên coverage code có thể bỏ sót tác động qua cấu hình, schema, dữ liệu seed hay dependency động — ví dụ đổi phần trăm của GIAM20 trong seed không chạm dòng code nào. Kết hợp mapping yêu cầu–ca, lịch sử lỗi và một suite nền luôn chạy. Đừng loại một ca chậm nhưng bảo vệ rủi ro cao về tiền chỉ vì thời gian chạy trong một lần đo.
 
 ### 9.2. Mutation testing
 
@@ -386,7 +386,7 @@ Khi thay hẳn engine tính giá, chạy bản cũ và mới trên cùng bộ d�
 
 ### 9.4. Regression phi chức năng
 
-Sau đổi thuật toán, chức năng vẫn đúng nhưng latency hay bộ nhớ có thể xấu đi. Regression hiệu năng cần workload xác định, cấu hình máy, warm-up, số mẫu và ngưỡng biến động chấp nhận — chủ đề của [SYS-07 · Performance Test](/articles/system-testing-performance-test). Không so 112 ms với 150 ms của hai lần chạy unit suite rồi kết luận sản phẩm chậm đi: đó là thời gian của test runner trên hai máy khác Node. Security và accessibility cũng cần baseline riêng, ở các bài tương ứng của series.
+Sau đổi thuật toán, chức năng vẫn đúng nhưng latency hay bộ nhớ có thể xấu đi. Regression hiệu năng cần workload xác định, cấu hình máy, warm-up, số mẫu và ngưỡng biến động chấp nhận — chủ đề của [SYS-07 · Performance Test](/articles/system-testing-performance-test). Không so 112 ms với 150 ms của hai lần chạy unit suite rồi kết luận sản phẩm chậm đi: đó là thời gian của test runner trên hai môi trường dùng phiên bản Node khác nhau. Security và accessibility cũng cần baseline riêng, ở các bài tương ứng của series.
 
 ### 9.5. Metrics không đánh lừa
 
@@ -401,7 +401,7 @@ Theo dõi escaped defects (lỗi lọt tới người dùng), thời gian phát 
 - **Gọi mọi failure là regression sản phẩm:** che lỗi môi trường, tạo defect trùng.
 - **Đo chất lượng bằng số test:** cảm giác an toàn không có căn cứ.
 
-Đánh đổi: thêm ca tương tác làm suite dài hơn chút nhưng rẻ hơn nhiều so với tính sai tiền hàng nghìn chuyến cao điểm. Ngược lại, chạy mọi suite ở mọi PR làm chậm phản hồi và đẩy đội tới việc tắt gate. Impact map công khai phần bỏ lại là cách cân bằng hai đầu: người duyệt release biết rủi ro nào còn mở.
+Đánh đổi: thêm ca tương tác làm suite dài hơn chút nhưng rẻ hơn nhiều so với tính sai tiền hàng nghìn chuyến cao điểm. Ngược lại, chạy mọi suite ở mọi PR làm chậm phản hồi và khiến đội phải tắt gate. Impact map công khai phần bỏ lại là cách cân bằng hai đầu: người duyệt release biết rủi ro nào còn mở.
 
 ## 11. Bài tập và câu hỏi ôn tập
 
@@ -417,7 +417,7 @@ Theo dõi escaped defects (lỗi lọt tới người dùng), thời gian phát 
 <summary><b>Lời giải gợi ý</b></summary>
 <p><b>1.</b> Không cao điểm thì hệ số là 1, nên cộng mưa trước hay sau khi nhân cho cùng kết quả (43.000). Ca tối thiểu là cao điểm + mưa — RG-04 — nơi candidate sai ra 54.000, oracle 52.000.</p>
 <p><b>2.</b> Ô tô 5 km cao điểm mưa: cơ bản 25.000 + 11.000 × 5 = 80.000; × 1,25 = 100.000; + 8.000 = <b>108.000</b>. Candidate sai: (80.000 + 8.000) × 1,25 = 110.000. Nên kiểm thêm voucher và cước tối thiểu theo rủi ro, với oracle tính riêng cho ô tô — không chỉ đổi <code>vehicle</code> mà giữ con số của xe máy.</p>
-<p><b>3.</b> Không xoá âm thầm. Phân loại nguyên nhân (thời gian thực, state rò rỉ, race sản phẩm). Nếu buộc quarantine: owner, issue, hạn xử lý, kiểm bù (ví dụ chạy ca tương đương ở cấp hàm trong gate), và báo cáo ghi rõ coverage food giảm trong thời gian đó.</p>
+<p><b>3.</b> Không xoá khỏi gate mà không báo lại. Phân loại nguyên nhân (thời gian thực, state rò rỉ, race sản phẩm). Nếu buộc quarantine: owner, issue, hạn xử lý, kiểm bù (ví dụ chạy ca tương đương ở cấp hàm trong gate), và báo cáo ghi rõ coverage food giảm trong thời gian đó.</p>
 <p><b>4.</b> Trong lab, <code>money.ts</code> được <code>fare.ts</code>, <code>parcel.ts</code>, <code>voucher.ts</code> và <code>food.ts</code> import — tức là nằm dưới mọi phép tính tiền. Mapping phải mở rộng tới ride, parcel, food, voucher (đặc biệt trần giảm và phần lẻ dưới 1 đồng) và mọi nơi khác gọi tới nó — lần theo callers thực trước khi chốt. Chỉ chạy RG-01…04 là chưa đủ. Ưu tiên chạy theo hậu quả sai tiền và khả năng phát hiện sớm: ca voucher/food trước, rồi ride/parcel.</p>
 <p><b>5.</b> Đây là <b>expected change</b>: RG-02, RG-04, RG-06, RG-07, RG-08 sẽ đỏ đúng như mong đợi. Cập nhật SPEC trước, tính lại oracle (ví dụ RG-04: 43.125 + 10.000 = 53.125 → 54.000 — lúc này trùng con số với candidate sai cũ, nên RG-05 cũng cần đổi input để vẫn phân biệt được), cập nhật expected kèm lý do và người duyệt. Kiểm thêm chuyến đặt từ báo giá cũ vẫn giữ giá cũ (R-QUOTE-04).</p>
 </details>
