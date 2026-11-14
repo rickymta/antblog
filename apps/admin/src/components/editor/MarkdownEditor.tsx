@@ -38,6 +38,8 @@ import { checkImageFile, defaultAlt, imageMarkdown } from '../../lib/media';
 import { useToast } from '../../lib/toast';
 import { insertBlock, insertCodeBlock, insertLink, replaceMarker, toggleHeading, toggleLinePrefix, toggleWrap } from './commands';
 
+import { liveMarkdown } from './liveMarkdown';
+
 export const CODE_LANGUAGES = ['sql', 'bash', 'javascript', 'typescript', 'json', 'yaml', 'python', 'go', 'java', 'csharp', 'html', 'css', 'dockerfile', 'text'] as const;
 
 /** Khoá màu theo theme trang (class `.dark` trên <html>) — đổi tức thì khi bấm nút sáng/tối. */
@@ -332,6 +334,7 @@ function ToolMenu({
 
 /** Ô soạn CodeMirror. `onView` nhận EditorView khi dựng xong (để thanh công cụ, mục lục, cuộn đồng bộ dùng). */
 export function MarkdownCodeMirror({
+  live,
   value,
   onChange,
   onView,
@@ -339,6 +342,7 @@ export function MarkdownCodeMirror({
   label,
   invalid,
 }: {
+  live: boolean;
   value: string;
   onChange: (v: string) => void;
   onView: (view: EditorView | null) => void;
@@ -383,6 +387,7 @@ export function MarkdownCodeMirror({
       markdown({ base: markdownLanguage, codeLanguages: languages }),
       EditorView.lineWrapping,
       // Ưu tiên cao nhất để nền trong suốt + font đè lên theme sáng/tối có sẵn.
+      ...(live ? [Prec.highest(liveMarkdown)] : []),
       Prec.highest(editorTheme),
       EditorView.contentAttributes.of({ 'aria-label': label, spellcheck: 'false' }),
       Prec.highest(
@@ -412,7 +417,7 @@ export function MarkdownCodeMirror({
     ],
     // Nhãn/chữ mẫu đổi theo ngôn ngữ giao diện ⇒ dựng lại phần mở rộng (giữ nội dung, lịch sử hoàn tác).
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [label, i18n.language],
+    [label, i18n.language, live],
   );
 
   useEffect(() => () => onView(null), [onView]);

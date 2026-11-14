@@ -11,10 +11,13 @@ import {
   CalendarClock,
   ChevronDown,
   Columns2,
+  Code2,
   ExternalLink,
   Eye,
   ImagePlus,
   PenLine,
+  PanelRightClose,
+  PanelRightOpen,
   RefreshCw,
   Save,
   Send,
@@ -44,7 +47,7 @@ const SUMMARY_MAX = 400;
 const SEO_TITLE_MAX = 70;
 const SEO_DESC_MAX = 170;
 const AUTOSAVE_MS = 3000;
-type Mode = 'edit' | 'preview' | 'split';
+type Mode = 'live' | 'edit' | 'preview' | 'split';
 const MODE_KEY = 'tkh-admin-editor-mode';
 const PANELS_KEY = 'tkh-admin-editor-panels';
 
@@ -140,11 +143,11 @@ function normalizeTag(raw: string): string {
 function readMode(): Mode {
   try {
     const v = localStorage.getItem(MODE_KEY);
-    if (v === 'edit' || v === 'preview' || v === 'split') return v;
+    if (v === 'live' || v === 'edit' || v === 'preview' || v === 'split') return v;
   } catch {
     /* bỏ qua */
   }
-  return 'split';
+  return 'live';
 }
 
 type PanelId = 'publish' | 'info' | 'cover' | 'seo' | 'outline';
@@ -315,6 +318,8 @@ function ArticleEditor({ article: initialArticle }: { article: AdminArticle | un
   const [errors, setErrors] = useState<Errors>({});
   const [showErrors, setShowErrors] = useState(false);
   const [mode, setModeState] = useState<Mode>(readMode);
+  const [sidebarOpen, setSidebarOpen] = useState(true);
+  const sidebarId = useId();
   const [panels, setPanels] = useState<Record<PanelId, boolean>>(readPanels);
   const [confirm, setConfirm] = useState<'unpublish' | 'archive' | null>(null);
   const [tagText, setTagText] = useState('');
@@ -351,6 +356,7 @@ function ArticleEditor({ article: initialArticle }: { article: AdminArticle | un
     });
   }, []);
   const openPanel = (id: PanelId) => {
+    setSidebarOpen(true);
     if (!panels[id]) togglePanel(id);
   };
 
@@ -639,7 +645,7 @@ function ArticleEditor({ article: initialArticle }: { article: AdminArticle | un
   }, [deferredContent]);
 
   const jumpTo = (item: { line: number; id?: string }) => {
-    if (mode !== 'edit' && item.id && previewRef.current) {
+    if ((mode === 'split' || mode === 'preview') && item.id && previewRef.current) {
       const box = previewRef.current;
       const target = box.querySelector<HTMLElement>(`#${CSS.escape(item.id)}`);
       if (target) box.scrollTo({ top: box.scrollTop + target.getBoundingClientRect().top - box.getBoundingClientRect().top - 12, behavior: 'smooth' });
@@ -718,6 +724,11 @@ function ArticleEditor({ article: initialArticle }: { article: AdminArticle | un
           </p>
         </div>
         <div className="flex flex-wrap items-center gap-2">
+          <Button icon={sidebarOpen ? PanelRightClose : PanelRightOpen}
+            aria-expanded={sidebarOpen} aria-controls={sidebarId}
+            onClick={() => setSidebarOpen(open => !open)}>
+            {t(sidebarOpen ? 'editor.hideSidebar' : 'editor.showSidebar')}
+          </Button>
           {article && live && (
             <a href={siteArticleUrl(article.slug)} target="_blank" rel="noreferrer" className="inline-flex h-10 items-center gap-1.5 rounded-ui px-3 text-sm font-medium text-primary-ink hover:bg-surface-2">
               <ExternalLink className="size-4" aria-hidden />
@@ -750,7 +761,7 @@ function ArticleEditor({ article: initialArticle }: { article: AdminArticle | un
         </div>
       )}
 
-      <div className="grid gap-4 xl:grid-cols-[minmax(0,1fr)_22rem]">
+      <div className={cx('grid grid-cols-1 gap-4', sidebarOpen && 'xl:grid-cols-[minmax(0,1fr)_22rem]')}>
         {/* Soạn + xem trước */}
         <Card className="flex min-w-0 flex-col xl:h-[calc(100dvh-10.5rem)]">
           <div className="sticky top-16 z-10 flex flex-wrap items-center justify-between gap-2 rounded-t-card border-b border-line bg-surface px-2 py-1.5 xl:static">
@@ -762,7 +773,8 @@ function ArticleEditor({ article: initialArticle }: { article: AdminArticle | un
             <div role="radiogroup" aria-label={t('editor.editorMode')} className="inline-flex rounded-ui border border-line bg-surface-2 p-0.5">
               {(
                 [
-                  ['edit', PenLine, t('editor.modeEdit')],
+                  ['live', PenLine, t('editor.modeLive')],
+                  ['edit', Code2, 'Markdown'],
                   ['split', Columns2, t('editor.modeSplit')],
                   ['preview', Eye, t('editor.modePreview')],
                 ] as const
@@ -788,6 +800,7 @@ function ArticleEditor({ article: initialArticle }: { article: AdminArticle | un
             {mode !== 'preview' && (
               <div className={cx('h-[70dvh] min-h-[24rem] min-w-0 xl:h-full', mode === 'split' && 'border-b border-line md:border-r md:border-b-0')}>
                 <MarkdownCodeMirror
+                  live={mode === 'live'}
                   value={form.content}
                   onChange={(v) => update('content', v)}
                   onView={setView}
@@ -797,7 +810,7 @@ function ArticleEditor({ article: initialArticle }: { article: AdminArticle | un
                 />
               </div>
             )}
-            {mode !== 'edit' && (
+            {(mode === 'split' || mode === 'preview') && (
               <div
                 ref={previewRef}
                 className="h-[70dvh] min-h-[24rem] min-w-0 overflow-auto bg-page p-4 sm:p-6 xl:h-full"
@@ -820,7 +833,7 @@ function ArticleEditor({ article: initialArticle }: { article: AdminArticle | un
         </Card>
 
         {/* Cột phải */}
-        <aside className="space-y-3 xl:max-h-[calc(100dvh-10.5rem)] xl:overflow-y-auto xl:pr-1">
+        <aside id={sidebarId} hidden={!sidebarOpen} className="space-y-3 xl:max-h-[calc(100dvh-10.5rem)] xl:overflow-y-auto xl:pr-1">
           <Panel id="publish" title={t('cms.panelPublish')} open={panels.publish} onToggle={togglePanel} badge={!isNew ? <ArticleStatusBadge status={status} /> : undefined}>
             <div className="space-y-1 text-sm">
               {scheduledAt && (
