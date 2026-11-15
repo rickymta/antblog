@@ -5,3 +5,4 @@ export { Avatar, initialsOf } from './Avatar';
 export { Skeleton } from './Skeleton';
 export { LevelBadge } from './LevelBadge';
 export { CategoryGlyph } from './CategoryGlyph';
+export { rehypeGlossary, TERM_CLASS, type RehypeGlossaryOptions } from './rehypeGlossary';

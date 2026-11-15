@@ -85,6 +85,8 @@ export default async function ArticlePage({ params }: Props) {
   const { slug } = await params;
   const { t, locale } = await getServerI18n();
   const [article, related] = await Promise.all([orNotFound(serverApi.article(slug)), settle(serverApi.related(slug, 3))]);
+  // Từ điển keyword là phần phụ: API lỗi ⇒ bài vẫn hiển thị, chỉ không đánh dấu keyword.
+  const glossary = (await settle(serverApi.glossary(article.language))) ?? [];
   const headings = extractHeadings(article.content);
   const path = article.learningPath;
   const url = absoluteUrl(articlePath(article.slug));
@@ -161,7 +163,7 @@ export default async function ArticlePage({ params }: Props) {
           )}
 
           <ArticleBody>
-            <ArticleContent markdown={article.content} />
+            <ArticleContent markdown={article.content} glossary={glossary} />
           </ArticleBody>
 
           <div className="mt-10">

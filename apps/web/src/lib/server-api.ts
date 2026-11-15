@@ -8,6 +8,7 @@ import {
   type ArticleDetail,
   type ArticleQuery,
   type Category,
+  type GlossaryTerm,
   type LearningPathCard,
   type LearningPathDetail,
   type Level,
@@ -76,6 +77,8 @@ export const serverApi = {
   popularTags: (limit = 30) => get<TagCount[]>('/tags/popular', { limit }, 300),
   learningPaths: (query: { level?: Level; q?: string } = {}) => get<LearningPathCard[]>('/learning-paths', { ...query }),
   learningPath: (slug: string) => get<LearningPathDetail>(`/learning-paths/${enc(slug)}`),
+  /** Từ điển keyword (cache 5 phút — sửa thuật ngữ trong CMS hiện ra trong vòng 5 phút). */
+  glossary: (language: 'vi' | 'en' = 'vi') => get<GlossaryTerm[]>('/glossary', { language }, 300),
 };
 
 /** API trả 404 ⇒ trang 404 của Next (mã HTTP 404); lỗi khác ném tiếp cho error boundary. */

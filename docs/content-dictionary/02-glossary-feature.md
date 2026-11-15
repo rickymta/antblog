@@ -1,5 +1,25 @@
 # Giai đoạn 1–5 — Tính năng từ điển keyword
 
+## Trạng thái triển khai (11/2026)
+
+| Giai đoạn | Trạng thái | Mã nguồn |
+|---|---|---|
+| 1. Model, API, seed | Xong | `api/src/models/term.ts`, `api/src/routes/glossary.ts` (`GET /glossary`, `GET /glossary/:slug`, `/admin/terms`), bước seed trong `api/seed/lib.ts` |
+| 2. Dò keyword khi render | Xong | Bộ dò `packages/shared/src/glossary.ts`, plugin `packages/ui/src/rehypeGlossary.ts`, nối vào `ArticleContent` |
+| 3. Hộp thoại | Xong | `apps/web/src/components/article/GlossaryPopover.tsx`, CSS `.tkh-term` trong `packages/ui/src/article.css` |
+| — Xem trước trong CMS | Xong | `useGlossary` trong `apps/admin/src/lib/queries.ts`. Bản xem trước chỉ đánh dấu keyword, chưa có hộp thoại |
+| 4. Trang quản trị keyword | Chưa làm | API CRUD và client `api.admin.terms` đã có, còn thiếu giao diện |
+| 5. Trang `/glossary`, SEO | Chưa làm | `GET /glossary/:slug` đã trả `body` |
+| Frontmatter `glossary: false` | Chưa làm | Hiện tắt từng vùng bằng `data-no-glossary` |
+
+Test: `api/test/glossary.test.ts` (API và seed), `glossary-matcher.test.ts` (bộ dò), `glossary-render.test.ts` (plugin chạy qua `ArticleContent`).
+
+**Khác với thiết kế ban đầu bên dưới:**
+- Dữ liệu cho hộp thoại không được truyền riêng qua `vfile.data`, mà nằm luôn trên thẻ `dfn`, trong các thuộc tính `data-term-title`, `data-term-english`, `data-term-definition`. Lý do: `react-markdown` render ở server không trả ra danh sách các keyword đã khớp. Cách này chỉ tốn thêm vài trăm byte cho mỗi keyword, vì mỗi keyword chỉ được đánh dấu lần đầu. Đổi lại, bản xem trước trong CMS có sẵn dữ liệu mà không cần làm thêm gì.
+- Hộp thoại tự tính vị trí (trên hay dưới, giữ trong màn hình với lề 16 px, chọn đúng dòng khi keyword xuống dòng), không dùng thư viện `@floating-ui`.
+- Bộ dò keyword đặt trong `@tkh/shared` thay vì `@tkh/ui`, để API dùng lại được ở giai đoạn 4 (đếm số bài chứa một keyword).
+- Trang bài lấy từ điển qua `serverApi.glossary()` với cache 5 phút. Nếu API lỗi, bài vẫn hiển thị bình thường, chỉ không đánh dấu keyword.
+
 ## Hành vi với người đọc
 
 - Keyword trong bài có gạch chân chấm mờ.

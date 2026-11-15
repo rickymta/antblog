@@ -257,6 +257,9 @@ export const en: Messages = {
     emptyArticles: 'This path has no published articles yet.',
   },
   article: {
+    glossaryLabel: 'Term definition',
+    glossaryEnglish: 'English',
+    glossaryClose: 'Close definition',
     breadcrumb: 'Breadcrumb',
     toc: 'On this page',
     tocMobile: 'Table of contents',

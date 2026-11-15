@@ -22,6 +22,14 @@
   padding-top: 1.5rem; /* + 1em đệm của code.hljs ≈ 40px — đủ cho nút cao ~28px */
 }
 
+/* Hộp thoại từ điển keyword (GlossaryPopover) hiện ra nhẹ — chỉ chạy qua `motion-safe:`. */
+@keyframes tkh-pop {
+  from {
+    opacity: 0;
+    transform: translateY(2px);
+  }
+}
+
 /* Đường nét đứt "chạy" trên sơ đồ lộ trình ở hero — tắt hẳn khi người dùng giảm chuyển động. */
 @keyframes tkh-dash-flow {
   to {

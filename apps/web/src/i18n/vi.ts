@@ -257,6 +257,9 @@ export const vi = {
     emptyArticles: 'Lộ trình này chưa có bài viết nào được xuất bản.',
   },
   article: {
+    glossaryLabel: 'Giải thích thuật ngữ',
+    glossaryEnglish: 'Tiếng Anh',
+    glossaryClose: 'Đóng giải thích',
     breadcrumb: 'Đường dẫn trang',
     toc: 'Trên trang này',
     tocMobile: 'Mục lục bài viết',

@@ -18,6 +18,9 @@
       "node"
     ]
   },
+  // glossary-render.test.ts render ArticleContent của packages/ui (mã frontend, phân giải module kiểu bundler):
+  // gói ui/shared tự typecheck riêng; vitest vẫn chạy tệp test này.
+  "exclude": ["test/glossary-render.test.ts"],
   "include": [
     "src",
     "seed/**/*.ts",
