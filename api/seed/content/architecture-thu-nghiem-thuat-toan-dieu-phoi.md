@@ -33,3 +33,5 @@ Trước khi phát đề nghị thật, thống nhất thước đo. Ví dụ, t
 Khi độ trễ xếp hạng hoặc tỷ lệ lỗi vượt ngưỡng đã đặt trước, dừng cấp lượt tìm mới cho B. Lượt đang chờ tài xế trả lời tiếp tục dùng mã đề nghị, thời hạn và chính sách đã ghi. Chỉ mở lượt kế tiếp sau khi lượt trước đã kết thúc hoặc được thu hồi. Dùng quy tắc [giữ chỗ theo thế hệ](/articles/architecture-giu-cho-tai-xe) để chặn phản hồi cũ.
 
 Trước thử nghiệm, diễn tập bằng một đơn có đề nghị đang bay: chuyển chính sách về A, cho điện thoại gửi xác nhận muộn rồi gửi lại cùng xác nhận. Kiểm tra đơn chỉ sinh một phân công, log vẫn ghi được phiên bản đã chọn D12 và báo cáo vẫn tính đơn vào đúng nhóm ban đầu.
+
+Đọc tiếp bài [Ring buffer trong Tới Nơi](/articles/architecture-ring-buffer-gps).
