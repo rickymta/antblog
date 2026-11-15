@@ -98,6 +98,26 @@
     "status": "published"
   },
   {
+    "slug": "postgresql-tu-ben-trong-phan-06",
+    "title": "PostgreSQL · Phần 6 · Mở rộng, tích hợp và vận hành đầu cuối",
+    "description": "Mười bài khép lại series PostgreSQL qua Tới Nơi: partition và vòng đời dữ liệu, JSONB, primary/standby, logical replication, materialized view, PostGIS/pgvector, failover có fencing, nâng phiên bản 17 → 18 và capstone đối soát sau sự cố. Lab PostgreSQL 18 thật dựng nhiều cluster, giả lập mất primary, split-brain và pg_rewind.",
+    "level": "advanced",
+    "category": "postgresql",
+    "articles": [
+      "postgresql-partition-co-ban",
+      "postgresql-replication-primary-standby",
+      "postgresql-jsonb-quan-he",
+      "postgresql-partition-pruning-retention",
+      "postgresql-logical-replication-cdc",
+      "postgresql-materialized-view-reporting",
+      "postgresql-extension-postgis-pgvector",
+      "postgresql-ha-failover-read-consistency",
+      "postgresql-upgrade-migration-cutover",
+      "postgresql-capstone-van-hanh-toi-noi"
+    ],
+    "status": "published"
+  },
+  {
     "slug": "design-pattern-qua-toi-noi",
     "title": "Design Pattern qua dự án Tới Nơi",
     "description": "23 design pattern kinh điển chia theo ba nhóm Khởi tạo, Cấu trúc, Hành vi — mỗi pattern gắn với một bài toán thật của hệ thống đặt xe và giao hàng Tới Nơi, có so sánh các pattern trong cùng nhóm và khi nào không nên dùng.",

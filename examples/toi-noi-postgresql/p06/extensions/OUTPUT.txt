@@ -1,0 +1,39 @@
+PG-057 extension lab · PGlite PostgreSQL 18.6 · postgis 3.6.2 · vector 0.8.7 · Node v22.18.0
+--- 057 EXPLAIN ST_DWithin without spatial index
+  Aggregate
+    ->  Seq Scan on drivers
+          Filter: st_dwithin(location, '0101000020E6100000CDCCCCCCCCAC5A400AD7A3703D8A2540'::geography, '500'::double precision, true)
+PASS 057 drivers within 500 m of pickup (seq scan = GiST): 21
+--- 057 EXPLAIN ST_DWithin with GiST
+  Aggregate
+    ->  Bitmap Heap Scan on drivers
+          Filter: st_dwithin(location, '0101000020E6100000CDCCCCCCCCAC5A400AD7A3703D8A2540'::geography, '500'::double precision, true)
+          ->  Bitmap Index Scan on drivers_location_gist
+                Index Cond: (location && _st_expand('0101000020E6100000CDCCCCCCCCAC5A400AD7A3703D8A2540'::geography, '500'::double precision))
+--- 057 three nearest drivers (KNN <->)
+  id 3550 · 0 m
+  id 3551 · 219 m
+  id 3549 · 219 m
+PASS 057 geometry in SRID 4326 measures degrees: radius 500 matches 5000 of 5000 drivers
+--- 057 EXPLAIN cosine top-10 without vector index
+  Limit
+    InitPlan 1
+      ->  Aggregate
+            ->  Sort
+                  Sort Key: d.d
+                  ->  Function Scan on generate_series d
+    ->  Sort
+          Sort Key: ((tickets.embedding <=> ((InitPlan 1).col1)::vector))
+          ->  Seq Scan on tickets
+--- 057 EXPLAIN cosine top-10 with HNSW
+  Limit
+    InitPlan 1
+      ->  Aggregate
+            ->  Sort
+                  Sort Key: d.d
+                  ->  Function Scan on generate_series d
+    ->  Index Scan using tickets_embedding_hnsw on tickets
+          Order By: (embedding <=> ((InitPlan 1).col1)::vector)
+MEASURE 057 HNSW (m=4, ef_construction=16) recall@10 vs exact, 20 queries not in table, 3 index builds: [{"ef_search":10,"recall_per_build":[0.995,0.995,0.945],"min":0.945,"max":0.995},{"ef_search":40,"recall_per_build":[0.995,0.995,0.945],"min":0.945,"max":0.995},{"ef_search":200,"recall_per_build":[0.995,0.995,0.98],"min":0.98,"max":0.995}]
+PASS 057 every HNSW query returned 10 rows (min rows seen: 10)
+PASS PG-057: both experiments completed.

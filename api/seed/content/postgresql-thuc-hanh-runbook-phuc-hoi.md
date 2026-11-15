@@ -346,4 +346,4 @@ Không có lời giải chạy sẵn; mỗi bài nêu điều một lời giải
 - [PostgreSQL 18 · pg_basebackup](https://www.postgresql.org/docs/18/app-pgbasebackup.html) và [pg_stat_archiver](https://www.postgresql.org/docs/18/monitoring-stats.html).
 - Lab: `examples/toi-noi-postgresql/p05/RUNBOOK.md`, `p05/OUTPUT.txt`, `p05/run.mjs`, `p05/README.md` (phương pháp đo), `p05/wal-copy.mjs` (archive/restore helper).
 
-Bài tiếp theo: Phần 6 · Mở rộng, tích hợp và vận hành đầu cuối sắp ra mắt. Đọc lại từ đầu Phần 5: [PG-041: Role, GRANT và quyền tối thiểu](/articles/postgresql-role-grant-least-privilege)
+Bài tiếp theo — Phần 6 · Mở rộng, tích hợp và vận hành đầu cuối: [PG-051: Partition là gì và dùng khi nào?](/articles/postgresql-partition-co-ban). Đọc lại từ đầu Phần 5: [PG-041: Role, GRANT và quyền tối thiểu](/articles/postgresql-role-grant-least-privilege)

@@ -1,0 +1,270 @@
+P06 extension & integration lab · PostgreSQL 18.1 (+ 17.7 for PG-059)
+Node v22.18.0 · win32/x64
+Fixture: gps 1464 points (20 drivers, Oct–Nov 2026 UTC) partitioned by month + gps_plain copy; fares 2 rows / 150000 VND.
+PASS 051 rows per partition oct/nov: 744/720
+PASS 051 boundary point 2026-11-01 00:00 UTC lands in: gps_nov
+PASS 051 driver 1 in November (gps): 36
+--- 051 EXPLAIN driver+month on gps
+                                                                                    QUERY PLAN                                                                                  
+  ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+   Bitmap Heap Scan on gps_nov gps (actual rows=36.00 loops=1)
+     Recheck Cond: ((driver_id = 1) AND (seen_at >= '2026-11-01 07:00:00+07'::timestamp with time zone) AND (seen_at < '2026-12-01 07:00:00+07'::timestamp with time zone))
+     Heap Blocks: exact=9
+     Buffers: shared hit=11
+     ->  Bitmap Index Scan on gps_nov_pkey (actual rows=36.00 loops=1)
+           Index Cond: ((driver_id = 1) AND (seen_at >= '2026-11-01 07:00:00+07'::timestamp with time zone) AND (seen_at < '2026-12-01 07:00:00+07'::timestamp with time zone))
+           Index Searches: 1
+           Buffers: shared hit=2
+   Planning:
+     Buffers: shared hit=186
+  (10 rows)
+PASS 051 driver 1 in November (gps_plain): 36
+--- 051 EXPLAIN driver+month on gps_plain
+                                                                                    QUERY PLAN                                                                                  
+  ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+   Bitmap Heap Scan on gps_plain (actual rows=36.00 loops=1)
+     Recheck Cond: ((driver_id = 1) AND (seen_at >= '2026-11-01 07:00:00+07'::timestamp with time zone) AND (seen_at < '2026-12-01 07:00:00+07'::timestamp with time zone))
+     Heap Blocks: exact=10
+     Buffers: shared hit=12
+     ->  Bitmap Index Scan on gps_plain_pkey (actual rows=36.00 loops=1)
+           Index Cond: ((driver_id = 1) AND (seen_at >= '2026-11-01 07:00:00+07'::timestamp with time zone) AND (seen_at < '2026-12-01 07:00:00+07'::timestamp with time zone))
+           Index Searches: 1
+           Buffers: shared hit=2
+   Planning:
+     Buffers: shared hit=86
+  (10 rows)
+--- 051 EXPLAIN driver only (no partition key)
+                    QUERY PLAN                   
+  -----------------------------------------------
+   Append
+     ->  Bitmap Heap Scan on gps_oct gps_1
+           Recheck Cond: (driver_id = 1)
+           ->  Bitmap Index Scan on gps_oct_pkey
+                 Index Cond: (driver_id = 1)
+     ->  Bitmap Heap Scan on gps_nov gps_2
+           Recheck Cond: (driver_id = 1)
+           ->  Bitmap Index Scan on gps_nov_pkey
+                 Index Cond: (driver_id = 1)
+  (9 rows)
+--- 051 INSERT outside every partition
+  ERROR:  23514: no partition of relation "gps" found for row
+  DETAIL:  Partition key of the failing row contains (seen_at) = (2026-12-01 07:00:00+07).
+  SCHEMA NAME:  public
+  TABLE NAME:  gps
+--- 051 UNIQUE without partition key
+  ERROR:  0A000: unique constraint on partitioned table must include all partitioning columns
+  DETAIL:  UNIQUE constraint on table "gps_bad" lacks column "seen_at" which is part of the partition key.
+--- 051 relation sizes
+    relname  | total  
+  -----------+--------
+   gps_nov   | 152 kB
+   gps_oct   | 168 kB
+   gps_plain | 272 kB
+  (3 rows)
+PASS 053 attrs @> accuracy 5: 147
+PASS 053 typo in key is silent: 0
+PASS 053 ->> returns text, -> returns jsonb: text / jsonb
+--- 053 CHECK jsonb_typeof = object
+  ERROR:  23514: new row for relation "gps_nov" violates check constraint "gps_attrs_check"
+  DETAIL:  Failing row contains (1, 2026-11-15 07:30:00+07, [5]).
+  SCHEMA NAME:  public
+  TABLE NAME:  gps_nov
+  CONSTRAINT NAME:  gps_attrs_check
+--- 053 cast of a text value at query time
+  ERROR:  22P02: invalid input syntax for type integer: "phone"
+--- 053 EXPLAIN @> with GIN, default planner choice
+                           QUERY PLAN                          
+  -------------------------------------------------------------
+   Aggregate
+     ->  Append
+           ->  Seq Scan on gps_oct gps_1
+                 Filter: (attrs @> '{"accuracy_m": 5}'::jsonb)
+           ->  Seq Scan on gps_nov gps_2
+                 Filter: (attrs @> '{"accuracy_m": 5}'::jsonb)
+  (6 rows)
+--- 053 EXPLAIN @> with GIN, enable_seqscan=off (demonstration only)
+                                QUERY PLAN                               
+  -----------------------------------------------------------------------
+   Aggregate
+     ->  Append
+           ->  Bitmap Heap Scan on gps_oct gps_1
+                 Recheck Cond: (attrs @> '{"accuracy_m": 5}'::jsonb)
+                 ->  Bitmap Index Scan on gps_oct_attrs_idx
+                       Index Cond: (attrs @> '{"accuracy_m": 5}'::jsonb)
+           ->  Bitmap Heap Scan on gps_nov gps_2
+                 Recheck Cond: (attrs @> '{"accuracy_m": 5}'::jsonb)
+                 ->  Bitmap Index Scan on gps_nov_attrs_idx
+                       Index Cond: (attrs @> '{"accuracy_m": 5}'::jsonb)
+  (10 rows)
+PASS 053 generated column agrees with JSONB: 147
+--- 053 index sizes
+         index       | size  
+  -------------------+-------
+   gps_oct_pkey      | 40 kB
+   gps_nov_pkey      | 40 kB
+   gps_oct_attrs_idx | 16 kB
+   gps_nov_attrs_idx | 16 kB
+  (4 rows)
+--- 054 generic plan, run-time pruning
+                              QUERY PLAN                             
+  -------------------------------------------------------------------
+   Aggregate (actual rows=1.00 loops=1)
+     Buffers: shared hit=16
+     ->  Append (actual rows=24.00 loops=1)
+           Buffers: shared hit=16
+           Subplans Removed: 1
+           ->  Seq Scan on gps_nov gps_1 (actual rows=24.00 loops=1)
+                 Filter: ((seen_at >= $1) AND (seen_at < $2))
+                 Rows Removed by Filter: 696
+                 Buffers: shared hit=16
+   Planning:
+     Buffers: shared hit=238
+  (11 rows)
+--- 054 EXPLAIN function on partition key (no pruning)
+                                                                   QUERY PLAN                                                                 
+  --------------------------------------------------------------------------------------------------------------------------------------------
+   Aggregate
+     ->  Append
+           ->  Seq Scan on gps_oct gps_1
+                 Filter: (date_trunc('month'::text, (seen_at AT TIME ZONE 'UTC'::text)) = '2026-11-01 00:00:00'::timestamp without time zone)
+           ->  Seq Scan on gps_nov gps_2
+                 Filter: (date_trunc('month'::text, (seen_at AT TIME ZONE 'UTC'::text)) = '2026-11-01 00:00:00'::timestamp without time zone)
+  (6 rows)
+PASS 054 December partition prepared ahead receives: 1
+PASS 054 after DETACH: gps / detached gps_oct: 721/744
+PASS 054 detached table is a normal table: f
+MEASURE 054 WAL bytes · DELETE 744 rows from gps_plain: 59736 · DETACH CONCURRENTLY: 12296 · DROP detached partition: 12680
+PASS 054 gps_plain after DELETE: 720
+PASS 056 report before REFRESH (HCM): 1/85000
+PASS 056 base table HCM: 2/135000
+--- 056 CONCURRENTLY without unique index
+  ERROR:  55000: cannot refresh materialized view "public.fare_report" concurrently
+  HINT:  Create a unique index with no WHERE clause on one or more columns of the materialized view.
+PASS 056 plain REFRESH blocks readers: reader wait_event_type = Lock
+--- 056 locks during plain REFRESH
+      s    |        mode         | granted 
+  ---------+---------------------+---------
+   refresh | AccessExclusiveLock | t
+   refresh | ExclusiveLock       | t
+   refresh | ShareLock           | t
+   reader  | AccessShareLock     | f
+  (4 rows)
+PASS 056 CONCURRENTLY: reader answered while refresh transaction open (no wait)
+--- 056 locks during REFRESH CONCURRENTLY
+      s    |       mode       | granted 
+  ---------+------------------+---------
+   refresh | AccessShareLock  | t
+   refresh | ExclusiveLock    | t
+   refresh | RowExclusiveLock | t
+  (3 rows)
+PASS 056 report after REFRESH (HCM): 2/135000
+PASS 056 refreshed_at advanced: t
+PASS 056 reconcile report vs base: t
+--- 056 fare_report
+   city | trips | total  
+  ------+-------+--------
+   HCM  |     2 | 135000
+   HN   |     1 |  65000
+  (2 rows)
+PASS 055 initial copy: 3|200000
+--- 055 slot on publisher
+   slot_name |  plugin  | slot_type | active | wal_status 
+  -----------+----------+-----------+--------+------------
+   fare_sub  | pgoutput | logical   | t      | reserved
+  (1 row)
+--- 055 walsender for subscription
+   application_name |   state   
+  ------------------+-----------
+   fare_sub         | streaming
+  (1 row)
+PASS 055 disabled subscriber still sees: 50000
+MEASURE 055 WAL bytes held back by inactive slot fare_sub: 6638440
+--- 055 inactive slot
+   slot_name | active | wal_status | retained 
+  -----------+--------+------------+----------
+   fare_sub  | f      | reserved   | 6483 kB
+  (1 row)
+PASS 055 subscriber caught up after ENABLE: 55000
+PASS 055 subscriber unchanged while apply fails: 0
+--- 055 subscriber log: DDL drift
+  ERROR:  logical replication target relation "public.fares" is missing replicated column: "tip"
+PASS 055 apply resumed after matching DDL on subscriber: tip 5000
+PASS 055 apply errors counted: t
+PASS 055 DROP SUBSCRIPTION removed the slot: 0
+PASS 052 standby.signal written by -R: true
+--- 052 postgresql.auto.conf from pg_basebackup -R
+  primary_conninfo = 'user=postgres host=127.0.0.1 port=<PRIMARY> client_encoding=UTF8
+PASS 052 standby in recovery: t
+--- 052 pg_stat_replication on primary
+   application_name |   state   | sync_state | caught_up 
+  ------------------+-----------+------------+-----------
+   walreceiver      | streaming | async      | t
+  (1 row)
+--- 052 write on standby
+  ERROR:  25006: cannot execute INSERT in a read-only transaction
+PASS 052 standby received WAL but row not visible: 0
+MEASURE 052 standby received-but-not-replayed bytes: 696
+--- 052 pg_stat_replication while replay paused
+   application_name | flushed_on_standby | replayed 
+  ------------------+--------------------+----------
+   walreceiver      | t                  | f
+  (1 row)
+PASS 052 read-your-writes after waiting for commit LSN: 1
+PASS 058 standby cut off from primary (network partition simulated)
+PASS 058 old primary accepted write while standby cut off: 1
+MEASURE 058 WAL not received by standby at failover: 184 bytes (primary flush 0/4000370, standby received 0/40002B8)
+PASS 058 pg_promote: t
+PASS 058 committed row lost by async failover: 0
+PASS 058 new primary timeline: 00000002
+PASS 058 target_session_attrs=read-write picks: standby (new primary)
+PASS 058 old primary restarted, not in recovery: f
+--- 058 split-brain: two writable primaries
+  old primary (timeline 00000001): 1,2,3,4,5,7
+  new primary (timeline 00000002): 1,2,3,4,6
+PASS 058 same connection string now picks: old primary
+--- 058 pg_rewind
+  pg_rewind: servers diverged at WAL location 0/40002B8 on timeline 1
+  pg_rewind: rewinding from last common checkpoint at 0/3000080 on timeline 1
+  pg_rewind: Done!
+PASS 058 rewound old primary is standby: t
+PASS 058 rows 5 and 7 discarded by rewind: 0
+PASS 058 ledger on new primary: 5|250000
+PASS 060 report projection stale after failover: 200000 vs 250000
+PASS 060 report reconciled after REFRESH: t
+--- 060 final ledger on new primary
+   id | city | fare  | tip  
+  ----+------+-------+------
+    1 | HCM  | 85000 | 5000
+    2 | HN   | 65000 |    0
+    3 | HCM  | 55000 |    0
+    4 | HN   | 30000 |    0
+    6 | HCM  | 15000 |    0
+  (5 rows)
+--- 060 final report
+   city | trips | total  
+  ------+-------+--------
+   HCM  |     3 | 155000
+   HN   |     2 |  95000
+  (2 rows)
+PASS 060 replica follows new primary: 5|250000
+PASS 059 source version: 17.7
+MEASURE 059 dump size bytes: 2495
+PASS 059 A dump/restore digest: 2/150000/fd0064873b687f567636614c521ab902
+PASS 059 A identity continues after restore: 3
+PASS 059 A source untouched (rollback target lacks new write): 2
+PASS 059 A statistics after restore (before ANALYZE): 0
+--- 059 B pg_upgrade --check against default 18 initdb
+  Checking cluster versions                                     ok
+  old cluster does not use data checksums but the new one does
+  Failure, exiting
+--- 059 B pg_upgrade (copy mode)
+  Performing Upgrade
+  Copying user relation files                                   ok
+  Upgrade Complete
+  Some statistics are not transferred by pg_upgrade.
+PASS 059 B upgraded version: 18
+PASS 059 B digest after pg_upgrade: 2/150000/fd0064873b687f567636614c521ab902
+PASS 059 B planner statistics carried over: true
+PASS 059 B identity continues: 3
+PASS 059 B copy mode: old 17 cluster still starts with: 2 rows on 17.7
+PASS P06: all assertions passed; temporary clusters cleaned up.

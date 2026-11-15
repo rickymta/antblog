@@ -2,7 +2,7 @@
   "name": "toi-noi-postgresql-lab",
   "private": true,
   "type": "module",
-  "description": "Lab PostgreSQL qua dự án Tới Nơi — P01–P02 chạy bằng PGlite (PostgreSQL 17.5 trong WASM), P03+ chạy trên PostgreSQL 18 thật (cluster tạm do pg/run-pg.mjs dựng; phép thử đồng thời P04: pg/run-dong-thoi.mjs)",
+  "description": "Lab PostgreSQL qua dự án Tới Nơi — P01–P02 chạy bằng PGlite (PostgreSQL 17.5 trong WASM), P03+ chạy trên PostgreSQL 18 thật (cluster tạm do pg/run-pg.mjs dựng; phép thử đồng thời P04: pg/run-dong-thoi.mjs; P05–P06 có runner riêng trong thư mục phần, P06 cần thêm PG17_BIN và PGlite cho PostGIS/pgvector)",
   "engines": {
     "node": ">=22"
   },
@@ -21,7 +21,10 @@
     "p04:measure": "node pg/run-dong-thoi.mjs p04/dong-thoi.mjs",
     "p04:dong-thoi-nho": "node pg/run-dong-thoi.mjs p04/dong-thoi.mjs --nho",
     "test": "node --test \"test/*.test.mjs\"",
-    "p05": "node p05/run.mjs"
+    "p05": "node p05/run.mjs",
+    "p06": "node p06/run.mjs",
+    "p06:extensions": "node p06/extensions/run.mjs",
+    "p06:extensions:install": "npm ci --prefix p06/extensions"
   },
   "dependencies": {
     "@electric-sql/pglite": "0.3.16"

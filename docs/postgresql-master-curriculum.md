@@ -23,7 +23,7 @@ Series riêng cho PostgreSQL thuộc chuyên mục cha Database, dùng xuyên su
 
 | Engine | Slug chuyên mục | Tiền tố bài mới | Curriculum dự kiến | Trạng thái |
 |---|---|---|---|---|
-| PostgreSQL | `postgresql` | `postgresql-` | `postgresql-master-curriculum.md` | P01–P05 đã viết; P06 kế hoạch |
+| PostgreSQL | `postgresql` | `postgresql-` | `postgresql-master-curriculum.md` | P01–P06 đã viết (60 bài) |
 | MySQL | `mysql` | `mysql-` | `mysql-master-curriculum.md` | Dự kiến |
 | MongoDB | `mongodb` | `mongodb-` | `mongodb-master-curriculum.md` | Dự kiến |
 | Microsoft SQL Server (MSSQL) | `mssql` | `mssql-` | `mssql-master-curriculum.md` | Dự kiến |
@@ -40,7 +40,7 @@ Mọi series engine theo cùng quy ước với PostgreSQL: chia thành nhiều 
 - Giữ nguyên slug hai bài đã có: `page-don-vi-doc-ghi` → PG-022, `heap-ctid-va-primary-key` → PG-024. Chuyển chuyên mục sang `postgresql`, không viết bản sao. Khi làm P03 phải rà lại nội dung, phép đo và thứ tự đọc trước khi đánh dấu hoàn tất phần.
 - Khi P01 hoàn tất, cập nhật lộ trình gốc thành P01 với 10 bài PG-001–010; hồ sơ chung trở thành tài liệu đọc trước. Hai bài cũ giữ URL và đăng ký vào P03 khi phần đó sẵn sàng. Các phần tiếp theo dùng `postgresql-tu-ben-trong-phan-02` … `-phan-06`.
 - Chỉ thêm các bài đã viết và kiểm tra vào `api/seed/learning-paths.json`; tối đa 10 bài/phần. Không thêm slug kế hoạch vào seed, không tạo Markdown rỗng. Level lộ trình dự kiến: P01 beginner, P02 intermediate, P03–P06 advanced; level từng bài theo bảng.
-- Danh sách dưới đây quản lý ID, slug và đầu ra. P01–P05 đã viết (50 bài, gồm 2 bài kế thừa đã rà soát); P06 còn 10 bài kế hoạch. Trạng thái source không đồng nghĩa đã seed/deploy.
+- Danh sách dưới đây quản lý ID, slug và đầu ra. P01–P06 đã viết (60 bài, gồm 2 bài kế thừa đã rà soát). Trạng thái source không đồng nghĩa đã seed/deploy.
 
 ## Tiêu chuẩn viết và hoàn tất một phần
 
@@ -151,17 +151,17 @@ Lộ trình: `postgresql-tu-ben-trong-phan-05` — **đã viết đủ 10 bài n
 
 Đầu vào: P01–P05; có baseline đo và runbook phục hồi. Đầu ra: Capstone vận hành PostgreSQL với kế hoạch thay đổi và diễn tập sự cố.
 
-Lộ trình khi hoàn tất: `postgresql-tu-ben-trong-phan-06`.
+Lộ trình: `postgresql-tu-ben-trong-phan-06` — **đã viết đủ 10 bài ngày 15/11/2026**. Lab: `examples/toi-noi-postgresql/p06` (PostgreSQL **18.1 thật** cho partition, JSONB, materialized view, logical/physical replication, failover, split-brain + pg_rewind; PostgreSQL **17.7** làm nguồn nâng cấp qua dump/restore và pg_upgrade; PG-057 chạy PostGIS/pgvector trên PGlite vì bản PostgreSQL 18 Windows không kèm hai extension; kết quả `OUTPUT.txt` và `extensions/OUTPUT.txt`, giới hạn trong README, bàn giao `HO-SO-BAN-GIAO.md`). Chưa seed/deploy lên website.
 
 | ID | Bài / slug | Mức | Làm được sau bài / sản phẩm thực hành | Trạng thái |
 |---|---|---|---|---|
-| PG-051 | Partition là gì và dùng khi nào?<br>`postgresql-partition-co-ban` | CB | Phân biệt partition với index và chọn khoá theo workload | Kế hoạch |
-| PG-052 | Primary, standby và replication lag<br>`postgresql-replication-primary-standby` | CB | Quan sát sao chép trong lab và diễn giải độ trễ đọc | Kế hoạch |
-| PG-053 | JSONB và dữ liệu quan hệ<br>`postgresql-jsonb-quan-he` | CB | Chọn cột quan hệ hoặc JSONB theo ràng buộc và truy vấn | Kế hoạch |
-| PG-054 | Partition pruning và vòng đời dữ liệu<br>`postgresql-partition-pruning-retention` | TB | Đo pruning, chuẩn bị partition và thử retention có kiểm tra | Kế hoạch |
-| PG-055 | Logical replication và CDC<br>`postgresql-logical-replication-cdc` | TB | Thử initial copy, thay đổi dữ liệu và giám sát replication slot | Kế hoạch |
-| PG-056 | Materialized view và dữ liệu báo cáo<br>`postgresql-materialized-view-reporting` | TB | Định nghĩa độ tươi, quy trình refresh và đối soát kết quả | Kế hoạch |
-| PG-057 | Đánh giá PostGIS và pgvector theo workload<br>`postgresql-extension-postgis-pgvector` | TB | Thiết kế hai thử nghiệm độc lập cho vị trí và vector, nêu điều kiện dùng | Kế hoạch |
-| PG-058 | Failover, split-brain và tính nhất quán khi đọc<br>`postgresql-ha-failover-read-consistency` | NC | Lập kịch bản mất primary, fencing, kết nối lại và đo mất dữ liệu | Kế hoạch |
-| PG-059 | Nâng phiên bản và cutover có phương án quay lại<br>`postgresql-upgrade-migration-cutover` | NC | Rehearsal tương thích, đối soát, cổng go/no-go và giới hạn rollback | Kế hoạch |
-| PG-060 | Capstone: vận hành dữ liệu Tới Nơi từ schema tới sự cố<br>`postgresql-capstone-van-hanh-toi-noi` | NC | Bàn giao schema, SQL, benchmark, restore, failover và quyết định kiến trúc | Kế hoạch |
+| PG-051 | Partition là gì và dùng khi nào?<br>`postgresql-partition-co-ban` | CB | Phân biệt partition với index và chọn khoá theo workload | Đã viết |
+| PG-052 | Primary, standby và replication lag<br>`postgresql-replication-primary-standby` | CB | Quan sát sao chép trong lab và diễn giải độ trễ đọc | Đã viết |
+| PG-053 | JSONB và dữ liệu quan hệ<br>`postgresql-jsonb-quan-he` | CB | Chọn cột quan hệ hoặc JSONB theo ràng buộc và truy vấn | Đã viết |
+| PG-054 | Partition pruning và vòng đời dữ liệu<br>`postgresql-partition-pruning-retention` | TB | Đo pruning, chuẩn bị partition và thử retention có kiểm tra | Đã viết |
+| PG-055 | Logical replication và CDC<br>`postgresql-logical-replication-cdc` | TB | Thử initial copy, thay đổi dữ liệu và giám sát replication slot | Đã viết |
+| PG-056 | Materialized view và dữ liệu báo cáo<br>`postgresql-materialized-view-reporting` | TB | Định nghĩa độ tươi, quy trình refresh và đối soát kết quả | Đã viết |
+| PG-057 | Đánh giá PostGIS và pgvector theo workload<br>`postgresql-extension-postgis-pgvector` | TB | Thiết kế hai thử nghiệm độc lập cho vị trí và vector, nêu điều kiện dùng | Đã viết |
+| PG-058 | Failover, split-brain và tính nhất quán khi đọc<br>`postgresql-ha-failover-read-consistency` | NC | Lập kịch bản mất primary, fencing, kết nối lại và đo mất dữ liệu | Đã viết |
+| PG-059 | Nâng phiên bản và cutover có phương án quay lại<br>`postgresql-upgrade-migration-cutover` | NC | Rehearsal tương thích, đối soát, cổng go/no-go và giới hạn rollback | Đã viết |
+| PG-060 | Capstone: vận hành dữ liệu Tới Nơi từ schema tới sự cố<br>`postgresql-capstone-van-hanh-toi-noi` | NC | Bàn giao schema, SQL, benchmark, restore, failover và quyết định kiến trúc | Đã viết |

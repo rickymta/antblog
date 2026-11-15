@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="675" viewBox="0 0 1200 675">
+    <title>PostgreSQL · Phần 6 · Mở rộng, tích hợp và vận hành đầu cuối</title><desc>Mười bài khép lại series PostgreSQL qua Tới Nơi: partition và vòng đời dữ liệu, JSONB, primary/standby, logical replication, materialized view, PostGIS/pgvector, failover có fencing, nâng phiên bản 17 → 18 và capstone đối soát sau sự cố. Lab PostgreSQL 18 thật dựng nhiều cluster, giả lập mất primary, split-brain và pg_rewind.</desc>
+    <rect width="1200" height="675" fill="#edf2f7"/>
+    <svg x="0" y="115" width="1200" height="420" viewBox="0 85 1200 420"><title>PARTITION GPS</title><desc>PostgreSQL · PG-051 · Scale and integration through Toi Noi</desc>
+    <defs><pattern id="grid" width="32" height="32" patternUnits="userSpaceOnUse"><circle cx="1" cy="1" r="1" fill="#6455bf" opacity=".15"/></pattern></defs>
+    <rect x="0" y="0" width="1200" height="675" rx="0" fill="#e6e4fa" stroke="none" stroke-width="2"/><rect width="1200" height="675" fill="url(#grid)"/>
+    <text x="54" y="51" font-family="Arial, sans-serif" font-size="14" font-weight="600" fill="#302b53">ANTBLOG / ENGINEERING NOTES</text><text x="1080" y="51" font-family="Arial, sans-serif" font-size="16" font-weight="500" fill="#302b53">587</text>
+    <path d="M54 73L1146 73" stroke="#6455bf33" stroke-width="3" fill="none" />
+    <rect x="194" y="246" width="210" height="120" rx="12" fill="#6455bf33" stroke="none" stroke-width="2"/><rect x="180" y="230" width="210" height="120" rx="12" fill="#ffffff" stroke="#6455bf" stroke-width="2"/><rect x="202" y="208" width="58" height="36" rx="6" fill="#6455bf" stroke="none" stroke-width="2"/><text x="199" y="298" font-family="Arial, sans-serif" font-size="18" font-weight="700" fill="#302b53">OCTOBER</text><path d="M390 290L430 290" stroke="#6455bf" stroke-width="3" fill="none" stroke-dasharray="5 5"/><rect x="444" y="316" width="210" height="120" rx="12" fill="#6455bf33" stroke="none" stroke-width="2"/><rect x="430" y="300" width="210" height="120" rx="12" fill="#ffffff" stroke="#6455bf" stroke-width="2"/><rect x="452" y="278" width="58" height="36" rx="6" fill="#6455bf" stroke="none" stroke-width="2"/><text x="449" y="368" font-family="Arial, sans-serif" font-size="18" font-weight="700" fill="#302b53">NOVEMBER</text><path d="M640 360L680 360" stroke="#6455bf" stroke-width="3" fill="none" stroke-dasharray="5 5"/><rect x="694" y="246" width="210" height="120" rx="12" fill="#6455bf33" stroke="none" stroke-width="2"/><rect x="680" y="230" width="210" height="120" rx="12" fill="#ffffff" stroke="#6455bf" stroke-width="2"/><rect x="702" y="208" width="58" height="36" rx="6" fill="#6455bf" stroke="none" stroke-width="2"/><text x="699" y="298" font-family="Arial, sans-serif" font-size="18" font-weight="700" fill="#302b53">DECEMBER</text>
+    <rect x="0" y="507" width="1200" height="168" rx="0" fill="#302b53" stroke="none" stroke-width="2"/><rect x="54" y="539" width="5" height="81" rx="0" fill="#6455bf" stroke="none" stroke-width="2"/>
+    <text x="78" y="578" font-family="Arial, sans-serif" font-size="60" font-weight="700" fill="#ffffff">PARTITION GPS</text><text x="80" y="620" font-family="Arial, sans-serif" font-size="20" font-weight="500" fill="#cbd5e1">PostgreSQL · PG-051 · Scale and integration through Toi Noi</text>
+  </svg>
+    <rect width="1200" height="115" fill="#0f172a"/>
+    <rect x="40" y="37" width="5" height="40" rx="2" fill="#336791"/>
+    <text x="65" y="65" font-family="Arial,sans-serif" font-size="26" font-weight="700" fill="white">POSTGRESQL</text>
+    <text x="1110" y="79" text-anchor="middle" font-family="Arial,sans-serif" font-size="62" font-weight="700" fill="#99f6e4">06</text>
+    <rect y="535" width="1200" height="140" fill="#0f172a"/>
+    <path d="M75 610h900" stroke="#334155" stroke-width="3" stroke-dasharray="6 10"/>
+    <circle cx="75" cy="610" r="8" fill="#64748b"/><circle cx="165" cy="610" r="8" fill="#64748b"/><circle cx="255" cy="610" r="8" fill="#64748b"/><circle cx="345" cy="610" r="8" fill="#64748b"/><circle cx="435" cy="610" r="8" fill="#64748b"/><circle cx="525" cy="610" r="15" fill="#5eead4"/>
+    <path d="m1080 590 20 20-20 20m-24-20h44" fill="none" stroke="#5eead4" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>
+  </svg>

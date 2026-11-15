@@ -24,6 +24,11 @@
     "topic": "postgresql",
     "number": 5
   },
+  "postgresql-tu-ben-trong-phan-06": {
+    "source": "postgresql-partition-co-ban",
+    "topic": "postgresql",
+    "number": 6
+  },
   "design-pattern-qua-toi-noi": {
     "source": "du-an-mau-toi-noi",
     "topic": "design-pattern",

@@ -5858,5 +5858,105 @@
       "OPEN RISKS",
       "SIGN-OFF"
     ]
+  },
+  "postgresql-partition-co-ban": {
+    "title": "PARTITION GPS",
+    "subtitle": "PostgreSQL · PG-051 · Scale and integration through Toi Noi",
+    "diagram": "blocks",
+    "labels": [
+      "OCTOBER",
+      "NOVEMBER",
+      "DECEMBER"
+    ]
+  },
+  "postgresql-replication-primary-standby": {
+    "title": "PRIMARY / STANDBY",
+    "subtitle": "PostgreSQL · PG-052 · Scale and integration through Toi Noi",
+    "diagram": "network",
+    "labels": [
+      "PRIMARY",
+      "WAL STREAM",
+      "STANDBY"
+    ]
+  },
+  "postgresql-jsonb-quan-he": {
+    "title": "JSONB OR COLUMN?",
+    "subtitle": "PostgreSQL · PG-053 · Scale and integration through Toi Noi",
+    "diagram": "split",
+    "labels": [
+      "COLUMNS",
+      "CHOOSE",
+      "JSONB"
+    ]
+  },
+  "postgresql-partition-pruning-retention": {
+    "title": "PRUNE / RETAIN",
+    "subtitle": "PostgreSQL · PG-054 · Scale and integration through Toi Noi",
+    "diagram": "cycle",
+    "labels": [
+      "CREATE",
+      "DETACH",
+      "DROP"
+    ]
+  },
+  "postgresql-logical-replication-cdc": {
+    "title": "LOGICAL CDC",
+    "subtitle": "PostgreSQL · PG-055 · Scale and integration through Toi Noi",
+    "diagram": "flow",
+    "labels": [
+      "PUBLICATION",
+      "SLOT",
+      "SUBSCRIPTION"
+    ]
+  },
+  "postgresql-materialized-view-reporting": {
+    "title": "MATERIALIZED VIEW",
+    "subtitle": "PostgreSQL · PG-056 · Scale and integration through Toi Noi",
+    "diagram": "target",
+    "labels": [
+      "BASE TABLE",
+      "REFRESH",
+      "REPORT"
+    ]
+  },
+  "postgresql-extension-postgis-pgvector": {
+    "title": "POSTGIS / PGVECTOR",
+    "subtitle": "PostgreSQL · PG-057 · Scale and integration through Toi Noi",
+    "diagram": "map",
+    "labels": [
+      "PICKUP",
+      "500 M",
+      "DRIVER"
+    ]
+  },
+  "postgresql-ha-failover-read-consistency": {
+    "title": "FAILOVER / FENCING",
+    "subtitle": "PostgreSQL · PG-058 · Scale and integration through Toi Noi",
+    "diagram": "split",
+    "labels": [
+      "OLD PRIMARY",
+      "FENCE",
+      "NEW PRIMARY"
+    ]
+  },
+  "postgresql-upgrade-migration-cutover": {
+    "title": "UPGRADE / CUTOVER",
+    "subtitle": "PostgreSQL · PG-059 · Scale and integration through Toi Noi",
+    "diagram": "flow",
+    "labels": [
+      "PG 17",
+      "CHECK",
+      "PG 18"
+    ]
+  },
+  "postgresql-capstone-van-hanh-toi-noi": {
+    "title": "CAPSTONE",
+    "subtitle": "PostgreSQL · PG-060 · Scale and integration through Toi Noi",
+    "diagram": "checklist",
+    "labels": [
+      "SCHEMA",
+      "RECOVER",
+      "RECONCILE"
+    ]
   }
 }

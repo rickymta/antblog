@@ -8,8 +8,8 @@ Mã thực hành cho loạt bài **PostgreSQL qua dự án Tới Nơi**. Đọc 
 | P02 | SQL cho nghiệp vụ | [`p02/`](p02/README.md) | Có SQL, fixture 30 ngày tất định, kết quả mẫu và test — đã chạy trên PGlite 17.5 (chạy trên lược đồ P01) |
 | P03 | Lưu trữ, index và kế hoạch thực thi | [`p03/`](p03/README.md) | Có SQL, fixture 1 triệu chuyến tất định, kết quả mẫu, thí nghiệm, phép đo và test — **đã chạy trên PostgreSQL 18.1 thật** (cluster tạm, xem [P03+](#p03-postgresql-18-that)) |
 | P04 | Giao dịch, MVCC và đồng thời | [`p04/`](p04/README.md) | Có SQL (10 kịch bản phần lớn NHIỀU PHIÊN, lịch chạy tất định), fixture nhỏ, kết quả mẫu, thí nghiệm, **phép thử đồng thời** (8 phiên chạy đua, kiểm bất biến) và test — **đã chạy trên PostgreSQL 18.1 thật** |
-| P05 | Bảo mật, bảo trì và phục hồi | `p05/` | Chưa có |
-| P06 | Mở rộng, tích hợp và vận hành đầu cuối | `p06/` | Chưa có |
+| P05 | Bảo mật, bảo trì và phục hồi | [`p05/`](p05/README.md) | Runner riêng `npm run p05`: hai cluster tạm, TLS/SCRAM, quyền, quan sát, VACUUM, WAL, dump/restore, pool, RLS, PITR — **đã chạy trên PostgreSQL 18.1 thật** |
+| P06 | Mở rộng, tích hợp và vận hành đầu cuối | [`p06/`](p06/README.md) | Runner riêng `npm run p06`: partition, JSONB, materialized view, logical/physical replication, failover, split-brain + pg_rewind, nâng 17 → 18 — **đã chạy trên PostgreSQL 18.1 + 17.7 thật**; PG-057 (PostGIS/pgvector) chạy trên PGlite |
 
 Mỗi phần là một thư mục gồm các file `NN-*.sql` chạy theo thứ tự tên, một `README.md`, kết quả chạy thật `OUTPUT.txt` và một file test trong `test/`. Phần sau có thể chạy trên lược đồ của phần trước: P02 = `p01/00-reset.sql` + `p01/01-schema.sql` + `p02/` (không nạp fixture P01); P03 = lược đồ P01 + `p02/00-mo-rong-schema.sql` + `p03/00`–`03` (dữ liệu riêng của P03); P04 = lược đồ P01 + `p02/00-mo-rong-schema.sql` + `p04/00`–`02` (fixture nhỏ riêng của P04).
 
@@ -357,3 +357,7 @@ toi-noi-postgresql/
 ## P05 · Bảo mật, bảo trì và phục hồi
 
 Đã bổ sung PG-041–050. Chạy `npm run p05` trên PostgreSQL thật; cần thêm OpenSSL. Xem [hướng dẫn và giới hạn phép đo](p05/README.md), [runbook](p05/RUNBOOK.md) và [kết quả thực](p05/OUTPUT.txt). Lab dựng hai cluster tạm, kiểm TLS/SCRAM, quyền, lock, vacuum, backup logic, pool, RLS và PITR. Không chạy seed/deploy.
+
+## P06 · Mở rộng, tích hợp và vận hành đầu cuối
+
+Đã bổ sung PG-051–060. Chạy `npm run p06` với PostgreSQL 18 và biến `PG17_BIN` trỏ tới binary PostgreSQL 17 (cho PG-059); PG-057 chạy riêng bằng `npm run p06:extensions:install` rồi `npm run p06:extensions`. Xem [hướng dẫn và giới hạn](p06/README.md), [hồ sơ bàn giao capstone](p06/HO-SO-BAN-GIAO.md), [kết quả thực](p06/OUTPUT.txt) và [kết quả PG-057](p06/extensions/OUTPUT.txt). Không chạy seed/deploy.
