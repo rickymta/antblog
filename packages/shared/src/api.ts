@@ -1,4 +1,5 @@
 // Client gọi API theo docs/api-contract.md. Dev chạy qua proxy Vite (`/api` → API) nên cùng origin, cookie phiên tự đi kèm.
+import type { AdminTerm, GlossaryTerm, TermInput, TermUsage, TermUsageInput } from './glossary';
 import type {
   AdminArticle,
   AdminComment,
@@ -120,6 +121,10 @@ export const api = {
     get: (slug: string) => request<Category>('GET', `/categories/${enc(slug)}`),
   },
 
+  glossary: {
+    list: (language: 'vi' | 'en' = 'vi') => request<GlossaryTerm[]>('GET', '/glossary', undefined, { language }),
+  },
+
   articles: {
     list: (query: ArticleQuery = {}) => request<Page<ArticleCard>>('GET', '/articles', undefined, { ...query }),
     trending: (limit = 4) => request<ArticleCard[]>('GET', '/articles/trending', undefined, { limit }),
@@ -175,6 +180,14 @@ export const api = {
       create: (input: CategoryInput) => request<Category>('POST', '/admin/categories', input),
       update: (id: string, input: CategoryInput) => request<Category>('PUT', `/admin/categories/${enc(id)}`, input),
       remove: (id: string) => request<void>('DELETE', `/admin/categories/${enc(id)}`),
+    },
+
+    terms: {
+      list: () => request<AdminTerm[]>('GET', '/admin/terms'),
+      create: (input: TermInput) => request<AdminTerm>('POST', '/admin/terms', input),
+      update: (id: string, input: TermInput) => request<AdminTerm>('PUT', `/admin/terms/${enc(id)}`, input),
+      remove: (id: string) => request<void>('DELETE', `/admin/terms/${enc(id)}`),
+      usage: (input: TermUsageInput) => request<TermUsage>('POST', '/admin/terms/usage', input),
     },
 
     learningPaths: {

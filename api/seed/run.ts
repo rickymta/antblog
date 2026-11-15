@@ -24,7 +24,8 @@ async function main(): Promise<void> {
     });
     console.log(
       `[seed] Xong: admin ${r.adminCreated ? 'mới tạo' : 'đã có'}, ${r.categories} chủ đề, ` +
-        `${r.articles.created + r.articles.updated} bài (giữ ${r.articles.keptCms} bài đã sửa trong CMS), ${r.learningPaths} lộ trình.`,
+        `${r.articles.created + r.articles.updated} bài (giữ ${r.articles.keptCms} bài đã sửa trong CMS), ${r.learningPaths} lộ trình, ` +
+        `${r.terms.upserted} thuật ngữ.`,
     );
   } finally {
     await disconnectDb();

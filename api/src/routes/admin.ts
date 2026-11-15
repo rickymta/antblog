@@ -32,6 +32,7 @@ import { resolveArticleSlug, syncLearningPathArticles } from '../services/articl
 import { setCommentVisibility, softDeleteComment } from '../services/comments.js';
 import { recountCategories, withLiveArticleCounts } from '../services/counters.js';
 import { mediaRouter } from './media.js';
+import { adminTermsRouter } from './glossary.js';
 import {
   compact,
   toAdminArticles,
@@ -325,6 +326,9 @@ export function adminRouter(): Router {
 
   // ---------- Mọi mục còn lại: chỉ admin ----------
   r.use(adminOnly);
+
+  // ---------- Từ điển keyword ----------
+  r.use('/terms', adminTermsRouter());
 
   // ---------- Chủ đề ----------
   r.get('/categories', async (_req, res) => {

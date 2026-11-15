@@ -7,7 +7,7 @@ import { Types } from 'mongoose';
 import { z } from 'zod';
 import { zodFields } from '../src/lib/validate.js';
 import { computeReadingMinutes, SLUG_PATTERN } from '../src/lib/text.js';
-import { Article, Category, CATEGORY_ICONS, LearningPath, LEVELS, PATH_STATUSES, User, type IUser } from '../src/models/index.js';
+import { Article, Category, CATEGORY_ICONS, LearningPath, LEVELS, PATH_STATUSES, Term, User, type IUser } from '../src/models/index.js';
 import { syncLearningPathArticles } from '../src/services/articles.js';
 import { recountCategories } from '../src/services/counters.js';
 
@@ -26,6 +26,8 @@ export interface SeedResult {
   /** `keptCms`: bài có sẵn đã sửa trong CMS ⇒ giữ nguyên, không ghi đè từ tệp .md. */
   articles: { created: number; updated: number; skipped: number; keptCms: number };
   learningPaths: number;
+  /** Từ điển keyword nạp từ `terminology.json` (mục `glossary: true`). `keptCms`: đã sửa trong CMS ⇒ giữ nguyên. */
+  terms: { upserted: number; keptCms: number };
 }
 
 const slug = z.string().trim().regex(SLUG_PATTERN, { message: 'slug không hợp lệ (a-z0-9-)' });
@@ -118,7 +120,7 @@ async function ensureAdmin(opts: SeedOptions['admin'], log: (m: string) => void)
 
 export async function runSeed(opts: SeedOptions): Promise<SeedResult> {
   const log = opts.log ?? ((m: string) => console.log(m));
-  const result: SeedResult = { adminCreated: false, categories: 0, articles: { created: 0, updated: 0, skipped: 0, keptCms: 0 }, learningPaths: 0 };
+  const result: SeedResult = { adminCreated: false, categories: 0, articles: { created: 0, updated: 0, skipped: 0, keptCms: 0 }, learningPaths: 0, terms: { upserted: 0, keptCms: 0 } };
 
   const { user: admin, created } = await ensureAdmin(opts.admin, log);
   result.adminCreated = created;
@@ -281,6 +283,60 @@ export async function runSeed(opts: SeedOptions): Promise<SeedResult> {
     log(`[seed] Lộ trình học: ${parsed.data.length}.`);
   }
 
+  // ---- Từ điển keyword ----
+  result.terms = await seedTerms(opts, log);
+
   await recountCategories();
   return result;
+}
+
+const terminologyFile = z.object({
+  terms: z.array(
+    z.object({
+      id: slug,
+      use: z.string().trim().min(1),
+      english: z.string().trim().optional(),
+      glossary: z.boolean().optional(),
+      definition: z.string().trim().max(300).optional(),
+    }),
+  ),
+});
+
+/**
+ * Seed `Term` từ các mục `glossary: true` có `definition` trong `terminology.json` (ngôn ngữ `vi`).
+ * Tên tiếng Anh (nếu khác cách viết chuẩn) thành alias để cũng được dò trong bài.
+ */
+async function seedTerms(opts: SeedOptions, log: (m: string) => void): Promise<SeedResult['terms']> {
+  const out = { upserted: 0, keptCms: 0 };
+  const raw = readJson(path.join(opts.dataDir, 'terminology.json'), log);
+  if (raw === undefined) return out;
+  const parsed = terminologyFile.safeParse(raw);
+  if (!parsed.success) throw new Error(`terminology.json không hợp lệ: ${describe(parsed.error)}`);
+  for (const t of parsed.data.terms) {
+    if (!t.glossary || !t.definition) continue;
+    const existing = await Term.findOne({ language: 'vi', slug: t.id }).select({ editedInCms: 1 }).lean();
+    if (existing?.editedInCms === true && !opts.forceContent) {
+      out.keptCms++;
+      continue;
+    }
+    const english = t.english && t.english.toLowerCase() !== t.use.toLowerCase() ? t.english : undefined;
+    await Term.updateOne(
+      { language: 'vi', slug: t.id },
+      {
+        $set: {
+          term: t.use,
+          aliases: english ? [english] : [],
+          shortDefinition: t.definition,
+          status: 'published',
+          ...(english ? { english } : {}),
+        },
+        $setOnInsert: { caseSensitive: false, autoLink: true },
+        ...(english ? {} : { $unset: { english: 1 } }),
+      },
+      { upsert: true },
+    );
+    out.upserted++;
+  }
+  log(`[seed] Từ điển keyword: ${out.upserted} thuật ngữ${out.keptCms ? `, giữ ${out.keptCms} thuật ngữ đã sửa trong CMS` : ''}.`);
+  return out;
 }

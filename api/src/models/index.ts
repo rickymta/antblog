@@ -5,3 +5,4 @@ export * from './learningPath.js';
 export * from './comment.js';
 export * from './activity.js';
 export * from './media.js';
+export * from './term.js';

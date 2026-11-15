@@ -18,6 +18,7 @@ import { articlesRouter } from './routes/articles.js';
 import { authRouter } from './routes/auth.js';
 import { commentsRouter } from './routes/comments.js';
 import { publicRouter } from './routes/public.js';
+import { glossaryRouter } from './routes/glossary.js';
 
 export interface AppOptions {
   /** Số lần đăng nhập/đăng ký mỗi IP trong 15 phút (mặc định 10). */
@@ -50,6 +51,7 @@ export function createApp(options: AppOptions = {}): Express {
 
   api.use('/auth', authRouter(authLimiter(options.authRateLimit ?? 10)));
   api.use(publicRouter());
+  api.use(glossaryRouter());
   api.use(articlesRouter());
   api.use(commentsRouter(commentLimiter(options.commentRateLimit ?? 10)));
   api.use('/admin', adminRouter());

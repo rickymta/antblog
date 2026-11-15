@@ -4,6 +4,7 @@ import { useRef, type ReactNode } from 'react';
 import { useArticleView } from '../../hooks/useArticleView';
 import { useArticle } from './ArticleContext';
 import { CodeCopyOverlay } from './CodeCopyOverlay';
+import { GlossaryPopover } from './GlossaryPopover';
 
 /**
  * Khung thân bài phía trình duyệt: đếm lượt xem (5 giây hiển thị hoặc cuộn qua 30%) và lớp nút "Sao chép" cho khối mã.
@@ -17,6 +18,7 @@ export function ArticleBody({ children }: { children: ReactNode }) {
     <div ref={bodyRef} lang={article.language} className="tkh-article-body relative mt-8">
       {children}
       <CodeCopyOverlay containerRef={bodyRef} contentKey={article.id + article.updatedAt} />
+      <GlossaryPopover containerRef={bodyRef} />
     </div>
   );
 }

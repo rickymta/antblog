@@ -38,7 +38,7 @@ import { draftKey, readDraft, removeDraft, writeDraft } from '../lib/drafts';
 import { errorMessage, hasCode, hasStatus, isApiError } from '../lib/errors';
 import { imageMarkdown } from '../lib/media';
 import { IMAGE_URL_RE, SLUG_RE, siteArticleUrl } from '../lib/site';
-import { useCategoryOptions } from '../lib/queries';
+import { useCategoryOptions, useGlossary } from '../lib/queries';
 import { useToast } from '../lib/toast';
 import { useLocale } from '../i18n';
 
@@ -637,6 +637,8 @@ function ArticleEditor({ article: initialArticle }: { article: AdminArticle | un
 
   // ---- Xem trước, số từ, mục lục ----
   const deferredContent = useDeferredValue(form.content);
+  // Xem trước có đánh dấu keyword như trang đọc; lỗi tải từ điển thì xem trước vẫn chạy, chỉ không đánh dấu.
+  const glossary = useGlossary(form.language).data;
   const stats = useMemo(() => wordStats(deferredContent), [deferredContent]);
   const outline = useMemo(() => {
     const lines = outlineLines(deferredContent);
@@ -818,7 +820,7 @@ function ArticleEditor({ article: initialArticle }: { article: AdminArticle | un
                 role="region"
                 tabIndex={0}
               >
-                {deferredContent.trim() ? <ArticleContent markdown={deferredContent} /> : <p className="text-sm text-muted italic">{t('editor.previewEmpty')}</p>}
+                {deferredContent.trim() ? <ArticleContent markdown={deferredContent} glossary={glossary} /> : <p className="text-sm text-muted italic">{t('editor.previewEmpty')}</p>}
               </div>
             )}
           </div>

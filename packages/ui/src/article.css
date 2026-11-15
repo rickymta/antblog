@@ -179,3 +179,23 @@
   .tkh-prose h2 { font-size: 1.45rem; }
   .tkh-prose pre { font-size: 0.875rem; padding-inline: 1rem; }
 }
+
+/* Từ điển keyword (rehypeGlossary): gạch chân chấm mờ, rê chuột/chạm để mở hộp thoại giải thích. */
+.tkh-prose dfn.tkh-term {
+  font-style: normal;
+  text-decoration: underline dotted;
+  text-decoration-color: color-mix(in srgb, var(--color-primary) 55%, transparent);
+  text-decoration-thickness: 1.5px;
+  text-underline-offset: 4px;
+  cursor: help;
+  border-radius: 3px;
+}
+.tkh-prose dfn.tkh-term:hover,
+.tkh-prose dfn.tkh-term[aria-expanded='true'] {
+  text-decoration-color: var(--color-primary);
+  background: var(--tkh-primary-soft);
+}
+.tkh-prose dfn.tkh-term:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+}

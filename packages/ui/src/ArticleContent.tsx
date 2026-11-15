@@ -4,6 +4,8 @@ import rehypeRaw from 'rehype-raw';
 import rehypeSlug from 'rehype-slug';
 import rehypeHighlight from 'rehype-highlight';
 import GithubSlugger from 'github-slugger';
+import type { GlossaryTerm } from '@tkh/shared';
+import { rehypeGlossary } from './rehypeGlossary';
 import 'highlight.js/styles/github-dark.css';
 
 /**
@@ -13,12 +15,22 @@ import 'highlight.js/styles/github-dark.css';
  * Nội dung do tác giả (vai trò author/admin) viết nên cho phép HTML/SVG thô (rehype-raw) để nhúng hình.
  * KHÔNG dùng component này cho chữ người đọc gửi lên (bình luận) — bình luận hiển thị dạng văn bản thuần.
  */
-export function ArticleContent({ markdown, className }: { markdown: string; className?: string }) {
+export function ArticleContent({
+  markdown,
+  className,
+  glossary,
+}: {
+  markdown: string;
+  className?: string;
+  /** Thuật ngữ của từ điển keyword (`GET /glossary`). Vắng hoặc rỗng = không đánh dấu keyword. */
+  glossary?: readonly GlossaryTerm[];
+}) {
   return (
     <div className={className ? `tkh-prose ${className}` : 'tkh-prose'}>
       <ReactMarkdown
         remarkPlugins={[remarkGfm]}
-        rehypePlugins={[rehypeRaw, rehypeSlug, [rehypeHighlight, { detect: false, ignoreMissing: true }]]}
+        // rehypeGlossary chạy SAU rehypeRaw (để thấy `<dfn data-term>` tác giả viết tay) và trước highlight.
+        rehypePlugins={[rehypeRaw, [rehypeGlossary, { terms: glossary }], rehypeSlug, [rehypeHighlight, { detect: false, ignoreMissing: true }]]}
       >
         {markdown}
       </ReactMarkdown>

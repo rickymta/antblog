@@ -11,6 +11,7 @@ import {
   type IMedia,
   type IComment,
   type ILearningPath,
+  type ITerm,
   type IUser,
   type ReactionCounts,
 } from '../models/index.js';
@@ -326,4 +327,31 @@ export async function toMediaItems(items: IMedia[]) {
       createdAt: iso(m.createdAt)!,
     }),
   );
+}
+
+// ---------- Từ điển keyword ----------
+
+/** Bản công khai: đủ để dò keyword và hiển thị hộp thoại (không kèm `body`). */
+export function toGlossaryTerm(t: ITerm) {
+  return compact({
+    slug: t.slug,
+    term: t.term,
+    english: t.english || undefined,
+    aliases: t.aliases ?? [],
+    shortDefinition: t.shortDefinition,
+    caseSensitive: t.caseSensitive ?? false,
+    autoLink: t.autoLink ?? true,
+  });
+}
+
+export function toAdminTerm(t: ITerm) {
+  return compact({
+    id: idOf(t._id),
+    ...toGlossaryTerm(t),
+    language: t.language,
+    body: t.body || undefined,
+    status: t.status,
+    editedInCms: t.editedInCms === true,
+    updatedAt: iso(t.updatedAt),
+  });
 }
