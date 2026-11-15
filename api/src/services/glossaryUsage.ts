@@ -1,5 +1,6 @@
 import { proseLines, phraseRegex } from '../lib/contentLint.js';
 import { Article, type IArticle, type Language } from '../models/index.js';
+import { publicArticleFilter } from './serializers.js';
 
 export interface TermUsageInput {
   language: Language;
@@ -33,10 +34,17 @@ const EXCERPT_RADIUS = 60;
  * Chỉ quét văn xuôi (che code, inline code, thẻ HTML, đích liên kết — cùng quy tắc với `content:lint`), nên con số là
  * ước lượng trên: trang đọc còn bỏ qua chữ trong heading và liên kết, và chỉ đánh dấu lần xuất hiện đầu tiên mỗi bài.
  */
-export async function termUsage(input: TermUsageInput): Promise<TermUsage> {
+export interface TermUsageOptions {
+  /** Chỉ tính bài đã xuất bản (trang /glossary công khai). Mặc định: mọi trạng thái (trang quản trị). */
+  publishedOnly?: boolean;
+  /** Số bài mẫu trả về, sắp theo số lần xuất hiện giảm dần. */
+  limit?: number;
+}
+
+export async function termUsage(input: TermUsageInput, options: TermUsageOptions = {}): Promise<TermUsage> {
   const phrases = [...new Set([input.term, ...input.aliases].map((p) => p.trim()).filter(Boolean))];
   const regexes = phrases.map((p) => phraseRegex(p, input.caseSensitive));
-  const articles = await Article.find({ language: input.language })
+  const articles = await Article.find(options.publishedOnly ? { language: input.language, ...publicArticleFilter() } : { language: input.language })
     .select({ slug: 1, title: 1, status: 1, content: 1 })
     .lean<Pick<IArticle, '_id' | 'slug' | 'title' | 'status' | 'content'>[]>();
 
@@ -64,5 +72,5 @@ export async function termUsage(input: TermUsageInput): Promise<TermUsage> {
     hits.push({ id: a._id.toString(), slug: a.slug, title: a.title, status: a.status, occurrences: count, excerpt });
   }
   hits.sort((x, y) => y.occurrences - x.occurrences || x.slug.localeCompare(y.slug));
-  return { articles: hits.length, occurrences, samples: hits.slice(0, SAMPLE_LIMIT) };
+  return { articles: hits.length, occurrences, samples: hits.slice(0, options.limit ?? SAMPLE_LIMIT) };
 }

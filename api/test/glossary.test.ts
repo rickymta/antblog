@@ -44,6 +44,17 @@ describe('từ điển keyword — API công khai', () => {
 
     const detail = await request(app).get('/api/v1/glossary/smoke-test').expect(200);
     expect(detail.body.body).toBe('# Dài');
+    expect(detail.body.articles).toEqual([]);
+    expect(typeof detail.body.updatedAt).toBe('string');
+
+    // Bài liên quan: chỉ bài đã xuất bản của đúng ngôn ngữ có nhắc tới thuật ngữ.
+    const author = await createUser('author');
+    const cat = await createCategory();
+    await createArticle(cat, author, { slug: 'co-smoke', title: 'Bài có smoke test', content: 'Chạy smoke test trước.' });
+    await createArticle(cat, author, { slug: 'nhap-smoke', status: 'draft', publishedAt: undefined, content: 'Bản nháp có smoke test.' });
+    await createArticle(cat, author, { slug: 'khong-co', content: 'Không nhắc gì.' });
+    const withArticles = await request(app).get('/api/v1/glossary/smoke-test').expect(200);
+    expect(withArticles.body.articles).toEqual([{ slug: 'co-smoke', title: 'Bài có smoke test' }]);
     await request(app).get('/api/v1/glossary/nhap').expect(404);
   });
 });

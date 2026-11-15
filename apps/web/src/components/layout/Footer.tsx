@@ -67,6 +67,11 @@ export function Footer({ categories, year }: { categories: Category[] | null; ye
             </Link>
           </li>
           <li>
+            <Link href="/glossary" className={linkCls}>
+              {t('footer.glossary')}
+            </Link>
+          </li>
+          <li>
             <Link href="/about" className={linkCls}>
               {t('nav.about')}
             </Link>

@@ -9,6 +9,8 @@ import { toAdminTerm, toGlossaryTerm } from '../services/serializers.js';
 
 /** Độ dài tối đa của định nghĩa ngắn — vừa một hộp thoại nhỏ (đặc tả §Dữ liệu). */
 export const SHORT_DEFINITION_MAX = 300;
+/** Số bài liên quan hiển thị ở trang chi tiết thuật ngữ. */
+const RELATED_ARTICLE_LIMIT = 6;
 
 const languageQuery = z.object({ language: z.preprocess((v) => (v === '' ? undefined : v), z.enum(LANGUAGES).default('vi')) });
 
@@ -26,7 +28,17 @@ export function glossaryRouter(): Router {
     const { language } = parse(languageQuery, req.query);
     const term = await Term.findOne({ language, slug: req.params.slug, status: 'published' }).lean<ITerm>();
     if (!term) throw notFound('Không tìm thấy thuật ngữ.');
-    res.json({ ...toGlossaryTerm(term), ...(term.body ? { body: term.body } : {}) });
+    // Bài đã xuất bản có nhắc tới thuật ngữ — liên kết nội bộ cho trang /glossary/<slug>.
+    const usage = await termUsage(
+      { language, term: term.term, aliases: term.aliases ?? [], caseSensitive: term.caseSensitive ?? false },
+      { publishedOnly: true, limit: RELATED_ARTICLE_LIMIT },
+    );
+    res.json({
+      ...toGlossaryTerm(term),
+      ...(term.body ? { body: term.body } : {}),
+      ...(term.updatedAt ? { updatedAt: new Date(term.updatedAt).toISOString() } : {}),
+      articles: usage.samples.map((a) => ({ slug: a.slug, title: a.title })),
+    });
   });
 
   return r;

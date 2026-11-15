@@ -4,6 +4,8 @@ import { useCallback, useEffect, useId, useLayoutEffect, useRef, useState, type 
 import { createPortal } from 'react-dom';
 import { useTranslation } from 'react-i18next';
 import { X } from 'lucide-react';
+import Link from 'next/link';
+import { glossaryPath } from '../../lib/glossary';
 
 /** Phải khớp TERM_CLASS của rehypeGlossary (@tkh/ui). */
 const TERM_SELECTOR = 'dfn.tkh-term[data-term]';
@@ -15,6 +17,7 @@ const MAX_WIDTH = 360;
 
 interface Active {
   el: HTMLElement;
+  slug: string;
   title: string;
   english?: string;
   definition: string;
@@ -22,6 +25,8 @@ interface Active {
   pinned: boolean;
   /** Toạ độ y của con trỏ lúc mở — chọn đúng dòng khi keyword bị xuống dòng. */
   pointerY?: number;
+  /** Mở bằng Enter/Space: chuyển focus vào hộp thoại để Tab tới được nút đóng và liên kết "Xem thêm". */
+  fromKeyboard?: boolean;
 }
 
 interface Position {
@@ -34,7 +39,7 @@ interface Position {
 function readTerm(el: HTMLElement, pinned: boolean, pointerY?: number): Active | null {
   const definition = el.dataset.termDefinition;
   if (!definition) return null;
-  return { el, title: el.dataset.termTitle || el.textContent || '', english: el.dataset.termEnglish, definition, pinned, pointerY };
+  return { el, slug: el.dataset.term ?? '', title: el.dataset.termTitle || el.textContent || '', english: el.dataset.termEnglish, definition, pinned, pointerY };
 }
 
 /** Hộp chữ của keyword: nếu keyword xuống dòng, lấy dòng gần con trỏ nhất (hoặc dòng đầu). */
@@ -124,6 +129,11 @@ export function GlossaryPopover({ containerRef }: { containerRef: RefObject<HTML
     if (active) reposition();
   }, [active, reposition]);
 
+  // Mở bằng bàn phím ⇒ đưa focus vào phần tử tương tác đầu tiên của hộp thoại (portal nằm cuối <body>, Tab không tới).
+  useEffect(() => {
+    if (active?.pinned && active.fromKeyboard) popRef.current?.querySelector<HTMLElement>('button, a[href]')?.focus();
+  }, [active]);
+
   // Sự kiện trên thân bài.
   useEffect(() => {
     const root = containerRef.current;
@@ -175,7 +185,7 @@ export function GlossaryPopover({ containerRef }: { containerRef: RefObject<HTML
       e.preventDefault();
       if (activeRef.current?.el === el && activeRef.current.pinned) return close();
       const next = readTerm(el, true);
-      if (next) open(next);
+      if (next) open({ ...next, fromKeyboard: true });
     };
 
     root.addEventListener('pointerover', onPointerOver);
@@ -231,7 +241,8 @@ export function GlossaryPopover({ containerRef }: { containerRef: RefObject<HTML
     <div
       ref={popRef}
       id={id}
-      role="tooltip"
+      // Đã ghim (có nút đóng, liên kết) ⇒ dialog không chặn trang; chỉ rê chuột/focus ⇒ tooltip mô tả cho keyword.
+      role={active.pinned ? 'dialog' : 'tooltip'}
       aria-label={t('article.glossaryLabel')}
       onPointerEnter={() => window.clearTimeout(closeTimer.current)}
       onPointerLeave={(e) => {
@@ -262,6 +273,14 @@ export function GlossaryPopover({ containerRef }: { containerRef: RefObject<HTML
         )}
       </div>
       <p className="mt-2 text-sm leading-relaxed text-ink">{active.definition}</p>
+      <Link
+        href={glossaryPath(active.slug)}
+        // Next chuyển trang phía client: đóng hộp thoại để nó không treo lại trên trang mới.
+        onClick={() => close()}
+        className="mt-3 inline-flex items-center gap-1 text-sm font-semibold text-primary-ink hover:underline focus-visible:outline focus-visible:outline-2 focus-visible:outline-primary"
+      >
+        {t('article.glossaryMore')} <span aria-hidden="true">→</span>
+      </Link>
     </div>,
     document.body,
   );

@@ -1,6 +1,7 @@
 import type { MetadataRoute } from 'next';
 import type { SitemapData } from '@tkh/shared';
-import { serverApi } from '../lib/server-api';
+import { serverApi, settle } from '../lib/server-api';
+import { glossaryPath } from '../lib/glossary';
 import { absoluteUrl } from '../lib/site';
 
 // Dữ liệu lấy từ API lúc chạy (cache 5 phút ở tầng fetch) — không dựng lúc build vì ảnh Docker build không có API.
@@ -36,6 +37,8 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     data = await fallbackData();
   }
 
+  // Từ điển là phần phụ: API lỗi ⇒ sitemap vẫn có các trang khác.
+  const terms = (await settle(serverApi.glossary())) ?? [];
   const articles = data.articles.filter((a) => !a.noindex);
   const latest = articles.map((a) => toDate(a.updatedAt)).reduce<Date | undefined>((max, d) => (d && (!max || d > max) ? d : max), undefined);
 
@@ -44,6 +47,12 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     { url: absoluteUrl('/articles'), lastModified: latest, changeFrequency: 'daily', priority: 0.8 },
     { url: absoluteUrl('/learning-paths'), changeFrequency: 'weekly', priority: 0.7 },
     { url: absoluteUrl('/about'), changeFrequency: 'yearly', priority: 0.3 },
+    ...(terms.length
+      ? [
+          { url: absoluteUrl(glossaryPath()), changeFrequency: 'weekly' as const, priority: 0.5 },
+          ...terms.map((t) => ({ url: absoluteUrl(glossaryPath(t.slug)), changeFrequency: 'monthly' as const, priority: 0.4 })),
+        ]
+      : []),
     ...data.categories.map((c) => ({
       url: absoluteUrl(`/topics/${encodeURIComponent(c.slug)}`),
       lastModified: toDate(c.updatedAt),

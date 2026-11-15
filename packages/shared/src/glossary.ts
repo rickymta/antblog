@@ -14,6 +14,13 @@ export interface GlossaryTerm {
   autoLink: boolean;
 }
 
+/** `GET /glossary/:slug`: thêm phần giải thích dài và bài đã xuất bản có nhắc tới thuật ngữ. */
+export interface GlossaryTermDetail extends GlossaryTerm {
+  body?: string;
+  updatedAt?: string;
+  articles: Array<{ slug: string; title: string }>;
+}
+
 export type TermStatus = 'draft' | 'published';
 
 export interface AdminTerm extends GlossaryTerm {

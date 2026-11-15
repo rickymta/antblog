@@ -9,6 +9,7 @@ import {
   type ArticleQuery,
   type Category,
   type GlossaryTerm,
+  type GlossaryTermDetail,
   type LearningPathCard,
   type LearningPathDetail,
   type Level,
@@ -79,6 +80,7 @@ export const serverApi = {
   learningPath: (slug: string) => get<LearningPathDetail>(`/learning-paths/${enc(slug)}`),
   /** Từ điển keyword (cache 5 phút — sửa thuật ngữ trong CMS hiện ra trong vòng 5 phút). */
   glossary: (language: 'vi' | 'en' = 'vi') => get<GlossaryTerm[]>('/glossary', { language }, 300),
+  glossaryTerm: (slug: string, language: 'vi' | 'en' = 'vi') => get<GlossaryTermDetail>(`/glossary/${enc(slug)}`, { language }, 300),
 };
 
 /** API trả 404 ⇒ trang 404 của Next (mã HTTP 404); lỗi khác ném tiếp cho error boundary. */

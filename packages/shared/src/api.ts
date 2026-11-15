@@ -1,5 +1,5 @@
 // Client gọi API theo docs/api-contract.md. Dev chạy qua proxy Vite (`/api` → API) nên cùng origin, cookie phiên tự đi kèm.
-import type { AdminTerm, GlossaryTerm, TermInput, TermUsage, TermUsageInput } from './glossary';
+import type { AdminTerm, GlossaryTerm, GlossaryTermDetail, TermInput, TermUsage, TermUsageInput } from './glossary';
 import type {
   AdminArticle,
   AdminComment,
@@ -123,6 +123,7 @@ export const api = {
 
   glossary: {
     list: (language: 'vi' | 'en' = 'vi') => request<GlossaryTerm[]>('GET', '/glossary', undefined, { language }),
+    get: (slug: string, language: 'vi' | 'en' = 'vi') => request<GlossaryTermDetail>('GET', `/glossary/${enc(slug)}`, undefined, { language }),
   },
 
   articles: {
