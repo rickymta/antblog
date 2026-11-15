@@ -8,16 +8,17 @@
 | 2. Dò keyword khi render | Xong | Bộ dò `packages/shared/src/glossary.ts`, plugin `packages/ui/src/rehypeGlossary.ts`, nối vào `ArticleContent` |
 | 3. Hộp thoại | Xong | `apps/web/src/components/article/GlossaryPopover.tsx`, CSS `.tkh-term` trong `packages/ui/src/article.css` |
 | — Xem trước trong CMS | Xong | `useGlossary` trong `apps/admin/src/lib/queries.ts`. Bản xem trước chỉ đánh dấu keyword, chưa có hộp thoại |
-| 4. Trang quản trị keyword | Chưa làm | API CRUD và client `api.admin.terms` đã có, còn thiếu giao diện |
+| 4. Trang quản trị keyword | Xong | `apps/admin/src/pages/TermsPage.tsx` (route `/terms`, chỉ admin): danh sách có tìm kiếm và lọc, form có xem trước hộp thoại, nút đếm số bài chứa keyword (`POST /admin/terms/usage`, `api/src/services/glossaryUsage.ts`) |
 | 5. Trang `/glossary`, SEO | Chưa làm | `GET /glossary/:slug` đã trả `body` |
 | Frontmatter `glossary: false` | Chưa làm | Hiện tắt từng vùng bằng `data-no-glossary` |
 
-Test: `api/test/glossary.test.ts` (API và seed), `glossary-matcher.test.ts` (bộ dò), `glossary-render.test.ts` (plugin chạy qua `ArticleContent`).
+Test: `api/test/glossary.test.ts` (API, seed, đếm số bài), `glossary-matcher.test.ts` (bộ dò), `glossary-render.test.ts` (plugin chạy qua `ArticleContent`).
 
 **Khác với thiết kế ban đầu bên dưới:**
 - Dữ liệu cho hộp thoại không được truyền riêng qua `vfile.data`, mà nằm luôn trên thẻ `dfn`, trong các thuộc tính `data-term-title`, `data-term-english`, `data-term-definition`. Lý do: `react-markdown` render ở server không trả ra danh sách các keyword đã khớp. Cách này chỉ tốn thêm vài trăm byte cho mỗi keyword, vì mỗi keyword chỉ được đánh dấu lần đầu. Đổi lại, bản xem trước trong CMS có sẵn dữ liệu mà không cần làm thêm gì.
 - Hộp thoại tự tính vị trí (trên hay dưới, giữ trong màn hình với lề 16 px, chọn đúng dòng khi keyword xuống dòng), không dùng thư viện `@floating-ui`.
 - Bộ dò keyword đặt trong `@tkh/shared` thay vì `@tkh/ui`, để API dùng lại được ở giai đoạn 4 (đếm số bài chứa một keyword).
+- Bộ đếm số bài chứa keyword ở API dùng `api/src/lib/contentLint.ts` (chuyển từ `api/seed/` để bản build API dùng được), không dùng bộ dò của `@tkh/shared`, vì API là gói npm riêng. Bộ đếm quét toàn bộ văn xuôi (chỉ che code, thẻ HTML, đích liên kết), nên kết quả là ước lượng trên: trang đọc còn bỏ qua chữ trong heading và link, và chỉ đánh dấu lần xuất hiện đầu tiên mỗi bài.
 - Trang bài lấy từ điển qua `serverApi.glossary()` với cache 5 phút. Nếu API lỗi, bài vẫn hiển thị bình thường, chỉ không đánh dấu keyword.
 
 ## Hành vi với người đọc

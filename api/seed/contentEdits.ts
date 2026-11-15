@@ -4,7 +4,7 @@
  * Quy trình: docs/content-dictionary/01-content-review.md.
  */
 import matter from 'gray-matter';
-import { proseLines, type Severity } from './contentLint.js';
+import { proseLines, type Severity } from '../src/lib/contentLint.js';
 
 export interface ContentEdit {
   /** Đoạn gốc, chép NGUYÊN VĂN từ bài, nằm trên một dòng, xuất hiện đúng một lần. */

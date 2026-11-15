@@ -8,6 +8,7 @@ import { AdminOnly, SessionGate } from './layout/AppShell';
 import { Card, ErrorState, Spinner, buttonClass } from './components/ui';
 import { ArticlesPage } from './pages/ArticlesPage';
 import { CategoriesPage } from './pages/CategoriesPage';
+import { TermsPage } from './pages/TermsPage';
 import { LearningPathsPage } from './pages/LearningPathsPage';
 import { LearningPathEditorPage } from './pages/LearningPathEditorPage';
 import { CommentsPage } from './pages/CommentsPage';
@@ -74,6 +75,7 @@ const router = createBrowserRouter([
           { path: 'articles/:id', element: <Lazy><ArticleEditorPage /></Lazy> },
           { path: 'media', element: <Lazy><MediaPage /></Lazy> },
           { path: 'categories', element: <AdminOnly><CategoriesPage /></AdminOnly> },
+          { path: 'terms', element: <AdminOnly><TermsPage /></AdminOnly> },
           { path: 'learning-paths', element: <AdminOnly><LearningPathsPage /></AdminOnly> },
           { path: 'learning-paths/new', element: <AdminOnly><LearningPathEditorPage /></AdminOnly> },
           { path: 'learning-paths/:id', element: <AdminOnly><LearningPathEditorPage /></AdminOnly> },

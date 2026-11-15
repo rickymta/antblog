@@ -2,7 +2,7 @@ import { readFileSync } from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { describe, expect, it } from 'vitest';
-import { applyFixes, compileRules, lintMarkdown, phraseRegex, proseLines, type Terminology } from '../seed/contentLint.js';
+import { applyFixes, compileRules, lintMarkdown, phraseRegex, proseLines, type Terminology } from '../src/lib/contentLint.js';
 
 const seedDir = path.join(path.dirname(fileURLToPath(import.meta.url)), '..', 'seed');
 

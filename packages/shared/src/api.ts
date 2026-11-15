@@ -1,5 +1,5 @@
 // Client gọi API theo docs/api-contract.md. Dev chạy qua proxy Vite (`/api` → API) nên cùng origin, cookie phiên tự đi kèm.
-import type { AdminTerm, GlossaryTerm, TermInput } from './glossary';
+import type { AdminTerm, GlossaryTerm, TermInput, TermUsage, TermUsageInput } from './glossary';
 import type {
   AdminArticle,
   AdminComment,
@@ -187,6 +187,7 @@ export const api = {
       create: (input: TermInput) => request<AdminTerm>('POST', '/admin/terms', input),
       update: (id: string, input: TermInput) => request<AdminTerm>('PUT', `/admin/terms/${enc(id)}`, input),
       remove: (id: string) => request<void>('DELETE', `/admin/terms/${enc(id)}`),
+      usage: (input: TermUsageInput) => request<TermUsage>('POST', '/admin/terms/usage', input),
     },
 
     learningPaths: {

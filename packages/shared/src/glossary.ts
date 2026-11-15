@@ -38,6 +38,20 @@ export interface TermInput {
   status?: TermStatus;
 }
 
+/** Kết quả `POST /admin/terms/usage`: số bài chứa keyword (để ước lượng nguy cơ bắt nhầm). */
+export interface TermUsage {
+  articles: number;
+  occurrences: number;
+  samples: Array<{ id: string; slug: string; title: string; status: 'draft' | 'published' | 'archived'; occurrences: number; excerpt: string }>;
+}
+
+export interface TermUsageInput {
+  language?: 'vi' | 'en';
+  term: string;
+  aliases?: string[];
+  caseSensitive?: boolean;
+}
+
 export interface GlossaryMatch {
   start: number;
   end: number;

@@ -7,7 +7,7 @@
 import { readFileSync, readdirSync, writeFileSync } from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { SEVERITIES, applyFixes, compileRules, lintMarkdown, type Finding, type Severity, type Terminology } from '../seed/contentLint.js';
+import { SEVERITIES, applyFixes, compileRules, lintMarkdown, type Finding, type Severity, type Terminology } from '../src/lib/contentLint.js';
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const contentDir = path.join(root, 'seed/content');

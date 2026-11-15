@@ -4,6 +4,7 @@ import { conflict, isDuplicateKeyError, notFound } from '../lib/errors.js';
 import { SLUG_PATTERN } from '../lib/text.js';
 import { isObjectId, parse } from '../lib/validate.js';
 import { LANGUAGES, Term, TERM_STATUSES, type ITerm } from '../models/index.js';
+import { termUsage } from '../services/glossaryUsage.js';
 import { toAdminTerm, toGlossaryTerm } from '../services/serializers.js';
 
 /** Độ dài tối đa của định nghĩa ngắn — vừa một hộp thoại nhỏ (đặc tả §Dữ liệu). */
@@ -50,6 +51,13 @@ const termInputSchema = z.object({
   status: z.enum(TERM_STATUSES).default('published'),
 });
 
+const termUsageSchema = z.object({
+  language: z.enum(LANGUAGES).default('vi'),
+  term: z.string().trim().min(1).max(100),
+  aliases: trimmedList,
+  caseSensitive: z.boolean().default(false),
+});
+
 function termId(raw: string) {
   if (!isObjectId(raw)) throw notFound('Không tìm thấy thuật ngữ.');
   return raw;
@@ -64,6 +72,12 @@ export function adminTermsRouter(): Router {
   r.get('/', async (_req, res) => {
     const terms = await Term.find({}).sort({ language: 1, slug: 1 }).lean<ITerm[]>();
     res.json(terms.map(toAdminTerm));
+  });
+
+  // Đếm số bài chứa keyword — nhận dữ liệu từ form (chưa cần lưu) để kiểm tra nguy cơ bắt nhầm trước khi xuất bản.
+  r.post('/usage', async (req, res) => {
+    const input = parse(termUsageSchema, req.body);
+    res.json(await termUsage(input));
   });
 
   r.post('/', async (req, res) => {

@@ -6,7 +6,7 @@ import request from 'supertest';
 import { beforeEach, describe, expect, it } from 'vitest';
 import { runSeed } from '../seed/lib.js';
 import { Term } from '../src/models/index.js';
-import { assertCleanJson, createUser, makeApp, resetDb, sessionCookie, useTestDb } from './helpers.js';
+import { assertCleanJson, createArticle, createCategory, createUser, makeApp, resetDb, sessionCookie, useTestDb } from './helpers.js';
 
 useTestDb();
 const app = makeApp();
@@ -90,6 +90,45 @@ describe('từ điển keyword — quản trị', () => {
     await request(app).delete(`/api/v1/admin/terms/${ok.body.id}`).set('Cookie', cookie).send({}).expect(404);
     const list = await request(app).get('/api/v1/admin/terms').set('Cookie', cookie).expect(200);
     expect(list.body.map((t: { language: string }) => t.language)).toEqual(['en']);
+  });
+});
+
+describe('từ điển keyword — đếm số bài chứa keyword', () => {
+  beforeEach(resetDb);
+
+  it('đếm theo tên và alias trong văn xuôi, bỏ qua code; trả mẫu theo số lần xuất hiện; chỉ admin', async () => {
+    const adminUser = await createUser('admin');
+    const cookie = sessionCookie(adminUser);
+    const cat = await createCategory();
+    await createArticle(cat, adminUser, {
+      slug: 'nhieu',
+      content: ['Chạy smoke test. Smoke testing nữa. Lại smoke test.', '', '```', 'smoke test', '```'].join('\n'),
+    });
+    await createArticle(cat, adminUser, { slug: 'mot', status: 'draft', publishedAt: undefined, content: 'Một smoke test thôi, kèm `smoke test` trong code.' });
+    await createArticle(cat, adminUser, { slug: 'khong', content: 'Không có gì: smoketest dính liền.' });
+    await createArticle(cat, adminUser, { slug: 'tieng-anh', language: 'en', content: 'English smoke test.' });
+
+    const r = await request(app)
+      .post('/api/v1/admin/terms/usage')
+      .set('Cookie', cookie)
+      .send({ term: 'smoke test', aliases: ['smoke testing'] })
+      .expect(200);
+    expect(r.body).toMatchObject({ articles: 2, occurrences: 4 });
+    expect(r.body.samples.map((x: { slug: string; occurrences: number; status: string }) => `${x.slug}:${x.occurrences}:${x.status}`)).toEqual([
+      'nhieu:3:published',
+      'mot:1:draft',
+    ]);
+    expect(r.body.samples[0].excerpt).toContain('smoke test');
+
+    // Phân biệt hoa thường: "Smoke test" không khớp bên trong "Smoke testing" (ranh giới từ); "Smoke testing" khớp đúng 1 chỗ.
+    const cs = await request(app).post('/api/v1/admin/terms/usage').set('Cookie', cookie).send({ term: 'Smoke test', caseSensitive: true }).expect(200);
+    expect(cs.body).toMatchObject({ articles: 0, occurrences: 0 });
+    const csLong = await request(app).post('/api/v1/admin/terms/usage').set('Cookie', cookie).send({ term: 'Smoke testing', caseSensitive: true }).expect(200);
+    expect(csLong.body).toMatchObject({ articles: 1, occurrences: 1 });
+
+    const author = sessionCookie(await createUser('author'));
+    await request(app).post('/api/v1/admin/terms/usage').set('Cookie', author).send({ term: 'smoke test' }).expect(403);
+    await request(app).post('/api/v1/admin/terms/usage').set('Cookie', cookie).send({ term: '' }).expect(400);
   });
 });
 
