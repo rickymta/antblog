@@ -31,3 +31,5 @@ Hai topic riêng vẫn có thể tranh I/O trên cùng cụm Kafka. Hai dịch v
 Chạy đều lưu lượng đặt và nhận chuyến, ghi lại p95 từ khi tài xế bấm nhận tới khi Dispatch xác nhận. Giữ nguyên lưu lượng đó, bơm thêm 30.000 điểm gửi bù rồi cố ý làm chậm kho lịch sử. Theo dõi p95 nhận chuyến, tuổi vị trí đang hiển thị, số điểm được gộp và thời gian hàng đợi trở lại bình thường.
 
 Nếu p95 nhận chuyến tăng trong khi consumer điều phối gần như rảnh, hãy xem tài nguyên dùng chung trước khi tăng số consumer. Nếu p95 ổn nhưng bản đồ lùi vị trí sau đợt gửi bù, hãy kiểm tra quy tắc chọn điểm mới nhất. Hai kết quả này đòi hỏi hai thay đổi thiết kế khác nhau dù chúng xuất hiện trong cùng một lần thử tải.
+
+Đọc tiếp bài [Modular monolith hay microservices cho phiên bản đầu của Tới Nơi?](/articles/architecture-modular-monolith-hay-microservices)
