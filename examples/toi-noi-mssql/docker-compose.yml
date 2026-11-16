@@ -1,0 +1,37 @@
+# SQL Server 2022 cho lab "SQL Server qua dự án Tới Nơi".
+#
+#   docker compose up -d --wait           # khởi động, chờ healthcheck "healthy"
+#   npm run p01                           # chạy lab P01 (sqlcmd bên trong container)
+#   docker compose down -v                # dừng và XOÁ dữ liệu lab (volume)
+#
+# Mật khẩu SA dưới đây là giá trị giữ chỗ cho lab cục bộ — KHÔNG dùng ở bất kỳ
+# đâu khác. Cổng chỉ mở trên 127.0.0.1 (máy của bạn), không mở ra mạng ngoài.
+# Kết nối từ DBStudio: host 127.0.0.1, cổng 14330, user sa, Trust server certificate.
+name: toinoi-mssql-lab
+
+services:
+  db:
+    # Ghim theo digest đã kiểm chứng: SQL Server 2022 bản 16.0.4325.4 (xem README).
+    image: mcr.microsoft.com/mssql/server:2022-latest@sha256:4525e3efac9f3e241cb003bb2ff2a82818b502f37e12049d788b1a9fa7e13b7f
+    environment:
+      ACCEPT_EULA: "Y"
+      MSSQL_PID: "Developer"
+      MSSQL_SA_PASSWORD: "ToiNoi_lab_2022!"
+      MSSQL_COLLATION: "SQL_Latin1_General_CP1_CI_AS"
+      TZ: "Asia/Ho_Chi_Minh"
+    ports:
+      - "127.0.0.1:14330:1433"
+    volumes:
+      - toinoi-mssql2022-data:/var/opt/mssql
+      # File SQL của các phần, chỉ đọc: trong container là /lab/p01/*.sql …
+      - ./p01:/lab/p01:ro
+    healthcheck:
+      test: ["CMD-SHELL", "/opt/mssql-tools18/bin/sqlcmd -C -S localhost -U sa -P \"$$MSSQL_SA_PASSWORD\" -Q \"SELECT 1\" -b -o /dev/null"]
+      interval: 5s
+      timeout: 5s
+      retries: 30
+      start_period: 20s
+    mem_limit: 2g
+
+volumes:
+  toinoi-mssql2022-data:

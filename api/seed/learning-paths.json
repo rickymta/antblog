@@ -118,6 +118,26 @@
     "status": "published"
   },
   {
+    "slug": "mssql-2022-qua-toi-noi",
+    "title": "SQL Server 2022 · Phần 1 · Nền tảng và mô hình dữ liệu",
+    "description": "Bắt đầu Microsoft SQL Server 2022 từ dữ liệu chuyến xe của Tới Nơi: instance, database và schema, dựng lab bằng Docker và kết nối bằng DBStudio, khoá chính và clustered index, kiểu dữ liệu cho tiền, thời gian và chữ tiếng Việt, ràng buộc và IDENTITY, OUTPUT, SELECT với TOP và OFFSET/FETCH, chuẩn hoá, migration với WITH NOCHECK — kết thúc bằng bài thực hành bàn giao schema có kiểm tra ràng buộc.",
+    "level": "beginner",
+    "category": "mssql",
+    "articles": [
+      "mssql-la-gi-va-vai-tro-trong-toi-noi",
+      "mssql-cai-dat-docker-dbstudio",
+      "mssql-bang-khoa-chinh-clustered-index",
+      "mssql-kieu-du-lieu-tien-thoi-gian-unicode",
+      "mssql-create-table-constraints",
+      "mssql-insert-update-delete-output",
+      "mssql-select-loc-sap-xep-top-offset",
+      "mssql-mo-hinh-quan-he-chuan-hoa",
+      "mssql-schema-migration-tuong-thich",
+      "mssql-thuc-hanh-schema-chuyen-xe"
+    ],
+    "status": "published"
+  },
+  {
     "slug": "design-pattern-qua-toi-noi",
     "title": "Design Pattern qua dự án Tới Nơi",
     "description": "23 design pattern kinh điển chia theo ba nhóm Khởi tạo, Cấu trúc, Hành vi — mỗi pattern gắn với một bài toán thật của hệ thống đặt xe và giao hàng Tới Nơi, có so sánh các pattern trong cùng nhóm và khi nào không nên dùng.",

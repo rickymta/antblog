@@ -6,8 +6,8 @@
       "en": "Database"
     },
     "description": {
-      "vi": "Các hệ quản trị dữ liệu qua Tới Nơi: PostgreSQL; lộ trình mở rộng Microsoft SQL Server, MySQL, Oracle, MongoDB, Cassandra, ScyllaDB và Redis.",
-      "en": "Database engines through Toi Noi: PostgreSQL, with future series for Microsoft SQL Server, MySQL, Oracle, MongoDB, Cassandra, ScyllaDB and Redis."
+      "vi": "Các hệ quản trị dữ liệu qua Tới Nơi: PostgreSQL, Microsoft SQL Server; lộ trình mở rộng MySQL, Oracle, MongoDB, Cassandra, ScyllaDB và Redis.",
+      "en": "Database engines through Toi Noi: PostgreSQL and Microsoft SQL Server, with future series for MySQL, Oracle, MongoDB, Cassandra, ScyllaDB and Redis."
     },
     "icon": "database",
     "color": "#2563EB",
@@ -26,6 +26,21 @@
     "icon": "database",
     "color": "#336791",
     "order": 1,
+    "parent": "database"
+  },
+  {
+    "slug": "mssql",
+    "name": {
+      "vi": "SQL Server",
+      "en": "SQL Server"
+    },
+    "description": {
+      "vi": "Microsoft SQL Server 2022 qua Tới Nơi: mô hình dữ liệu, T-SQL, clustered index và execution plan, khoá và RCSI, backup/restore và Always On.",
+      "en": "Microsoft SQL Server 2022 through Toi Noi: data modeling, T-SQL, clustered indexes and execution plans, locking and RCSI, backup/restore and Always On."
+    },
+    "icon": "database",
+    "color": "#CC2927",
+    "order": 2,
     "parent": "database"
   },
   {

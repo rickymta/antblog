@@ -1,0 +1,279 @@
+
+-- ==================== p01/00-reset.sql ====================
+Changed database context to 'master'.
+Đã xoá database ToiNoi cũ
+Changed database context to 'ToiNoi'.
+database_hien_tai|login|user_trong_db|schema_mac_dinh|collation_db
+-----------------|-----|-------------|---------------|------------
+ToiNoi|sa|dbo|dbo|Vietnamese_100_CI_AS
+phien_ban|cu|edition
+---------|--|-------
+16.0.4325.4|CU28|Developer Edition (64-bit)
+
+-- ==================== p01/01-schema.sql ====================
+Changed database context to 'ToiNoi'.
+stt|cot|kieu|null_|mac_dinh
+---|---|----|-----|--------
+1|id|uniqueidentifier|NOT NULL|df_trips_id
+2|code|bigint|NOT NULL|IDENTITY
+3|kind|varchar(10)|NOT NULL|
+4|city_id|smallint|NOT NULL|
+5|customer_id|uniqueidentifier|NOT NULL|
+6|driver_id|uniqueidentifier|NULL|
+7|merchant_id|uniqueidentifier|NULL|
+8|status|varchar(12)|NOT NULL|df_trips_status
+9|fare|int|NOT NULL|
+10|requested_at|datetimeoffset(3)|NOT NULL|df_trips_requested_at
+11|accepted_at|datetimeoffset(3)|NULL|
+12|completed_at|datetimeoffset(3)|NULL|
+13|updated_at|datetimeoffset(3)|NOT NULL|df_trips_updated_at
+index_name|type_desc|la_pk|duy_nhat|cot_khoa
+----------|---------|-----|--------|--------
+uq_trips_code|CLUSTERED|0|1|code
+pk_trips|NONCLUSTERED|1|1|id
+ix_trips_city_requested|NONCLUSTERED|0|0|city_id, requested_at
+ix_trips_customer_requested|NONCLUSTERED|0|0|customer_id, requested_at
+ix_trips_driver_id|NONCLUSTERED|0|0|driver_id
+
+-- ==================== p01/02-fixture-valid.sql ====================
+Changed database context to 'ToiNoi'.
+PASS cities sau khi nạp = 3
+PASS customers sau khi nạp = 6
+PASS drivers sau khi nạp = 6
+PASS merchants sau khi nạp = 3
+PASS trips sau khi nạp = 15
+PASS chuyến có id lệch mã = 0
+PASS IDENT_CURRENT(trips) = 100014
+status|ride|food|parcel|tong
+------|----|----|------|----
+requested|1|0|0|1
+searching|0|1|0|1
+accepted|1|0|0|1
+arriving|0|0|1|1
+picked_up|0|1|0|1
+in_transit|1|0|0|1
+completed|3|2|2|7
+cancelled|1|1|0|2
+
+-- ==================== p01/03-fixture-invalid.sql ====================
+Changed database context to 'ToiNoi'.
+PASS N1 khách thiếu số điện thoại — lỗi 515: Cannot insert the value NULL into column 'phone', table 'ToiNoi.toinoi.customers'; column does not allow nulls. INSERT fails.
+PASS N2 chuyến thiếu cước — lỗi 515: Cannot insert the value NULL into column 'fare', table 'ToiNoi.toinoi.trips'; column does not allow nulls. INSERT fails.
+PASS N3 đặt NULL tường minh cho status (DEFAULT không cứu) — lỗi 515: Cannot insert the value NULL into column 'status', table 'ToiNoi.toinoi.trips'; column does not allow nulls. INSERT fails.
+PASS U1 trùng id thành phố — lỗi 2627: Violation of PRIMARY KEY constraint 'pk_cities'. Cannot insert duplicate key in object 'toinoi.cities'. The duplicate key value is (1).
+PASS U2 trùng số điện thoại — lỗi 2627: Violation of UNIQUE KEY constraint 'uq_customers_phone'. Cannot insert duplicate key in object 'toinoi.customers'. The duplicate key value is (0900000001).
+PASS U3 trùng mã tài xế — lỗi 2627: Violation of UNIQUE KEY constraint 'uq_drivers_code'. Cannot insert duplicate key in object 'toinoi.drivers'. The duplicate key value is (8001).
+PASS U4 trùng mã thành phố — lỗi 2627: Violation of UNIQUE KEY constraint 'uq_cities_code'. Cannot insert duplicate key in object 'toinoi.cities'. The duplicate key value is (HN).
+PASS F1 chuyến của khách không tồn tại — lỗi 547: The INSERT statement conflicted with the FOREIGN KEY constraint "fk_trips_customer". The conflict occurred in database "ToiNoi", table "toinoi.customers", column 'id'.
+PASS F2 tài xế ở thành phố không tồn tại — lỗi 547: The INSERT statement conflicted with the FOREIGN KEY constraint "fk_drivers_city". The conflict occurred in database "ToiNoi", table "toinoi.cities", column 'id'.
+PASS F3 xoá khách đang có chuyến — lỗi 547: The DELETE statement conflicted with the REFERENCE constraint "fk_trips_customer". The conflict occurred in database "ToiNoi", table "toinoi.trips", column 'customer_id'.
+PASS C1 mã thành phố chữ thường — lỗi 547: The INSERT statement conflicted with the CHECK constraint "ck_cities_code_format". The conflict occurred in database "ToiNoi", table "toinoi.cities", column 'code'.
+PASS C2 tên thành phố toàn khoảng trắng — lỗi 547: The INSERT statement conflicted with the CHECK constraint "ck_cities_name_not_blank". The conflict occurred in database "ToiNoi", table "toinoi.cities", column 'name'.
+PASS C3 số điện thoại dạng +84 — lỗi 547: The INSERT statement conflicted with the CHECK constraint "ck_customers_phone_format". The conflict occurred in database "ToiNoi", table "toinoi.customers", column 'phone'.
+PASS C4 số điện thoại 9 chữ số — lỗi 547: The INSERT statement conflicted with the CHECK constraint "ck_customers_phone_format". The conflict occurred in database "ToiNoi", table "toinoi.customers", column 'phone'.
+PASS C5 mã tài xế âm — lỗi 547: The INSERT statement conflicted with the CHECK constraint "ck_drivers_code_positive". The conflict occurred in database "ToiNoi", table "toinoi.drivers", column 'code'.
+PASS C6 loại xe lạ — lỗi 547: The INSERT statement conflicted with the CHECK constraint "ck_drivers_vehicle_type". The conflict occurred in database "ToiNoi", table "toinoi.drivers", column 'vehicle_type'.
+PASS C7 trạng thái tài xế lạ — lỗi 547: The UPDATE statement conflicted with the CHECK constraint "ck_drivers_status". The conflict occurred in database "ToiNoi", table "toinoi.drivers", column 'status'.
+PASS C8 loại dịch vụ lạ — lỗi 547: The INSERT statement conflicted with the CHECK constraint "ck_trips_kind". The conflict occurred in database "ToiNoi", table "toinoi.trips", column 'kind'.
+PASS C9 trạng thái chuyến lạ — lỗi 547: The INSERT statement conflicted with the CHECK constraint "ck_trips_status". The conflict occurred in database "ToiNoi", table "toinoi.trips", column 'status'.
+PASS C10 cước âm — lỗi 547: The INSERT statement conflicted with the CHECK constraint "ck_trips_fare_non_negative". The conflict occurred in database "ToiNoi", table "toinoi.trips", column 'fare'.
+PASS C11 đồ ăn không có quán — lỗi 547: The INSERT statement conflicted with the CHECK constraint "ck_trips_merchant_only_food". The conflict occurred in database "ToiNoi", table "toinoi.trips".
+PASS C12 đặt xe gắn quán — lỗi 547: The INSERT statement conflicted with the CHECK constraint "ck_trips_merchant_only_food". The conflict occurred in database "ToiNoi", table "toinoi.trips".
+PASS C13 có tài xế nhưng thiếu accepted_at — lỗi 547: The INSERT statement conflicted with the CHECK constraint "ck_trips_driver_accepted_together". The conflict occurred in database "ToiNoi", table "toinoi.trips".
+PASS C14 đang tìm tài xế mà đã có tài xế — lỗi 547: The INSERT statement conflicted with the CHECK constraint "ck_trips_unassigned_no_driver". The conflict occurred in database "ToiNoi", table "toinoi.trips".
+PASS C15 đang tới đón mà không có tài xế — lỗi 547: The INSERT statement conflicted with the CHECK constraint "ck_trips_assigned_has_driver". The conflict occurred in database "ToiNoi", table "toinoi.trips".
+PASS C16 huỷ mà có mốc hoàn thành — lỗi 547: The INSERT statement conflicted with the CHECK constraint "ck_trips_completed_at_by_status". The conflict occurred in database "ToiNoi", table "toinoi.trips".
+PASS C17 nhận chuyến trước giờ đặt (khác múi giờ) — lỗi 547: The INSERT statement conflicted with the CHECK constraint "ck_trips_accepted_after_requested". The conflict occurred in database "ToiNoi", table "toinoi.trips".
+PASS I1 tự ghi mã chuyến — lỗi 544: Cannot insert explicit value for identity column in table 'trips' when IDENTITY_INSERT is set to OFF.
+PASS T1 tên dài quá 100 ký tự — lỗi 2628: String or binary data would be truncated in table 'ToiNoi.toinoi.customers', column 'full_name'. Truncated value: 'AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA'.
+PASS T2 city_id vượt smallint — lỗi 220: Arithmetic overflow error for data type smallint, value = 40000.
+PASS T3 cước vượt int (2.147.483.648 đ) — lỗi 8115: Arithmetic overflow error converting expression to data type int.
+PASS T4 cước viết kiểu "45.000đ" — lỗi 245: Conversion failed when converting the varchar value '45.000đ' to data type int.
+PASS T5 ngày 31/11 không tồn tại — lỗi 241: Conversion failed when converting date and/or time from character string.
+PASS T6 GUID sai định dạng — lỗi 8169: Conversion failed when converting from a character string to uniqueidentifier.
+PASS B1 '03/11/2026' với DATEFORMAT dmy = 2026-11-03
+PASS B2 '03/11/2026' với DATEFORMAT mdy = 2026-03-11
+PASS số dòng cities/customers/drivers/merchants/trips = 3/6/6/3/15
+
+-- ==================== p01/04-lifecycle.sql ====================
+Changed database context to 'ToiNoi'.
+code|status|fare|requested_at
+----|------|----|------------
+100032|requested|42000|2026-11-03 09:00:00.000 +07:00
+PASS mã chuyến mới (100014 + 17 giá trị bị tiêu ở 03 + 1) = 100032
+PASS O1 OUTPUT INTO bảng có CHECK/khoá ngoại — lỗi 333: The target table 'toinoi.trip_events' of the OUTPUT INTO clause cannot have any enabled check constraints or any enabled rules. Found check constraint or rule 'ck_trip_events_status'.
+PASS requested → searching = 1
+truoc|sau|accepted_at
+-----|---|-----------
+searching|accepted|2026-11-03 09:01:00.000 +07:00
+PASS searching → accepted = 1
+PASS tài xế 8003 online → busy = 1
+PASS tài xế 8001 nhận trễ: số dòng đổi = 0
+PASS accepted → arriving = 1
+PASS arriving → picked_up = 1
+PASS picked_up → in_transit = 1
+PASS in_transit → completed = 1
+id|status|occurred_at
+--|------|-----------
+1|requested|2026-11-03 09:00:00.000 +07:00
+2|searching|2026-11-03 09:00:05.000 +07:00
+3|accepted|2026-11-03 09:01:00.000 +07:00
+4|arriving|2026-11-03 09:01:30.000 +07:00
+5|picked_up|2026-11-03 09:07:00.000 +07:00
+6|in_transit|2026-11-03 09:07:20.000 +07:00
+7|completed|2026-11-03 09:31:00.000 +07:00
+code|status|fare|so_phut
+----|------|----|-------
+100032|completed|42000|31
+PASS số dòng trip_events = 7
+PASS D1 xoá chuyến còn lịch sử — lỗi 547: The DELETE statement conflicted with the REFERENCE constraint "fk_trip_events_trip". The conflict occurred in database "ToiNoi", table "toinoi.trip_events", column 'trip_id'.
+trip_id|status
+-------|------
+71000000-0000-4000-8000-000000000002|requested
+code|kind|status|fare
+----|----|------|----
+100033|parcel|requested|25000
+PASS IDENT_CURRENT sau khi xoá bản nháp = 100033
+PASS số dòng trips/trip_events = 16/7
+
+-- ==================== p01/05-select.sql ====================
+Changed database context to 'ToiNoi'.
+code|kind|status|fare
+----|----|------|----
+100014|ride|requested|48000
+100013|food|searching|85000
+100012|ride|accepted|39000
+100011|parcel|arriving|27000
+100010|ride|in_transit|98000
+100009|food|picked_up|64000
+PASS S1 số chuyến đang chạy = 6
+code|requested_at
+----|------------
+100000|2026-11-02 07:58:00.000 +07:00
+100001|2026-11-02 09:15:00.000 +07:00
+100002|2026-11-02 11:05:00.000 +07:00
+100003|2026-11-02 12:00:00.000 +07:00
+100004|2026-11-02 12:00:00.000 +07:00
+100005|2026-11-02 17:30:00.000 +07:00
+100006|2026-11-02 18:00:00.000 +07:00
+100007|2026-11-02 23:50:00.000 +07:00
+PASS S2 chuyến đặt ngày 02/11 giờ VN = 8
+ngay_02_theo_gia_tri_luu|ngay_02_theo_utc
+------------------------|----------------
+8|9
+code|kind|requested_at
+----|----|------------
+100002|food|2026-11-02 11:05:00.000 +07:00
+100003|food|2026-11-02 12:00:00.000 +07:00
+100004|food|2026-11-02 12:00:00.000 +07:00
+code|fare
+----|----
+100005|126000
+100010|98000
+100013|85000
+code|requested_at
+----|------------
+100003|2026-11-02 12:00:00.000 +07:00
+100004|2026-11-02 12:00:00.000 +07:00
+PASS S5 TOP (1) WITH TIES lúc 12:00 = 2
+code|status
+----|------
+100005|completed
+100006|cancelled
+100007|completed
+100008|completed
+100009|picked_up
+code|status|accepted_at
+----|------|-----------
+100006|cancelled|NULL
+100013|searching|NULL
+100014|requested|NULL
+100000|completed|2026-11-02 08:00:30.000 +07:00
+100001|completed|2026-11-02 09:17:00.000 +07:00
+code|status|accepted_at
+----|------|-----------
+100000|completed|2026-11-02 08:00:30.000 +07:00
+100001|completed|2026-11-02 09:17:00.000 +07:00
+100002|completed|2026-11-02 11:06:00.000 +07:00
+100003|cancelled|2026-11-02 12:01:00.000 +07:00
+100004|completed|2026-11-02 12:02:00.000 +07:00
+bang_null|is_null
+---------|-------
+0|3
+not_in
+------
+0
+not_exists
+----------
+8006
+thu_tu_vietnamese|thu_tu_latin1
+-----------------|-------------
+An, Ăn, Ân, Bình, Dung, Duy, Đức, Em|An, Ân, Ăn, Bình, Đức, Dung, Duy, Em
+khong_phan_biet_hoa|bo_dau_CI_AS|bo_thanh_vn_AI|bo_het_dau_vn_AI|bo_het_dau_latin_AI
+-------------------|------------|--------------|----------------|-------------------
+1|0|1|0|1
+phone|full_name
+-----|---------
+0900000001|Nguyễn Văn An
+phone|full_name
+-----|---------
+0900000006|Đặng Ngọc Hà
+
+-- ==================== p01/06-migration.sql ====================
+Changed database context to 'ToiNoi'.
+PASS E1 app cũ thêm tài xế 8007 = 1
+PASS E2 ck_drivers_vehicle_plate_format is_not_trusted = 1
+PASS E3 app mới ghi biển sai định dạng — lỗi 547: The UPDATE statement conflicted with the CHECK constraint "ck_drivers_vehicle_plate_format". The conflict occurred in database "ToiNoi", table "toinoi.drivers", column 'vehicle_plate'.
+PASS B1 backfill biển số = 7
+PASS B2 validate khi còn dữ liệu sai — lỗi 547: The ALTER TABLE statement conflicted with the CHECK constraint "ck_drivers_vehicle_plate_format". The conflict occurred in database "ToiNoi", table "toinoi.drivers", column 'vehicle_plate'.
+code|vehicle_plate
+----|-------------
+8005|43c1-567.89
+PASS B3 sau khi sửa và validate: is_not_trusted = 0
+PASS C1 còn tài xế thiếu biển = 0
+PASS C2 app cũ (không gửi biển số) bị chặn sau contract — lỗi 515: Cannot insert the value NULL into column 'vehicle_plate', table 'ToiNoi.toinoi.drivers'; column does not allow nulls. INSERT fails.
+code|vehicle_type|vehicle_plate
+----|------------|-------------
+8001|bike|59X1-123.45
+8002|bike|59X2-234.56
+8003|bike|29B1-345.67
+8004|car|30A-456.78
+8005|bike|43C1-567.89
+8006|car|43A-678.90
+8007|bike|59X3-789.01
+
+-- ==================== p01/07-checks.sql ====================
+Changed database context to 'ToiNoi'.
+PASS K1 tài xế khác thành phố với chuyến = 0
+PASS K2 quán khác thành phố với chuyến = 0
+PASS K3 tài xế có hơn một chuyến đang chạy = 0
+PASS K4 drivers.status lệch chuyến đang chạy = 0
+PASS K5 sự kiện cuối lệch trạng thái chuyến = 0
+PASS K6 sự kiện trước giờ đặt = 0
+PASS K7 updated_at nhỏ hơn mốc khác = 0
+PASS K8 ràng buộc tắt / không tin cậy = 0
+PASS K9 tên ràng buộc sai quy ước = 0
+khoa_ngoai|cot|co_index
+----------|---|--------
+fk_drivers_city|city_id|KHÔNG
+fk_merchants_city|city_id|KHÔNG
+fk_trip_events_trip|trip_id|có
+fk_trips_city|city_id|có
+fk_trips_customer|customer_id|có
+fk_trips_driver|driver_id|có
+fk_trips_merchant|merchant_id|KHÔNG
+PASS K11 DBCC CHECKCONSTRAINTS không báo vi phạm
+bang|pk|fk|uq|ck|df
+----|--|--|--|--|--
+cities|1|0|1|2|0
+customers|1|0|1|2|2
+drivers|1|1|1|5|3
+merchants|1|1|0|1|2
+trip_events|1|1|0|1|1
+trips|1|4|1|10|4
+PASS số dòng cuối cities/customers/drivers/merchants/trips/trip_events = 3/6/7/3/16/7
+
+-- [lab] File đã chạy: 8
+-- [lab] PASS: 80
+-- [lab] FAIL: 0
+-- [lab] KẾT QUẢ: ĐẠT

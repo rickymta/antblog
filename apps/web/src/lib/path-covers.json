@@ -318,5 +318,10 @@
     "source": null,
     "topic": "data-analysis",
     "number": 1
+  },
+  "mssql-2022-qua-toi-noi": {
+    "source": "mssql-la-gi-va-vai-tro-trong-toi-noi",
+    "topic": "mssql",
+    "number": 1
   }
 }

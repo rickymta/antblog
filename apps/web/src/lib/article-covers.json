@@ -5958,5 +5958,105 @@
       "RECOVER",
       "RECONCILE"
     ]
+  },
+  "mssql-la-gi-va-vai-tro-trong-toi-noi": {
+    "title": "SQL SERVER",
+    "subtitle": "SQL Server 2022 · Nguồn dữ liệu gốc của Tới Nơi",
+    "diagram": "network",
+    "labels": [
+      "APP",
+      "SQL SERVER",
+      "DATA"
+    ]
+  },
+  "mssql-cai-dat-docker-dbstudio": {
+    "title": "LAB · DOCKER",
+    "subtitle": "SQL Server 2022 · Docker và DBStudio",
+    "diagram": "code",
+    "labels": [
+      "DOCKER",
+      "DBSTUDIO",
+      "2022 CU28"
+    ]
+  },
+  "mssql-bang-khoa-chinh-clustered-index": {
+    "title": "CLUSTERED",
+    "subtitle": "SQL Server 2022 · Bảng, khoá và clustered index",
+    "diagram": "map",
+    "labels": [
+      "CUSTOMERS",
+      "TRIPS",
+      "DRIVERS"
+    ]
+  },
+  "mssql-kieu-du-lieu-tien-thoi-gian-unicode": {
+    "title": "DATA TYPES",
+    "subtitle": "SQL Server 2022 · Tiền, thời gian, tiếng Việt",
+    "diagram": "blocks",
+    "labels": [
+      "INT ĐỒNG",
+      "DATETIMEOFFSET",
+      "NVARCHAR"
+    ]
+  },
+  "mssql-create-table-constraints": {
+    "title": "CONSTRAINTS",
+    "subtitle": "SQL Server 2022 · Ràng buộc và IDENTITY",
+    "diagram": "checklist",
+    "labels": [
+      "NOT NULL",
+      "UNIQUE",
+      "CHECK"
+    ]
+  },
+  "mssql-insert-update-delete-output": {
+    "title": "OUTPUT",
+    "subtitle": "SQL Server 2022 · Vòng đời một chuyến",
+    "diagram": "cycle",
+    "labels": [
+      "INSERT",
+      "UPDATE",
+      "DELETE"
+    ]
+  },
+  "mssql-select-loc-sap-xep-top-offset": {
+    "title": "SELECT",
+    "subtitle": "SQL Server 2022 · Lọc, sắp xếp, TOP",
+    "diagram": "flow",
+    "labels": [
+      "WHERE",
+      "ORDER BY",
+      "OFFSET"
+    ]
+  },
+  "mssql-mo-hinh-quan-he-chuan-hoa": {
+    "title": "NORMALIZE",
+    "subtitle": "SQL Server 2022 · Chuẩn hoá và ranh giới",
+    "diagram": "flow",
+    "labels": [
+      "1NF",
+      "2NF",
+      "3NF"
+    ]
+  },
+  "mssql-schema-migration-tuong-thich": {
+    "title": "MIGRATION",
+    "subtitle": "SQL Server 2022 · WITH NOCHECK và trusted",
+    "diagram": "split",
+    "labels": [
+      "EXPAND",
+      "WITH CHECK",
+      "CONTRACT"
+    ]
+  },
+  "mssql-thuc-hanh-schema-chuyen-xe": {
+    "title": "PHẦN 1 · LAB",
+    "subtitle": "SQL Server 2022 · Schema chuyến xe",
+    "diagram": "target",
+    "labels": [
+      "DDL",
+      "FIXTURE",
+      "CHECKS"
+    ]
   }
 }
