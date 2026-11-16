@@ -21,6 +21,7 @@ Test: `api/test/glossary.test.ts` (API, seed, đếm số bài), `glossary-match
 - Bộ dò keyword đặt trong `@tkh/shared` thay vì `@tkh/ui`, để API dùng lại được ở giai đoạn 4 (đếm số bài chứa một keyword).
 - Hộp thoại khi đã ghim (mở bằng nhấp, chạm, Enter hoặc Space) dùng `role="dialog"`, vì nó có nút đóng và link "Xem thêm". Khi mở bằng phím, focus được chuyển vào trong hộp thoại. Khi chỉ rê chuột hoặc focus, hộp thoại vẫn là `role="tooltip"`.
 - Bộ đếm số bài chứa keyword ở API dùng `api/src/lib/contentLint.ts` (chuyển từ `api/seed/` để bản build API dùng được), không dùng bộ dò của `@tkh/shared`, vì API là gói npm riêng. Bộ đếm quét toàn bộ văn xuôi (chỉ che code, thẻ HTML, đích liên kết), nên kết quả là ước lượng trên: trang đọc còn bỏ qua chữ trong heading và link, và chỉ đánh dấu lần xuất hiện đầu tiên mỗi bài.
+- Plugin bỏ qua mọi bảng nằm trong callout `.tkh-callout` (bảng "Thông tin bài" của loạt testing và vài bảng tóm tắt), vì nhãn như "Test Level", "Test Type" ở đó không phải văn xuôi. Keyword vẫn được đánh dấu ở lần xuất hiện đầu tiên trong thân bài.
 - Trang bài lấy từ điển qua `serverApi.glossary()` với cache 5 phút. Nếu API lỗi, bài vẫn hiển thị bình thường, chỉ không đánh dấu keyword.
 
 ## Hành vi với người đọc

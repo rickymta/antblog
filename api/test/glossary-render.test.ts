@@ -56,6 +56,19 @@ describe('rehypeGlossary qua ArticleContent', () => {
     expect(render(md)).toMatch(/Cuối cùng mới là <dfn[^>]*>smoke test<\/dfn>/);
   });
 
+  it('bỏ qua bảng trong callout (bảng thông tin bài) nhưng vẫn dò văn xuôi trong callout và bảng thường', () => {
+    const md = [
+      '<div class="tkh-callout tkh-callout--example">',
+      '<span class="tkh-callout-title">Thông tin bài</span>',
+      '<table><tbody><tr><th scope="row">smoke test</th><td>deduplication</td></tr></tbody></table>',
+      '<p>Văn xuôi có smoke test.</p>',
+      '</div>',
+      '',
+      '<table><tbody><tr><td>deduplication</td></tr></tbody></table>',
+    ].join('\n');
+    expect(dfns(render(md))).toEqual(['smoke-test:smoke test', 'deduplication:deduplication']);
+  });
+
   it('dfn gắn tay được bổ sung dữ liệu (kể cả autoLink false) và chặn đánh dấu tự động thuật ngữ đó', () => {
     const html = render('Trước: smoke test. Rồi <dfn data-term="smoke-test">kiểm thử khói</dfn>, làm <dfn data-term="manual-only">thủ công</dfn>.');
     expect(dfns(html)).toEqual(['smoke-test:kiểm thử khói', 'manual-only:thủ công']);

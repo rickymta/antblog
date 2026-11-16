@@ -8,6 +8,7 @@ import type { Element, ElementContent, Properties, Root, RootContent, Text } fro
  *
  * - Chỉ đánh dấu LẦN XUẤT HIỆN ĐẦU TIÊN của mỗi thuật ngữ trong bài.
  * - Bỏ qua chữ trong code, heading, liên kết, SVG… và mọi phần tử có `data-no-glossary`.
+ * - Bỏ qua bảng nằm trong callout (`.tkh-callout`): đó là bảng thông tin bài (series, level…), không phải văn xuôi.
  * - Tác giả gắn tay `<dfn data-term="slug">…</dfn>` (kể cả thuật ngữ `autoLink: false`): plugin bổ sung dữ liệu và
  *   tính là đã đánh dấu.
  * Đặc tả: docs/content-dictionary/02-glossary-feature.md.
@@ -31,8 +32,16 @@ function termProperties(t: GlossaryTerm): Properties {
   };
 }
 
-function isSkipped(el: Element): boolean {
-  return SKIP_TAGS.has(el.tagName) || el.properties?.dataNoGlossary !== undefined;
+const CALLOUT_CLASS = 'tkh-callout';
+
+function hasClass(el: Element, name: string): boolean {
+  const c = el.properties?.className;
+  // hast-util-from-html (rehypeRaw) luôn tách `class` thành mảng `className`.
+  return Array.isArray(c) && c.includes(name);
+}
+
+function isSkipped(el: Element, inCallout: boolean): boolean {
+  return SKIP_TAGS.has(el.tagName) || el.properties?.dataNoGlossary !== undefined || (inCallout && el.tagName === 'table');
 }
 
 /** Tách một text node thành các mảnh văn bản và thẻ `dfn` cho những thuật ngữ chưa được đánh dấu. */
@@ -59,7 +68,7 @@ function splitText(node: Text, matcher: GlossaryMatcher, used: Set<string>): Ele
   return out;
 }
 
-function walk(parent: Root | Element, matcher: GlossaryMatcher, used: Set<string>): void {
+function walk(parent: Root | Element, matcher: GlossaryMatcher, used: Set<string>, inCallout = false): void {
   const next: Array<RootContent | ElementContent> = [];
   let changed = false;
   for (const child of parent.children) {
@@ -78,8 +87,8 @@ function walk(parent: Root | Element, matcher: GlossaryMatcher, used: Set<string
           child.properties = { ...child.properties, ...termProperties(t) };
           used.add(t.slug);
         }
-      } else if (!isSkipped(child)) {
-        walk(child, matcher, used);
+      } else if (!isSkipped(child, inCallout)) {
+        walk(child, matcher, used, inCallout || hasClass(child, CALLOUT_CLASS));
       }
     }
     next.push(child);
