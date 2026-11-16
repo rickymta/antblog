@@ -6258,5 +6258,205 @@
       "THỰC THU",
       "CHÊNH LỆCH"
     ]
+  },
+  "mongodb-la-gi-va-vai-tro-trong-toi-noi": {
+    "title": "MONGODB",
+    "subtitle": "MongoDB 8.0 · Document store trong Tới Nơi",
+    "diagram": "network",
+    "labels": [
+      "APP",
+      "MONGODB",
+      "DOCUMENT"
+    ]
+  },
+  "mongodb-cai-dat-docker-dbstudio": {
+    "title": "LAB · DOCKER",
+    "subtitle": "MongoDB 8.0 · Replica set và DBStudio",
+    "diagram": "code",
+    "labels": [
+      "DOCKER",
+      "DBSTUDIO",
+      "RS0"
+    ]
+  },
+  "mongodb-document-bson-id": {
+    "title": "DOCUMENT",
+    "subtitle": "MongoDB 8.0 · Document, BSON và _id",
+    "diagram": "pages",
+    "labels": [
+      "_ID",
+      "BSON",
+      "DOCUMENT 100004"
+    ]
+  },
+  "mongodb-kieu-bson-tien-thoi-gian-unicode": {
+    "title": "BSON TYPES",
+    "subtitle": "MongoDB 8.0 · Tiền, thời gian, tiếng Việt",
+    "diagram": "blocks",
+    "labels": [
+      "LONG ĐỒNG",
+      "DATE UTC",
+      "UUID"
+    ]
+  },
+  "mongodb-schema-validation-unique-index": {
+    "title": "VALIDATION",
+    "subtitle": "MongoDB 8.0 · $jsonSchema và index unique",
+    "diagram": "checklist",
+    "labels": [
+      "REQUIRED",
+      "BSONTYPE",
+      "UNIQUE"
+    ]
+  },
+  "mongodb-insert-update-delete": {
+    "title": "WRITE",
+    "subtitle": "MongoDB 8.0 · Vòng đời một chuyến",
+    "diagram": "cycle",
+    "labels": [
+      "INSERT",
+      "UPDATE",
+      "DELETE"
+    ]
+  },
+  "mongodb-find-loc-sap-xep-collation": {
+    "title": "FIND",
+    "subtitle": "MongoDB 8.0 · Lọc, sắp xếp, collation",
+    "diagram": "flow",
+    "labels": [
+      "FILTER",
+      "SORT",
+      "COLLATION"
+    ]
+  },
+  "mongodb-nhung-hay-tham-chieu": {
+    "title": "EMBED / REF",
+    "subtitle": "MongoDB 8.0 · Nhúng hay tham chiếu",
+    "diagram": "split",
+    "labels": [
+      "EMBED",
+      "TRADE-OFF",
+      "REFERENCE"
+    ]
+  },
+  "mongodb-schema-migration-tuong-thich": {
+    "title": "MIGRATION",
+    "subtitle": "MongoDB 8.0 · Đổi schema không cần ALTER",
+    "diagram": "split",
+    "labels": [
+      "EXPAND",
+      "BACKFILL",
+      "CONTRACT"
+    ]
+  },
+  "mongodb-thuc-hanh-mo-hinh-chuyen-xe": {
+    "title": "PHẦN 1 · LAB",
+    "subtitle": "MongoDB 8.0 · Mô hình chuyến xe",
+    "diagram": "target",
+    "labels": [
+      "VALIDATOR",
+      "FIXTURE",
+      "CHECKS"
+    ]
+  },
+  "cassandra-la-gi-va-vai-tro-trong-toi-noi": {
+    "title": "CASSANDRA",
+    "subtitle": "Cassandra 5.0 · Lịch sử chuyến trong Tới Nơi",
+    "diagram": "network",
+    "labels": [
+      "APP",
+      "CASSANDRA",
+      "TIMELINE"
+    ]
+  },
+  "cassandra-cai-dat-docker-dbstudio": {
+    "title": "LAB · DOCKER",
+    "subtitle": "Cassandra 5.0 · Docker, cqlsh và DBStudio",
+    "diagram": "code",
+    "labels": [
+      "DOCKER",
+      "DBSTUDIO",
+      "CQLSH"
+    ]
+  },
+  "cassandra-keyspace-bang-khoa-chinh": {
+    "title": "PRIMARY KEY",
+    "subtitle": "Cassandra 5.0 · Partition key và clustering key",
+    "diagram": "storage",
+    "labels": [
+      "PARTITION KEY",
+      "CLUSTERING",
+      "ROWS"
+    ]
+  },
+  "cassandra-kieu-du-lieu-cql": {
+    "title": "CQL TYPES",
+    "subtitle": "Cassandra 5.0 · Tiền, thời gian, định danh",
+    "diagram": "blocks",
+    "labels": [
+      "BIGINT ĐỒNG",
+      "TIMESTAMP",
+      "TIMEUUID"
+    ]
+  },
+  "cassandra-insert-update-delete-upsert": {
+    "title": "UPSERT",
+    "subtitle": "Cassandra 5.0 · Ghi là upsert, xoá là tombstone",
+    "diagram": "cycle",
+    "labels": [
+      "INSERT",
+      "UPDATE",
+      "TOMBSTONE"
+    ]
+  },
+  "cassandra-select-where-clustering-order": {
+    "title": "SELECT",
+    "subtitle": "Cassandra 5.0 · WHERE theo khoá và phân trang",
+    "diagram": "flow",
+    "labels": [
+      "PARTITION",
+      "CLUSTERING",
+      "PAGING"
+    ]
+  },
+  "cassandra-thiet-ke-theo-truy-van": {
+    "title": "QUERY-FIRST",
+    "subtitle": "Cassandra 5.0 · Thiết kế bảng theo truy vấn",
+    "diagram": "flow",
+    "labels": [
+      "MÀN HÌNH",
+      "TRUY VẤN",
+      "BẢNG"
+    ]
+  },
+  "cassandra-phi-chuan-hoa-nhieu-bang": {
+    "title": "DENORMALIZE",
+    "subtitle": "Cassandra 5.0 · Một chuyến ở bốn bảng",
+    "diagram": "map",
+    "labels": [
+      "BY RIDER",
+      "BY DRIVER",
+      "BY CITY"
+    ]
+  },
+  "cassandra-partition-size-bucketing": {
+    "title": "BUCKETING",
+    "subtitle": "Cassandra 5.0 · Kích thước partition theo thời gian",
+    "diagram": "blocks",
+    "labels": [
+      "THEO NGÀY",
+      "THEO GIỜ",
+      "PARTITION"
+    ]
+  },
+  "cassandra-thuc-hanh-mo-hinh-lich-su-chuyen": {
+    "title": "PHẦN 1 · LAB",
+    "subtitle": "Cassandra 5.0 · Lịch sử chuyến và sự kiện",
+    "diagram": "target",
+    "labels": [
+      "CQL",
+      "FIXTURE",
+      "CHECKS"
+    ]
   }
 }
