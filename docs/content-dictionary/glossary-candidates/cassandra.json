@@ -1,0 +1,628 @@
+{
+  "version": 1,
+  "category": "cassandra",
+  "generatedAt": "2026-11-17",
+  "source": {
+    "articles": 10,
+    "checkedAgainst": "api/seed/terminology.json (working tree 17/11/2026, 422 mục) và các file khác trong glossary-candidates/",
+    "occurrencesMethod": "Như postgresql.json: occurrences = số bài trong series (Phần 1, 10 bài) có ít nhất một chỗ khớp term/english/aliases trong văn xuôi; mentions = tổng số chỗ khớp; outsideSeriesArticles = số bài ngoài series có chỗ khớp. Bỏ frontmatter, khối code, inline code, <pre>/<code>/<script>/<style>, thẻ HTML (giữ alt/title/aria-label), đích liên kết, URL. Ranh giới từ Unicode, cụm dài thắng cụm ngắn, tôn trọng caseSensitive. Cập nhật lại khi viết thêm các phần sau."
+  },
+  "conflicts": [
+    {
+      "candidate": "partition key",
+      "existingId": "partition-key",
+      "action": "keep-existing",
+      "note": "Định nghĩa có sẵn trung lập, đúng cho Cassandra. Không thêm mục riêng để tránh hai mục tranh chữ \"partition key\".",
+      "proposedAliases": [
+        "khoá phân vùng"
+      ]
+    },
+    {
+      "candidate": "upsert",
+      "existingId": "upsert",
+      "action": "update-existing-definition",
+      "note": "Định nghĩa hiện chỉ nói PostgreSQL/SQL Server. Trong Cassandra mọi INSERT/UPDATE đều là upsert, không có lỗi trùng khoá.",
+      "proposedDefinition": "Thao tác ghi \"có thì cập nhật, chưa có thì thêm\" theo một khoá. PostgreSQL dùng INSERT … ON CONFLICT, SQL Server dùng MERGE hoặc UPDATE rồi INSERT; trong Cassandra mọi INSERT và UPDATE đều là upsert, không có lỗi trùng khoá."
+    },
+    {
+      "candidate": "denormalization",
+      "existingId": "denormalization",
+      "action": "update-existing-definition",
+      "note": "Định nghĩa hiện đòi \"một đường ghi cùng transaction\", không đúng với Cassandra (không có transaction nhiều bảng; dùng logged batch + đối soát).",
+      "proposedDefinition": "Cố ý giữ một dữ kiện ở nhiều chỗ (cột suy ra, bảng tổng hợp, bảng theo từng truy vấn như ở Cassandra) để đọc nhanh hơn. Cần nguồn dữ liệu gốc, một đường ghi cập nhật mọi bản sao (transaction hoặc logged batch), truy vấn phát hiện lệch và cách dựng lại."
+    },
+    {
+      "candidate": "ttl",
+      "existingId": "ttl",
+      "action": "update-existing-definition",
+      "note": "Định nghĩa hiện chỉ nêu DNS và DynamoDB; Cassandra gắn TTL theo từng ô và biến ô hết hạn thành tombstone (dùng nhiều ở P02).",
+      "proposedDefinition": "Thời gian sống của một bản ghi hoặc mục dữ liệu trước khi hết hạn: cache DNS giữ bản ghi bao lâu, DynamoDB tự xoá item cũ, Cassandra gắn TTL cho từng ô và coi ô hết hạn như đã xoá."
+    },
+    {
+      "candidate": "materialized view",
+      "existingId": null,
+      "action": "related",
+      "note": "Ứng viên materialized-view của series PostgreSQL. Cassandra có materialized view (thử nghiệm, mặc định tắt) nghĩa khác; khi gộp nên để mục PostgreSQL theo phạm vi postgresql hoặc định nghĩa chung. P01 Cassandra chỉ nhắc, chưa đề xuất."
+    },
+    {
+      "candidate": "partition",
+      "existingId": null,
+      "action": "related",
+      "note": "postgresql.json đề xuất partitioning với alias \"partition\" (nghĩa table partitioning). Hai mục cùng chữ \"partition\" chỉ gộp được khi seed có phạm vi chủ đề: cassandra-partition dùng categories [\"cassandra\"], mục PostgreSQL dùng [\"postgresql\"]."
+    },
+    {
+      "candidate": "eventual consistency",
+      "existingId": "eventual-consistency",
+      "action": "no-action",
+      "note": "Định nghĩa có sẵn đúng với Cassandra."
+    }
+  ],
+  "terms": [
+    {
+      "slug": "cql",
+      "term": "CQL",
+      "english": "Cassandra Query Language",
+      "caseSensitive": true,
+      "categories": [],
+      "shortDefinition": "Ngôn ngữ truy vấn của Apache Cassandra. Cú pháp giống SQL nhưng không có JOIN, không có transaction nhiều dòng, và mặc định từ chối truy vấn có thể phải quét toàn bảng.",
+      "relatedArticleSlugs": [
+        "cassandra-la-gi-va-vai-tro-trong-toi-noi",
+        "cassandra-select-where-clustering-order"
+      ],
+      "scopeNote": "Viết tắt riêng của Cassandra, phân biệt hoa thường; không trùng nghĩa ở series khác.",
+      "occurrences": 10,
+      "mentions": 46,
+      "outsideSeriesArticles": 0
+    },
+    {
+      "slug": "cqlsh",
+      "term": "cqlsh",
+      "categories": [],
+      "shortDefinition": "Trình dòng lệnh CQL đi kèm Cassandra, dùng để chạy câu lệnh tương tác hoặc từ file (cqlsh -f). Có thêm các lệnh riêng không thuộc CQL như COPY, TRACING, DESCRIBE.",
+      "relatedArticleSlugs": [
+        "cassandra-cai-dat-docker-dbstudio"
+      ],
+      "scopeNote": "Tên công cụ, không có nghĩa khác.",
+      "occurrences": 7,
+      "mentions": 22,
+      "outsideSeriesArticles": 0
+    },
+    {
+      "slug": "keyspace",
+      "term": "keyspace",
+      "categories": [],
+      "shortDefinition": "Không gian tên chứa bảng trong Cassandra, gần với database của PostgreSQL. Keyspace mang chiến lược nhân bản (ví dụ NetworkTopologyStrategy và số bản sao mỗi datacenter) áp dụng cho mọi bảng bên trong.",
+      "relatedArticleSlugs": [
+        "cassandra-keyspace-bang-khoa-chinh",
+        "cassandra-la-gi-va-vai-tro-trong-toi-noi"
+      ],
+      "scopeNote": "Chỉ Cassandra/ScyllaDB (và Redis keyspace notification, hiếm) dùng chữ này.",
+      "occurrences": 8,
+      "mentions": 46,
+      "outsideSeriesArticles": 1
+    },
+    {
+      "slug": "cassandra-partition",
+      "term": "partition",
+      "categories": [
+        "cassandra"
+      ],
+      "shortDefinition": "Trong Cassandra, partition là nhóm dòng có cùng partition key, được lưu cùng nhau trên cùng các node và sắp sẵn theo clustering key. Đây là đơn vị phân tán và nhân bản dữ liệu; truy vấn hiệu quả đọc một partition.",
+      "relatedArticleSlugs": [
+        "cassandra-keyspace-bang-khoa-chinh",
+        "cassandra-partition-size-bucketing"
+      ],
+      "reviewNote": "\"partition\" có nghĩa khác ở Kafka, PostgreSQL (partitioning), Azure Cosmos DB: bắt buộc phạm vi chủ đề cassandra.",
+      "occurrences": 10,
+      "mentions": 319,
+      "outsideSeriesArticles": 60
+    },
+    {
+      "slug": "clustering-key",
+      "term": "clustering key",
+      "aliases": [
+        "clustering column",
+        "cột clustering"
+      ],
+      "categories": [
+        "cassandra"
+      ],
+      "shortDefinition": "Các cột của khoá chính đứng sau partition key trong Cassandra. Chúng phân biệt các dòng trong cùng partition và quyết định thứ tự lưu trên đĩa theo CLUSTERING ORDER BY khai báo lúc tạo bảng.",
+      "relatedArticleSlugs": [
+        "cassandra-keyspace-bang-khoa-chinh",
+        "cassandra-thiet-ke-theo-truy-van"
+      ],
+      "occurrences": 8,
+      "mentions": 45,
+      "outsideSeriesArticles": 0
+    },
+    {
+      "slug": "composite-partition-key",
+      "term": "composite partition key",
+      "aliases": [
+        "partition key nhiều cột"
+      ],
+      "categories": [
+        "cassandra"
+      ],
+      "shortDefinition": "Partition key gồm nhiều cột, viết trong cặp ngoặc riêng: PRIMARY KEY ((driver_id, day), …). Cassandra băm cả bộ giá trị thành một token, nên truy vấn phải nêu đủ mọi cột trong cặp ngoặc.",
+      "relatedArticleSlugs": [
+        "cassandra-keyspace-bang-khoa-chinh"
+      ],
+      "occurrences": 1,
+      "mentions": 4,
+      "outsideSeriesArticles": 0
+    },
+    {
+      "slug": "cassandra-token",
+      "term": "token",
+      "categories": [
+        "cassandra"
+      ],
+      "shortDefinition": "Trong Cassandra, token là số nguyên 64 bit do partitioner băm từ partition key, nằm trong khoảng −2^63 tới 2^63−1. Token quyết định node nào giữ partition; hàm token() của CQL cho xem giá trị này.",
+      "relatedArticleSlugs": [
+        "cassandra-keyspace-bang-khoa-chinh"
+      ],
+      "reviewNote": "\"token\" ở series khác là JWT, access token, token của tokenizer: bắt buộc phạm vi chủ đề cassandra.",
+      "occurrences": 7,
+      "mentions": 62,
+      "outsideSeriesArticles": 116
+    },
+    {
+      "slug": "partitioner",
+      "term": "partitioner",
+      "aliases": [
+        "Murmur3Partitioner"
+      ],
+      "categories": [
+        "cassandra"
+      ],
+      "shortDefinition": "Thành phần của Cassandra biến partition key thành token. Mặc định là Murmur3Partitioner: partition rải đều trên dải token theo giá trị băm, không theo thứ tự của giá trị gốc.",
+      "relatedArticleSlugs": [
+        "cassandra-keyspace-bang-khoa-chinh"
+      ],
+      "occurrences": 2,
+      "mentions": 6,
+      "outsideSeriesArticles": 1
+    },
+    {
+      "slug": "coordinator-node",
+      "term": "node điều phối",
+      "english": "coordinator",
+      "aliases": [
+        "coordinator node"
+      ],
+      "categories": [
+        "cassandra"
+      ],
+      "shortDefinition": "Node Cassandra nhận câu lệnh từ client. Nó tính token, chuyển câu lệnh tới các node giữ bản sao, chờ đủ phản hồi theo consistency level rồi trả kết quả. Node nào cũng có thể làm node điều phối.",
+      "relatedArticleSlugs": [
+        "cassandra-la-gi-va-vai-tro-trong-toi-noi",
+        "cassandra-kieu-du-lieu-cql"
+      ],
+      "reviewNote": "english \"coordinator\" tự được dò; ở series khác có \"coordinator\" của Kafka/Saga nên cần phạm vi.",
+      "occurrences": 7,
+      "mentions": 25,
+      "outsideSeriesArticles": 1
+    },
+    {
+      "slug": "consistency-level",
+      "term": "consistency level",
+      "aliases": [
+        "mức nhất quán"
+      ],
+      "categories": [
+        "cassandra"
+      ],
+      "shortDefinition": "Mức nhất quán chọn cho từng câu lệnh Cassandra: số bản sao node điều phối phải chờ trả lời (ONE, QUORUM, LOCAL_QUORUM, ALL…). Ghi QUORUM và đọc QUORUM thì lần đọc luôn thấy dữ liệu vừa ghi.",
+      "relatedArticleSlugs": [
+        "cassandra-la-gi-va-vai-tro-trong-toi-noi"
+      ],
+      "occurrences": 2,
+      "mentions": 9,
+      "outsideSeriesArticles": 1
+    },
+    {
+      "slug": "replication-factor",
+      "term": "replication factor",
+      "aliases": [
+        "hệ số nhân bản"
+      ],
+      "categories": [
+        "cassandra"
+      ],
+      "shortDefinition": "Số bản sao của mỗi dòng trong một datacenter, khai báo ở keyspace của Cassandra. Ví dụ NetworkTopologyStrategy với 'dc1': 3 nghĩa là mỗi dòng có 3 bản sao ở dc1.",
+      "relatedArticleSlugs": [
+        "cassandra-keyspace-bang-khoa-chinh"
+      ],
+      "reviewNote": "Kafka cũng dùng \"replication factor\" với nghĩa gần; có thể chuyển sang categories [] với định nghĩa chung sau khi soát.",
+      "occurrences": 2,
+      "mentions": 2,
+      "outsideSeriesArticles": 1
+    },
+    {
+      "slug": "masterless",
+      "term": "masterless",
+      "aliases": [
+        "peer-to-peer"
+      ],
+      "categories": [
+        "cassandra"
+      ],
+      "shortDefinition": "Kiến trúc không có node chính: mọi node Cassandra ngang hàng, đều nhận đọc và ghi, nên không có điểm hỏng duy nhất và không cần failover khi một node chết.",
+      "relatedArticleSlugs": [
+        "cassandra-la-gi-va-vai-tro-trong-toi-noi"
+      ],
+      "occurrences": 1,
+      "mentions": 3,
+      "outsideSeriesArticles": 0
+    },
+    {
+      "slug": "gossip-protocol",
+      "term": "gossip",
+      "aliases": [
+        "gossip protocol"
+      ],
+      "categories": [
+        "cassandra"
+      ],
+      "shortDefinition": "Giao thức các node Cassandra trao đổi trạng thái với nhau mỗi giây, nhờ đó mỗi node biết cụm gồm những node nào và node nào còn sống mà không cần máy chủ trung tâm.",
+      "relatedArticleSlugs": [
+        "cassandra-la-gi-va-vai-tro-trong-toi-noi"
+      ],
+      "occurrences": 2,
+      "mentions": 2,
+      "outsideSeriesArticles": 0
+    },
+    {
+      "slug": "commit-log",
+      "term": "commit log",
+      "categories": [
+        "cassandra"
+      ],
+      "shortDefinition": "File Cassandra nối thêm mỗi câu ghi vào cuối trước khi ghi memtable, để dữ liệu không mất khi node sập. Keyspace đặt durable_writes = false thì bỏ qua commit log.",
+      "relatedArticleSlugs": [
+        "cassandra-la-gi-va-vai-tro-trong-toi-noi"
+      ],
+      "occurrences": 2,
+      "mentions": 2,
+      "outsideSeriesArticles": 0
+    },
+    {
+      "slug": "memtable",
+      "term": "memtable",
+      "categories": [],
+      "shortDefinition": "Cấu trúc đã sắp xếp trong bộ nhớ, nơi Cassandra ghi dữ liệu ngay sau khi nối vào commit log. Khi đầy hoặc khi flush, memtable được ghi xuống đĩa thành SSTable.",
+      "relatedArticleSlugs": [
+        "cassandra-la-gi-va-vai-tro-trong-toi-noi"
+      ],
+      "scopeNote": "Thuật ngữ của các hệ LSM-tree, không có nghĩa khác.",
+      "occurrences": 3,
+      "mentions": 8,
+      "outsideSeriesArticles": 0
+    },
+    {
+      "slug": "sstable",
+      "term": "SSTable",
+      "english": "Sorted String Table",
+      "caseSensitive": true,
+      "categories": [],
+      "shortDefinition": "File dữ liệu bất biến trên đĩa của Cassandra, sinh ra khi flush memtable. Các SSTable được gộp dần bằng compaction; một dòng có thể nằm rải trên nhiều SSTable cho tới khi được gộp.",
+      "relatedArticleSlugs": [
+        "cassandra-la-gi-va-vai-tro-trong-toi-noi",
+        "cassandra-partition-size-bucketing"
+      ],
+      "scopeNote": "Thuật ngữ của các hệ LSM-tree, không có nghĩa khác.",
+      "occurrences": 4,
+      "mentions": 14,
+      "outsideSeriesArticles": 0
+    },
+    {
+      "slug": "tombstone",
+      "term": "tombstone",
+      "categories": [
+        "cassandra"
+      ],
+      "shortDefinition": "Dấu xoá trong Cassandra, có write timestamp như mọi lần ghi. Sinh ra khi DELETE, khi ghi null hoặc khi TTL hết hạn; che các phiên bản cũ hơn khi đọc và chỉ được dọn sau gc_grace_seconds (mặc định 10 ngày) trong compaction.",
+      "relatedArticleSlugs": [
+        "cassandra-insert-update-delete-upsert"
+      ],
+      "reviewNote": "Kafka cũng có \"tombstone\" (bản ghi value null trong topic compacted): cần phạm vi hoặc định nghĩa chung.",
+      "occurrences": 3,
+      "mentions": 26,
+      "outsideSeriesArticles": 0
+    },
+    {
+      "slug": "range-tombstone",
+      "term": "range tombstone",
+      "categories": [
+        "cassandra"
+      ],
+      "shortDefinition": "Một tombstone che cả một dải dòng trong partition, sinh ra khi DELETE với điều kiện dải trên cột clustering, ví dụ xoá mọi sự kiện của một chuyến sau một thời điểm.",
+      "relatedArticleSlugs": [
+        "cassandra-insert-update-delete-upsert"
+      ],
+      "occurrences": 1,
+      "mentions": 1,
+      "outsideSeriesArticles": 0
+    },
+    {
+      "slug": "last-write-wins",
+      "term": "last-write-wins",
+      "aliases": [
+        "LWW"
+      ],
+      "categories": [
+        "cassandra"
+      ],
+      "shortDefinition": "Quy tắc hoà giải của Cassandra: với mỗi ô dữ liệu, phiên bản có write timestamp lớn nhất thắng, bất kể câu ghi nào đến sau. Câu ghi mang timestamp cũ hơn bị bỏ qua mà không báo lỗi.",
+      "relatedArticleSlugs": [
+        "cassandra-insert-update-delete-upsert"
+      ],
+      "occurrences": 1,
+      "mentions": 5,
+      "outsideSeriesArticles": 0
+    },
+    {
+      "slug": "write-timestamp",
+      "term": "write timestamp",
+      "aliases": [
+        "WRITETIME"
+      ],
+      "categories": [
+        "cassandra"
+      ],
+      "shortDefinition": "Thời điểm ghi (micro giây từ 1970) gắn với từng ô trong Cassandra, do driver hoặc node điều phối gán, hoặc đặt bằng USING TIMESTAMP. Đọc bằng WRITETIME(cột); dùng để quyết định phiên bản nào thắng.",
+      "relatedArticleSlugs": [
+        "cassandra-insert-update-delete-upsert"
+      ],
+      "occurrences": 1,
+      "mentions": 5,
+      "outsideSeriesArticles": 0
+    },
+    {
+      "slug": "lightweight-transaction",
+      "term": "lightweight transaction",
+      "aliases": [
+        "LWT"
+      ],
+      "categories": [
+        "cassandra"
+      ],
+      "shortDefinition": "Câu ghi có điều kiện của Cassandra (IF NOT EXISTS, IF EXISTS, IF cột = giá trị), chạy thoả thuận Paxos giữa các bản sao của một partition. Trả về cột [applied]; đắt hơn câu ghi thường nhiều lần.",
+      "relatedArticleSlugs": [
+        "cassandra-insert-update-delete-upsert"
+      ],
+      "occurrences": 4,
+      "mentions": 17,
+      "outsideSeriesArticles": 0
+    },
+    {
+      "slug": "timeuuid",
+      "term": "timeuuid",
+      "categories": [],
+      "shortDefinition": "Kiểu UUID phiên bản 1 của CQL, chứa thời điểm và được sắp theo thời điểm đó. Hợp làm cột clustering cho sự kiện vì vừa có thứ tự thời gian vừa không trùng khi cùng mili giây.",
+      "relatedArticleSlugs": [
+        "cassandra-kieu-du-lieu-cql"
+      ],
+      "scopeNote": "Tên kiểu dữ liệu riêng của CQL.",
+      "occurrences": 1,
+      "mentions": 6,
+      "outsideSeriesArticles": 0
+    },
+    {
+      "slug": "allow-filtering",
+      "term": "ALLOW FILTERING",
+      "caseSensitive": true,
+      "categories": [],
+      "shortDefinition": "Mệnh đề CQL cho phép Cassandra đọc các dòng ứng viên rồi lọc bỏ dòng không khớp. Chấp nhận được trong một partition nhỏ đã chỉ rõ; không có partition key thì đọc mọi partition trên mọi node.",
+      "relatedArticleSlugs": [
+        "cassandra-select-where-clustering-order"
+      ],
+      "scopeNote": "Từ khoá CQL viết hoa, phân biệt hoa thường.",
+      "occurrences": 1,
+      "mentions": 3,
+      "outsideSeriesArticles": 0
+    },
+    {
+      "slug": "per-partition-limit",
+      "term": "PER PARTITION LIMIT",
+      "caseSensitive": true,
+      "categories": [],
+      "shortDefinition": "Mệnh đề SELECT của CQL giới hạn số dòng trả về trong mỗi partition, khác LIMIT giới hạn tổng số dòng. Kết hợp thứ tự clustering để lấy N dòng mới nhất của từng partition.",
+      "relatedArticleSlugs": [
+        "cassandra-select-where-clustering-order"
+      ],
+      "scopeNote": "Từ khoá CQL viết hoa.",
+      "occurrences": 1,
+      "mentions": 3,
+      "outsideSeriesArticles": 0
+    },
+    {
+      "slug": "paging-state",
+      "term": "paging state",
+      "categories": [
+        "cassandra"
+      ],
+      "shortDefinition": "Chuỗi byte Cassandra trả kèm mỗi trang kết quả, đánh dấu vị trí đã đọc tới. Driver gửi lại nó để lấy trang tiếp; CQL không có OFFSET nên phân trang dựa vào paging state hoặc cận theo cột clustering.",
+      "relatedArticleSlugs": [
+        "cassandra-select-where-clustering-order"
+      ],
+      "occurrences": 1,
+      "mentions": 10,
+      "outsideSeriesArticles": 0
+    },
+    {
+      "slug": "query-first-design",
+      "term": "thiết kế theo truy vấn",
+      "english": "query-first design",
+      "aliases": [
+        "query-first",
+        "query-driven"
+      ],
+      "categories": [
+        "cassandra"
+      ],
+      "shortDefinition": "Cách thiết kế dữ liệu cho Cassandra: liệt kê màn hình và truy vấn của ứng dụng trước, rồi tạo mỗi truy vấn một bảng có khoá chính sắp sẵn dữ liệu cho truy vấn đó, thay vì vẽ sơ đồ thực thể rồi dùng JOIN.",
+      "relatedArticleSlugs": [
+        "cassandra-thiet-ke-theo-truy-van",
+        "cassandra-thuc-hanh-mo-hinh-lich-su-chuyen"
+      ],
+      "occurrences": 2,
+      "mentions": 5,
+      "outsideSeriesArticles": 0
+    },
+    {
+      "slug": "access-pattern",
+      "term": "access pattern",
+      "aliases": [
+        "mẫu truy cập"
+      ],
+      "categories": [],
+      "shortDefinition": "Mô tả một lần đọc hoặc ghi của ứng dụng: biết trước tham số nào, cần lấy gì, theo thứ tự nào, bao nhiêu dòng, tần suất ra sao. Là đầu vào để chọn khoá, index hoặc cách chia dữ liệu.",
+      "relatedArticleSlugs": [
+        "cassandra-thiet-ke-theo-truy-van"
+      ],
+      "scopeNote": "Định nghĩa chung, đúng cho MongoDB, DynamoDB, PostgreSQL; nên dùng toàn site.",
+      "occurrences": 2,
+      "mentions": 12,
+      "outsideSeriesArticles": 9
+    },
+    {
+      "slug": "chebotko-diagram",
+      "term": "sơ đồ Chebotko",
+      "english": "Chebotko diagram",
+      "categories": [
+        "cassandra"
+      ],
+      "shortDefinition": "Ký pháp mô hình hoá dữ liệu cho Cassandra: sơ đồ luồng ứng dụng nối màn hình với truy vấn, và sơ đồ bảng đánh dấu cột K (partition key), C↑/C↓ (clustering tăng/giảm), S (static).",
+      "relatedArticleSlugs": [
+        "cassandra-thiet-ke-theo-truy-van"
+      ],
+      "occurrences": 1,
+      "mentions": 2,
+      "outsideSeriesArticles": 0
+    },
+    {
+      "slug": "bucketing",
+      "term": "bucketing",
+      "categories": [
+        "cassandra"
+      ],
+      "shortDefinition": "Kỹ thuật thêm một cột thời gian đã làm tròn (giờ, ngày) hoặc số shard vào partition key để cắt dữ liệu tăng mãi thành các partition có kích thước giới hạn; ứng dụng phải tự tính bucket khi ghi và đọc.",
+      "relatedArticleSlugs": [
+        "cassandra-partition-size-bucketing",
+        "cassandra-thiet-ke-theo-truy-van"
+      ],
+      "occurrences": 3,
+      "mentions": 4,
+      "outsideSeriesArticles": 0
+    },
+    {
+      "slug": "hot-partition",
+      "term": "partition nóng",
+      "english": "hot partition",
+      "categories": [
+        "cassandra"
+      ],
+      "shortDefinition": "Partition nhận phần lớn lượt ghi hoặc đọc trong một khoảng thời gian, dồn tải vào đúng các bản sao của nó dù cụm có nhiều node; thường do partition key có quá ít giá trị hoặc bucket thời gian quá rộng.",
+      "relatedArticleSlugs": [
+        "cassandra-partition-size-bucketing"
+      ],
+      "occurrences": 1,
+      "mentions": 4,
+      "outsideSeriesArticles": 6
+    },
+    {
+      "slug": "logged-batch",
+      "term": "logged batch",
+      "categories": [
+        "cassandra"
+      ],
+      "shortDefinition": "Lô câu ghi CQL (BEGIN BATCH … APPLY BATCH) được ghi vào batchlog trước khi áp dụng, nên mọi câu rồi sẽ được áp dụng hết dù node điều phối chết. Không cô lập giữa các partition, không rollback, chậm hơn ghi lẻ.",
+      "relatedArticleSlugs": [
+        "cassandra-phi-chuan-hoa-nhieu-bang"
+      ],
+      "occurrences": 4,
+      "mentions": 22,
+      "outsideSeriesArticles": 0
+    },
+    {
+      "slug": "batchlog",
+      "term": "batchlog",
+      "categories": [
+        "cassandra"
+      ],
+      "shortDefinition": "Nơi Cassandra ghi tạm nội dung của logged batch trước khi áp dụng; nếu node điều phối chết giữa chừng, batch được phát lại từ batchlog để mọi câu trong batch đều được áp dụng.",
+      "relatedArticleSlugs": [
+        "cassandra-phi-chuan-hoa-nhieu-bang"
+      ],
+      "occurrences": 1,
+      "mentions": 6,
+      "outsideSeriesArticles": 0
+    },
+    {
+      "slug": "read-before-write",
+      "term": "read-before-write",
+      "aliases": [
+        "đọc trước khi ghi"
+      ],
+      "categories": [
+        "cassandra"
+      ],
+      "shortDefinition": "Phải đọc dữ liệu hiện có trước khi ghi, ví dụ đọc bảng trips để lấy đủ khoá của các bản sao phi chuẩn hoá. Trong Cassandra đây là chi phí thêm một lượt đọc, và giữa lượt đọc với lượt ghi dữ liệu có thể đã đổi.",
+      "relatedArticleSlugs": [
+        "cassandra-phi-chuan-hoa-nhieu-bang"
+      ],
+      "occurrences": 2,
+      "mentions": 3,
+      "outsideSeriesArticles": 2
+    },
+    {
+      "slug": "storage-attached-index",
+      "term": "Storage-Attached Index",
+      "aliases": [
+        "SAI"
+      ],
+      "caseSensitive": true,
+      "categories": [
+        "cassandra"
+      ],
+      "reviewNote": "Bắt buộc caseSensitive: alias SAI không phân biệt hoa thường khớp chữ \"sai\" tiếng Việt ở hơn 500 bài.",
+      "shortDefinition": "Loại index phụ mới của Cassandra 5.0, được xây cùng memtable và SSTable của bảng, cho phép lọc theo cột ngoài khoá chính và là nền cho tìm kiếm vector.",
+      "relatedArticleSlugs": [
+        "cassandra-la-gi-va-vai-tro-trong-toi-noi"
+      ],
+      "occurrences": 4,
+      "mentions": 12,
+      "outsideSeriesArticles": 3
+    },
+    {
+      "slug": "guardrail",
+      "term": "guardrail",
+      "categories": [
+        "cassandra"
+      ],
+      "shortDefinition": "Cơ chế của Cassandra (cấu hình trong cassandra.yaml) cảnh báo hoặc chặn thao tác vượt ngưỡng, ví dụ partition_size_warn_threshold cho kích thước partition; nhiều guardrail mặc định tắt.",
+      "relatedArticleSlugs": [
+        "cassandra-partition-size-bucketing"
+      ],
+      "occurrences": 1,
+      "mentions": 4,
+      "outsideSeriesArticles": 18
+    }
+  ],
+  "deferred": [
+    {
+      "slug": "broadcast-rpc-address",
+      "term": "broadcast_rpc_address",
+      "reason": "Tên tham số cấu hình, chỉ xuất hiện ở CS-002; đã giải thích ngay trong bài."
+    },
+    {
+      "slug": "cassandra-cell",
+      "term": "ô",
+      "english": "cell",
+      "reason": "\"ô\" quá phổ biến trong tiếng Việt, dò sẽ bắt nhầm; chỉ nên gắn tay bằng <dfn data-term> hoặc đợi dò theo english \"cell\"."
+    }
+  ]
+}

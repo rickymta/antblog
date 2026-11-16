@@ -1,0 +1,9 @@
+{
+  "name": "toi-noi-cassandra-shots",
+  "private": true,
+  "type": "module",
+  "description": "Chụp ảnh minh hoạ DBStudio cho series Cassandra (Playwright điều khiển giao diện DBStudio nối với backend thật qua dev bridge)",
+  "dependencies": {
+    "playwright-core": "1.64.1"
+  }
+}

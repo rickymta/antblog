@@ -1,0 +1,3 @@
+*.sh text eol=lf
+*.cql text eol=lf
+OUTPUT.txt text eol=lf

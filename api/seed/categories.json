@@ -6,8 +6,8 @@
       "en": "Database"
     },
     "description": {
-      "vi": "Các hệ quản trị dữ liệu qua Tới Nơi: PostgreSQL, Microsoft SQL Server, MongoDB; lộ trình mở rộng MySQL, Oracle, Cassandra, ScyllaDB và Redis.",
-      "en": "Database engines through Toi Noi: PostgreSQL, Microsoft SQL Server and MongoDB, with future series for MySQL, Oracle, Cassandra, ScyllaDB and Redis."
+      "vi": "Các hệ quản trị dữ liệu qua Tới Nơi: PostgreSQL, Microsoft SQL Server, MongoDB, Cassandra; lộ trình mở rộng MySQL, Oracle, ScyllaDB và Redis.",
+      "en": "Database engines through Toi Noi: PostgreSQL, Microsoft SQL Server, MongoDB and Cassandra, with future series for MySQL, Oracle, ScyllaDB and Redis."
     },
     "icon": "database",
     "color": "#2563EB",
@@ -56,6 +56,21 @@
     "icon": "database",
     "color": "#13AA52",
     "order": 3,
+    "parent": "database"
+  },
+  {
+    "slug": "cassandra",
+    "name": {
+      "vi": "Cassandra",
+      "en": "Cassandra"
+    },
+    "description": {
+      "vi": "Apache Cassandra 5.0 qua Tới Nơi: thiết kế bảng theo truy vấn, partition và clustering key, upsert và tombstone, replication và consistency level, compaction, repair và vận hành cụm nhiều node.",
+      "en": "Apache Cassandra 5.0 through Toi Noi: query-first table design, partition and clustering keys, upserts and tombstones, replication and consistency levels, compaction, repair and multi-node operations."
+    },
+    "icon": "database",
+    "color": "#1287B1",
+    "order": 4,
     "parent": "database"
   },
   {

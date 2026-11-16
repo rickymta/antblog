@@ -1,0 +1,17 @@
+{
+  "name": "toi-noi-cassandra-lab",
+  "private": true,
+  "type": "module",
+  "description": "Lab Apache Cassandra 5.0 qua dự án Tới Nơi — Cassandra chạy trong Docker, cqlsh chạy bên trong container; runner Node không có dependency",
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "db:up": "docker compose up -d --wait",
+    "db:down": "docker compose --profile cluster down -v",
+    "p01": "node run.mjs p01",
+    "p01:output": "node run.mjs p01 > p01/OUTPUT.txt",
+    "test": "node --test \"test/*.test.mjs\"",
+    "shots": "cd shots && npm install --silent && node shoot.mjs"
+  }
+}

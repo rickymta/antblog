@@ -1,0 +1,74 @@
+# Lab Apache Cassandra 5.0 · Tới Nơi
+# Mỗi node mở cổng CQL riêng (19042/19043/19044) và quảng bá 127.0.0.1 để driver trên máy host kết nối được.
+#   docker compose --profile cluster up -d --wait
+name: toinoi-cassandra-lab
+
+x-node: &node
+  image: cassandra:5.0.9@sha256:acd754f07c73f3a166bb477354b56ce9a05690c3e5e2aaacc1aab2afddba6436
+  mem_limit: 1600m
+  environment: &env
+    CASSANDRA_CLUSTER_NAME: "ToiNoi Lab"
+    CASSANDRA_DC: "dc1"
+    CASSANDRA_RACK: "rack1"
+    CASSANDRA_ENDPOINT_SNITCH: "GossipingPropertyFileSnitch"
+    CASSANDRA_NUM_TOKENS: "16"
+    CASSANDRA_SEEDS: "node1"
+    MAX_HEAP_SIZE: "768M"
+    HEAP_NEWSIZE: "200M"
+    CASSANDRA_BROADCAST_RPC_ADDRESS: "127.0.0.1"
+    TZ: "Asia/Ho_Chi_Minh"
+  entrypoint: ["sh", "/lab/docker/entry.sh"]
+  healthcheck:
+    test: ["CMD-SHELL", "cqlsh 127.0.0.1 $$NATIVE_PORT -e 'SELECT release_version FROM system.local' > /dev/null"]
+    interval: 10s
+    timeout: 15s
+    retries: 30
+    start_period: 60s
+
+services:
+  node1:
+    <<: *node
+    hostname: node1
+    environment:
+      <<: *env
+      NATIVE_PORT: "19042"
+    ports:
+      - "127.0.0.1:19042:19042"
+    volumes:
+      - node1-data:/var/lib/cassandra
+      - ./:/lab:ro
+
+  node2:
+    <<: *node
+    profiles: ["cluster"]
+    hostname: node2
+    environment:
+      <<: *env
+      NATIVE_PORT: "19043"
+    depends_on:
+      node1: { condition: service_healthy }
+    ports:
+      - "127.0.0.1:19043:19043"
+    volumes:
+      - node2-data:/var/lib/cassandra
+      - ./:/lab:ro
+
+  node3:
+    <<: *node
+    profiles: ["cluster"]
+    hostname: node3
+    environment:
+      <<: *env
+      NATIVE_PORT: "19044"
+    depends_on:
+      node2: { condition: service_healthy }
+    ports:
+      - "127.0.0.1:19044:19044"
+    volumes:
+      - node3-data:/var/lib/cassandra
+      - ./:/lab:ro
+
+volumes:
+  node1-data:
+  node2-data:
+  node3-data:
