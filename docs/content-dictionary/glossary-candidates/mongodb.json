@@ -1,0 +1,465 @@
+{
+  "version": 1,
+  "category": "mongodb",
+  "generatedAt": "2026-11-16",
+  "source": {
+    "articles": 10,
+    "checkedAgainst": "api/seed/terminology.json (working tree 16/11/2026, 407 mục) và glossary-candidates/postgresql.json",
+    "occurrencesMethod": "Như postgresql.json: occurrences = số bài MongoDB P01 (10 bài) có ít nhất một chỗ khớp term/english/aliases trong văn xuôi; mentions = tổng số chỗ khớp. Bỏ frontmatter, khối code, inline code, <pre>/<code>/<script>/<style>, thẻ HTML (giữ alt), đích liên kết, URL. Ranh giới từ Unicode, cụm dài thắng cụm ngắn, tôn trọng caseSensitive. outsideSeriesArticles = số bài ngoài series có chỗ khớp. Đếm lại khi viết thêm phần."
+  },
+  "conflicts": [
+    {
+      "candidate": "collation",
+      "existingId": "collation",
+      "action": "keep-existing",
+      "note": "Định nghĩa chung dùng được cho MongoDB. Ví dụ đang là Vietnamese_100_CI_AS (SQL Server); MongoDB không có phần \"bảng mã lưu ký tự\" vì chuỗi BSON luôn là UTF-8. Nên viết lại câu cuối trung lập hoặc thêm ví dụ { locale: 'vi', strength: 1 }.",
+      "occurrences": 5
+    },
+    {
+      "candidate": "denormalization",
+      "existingId": "denormalization",
+      "action": "keep-existing",
+      "note": "Định nghĩa đúng cho MongoDB; \"một đường ghi cùng transaction\" cũng đạt được bằng một lần ghi nguyên tử trên một document.",
+      "occurrences": 1
+    },
+    {
+      "candidate": "expand-contract",
+      "existingId": "expand-contract",
+      "action": "keep-existing",
+      "note": "MG-009 dùng đúng nghĩa này (collMod → backfill → contract). Đề xuất thêm categories mongodb.",
+      "occurrences": 2
+    },
+    {
+      "candidate": "unique-constraint",
+      "existingId": "unique-constraint",
+      "action": "extend-existing",
+      "note": "MongoDB không có \"constraint\"; khoá tự nhiên giữ bằng unique index (lỗi 11000). Đề xuất alias \"unique index\", \"index unique\" và đổi \"dòng\" thành \"dòng/document\".",
+      "proposedAliases": [
+        "unique index",
+        "index unique"
+      ],
+      "occurrences": 8
+    },
+    {
+      "candidate": "replica",
+      "existingId": "replica",
+      "action": "keep-existing",
+      "note": "Giữ; \"replica set\" là mục mới (cụm dài hơn thắng khi khớp).",
+      "occurrences": 4
+    },
+    {
+      "candidate": "embedding",
+      "existingId": "embedding",
+      "action": "keep-existing-separate",
+      "note": "Id \"embedding\" mang nghĩa vector học máy. Khái niệm MongoDB tách thành \"embedded-document\" với term tiếng Việt, tránh alias tiếng Anh \"embedding\".",
+      "occurrences": 1
+    },
+    {
+      "candidate": "decimal",
+      "existingId": "decimal",
+      "action": "keep-existing-separate",
+      "note": "Mục hiện có là kiểu Decimal của Python; Decimal128 của BSON là mục riêng.",
+      "occurrences": 0
+    },
+    {
+      "candidate": "upsert",
+      "existingId": null,
+      "action": "shared-with-postgresql-candidate",
+      "note": "Ứng viên PostgreSQL định nghĩa qua INSERT … ON CONFLICT. MongoDB: updateOne/findOneAndUpdate với { upsert: true } (MG-006). Đề xuất định nghĩa trung lập engine, categories [\"postgresql\",\"mongodb\"], alias \"upsert: true\".",
+      "proposedAliases": [
+        "upsert: true"
+      ],
+      "occurrences": 0
+    },
+    {
+      "candidate": "invariant",
+      "existingId": "invariant",
+      "action": "keep-existing",
+      "note": "MG-010 dùng đúng nghĩa (bất biến kiểm trong 07-checks).",
+      "occurrences": 0
+    },
+    {
+      "candidate": "source-of-truth",
+      "existingId": "source-of-truth",
+      "action": "keep-existing",
+      "note": "MG-001 dùng đúng nghĩa.",
+      "occurrences": 1
+    }
+  ],
+  "terms": [
+    {
+      "slug": "bson",
+      "term": "BSON",
+      "english": "Binary JSON",
+      "aliases": [],
+      "shortDefinition": "Định dạng nhị phân MongoDB dùng để lưu và truyền document. Cấu trúc giống JSON nhưng có thêm kiểu riêng như int, long, double, Decimal128, Date, ObjectId, binary, nên phân biệt được 45000 (int) với 45000.5 (double).",
+      "caseSensitive": true,
+      "autoLink": true,
+      "categories": [
+        "mongodb"
+      ],
+      "relatedArticleSlugs": [
+        "mongodb-kieu-bson-tien-thoi-gian-unicode",
+        "mongodb-document-bson-id",
+        "mongodb-thuc-hanh-mo-hinh-chuyen-xe",
+        "mongodb-la-gi-va-vai-tro-trong-toi-noi"
+      ],
+      "occurrences": 9,
+      "mentions": 63,
+      "outsideSeriesArticles": 2
+    },
+    {
+      "slug": "mongodb-document",
+      "term": "document",
+      "english": "document",
+      "aliases": [],
+      "shortDefinition": "Trong MongoDB, document là một bản ghi BSON gồm các cặp trường–giá trị, có thể lồng object và mảng, luôn có _id duy nhất trong collection. Gần với một dòng của bảng nhưng các document không bắt buộc có cùng trường.",
+      "caseSensitive": false,
+      "autoLink": false,
+      "categories": [
+        "mongodb"
+      ],
+      "relatedArticleSlugs": [
+        "mongodb-insert-update-delete",
+        "mongodb-document-bson-id",
+        "mongodb-nhung-hay-tham-chieu",
+        "mongodb-la-gi-va-vai-tro-trong-toi-noi"
+      ],
+      "reviewNote": "\"document\" xuất hiện dày đặc và cũng mang nghĩa \"tài liệu\"; autoLink false, tác giả gắn tay ở lần giải thích đầu (MG-001, MG-003).",
+      "occurrences": 10,
+      "mentions": 407,
+      "outsideSeriesArticles": 12
+    },
+    {
+      "slug": "mongodb-collection",
+      "term": "collection",
+      "english": "collection",
+      "aliases": [],
+      "shortDefinition": "Nhóm document trong một database MongoDB, tương ứng vai trò của bảng. Collection không bắt buộc schema; luật về hình dạng document nằm ở validator nếu có. Ghi vào collection chưa tồn tại sẽ tự tạo nó.",
+      "caseSensitive": false,
+      "autoLink": false,
+      "categories": [
+        "mongodb"
+      ],
+      "relatedArticleSlugs": [
+        "mongodb-la-gi-va-vai-tro-trong-toi-noi",
+        "mongodb-schema-validation-unique-index",
+        "mongodb-thuc-hanh-mo-hinh-chuyen-xe",
+        "mongodb-nhung-hay-tham-chieu"
+      ],
+      "reviewNote": "\"collection\" cũng là từ thường trong C#/Python (collection của ngôn ngữ); autoLink false.",
+      "occurrences": 10,
+      "mentions": 160,
+      "outsideSeriesArticles": 15
+    },
+    {
+      "slug": "objectid",
+      "term": "ObjectId",
+      "english": "ObjectId",
+      "aliases": [],
+      "shortDefinition": "Kiểu định danh 12 byte mặc định của _id trong MongoDB: 4 byte thời điểm tạo (giây), 5 byte ngẫu nhiên, 3 byte bộ đếm. Sinh được ở client, tăng gần theo thời gian, và để lộ thời điểm tạo document.",
+      "caseSensitive": true,
+      "autoLink": true,
+      "categories": [
+        "mongodb"
+      ],
+      "relatedArticleSlugs": [
+        "mongodb-kieu-bson-tien-thoi-gian-unicode",
+        "mongodb-document-bson-id",
+        "mongodb-cai-dat-docker-dbstudio"
+      ],
+      "occurrences": 3,
+      "mentions": 22,
+      "outsideSeriesArticles": 0
+    },
+    {
+      "slug": "extended-json",
+      "term": "Extended JSON",
+      "english": "MongoDB Extended JSON",
+      "aliases": [
+        "EJSON"
+      ],
+      "shortDefinition": "Cách viết BSON thành JSON mà không mất kiểu, ví dụ {\"$date\": \"…Z\"}, {\"$oid\": \"…\"}, {\"$numberLong\": \"…\"}. mongosh, công cụ GUI như DBStudio và mongoexport dùng nó để hiển thị và trao đổi document.",
+      "caseSensitive": false,
+      "autoLink": true,
+      "categories": [
+        "mongodb"
+      ],
+      "relatedArticleSlugs": [
+        "mongodb-document-bson-id",
+        "mongodb-cai-dat-docker-dbstudio"
+      ],
+      "occurrences": 2,
+      "mentions": 7,
+      "outsideSeriesArticles": 0
+    },
+    {
+      "slug": "decimal128",
+      "term": "Decimal128",
+      "english": "Decimal128",
+      "aliases": [],
+      "shortDefinition": "Kiểu số thập phân 128 bit của BSON, tính chính xác theo cơ số 10 (0.1 + 0.2 = 0.3). Dùng cho tiền có phần lẻ, tỷ giá, đơn giá; tiền VND nguyên đồng thì int/long đơn giản và nhanh hơn.",
+      "caseSensitive": true,
+      "autoLink": true,
+      "categories": [
+        "mongodb"
+      ],
+      "relatedArticleSlugs": [
+        "mongodb-kieu-bson-tien-thoi-gian-unicode",
+        "mongodb-thuc-hanh-mo-hinh-chuyen-xe"
+      ],
+      "occurrences": 2,
+      "mentions": 9,
+      "outsideSeriesArticles": 0
+    },
+    {
+      "slug": "schema-validation",
+      "term": "validator",
+      "english": "schema validation",
+      "aliases": [
+        "schema validation",
+        "document validation"
+      ],
+      "shortDefinition": "Luật MongoDB kiểm trên từng document khi insert/update, khai báo bằng $jsonSchema (kiểu, trường bắt buộc, enum, khoảng giá trị) và toán tử truy vấn cho quy tắc liên trường. Vi phạm trả lỗi 121; validator không nhìn sang document khác.",
+      "caseSensitive": false,
+      "autoLink": true,
+      "categories": [
+        "mongodb"
+      ],
+      "relatedArticleSlugs": [
+        "mongodb-schema-validation-unique-index",
+        "mongodb-thuc-hanh-mo-hinh-chuyen-xe",
+        "mongodb-schema-migration-tuong-thich",
+        "mongodb-nhung-hay-tham-chieu"
+      ],
+      "reviewNote": "\"validator\" cũng dùng trong bài Python (Pydantic) và .NET; giới hạn categories mongodb để không gắn nhầm.",
+      "occurrences": 10,
+      "mentions": 209,
+      "outsideSeriesArticles": 17
+    },
+    {
+      "slug": "replica-set",
+      "term": "replica set",
+      "english": "replica set",
+      "aliases": [],
+      "shortDefinition": "Nhóm tiến trình mongod giữ cùng dữ liệu: một primary nhận ghi, các secondary sao chép qua oplog và tự bầu primary mới khi primary hỏng. Transaction nhiều document và change stream cần replica set, kể cả replica set một node.",
+      "caseSensitive": false,
+      "autoLink": true,
+      "categories": [
+        "mongodb"
+      ],
+      "relatedArticleSlugs": [
+        "mongodb-cai-dat-docker-dbstudio",
+        "mongodb-la-gi-va-vai-tro-trong-toi-noi",
+        "mongodb-thuc-hanh-mo-hinh-chuyen-xe",
+        "mongodb-nhung-hay-tham-chieu"
+      ],
+      "reviewNote": "Cụm dài hơn \"replica\" đã có trong terminology.json nên thắng khi khớp; hai định nghĩa bổ sung cho nhau.",
+      "occurrences": 4,
+      "mentions": 48,
+      "outsideSeriesArticles": 2
+    },
+    {
+      "slug": "oplog",
+      "term": "oplog",
+      "english": "operations log",
+      "aliases": [],
+      "shortDefinition": "Collection đặc biệt (local.oplog.rs) ghi mọi thay đổi trên primary của replica set theo thứ tự; secondary đọc nó để sao chép, change stream và khôi phục tới thời điểm cũng dựa vào nó.",
+      "caseSensitive": false,
+      "autoLink": true,
+      "categories": [
+        "mongodb"
+      ],
+      "relatedArticleSlugs": [
+        "mongodb-la-gi-va-vai-tro-trong-toi-noi",
+        "mongodb-insert-update-delete",
+        "mongodb-kieu-bson-tien-thoi-gian-unicode"
+      ],
+      "occurrences": 3,
+      "mentions": 8,
+      "outsideSeriesArticles": 0
+    },
+    {
+      "slug": "embedded-document",
+      "term": "document nhúng",
+      "english": "embedded document",
+      "aliases": [
+        "nhúng",
+        "nhúng document",
+        "mảng nhúng",
+        "subdocument"
+      ],
+      "shortDefinition": "Object hoặc mảng object nằm ngay trong document cha, ví dụ mảng events trong chuyến, menu trong quán. Đọc một lần là đủ và ghi nguyên tử cùng cha; chỉ hợp khi dữ liệu con có giới hạn và luôn đi cùng cha.",
+      "caseSensitive": false,
+      "autoLink": false,
+      "categories": [
+        "mongodb"
+      ],
+      "relatedArticleSlugs": [
+        "mongodb-nhung-hay-tham-chieu",
+        "mongodb-thuc-hanh-mo-hinh-chuyen-xe",
+        "mongodb-document-bson-id",
+        "mongodb-insert-update-delete"
+      ],
+      "reviewNote": "Alias \"nhúng\" bao phủ cách viết thật trong bài (\"menu nhúng\", \"nhúng hay tham chiếu\") nhưng cũng là từ thường (\"nhúng ảnh\") nên autoLink false, gắn tay ở MG-008. KHÔNG dùng alias tiếng Anh \"embedding\": id \"embedding\" đã có trong terminology.json với nghĩa vector học máy.",
+      "occurrences": 8,
+      "mentions": 61,
+      "outsideSeriesArticles": 13
+    },
+    {
+      "slug": "aggregation-pipeline",
+      "term": "aggregation pipeline",
+      "english": "aggregation pipeline",
+      "aliases": [
+        "aggregation"
+      ],
+      "shortDefinition": "Chuỗi stage MongoDB xử lý document lần lượt ($match, $group, $lookup, $project, $sort…), đầu ra stage trước là đầu vào stage sau. Dùng cho báo cáo, nối collection và các phép biến đổi mà find không làm được.",
+      "caseSensitive": false,
+      "autoLink": true,
+      "categories": [
+        "mongodb"
+      ],
+      "relatedArticleSlugs": [
+        "mongodb-kieu-bson-tien-thoi-gian-unicode",
+        "mongodb-nhung-hay-tham-chieu",
+        "mongodb-la-gi-va-vai-tro-trong-toi-noi",
+        "mongodb-find-loc-sap-xep-collation"
+      ],
+      "reviewNote": "P01 mới dùng ở mức xem trước (07-checks, đối soát); P02 là chủ đề chính.",
+      "occurrences": 7,
+      "mentions": 17,
+      "outsideSeriesArticles": 7
+    },
+    {
+      "slug": "orphan-document",
+      "term": "document mồ côi",
+      "english": "orphaned document",
+      "aliases": [
+        "chuyến mồ côi",
+        "dữ liệu mồ côi"
+      ],
+      "shortDefinition": "Document tham chiếu tới một document không còn tồn tại, ví dụ chuyến trỏ tới khách đã bị xoá. MongoDB không có khoá ngoại nên không chặn được; phát hiện bằng truy vấn $lookup định kỳ hoặc chặn ở tầng ứng dụng.",
+      "caseSensitive": false,
+      "autoLink": true,
+      "categories": [
+        "mongodb"
+      ],
+      "relatedArticleSlugs": [
+        "mongodb-insert-update-delete",
+        "mongodb-find-loc-sap-xep-collation",
+        "mongodb-thuc-hanh-mo-hinh-chuyen-xe"
+      ],
+      "occurrences": 3,
+      "mentions": 5,
+      "outsideSeriesArticles": 0
+    },
+    {
+      "slug": "schema-versioning",
+      "term": "schema versioning",
+      "english": "Schema Versioning pattern",
+      "aliases": [
+        "schema_version"
+      ],
+      "shortDefinition": "Mẫu thiết kế MongoDB: mỗi document mang trường như schema_version cho biết nó theo hình dạng nào, để ứng dụng đọc được cả bản cũ lẫn bản mới trong lúc migration chạy dần, không cần dừng hệ thống.",
+      "caseSensitive": false,
+      "autoLink": true,
+      "categories": [
+        "mongodb"
+      ],
+      "relatedArticleSlugs": [
+        "mongodb-schema-migration-tuong-thich",
+        "mongodb-nhung-hay-tham-chieu"
+      ],
+      "occurrences": 2,
+      "mentions": 4,
+      "outsideSeriesArticles": 2
+    },
+    {
+      "slug": "feature-compatibility-version",
+      "term": "feature compatibility version",
+      "english": "feature compatibility version",
+      "aliases": [
+        "FCV"
+      ],
+      "shortDefinition": "Thiết lập của MongoDB quyết định những tính năng lưu dữ liệu nào của phiên bản mới được bật. Nâng binary trước, đổi FCV sau, nên còn hạ binary về được cho tới khi FCV đã nâng.",
+      "caseSensitive": false,
+      "autoLink": true,
+      "categories": [
+        "mongodb"
+      ],
+      "relatedArticleSlugs": [
+        "mongodb-cai-dat-docker-dbstudio",
+        "mongodb-thuc-hanh-mo-hinh-chuyen-xe",
+        "mongodb-la-gi-va-vai-tro-trong-toi-noi"
+      ],
+      "occurrences": 3,
+      "mentions": 5,
+      "outsideSeriesArticles": 0
+    },
+    {
+      "slug": "mongosh",
+      "term": "mongosh",
+      "english": "MongoDB Shell",
+      "aliases": [],
+      "shortDefinition": "Shell dòng lệnh chính thức của MongoDB, chạy JavaScript (Node.js) với các hàm như db.collection.find(). Lab chạy mongosh bên trong container; query editor của DBStudio hiểu một tập con cú pháp của nó.",
+      "caseSensitive": true,
+      "autoLink": true,
+      "categories": [
+        "mongodb"
+      ],
+      "relatedArticleSlugs": [
+        "mongodb-kieu-bson-tien-thoi-gian-unicode",
+        "mongodb-find-loc-sap-xep-collation",
+        "mongodb-cai-dat-docker-dbstudio",
+        "mongodb-insert-update-delete"
+      ],
+      "occurrences": 9,
+      "mentions": 42,
+      "outsideSeriesArticles": 0
+    }
+  ],
+  "deferred": [
+    {
+      "slug": "write-concern",
+      "term": "write concern",
+      "occurrences": 2,
+      "reason": "Chỉ nhắc trước ở P01; P04 (MG-032) giải thích đầy đủ."
+    },
+    {
+      "slug": "read-concern",
+      "term": "read concern",
+      "occurrences": 1,
+      "reason": "Thuộc P04 (MG-033)."
+    },
+    {
+      "slug": "type-bracketing",
+      "term": "type bracketing",
+      "occurrences": 2,
+      "reason": "Hiện tượng so sánh khác kiểu trả 0 kết quả; giải thích tại chỗ trong MG-004/MG-007, chưa đủ phổ biến."
+    },
+    {
+      "slug": "primary-secondary",
+      "term": "primary / secondary",
+      "occurrences": 0,
+      "reason": "Vai trò trong replica set; PostgreSQL đã có ứng viên primary-server. Gom khi viết P06."
+    },
+    {
+      "slug": "change-stream",
+      "term": "change stream",
+      "occurrences": 3,
+      "reason": "Chỉ nhắc tên ở P01; P06 (MG-053)."
+    },
+    {
+      "slug": "wiredtiger",
+      "term": "WiredTiger",
+      "occurrences": 2,
+      "reason": "Storage engine; P03 (MG-021)."
+    },
+    {
+      "slug": "lookup-stage",
+      "term": "$lookup",
+      "occurrences": 1,
+      "reason": "Là cú pháp (nằm trong code), bộ đếm bỏ inline code nên không gắn được."
+    }
+  ]
+}

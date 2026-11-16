@@ -138,6 +138,26 @@
     "status": "published"
   },
   {
+    "slug": "mongodb-8-qua-toi-noi",
+    "title": "MongoDB · Phần 1 · Nền tảng và mô hình document",
+    "description": "Bắt đầu MongoDB 8.0 từ dữ liệu chuyến xe của Tới Nơi: MongoDB nằm ở đâu, dựng lab replica set và kết nối bằng DBStudio, document – BSON – _id, kiểu dữ liệu cho tiền và thời gian, schema validation và index unique, ghi và đọc dữ liệu, nhúng hay tham chiếu, đổi schema khi không có ALTER TABLE — kết thúc bằng bài thực hành bàn giao mô hình có kiểm tra ràng buộc.",
+    "level": "beginner",
+    "category": "mongodb",
+    "articles": [
+      "mongodb-la-gi-va-vai-tro-trong-toi-noi",
+      "mongodb-cai-dat-docker-dbstudio",
+      "mongodb-document-bson-id",
+      "mongodb-kieu-bson-tien-thoi-gian-unicode",
+      "mongodb-schema-validation-unique-index",
+      "mongodb-insert-update-delete",
+      "mongodb-find-loc-sap-xep-collation",
+      "mongodb-nhung-hay-tham-chieu",
+      "mongodb-schema-migration-tuong-thich",
+      "mongodb-thuc-hanh-mo-hinh-chuyen-xe"
+    ],
+    "status": "published"
+  },
+  {
     "slug": "design-pattern-qua-toi-noi",
     "title": "Design Pattern qua dự án Tới Nơi",
     "description": "23 design pattern kinh điển chia theo ba nhóm Khởi tạo, Cấu trúc, Hành vi — mỗi pattern gắn với một bài toán thật của hệ thống đặt xe và giao hàng Tới Nơi, có so sánh các pattern trong cùng nhóm và khi nào không nên dùng.",

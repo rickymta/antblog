@@ -6,8 +6,8 @@
       "en": "Database"
     },
     "description": {
-      "vi": "Các hệ quản trị dữ liệu qua Tới Nơi: PostgreSQL, Microsoft SQL Server; lộ trình mở rộng MySQL, Oracle, MongoDB, Cassandra, ScyllaDB và Redis.",
-      "en": "Database engines through Toi Noi: PostgreSQL and Microsoft SQL Server, with future series for MySQL, Oracle, MongoDB, Cassandra, ScyllaDB and Redis."
+      "vi": "Các hệ quản trị dữ liệu qua Tới Nơi: PostgreSQL, Microsoft SQL Server, MongoDB; lộ trình mở rộng MySQL, Oracle, Cassandra, ScyllaDB và Redis.",
+      "en": "Database engines through Toi Noi: PostgreSQL, Microsoft SQL Server and MongoDB, with future series for MySQL, Oracle, Cassandra, ScyllaDB and Redis."
     },
     "icon": "database",
     "color": "#2563EB",
@@ -41,6 +41,21 @@
     "icon": "database",
     "color": "#CC2927",
     "order": 2,
+    "parent": "database"
+  },
+  {
+    "slug": "mongodb",
+    "name": {
+      "vi": "MongoDB",
+      "en": "MongoDB"
+    },
+    "description": {
+      "vi": "MongoDB 8.0 qua Tới Nơi: mô hình document và BSON, validator, nhúng hay tham chiếu, aggregation, index và explain, transaction, replica set và sharding.",
+      "en": "MongoDB 8.0 through Toi Noi: document modeling and BSON, validation, embedding vs referencing, aggregation, indexes and explain, transactions, replica sets and sharding."
+    },
+    "icon": "database",
+    "color": "#13AA52",
+    "order": 3,
     "parent": "database"
   },
   {

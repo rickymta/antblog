@@ -1,0 +1,416 @@
+
+// ==================== p01/00-reset.js ====================
+Đã xoá database toinoi cũ
+
+/* Phiên bản và vai trò của server */
+phien_ban|replica_set|vai_tro|database|fcv
+---------|-----------|-------|--------|---
+8.0.38|rs0|PRIMARY|toinoi|8.0
+(1 document)
+PASS phiên bản 8.0.x = 8.0.
+PASS replica set = rs0
+
+/* Database có sẵn trong instance (trước khi tạo dữ liệu) */
+name
+----
+admin
+config
+local
+(3 document)
+
+// ==================== p01/01-schema.js ====================
+
+/* Index */
+collection|name|key|unique
+----------|----|---|------
+cities|_id_|{"_id":1}|true
+customers|_id_|{"_id":1}|true
+customers|uq_customers_phone|{"phone":1}|true
+drivers|_id_|{"_id":1}|true
+drivers|uq_drivers_code|{"code":1}|true
+merchants|_id_|{"_id":1}|true
+trips|_id_|{"_id":1}|true
+trips|uq_trips_code|{"code":1}|true
+trips|ix_trips_customer_requested|{"customer_id":1,"requested_at":-1}|false
+trips|ix_trips_driver_status|{"driver_id":1,"status":1}|false
+(10 document)
+PASS số index (kể cả _id) = 10
+
+/* Collection và validator */
+name|co_validator|validationLevel|validationAction
+----|------------|---------------|----------------
+cities|true|(mặc định)|(mặc định)
+counters|false|(mặc định)|(mặc định)
+customers|true|(mặc định)|(mặc định)
+drivers|true|(mặc định)|(mặc định)
+merchants|true|(mặc định)|(mặc định)
+trips|true|strict|error
+(6 document)
+PASS collection có validator = 5
+
+// ==================== p01/02-fixture-valid.js ====================
+PASS cities sau khi nạp = 3
+PASS customers sau khi nạp = 6
+PASS drivers sau khi nạp = 6
+PASS merchants sau khi nạp = 3
+PASS trips sau khi nạp = 15
+PASS counters.trip_code = 100014
+
+/* Một chuyến nhìn dưới dạng document (100004) */
+{
+  _id: UUID('70000000-0000-4000-8000-000000100004'),
+  code: 100004,
+  kind: 'food',
+  city_id: 'DN',
+  customer_id: UUID('c0000000-0000-4000-8000-000000000005'),
+  driver_id: UUID('d0000000-0000-4000-8000-000000008005'),
+  merchant_id: UUID('e0000000-0000-4000-8000-000000000003'),
+  status: 'completed',
+  fare: 55000,
+  requested_at: ISODate('2026-11-02T05:00:00.000Z'),
+  accepted_at: ISODate('2026-11-02T05:02:00.000Z'),
+  completed_at: ISODate('2026-11-02T05:35:00.000Z'),
+  updated_at: ISODate('2026-11-02T05:35:00.000Z'),
+  events: []
+}
+
+/* Số chuyến theo trạng thái và loại (đủ 8 trạng thái) */
+_id|ride|food|parcel|tong
+---|----|----|------|----
+accepted|1|0|0|1
+arriving|0|0|1|1
+cancelled|1|1|0|2
+completed|3|2|2|7
+in_transit|1|0|0|1
+picked_up|0|1|0|1
+requested|1|0|0|1
+searching|0|1|0|1
+(8 document)
+PASS số trạng thái khác nhau = 8
+
+// ==================== p01/03-fixture-invalid.js ====================
+PASS ba document mẫu hợp lệ
+
+/* customers */
+PASS C1 thiếu phone → lỗi 121 (phone)
+PASS C2 phone 9 chữ số → lỗi 121 (pattern)
+PASS C3 phone là số, không phải chuỗi → lỗi 121 (bsonType)
+PASS C4 phone trùng khách 1 → lỗi 11000 (uq_customers_phone)
+PASS C5 full_name rỗng → lỗi 121 (minLength)
+PASS C6 created_at là chuỗi ngày → lỗi 121 (created_at)
+PASS C7 trường lạ (email) → lỗi 121 (additionalProperties)
+PASS C8 _id trùng khách 1 → lỗi 11000 (_id_)
+
+/* drivers */
+PASS D1 code trùng 8001 → lỗi 11000 (uq_drivers_code)
+PASS D2 vehicle_type truck → lỗi 121 (enum)
+PASS D3 status viết hoa ONLINE → lỗi 121 (enum)
+PASS D4 code là double 8099.5 → lỗi 121 (bsonType)
+PASS D5 city_id viết thường → lỗi 121 (pattern)
+
+/* trips: kiểu và giá trị */
+PASS T1 fare âm → lỗi 121 (minimum)
+PASS T2 fare có phần lẻ 45000.5 → lỗi 121 (bsonType)
+PASS T3 fare là chuỗi "45000" → lỗi 121 (bsonType)
+PASS T4 fare là Decimal128 → lỗi 121 (bsonType)
+PASS T5 kind taxi → lỗi 121 (enum)
+PASS T6 status done → lỗi 121 (enum)
+PASS T7 code dưới 100000 → lỗi 121 (minimum)
+PASS T8 code trùng 100004 → lỗi 11000 (uq_trips_code)
+PASS T9 customer_id là chuỗi UUID → lỗi 121 (customer_id)
+PASS T10 thiếu events → lỗi 121 (events)
+PASS T11 event có status lạ → lỗi 121 (enum)
+PASS T12 driver_id null thay vì vắng → lỗi 121 (driver_id)
+
+/* trips: quy tắc liên trường */
+PASS R1a food không có quán → lỗi 121 (điều kiện #1)
+PASS R1b ride có quán → lỗi 121 (điều kiện #1)
+PASS R2a requested mà đã có tài xế → lỗi 121 (điều kiện #2)
+PASS R2b accepted mà chưa có tài xế → lỗi 121 (điều kiện #2)
+PASS R3 có tài xế, thiếu accepted_at → lỗi 121 (điều kiện #3)
+PASS R4 completed thiếu completed_at → lỗi 121 (điều kiện #4)
+PASS R5 hoàn thành trước khi nhận → lỗi 121 (điều kiện #5)
+
+/* Chi tiết lỗi validation (errInfo.details) của R4 */
+PASS R4 lần nữa, đọc chi tiết → lỗi 121
+failingDocumentId có mặt (ở errInfo, không ở details): true
+operatorName gốc: $and
+các điều kiện $and không thoả: #4
+
+/* update cũng bị kiểm */
+PASS U1 $inc làm fare âm (chuyến 100014) → lỗi 121 (minimum)
+PASS U2 $set completed cho chuyến đang chạy 100010 → lỗi 121 (điều kiện #4)
+PASS U3 $set trùng phone khách 2 cho khách 3 → lỗi 11000 (uq_customers_phone)
+PASS U4 $unset trường bắt buộc full_name → lỗi 121 (full_name)
+
+/* Bẫy: KHÔNG có lỗi, dữ liệu sai lọt vào */
+PASS B1 chuyến của khách không tồn tại đã vào = 1
+PASS B2 tài xế ở thành phố không tồn tại đã vào = 1
+PASS B3 collection "trip" (thiếu s) được tự tạo = true
+PASS B4 fare âm lọt qua bypass = 1
+
+/* Dữ liệu sau các ca sai: không đổi */
+cities|customers|drivers|merchants|trips|fare_100014|status_100010
+------|---------|-------|---------|-----|-----------|-------------
+3|6|6|3|15|48000|in_transit
+(1 document)
+PASS số chuyến = 15
+
+// ==================== p01/04-lifecycle.js ====================
+
+/* Thêm tài xế mới 8007 (insertOne) */
+PASS acknowledged = true
+PASS insertedId = d0000000-0000-4000-8000-000000008007
+
+/* Cấp mã chuyến bằng bộ đếm (findOneAndUpdate + $inc, trả bản SAU khi sửa) */
+PASS mã chuyến mới = 100015
+
+/* Khách 1 đặt xe ở SG lúc 08:40 */
+PASS requested → searching: matched/modified = 1/1
+
+/* Hai tài xế cùng bấm nhận (8007 trước, 8003 sau) */
+PASS 8007 nhận: matched = 1
+PASS 8003 nhận muộn: matched (không ghi gì) = 0
+PASS tài xế của chuyến = d0000000-0000-4000-8000-000000008007
+
+/* Đi tiếp, bước cuối dùng findOneAndUpdate để nhận document sau khi sửa */
+code|status|fare|completed_at|n_events
+----|------|----|------------|--------
+100015|completed|41000|2026-11-03 09:11:00 +07:00|7
+(1 document)
+
+/* Lịch sử trạng thái nhúng trong chuyến */
+i|status|at|by
+-|------|--|--
+0|requested|2026-11-03 08:40:00 +07:00|customer
+1|searching|2026-11-03 08:40:05 +07:00|system
+2|accepted|2026-11-03 08:41:00 +07:00|driver
+3|picked_up|2026-11-03 08:47:00 +07:00|driver
+4|in_transit|2026-11-03 08:47:30 +07:00|driver
+5|arriving|2026-11-03 09:08:00 +07:00|system
+6|completed|2026-11-03 09:11:00 +07:00|driver
+(7 document)
+PASS số sự kiện = 7
+PASS phút từ đặt tới hoàn thành = 31
+
+/* Cập nhật sai thứ tự: không lỗi, chỉ khớp 0 document */
+PASS huỷ chuyến đã hoàn thành: matched = 0
+
+/* updateMany và upsert */
+PASS updateMany: matched/modified (giá trị không đổi ⇒ không sửa) = 1/0
+PASS upsert tạo bộ đếm mới: upsertedCount = 1
+
+/* replaceOne thay CẢ document: quên trường là mất trường */
+PASS replaceOne thiếu created_at → lỗi 121 (created_at)
+
+/* Xoá: không có khoá ngoại chặn */
+PASS đã xoá khách = Đặng Ngọc Hà
+PASS chuyến trỏ tới khách vừa xoá = 2
+PASS khôi phục khách 6 = 1
+PASS xoá an toàn khách 6 = bị chặn: còn chuyến
+
+/* Số document sau vòng đời */
+customers|drivers|trips|counter
+---------|-------|-----|-------
+6|7|16|100015
+(1 document)
+
+// ==================== p01/05-find.js ====================
+
+/* Chuyến của "ngày 02/11" theo giờ VN: khoảng nửa mở [00:00, 00:00 hôm sau) */
+code|status|requested_at
+----|------|------------
+100000|completed|2026-11-02 07:58:00 +07:00
+100001|completed|2026-11-02 09:15:00 +07:00
+100002|completed|2026-11-02 11:05:00 +07:00
+100003|cancelled|2026-11-02 12:00:00 +07:00
+100004|completed|2026-11-02 12:00:00 +07:00
+100005|completed|2026-11-02 17:30:00 +07:00
+100006|cancelled|2026-11-02 18:00:00 +07:00
+100007|completed|2026-11-02 23:50:00 +07:00
+(8 document)
+PASS chuyến ngày 02/11 giờ VN = 8
+
+/* Sai: lấy "ngày" theo UTC (mặc định của $dateToString) */
+theo_utc|theo_gio_vn
+--------|-----------
+9|8
+(1 document)
+PASS ngày UTC đếm thừa 100008 (00:10 ngày 03/11 giờ VN) = 9 vs 8
+
+/* Sai: so Date với chuỗi — không lỗi, 0 kết quả */
+PASS requested_at >= "2026-11-02" = 0
+
+/* Sai: so UUID với chuỗi — không lỗi, 0 kết quả */
+PASS customer_id = chuỗi UUID = 0
+PASS customer_id = UUID(...) = 4
+
+/* Sắp xếp có giá trị trùng: 100003 và 100004 cùng 12:00 */
+code|requested_at
+----|------------
+100003|2026-11-02 12:00:00 +07:00
+100004|2026-11-02 12:00:00 +07:00
+(2 document)
+Chỉ sort theo requested_at thì thứ tự hai chuyến này không được đảm bảo; thêm code làm khoá phụ.
+
+/* Phân trang: trang 2, mỗi trang 5 chuyến, mới nhất trước */
+code|requested_at
+----|------------
+100010|2026-11-03 08:05:00 +07:00
+100009|2026-11-03 08:00:00 +07:00
+100008|2026-11-03 00:10:00 +07:00
+100007|2026-11-02 23:50:00 +07:00
+100006|2026-11-02 18:00:00 +07:00
+(5 document)
+
+/* Projection: trường lồng nhau và cắt mảng */
+name|menu
+----|----
+Bún Chả Ngõ Mẫu|[{"name":"Bún chả suất thường"},{"name":"Nem rán (2 chiếc)"}]
+Cơm Tấm Phố Lab|[{"name":"Cơm tấm sườn"},{"name":"Cơm tấm sườn bì chả"}]
+Mì Quảng Thử Nghiệm|[{"name":"Mì Quảng gà"},{"name":"Mì Quảng tôm thịt"}]
+(3 document)
+code|events
+----|------
+100015|[{"status":"arriving","at":{"$date":"2026-11-03T02:08:00Z"},"by":"system"},{"status":"completed","at":{"$date":"2026-11-03T02:11:00Z"},"by":"driver"}]
+(1 document)
+
+/* Lọc theo phần tử mảng */
+PASS quán có món dưới 45.000 đ = 2
+PASS chuyến có sự kiện accepted bởi driver = 1
+
+/* null và trường vắng */
+code|status
+----|------
+100006|cancelled
+100013|searching
+100014|requested
+(3 document)
+PASS {driver_id: null} khớp cả trường vắng = 3
+PASS {driver_id: {$exists: false}} = 3
+PASS $ne tài xế 8001 (gồm cả 3 chuyến chưa có tài xế) = 13
+PASS $ne 8001 và có tài xế = 10
+
+/* Chuỗi tiếng Việt: sắp xếp và tìm không phân biệt dấu/hoa thường */
+so byte (mặc định): Lê Hoàng Cường · Nguyễn Văn An · Phạm Thu Dung · Trần Thị Bình · Võ Minh Đức · Đặng Ngọc Hà
+collation vi      : Đặng Ngọc Hà · Lê Hoàng Cường · Nguyễn Văn An · Phạm Thu Dung · Trần Thị Bình · Võ Minh Đức
+PASS Đặng đứng cuối khi so byte = Đặng Ngọc Hà
+PASS collation vi: Đ đứng sau D, trước L ⇒ Đặng đầu danh sách = Đặng Ngọc Hà
+truy_van|khong_collation|vi_1|en_1
+--------|---------------|----|----
+nguyen van an|0|0|1
+nguyên văn an|0|1|1
+NGUYỄN VĂN AN|0|1|1
+dang ngoc ha|0|0|1
+(4 document)
+PASS vi strength 1: "nguyen van an" KHÔNG khớp (văn ≠ van) = 0
+PASS vi strength 1: bỏ dấu thanh và hoa/thường = 1
+PASS en strength 1: bỏ mọi dấu ⇒ tìm không dấu = 1
+PASS regex /^Nguy/ (phân biệt dấu) = 1
+
+/* Đếm: countDocuments vs estimatedDocumentCount */
+countDocuments|estimatedDocumentCount
+--------------|----------------------
+16|16
+(1 document)
+
+// ==================== p01/06-migration.js ====================
+
+/* Bước 1 · expand: cho phép vehicle_plate, chưa bắt buộc */
+PASS app cũ cập nhật tài xế 8003 không có biển số
+PASS biển số sai định dạng bị chặn ngay từ expand → lỗi 121 (pattern)
+
+/* Bước 2 · backfill theo lô (bulkWrite), dữ liệu nguồn có dòng bẩn */
+PASS lần 1: số tài xế đã ghi biển số = 6
+PASS lần 1: lỗi tại vị trí (mã lỗi) = 3 (121)
+PASS còn thiếu biển số = 8004
+PASS 8004 sau chuẩn hoá = 30H-135.79
+PASS backfill lần 2 (idempotent) = 0
+
+/* Bước 3 · document không thoả validator đích */
+PASS drivers không thoả validator đích = 0
+
+/* validationAction "warn": ghi được, chỉ để lại log */
+PASS log id 20294 "Document would fail validation" = Document would fail validation
+
+/* Bước 4 · contract: bắt buộc biển số, strict + error */
+PASS tài xế mới thiếu biển số → lỗi 121 (vehicle_plate)
+PASS $unset biển số của 8001 → lỗi 121 (vehicle_plate)
+
+/* validate: kiểm toàn bộ collection với validator hiện tại */
+valid|nrecords|nNonCompliantDocuments
+-----|--------|----------------------
+true|8|0
+(1 document)
+PASS nNonCompliantDocuments = 0
+
+/* Tài xế sau migration */
+code|full_name|vehicle_type|vehicle_plate|schema_version
+----|---------|------------|-------------|--------------
+8001|Bùi Văn Khoa|bike|59X3-123.45|2
+8002|Hồ Thị Lan|bike|59X1-678.90|2
+8003|Ngô Quang Minh|bike|29B1-246.80|2
+8004|Đỗ Thanh Nam|car|30H-135.79|2
+8005|Lý Thị Oanh|bike|43D1-112.23|2
+8006|Trịnh Văn Phúc|car|43A-998.87|2
+8007|Mai Văn Quý|bike|59X2-555.01|2
+8008|Kiều Thị Sen|car|30K-456.78|2
+(8 document)
+
+// ==================== p01/07-checks.js ====================
+
+/* Tham chiếu (thay cho khoá ngoại) */
+PASS K1 chuyến trỏ tới khách không tồn tại = 0
+PASS K2 chuyến trỏ tới tài xế không tồn tại = 0
+PASS K3 chuyến trỏ tới quán không tồn tại = 0
+PASS K4 trips.city_id không có trong cities = 0
+PASS K4 drivers.city_id không có trong cities = 0
+PASS K4 merchants.city_id không có trong cities = 0
+
+/* Luật nghiệp vụ liên collection */
+PASS K5 quán khác thành phố với chuyến đồ ăn = 0
+PASS K6 tài xế khác thành phố với chuyến = 0
+PASS K7 tài xế: busy ⇔ đúng một chuyến đang chạy = 0
+
+/* Luật trong một document mà validator khó diễn đạt */
+PASS K8 sự kiện cuối khác trạng thái hiện tại = 0
+PASS K9 sự kiện không theo thứ tự thời gian = 0
+PASS K10 bộ đếm ≥ mã chuyến lớn nhất = true
+
+/* Toàn bộ document thoả validator hiện tại (validate) */
+collection|valid|nrecords|nNonCompliantDocuments
+----------|-----|--------|----------------------
+cities|true|3|0
+customers|true|6|0
+drivers|true|8|0
+merchants|true|3|0
+trips|true|16|0
+(5 document)
+PASS K11 tổng document không thoả validator = 0
+
+/* Index unique giữ khoá tự nhiên */
+PASS K12 index unique ngoài _id = customers.uq_customers_phone, drivers.uq_drivers_code, trips.uq_trips_code
+
+/* Đối soát nhanh: doanh thu chuyến hoàn thành theo thành phố */
+city|ten|so_chuyen|doanh_thu|kieu_tong
+----|---|---------|---------|---------
+DN|Đà Nẵng|1|55000|int
+HN|Hà Nội|2|164000|int
+SG|TP. Hồ Chí Minh|5|178000|int
+(3 document)
+PASS tổng doanh thu chuyến hoàn thành (đ) = 397000
+
+/* Kiểm kê cuối P01 */
+cities|customers|drivers|merchants|trips|counters
+------|---------|-------|---------|-----|--------
+3|6|8|3|16|1
+(1 document)
+collection|count|avgObjSize|nindexes
+----------|-----|----------|--------
+trips|16|283|4
+(1 document)
+
+// [lab] File đã chạy: 8
+// [lab] PASS: 115
+// [lab] FAIL: 0
+// [lab] KẾT QUẢ: ĐẠT

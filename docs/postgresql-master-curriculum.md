@@ -25,7 +25,7 @@ Series riêng cho PostgreSQL thuộc chuyên mục cha Database, dùng xuyên su
 |---|---|---|---|---|
 | PostgreSQL | `postgresql` | `postgresql-` | `postgresql-master-curriculum.md` | P01–P06 đã viết (60 bài) |
 | MySQL | `mysql` | `mysql-` | `mysql-master-curriculum.md` | Dự kiến |
-| MongoDB | `mongodb` | `mongodb-` | `mongodb-master-curriculum.md` | Dự kiến |
+| MongoDB | `mongodb` | `mongodb-` | `mongodb-master-curriculum.md` | P01 đã viết (10 bài) |
 | Microsoft SQL Server (MSSQL) | `mssql` | `mssql-` | [`mssql-master-curriculum.md`](mssql-master-curriculum.md) | P01 đã viết (10 bài, SQL Server 2022) |
 | Oracle Database | `oracle` | `oracle-` | `oracle-master-curriculum.md` | Dự kiến |
 | Apache Cassandra | `cassandra` | `cassandra-` | `cassandra-master-curriculum.md` | Dự kiến |

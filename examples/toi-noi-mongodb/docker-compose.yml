@@ -1,0 +1,41 @@
+# MongoDB 8.0 cho lab "MongoDB qua dự án Tới Nơi".
+#
+#   docker compose up -d --wait           # khởi động, tự khởi tạo replica set rs0, chờ "healthy"
+#   npm run p01                           # chạy lab P01 (mongosh bên trong container)
+#   docker compose down -v                # dừng và XOÁ dữ liệu lab (volume)
+#
+# Chạy dưới dạng replica set MỘT node (rs0): transaction nhiều document, change
+# stream và oplog (Phần 4, 6) chỉ có trên replica set. P01 chưa dùng tới nhưng
+# dựng sẵn để mọi phần dùng cùng một môi trường.
+#
+# Lab KHÔNG bật xác thực để bớt bước cho người mới; bù lại cổng chỉ mở trên
+# 127.0.0.1 (máy của bạn). Phần 5 bật xác thực và phân quyền. Không bao giờ
+# chạy MongoDB không xác thực trên một cổng mở ra mạng.
+# Kết nối từ DBStudio: mongodb://127.0.0.1:27018/toinoi?directConnection=true
+name: toinoi-mongodb-lab
+
+services:
+  db:
+    # Ghim theo digest đã kiểm chứng: MongoDB 8.0.38 (xem README).
+    image: mongo:8.0@sha256:d97fea17ccb8d004cd137be8dab54d70d0df11be69c9f422aefe4484c8414ab7
+    command: ["mongod", "--replSet", "rs0", "--bind_ip_all"]
+    environment:
+      TZ: "Asia/Ho_Chi_Minh"
+    ports:
+      - "127.0.0.1:27018:27017"
+    volumes:
+      - toinoi-mongo8-data:/data/db
+      # Script của các phần, chỉ đọc: trong container là /lab/p01/*.js …
+      - ./lib:/lab/lib:ro
+      - ./p01:/lab/p01:ro
+    healthcheck:
+      # Lần đầu: khởi tạo replica set rs0 một node. Các lần sau: chỉ kiểm đã là PRIMARY.
+      test: ["CMD", "mongosh", "--quiet", "--eval", "try { rs.status() } catch (e) { rs.initiate({ _id: 'rs0', members: [{ _id: 0, host: 'localhost:27017' }] }) }; if (!db.hello().isWritablePrimary) quit(1)"]
+      interval: 3s
+      timeout: 10s
+      retries: 40
+      start_period: 10s
+    mem_limit: 1g
+
+volumes:
+  toinoi-mongo8-data:
