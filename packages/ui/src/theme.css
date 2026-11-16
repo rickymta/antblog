@@ -44,6 +44,9 @@
   --tkh-link: #1D4ED8;
   --tkh-link-hover: #1E40AF;
   --tkh-link-visited: #6D28D9;
+  /* Keyword từ điển: teal, khác màu link (xanh dương) và link đã xem (tím). #0F766E ≥ 5:1 trên surface và surface-2. */
+  --tkh-term: #0F766E;
+  --tkh-term-soft: #CCFBF1;
   --tkh-scroll-thumb: #64748B;
   --tkh-scroll-track: #E2E8F0;
   --tkh-scroll-hover: #475569;
@@ -62,6 +65,8 @@
   --tkh-link: #93C5FD;
   --tkh-link-hover: #BFDBFE;
   --tkh-link-visited: #C4B5FD;
+  --tkh-term: #5EEAD4;
+  --tkh-term-soft: rgba(45, 212, 191, 0.16);
   --tkh-scroll-thumb: #64748B;
   --tkh-scroll-track: #172033;
   --tkh-scroll-hover: #94A3B8;

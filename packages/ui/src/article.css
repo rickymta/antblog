@@ -181,21 +181,25 @@
 }
 
 /* Từ điển keyword (rehypeGlossary): gạch chân chấm mờ, rê chuột/chạm để mở hộp thoại giải thích. */
+/* Keyword từ điển: gạch chân chấm dày + màu chữ riêng (teal), không dùng đậm/nghiêng/gạch liền để khỏi lẫn với
+   chữ nhấn, trích dẫn và liên kết. Nền nhạt chỉ hiện khi rê chuột hoặc hộp giải thích đang mở. */
 .tkh-prose dfn.tkh-term {
   font-style: normal;
+  color: var(--tkh-term);
   text-decoration: underline dotted;
-  text-decoration-color: color-mix(in srgb, var(--color-primary) 55%, transparent);
-  text-decoration-thickness: 1.5px;
+  text-decoration-color: color-mix(in srgb, var(--tkh-term) 70%, transparent);
+  text-decoration-thickness: 2px;
   text-underline-offset: 4px;
+  text-decoration-skip-ink: none;
   cursor: help;
   border-radius: 3px;
 }
 .tkh-prose dfn.tkh-term:hover,
 .tkh-prose dfn.tkh-term[aria-expanded='true'] {
-  text-decoration-color: var(--color-primary);
-  background: var(--tkh-primary-soft);
+  text-decoration-color: var(--tkh-term);
+  background: var(--tkh-term-soft);
 }
 .tkh-prose dfn.tkh-term:focus-visible {
-  outline: 2px solid var(--color-primary);
+  outline: 2px solid var(--tkh-term);
   outline-offset: 2px;
 }
