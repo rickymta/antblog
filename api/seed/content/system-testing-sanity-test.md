@@ -47,7 +47,7 @@ Ngược lại, chạy toàn bộ bộ test đặt xe, giao hàng, đồ ăn, th
 Sau bài này, bạn có thể:
 
 - phân biệt sanity với smoke, confirmation và regression bằng câu hỏi mỗi hoạt động trả lời;
-- vẽ impact map cho một thay đổi nhỏ và giải thích vì sao chọn từng ca;
+- vẽ impact map cho một thay đổi nhỏ và giải thích vì sao chọn từng test case;
 - tính oracle tiền bằng tay từ đặc tả, không lấy kết quả của code đang kiểm;
 - chạy lab, đọc 8 lượt pass và nói đúng những gì 8 lượt đó **không** chứng minh;
 - viết kết luận sanity đúng phạm vi: «được kiểm tiếp», không phải «được release».
@@ -65,11 +65,11 @@ Sanity có thể được làm bằng manual testing, component test hay API tes
 | Hoạt động | Căn cứ chọn test case | Kết luận hợp lệ khi pass | Ví dụ Tới Nơi |
 |---|---|---|---|
 | Smoke | Khả năng thiết yếu của build/môi trường | Có thể bắt đầu vòng kiểm tiếp theo | Health, chặn người vô danh, đặt → hoàn tất → thu tiền (SYS-01) |
-| Confirmation | Điều kiện từng gây ra lỗi đã biết | Lỗi đó không còn tái hiện với ca đã chạy | ` giam20 ` không còn bị báo không tìm thấy |
+| Confirmation | Điều kiện từng gây ra lỗi đã biết | Lỗi đó không còn tái hiện với test case đã chạy | ` giam20 ` không còn bị báo không tìm thấy |
 | Sanity | Thay đổi và vùng ảnh hưởng gần | Thay đổi hoạt động hợp lý trong phạm vi đã chọn | SN-01…SN-06 của bài này |
 | Regression | Rủi ro ảnh hưởng bất lợi do thay đổi, rộng hơn | Các hành vi được chọn vẫn đáp ứng yêu cầu | Voucher ở mọi dịch vụ, thành phố, ngày hết hạn, huỷ hoàn lượt |
 
-Một sanity suite thường gồm **test case confirmation cộng một ít regression có chủ đích**. Nó không thay regression đầy đủ. Mẹo nhớ «smoke rộng và nông, sanity hẹp và sâu» có ích nhưng có giới hạn: phạm vi thực tế phải xuất phát từ mục tiêu, rủi ro và kiến trúc, không phải từ số lượng ca. Khi hai nhóm dùng tên khác nhau, hãy ghi mục tiêu và phạm vi vào test plan thay vì tranh luận về chữ.
+Một sanity suite thường gồm **test case confirmation cộng một ít regression có chủ đích**. Nó không thay regression đầy đủ. Mẹo nhớ «smoke rộng và nông, sanity hẹp và sâu» có ích nhưng có giới hạn: phạm vi thực tế phải xuất phát từ mục tiêu, rủi ro và kiến trúc, không phải từ số lượng test case. Khi hai nhóm dùng tên khác nhau, hãy ghi mục tiêu và phạm vi vào test plan thay vì tranh luận về chữ.
 
 ### 2.3. Khi nào một vòng sanity nhỏ là không đủ?
 
@@ -110,7 +110,7 @@ export function normalizeVoucherCode(raw: string | null | undefined): string | n
 }
 ```
 
-Điểm quan trọng: expected `GIAM20` đến từ **R-VOUCHER-02**, không đến từ việc gọi `normalizeVoucherCode`. Nếu test lấy kết quả của hàm thật làm expected để so với fixture, ta chỉ đang so hai implementation với nhau; khi cả hai cùng sai, test vẫn xanh.
+Giá trị mong đợi `GIAM20` đến từ **R-VOUCHER-02**, không đến từ việc gọi `normalizeVoucherCode`. Nếu test lấy kết quả của hàm thật làm giá trị mong đợi để so với fixture, ta chỉ đang so hai implementation với nhau; khi cả hai cùng sai, test vẫn xanh.
 
 ### 3.3. Oracle tiền tính tay
 
@@ -159,12 +159,12 @@ Thay vì hỏi «file nào bị sửa», hãy hỏi «giá trị bị đổi đi
 <text x="460" y="234" text-anchor="middle" class="t-small t-warn">chưa chọn: dịch vụ/thành phố khác, hết hạn, trần giảm, huỷ hoàn lượt, concurrency, thanh toán, browser</text>
 </svg>
 </div>
-<figcaption><b>Hình 1 · Impact map của thay đổi chuẩn hoá voucher.</b> Mỗi thanh ngang là đoạn chuỗi một ca đi qua. Chỉ SN-01 dừng ở cấp hàm; SN-06 là ca duy nhất phủ tới lượt dùng — lý do bài chọn một ca có trạng thái dù thay đổi gốc chỉ là xử lý chuỗi.</figcaption>
+<figcaption><b>Hình 1 · Impact map của thay đổi chuẩn hoá voucher.</b> Mỗi thanh ngang là đoạn chuỗi một test case đi qua. Chỉ SN-01 dừng ở cấp hàm; SN-06 là test case duy nhất phủ tới lượt dùng — lý do bài chọn một ca có trạng thái dù thay đổi gốc chỉ là xử lý chuỗi.</figcaption>
 </figure>
 
 ### 4.2. Bảng test case
 
-| ID | Basis / rủi ro | Precondition | Input và hành động | Expected | Vai trò | Cleanup |
+| ID | Basis / rủi ro | Precondition | Input và hành động | Mong đợi | Vai trò | Cleanup |
 |---|---|---|---|---|---|---|
 | SN-01 | R-VOUCHER-02; thiếu trim | Không cần app | Gọi fixture và hàm thật với ` giam20 ` | Fixture ≠ `GIAM20`; hàm thật = `GIAM20` | Chứng minh oracle phân biệt được lỗi gốc | Không có |
 | SN-02 | R-VOUCHER-02/06; chuẩn hoá không nối vào API | System mới, C001, 09:00 VN 04/11/2026 | POST `/api/quotes` với ` giam20 ` | 200; `voucherCode` GIAM20; discount 6.900; total 28.000 | Confirmation ở API | Bỏ instance |
@@ -181,9 +181,9 @@ Không chọn: mọi tổ hợp thành phố/dịch vụ, ngày hết hạn (R-V
 
 ### 4.4. Entry và exit criteria
 
-**Entry:** yêu cầu chuẩn hoá đã rõ (R-VOUCHER-02), biết diff giả định, seed và clock xác định, lab chạy được. Nếu smoke nền (SYS-01) đỏ ở phần sanity cần dùng, hãy sửa môi trường hoặc ghi blocked trước khi giải thích kết quả sanity.
+**Entry criteria:** yêu cầu chuẩn hoá đã rõ (R-VOUCHER-02), biết diff giả định, seed và clock xác định, lab chạy được. Nếu smoke nền (SYS-01) đỏ ở phần sanity cần dùng, hãy sửa môi trường hoặc ghi blocked trước khi giải thích kết quả sanity.
 
-**Exit:** đủ 8 lượt pass, không skip, assertion không bị nới lỏng, các vùng chưa kiểm được ghi rõ. Có failure chưa giải thích được ⇒ chưa đạt gate. Đạt gate ⇒ **được kiểm tiếp**, không tự động được release.
+**Exit criteria:** đủ 8 lượt pass, không skip, assertion không bị nới lỏng, các vùng chưa kiểm được ghi rõ. Có failure chưa giải thích được ⇒ chưa đạt gate. Đạt gate ⇒ **được kiểm tiếp**, không tự động được release.
 
 ## 5. Thực hành: từ assertion nhỏ tới API có trạng thái
 
@@ -195,9 +195,9 @@ npm test -- articles/system-testing-sanity-test
 npm run typecheck
 ```
 
-`npm ci` chỉ cần khi chuẩn bị hoặc cập nhật dependency theo lockfile. Không cần DB hay server ngoài: mỗi ca dựng một system bộ nhớ mới với đồng hồ cố định, ví và thời tiết giả.
+`npm ci` chỉ cần khi chuẩn bị hoặc cập nhật dependency theo lockfile. Không cần DB hay server ngoài: mỗi test case dựng một system bộ nhớ mới với đồng hồ cố định, ví và thời tiết giả.
 
-### 5.1. Dựng môi trường cho từng ca
+### 5.1. Dựng môi trường cho từng test case
 
 ```ts
 let app: ReturnType<typeof createApp>;
@@ -210,7 +210,7 @@ const quote = (voucherCode?: string) => request(app).post('/api/quotes')
   .set('x-user', 'customer:C001').send({ ...ride, ...(voucherCode === undefined ? {} : { voucherCode }) });
 ```
 
-Ba chi tiết đáng chú ý. `beforeEach` tạo system mới, nên lượt voucher mà SN-06 sử dụng không rò sang test case khác — đó cũng là «cleanup» của bài. `FixedClock` giữ 09:00 để cao điểm không làm đổi oracle. Và helper `quote` gửi `voucherCode` **nguyên trạng**: nếu helper tự `trim()` cho «gọn», ca sẽ xanh ngay cả khi server còn lỗi — test đã sửa hộ sản phẩm. Khi `voucherCode` là `undefined`, helper không gửi field, để phủ đúng dataset «không nhập».
+Ba chi tiết đáng chú ý. `beforeEach` tạo system mới, nên lượt voucher mà SN-06 sử dụng không rò sang test case khác — đó cũng là «cleanup» của bài. `FixedClock` giữ 09:00 để cao điểm không làm đổi oracle. Và helper `quote` gửi `voucherCode` **nguyên trạng**: nếu helper tự `trim()` cho «gọn», test case sẽ xanh ngay cả khi server còn lỗi — test đã sửa hộ sản phẩm. Khi `voucherCode` là `undefined`, helper không gửi field, để phủ đúng dataset «không nhập».
 
 ### 5.2. Bước 1 — Oracle có phân biệt được đúng và sai không?
 
@@ -261,15 +261,15 @@ it('SN-06 · R-VOUCHER-07/R-QUOTE-04: mã chuẩn được giữ khi đặt và 
 });
 ```
 
-Test case này dùng `quoteId` thật do API trả về, không hardcode. Chuyến phải mang `fare` 28.000 và `voucherCode` GIAM20 (R-QUOTE-04: giữ ảnh chụp giá). Vì chuyến chưa huỷ đã tiêu lượt duy nhất trong ngày, báo giá tiếp theo với `GIAM20` phải bị từ chối `VOUCHER_USAGE_LIMIT` (R-VOUCHER-07 kiểm lượt ngay khi báo giá). Giả sử chuyến lưu mã ở dạng ` GIAM20 ` còn khoảng trắng: phần đếm theo mã chuẩn có thể không thấy chuyến đó và cho khách dùng thêm lượt. Thay đổi gốc chỉ là xử lý chuỗi, nhưng hậu quả nằm ở trạng thái — vì vậy sanity cần một ca có trạng thái.
+Test case này dùng `quoteId` thật do API trả về, không hardcode. Chuyến phải mang `fare` 28.000 và `voucherCode` GIAM20 (R-QUOTE-04: giữ ảnh chụp giá). Vì chuyến chưa huỷ đã tiêu lượt duy nhất trong ngày, báo giá tiếp theo với `GIAM20` phải bị từ chối `VOUCHER_USAGE_LIMIT` (R-VOUCHER-07 kiểm lượt ngay khi báo giá). Giả sử chuyến lưu mã ở dạng ` GIAM20 ` còn khoảng trắng: phần đếm theo mã chuẩn có thể không thấy chuyến đó và cho khách dùng thêm lượt. Thay đổi gốc chỉ là xử lý chuỗi, nhưng hậu quả nằm ở trạng thái — vì vậy sanity cần một test case có trạng thái.
 
 ### 5.5. Mong đợi và thực tế
 
-**Expected** (theo README lab): 8 tests pass — sáu ID test case, trong đó SN-04 chạy ba dataset, nên runner báo 8 lượt chứ không phải 6. Không skip.
+**Mong đợi** (theo README lab): 8 tests pass — sáu ID test case, trong đó SN-04 chạy ba dataset, nên runner báo 8 lượt chứ không phải 6. Không skip.
 
-**Observed** — báo cáo SYS-02 ngày 13/11/2026 (Windows, Node v24.15.0, npm 11.12.1, Vitest 3.2.7): chạy chung với smoke SYS-01 được 2 file, 11 tests pass trong 4,01 giây; riêng sanity 8 tests pass trong 160 ms; `npm run typecheck` exit 0.
+**Thực tế — báo cáo gốc (13/11/2026)** (Windows, Node v24.15.0, npm 11.12.1, Vitest 3.2.7): chạy chung với smoke SYS-01 được 2 file, 11 tests pass trong 4,01 giây; riêng sanity 8 tests pass trong 160 ms; `npm run typecheck` exit 0.
 
-Chạy lại khi biên tập bài, cùng ngày 13/11/2026 (Windows, Node v22.18.0, Vitest 3.2.7), lệnh `npx vitest run articles/system-testing-sanity-test`:
+**Thực tế — chạy lại khi biên tập (13/11/2026)** (Windows, Node v22.18.0, Vitest 3.2.7), lệnh `npx vitest run articles/system-testing-sanity-test`:
 
 ```text
  ✓ articles/system-testing-sanity-test/sanity.test.ts (8 tests) 538ms
@@ -278,27 +278,27 @@ Chạy lại khi biên tập bài, cùng ngày 13/11/2026 (Windows, Node v22.18.
    Duration  5.47s (transform 334ms, setup 0ms, collect 3.72s, tests 538ms, environment 0ms, prepare 436ms)
 ```
 
-Thời gian khác nhau giữa hai lượt (160 ms so với 538 ms phần test; lượt sau có SN-02 chiếm 417 ms vì là request đầu tiên làm nóng app) — con số thời gian phụ thuộc máy và lượt chạy, không phải tiêu chí pass. Tiêu chí là số lượt pass, không skip và assertion nguyên vẹn.
+Thời gian phần test khác nhau giữa hai lượt (160 ms so với 538 ms; ở lượt sau, SN-02 chiếm 417 ms vì là request đầu tiên làm nóng app). Thời gian phụ thuộc máy và lượt chạy, không phải tiêu chí pass; tiêu chí là số lượt pass, không skip và assertion nguyên vẹn.
 
 <div class="tkh-callout tkh-callout--warn">
-<span class="tkh-callout-title">8 lượt xanh chưa nói gì</span>
+<span class="tkh-callout-title">8 lượt xanh chưa chứng minh</span>
 <p>Lab dùng kho bộ nhớ, đồng hồ/thời tiết/ví giả và danh tính qua header <code>x-user</code> (giản lược R-API-03, không phải xác thực thật). Lab này <b>không</b> chứng minh: query, collation hay transaction của PostgreSQL; hai request đồng thời tranh một lượt voucher; trình duyệt; Unicode ngoài ASCII; lịch sử một bug thật. Suite cũng không chạy một build API lỗi rồi sửa — lỗi chỉ được so ở cấp hàm qua fixture.</p>
 </div>
 
 ## 6. Đọc thất bại và ra quyết định
 
-Khi sanity đỏ, việc đầu tiên là xác định **bước đầu tiên lệch** trên impact map, không phải sửa expected cho xanh.
+Khi sanity đỏ, việc đầu tiên là xác định **bước đầu tiên lệch** trên impact map, không phải sửa giá trị mong đợi cho xanh.
 
 | Thất bại | Cần phân biệt | Bước điều tra |
 |---|---|---|
 | SN-01 pass, SN-02 fail | Wiring, validation, lookup hay một rule khác | Xem error code và input thực gửi; lần theo use case báo giá |
-| SN-04 fail với `'   '` | Quy ước null/rỗng hay validation từ chối | Đối chiếu R-VOUCHER-02 trước khi động vào expected |
+| SN-04 fail với `'   '` | Quy ước null/rỗng hay validation từ chối | Đối chiếu R-VOUCHER-02 trước khi động vào giá trị mong đợi |
 | Total đúng, discount sai | Sai thứ tự tính bị làm tròn che | So từng bước với oracle 34.500 → 6.900 → 27.600 → 28.000 |
 | SN-05 trả 200 | Mã sai bị coi như không dùng mã | Kiểm nhánh xử lý khi tra voucher không thấy |
 | SN-06 không bị giới hạn | Chuyến lưu mã chưa chuẩn hoặc không đếm lượt | Kiểm `voucherCode` trên chuyến, phạm vi khách/ngày, rồi repository |
-| Chạy riêng pass, chạy chung fail | Rò clock, seed hoặc state giữa ca | Kiểm `beforeEach` và việc tham chiếu instance cũ |
+| Chạy riêng pass, chạy chung fail | Rò clock, seed hoặc state giữa các test case | Kiểm `beforeEach` và việc tham chiếu instance cũ |
 
-Defect report cần: build/commit, ID test case, input nguyên văn **với khoảng trắng hiển thị rõ** (ví dụ ghi `␠giam20␠` hoặc kèm độ dài chuỗi), clock, seed, expected/actual và bước đầu tiên lệch. Ảnh chụp dòng «test failed» không giúp ai tái hiện.
+Defect report cần: build/commit, ID test case, input nguyên văn **với khoảng trắng hiển thị rõ** (ví dụ ghi `␠giam20␠` hoặc kèm độ dài chuỗi), clock, seed, giá trị mong đợi/thực tế và bước đầu tiên lệch. Ảnh chụp dòng «test failed» không giúp ai tái hiện.
 
 Ví dụ kết luận đúng phạm vi khi xanh: «Sanity cho thay đổi chuẩn hoá voucher đạt 8/8 lượt trong lab bộ nhớ; tiếp tục functional/regression cho voucher. Chưa kiểm PostgreSQL, concurrency lượt dùng, Unicode.» Khi SN-02 đỏ nhưng SN-01 xanh: «Không đóng lỗi — hàm đúng nhưng hành vi người dùng qua API chưa đáp ứng R-VOUCHER-02.»
 
@@ -306,11 +306,11 @@ Ví dụ kết luận đúng phạm vi khi xanh: «Sanity cho thay đổi chuẩ
 
 ### 7.1. Thay đổi nhỏ ở hàm dùng chung
 
-Đặt xe, bưu kiện và đồ ăn đều nhận voucher. Với đồ ăn, tiền giảm tính trên **tiền món** (R-FOOD-05), không phải trên cước. Nếu chuẩn hoá đổi cách hiểu mã cho mọi dịch vụ, hãy lập caller map từ code và hợp đồng API, rồi thêm ít nhất một đường đại diện cho mỗi **cấu trúc xử lý khác nhau** — không nhân bản mọi ca cho mọi dịch vụ. Tiêu chí chọn là khác biệt về cách dữ liệu được dùng, không phải khác biệt về tên endpoint.
+Đặt xe, bưu kiện và đồ ăn đều nhận voucher. Với đồ ăn, tiền giảm tính trên **tiền món** (R-FOOD-05), không phải trên cước. Nếu chuẩn hoá đổi cách hiểu mã cho mọi dịch vụ, hãy lập caller map từ code và hợp đồng API, rồi thêm ít nhất một đường đại diện cho mỗi **cấu trúc xử lý khác nhau** — không nhân bản mọi test case cho mọi dịch vụ. Tiêu chí chọn là khác biệt về cách dữ liệu được dùng, không phải khác biệt về tên endpoint.
 
 ### 7.2. Unicode và canonicalization
 
-`trim` và `toUpperCase` không giải quyết ký tự vô hình (zero-width space), khoảng trắng bên trong hay các biểu diễn Unicode khác nhau của cùng một chữ. Đừng tự quyết «xoá mọi khoảng trắng»: `GIAM 20` có thể cần báo không tồn tại thay vì biến thành GIAM20 — đó là quyết định của đặc tả, không của tester. Nếu mã chỉ cho phép ASCII, cần hợp đồng validation rõ và ca cho ký tự ngoài tập. Nếu nhận Unicode, phải quyết định chuẩn lưu và đối chiếu trước khi viết được expected.
+`trim` và `toUpperCase` không giải quyết ký tự vô hình (zero-width space), khoảng trắng bên trong hay các biểu diễn Unicode khác nhau của cùng một chữ. Đừng tự quyết «xoá mọi khoảng trắng»: `GIAM 20` có thể cần báo không tồn tại thay vì biến thành GIAM20 — đó là quyết định của đặc tả, không của tester. Nếu mã chỉ cho phép ASCII, cần hợp đồng validation rõ và test case cho ký tự ngoài tập. Nếu nhận Unicode, phải quyết định chuẩn lưu và đối chiếu trước khi viết được giá trị mong đợi.
 
 ### 7.3. Giới hạn lượt và concurrency
 
@@ -331,30 +331,30 @@ Một property hữu ích là tính idempotent: chuẩn hoá hai lần bằng ch
 - **Chạy toàn bộ test rồi gọi là sanity.** Mất ý nghĩa lựa chọn phạm vi, mất tốc độ phản hồi, và không còn ai biết mỗi test case chạy vì lý do gì.
 - **Gán sanity là «luôn manual» hoặc «luôn automated».** Hình thức tuỳ thay đổi; ở đây API test hợp lý vì thay đổi nằm sau API.
 - **Suy rủi ro từ độ dài diff.** Một dòng trong code dùng chung có thể rộng hơn trăm dòng trong một màn hình riêng.
-- **Sửa expected khi đỏ.** Expected đến từ SPEC; đổi expected cần đổi yêu cầu trước, có người chịu trách nhiệm.
+- **Sửa giá trị mong đợi khi đỏ.** Giá trị mong đợi đến từ SPEC; muốn đổi nó phải đổi yêu cầu trước, có người chịu trách nhiệm.
 
-Đánh đổi: sáu ca chạy dưới một giây cho phản hồi nhanh, đổi lại phải chấp nhận và **ghi ra** những vùng chưa phủ. Thêm ca có trạng thái như SN-06 tốn chút chi phí dựng dữ liệu nhưng bắt được loại lỗi mà kiểm cấp hàm không thể thấy. Mở rộng sang PostgreSQL và concurrency thì đắt hơn nhiều và thuộc suite riêng — quyết định dựa vào việc thay đổi có thực sự chạm tới chúng không.
+Đánh đổi: sáu test case chạy dưới một giây cho phản hồi nhanh, đổi lại phải chấp nhận và **ghi ra** những vùng chưa phủ. Thêm test case có trạng thái như SN-06 tốn chút chi phí dựng dữ liệu nhưng bắt được loại lỗi mà kiểm cấp hàm không thể thấy. Mở rộng sang PostgreSQL và concurrency thì đắt hơn nhiều và thuộc suite riêng — quyết định dựa vào việc thay đổi có thực sự chạm tới chúng không.
 
-## 9. Bài tập và câu hỏi ôn tập
+## 9. Bài tập và câu hỏi tự kiểm
 
 ### Bài tập
 
-1. **Cơ bản.** Thêm input `gIaM20` vào sanity. Expected là gì, và ca này phủ thêm điều gì so với ` giam20 `?
-2. **Trung bình.** Thêm input `GIAM 20` (khoảng trắng ở giữa). Expected theo SPEC hiện tại là gì? Có nên sửa helper để xoá khoảng trắng bên trong không?
+1. **Cơ bản.** Thêm input `gIaM20` vào sanity. Kết quả mong đợi là gì, và test case này phủ thêm điều gì so với ` giam20 `?
+2. **Trung bình.** Thêm input `GIAM 20` (khoảng trắng ở giữa). Kết quả mong đợi theo SPEC hiện tại là gì? Có nên sửa helper để xoá khoảng trắng bên trong không?
 3. **Trung bình.** Giả sử thay đổi tiếp theo là đổi GIAM20 từ 20% thành 25%. Tám lượt hiện tại có còn là sanity phù hợp không?
-4. **Nâng cao.** Thiết kế ca kiểm hai request tạo chuyến đồng thời tranh một lượt GIAM20.
+4. **Nâng cao.** Thiết kế test case kiểm hai request tạo chuyến đồng thời tranh một lượt GIAM20.
 
 <details>
 <summary><b>Lời giải gợi ý</b></summary>
-<p><b>1.</b> Expected giống SN-02/SN-03: 200, <code>voucherCode</code> GIAM20, discount 6.900, total 28.000. Ca phủ quy tắc <b>viết hoa</b> của R-VOUCHER-02 với chữ hoa/thường lẫn lộn, không chỉ quy tắc trim.</p>
-<p><b>2.</b> R-VOUCHER-02 chỉ bỏ khoảng trắng <b>hai đầu</b>; <code>GIAM 20</code> không có trong seed nên expected là 422 <code>VOUCHER_NOT_FOUND</code>. Không sửa helper: muốn chấp nhận khoảng trắng bên trong là thay đổi đặc tả, cần quyết định nghiệp vụ trước.</p>
-<p><b>3.</b> Không dùng nguyên được. Oracle đổi: 25% × 34.500 = 8.625 ⇒ 25.875 ⇒ làm tròn 26.000. Phạm vi cũng chuyển từ normalization sang pricing: cần thêm ca trần giảm, cước tối thiểu và ảnh chụp giá (chuyến đặt từ báo giá cũ giữ giá cũ theo R-QUOTE-04). Làm rõ thay đổi seed/requirement trước khi viết expected.</p>
-<p><b>4.</b> Cần DB có transaction thật (PostgreSQL riêng, không phải kho bộ nhớ), hai báo giá hợp lệ của C001, barrier để hai request <code>POST /api/trips</code> khởi chạy cùng lúc với hai Idempotency-Key khác nhau, expected đúng một 201 và một 422 <code>VOUCHER_USAGE_LIMIT</code>, kèm SQL kiểm invariant số chuyến chưa huỷ dùng GIAM20 trong ngày ≤ 1, và cleanup theo run ID. Lặp nhiều lần để giảm khả năng pass do may mắn về thứ tự.</p>
+<p><b>1.</b> Kết quả mong đợi giống SN-02/SN-03: 200, <code>voucherCode</code> GIAM20, discount 6.900, total 28.000. Test case này phủ quy tắc <b>viết hoa</b> của R-VOUCHER-02 với chữ hoa/thường lẫn lộn, không chỉ quy tắc trim.</p>
+<p><b>2.</b> R-VOUCHER-02 chỉ bỏ khoảng trắng <b>hai đầu</b>; <code>GIAM 20</code> không có trong seed nên kết quả mong đợi là 422 <code>VOUCHER_NOT_FOUND</code>. Không sửa helper: muốn chấp nhận khoảng trắng bên trong là thay đổi đặc tả, cần quyết định nghiệp vụ trước.</p>
+<p><b>3.</b> Không dùng nguyên được. Oracle đổi: 25% × 34.500 = 8.625 ⇒ 25.875 ⇒ làm tròn 26.000. Phạm vi cũng chuyển từ normalization sang pricing: cần thêm test case cho trần giảm, cước tối thiểu và ảnh chụp giá (chuyến đặt từ báo giá cũ giữ giá cũ theo R-QUOTE-04). Làm rõ thay đổi seed/requirement trước khi viết giá trị mong đợi.</p>
+<p><b>4.</b> Cần DB có transaction thật (PostgreSQL riêng, không phải kho bộ nhớ), hai báo giá hợp lệ của C001, barrier để hai request <code>POST /api/trips</code> khởi chạy cùng lúc với hai Idempotency-Key khác nhau, mong đợi đúng một 201 và một 422 <code>VOUCHER_USAGE_LIMIT</code>, kèm SQL kiểm invariant số chuyến chưa huỷ dùng GIAM20 trong ngày ≤ 1, và cleanup theo run ID. Lặp nhiều lần để giảm khả năng pass do may mắn về thứ tự.</p>
 </details>
 
 ### Câu hỏi tự kiểm
 
-**Câu 1.** Ca nào dưới đây là confirmation thuần, không phải regression gần?
+**Câu 1.** Test case nào dưới đây là confirmation thuần, không phải regression gần?
 
 - a) SN-02 — ` giam20 ` qua API
 - b) SN-03 — `GIAM20` qua API
@@ -408,7 +408,7 @@ Nguồn ngoài tra cứu 13/11/2026.
 
 - ISTQB, *Certified Tester Foundation Level Syllabus v4.0.1* (2024) — mục 2.2.3 Confirmation Testing and Regression Testing, impact analysis. PDF: https://istqb.org/wp-content/uploads/2024/11/ISTQB_CTFL_Syllabus_v4.0.1.pdf. Thuật ngữ «sanity suite» và cách ghép confirmation + regression gần trong bài là thực tiễn của series, không phải định nghĩa của syllabus.
 - Vitest — Expect API (`toBe`, `toMatchObject`, `it.each`): https://vitest.dev/api/expect.html
-- Phòng lab Tới Nơi: `SPEC.md` (R-VOUCHER-02/03/06/07, R-QUOTE-04, R-FARE-01…08), `src/domain/voucher.ts`, bộ test của bài — https://github.com/rickymta/antblog/tree/main/examples/toi-noi-testing/articles/system-testing-sanity-test
+- Lab Tới Nơi: `SPEC.md` (R-VOUCHER-02/03/06/07, R-QUOTE-04, R-FARE-01…08), `src/domain/voucher.ts`, bộ test của bài — https://github.com/rickymta/antblog/tree/main/examples/toi-noi-testing/articles/system-testing-sanity-test
 - Bài liên quan: [Dự án mẫu Tới Nơi](/articles/du-an-mau-toi-noi) · [SYS-01 · Smoke Test](/articles/system-testing-smoke-test) · [Confirmation Testing và Regression Testing](/articles/confirmation-testing-va-regression-testing) · [Equivalence Partitioning](/articles/equivalence-partitioning) · [Phân tích tác động của change request](/articles/ba-change-request-impact-analysis)
 
 Bài tiếp theo: [SYS-03 · Functional Test](/articles/system-testing-functional-test).

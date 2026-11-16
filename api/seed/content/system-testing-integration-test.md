@@ -18,7 +18,7 @@ Hàm cước trả đúng 35.000 đồng, repository lưu được chuyến, c�
 <tr><th scope="row">Cấp độ</th><td>Intermediate — đã biết API test, SQL cơ bản và test double</td></tr>
 <tr><th scope="row">Test level / hướng kiểm</th><td>Component integration (API → use case → repository → PostgreSQL WASM) và consumer side của cổng thanh toán; functional + reliability ở chỗ nối</td></tr>
 <tr><th scope="row">Bài cần đọc trước</th><td><a href="/articles/system-testing-functional-test">SYS-03 Functional Test</a>; nền tảng khái niệm: <a href="/articles/component-integration-testing">TEST-013 Component Integration Testing</a>, <a href="/articles/test-doubles-dummy-stub-fake-mock-spy">Test double</a></td></tr>
-<tr><th scope="row">Thực hành</th><td>Lab (code): 7 execution — replay idempotency, foreign key, 5 dataset lỗi thanh toán (R-QUOTE-03, R-IDEM-02, R-PAY-03/04/06) — <code>examples/toi-noi-testing/articles/system-testing-integration-test/</code></td></tr>
+<tr><th scope="row">Thực hành</th><td>Lab (code): 7 execution — replay idempotency, foreign key, 5 dataset chế độ ví — một đường thu bình thường và bốn chế độ lỗi (R-QUOTE-03, R-IDEM-02, R-PAY-03/04/06) — <code>examples/toi-noi-testing/articles/system-testing-integration-test/</code></td></tr>
 <tr><th scope="row">Nguồn chính</th><td>ISTQB CTFL v4.0.1 mục 2.2.1; PostgreSQL 18 Constraints; PGlite docs; <code>SPEC.md</code> của lab</td></tr>
 </tbody>
 </table>
@@ -41,7 +41,7 @@ Bài dành cho người đã biết viết API test, đọc SQL cơ bản và ph
 
 **Integration testing** tập trung vào tương tác giữa các thành phần hoặc hệ thống: dữ liệu trao đổi, thứ tự gọi, mapping, xử lý lỗi và các tác dụng phụ đi kèm. CTFL v4.0.1 tách hai cấp: *component integration* (phối hợp giữa các thành phần trong một hệ thống) và *system integration* (giao tiếp giữa các hệ thống hoặc dịch vụ ngoài). Khái niệm nền đã có ở [TEST-013](/articles/component-integration-testing) và [TEST-015](/articles/system-integration-testing); bài này đi vào thực hành: port, contract, double, timeout/retry và schema.
 
-Điều quan trọng nhất: cái tên «integration test» **không tự cho biết** dependency nào đang chạy thật. Một file tên `integration.test.ts` có thể mock toàn bộ DB. Vì vậy mỗi suite phải công bố ranh giới.
+Cái tên «integration test» **không tự cho biết** dependency nào đang chạy thật. Một file tên `integration.test.ts` có thể mock toàn bộ DB. Vì vậy mỗi suite phải công bố ranh giới.
 
 | Phạm vi | Ví dụ Tới Nơi | Bằng chứng chính |
 |---|---|---|
@@ -55,7 +55,7 @@ Lab của bài nối **Express → use case → PostgreSQL repository → PGlite
 Ba cặp thuật ngữ hay bị trộn:
 
 - **Interface vs contract.** Interface TypeScript là hình dạng lời gọi, kiểm ở compile time. Contract gồm cả ý nghĩa: đơn vị tiền, mã lỗi, khoá idempotency được tôn trọng ra sao, lỗi nào được thử lại.
-- **Fake vs stub vs mock.** Stub trả về kết quả dựng sẵn; mock kiểm kỳ vọng tương tác; fake là cài đặt đơn giản *có hành vi*. `FakePaymentGateway` của lab là fake: có sổ ghi (ledger) các khoản đã trừ, dedupe theo khoá, và các chế độ lỗi.
+- **Fake vs stub vs mock.** Stub trả về kết quả dựng sẵn; mock kiểm tương tác mong đợi; fake là cài đặt đơn giản *có hành vi*. `FakePaymentGateway` của lab là fake: có sổ ghi (ledger) các khoản đã trừ, dedupe theo khoá, và các chế độ lỗi.
 - **Timeout vs huỷ.** Hết giờ chờ ở phía caller không có nghĩa thao tác phía provider đã dừng — đây là gốc của lỗi trừ tiền hai lần ở đầu bài.
 
 ## 3. Chiến lược ghép nối và chọn dependency
@@ -147,10 +147,10 @@ Chỉ kiểm HTTP 200 sẽ bỏ sót `payment failed`. Chỉ kiểm response `pa
 
 Insert một event trỏ tới chuyến không tồn tại phải bị PostgreSQL từ chối với SQLSTATE **23503** (`foreign_key_violation`). Test assert *mã* lỗi và việc không có row nào được ghi, không assert toàn văn thông báo — câu chữ có thể đổi theo ngôn ngữ hoặc phiên bản.
 
-### 4.4. Tiêu chí bắt đầu và kết thúc
+### 4.4. Entry criteria và exit criteria
 
-- **Entry:** SPEC và schema xác định; app dựng được; dữ liệu mỗi test case độc lập (reset trước từng execution); dependency cài theo lockfile.
-- **Exit:** 7/7 execution pass, không skip; `npm run typecheck` exit 0; ranh giới thật/giả được công bố trong báo cáo.
+- **Entry criteria:** SPEC và schema xác định; app dựng được; dữ liệu mỗi test case độc lập (reset trước từng execution); dependency cài theo lockfile.
+- **Exit criteria:** 7/7 execution pass, không skip; `npm run typecheck` exit 0; ranh giới thật/giả được công bố trong báo cáo.
 
 ## 5. Thiết kế test case
 
@@ -160,9 +160,9 @@ Seed khách C001 và tài xế D101; xe máy (`bike`) tại SG, 5 km; đồng h�
 
 ### 5.2. Bảng test case
 
-| ID / dataset | Requirement / risk | Hành động | Expected | Cleanup |
+| ID / dataset | Requirement / rủi ro | Hành động | Mong đợi | Cleanup |
 |---|---|---|---|---|
-| IN-01 | R-QUOTE-03, R-IDEM-02 — replay tạo chuyến trùng | Báo giá; POST `/api/trips` với key `sys04-book-001`; gửi lại y hệt | Cả hai 201, body giống nhau, `idempotent-replayed: true`; SQL: 1 trip `pending`; quote trỏ đúng trip; events chỉ `requested`, `searching` | reset trước ca kế |
+| IN-01 | R-QUOTE-03, R-IDEM-02 — replay tạo chuyến trùng | Báo giá; POST `/api/trips` với key `sys04-book-001`; gửi lại y hệt | Cả hai 201, body giống nhau, `idempotent-replayed: true`; SQL: 1 chuyến `pending`; báo giá trỏ đúng chuyến; events chỉ `requested`, `searching` | reset trước test case kế tiếp |
 | IN-02 | FK schema — event mồ côi | INSERT `trip_events` với `trip_id='missing-trip'` | Reject code `23503`; bảng `trip_events` có 0 row | reset |
 | IN-03 / none | R-PAY-03 — đường thu bình thường | Đưa chuyến tới `in_transit` qua API; complete | `completed/paid`; 1 call; ledger 35.000 | reset |
 | IN-03 / lost_response | R-PAY-04 — đã thu nhưng mất phản hồi lần đầu | `failNext('lost_response')`; complete | 2 call cùng key; `paid`; ledger **chỉ** 35.000 | reset |
@@ -188,7 +188,7 @@ npx vitest run articles/system-testing-integration-test
 npm run typecheck
 ```
 
-`npm ci` chỉ cần khi chuẩn bị dependency theo lockfile. Không cần PostgreSQL server: PGlite chạy PostgreSQL biên dịch sang WASM ngay trong tiến trình test. Expected: **7 tests pass** — hai test case riêng và năm dataset thanh toán.
+`npm ci` chỉ cần khi chuẩn bị dependency theo lockfile. Không cần PostgreSQL server: PGlite chạy PostgreSQL biên dịch sang WASM ngay trong tiến trình test. Mong đợi: **7 tests pass** — hai test case riêng và năm dataset thanh toán.
 
 ### 6.1. Bước 1 — Lắp ráp và kiểm soát vòng đời
 
@@ -212,7 +212,7 @@ Lưu ý `timeoutMs: 50`: lab rút deadline từ 3 giây (mặc định của SPE
 
 ### 6.2. Bước 2 — Kích hoạt qua API, quan sát bằng SQL
 
-IN-01 không insert trip trực tiếp mà gọi báo giá và đặt chuyến thật, rồi truy vấn bảng:
+IN-01 không insert chuyến trực tiếp mà gọi báo giá và đặt chuyến thật, rồi truy vấn bảng:
 
 ```ts
 const tripId = first.body.trip.id;
@@ -271,13 +271,15 @@ expect(system.payments.totalCharged()).toBe(charged);
 expect(system.payments.chargedKeys()).toEqual(charged ? [`trip:${id}:fare`] : []);
 ```
 
-Khoá dựng từ `id` của chính test case đó, không hardcode. Vòng `for` kiểm **từng** lần gọi — nếu lần retry thứ hai đổi khoá hay đổi số tiền, test đỏ. Decline/timeout/error vẫn kỳ vọng HTTP 200 theo R-PAY-06: hoàn tất chuyến và thu tiền là hai kết quả khác nhau. Test đòi 500 cho mọi lỗi ví sẽ áp đặt một hợp đồng sai.
+Khoá dựng từ `id` của chính test case đó, không hardcode. Vòng `for` kiểm **từng** lần gọi — nếu lần retry thứ hai đổi khoá hay đổi số tiền, test đỏ. Với decline/timeout/error, kết quả mong đợi vẫn là HTTP 200 theo R-PAY-06: hoàn tất chuyến và thu tiền là hai kết quả khác nhau. Test đòi 500 cho mọi lỗi ví sẽ áp đặt một hợp đồng sai.
 
 ### 6.5. Kết quả: mong đợi và thực tế
 
 **Mong đợi** (từ thiết kế ở mục 5): 7 pass; số lần gọi theo dataset none/lost_response/decline/timeout/error là 1/2/1/3/3; ledger 35.000/35.000/0/0/0.
 
-**Thực tế — lượt chạy lại ngày 13/11/2026** (Windows, Node v22.18.0, Vitest 3.2.7, lệnh `npx vitest run articles/system-testing-integration-test`):
+**Thực tế — báo cáo gốc (13/11/2026)** (Node v24.15.0, chạy chung với suite SYS-01…03): 7/7 pass, 2.628 ms cho file này.
+
+**Thực tế — chạy lại khi biên tập (13/11/2026)** (Windows, Node v22.18.0, Vitest 3.2.7, lệnh `npx vitest run articles/system-testing-integration-test`):
 
 ```text
 ✓ articles/system-testing-integration-test/integration.test.ts (7 tests) 3750ms
@@ -287,7 +289,7 @@ Test Files  1 passed (1)
   Duration  10.64s (transform 294ms, collect 5.69s, tests 3.75s, prepare 687ms)
 ```
 
-Lượt chạy ghi trong báo cáo bài (cùng ngày, Node v24.15.0, chạy chung với suite SYS-01…03) cũng cho 7/7 pass, 2.628 ms cho file này. Thời gian khác nhau giữa hai lượt là bình thường — máy đang chạy việc khác, và đây **không** phải phép đo hiệu năng. Dataset `timeout` chậm nhất vì phải chờ ba deadline 50 ms cộng xử lý.
+Thời gian khác nhau giữa hai lượt là bình thường — máy đang chạy việc khác, và đây **không** phải phép đo hiệu năng. Dataset `timeout` chậm nhất vì phải chờ ba deadline 50 ms cộng xử lý.
 
 Đọc kết quả: replay trả lại response cũ, SQL có một chuyến và hai event khởi tạo; FK chặn event mồ côi với 23503; `lost_response` gọi hai lần nhưng chỉ trừ một lần 35.000; các lỗi kéo dài cho `completed/failed` và tài xế `online`. Không phát hiện defect sản phẩm trong lượt chạy.
 
@@ -300,16 +302,16 @@ Lượt chạy ghi trong báo cáo bài (cùng ngày, Node v24.15.0, chạy chun
 
 | Dấu hiệu | Giả thuyết cần kiểm | Bằng chứng tiếp theo |
 |---|---|---|
-| Response đúng, SQL sai | Mapping/update chưa lưu | Row theo tripId và câu SQL của adapter |
+| Response đúng, SQL sai | Mapping/update chưa lưu | Row theo id chuyến và câu SQL của adapter |
 | Replay tạo thêm event | Idempotency không bao toàn bộ handler | Phạm vi khoá, response đã lưu, số row trước/sau |
 | lost_response thu hai lần | Khoá đổi giữa các lần thử, hoặc fake/provider không dedupe | Danh sách `calls` và ledger |
 | decline có ba lần gọi | Gộp lỗi nghiệp vụ với lỗi tạm thời | Nhánh xử lý `ChargeResult` |
 | IN-02 không lỗi | Schema/constraint chưa được nạp vào DB test | Kiểm schema thực của DB test |
 | Test treo | Deadline hoặc cleanup không hoạt động | Timer, promise đang chờ; không chỉ tăng timeout của runner |
 
-Khi test case đỏ, ghi: commit, test case/dataset, cấu hình timeout và retry, response, các row SQL và danh sách `calls` đã quan sát. Phân biệt **failed** (lỗi sản phẩm, có expected/actual và dữ liệu tái hiện) với **blocked** (môi trường: PGlite không khởi tạo, thiếu dependency). Khi mở rộng sang sandbox, không log token hay dữ liệu thanh toán thật.
+Khi test case đỏ, ghi: commit, test case/dataset, cấu hình timeout và retry, response, các row SQL và danh sách `calls` đã quan sát. Phân biệt **failed** (lỗi sản phẩm, có mong đợi/thực tế và dữ liệu tái hiện) với **blocked** (môi trường: PGlite không khởi tạo, thiếu dependency). Khi mở rộng sang sandbox, không log token hay dữ liệu thanh toán thật.
 
-Ví dụ quyết định: «IN-03/lost_response đỏ: `chargedKeys` có hai khoá khác nhau. Chặn merge thay đổi ở `payment.ts`; các suite không chạm thanh toán vẫn review được. Sau khi sửa, chạy confirmation dataset này, rồi cả bảy test case.»
+Ví dụ quyết định: «IN-03/lost_response đỏ: `chargedKeys` có hai khoá khác nhau. Chặn merge thay đổi ở `payment.ts`; các suite không chạm thanh toán vẫn review được. Sau khi sửa, chạy confirmation testing với dataset này, rồi cả bảy test case.»
 
 ## 8. Mở rộng nâng cao
 
@@ -331,7 +333,7 @@ DB tạo sạch từ `schema.sql` không chứng minh migration từ bản cũ �
 
 ### 8.5. Concurrency và ranh giới của PGlite
 
-`Promise.all` trên PGlite không biến nó thành server nhiều connection. Kiểm hai tài xế nhận cùng chuyến (hay hai request đặt cùng quote, điều R-QUOTE-03 nói «kể cả khi hai yêu cầu tới cùng lúc») cần hai transaction độc lập, điểm đồng bộ khởi chạy, isolation level rõ ràng và invariant «chỉ một bên thắng». IN-01 replay **tuần tự**, không chứng minh xử lý hai request đang in-progress. Phần này cần PostgreSQL riêng và chưa chạy ở bài này.
+`Promise.all` trên PGlite không biến nó thành server nhiều connection. Kiểm hai tài xế nhận cùng chuyến (hay hai request đặt cùng báo giá, điều R-QUOTE-03 nói «kể cả khi hai yêu cầu tới cùng lúc») cần hai transaction độc lập, điểm đồng bộ khởi chạy, isolation level rõ ràng và invariant «chỉ một bên thắng». IN-01 replay **tuần tự**, không chứng minh xử lý hai request đang in-progress. Phần này cần PostgreSQL riêng và chưa chạy ở bài này.
 
 ### 8.6. Broker, outbox và quan sát
 
@@ -361,8 +363,8 @@ Về chi phí: bảy test case chạy vài giây, đủ rẻ để nằm trong p
 
 <details>
 <summary><b>Lời giải gợi ý</b></summary>
-<p><b>1.</b> Dùng <code>system.payments.failNext('error')</code> (không phải <code>setMode</code>, để lỗi chỉ áp cho lần đầu). Expected: 2 calls cùng khoá <code>trip:&lt;id&gt;:fare</code>, <code>completed/paid</code> ở cả response và SQL, ledger 35.000.</p>
-<p><b>2.</b> Theo R-IDEM-03: 422 <code>IDEMPOTENCY_KEY_REUSED</code>. Kiểm thêm bằng SQL: số row <code>trips</code> không tăng và quote mới có <code>used_by_trip_id</code> rỗng. Đây là ca khác hẳn replay cùng body của IN-01.</p>
+<p><b>1.</b> Dùng <code>system.payments.failNext('error')</code> (không phải <code>setMode</code>, để lỗi chỉ áp cho lần đầu). Mong đợi: 2 calls cùng khoá <code>trip:&lt;id&gt;:fare</code>, <code>completed/paid</code> ở cả response và SQL, ledger 35.000.</p>
+<p><b>2.</b> Theo R-IDEM-03: 422 <code>IDEMPOTENCY_KEY_REUSED</code>. Kiểm thêm bằng SQL: số row <code>trips</code> không tăng và báo giá mới có <code>used_by_trip_id</code> rỗng. Đây là test case khác hẳn replay cùng body của IN-01.</p>
 <p><b>3.</b> Theo R-PAY-02: <code>paymentStatus = cash</code>, <code>payments.calls</code> rỗng, ledger 0, DB <code>completed</code>, D101 <code>online</code>. Không áp oracle <code>paid</code> của chuyến <code>vixanh</code>.</p>
 <p><b>4.</b> Có cửa sổ lệch: ledger đã trừ 35.000, DB vẫn chưa ghi <code>paid</code> (hoặc request lỗi). Đáp án tốt nêu: số tiền thực đã thu, cách phát hiện (đối soát ledger/provider với DB), cách sửa (retry ghi DB, reconciliation job, outbox) — và <b>không</b> retry toàn luồng với khoá mới, vì sẽ thu lần hai.</p>
 </details>
@@ -405,7 +407,7 @@ Về chi phí: bảy test case chạy vài giây, đủ rẻ để nằm trong p
 <p><b>c)</b> theo R-PAY-04 (decline không retry) và R-PAY-06 (thanh toán không chặn nghiệp vụ). d) là hành vi của timeout/error kéo dài.</p>
 </details>
 
-**Câu 4.** Bảy ca pass có chứng minh hai yêu cầu đặt cùng một quote đến *đồng thời* chỉ tạo một chuyến không?
+**Câu 4.** Bảy test case pass có chứng minh hai yêu cầu đặt cùng một báo giá đến *đồng thời* chỉ tạo một chuyến không?
 
 <details>
 <summary><b>Đáp án và giải thích</b></summary>

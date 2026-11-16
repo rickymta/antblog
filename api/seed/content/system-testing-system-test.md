@@ -1,14 +1,14 @@
 ---
 slug: system-testing-system-test
 title: "System Test: kiểm hành vi của toàn ứng dụng Tới Nơi trong ranh giới đã chọn"
-summary: "Bài thực hành system testing: vẽ ranh giới hệ thống đang kiểm, tách system test khỏi E2E và UAT, thiết kế ba hành trình nhiều vai trò qua hai giao diện, chờ trạng thái bất đồng bộ bằng điều kiện thay vì sleep, đối chiếu UI với API và ghi rõ giới hạn bằng chứng của một lab Playwright trên server riêng."
+summary: "Thực hành system testing: vẽ ranh giới hệ thống đang kiểm, tách system test khỏi E2E và UAT, thiết kế ba hành trình (một hành trình khách–tài xế qua hai giao diện), chờ trạng thái bằng điều kiện thay vì sleep, đối chiếu UI với API và ghi rõ giới hạn bằng chứng của lab Playwright."
 category: testing
 level: intermediate
 tags: [testing, sys-05, system-testing, e2e, playwright, test-environment, observability, eventual-consistency]
 language: vi
 ---
 
-API hoàn tất chuyến trả `completed`, DB lưu đúng, nhưng trang khách vẫn hiện «Đang tìm tài xế» vì vòng hỏi lại trạng thái không chạy. Mọi test integration của backend đều xanh, còn người dùng thì không biết chuyến đã kết thúc. Bài này trả lời: **muốn bắt loại lỗi đó, cần kiểm cái gì, qua đâu, trên môi trường nào, và được phép kết luận tới đâu.** Ta vẽ ranh giới hệ thống đang kiểm của lab Tới Nơi, thiết kế ba hành trình khách–tài xế qua hai giao diện, tự động hoá bằng Playwright trên một server riêng, rồi đọc kết quả như một người phải ký quyết định.
+API hoàn tất chuyến trả `completed`, DB lưu đúng, nhưng trang khách vẫn hiện «Đang tìm tài xế» vì vòng hỏi lại trạng thái không chạy. Mọi test integration của backend đều xanh, còn người dùng thì không biết chuyến đã kết thúc. Bài này trả lời: **muốn bắt loại lỗi đó, cần kiểm cái gì, qua đâu, trên môi trường nào, và được phép kết luận tới đâu.** Ta vẽ ranh giới hệ thống đang kiểm (system under test) của lab Tới Nơi, thiết kế ba hành trình khách–tài xế qua hai giao diện, tự động hoá bằng Playwright trên một server riêng, rồi đọc kết quả như một người phải ký quyết định.
 
 <div class="tkh-callout">
 <span class="tkh-callout-title">Thông tin bài · SYS-05</span>
@@ -37,8 +37,8 @@ Mỗi câu cần ít nhất hai mảnh chạy cùng nhau: HTML/JS của trang, H
 
 Sau bài này, bạn có thể:
 
-1. Xác định **system under test** và ghi rõ cái gì nằm trong, cái gì được mô phỏng, cái gì nằm ngoài ranh giới.
-2. Thiết kế hành trình nhiều vai trò từ rủi ro người dùng, với oracle độc lập cho tiền và trạng thái.
+1. Xác định **hệ thống đang kiểm** và ghi rõ cái gì nằm trong, cái gì được mô phỏng, cái gì nằm ngoài ranh giới.
+2. Thiết kế hành trình từ rủi ro người dùng, kể cả hành trình nhiều vai trò, với oracle độc lập cho tiền và trạng thái.
 3. Kiểm kết quả ở **cả** UI lẫn API, và giải thích mỗi phía bắt được lỗi gì mà phía kia bỏ sót.
 4. Chờ trạng thái bất đồng bộ bằng assertion có điều kiện, không dùng sleep cố định.
 5. Phân biệt «ba hành trình lab xanh» với bằng chứng release production.
@@ -58,7 +58,7 @@ Phần định nghĩa theo ISTQB — test basis, môi trường, ai thực hiệ
 
 Ba điểm hay nhầm:
 
-- **E2E là cách tổ chức hành trình, không phải một cấp kiểm thử riêng.** Một test lỗi đầu vào ở trang khách cũng là system test dù không đi hết vòng đời chuyến (xem SY-03 bên dưới).
+- **E2E là cách tổ chức hành trình, không phải một test level riêng.** Một test lỗi đầu vào ở trang khách cũng là system test dù không đi hết vòng đời chuyến (xem SY-03 bên dưới).
 - **Browser test không tự động là system test.** Nếu mock mọi request, test chỉ kiểm giao diện — hữu ích, nhưng không cho bằng chứng về đường browser–server–DB.
 - **System test xanh không phải UAT.** Test máy chỉ đối chiếu với đặc tả; còn «đúng nhu cầu» do người nghiệp vụ quyết định.
 
@@ -122,7 +122,7 @@ Browser test đắt: chậm hơn API test, nhiều điểm hỏng, khó chẩn �
 
 ### 3.2. Test basis
 
-Mỗi kỳ vọng trích từ SPEC của lab, không từ implementation:
+Mỗi kết quả mong đợi trích từ SPEC của lab, không từ implementation:
 
 - **R-UI-01** — trang khách: báo giá, đặt, trạng thái tự làm mới mỗi 2 giây, «Sửa bất kỳ ô nào sau khi báo giá ⇒ phải báo giá lại».
 - **R-UI-02** — trang tài xế: tải chuyến đang chờ, nhận, bấm lần lượt các bước tới hoàn thành.
@@ -139,7 +139,7 @@ SY-03 chỉ chọn ô quãng đường để sửa. Bài **không** tuyên bố 
 
 Xe máy 5 km, 09:00 giờ Việt Nam (ngoài cao điểm), không mưa, không voucher: 12.000 + 4.500 × 5 = 34.500 đ, làm tròn lên bội số 1.000 theo R-FARE-08 ⇒ **35.000 đ**. UI phải hiện đúng chuỗi `35.000 đ`, API phải trả `fare: 35000`.
 
-Hai expected này được tính trên giấy từ bảng giá. Đừng đọc số trên UI rồi dùng chính số đó làm expected cho API: nếu calculator sai, cả hai phía sẽ sai giống nhau và test vẫn xanh.
+Hai giá trị mong đợi này được tính trên giấy từ bảng giá. Đừng đọc số trên UI rồi dùng chính số đó làm giá trị mong đợi cho API: nếu calculator sai, cả hai phía sẽ sai giống nhau và test vẫn xanh.
 
 ## 4. Môi trường và quyền sở hữu dữ liệu kiểm thử
 
@@ -163,10 +163,10 @@ webServer: {
 | Cấu hình | Giá trị | Lý do |
 |---|---|---|
 | Browser | Chrome cài sẵn (`channel: 'chrome'`), headless | Chưa có matrix nhiều engine — để dành cho bài Compatibility |
-| Dữ liệu | Seed C001, D101, SG, xe máy, 5 km; reset trước mỗi case | Mỗi case độc lập, chạy riêng hay chạy chung cùng kết quả |
-| Giờ | Đặt về 09:00 VN 04/11/2026 trước mỗi case; đồng hồ tiếp tục chạy | Xa biên cao điểm 11:00 nên thời gian thao tác không đổi oracle tiền |
+| Dữ liệu | Seed C001, D101, SG, xe máy, 5 km; reset trước mỗi test case | Mỗi test case độc lập, chạy riêng hay chạy chung cùng kết quả |
+| Giờ | Đặt về 09:00 VN 04/11/2026 trước mỗi test case; đồng hồ tiếp tục chạy | Xa biên cao điểm 11:00 nên thời gian thao tác không đổi oracle tiền |
 | DB | PGlite trong tiến trình server | Không dùng DB dùng chung |
-| Rate limit | 5 lượt/60 giây | Mỗi case chỉ tạo tối đa một chuyến |
+| Rate limit | 5 lượt/60 giây | Mỗi test case chỉ tạo tối đa một chuyến |
 | Worker / retry | `workers: 1`, `retries: 0` | Tránh reset chéo, không che flakiness |
 | Timeout | Test 30 giây, assertion 8 giây, khởi động server 60 giây | Budget local, không phải SLA |
 | Bằng chứng | Trace và screenshot khi fail, dưới `reports/system-testing` | Không commit; có thể chứa payload |
@@ -180,11 +180,11 @@ webServer: {
 
 ## 5. Thiết kế ba kịch bản
 
-| ID | Requirement / rủi ro | Tiền điều kiện | Hành động | Expected | Cleanup |
+| ID | Requirement / rủi ro | Tiền điều kiện | Hành động | Mong đợi | Cleanup |
 |---|---|---|---|---|---|
 | SY-01 | R-UI-01/02, R-UI-04, R-STATE-02, R-PAY-03, R-API-05 | Seed sạch, 09:00 | Khách báo giá 5 km, chọn VíXanh, đặt; tài xế (context riêng) tải, nhận, arrive → pickup → start → complete | Giá `35.000 đ`; nhãn tài xế đúng từng bước; khách thấy D101 và «Hoàn thành»; nút huỷ disabled; API `completed`/`paid`/`35000`/`D101`; C002 đọc nhận 404 | Đóng context tài xế; context khách do runner đóng |
-| SY-02 | R-CANCEL-01, R-PAY-05, R-UI-01 | Seed sạch, 09:00 | Khách đặt rồi huỷ ngay khi `searching` | UI «Đã huỷ», «Phí huỷ: 0 đ», nút huỷ disabled; API `cancelled`, `cancellationFee: 0`, `paymentStatus: none` | Reset ở case sau |
-| SY-03 | R-UI-01, R-FARE-02 | Seed sạch | Báo giá 5 km, sửa thành 0,1 km, báo giá lại | Báo giá cũ ẩn, nút đặt disabled; response 422 `DISTANCE_OUT_OF_RANGE`; UI hiện lỗi chứa «Quãng đường» | Không tạo trip |
+| SY-02 | R-CANCEL-01, R-PAY-05, R-UI-01 | Seed sạch, 09:00 | Khách đặt rồi huỷ ngay khi `searching` | UI «Đã huỷ», «Phí huỷ: 0 đ», nút huỷ disabled; API `cancelled`, `cancellationFee: 0`, `paymentStatus: none` | Reset ở test case sau |
+| SY-03 | R-UI-01, R-FARE-02 | Seed sạch | Báo giá 5 km, sửa thành 0,1 km, báo giá lại | Báo giá cũ ẩn, nút đặt disabled; response 422 `DISTANCE_OUT_OF_RANGE`; UI hiện lỗi chứa «Quãng đường» | Không tạo chuyến |
 
 Hai quyết định thiết kế đáng chú ý:
 
@@ -201,7 +201,7 @@ npx playwright test --config system-testing.config.ts
 npm run typecheck
 ```
 
-Không cần mở `npm start` trước: runner tự khởi động và dừng server. Expected: 3 test pass, không retry.
+Không cần mở `npm start` trước: runner tự khởi động và dừng server. Mong đợi: 3 test pass, không retry.
 
 ### 6.1. Bước 1 — Setup có kiểm kết quả
 
@@ -293,9 +293,9 @@ SYS-04 đã kiểm sổ gọi ví giả. Bài này không có endpoint ledger, n
 
 ### 6.5. Kết quả
 
-**Expected:** 3 test pass, không retry, typecheck exit 0.
+**Mong đợi:** 3 test pass, không retry, typecheck exit 0.
 
-**Observed — báo cáo SYS-05 ngày 13/11/2026** (Windows, Node v24.15.0, npm 11.12.1, Chrome 157.0.8103.51 headless):
+**Thực tế — báo cáo gốc (13/11/2026)** (Windows, Node v24.15.0, npm 11.12.1, Chrome 157.0.8103.51 headless):
 
 | Kiểm tra | Kết quả thực đo |
 |---|---|
@@ -305,7 +305,7 @@ SYS-04 đã kiểm sổ gọi ví giả. Bài này không có endpoint ledger, n
 | SY-03 | PASS, 695 ms |
 | `npm run typecheck` tại lab | PASS, exit 0 |
 
-**Observed — chạy lại khi biên tập bài, cùng ngày** (Windows, Node v22.18.0, Playwright 1.64.1, Chrome 157.0.8103.78):
+**Thực tế — chạy lại khi biên tập (13/11/2026)** (Windows, Node v22.18.0, Playwright 1.64.1, Chrome 157.0.8103.78):
 
 ```text
 Running 3 tests using 1 worker
@@ -317,9 +317,9 @@ Running 3 tests using 1 worker
   3 passed (18.2s)
 ```
 
-Tổng thời gian khác nhau giữa hai lượt (11,4 so với 18,2 giây) chủ yếu do khởi động server và máy; SY-01 dài nhất vì phải chờ ít nhất một chu kỳ polling. Không có lỗi sản phẩm được phát hiện. Lượt pass không sinh trace/screenshot vì config chỉ giữ chúng khi fail — bằng chứng ở đây là assertion và output runner.
+Tổng thời gian khác nhau giữa hai lượt (11,4 so với 18,2 giây) có thể do khởi động server và tải máy — chưa đo riêng nên chỉ là giả thuyết; SY-01 dài nhất vì phải chờ ít nhất một chu kỳ polling. Không có lỗi sản phẩm được phát hiện. Lượt pass không sinh trace/screenshot vì config chỉ giữ chúng khi fail — bằng chứng ở đây là assertion và output runner.
 
-## 7. Điều tra failure và tiêu chí kết thúc
+## 7. Điều tra failure và exit criteria
 
 | Failure | Phân loại ban đầu | Việc kiểm tiếp |
 |---|---|---|
@@ -331,9 +331,9 @@ Tổng thời gian khác nhau giữa hai lượt (11,4 so với 18,2 giây) ch�
 
 **Entry criteria:** môi trường riêng; Chrome và dependency có sẵn; test API bật đúng trong lab; SPEC đúng phiên bản.
 
-**Exit criteria của bài tập:** ba test case pass, không skip, không retry; typecheck đạt; giới hạn bằng chứng được ghi. Nếu có lỗi chập chờn, giữ trace và điều tra; không tăng timeout hay bật retry rồi gọi là ổn định.
+**Exit criteria của bài tập:** ba test case pass, không skip, không retry; typecheck đạt; giới hạn bằng chứng được ghi. Nếu có test flaky, giữ trace và điều tra; không tăng timeout hay bật retry rồi gọi là ổn định.
 
-Một báo cáo lỗi tốt ghi commit, cấu hình DB/browser, dữ liệu, **bước đầu tiên lệch**, expected/actual và artifact. Không cần chép lại mọi click khi trace đã có. Trace có thể chứa payload; khi dùng dữ liệu ngoài lab, quản lý quyền truy cập artifact theo độ nhạy của dữ liệu.
+Một báo cáo lỗi tốt ghi commit, cấu hình DB/browser, dữ liệu, **bước đầu tiên lệch**, mong đợi/thực tế và artifact. Không cần chép lại mọi click khi trace đã có. Trace có thể chứa payload; khi dùng dữ liệu ngoài lab, quản lý quyền truy cập artifact theo độ nhạy của dữ liệu.
 
 ## 8. Mở rộng nâng cao
 
@@ -389,14 +389,14 @@ Giữ vài hành trình kiếm tiền/huỷ/khôi phục quan trọng ở browse
 
 ### Bài tập
 
-**Bài 1 (cơ bản).** Sau khi báo giá, sửa ô voucher. Viết expected và chỉ ra cách thao tác để test thật sự kiểm sự kiện nhập liệu.
+**Bài 1 (cơ bản).** Sau khi báo giá, sửa ô voucher. Viết kết quả mong đợi và chỉ ra cách thao tác để test thật sự kiểm sự kiện nhập liệu.
 
 <details>
 <summary><b>Lời giải gợi ý</b></summary>
 <p>Theo R-UI-01, <code>quote-result</code> phải ẩn và <code>book-button</code> disabled. Dùng <code>fill()</code> trên ô voucher để phát sinh sự kiện <code>input</code> thật (trang gắn <code>invalidateQuote</code> vào sự kiện này). Không gọi thẳng <code>invalidateQuote()</code> qua <code>page.evaluate</code> — như vậy chỉ kiểm hàm, không kiểm việc trang có lắng nghe ô đó hay không.</p>
 </details>
 
-**Bài 2 (trung bình).** Nhập mã khách không tồn tại rồi báo giá. Expected là gì, và test này chứng minh được gì về bảo mật?
+**Bài 2 (trung bình).** Nhập mã khách không tồn tại rồi báo giá. Kết quả mong đợi là gì, và test này chứng minh được gì về bảo mật?
 
 <details>
 <summary><b>Lời giải gợi ý</b></summary>

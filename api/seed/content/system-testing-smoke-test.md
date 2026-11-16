@@ -1,14 +1,14 @@
 ---
 slug: system-testing-smoke-test
 title: "Smoke Test: bản build có đủ tốt để bắt đầu kiểm thử chuyên sâu?"
-summary: "Smoke test là bộ kiểm thử nhỏ trả lời một câu hỏi duy nhất: build này có đáng để đội tiếp tục kiểm thử chuyên sâu không. Bài chọn ba test case theo rủi ro của Tới Nơi — health, chặn truy cập vô danh, đặt → hoàn tất → thu tiền — chạy qua API và PGlite, rồi hướng dẫn đọc kết quả thất bại và viết quyết định có bằng chứng."
+summary: "Smoke test là bộ kiểm thử nhỏ trả lời một câu hỏi: build này có đáng để kiểm thử chuyên sâu không. Bài chọn ba test case theo rủi ro của Tới Nơi — health, chặn truy cập vô danh, đặt → hoàn tất → thu tiền — chạy qua API và PGlite, rồi hướng dẫn đọc thất bại và viết quyết định có bằng chứng."
 category: testing
 level: beginner
 tags: [testing, sys-01, smoke-test, build-verification, release-gate, api-testing, pglite, vitest, test-oracle]
 language: vi
 ---
 
-Thứ Hai, Tới Nơi vừa đóng gói bản build mới. Trang chủ vẫn mở, `/api/health` vẫn trả 200 — nhưng câu lệnh ghi chuyến không còn khớp schema. Nếu đội kiểm thử lao ngay vào hàng trăm test case voucher, họ sẽ báo đi báo lại cùng một lỗi nền dưới hàng chục tiêu đề khác nhau, và mất nửa ngày mới hiểu ra. Bài này trả lời: **làm sao chọn vài phép kiểm đại diện để quyết định trong vài giây rằng build đủ tốt để kiểm tiếp, hay phải trả về sửa** — và vì sao "health xanh" chưa bao giờ đủ cho câu hỏi đó.
+Thứ Hai, Tới Nơi vừa đóng gói bản build mới. Trang chủ vẫn mở, `/api/health` vẫn trả 200 — nhưng câu lệnh ghi chuyến không còn khớp schema. Nếu đội kiểm thử lao ngay vào hàng trăm test case voucher, họ sẽ báo đi báo lại cùng một lỗi nền dưới hàng chục tiêu đề khác nhau, và mất nửa ngày mới hiểu ra. Bài này trả lời: **làm sao chọn vài phép kiểm đại diện để quyết định trong vài giây rằng build đủ tốt để kiểm tiếp, hay phải trả về sửa** — và vì sao «health xanh» chưa bao giờ đủ cho câu hỏi đó.
 
 <div class="tkh-callout">
 <span class="tkh-callout-title">Thông tin bài · SYS-01</span>
@@ -32,8 +32,8 @@ Tới Nơi là ứng dụng gọi xe, giao bưu kiện và đồ ăn. Lab của 
 
 Mỗi lần có build mới, đội có hai lựa chọn tốn kém nếu chọn sai:
 
-- **Kiểm thử chuyên sâu ngay**: nếu build hỏng ở tầng nền (không ghi được chuyến, không thu được tiền), mọi ca chức năng phía sau đều đỏ với cùng một nguyên nhân. Thời gian điều tra bị nhân lên, báo cáo lỗi trùng lặp.
-- **Trả lại bản build ngay**: nếu không có bằng chứng cụ thể, developer nhận một câu "build hỏng" không tái hiện được.
+- **Kiểm thử chuyên sâu ngay**: nếu build hỏng ở tầng nền (không ghi được chuyến, không thu được tiền), mọi test case chức năng phía sau đều đỏ với cùng một nguyên nhân. Thời gian điều tra bị nhân lên, báo cáo lỗi trùng lặp.
+- **Trả lại bản build ngay**: nếu không có bằng chứng cụ thể, developer nhận một câu «build hỏng» không tái hiện được.
 
 Smoke test là bước nhỏ ở giữa: vài phép kiểm chọn lọc, chạy nhanh, cho ra quyết định *tiếp tục* hoặc *dừng* kèm bằng chứng tái hiện được.
 
@@ -47,7 +47,7 @@ Sau bài này, bạn có thể:
 
 1. Phân biệt health/liveness, readiness, smoke, sanity, confirmation và regression bằng câu hỏi mỗi loại trả lời.
 2. Chọn smoke case từ rủi ro và test basis, ghi rõ test case nào bị loại và sẽ được kiểm thử ở đâu.
-3. Viết một hành trình đi qua API và kho dữ liệu với oracle độc lập (không dùng code đang kiểm để tính expected).
+3. Viết một hành trình đi qua API và kho dữ liệu với oracle độc lập (không dùng code đang kiểm để tính kết quả mong đợi).
 4. Phân loại một thất bại là *blocked* (môi trường) hay *failed* (sản phẩm), và viết quyết định có phạm vi kết luận rõ.
 
 ## 2. Khái niệm và những điều dễ nhầm
@@ -59,7 +59,7 @@ Trong series này, **smoke test** là một bộ kiểm tra nhỏ nhắm vào c�
 Ba hệ quả của định nghĩa này:
 
 - **Smoke không phải một test level.** Theo CTFL v4.0.1, test level là component, component integration, system, system integration và acceptance. Smoke là cách *chọn phạm vi* một suite; các test case của smoke có thể nằm ở cấp API, UI hay tích hợp. Ở bài này, case chạy qua API và chạm kho dữ liệu thật của lab.
-- **Không bắt buộc chỉ có happy path.** Một hành trình "đặt xe thành công" là xương sống, nhưng cơ chế chặn truy cập vô danh có thể đủ quan trọng để nằm trong smoke: nếu nó hỏng, mọi kết quả phân quyền phía sau đều không đáng tin.
+- **Không bắt buộc chỉ có happy path.** Một hành trình «đặt xe thành công» là xương sống, nhưng cơ chế chặn truy cập vô danh có thể đủ quan trọng để nằm trong smoke: nếu nó hỏng, mọi kết quả phân quyền phía sau đều không đáng tin.
 - **Smoke xanh cho phép kiểm tiếp, không cho phép release.** Đây là câu dễ quên nhất.
 
 ### 2.2. Bảng phân biệt
@@ -75,29 +75,29 @@ Ba hệ quả của định nghĩa này:
 
 Lưu ý dòng health: trong lab, route `/api/health` chỉ trả `{ "status": "ok" }` mà **không chạm vào cơ sở dữ liệu** (đúng R-API-15, dùng cho giám sát và để công cụ kiểm thử chờ máy chủ). Nghĩa là health xanh chỉ chứng minh tiến trình đang phản hồi HTTP — đúng tình huống mở bài: health xanh, ghi chuyến hỏng.
 
-<div class="tkh-callout tkh-callout--warn">
+<div class="tkh-callout">
 <span class="tkh-callout-title">Tên gọi không thống nhất giữa các nhóm</span>
-<p>Có đội gọi smoke là "build verification test", có đội dùng "sanity" cho cùng mục đích. Đừng tranh luận theo tên: ghi <b>mục tiêu và phạm vi</b> của suite trong test plan. Ngoài ra, "smoke test" trong tài liệu k6 là bài chạy tải rất thấp để kiểm script và hệ thống trước khi đo hiệu năng — mục đích khác hẳn smoke build ở đây (bài SYS-07, SYS-08 sẽ dùng nghĩa đó).</p>
+<p>Có đội gọi smoke là «build verification test», có đội dùng «sanity» cho cùng mục đích. Đừng tranh luận theo tên: ghi <b>mục tiêu và phạm vi</b> của suite trong test plan. Ngoài ra, «smoke test» trong tài liệu k6 là bài chạy tải rất thấp để kiểm script và hệ thống trước khi đo hiệu năng — mục đích khác hẳn smoke build ở đây (bài SYS-07, SYS-08 sẽ dùng nghĩa đó).</p>
 </div>
 
 ### 2.3. Ưu và nhược điểm
 
-Smoke cho phản hồi nhanh, rẻ, dễ tự động hoá và tạo một điểm quyết định rõ trong pipeline. Đổi lại, nó cố ý bỏ qua phần lớn rủi ro: biên, tổ hợp, lỗi hiếm, phi chức năng. Một smoke suite "phình" theo thời gian sẽ mất đúng giá trị duy nhất của nó — tốc độ. Vì vậy mỗi test case bị loại khỏi smoke phải có **nơi kiểm thay thế**, không phải được miễn.
+Smoke cho phản hồi nhanh, rẻ, dễ tự động hoá và tạo một điểm quyết định rõ trong pipeline. Đổi lại, nó cố ý bỏ qua phần lớn rủi ro: biên, tổ hợp, lỗi hiếm, phi chức năng. Một smoke suite «phình» theo thời gian sẽ mất đúng giá trị duy nhất của nó — tốc độ. Vì vậy mỗi test case bị loại khỏi smoke phải có **nơi kiểm thay thế**, không phải được miễn.
 
 ## 3. Thiết kế từ rủi ro và test basis
 
 ### 3.1. Test basis và oracle
 
-Test basis là tài liệu làm căn cứ để thiết kế test; ở lab là `examples/toi-noi-testing/SPEC.md`. Đọc SPEC **trước** khi đọc implementation, để expected đến từ yêu cầu chứ không phải từ code.
+Test basis là tài liệu làm căn cứ để thiết kế test; ở lab là `examples/toi-noi-testing/SPEC.md`. Đọc SPEC **trước** khi đọc implementation, để kết quả mong đợi đến từ yêu cầu chứ không phải từ code.
 
-**Oracle** là căn cứ xác định kết quả đúng hay sai. Nếu ta gọi lại chính hàm tính cước để tạo expected, test và code có thể sai giống hệt nhau và test vẫn xanh. Vì thế oracle tiền trong bài là một con số tính tay từ SPEC:
+**Oracle** là căn cứ xác định kết quả đúng hay sai. Nếu ta gọi lại chính hàm tính cước để tạo giá trị mong đợi, test và code có thể sai giống hệt nhau và test vẫn xanh. Vì thế oracle tiền trong bài là một con số tính tay từ SPEC:
 
 - R-FARE-01: xe máy (`bike`) phí mở cửa 12.000 đ, 4.500 đ/km, cước tối thiểu 15.000 đ.
 - 5 km ⇒ cước cơ bản = 12.000 + 4.500 × 5 = 34.500 đ.
 - 09:00 giờ Việt Nam không thuộc [11:00; 13:00) hay [17:00; 19:00) ⇒ không nhân 1,25 (R-FARE-04). Không mưa (R-FARE-05), không voucher.
 - 34.500 > 15.000 nên không nâng lên tối thiểu (R-FARE-07); làm tròn lên bội số 1.000 đ (R-FARE-08) ⇒ **35.000 đ**.
 
-Con số 35.000 được viết thẳng vào test. Nếu một ngày test báo 36.000, ta phải quay về SPEC để hỏi "ai đúng", không được sửa expected cho khớp.
+Con số 35.000 được viết thẳng vào test. Nếu một ngày test báo 36.000, ta phải quay về SPEC để hỏi «ai đúng», không được sửa giá trị mong đợi cho khớp.
 
 ### 3.2. Ba câu hỏi chọn case
 
@@ -111,7 +111,7 @@ Không chọn chỉ vì test case chạy nhanh hoặc đã có sẵn.
 
 ### 3.3. Bảng case
 
-| ID | Requirement / rủi ro | Precondition | Input / action | Expected | Cleanup |
+| ID | Requirement / rủi ro | Precondition | Input / action | Mong đợi | Cleanup |
 |---|---|---|---|---|---|
 | SM-01 | R-API-15; tiến trình không phản hồi | App mới dựng, seed đã reset | `GET /api/health` | 200, body đúng `{ status: 'ok' }` | Không cần |
 | SM-02 | R-API-03; mất chặn truy cập | Như trên | `POST /api/quotes` báo giá hợp lệ, **không** gửi `x-user` | 401, `error.code = UNAUTHENTICATED` | Không cần |
@@ -128,7 +128,7 @@ Mỗi test case đều reset seed và dựng Express app mới; PGlite được 
 | Retry, lỗi ví, idempotency khi lỗi | Cần inject lỗi, khó chẩn đoán nhanh | [SYS-04 Integration](/articles/system-testing-integration-test), SYS-14 Recovery |
 | Giao diện trình duyệt | Chi phí chạy cao hơn | [SYS-05 System Test](/articles/system-testing-system-test) |
 
-### 3.5. Tiêu chí bắt đầu và kết thúc
+### 3.5. Entry criteria và exit criteria
 
 - **Entry criteria**: dependency đã cài theo lockfile; SPEC và seed đúng phiên bản; không dùng dữ liệu production.
 - **Exit criteria (bài tập)**: cả ba case pass, không có test case nào bị bỏ qua, exit code 0.
@@ -154,7 +154,7 @@ Exit criteria này cho phép **kiểm tiếp**, không cho phép release product
 <line x1="490" y1="160" x2="556" y2="180" class="s-warn" stroke-width="1.6" marker-end="url(#sys01-arrow)"/>
 </svg>
 </div>
-<figcaption><b>Hình 1 · Smoke là cổng quyết định "có kiểm tiếp không".</b> Ba case nhỏ đứng giữa build và vòng kiểm thử chuyên sâu. Nhánh xanh chỉ mở cửa cho các suite khác; nhánh đỏ phải đi kèm bằng chứng tái hiện được.</figcaption>
+<figcaption><b>Hình 1 · Smoke là gate quyết định «có kiểm tiếp không».</b> Ba test case nhỏ đứng giữa build và vòng kiểm thử chuyên sâu. Nhánh xanh chỉ mở cửa cho các suite khác; nhánh đỏ phải đi kèm bằng chứng tái hiện được.</figcaption>
 </figure>
 
 ## 4. Thực hành có thể chạy lại
@@ -253,7 +253,7 @@ expect(system.payments.calls).toHaveLength(1);
 expect(system.payments.totalCharged()).toBe(35_000);
 ```
 
-Vì sao không dừng ở "mọi request đều 200"? Vì server hoàn toàn có thể trả thành công mà không lưu, hoặc lưu đúng mà thu sai tiền. Ba lớp assertion bắt ba kiểu hỏng khác nhau:
+Vì sao không dừng ở «mọi request đều 200»? Vì server hoàn toàn có thể trả thành công mà không lưu, hoặc lưu đúng mà thu sai tiền. Ba lớp assertion bắt ba kiểu hỏng khác nhau:
 
 - **Đọc qua API**: khách C001 thấy chuyến của mình đã `completed`, `paid`, giá 35.000.
 - **Đọc qua repository**: trạng thái thật sự nằm trong DB của phiên chạy, không chỉ trong response.
@@ -266,11 +266,11 @@ Khoá ví được dựng từ `id` sinh trong test, không hardcode. `toMatchOb
 <p><code>calls</code> có độ dài 1 là đúng cho happy path không inject lỗi. Khi có retry, nhiều lần gọi cùng một khoá idempotency có thể là hành vi <b>đúng</b>. Đừng chép nguyên assertion này sang bài Recovery (SYS-14) — ở đó, thứ cần kiểm là tổng tiền thu và số khoá duy nhất.</p>
 </div>
 
-### 4.5. Expected và observed
+### 4.5. Kết quả mong đợi và thực tế
 
-**Expected** (từ thiết kế): 3 test pass, exit code 0; thời gian thay đổi theo máy.
+**Mong đợi** (từ thiết kế): 3 test pass, exit code 0; thời gian thay đổi theo máy.
 
-**Observed**, lần chạy lại ngày 13/11/2026 trên Windows 11, Node v22.18.0, Vitest 3.2.7:
+**Thực tế — chạy lại khi biên tập (13/11/2026)**, trên Windows 11, Node v22.18.0, Vitest 3.2.7:
 
 ```text
  ✓ articles/system-testing-smoke-test/smoke.test.ts (3 tests) 2728ms
@@ -280,7 +280,7 @@ Khoá ví được dựng từ `id` sinh trong test, không hardcode. `toMatchOb
    Duration  7.69s (transform 372ms, setup 0ms, collect 3.78s, tests 2.73s, environment 0ms, prepare 430ms)
 ```
 
-Lần chạy đầu khi soạn bài (cùng ngày, Node v24.15.0) chạy SYS-01 cùng bộ smoke có sẵn của lab: 4 file, 25 test pass trong 4,60 giây; riêng SYS-01 mất 3,028 giây, `npm run typecheck` exit 0. Phần lớn thời gian là khởi tạo và reset PGlite, không phải logic nghiệp vụ.
+**Thực tế — báo cáo gốc (13/11/2026)**: lần chạy đầu khi soạn bài (Node v24.15.0) chạy SYS-01 cùng bộ smoke có sẵn của lab: 4 file, 25 test pass trong 4,60 giây; riêng SYS-01 mất 3,028 giây, `npm run typecheck` exit 0. Phần lớn thời gian là khởi tạo và reset PGlite, không phải logic nghiệp vụ.
 
 Lần thử đầu tiên **trước khi cài dependency** đã thất bại ở bước nạp config vì thiếu Vitest cục bộ; `npx` tự tải một Vitest khác ngoài lab và không giải quyết được import. Đây là lỗi chuẩn bị môi trường — được ghi là *blocked*, không phải defect sản phẩm. Cài theo lockfile rồi chạy lại mới cho kết quả trên.
 
@@ -299,7 +299,7 @@ Lần thử đầu tiên **trước khi cài dependency** đã thất bại ở 
 ### 5.2. Blocked hay failed
 
 - **Blocked**: test không chạy được tới điểm đánh giá vì môi trường (thiếu dependency, cổng bị chiếm, WASM lỗi). Báo kèm bằng chứng môi trường; chưa kết luận gì về sản phẩm.
-- **Failed**: test chạy tới assertion và kết quả khác expected. Tạo defect với request, expected/actual, phiên bản build, dữ liệu tái hiện.
+- **Failed**: test chạy tới assertion và kết quả khác mong đợi. Tạo defect với request, giá trị mong đợi/thực tế, phiên bản build, dữ liệu tái hiện.
 
 Không đổi mọi thất bại thành lỗi sản phẩm, cũng không rerun đến khi xanh. Một lần pass sau retry **không xoá** lần lỗi trước — nó là dấu hiệu flakiness cần điều tra.
 
@@ -307,9 +307,9 @@ Không đổi mọi thất bại thành lỗi sản phẩm, cũng không rerun �
 
 Ví dụ khi đỏ:
 
-> SM-03 fail ở bước kiểm `paymentStatus`: expected `paid`, actual `pending`; chuyến đã `completed`. Build #… , seed lab mặc định. Dừng vòng kiểm chức năng phụ thuộc thanh toán; review test design độc lập vẫn có thể tiếp tục. Sau khi sửa: chạy confirmation cho SM-03, rồi chạy lại toàn bộ smoke.
+> SM-03 fail ở bước kiểm `paymentStatus`: mong đợi `paid`, thực tế `pending`; chuyến đã `completed`. Build #… , seed lab mặc định. Dừng vòng kiểm chức năng phụ thuộc thanh toán; review test design độc lập vẫn có thể tiếp tục. Sau khi sửa: chạy confirmation cho SM-03, rồi chạy lại toàn bộ smoke.
 
-Ví dụ khi xanh: "Ba case pass. Đường health, chặn người dùng vô danh, báo giá → đặt → nhận → hoàn tất → đọc lại → thu tiền hoạt động trong lab API/PGlite với ví giả. Cho phép bắt đầu sanity và functional." Câu kết luận nêu **cấu hình** và **phạm vi**, không nói "hệ thống ổn".
+Ví dụ khi xanh: «Ba case pass. Đường health, chặn người dùng vô danh, báo giá → đặt → nhận → hoàn tất → đọc lại → thu tiền hoạt động trong lab API/PGlite với ví giả. Cho phép bắt đầu sanity và functional.» Câu kết luận nêu **cấu hình** và **phạm vi**, không nói «hệ thống ổn».
 
 ## 6. Mở rộng nâng cao
 
@@ -334,11 +334,11 @@ Lab reset toàn bộ DB — không bao giờ làm vậy trên staging dùng chun
 
 ### 6.4. Ngân sách thời gian
 
-Giả sử nhóm đặt mục tiêu nội bộ "smoke dưới hai phút" — đây là **giả định thiết kế**, không phải chuẩn chung. Đo p95 của thời gian chạy suite qua nhiều lần chạy, loại các test case trùng rủi ro hoặc chuyển sang suite kiểm thử chuyên sâu. Theo dõi tỷ lệ báo động giả và số sự cố lọt qua gate để điều chỉnh; đừng dùng tổng số test làm thước đo chất lượng.
+Giả sử nhóm đặt mục tiêu nội bộ «smoke dưới hai phút» — đây là **giả định thiết kế**, không phải chuẩn chung. Đo p95 của thời gian chạy suite qua nhiều lần chạy, loại các test case trùng rủi ro hoặc chuyển sang suite kiểm thử chuyên sâu. Theo dõi tỷ lệ báo động giả và số sự cố lọt qua gate để điều chỉnh; đừng dùng tổng số test làm thước đo chất lượng.
 
 ### 6.5. Chứng minh test biết bắt lỗi (thí nghiệm đề xuất)
 
-Một test chưa từng đỏ là một test chưa được chứng minh. Đề xuất: trên nhánh bài tập, viết một adapter ví lỗi trong thư mục bài — báo thành công nhưng không ghi số tiền đã thu — và inject qua port. Kỳ vọng: SM-03 đỏ ở oracle tiền, SM-01 vẫn xanh. Bỏ lỗi đi, suite xanh lại. Thí nghiệm này **chưa được chạy** trong báo cáo hiện tại; khi làm, giữ nó trong thư mục bài, không sửa `src/` dùng chung của lab.
+Một test chưa từng đỏ là một test chưa được chứng minh. Đề xuất: trên nhánh bài tập, viết một adapter ví lỗi trong thư mục bài — báo thành công nhưng không ghi số tiền đã thu — và inject qua port. Mong đợi: SM-03 đỏ ở oracle tiền, SM-01 vẫn xanh. Bỏ lỗi đi, suite xanh lại. Thí nghiệm này **chưa được chạy** trong báo cáo hiện tại; khi làm, giữ nó trong thư mục bài, không sửa `src/` dùng chung của lab.
 
 ## 7. Anti-pattern, giới hạn bằng chứng và đánh đổi
 
@@ -347,7 +347,7 @@ Một test chưa từng đỏ là một test chưa được chứng minh. Đề 
 - **Chỉ kiểm health**: bỏ sót DB và thanh toán — chính là tình huống mở bài.
 - **Nhét regression vào smoke**: mất phản hồi nhanh, gate trở thành nút cổ chai.
 - **Snapshot cả response**: test đỏ vì trường không liên quan, người ta quen bỏ qua đỏ.
-- **Dùng giờ thực**: chạy lúc 11:30 giá nhân 1,25, test "ngẫu nhiên" đỏ.
+- **Dùng giờ thực**: chạy lúc 11:30 giá nhân 1,25, test «ngẫu nhiên» đỏ.
 - **Retry vô hạn**: che flakiness thay vì sửa nó.
 - **Tắt assertion để qua gate**: gate còn đó nhưng không còn kiểm gì.
 
@@ -373,7 +373,7 @@ Mỗi case thêm vào smoke tăng độ phủ nhưng tăng thời gian và số 
 <p><code>.expect(200)</code> của báo giá đỏ ngay vì server trả 401 <code>UNAUTHENTICATED</code>; mọi bước sau không chạy, ví không bị gọi. Đây là hành vi tốt: test dừng ở đúng bước hỏng, thông báo chỉ thẳng nguyên nhân. Nhớ khôi phục header sau thí nghiệm.</p>
 </details>
 
-**Bài 2 (trung bình).** Thêm kiểm tra khách C002 không đọc được chuyến của C001. Expected là gì, và có nên giữ case này trong smoke?
+**Bài 2 (trung bình).** Thêm kiểm tra khách C002 không đọc được chuyến của C001. Kết quả mong đợi là gì, và có nên giữ case này trong smoke?
 
 <details>
 <summary><b>Lời giải gợi ý</b></summary>
@@ -403,7 +403,7 @@ Mỗi case thêm vào smoke tăng độ phủ nhưng tăng thời gian và số 
 <p><b>Không.</b> Chúng trả lời hai câu hỏi khác nhau. Health của lab không chạm DB, nên chỉ chứng minh tiến trình phản hồi; SM-03 chứng minh luồng nghiệp vụ đi được tới kho dữ liệu và ví.</p>
 </details>
 
-**Câu 3.** Vì sao expected 35.000 được viết cứng thay vì gọi hàm tính cước?
+**Câu 3.** Vì sao giá trị mong đợi 35.000 được viết cứng thay vì gọi hàm tính cước?
 
 <details>
 <summary><b>Đáp án và giải thích</b></summary>
@@ -414,7 +414,7 @@ Mỗi case thêm vào smoke tăng độ phủ nhưng tăng thời gian và số 
 
 <details>
 <summary><b>Đáp án và giải thích</b></summary>
-<p>Ghi cả hai lần chạy. Lần đỏ là bằng chứng flakiness hoặc lỗi không ổn định; mở việc điều tra (trạng thái dùng chung, thời gian, môi trường). Không coi lần xanh sau retry là "đã ổn".</p>
+<p>Ghi cả hai lần chạy. Lần đỏ là bằng chứng flakiness hoặc lỗi không ổn định; mở việc điều tra (trạng thái dùng chung, thời gian, môi trường). Không coi lần xanh sau retry là «đã ổn».</p>
 </details>
 
 **Câu 5.** Phân loại: `npx vitest` báo không tìm thấy module vì chưa chạy `npm ci`.
@@ -429,7 +429,7 @@ Mỗi case thêm vào smoke tăng độ phủ nhưng tăng thời gian và số 
 Nguồn ngoài tra cứu 13/11/2026.
 
 - ISTQB, *Certified Tester Foundation Level Syllabus v4.0.1* (2024) — test levels, test types, confirmation và regression testing: https://istqb.org/wp-content/uploads/2024/11/ISTQB_CTFL_Syllabus_v4.0.1.pdf. Phần lựa chọn smoke và thiết kế pipeline trong bài là hướng dẫn thực tiễn, không phải yêu cầu của syllabus.
-- Grafana k6 — *Load test types*: https://grafana.com/docs/k6/latest/testing-guides/test-types/ — đối chiếu nghĩa "smoke" trong kiểm thử hiệu năng.
+- Grafana k6 — *Load test types*: https://grafana.com/docs/k6/latest/testing-guides/test-types/ — đối chiếu nghĩa «smoke» trong kiểm thử hiệu năng.
 - Lab Tới Nơi: `SPEC.md` (R-API-03, R-API-05, R-API-08, R-API-15, R-VALID-01, R-STATE-02, R-PAY-03, R-FARE-01…08) và mã bài — https://github.com/rickymta/antblog/tree/main/examples/toi-noi-testing/articles/system-testing-smoke-test
 - Bài liên quan: [Dự án mẫu Tới Nơi](/articles/du-an-mau-toi-noi) · [TEST-011 Tổng quan 5 test level](/articles/tong-quan-5-test-level-istqb) · [Quy trình kiểm thử](/articles/quy-trinh-kiem-thu-test-process) · [Confirmation testing và regression testing](/articles/confirmation-testing-va-regression-testing) · [System Testing (series ISTQB)](/articles/system-testing)
 

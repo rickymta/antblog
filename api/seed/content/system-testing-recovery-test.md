@@ -1,14 +1,14 @@
 ---
 slug: system-testing-recovery-test
 title: "Recovery Test: hệ thống có thật sự trở lại sau sự cố, hay chỉ health check xanh?"
-summary: "SYS-14 của series kiểm thử hệ thống: phân biệt retry, restart, restore, failover và đối soát; định nghĩa RTO/RPO đo được; inject lỗi ví VíXanh qua API Tới Nơi để kiểm phục hồi trong ngân sách retry, việc mới sau outage và khoản đã thu nhưng ghi failed; diễn tập pg_dump/pg_restore trên cluster PostgreSQL 18 riêng — kèm giới hạn bằng chứng."
+summary: "Phân biệt retry, restart, restore, failover và đối soát; định nghĩa RTO/RPO đo được; inject lỗi ví VíXanh qua API Tới Nơi để kiểm retry, việc mới sau outage và khoản đã thu nhưng ghi failed; diễn tập pg_dump/pg_restore trên cluster PostgreSQL 18 riêng, kèm giới hạn bằng chứng."
 category: testing
 level: advanced
 tags: [testing, sys-14, recovery-testing, rto-rpo, backup-restore, pg-dump, retry, idempotency, reconciliation, vitest]
 language: vi
 ---
 
-10:00, VíXanh ngừng trả lời. 10:07, VíXanh trở lại, `/api/health` của Tới Nơi vẫn xanh suốt thời gian đó, tài xế tiếp tục hoàn thành chuyến. Nhìn dashboard, mọi thứ "đã phục hồi". Nhưng trong bảy phút ấy có một chuyến mà ví **đã trừ tiền khách** mà không kịp trả lời, và trong DB chuyến đó mang nhãn `failed`. Nếu ai đó "sửa" bằng cách thu lại với một khoá mới, khách bị trừ hai lần. Bài này trả lời: **recovery test kiểm cái gì ngoài việc tiến trình sống lại, đo RTO/RPO thế nào cho trung thực, và thiết kế phép thử sao cho nó phơi ra khoảng trống chứ không che đi** — qua hai lab: lỗi dependency thanh toán trên API Tới Nơi và một restore drill PostgreSQL thật.
+10:00, VíXanh ngừng trả lời. 10:07, VíXanh trở lại; `/api/health` của Tới Nơi xanh suốt thời gian đó, tài xế vẫn hoàn thành chuyến. Nhìn dashboard, mọi thứ «đã phục hồi». Nhưng trong bảy phút ấy có một chuyến mà ví **đã trừ tiền khách** mà không kịp trả lời, và DB ghi chuyến đó là `failed`. Nếu ai đó «sửa» bằng cách thu lại với khoá mới, khách bị trừ hai lần. Bài này trả lời: **recovery test kiểm gì ngoài việc tiến trình sống lại, đo RTO/RPO thế nào cho trung thực, và thiết kế phép thử để phơi ra khoảng trống chứ không che đi** — qua hai lab: lỗi dependency thanh toán trên API Tới Nơi và một restore drill PostgreSQL thật.
 
 <div class="tkh-callout">
 <span class="tkh-callout-title">Thông tin bài · SYS-14</span>
@@ -28,13 +28,13 @@ language: vi
 
 ### 1.1. Tình huống
 
-Tới Nơi thu tiền chuyến `vixanh` khi tài xế bấm hoàn thành (R-PAY-03). Đường đi đó chạm ba thứ có thể hỏng độc lập: tiến trình ứng dụng, cơ sở dữ liệu và cổng ví bên ngoài. Mỗi thứ hỏng theo cách riêng, và "phục hồi" cũng mang nghĩa riêng:
+Tới Nơi thu tiền chuyến `vixanh` khi tài xế bấm hoàn thành (R-PAY-03). Đường đi đó chạm ba thứ có thể hỏng độc lập: tiến trình ứng dụng, cơ sở dữ liệu và cổng ví bên ngoài. Mỗi kiểu hỏng cho «phục hồi» một nghĩa riêng:
 
 - Ví lỗi vài trăm mili-giây rồi trở lại — phục hồi nghĩa là **retry đúng khoá**, không thu trùng.
-- Ví ngừng vài phút — phục hồi nghĩa là **việc mới chạy được** sau khi ví trở lại, và việc cũ còn dở được **ghi nhận để xử lý**, không bị quên.
+- Ví ngừng vài phút — phục hồi nghĩa là **việc mới chạy được** khi ví trở lại, và việc cũ còn dở được **ghi nhận để xử lý**.
 - Ai đó chạy nhầm `DELETE` trên DB — phục hồi nghĩa là **dựng lại dữ liệu từ bản sao**, biết chính xác mất gì, và DB khôi phục **ghi được** chứ không chỉ đọc được.
 
-Một health check chỉ trả lời "tiến trình có phản hồi không". Recovery test phải trả lời "hệ thống đã trở về trạng thái nghiệp vụ chấp nhận được chưa, trong giới hạn thời gian và dữ liệu đã thống nhất".
+Health check chỉ trả lời «tiến trình có phản hồi không». Recovery test phải trả lời «hệ thống đã trở về trạng thái nghiệp vụ chấp nhận được chưa, trong giới hạn thời gian và dữ liệu đã thống nhất».
 
 ### 1.2. Đối tượng và điều kiện tiên quyết
 
@@ -49,7 +49,7 @@ Sau bài này, bạn có thể:
 1. Phân biệt retry, restart, restore, failover và reconciliation; nói được mỗi cơ chế **chưa** chứng minh điều gì.
 2. Định nghĩa RTO/RPO kèm mốc đo cụ thể, không suy từ thời gian chạy test.
 3. Viết recovery test theo chu trình bình thường → inject lỗi → gỡ lỗi → kiểm dữ liệu cũ **và** việc mới.
-4. Nhận diện trạng thái "đã thu tiền nhưng chưa xác nhận" và giải thích vì sao không được retry mù.
+4. Nhận diện trạng thái «đã thu tiền nhưng chưa xác nhận» và giải thích vì sao không được retry mù.
 5. Chạy một logical restore drill cô lập, đọc được marker nào trở lại, marker nào mất và vì sao.
 
 ## 2. Khái niệm và những chỗ dễ nhầm
@@ -64,13 +64,13 @@ Sau bài này, bạn có thể:
 | Failover | Chuyển phục vụ sang instance khác | Không split-brain, không mất dữ liệu |
 | Reconciliation | Đối chiếu và xử lý trạng thái không khớp | Việc mới đã hoạt động bình thường |
 
-Cột thứ ba quan trọng hơn cột thứ hai. Mỗi cơ chế giải một phần bài toán, và mỗi phần còn lại phải có phép kiểm riêng. Đội nào chỉ kiểm cột "mục tiêu" sẽ có một báo cáo toàn xanh và một khoảng trống không ai nhìn thấy.
+Cột thứ ba quan trọng hơn cột thứ hai: mỗi cơ chế chỉ giải một phần bài toán, phần còn lại cần phép kiểm riêng. Chỉ kiểm cột «mục tiêu» sẽ cho một báo cáo toàn xanh và một khoảng trống không ai thấy.
 
 ### 2.2. Recovery test, backup job và resilience
 
-**Recovery test** là phép kiểm chủ động: có failure model (hỏng cái gì, ở đâu, lúc nào), điều kiện bắt đầu/kết thúc và bằng chứng. Recovery test khác với việc "backup job báo success": job thành công chỉ chứng minh công cụ đã tạo ra một tệp. Phải **khôi phục, đọc, ghi và đối soát** mới có bằng chứng bản sao dùng được.
+**Recovery test** là phép kiểm chủ động: có failure model (hỏng cái gì, ở đâu, lúc nào), entry/exit criteria và bằng chứng. Nó khác «backup job báo success»: job thành công chỉ chứng minh công cụ đã tạo ra một tệp. Phải **khôi phục, đọc, ghi và đối soát** mới có bằng chứng bản sao dùng được.
 
-**Resilience** rộng hơn: chịu lỗi, suy giảm có kiểm soát (graceful degradation) và phục hồi. **Disaster recovery** xét thêm sự cố lớn như mất vùng hay mất hệ lưu trữ. Bài này nằm ở phần nhỏ nhất: một dependency giả và một logical restore cục bộ. Không diễn tập mất vùng, và bài sẽ nói rõ điều đó ở mọi chỗ cần nói.
+**Resilience** rộng hơn: chịu lỗi, suy giảm có kiểm soát (graceful degradation) và phục hồi. **Disaster recovery** xét thêm sự cố lớn như mất vùng hay mất hệ lưu trữ. Bài này chỉ chạm phần nhỏ nhất: một dependency giả và một logical restore cục bộ.
 
 ### 2.3. Phân biệt với các bài trước
 
@@ -81,15 +81,15 @@ Cột thứ ba quan trọng hơn cột thứ hai. Mỗi cơ chế giải một p
 | [SYS-13 Data Integrity](/articles/system-testing-data-integrity-test) | Dữ liệu có nhất quán ở trạng thái hiện tại? | Đối soát chuyến – event – thu tiền |
 | **SYS-14 Recovery** | Sau sự cố, hệ thống có **trở về** trạng thái nghiệp vụ chấp nhận được? | Outage xong, việc mới chạy; việc cũ còn dở được nhận diện |
 
-SYS-04 kiểm một lỗi đơn lẻ. SYS-14 kiểm **chu trình**: có trước, trong và sau sự cố, và oracle nằm ở "sau".
+SYS-04 kiểm một lỗi đơn lẻ. SYS-14 kiểm **chu trình** trước, trong và sau sự cố, với oracle nằm ở «sau».
 
 ## 3. RTO, RPO và cách đo trung thực
 
 ### 3.1. Định nghĩa có mốc
 
-**RTO (Recovery Time Objective)** là mục tiêu thời gian phục hồi. Trước khi test phải chốt **mốc bắt đầu**: lúc nghiệp vụ ngừng đáp ứng, không phải lúc operator bắt đầu gõ lệnh restore. **Mốc kết thúc** là lúc nghiệp vụ đạt tiêu chí đã thống nhất, không phải lúc tiến trình vừa mở cổng.
+**RTO (Recovery Time Objective)** là mục tiêu thời gian phục hồi. Trước khi test phải chốt **mốc bắt đầu** — lúc nghiệp vụ ngừng đáp ứng, không phải lúc operator gõ lệnh restore — và **mốc kết thúc** — lúc nghiệp vụ đạt tiêu chí đã thống nhất, không phải lúc tiến trình vừa mở cổng.
 
-**RPO (Recovery Point Objective)** là giới hạn mất dữ liệu, tính theo thời gian. Đo bằng các giao dịch **đã được xác nhận với người dùng** trước sự cố, so với điểm dữ liệu thực sự khôi phục được. Không dùng giờ sửa file backup. Và phải tìm **lỗ hổng** trong chuỗi giao dịch, không chỉ nhìn timestamp lớn nhất: dữ liệu khôi phục tới 09:57 nhưng thiếu một bản ghi lúc 09:40 vẫn là mất dữ liệu.
+**RPO (Recovery Point Objective)** là giới hạn mất dữ liệu, tính theo thời gian. Đo bằng các giao dịch **đã xác nhận với người dùng** trước sự cố, so với điểm dữ liệu thực sự khôi phục được — không dùng giờ sửa file backup. Phải tìm cả **lỗ hổng** trong chuỗi giao dịch, không chỉ nhìn timestamp lớn nhất: khôi phục tới 09:57 nhưng thiếu một bản ghi lúc 09:40 vẫn là mất dữ liệu.
 
 ### 3.2. Ví dụ tính toán (giả định bài tập)
 
@@ -97,15 +97,11 @@ Giả định: RTO 15 phút, RPO 5 phút, **không thu trùng tiền**. Đây l�
 
 - Sự cố lúc 10:00; nghiệp vụ hoạt động đủ tiêu chí lúc 10:12 ⇒ thời gian phục hồi **12 phút** (đạt RTO).
 - Dữ liệu liên tục khôi phục tới 09:57 ⇒ khoảng mất **3 phút** (đạt RPO).
-- Nhưng còn một khoản thu không rõ trạng thái ⇒ tiêu chí "không thu trùng, không thất thoát" **chưa** được chứng minh. Ghi tồn đọng; không tuyên bố "đã phục hồi hoàn toàn".
-
-Ba con số cùng xanh không có nghĩa là xong, nếu tiêu chí thứ tư còn để ngỏ.
+- Nhưng còn một khoản thu không rõ trạng thái ⇒ tiêu chí «không thu trùng, không thất thoát» **chưa** được chứng minh. Ghi tồn đọng; không tuyên bố «đã phục hồi hoàn toàn».
 
 ### 3.3. Timeline cần ghi
 
-Năm mốc tối thiểu: `t_failure`, `t_detected`, `t_recovery_started`, `t_db_ready`, `t_business_verified`. Khoảng `t_failure → t_detected` thường dài nhất và hay bị bỏ khỏi báo cáo nhất. Đo duration trong một tiến trình bằng đồng hồ đơn điệu; ghép bằng chứng nhiều máy bằng UTC với đồng hồ đã đồng bộ.
-
-`FixedClock` trong lab A giữ cho kết quả nghiệp vụ **tất định** (giá giờ thường lúc 09:00), không phải để đo thời gian sự cố. Đừng lấy nó làm đồng hồ RTO.
+Năm mốc tối thiểu: `t_failure`, `t_detected`, `t_recovery_started`, `t_db_ready`, `t_business_verified`. Khoảng `t_failure → t_detected` thường dài nhất và hay bị bỏ khỏi báo cáo nhất. Đo duration trong một tiến trình bằng đồng hồ đơn điệu; ghép bằng chứng nhiều máy bằng UTC với đồng hồ đã đồng bộ. `FixedClock` trong lab A chỉ giữ kết quả nghiệp vụ **tất định** (giá giờ thường lúc 09:00); đừng lấy nó làm đồng hồ RTO.
 
 <figure class="tkh-fig">
 <div class="tkh-fig-box">
@@ -143,35 +139,35 @@ Năm mốc tối thiểu: `t_failure`, `t_detected`, `t_recovery_started`, `t_db
 | Mất tiến trình giữa commit và gọi ví | Restart, đối soát, replay có kiểm soát | Bài tập mở rộng, chưa chạy |
 | Mất máy/vùng, thiếu WAL, failover | Cluster và storage riêng | Chưa chạy |
 
-Viết failure model **trước** khi viết test buộc nhóm trả lời câu "chúng ta đang **không** kiểm cái gì" — hai dòng cuối bảng là phần quan trọng không kém bốn dòng đầu.
+Viết failure model **trước** khi viết test buộc nhóm trả lời «chúng ta đang **không** kiểm cái gì» — hai dòng cuối bảng quan trọng không kém bốn dòng đầu.
 
 ### 4.2. Test basis
 
 Yêu cầu trong `SPEC.md` mà lab A dựa vào:
 
 - **R-PAY-03** — chuyến `vixanh` hoàn thành ⇒ gọi VíXanh thu đúng `fare` với khoá `trip:<id>:fare`.
-- **R-PAY-04 / R-NFR-05** — mỗi lần gọi hết giờ sau 3 giây; hết giờ hoặc lỗi tạm thời ⇒ thử lại tối đa 2 lần (tổng 3 lần gọi) **cùng khoá**; cổng đảm bảo cùng khoá chỉ trừ tiền một lần; "không bao giờ trừ tiền hai lần cho cùng một khoản".
+- **R-PAY-04 / R-NFR-05** — mỗi lần gọi hết giờ sau 3 giây; hết giờ hoặc lỗi tạm thời ⇒ thử lại tối đa 2 lần (tổng 3 lần gọi) **cùng khoá**; cổng đảm bảo cùng khoá chỉ trừ tiền một lần; «không bao giờ trừ tiền hai lần cho cùng một khoản».
 - **R-PAY-06** — thu thất bại không chặn hoàn thành: chuyến vẫn `completed`, `paymentStatus = failed`, API trả 200.
-- **R-STATE-03** — chuyển trạng thái không hợp lệ ⇒ `INVALID_TRANSITION` (409), chuyến giữ nguyên. Đây là lý do gọi `complete` lần hai cho chuyến đã `completed` bị 409.
+- **R-STATE-03** — chuyển trạng thái không hợp lệ ⇒ `INVALID_TRANSITION` (409), chuyến giữ nguyên; vì vậy gọi `complete` lần hai cho chuyến đã `completed` bị 409.
 - **R-STATE-06** — mỗi lần đổi trạng thái ghi một dòng `trip_events`.
 - **R-ACCEPT-05** — chuyến `completed` ⇒ tài xế về `online`.
 
-Lab B dùng bảng `recovery_probe` tổng hợp, **không** gán requirement Tới Nơi cho nó. Đó là thí nghiệm về cơ chế backup/restore, chưa phải restore dữ liệu nghiệp vụ.
+Lab B dùng bảng `recovery_probe` tổng hợp, **không** gắn yêu cầu nào của Tới Nơi: đó là thí nghiệm về cơ chế backup/restore, chưa phải restore dữ liệu nghiệp vụ.
 
 ### 4.3. Oracle nhiều phía
 
-Sau sự cố, một nguồn duy nhất không đủ tin. Mỗi test case trong lab A kiểm đồng thời:
+Sau sự cố, một nguồn duy nhất không đủ tin. Mỗi test case lab A kiểm đồng thời:
 
 1. **HTTP** — mã trả về đúng R-PAY-06 / R-STATE-03.
 2. **DB** — `status`, `payment_status`, số dòng `trip_events` `completed`, trạng thái tài xế.
 3. **Phía ví** — số lần gọi, khoá đã dùng, khoá đã trừ tiền, tổng tiền đã trừ.
 
-Phía thứ ba là phía mà dashboard ứng dụng **không** nhìn thấy, và cũng là nơi RC-03 lộ ra mâu thuẫn.
+Dashboard ứng dụng **không** nhìn thấy phía thứ ba, và đó cũng là nơi RC-03 lộ ra mâu thuẫn.
 
-### 4.4. Tiêu chí bắt đầu và kết thúc
+### 4.4. Entry criteria và exit criteria
 
-- **Entry:** dependency cài theo lockfile; SPEC đúng phiên bản; dữ liệu seed, không dữ liệu thật; với lab B: binary PostgreSQL có trên PATH và một cổng loopback trống.
-- **Exit của bài tập:** 5 execution lab A pass, typecheck pass; lab B khôi phục đúng `1:35000`, ghi mới được, cluster đã dừng. Nếu RC-03 còn `failed` ⇒ ghi rõ "cần reconciliation". Exit này **không** cho phép tuyên bố release đạt RTO/RPO.
+- **Entry criteria:** dependency cài theo lockfile; SPEC đúng phiên bản; dữ liệu seed, không dữ liệu thật; với lab B: binary PostgreSQL có trên PATH và một cổng loopback trống.
+- **Exit criteria của bài tập:** 5 execution lab A pass, typecheck pass; lab B khôi phục đúng `1:35000`, ghi mới được, cluster đã dừng. Nếu RC-03 còn `failed` ⇒ ghi rõ «cần reconciliation». Exit criteria này **không** cho phép tuyên bố release đạt RTO/RPO.
 
 ## 5. Thiết kế test case — lab A
 
@@ -181,7 +177,7 @@ Mỗi test case: reset seed, dựng Express app mới; khách C001, tài xế D1
 
 ### 5.2. Bảng test case
 
-| ID | Requirement/rủi ro | Hành động | Expected | Cleanup |
+| ID | Yêu cầu / rủi ro | Hành động | Mong đợi | Dọn dẹp |
 |---|---|---|---|---|
 | RC-01 × 3 | R-PAY-03/04, R-NFR-05; lỗi thoáng qua | `failNext(mode)` với mode ∈ {`error`, `timeout`, `lost_response`}, rồi `complete` | 200; DB `completed/paid`; đúng 1 event `completed`; D101 `online`; 2 lần gọi **cùng khoá**; trừ đúng 35.000 một lần | reset seed |
 | RC-02 | R-PAY-06, R-STATE-03; outage rồi việc mới | `setMode('timeout')`, complete chuyến cũ; `setMode('none')`, tạo và complete chuyến mới; complete lại chuyến cũ | Chuyến cũ `failed`, 3 lần gọi, 0 đ; chuyến mới `paid`; complete lại chuyến cũ ⇒ 409, **không** gọi ví thêm (tổng 4 lần gọi) | reset seed |
@@ -189,7 +185,7 @@ Mỗi test case: reset seed, dựng Express app mới; khách C001, tài xế D1
 
 ### 5.3. Vì sao ba chế độ lỗi khác nhau
 
-Ví giả (`src/infra/fake-payment-gateway.ts`) phân biệt rõ ba kiểu lỗi — và vị trí của dòng trừ tiền quyết định tất cả:
+Ví giả (`src/infra/fake-payment-gateway.ts`) phân biệt ba kiểu lỗi, và vị trí dòng trừ tiền quyết định tất cả:
 
 ```ts
 const failure = this.queue.shift() ?? this.mode;
@@ -204,10 +200,10 @@ if (failure === 'lost_response') return never();
 return { status: 'succeeded', chargeId: record.chargeId };
 ```
 
-- `error` và `timeout`: **chưa** trừ tiền. Retry là an toàn tự nhiên.
-- `lost_response`: **đã** trừ tiền rồi mới im lặng. Đây là kiểu lỗi nguy hiểm nhất trong thực tế ("request tới nơi, response lạc đường"). Retry chỉ an toàn vì cùng khoá ⇒ `applyCharge` không trừ lần hai.
+- `error` và `timeout`: **chưa** trừ tiền, nên retry an toàn tự nhiên.
+- `lost_response`: **đã** trừ tiền rồi mới im lặng — kiểu lỗi nguy hiểm nhất trong thực tế («request tới nơi, response lạc đường»). Retry chỉ an toàn vì cùng khoá ⇒ `applyCharge` không trừ lần hai.
 
-`failNext` tiêu thụ hàng đợi lỗi cho N lần gọi kế tiếp rồi quay về chế độ lâu dài; `setMode` đặt chế độ lâu dài. RC-01 cần "lỗi một lần rồi thôi" ⇒ `failNext`. RC-02/03 cần "ngừng hẳn cho tới khi gỡ" ⇒ `setMode`.
+`failNext` tiêu thụ hàng đợi lỗi cho N lần gọi kế tiếp rồi quay về chế độ lâu dài; `setMode` đặt chế độ lâu dài. RC-01 cần «lỗi một lần rồi thôi» ⇒ `failNext`; RC-02/03 cần «ngừng hẳn cho tới khi gỡ» ⇒ `setMode`.
 
 ## 6. Thực hành A — phục hồi dependency thanh toán
 
@@ -232,9 +228,9 @@ beforeEach(async () => { await system.reset(); app = createApp(system.deps, { lo
 afterAll(async () => { await system?.db?.close(); });
 ```
 
-`timeoutMs: 30` thay vì 3 giây của SPEC để ba lần hết giờ chỉ mất ~90 ms. Hệ quả: lab kiểm **logic** đếm lần thử và giữ khoá, không chứng minh giá trị mặc định 3 giây, cũng không nói gì về latency thật của nhà cung cấp.
+`timeoutMs: 30` thay vì 3 giây của SPEC để ba lần hết giờ chỉ mất ~90 ms. Lab vì thế kiểm **logic** đếm lần thử và giữ khoá, không chứng minh giá trị mặc định 3 giây hay latency thật của nhà cung cấp.
 
-Retry nằm trong `chargeWithRetry` (`src/app/payment.ts`) — lỗi lập trình bị ném lại, không bị nuốt:
+Retry nằm trong `chargeWithRetry` (`src/app/payment.ts`); lỗi lập trình bị ném lại, không bị nuốt:
 
 ```ts
 for (let attempt = 1; attempt <= maxAttempts; attempt++) {
@@ -264,7 +260,7 @@ async function stored(id: string, payment: string) {
 }
 ```
 
-Đếm đúng **một** event `completed` chặn một lỗi phục hồi kinh điển: retry ở tầng sai (gọi lại cả use case thay vì chỉ gọi lại ví) sẽ ghi event hai lần. Kiểm tài xế `online` chặn lỗi ngược lại: chuyến xong nhưng tài xế bị kẹt `busy` vì lỗi thanh toán làm hỏng phần cập nhật sau.
+Đếm đúng **một** event `completed` bắt lỗi phục hồi kinh điển: retry ở tầng sai (gọi lại cả use case thay vì chỉ gọi lại ví) ghi event hai lần. Kiểm tài xế `online` bắt lỗi ngược lại: chuyến xong nhưng tài xế kẹt `busy` vì lỗi thanh toán làm hỏng phần cập nhật sau.
 
 ### 6.4. Bước 3 — RC-01: lỗi một lần rồi phục hồi
 
@@ -282,9 +278,9 @@ it.each(['error', 'timeout', 'lost_response'] as const)(
   });
 ```
 
-Với `lost_response`, lần gọi đầu **đã** trừ tiền; lần thứ hai cùng khoá trả về bản ghi cũ. Tổng vẫn 35.000. Nếu ai đó "cải tiến" retry bằng cách sinh khoá mới mỗi lần, assertion `totalCharged()` sẽ đỏ với 70.000 — đó là lỗi mà phép thử này tồn tại để bắt.
+Với `lost_response`, lần gọi đầu **đã** trừ tiền; lần thứ hai cùng khoá trả về bản ghi cũ, tổng vẫn 35.000. Nếu ai đó «cải tiến» retry bằng cách sinh khoá mới mỗi lần, `totalCharged()` sẽ đỏ với 70.000 — đúng lỗi mà phép thử này tồn tại để bắt.
 
-Chú ý: `calls` dài 2 chỉ đúng **vì** chỉ inject một lỗi. Không chuyển nguyên assertion "đúng N lần gọi" sang môi trường có retry ở nhiều tầng.
+`calls` dài 2 chỉ đúng **vì** chỉ inject một lỗi; đừng chuyển nguyên assertion «đúng N lần gọi» sang môi trường có retry ở nhiều tầng.
 
 ### 6.5. Bước 4 — RC-02: việc mới sau outage
 
@@ -306,7 +302,7 @@ expect(system.payments.chargedKeys()).toEqual([`trip:${newId}:fare`]);
 expect(system.payments.totalCharged()).toBe(35_000);
 ```
 
-Hai điều được chứng minh cùng lúc. Một: hệ thống **nhận việc mới** sau outage — không bị kẹt trạng thái lỗi, không có circuit breaker nào mở mãi. Hai: chuyến cũ **không** tự được thu lại khi ví trở lại; gọi complete lần nữa bị chặn bởi R-STATE-03 và ví không nhận thêm lần gọi nào (4 = 3 của chuyến cũ + 1 của chuyến mới). Chuyến cũ là việc tồn đọng **có nhãn**, chờ quy trình xử lý.
+Test chứng minh hai điều. Một: hệ thống **nhận việc mới** sau outage — không kẹt trạng thái lỗi, không có circuit breaker nào mở mãi. Hai: chuyến cũ **không** tự được thu lại khi ví trở lại; gọi complete lần nữa bị R-STATE-03 chặn và ví không nhận thêm lần gọi nào (4 = 3 của chuyến cũ + 1 của chuyến mới). Chuyến cũ là việc tồn đọng **có nhãn**, chờ quy trình xử lý.
 
 ### 6.6. Bước 5 — RC-03: khoảng trống được ghi nhận
 
@@ -325,18 +321,18 @@ expect(system.payments.calls).toHaveLength(3);
 expect(system.payments.totalCharged()).toBe(35_000);
 ```
 
-Đây là test case quan trọng nhất của bài, và nó **pass vì nó ghi lại đúng một mâu thuẫn**: ví đã thu 35.000, DB nói `failed`. Theo R-PAY-06, API trả 200 và chuyến `completed` — đúng đặc tả. Nhưng `failed` ở đây nghĩa là "**không xác nhận được**", không phải "chắc chắn chưa thu".
+Đây là test case quan trọng nhất của bài, và nó **pass vì ghi lại đúng một mâu thuẫn**: ví đã thu 35.000, DB nói `failed`. Theo R-PAY-06, API trả 200 và chuyến `completed` — đúng đặc tả. Nhưng `failed` ở đây nghĩa là «**không xác nhận được**», không phải «chắc chắn chưa thu».
 
 <div class="tkh-callout tkh-callout--warn">
 <span class="tkh-callout-title">RC-03 xanh không có nghĩa là đã phục hồi</span>
-<p>Lab chưa có worker đối soát, chưa có API hỏi trạng thái giao dịch theo khoá ở phía nhà cung cấp, chưa có ledger thật. PASS của RC-03 là bằng chứng hệ thống <b>hành xử như SPEC mô tả</b> và khoảng trống được phơi ra, không phải bằng chứng nghiệp vụ tài chính đã phục hồi đủ. Đừng làm test "xanh hơn" bằng cách <code>UPDATE trips SET payment_status='paid'</code>: cần bằng chứng từ nhà cung cấp và một quy trình cập nhật có kiểm toán. Đừng cấp khoá mới để thu lại khoản cũ khi kết quả còn mơ hồ — đó chính là cách khách bị trừ hai lần.</p>
+<p>Lab chưa có worker đối soát, chưa có API hỏi trạng thái giao dịch theo khoá ở phía nhà cung cấp, chưa có ledger thật. PASS của RC-03 là bằng chứng hệ thống <b>hành xử như SPEC mô tả</b> và khoảng trống được phơi ra, không phải bằng chứng nghiệp vụ tài chính đã phục hồi đủ. Đừng làm test «xanh hơn» bằng cách <code>UPDATE trips SET payment_status='paid'</code>: cần bằng chứng từ nhà cung cấp và quy trình cập nhật có kiểm toán. Đừng cấp khoá mới để thu lại khoản cũ khi kết quả còn mơ hồ — đó chính là cách khách bị trừ hai lần.</p>
 </div>
 
 ### 6.7. Kết quả: mong đợi và thực tế
 
 **Mong đợi:** 5 execution pass (RC-01 × 3, RC-02, RC-03), không skip; typecheck exit 0.
 
-**Thực tế — báo cáo gốc** (13/11/2026, Windows, Node.js 24.15.0, Vitest 3.2.7, PGlite 0.3.16):
+**Thực tế — báo cáo gốc (13/11/2026)**: Windows, Node.js 24.15.0, Vitest 3.2.7, PGlite 0.3.16.
 
 ```text
 Test Files  1 passed (1)
@@ -344,7 +340,7 @@ Test Files  1 passed (1)
 tổng 3,35 s · phần test 2,17 s · typecheck exit 0
 ```
 
-**Thực tế — chạy lại khi biên tập bài** (13/11/2026, Windows 11, Node.js v22.18.0, Vitest 3.2.7), lệnh `npx vitest run articles/system-testing-recovery-test`:
+**Thực tế — chạy lại khi biên tập (13/11/2026)**: Windows 11, Node.js v22.18.0, Vitest 3.2.7, lệnh `npx vitest run articles/system-testing-recovery-test`:
 
 ```text
 ✓ RC-02 · new work recovers after outage; old failed payment remains unresolved  364ms
@@ -355,7 +351,7 @@ Test Files  1 passed (1)
   Duration  5.38s (transform 362ms, collect 1.15s, tests 3.71s, prepare 187ms)
 ```
 
-Lần chạy lại diễn ra khi máy đang chạy song song các lab khác, nên thời gian dài hơn báo cáo gốc. Thời gian ở đây chỉ để tham khảo, **không** phải số đo hiệu năng hay RTO. Typecheck không chạy lại trong lần biên tập; bài dẫn kết quả PASS từ báo cáo gốc.
+Lượt chạy lại diễn ra khi máy chạy song song các lab khác nên lâu hơn báo cáo gốc; thời gian chỉ để tham khảo, **không** phải số đo hiệu năng hay RTO. Typecheck không chạy lại; kết quả PASS lấy từ báo cáo gốc.
 
 ## 7. Thực hành B — backup/restore thật trên dữ liệu tổng hợp
 
@@ -369,7 +365,7 @@ Từ root repository, trên Windows:
 & ./examples/toi-noi-testing/articles/system-testing-recovery-test/restore-drill.ps1 -Port 55485
 ```
 
-Script tạo thư mục GUID dưới TEMP, `initdb` một cluster **mới**, chỉ listen `127.0.0.1`, cổng mặc định 55484. Script không dùng cluster PostgreSQL đang có, không xoá database nào của bạn. `--auth=trust` chỉ chấp nhận được vì đây là cluster loopback ngắn hạn chứa dữ liệu giả; không dùng cấu hình này ở môi trường dùng chung. Cluster dừng trong khối `finally`; thư mục bằng chứng được giữ lại.
+Script tạo thư mục GUID dưới TEMP, `initdb` một cluster **mới**, chỉ listen `127.0.0.1`, cổng mặc định 55484; không dùng cluster PostgreSQL đang có, không xoá database nào của bạn. `--auth=trust` chỉ chấp nhận được vì đây là cluster loopback ngắn hạn chứa dữ liệu giả; đừng dùng ở môi trường dùng chung. Cluster dừng trong khối `finally`; thư mục bằng chứng được giữ lại.
 
 ### 7.2. Trình tự thí nghiệm
 
@@ -397,17 +393,17 @@ $timer.Stop()
 
 Ba lựa chọn đáng để ý:
 
-- **Restore vào DB mới**, không `--clean` lên DB có sẵn. Nếu restore hỏng giữa chừng, nguồn (hay những gì còn lại của nó) vẫn nguyên để điều tra.
-- `--exit-on-error --single-transaction`: restore được cả hoặc không gì cả. Không mở traffic cho một DB khôi phục một nửa.
-- Oracle là **chuỗi chính xác** `1:35000`, không phải "count > 0". Cách này bắt được cả trường hợp restore thiếu dòng lẫn trường hợp restore "thừa" (ví dụ dump lấy nhầm thời điểm).
+- **Restore vào DB mới**, không `--clean` lên DB có sẵn: nếu restore hỏng giữa chừng, nguồn (hay phần còn lại của nó) vẫn nguyên để điều tra.
+- `--exit-on-error --single-transaction`: restore được cả hoặc không gì cả; không mở traffic cho một DB khôi phục một nửa.
+- Oracle là **chuỗi chính xác** `1:35000`, không phải «count > 0», nên bắt được cả restore thiếu dòng lẫn restore «thừa» (ví dụ dump lấy nhầm thời điểm).
 
-`Invoke-Pg` ném lỗi khi exit code khác 0, nên mọi bước đều dừng sớm nếu sai. Khi `pg_ctl start` lỗi vì cổng bận: đọc log, chọn cổng khác — **không** dừng tiến trình đang giữ cổng của người khác.
+`Invoke-Pg` ném lỗi khi exit code khác 0, nên mọi bước dừng sớm nếu sai. Khi `pg_ctl start` lỗi vì cổng bận: đọc log, chọn cổng khác — **không** dừng tiến trình đang giữ cổng của người khác.
 
 ### 7.3. Kết quả: mong đợi và thực tế
 
 **Mong đợi:** exit code 0; marker khôi phục là 1; marker 2 thiếu; ghi được marker 3; cluster dừng.
 
-**Thực tế — từ báo cáo gốc** (13/11/2026, Windows, PostgreSQL 18.3, cluster mới trên 127.0.0.1:55484, backup custom format). Script **không** chạy lại khi biên tập bài này:
+**Thực tế — báo cáo gốc (13/11/2026)**: Windows, PostgreSQL 18.3, cluster mới trên 127.0.0.1:55484, backup custom format. Script **không** chạy lại khi biên tập:
 
 ```json
 {
@@ -421,15 +417,15 @@ Ba lựa chọn đáng để ý:
 }
 ```
 
-Nguồn có hai marker trước `DELETE`; DB đích khôi phục đúng `1:35000`; insert marker 3 thành công, count cuối bằng 2; log xác nhận "database system is shut down".
+Nguồn có hai marker trước `DELETE`; DB đích khôi phục đúng `1:35000`; insert marker 3 thành công, count cuối bằng 2; log xác nhận «database system is shut down».
 
-Báo cáo cũng ghi trung thực rằng **hai lần thử đầu không hoàn thành**: trên Windows, PowerShell giữ pipe output của tiến trình nền khiến lệnh khởi động không trả về. Cách sửa (khởi động `pg_ctl` bằng `Start-Process` ẩn, output ra file, `WaitForExit` chỉ chờ `pg_ctl` chứ không chờ cây tiến trình PostgreSQL) chính là đoạn comment trong script. Kết quả trên thuộc lần chạy sau khi sửa; không lấy số từ lần lỗi.
+Báo cáo cũng ghi rằng **hai lần thử đầu không hoàn thành**: trên Windows, PowerShell giữ pipe output của tiến trình nền khiến lệnh khởi động không trả về. Cách sửa (khởi động `pg_ctl` bằng `Start-Process` ẩn, output ra file, `WaitForExit` chỉ chờ `pg_ctl` chứ không chờ cây tiến trình PostgreSQL) chính là đoạn comment trong script. Kết quả trên thuộc lần chạy sau khi sửa, không lấy số từ lần lỗi.
 
 ### 7.4. Đọc con số 774 ms
 
-`restoreAndValidationMs` tính từ trước `createdb` đích tới sau kiểm ghi mới. Con số này **không** phải RTO ứng dụng: không gồm phát hiện sự cố, cấp hạ tầng, đổi endpoint, hay kiểm hành trình Tới Nơi. Script cũng không đo RPO theo thời gian — chỉ xác nhận "một marker sau backup bị mất". Hai cờ `applicationRtoMeasured: false` và `rpoTimeMeasured: false` có mặt trong kết quả **chính là để** người đọc báo cáo sau này không hiểu nhầm.
+`restoreAndValidationMs` tính từ trước `createdb` đích tới sau kiểm ghi mới — chỉ là ô nét đứt trong Hình 1, **không** phải RTO ứng dụng. Script cũng không đo RPO theo thời gian, chỉ xác nhận «một marker sau backup bị mất». Hai cờ `applicationRtoMeasured: false` và `rpoTimeMeasured: false` nằm trong kết quả **chính là để** người đọc sau này không hiểu nhầm.
 
-Fixture này không restore schema hay dữ liệu Tới Nơi. Mở rộng đúng cách cần thêm quote, trip, trip_events, idempotency, đối chiếu theo khoá, số tiền và snapshot giá như SYS-13, rồi chạy hành trình nghiệp vụ trên backend PostgreSQL tương ứng.
+Fixture này không restore schema hay dữ liệu Tới Nơi. Mở rộng đúng cách cần thêm báo giá, chuyến, `trip_events`, idempotency, đối chiếu theo khoá, số tiền và snapshot giá như SYS-13, rồi chạy hành trình nghiệp vụ trên backend PostgreSQL tương ứng.
 
 ## 8. Đọc thất bại và ra quyết định
 
@@ -443,27 +439,27 @@ Fixture này không restore schema hay dữ liệu Tới Nơi. Mở rộng đún
 | Lab B: marker trả về `1:35000,2:42000` | Dump lấy sau marker 2, hoặc restore nhầm nguồn | Thứ tự lệnh, `probe.dump` timestamp, log |
 | Lab B: start timeout | Cổng bận, pipe bị giữ | `start.err`, `postgres.log`, đổi `-Port` |
 
-Lỗi môi trường (thiếu binary, cổng bận) báo **blocked** kèm log; lỗi sản phẩm báo **failed** với request, expected/actual, build và dữ liệu tái hiện. Một lần pass sau khi chạy lại không xoá lần lỗi trước.
+Lỗi môi trường (thiếu binary, cổng bận) báo **blocked** kèm log; lỗi sản phẩm báo **failed** với request, mong đợi/thực tế, build và dữ liệu tái hiện. Một lần pass khi chạy lại không xoá lần lỗi trước.
 
-Ví dụ quyết định viết được từ bài này: *"Retry trong ngân sách và tiếp nhận việc mới sau outage: đạt trong lab. Khoản thu mơ hồ sau mất phản hồi kéo dài: **chưa có cơ chế đối soát** — rủi ro tồn, cần người phụ trách và hạn xử lý trước khi bật VíXanh cho toàn bộ thành phố. Logical restore một bảng tổng hợp: đạt; chưa chứng minh RTO/RPO ứng dụng."*
+Ví dụ quyết định viết được từ bài này: *«Retry trong ngân sách và tiếp nhận việc mới sau outage: đạt trong lab. Khoản thu mơ hồ sau mất phản hồi kéo dài: **chưa có cơ chế đối soát** — rủi ro tồn, cần người phụ trách và hạn xử lý trước khi bật VíXanh cho toàn bộ thành phố. Logical restore một bảng tổng hợp: đạt; chưa chứng minh RTO/RPO ứng dụng.»*
 
 ## 9. Mở rộng nâng cao
 
 ### 9.1. Từ logical restore tới PITR
 
-`pg_dump` cho một snapshot nhất quán của **một database**; roles và tablespaces cần kế hoạch riêng (`pg_dumpall --globals-only` hoặc tương đương). Có dump không có nghĩa có đủ cấu hình, chứng thư, quyền và secret để phục vụ ứng dụng — bài [Backup logic với pg_dump](/articles/postgresql-pg-dump-restore) đi sâu phần đối soát quyền.
+`pg_dump` cho snapshot nhất quán của **một database**; roles và tablespaces cần kế hoạch riêng (`pg_dumpall --globals-only` hoặc tương đương). Có dump chưa có nghĩa đủ cấu hình, chứng thư, quyền và secret để phục vụ ứng dụng — xem [Backup logic với pg_dump](/articles/postgresql-pg-dump-restore).
 
-PITR dùng **base backup + chuỗi WAL liên tục** để phục hồi tới một thời điểm chọn. Không thể lấy một `pg_dump` rồi replay WAL lên đó. Cần kiểm archive đủ, đúng timeline, đúng cấu hình phục hồi; thiếu một đoạn WAL có thể khiến không đạt được điểm đích. Phần này là mở rộng **chưa chạy** trong SYS-14; xem [Khôi phục theo thời điểm với base backup và WAL](/articles/postgresql-pitr-base-backup-wal).
+PITR dùng **base backup + chuỗi WAL liên tục** để phục hồi tới một thời điểm chọn; không thể lấy `pg_dump` rồi replay WAL lên đó. Cần kiểm archive đủ, đúng timeline, đúng cấu hình phục hồi; thiếu một đoạn WAL có thể khiến không tới được điểm đích. Xem [Khôi phục theo thời điểm với base backup và WAL](/articles/postgresql-pitr-base-backup-wal).
 
-Với `DELETE` nhầm lúc 10:00, phục hồi về 09:59:59 cũng **xoá luôn** các thay đổi hợp lệ sau đó trên những bảng khác. Cần kế hoạch đối soát và đưa lại phần dữ liệu cần giữ, không chỉ "restore là xong".
+Với `DELETE` nhầm lúc 10:00, phục hồi về 09:59:59 cũng **xoá luôn** các thay đổi hợp lệ sau đó trên bảng khác. Cần kế hoạch đối soát và đưa lại phần dữ liệu cần giữ, không chỉ «restore là xong».
 
 ### 9.2. Failover
 
-Kiểm **fencing** để primary cũ không tiếp tục ghi (split-brain), replication lag tại thời điểm chuyển, client reconnect, và tính duy nhất của tác dụng phụ ra ngoài (một khoản thu không được phát lại từ cả hai phía). Failback cần diễn tập riêng — nó hiếm khi đối xứng với failover.
+Kiểm **fencing** để primary cũ không tiếp tục ghi (split-brain), replication lag lúc chuyển, client reconnect, và tính duy nhất của tác dụng phụ ra ngoài (một khoản thu không được phát lại từ cả hai phía). Failback cần diễn tập riêng — hiếm khi đối xứng với failover.
 
 ### 9.3. Điểm cắt lỗi
 
-Inject lỗi ở các điểm khác nhau cho ra oracle khác nhau:
+Mỗi điểm inject lỗi cho một oracle khác:
 
 | Điểm cắt | Câu hỏi oracle |
 |---|---|
@@ -472,19 +468,19 @@ Inject lỗi ở các điểm khác nhau cho ra oracle khác nhau:
 | Sau khi ví trừ tiền, trước khi lưu `paid` | Ai biết khoản thu tồn tại? Đối soát tìm ra nó bằng cách nào? |
 | Worker đang giữ job | Job có được nhả, chạy lại đúng một lần? |
 
-Retry cả giao dịch phải có giới hạn, backoff/jitter và theo dõi **retry amplification** (mỗi tầng retry 3 lần ⇒ 3 tầng = 27 lần gọi xuống đáy). Lab hiện **không** chứng minh các cơ chế này.
+Retry cả giao dịch phải có giới hạn, backoff/jitter và theo dõi **retry amplification** (mỗi tầng retry 3 lần ⇒ 3 tầng = 27 lần gọi xuống đáy).
 
 ### 9.4. Bền vững qua restart
 
-Khoá idempotency và kết quả của nó phải sống qua restart theo thiết kế (R-IDEM-05 ghi rõ bản lab giữ khoá trong vòng đời tiến trình; hệ thống đích tối thiểu 24 giờ). Ví giả lưu charge **trong RAM**, nên dựng lại ví giả không phải bằng chứng nhà cung cấp không thu trùng. Bằng chứng phải nằm **ngoài** tiến trình bị lỗi. Mẫu outbox/transaction cho phần này: [Idempotency, outbox và transaction trong PostgreSQL](/articles/postgresql-idempotency-outbox-transaction).
+Khoá idempotency và kết quả của nó phải sống qua restart theo thiết kế (R-IDEM-05; bản lab giữ khoá trong vòng đời tiến trình). Ví giả lưu charge **trong RAM**, nên dựng lại ví giả không chứng minh nhà cung cấp không thu trùng; bằng chứng phải nằm **ngoài** tiến trình bị lỗi. Mẫu outbox/transaction: [Idempotency, outbox và transaction trong PostgreSQL](/articles/postgresql-idempotency-outbox-transaction).
 
 ### 9.5. Backlog sau phục hồi
 
-Dependency trở lại chưa đủ nếu hàng đợi vẫn phình. Đo tốc độ xử lý tồn, tuổi của job cũ nhất, lỗi lặp và công bằng giữa việc mới/cũ. Đặt **khoảng ổn định** sau phục hồi (ví dụ: 10 phút liên tục không tăng tồn) thay vì chấp nhận "một request thành công".
+Dependency trở lại chưa đủ nếu hàng đợi vẫn phình. Đo tốc độ xử lý tồn, tuổi job cũ nhất, lỗi lặp và công bằng giữa việc mới/cũ. Đặt **khoảng ổn định** sau phục hồi (ví dụ: 10 phút liên tục không tăng tồn) thay vì chấp nhận «một request thành công».
 
 ### 9.6. Backup hỏng và hạ tầng
 
-Thử archive thiếu, sai checksum hoặc thiếu quyền giải mã — trên bản sao dành riêng cho diễn tập. Kết quả cần **fail rõ**, không mở traffic. Bài hiện chưa có thử nghiệm này. Lab B đặt backup và data trên **cùng máy**, nên không chứng minh chịu được mất ổ đĩa; diễn tập thật phải restore vào môi trường độc lập với nguồn.
+Thử archive thiếu, sai checksum hoặc thiếu quyền giải mã — trên bản sao dành riêng cho diễn tập. Kết quả cần **fail rõ**, không mở traffic. Diễn tập thật phải restore vào môi trường độc lập với nguồn, vì backup và data cùng máy không chứng minh chịu được mất ổ đĩa.
 
 ## 10. Runbook, bằng chứng và anti-pattern
 
@@ -508,61 +504,61 @@ Người điều phối, người xác nhận dữ liệu, phạm vi inject, đi
 - **Backup thành công = phục hồi được.** Chưa restore thì chưa biết.
 - **Retry mù với khoá mới** khi kết quả mơ hồ ⇒ thu trùng.
 - **Sửa tay `payment_status`** để báo cáo đẹp ⇒ mất dấu vết kiểm toán.
-- **Gọi thời gian restore là RTO** ⇒ bỏ qua phần phát hiện và xác minh nghiệp vụ, thường là phần dài nhất.
-- **`sleep` cố định chờ "hệ thống ổn"** thay vì điều kiện quan sát được có deadline.
+- **Gọi thời gian restore là RTO** ⇒ bỏ qua phát hiện và xác minh nghiệp vụ, thường là phần dài nhất.
+- **`sleep` cố định chờ «hệ thống ổn»** thay vì điều kiện quan sát được có deadline.
 - **Diễn tập trên cluster dùng chung** với `--clean` ⇒ biến bài tập thành sự cố thật.
 
 <div class="tkh-callout tkh-callout--warn">
 <span class="tkh-callout-title">Giới hạn bằng chứng của SYS-14</span>
-<p>Lab A: PGlite một kết nối, ví giả trong RAM, timeout 30 ms thay vì 3 giây — kiểm logic, không đo SLO và không kiểm crash giữa commit và gọi ví. Lab B: một bảng tổng hợp, cùng máy, logical dump — chưa restore schema Tới Nơi, chưa PITR, failover, backup hỏng, mất storage hay mất vùng. <code>restoreAndValidationMs</code> không phải RTO; RPO thời gian chưa được đo. Đánh đổi: lab rẻ, chạy lại được trong vài giây và phơi đúng khoảng trống đối soát; cái giá là mọi kết luận về môi trường thật vẫn cần một diễn tập riêng có hạ tầng tách biệt.</p>
+<p>Lab A: PGlite một kết nối, ví giả trong RAM, timeout 30 ms thay vì 3 giây — kiểm logic, không đo SLO, không kiểm crash giữa commit và gọi ví. Lab B: một bảng tổng hợp, backup và data cùng máy, logical dump — chưa restore schema Tới Nơi, chưa thử PITR, failover, backup hỏng, mất storage hay mất vùng. <code>restoreAndValidationMs</code> không phải RTO; RPO theo thời gian chưa được đo. Đánh đổi: lab rẻ, chạy lại trong vài giây và phơi đúng khoảng trống đối soát; mọi kết luận về môi trường thật vẫn cần một diễn tập riêng có hạ tầng tách biệt.</p>
 </div>
 
 ## 11. Bài tập và câu hỏi tự kiểm
 
 ### Bài tập
 
-**Bài 1 (cơ bản).** Thêm test case: `failNext('timeout', 'timeout')` rồi complete. Viết đầy đủ expected cho HTTP, DB và phía ví.
+**Bài 1 (cơ bản).** Thêm test case: `failNext('timeout', 'timeout')` rồi complete. Viết đầy đủ kết quả mong đợi cho HTTP, DB và phía ví.
 
 <details>
-<summary><b>Lời giải gợi ý</b></summary>
-<p>Hai lần hết giờ rồi thành công ở lần thứ ba — vẫn trong ngân sách (tối đa 3 lần gọi, R-PAY-04). Expected: 200; <code>stored(id, 'paid')</code>; <code>calls</code> dài 3, cả ba cùng khoá <code>trip:&lt;id&gt;:fare</code>; <code>totalCharged()</code> = 35.000; <code>chargedKeys()</code> chỉ có khoá của chuyến. Thêm <code>failNext</code> ba lần thì case chuyển thành "hết ngân sách" và expected đổi sang <code>failed</code>, giống RC-02.</p>
+<summary><b>Gợi ý lời giải</b></summary>
+<p>Hai lần hết giờ rồi thành công ở lần thứ ba — vẫn trong ngân sách (tối đa 3 lần gọi, R-PAY-04). Mong đợi: 200; <code>stored(id, 'paid')</code>; <code>calls</code> dài 3, cả ba cùng khoá <code>trip:&lt;id&gt;:fare</code>; <code>totalCharged()</code> = 35.000; <code>chargedKeys()</code> chỉ có khoá của chuyến. Thêm <code>failNext</code> ba lần thì test case chuyển thành «hết ngân sách» và kết quả mong đợi đổi sang <code>failed</code>, giống RC-02.</p>
 </details>
 
 **Bài 2 (trung bình).** Đo RPO theo thời gian cho restore drill.
 
 <details>
-<summary><b>Lời giải gợi ý</b></summary>
-<p>Lưu <b>bên ngoài</b> DB nguồn (ví dụ tệp JSON trong thư mục evidence) chuỗi marker đã được ACK cùng <code>committed_at</code> (bảng đã có cột này), mốc sự cố và danh sách marker khôi phục. RPO = mốc sự cố − thời điểm commit của marker liên tục cuối cùng có mặt. Tìm cả lỗ hổng giữa chuỗi. Không dùng giờ <code>pg_dump</code> kết thúc làm điểm dữ liệu: snapshot của dump được chụp lúc bắt đầu.</p>
+<summary><b>Gợi ý lời giải</b></summary>
+<p>Lưu <b>bên ngoài</b> DB nguồn (ví dụ tệp JSON trong thư mục bằng chứng) chuỗi marker đã được ACK cùng <code>committed_at</code> (bảng đã có cột này), mốc sự cố và danh sách marker khôi phục. RPO = mốc sự cố − thời điểm commit của marker liên tục cuối cùng có mặt. Tìm cả lỗ hổng giữa chuỗi. Không dùng giờ <code>pg_dump</code> kết thúc làm điểm dữ liệu: snapshot của dump được chụp lúc bắt đầu.</p>
 </details>
 
 **Bài 3 (nâng cao).** Thiết kế worker giải quyết RC-03 và phép thử cho nó.
 
 <details>
-<summary><b>Lời giải gợi ý</b></summary>
-<p>Cần mở rộng port thanh toán (truy vấn giao dịch theo khoá) và SPEC trước — đây <b>không</b> phải hành vi sẵn có. Worker: chọn chuyến <code>completed</code> + <code>failed</code> + <code>vixanh</code>; hỏi ví theo khoá cũ <code>trip:&lt;id&gt;:fare</code>; nếu có giao dịch khớp số tiền và khách ⇒ cập nhật <code>paid</code> kèm bản ghi kiểm toán; nếu không ⇒ giữ <code>failed</code> và đưa vào hàng xử lý thủ công. Phép thử: restart worker giữa "đã hỏi ví" và "đã ghi DB" rồi chạy lại ⇒ vẫn đúng một cập nhật, không có lần thu mới, không cấp khoá mới.</p>
+<summary><b>Gợi ý lời giải</b></summary>
+<p>Cần mở rộng port thanh toán (truy vấn giao dịch theo khoá) và SPEC trước — đây <b>không</b> phải hành vi sẵn có. Worker: chọn chuyến <code>completed</code> + <code>failed</code> + <code>vixanh</code>; hỏi ví theo khoá cũ <code>trip:&lt;id&gt;:fare</code>; nếu có giao dịch khớp số tiền và khách ⇒ cập nhật <code>paid</code> kèm bản ghi kiểm toán; nếu không ⇒ giữ <code>failed</code> và đưa vào hàng xử lý thủ công. Phép thử: restart worker giữa «đã hỏi ví» và «đã ghi DB» rồi chạy lại ⇒ vẫn đúng một cập nhật, không có lần thu mới, không cấp khoá mới.</p>
 </details>
 
 **Bài 4 (nâng cao).** Restore một fixture có chuyến đang `in_transit` rồi tiếp tục hành trình.
 
 <details>
-<summary><b>Lời giải gợi ý</b></summary>
+<summary><b>Gợi ý lời giải</b></summary>
 <p>Đối chiếu sau restore: tài xế <code>busy</code> đúng một chuyến đang chạy (R-ACCEPT-05), snapshot giá giữ nguyên, <code>trip_events</code> đầy đủ theo R-STATE-06, bản ghi idempotency còn. Sau đó complete qua API với ví sandbox/giả, kiểm thu đúng một lần. Không trỏ cấu hình restore tới cổng thanh toán thật.</p>
 </details>
 
 **Bài 5 (nâng cao).** Thêm thử nghiệm archive không đọc được.
 
 <details>
-<summary><b>Lời giải gợi ý</b></summary>
+<summary><b>Gợi ý lời giải</b></summary>
 <p>Sao chép <code>probe.dump</code>, cắt cụt hoặc đổi vài byte ở bản sao. <code>pg_restore --exit-on-error --single-transaction</code> vào DB mới phải exit khác 0 và DB đích không được dùng. Giữ dump gốc làm nhóm đối chứng để chứng minh lỗi đến từ archive chứ không từ môi trường.</p>
 </details>
 
 ### Câu hỏi tự kiểm
 
-**Câu 1.** RC-03 pass. Có thể kết luận "lỗi mất phản hồi đã được xử lý" không?
+**Câu 1.** RC-03 pass. Có thể kết luận «lỗi mất phản hồi đã được xử lý» không?
 
 <details>
 <summary><b>Đáp án và giải thích</b></summary>
-<p><b>Không.</b> RC-03 chứng minh hệ thống hành xử theo SPEC (200, <code>completed</code>, <code>failed</code>, không thu thêm) và <b>phơi ra</b> mâu thuẫn ví đã thu – DB ghi failed. Không có cơ chế nào giải quyết mâu thuẫn đó trong lab. Kết luận đúng: "khoảng trống đối soát được xác nhận, cần xử lý".</p>
+<p><b>Không.</b> RC-03 chứng minh hệ thống hành xử theo SPEC (200, <code>completed</code>, <code>failed</code>, không thu thêm) và <b>phơi ra</b> mâu thuẫn ví đã thu – DB ghi failed; lab không có cơ chế giải quyết mâu thuẫn đó. Kết luận đúng: «khoảng trống đối soát được xác nhận, cần xử lý».</p>
 </details>
 
 **Câu 2.** Vì sao RC-02 kiểm complete lại chuyến cũ trả 409 **và** số lần gọi ví vẫn là 4?
@@ -576,7 +572,7 @@ Người điều phối, người xác nhận dữ liệu, phạm vi inject, đi
 
 <details>
 <summary><b>Đáp án và giải thích</b></summary>
-<p><b>Chưa biết.</b> 774 ms chỉ gồm tạo DB đích, restore một bảng nhỏ và kiểm. RTO tính từ lúc nghiệp vụ ngừng tới lúc nghiệp vụ được xác minh — gồm phát hiện, cấp hạ tầng, đổi endpoint, kiểm hành trình. Script tự ghi <code>applicationRtoMeasured: false</code>.</p>
+<p><b>Chưa biết.</b> 774 ms chỉ gồm tạo DB đích, restore một bảng nhỏ và kiểm. RTO tính từ lúc nghiệp vụ ngừng tới lúc nghiệp vụ được xác minh, gồm cả phát hiện, cấp hạ tầng, đổi endpoint, kiểm hành trình — script tự ghi <code>applicationRtoMeasured: false</code>.</p>
 </details>
 
 **Câu 4.** Vì sao script restore vào `restored_drill` mới thay vì `pg_restore --clean` lên `source_drill`?
@@ -586,7 +582,7 @@ Người điều phối, người xác nhận dữ liệu, phạm vi inject, đi
 <p>Restore vào đích mới giữ nguyên nguồn để điều tra và so sánh; nếu restore hỏng giữa chừng, không có gì bị ghi đè. Trên môi trường dùng chung, <code>--clean</code> trỏ nhầm DB là cách biến diễn tập thành sự cố thật. Kèm <code>--single-transaction</code>, đích hoặc đầy đủ hoặc trống.</p>
 </details>
 
-**Câu 5.** Một đồng nghiệp đề xuất: "khi ví trở lại, tự động gọi lại thu tiền cho mọi chuyến `failed` với khoá mới `trip:<id>:fare:retry`". Điều gì sai?
+**Câu 5.** Một đồng nghiệp đề xuất: «khi ví trở lại, tự động gọi lại thu tiền cho mọi chuyến `failed` với khoá mới `trip:<id>:fare:retry`». Điều gì sai?
 
 <details>
 <summary><b>Đáp án và giải thích</b></summary>

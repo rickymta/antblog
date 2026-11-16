@@ -1,14 +1,14 @@
 ---
 slug: system-testing-performance-test
 title: "Performance Test: đo đúng câu hỏi trước khi tăng tải"
-summary: "Bài thực hành performance testing trên lab Tới Nơi: đặt câu hỏi đo được, chọn ranh giới thời gian, tính p50/p95/p99, throughput, goodput và error rate với mẫu số rõ ràng, phân biệt closed và open model, lưu mẫu gốc và đọc một baseline 900 request trên loopback mà không biến nó thành tuyên bố về công suất production."
+summary: "Thực hành performance testing trên lab Tới Nơi: đặt câu hỏi đo được, chọn ranh giới đo, tính p50/p95/p99, throughput, goodput và error rate với mẫu số rõ ràng, phân biệt closed và open model, rồi đọc một baseline 900 request trên loopback mà không biến nó thành tuyên bố về công suất production."
 category: testing
 level: intermediate
 tags: [testing, sys-07, performance-testing, latency, percentile, throughput, baseline, slo, non-functional-testing]
 language: vi
 ---
 
-Khách mở Tới Nơi, bấm «Báo giá», chờ, rồi bấm lại. API báo giá trả đúng 35.000 đ, nhưng không ai trong đội trả lời được *nó trả nhanh tới đâu, trong điều kiện nào*. Một người nói «trên máy tôi nhanh lắm», người khác khoe «test đạt 2.000 request/giây» — không ai nói workload, dữ liệu, môi trường hay bao nhiêu request sai. Bài này trả lời: **làm sao biến cảm giác «nhanh/chậm» thành một phép đo có câu hỏi, có mẫu số, có bằng chứng gốc và có giới hạn được công bố**, qua một baseline nhỏ cho `POST /api/quotes` của lab Tới Nơi.
+Khách mở Tới Nơi, bấm «Báo giá», chờ, rồi bấm lại. API báo giá trả đúng 35.000 đ, nhưng không ai trong đội trả lời được *nó trả nhanh tới đâu, trong điều kiện nào*. Người nói «trên máy tôi nhanh lắm», người khoe «test đạt 2.000 request/giây» — không ai nói workload, dữ liệu, môi trường hay bao nhiêu request sai. Bài này trả lời: **làm sao biến cảm giác «nhanh/chậm» thành phép đo có câu hỏi, mẫu số, bằng chứng gốc và giới hạn được công bố**, qua một baseline nhỏ cho `POST /api/quotes` của lab Tới Nơi.
 
 <div class="tkh-callout">
 <span class="tkh-callout-title">Thông tin bài · SYS-07</span>
@@ -30,11 +30,11 @@ Khách mở Tới Nơi, bấm «Báo giá», chờ, rồi bấm lại. API báo 
 
 Một câu khẳng định hiệu năng chỉ có nghĩa khi trả lời được năm câu hỏi: **đo cái gì** (endpoint nào, ranh giới thời gian từ đâu tới đâu), **dưới tải nào** (bao nhiêu request, gửi theo mô hình nào), **trên môi trường nào** (máy, DB, mạng), **đúng hay sai** (bao nhiêu response đạt oracle nghiệp vụ) và **so với mục tiêu nào** (ngưỡng đặt trước hay đặt sau khi thấy số). «2.000 request/giây» thiếu cả năm. Con số đó có thể là 2.000 response lỗi 500 trả rất nhanh, đo trong 0,2 giây, trên một máy dev không có DB.
 
-Ở [SYS-06](/articles/system-testing-regression-test) ta bảo vệ hành vi đúng sau thay đổi. Bài này giữ nguyên nguyên tắc đó và thêm một chiều: **đúng và trong bao lâu**. Một response nhanh nhưng tổng tiền sai không phải thành công.
+Ở [SYS-06](/articles/system-testing-regression-test) ta bảo vệ hành vi đúng sau thay đổi. Bài này thêm một chiều: **đúng và trong bao lâu**. Response nhanh mà tổng tiền sai không phải thành công.
 
 ### 1.2. Đối tượng và điều kiện tiên quyết
 
-Tester hoặc developer đã đọc SYS-01…06, biết đọc TypeScript, hiểu HTTP request/response và khái niệm oracle. Không cần k6 hay JMeter: lab dùng một script Node để mọi bước đo đều nhìn thấy được trong mã.
+Tester hoặc developer đã đọc SYS-01…06, biết đọc TypeScript, hiểu HTTP request/response và khái niệm oracle. Không cần k6 hay JMeter: lab dùng script Node để mọi bước đo đều đọc được trong mã.
 
 ### 1.3. Mục tiêu đo được
 
@@ -48,7 +48,7 @@ Sau bài này, bạn có thể:
 
 ## 2. Khái niệm: performance là một nhóm câu hỏi
 
-Performance testing đánh giá đặc tính thời gian, thông lượng và sử dụng tài nguyên **dưới điều kiện xác định**. Đây là tên chung; các biến thể khác nhau ở câu hỏi mà chúng trả lời:
+Performance testing đánh giá đặc tính thời gian, thông lượng và sử dụng tài nguyên **dưới điều kiện xác định**. Đây là tên chung; các biến thể khác nhau ở câu hỏi chúng trả lời:
 
 | Biến thể | Câu hỏi | Ở series này |
 |---|---|---|
@@ -62,8 +62,8 @@ Tài liệu k6 gọi một lượt tải thấp để kiểm script là *smoke t
 
 Ba điểm hay nhầm:
 
-- **Đối tượng đo quyết định kết luận.** Microbenchmark hàm tính cước không đại diện latency HTTP có DB. Một bài HTTP không chứng minh thời gian render UI. Chọn đối tượng trước, chọn công cụ sau.
-- **Correctness vẫn là một phần của phép đo.** Response 200 nhanh nhưng `total` sai phải tính là lỗi. Tách lỗi transport (timeout, mất kết nối), HTTP (status) và nghiệp vụ (oracle) khi đọc kết quả.
+- **Đối tượng đo quyết định kết luận.** Microbenchmark hàm tính cước không đại diện latency HTTP có DB; phép đo HTTP không chứng minh thời gian render UI. Chọn đối tượng trước, công cụ sau.
+- **Correctness vẫn là một phần của phép đo.** Response 200 nhanh nhưng `total` sai phải tính là lỗi. Khi đọc kết quả, tách lỗi transport (timeout, mất kết nối), HTTP (status) và nghiệp vụ (oracle).
 - **Không phải mọi 4xx là hỏng.** Với endpoint có failure hợp lệ theo nghiệp vụ (ví dụ 422 khi quãng đường ngoài khoảng), định nghĩa *expected mix* trước khi chạy. Bài này cố ý dùng một input hợp lệ duy nhất nên mọi response khác 200/35.000 đều là lỗi.
 
 ### 2.1. Test basis: SPEC nói gì về hiệu năng?
@@ -73,11 +73,11 @@ SPEC của lab có mục R-NFR với các «mục tiêu khởi tạo để thả
 - **R-NFR-03** — p95 của `POST /api/quotes` dưới 500 ms, *trong hệ thống đích phụ thuộc bản đồ MapViet*.
 - **R-NFR-07** — mức tải tham chiếu lúc cao điểm khoảng 70 chuyến tạo mới/giây và 30.000 truy vấn đọc/giây toàn hệ thống; SPEC ghi rõ đây *không phải mục tiêu* mà là dữ liệu dựng mô hình tải (dùng ở SYS-08).
 
-SPEC cũng nói thẳng: bản lab chạy một tiến trình trên một máy nên chỉ dùng để minh hoạ phương pháp đo, không dùng để kết luận hệ thống đạt hay không. Đó là lý do bài này **không** kiểm R-NFR-03. Lab không có MapViet, không có DB server, không có mạng thật — đo nó rồi gọi là «đạt R-NFR-03» là sai đối tượng.
+SPEC cũng nói rõ: bản lab chạy một tiến trình trên một máy, chỉ để minh hoạ phương pháp đo, không để kết luận hệ thống đạt hay không. Vì vậy bài này **không** kiểm R-NFR-03: lab không có MapViet, DB server hay mạng thật, nên gọi kết quả là «đạt R-NFR-03» là sai đối tượng.
 
 ## 3. Định nghĩa phép đo và mẫu số
 
-Một con số hiệu năng chỉ có nghĩa khi định nghĩa đi kèm. Bài chốt các định nghĩa sau và script tuân theo chúng.
+Một con số hiệu năng chỉ có nghĩa khi đi kèm định nghĩa. Script tuân theo các định nghĩa sau.
 
 **Latency** là thời gian một lần thực hiện trong ranh giới đã chọn. Trong lab, đồng hồ bắt đầu ngay trước `fetch` và dừng sau khi đọc/parse JSON và kiểm oracle. Vì vậy latency gồm client, loopback, server và xử lý response — không chỉ thời gian hàm backend, và không trùng hoàn toàn `http_req_duration` của k6.
 
@@ -111,9 +111,9 @@ Một con số hiệu năng chỉ có nghĩa khi định nghĩa đi kèm. Bài c
 
 **Throughput hoàn tất** = số attempt hoàn tất / thời gian cửa sổ đo. **Goodput** — trong script là `validRps` — = số request đạt oracle / thời gian cửa sổ đo. **Error rate** = số attempt không đạt oracle / tổng attempt đo. Khi không có lỗi, throughput bằng goodput; khi server trả lỗi nhanh, throughput cao có thể che chất lượng thấp. Báo cáo luôn cần cả hai.
 
-**Percentile** p95 là giá trị mà khoảng 95% mẫu không vượt quá, theo một phương pháp tính cụ thể. Script dùng *nearest-rank*: sắp N mẫu tăng dần, lấy phần tử ở vị trí ⌈0,95 × N⌉ (đánh số từ 1). Với N = 300: p95 là phần tử thứ 285, p99 là phần tử thứ 297. p99 trên 300 mẫu chỉ dựa vào 3 mẫu phía đuôi — nên p99 dao động mạnh giữa các lượt, kém ổn định hơn so với một thí nghiệm dài.
+**Percentile** p95 là giá trị mà khoảng 95% mẫu không vượt quá, theo một phương pháp tính cụ thể. Script dùng *nearest-rank*: sắp N mẫu tăng dần, lấy phần tử ở vị trí ⌈0,95 × N⌉ (đánh số từ 1). Với N = 300: p95 là phần tử thứ 285, p99 là phần tử thứ 297. p99 trên 300 mẫu chỉ dựa vào 3 mẫu phía đuôi, nên dao động mạnh giữa các lượt.
 
-Hai quy tắc đi kèm:
+Hai quy tắc:
 
 - **Không lấy trung bình các p95.** Muốn p95 của 900 request phải gộp mẫu gốc (hoặc histogram tương thích) rồi tính lại. Mục 7.3 có ví dụ bằng chính dữ liệu của bài.
 - **Mean thấp không loại trừ đuôi chậm.** Script ghi p50/p95/p99/max và toàn bộ mẫu, kèm status và lỗi của từng attempt.
@@ -124,7 +124,7 @@ Hai quy tắc đi kèm:
 
 > Một request báo giá gửi nối tiếp qua HTTP loopback tới app dùng kho bộ nhớ có trả đúng kết quả không, và phân bố thời gian quan sát được là gì?
 
-Đây là **baseline nhập môn**, không phải capacity test, không phải load test. Câu hỏi được viết trước; mọi con số sau đó chỉ trả lời câu hỏi này.
+Đây là **baseline nhập môn**, không phải capacity test hay load test. Câu hỏi được viết trước khi chạy; mọi con số sau đó chỉ trả lời câu hỏi này.
 
 ### 4.2. Bảng thiết kế
 
@@ -148,7 +148,7 @@ Hai quy tắc đi kèm:
 
 ### 4.3. Warm-up và reset: loại bỏ gì, giữ lại gì
 
-Warm-up cho đường code, kết nối và JIT chạy nóng trước khi đo. Reset sau warm-up loại 50 quote của warm-up khỏi dataset đo. Nhưng reset **không** reset JIT, heap hay cache của tiến trình. Ba vòng là ba cửa sổ trong *cùng* một tiến trình, không phải ba lần khởi động độc lập. Cần ghi rõ điều này khi diễn giải xu hướng «vòng sau nhanh hơn».
+Warm-up cho đường code, kết nối và JIT chạy nóng trước khi đo. Reset sau warm-up loại 50 quote của warm-up khỏi dataset đo, nhưng **không** reset JIT, heap hay cache của tiến trình. Ba vòng là ba cửa sổ trong *cùng* một tiến trình, không phải ba lần khởi động độc lập — cần nhớ điều này khi diễn giải xu hướng «vòng sau nhanh hơn».
 
 ### 4.4. Entry và exit criteria
 
@@ -157,18 +157,18 @@ Warm-up cho đường code, kết nối và JIT chạy nóng trước khi đo. R
 
 ## 5. Closed model và coordinated omission
 
-Worker của lab chỉ gửi request tiếp theo khi request trước đã hoàn tất. Khi server chậm đi, tốc độ gửi **tự giảm theo**. Đó là *closed model*: hợp với câu hỏi «một luồng làm việc nối tiếp trải nghiệm gì», nhưng không mô phỏng dòng khách độc lập ngoài đời — khách không chờ khách khác xong mới bấm.
+Worker của lab chỉ gửi request tiếp khi request trước hoàn tất. Khi server chậm đi, tốc độ gửi **tự giảm theo**. Đó là *closed model*: hợp với câu hỏi «một luồng làm việc nối tiếp trải nghiệm gì», nhưng không mô phỏng dòng khách độc lập ngoài đời — khách không chờ khách khác xong mới bấm.
 
-*Open model* lên lịch các arrival độc lập với thời gian phản hồi. Khi service chậm, hàng đợi hoặc số request đồng thời tăng lên, hoặc generator không tạo được đủ tải dự kiến (và phải báo điều đó). Nếu mục tiêu là giữ một arrival rate mà lại dùng closed model, kết quả bỏ qua phần thời gian chờ lẽ ra đã tích luỹ khi tải vẫn tiếp tục tới. Hiện tượng này thường được thảo luận dưới tên **coordinated omission**: chính lúc hệ thống chậm nhất, generator gửi ít nhất, nên phân bố đo được trông đẹp hơn thực tế.
+*Open model* lên lịch các arrival độc lập với thời gian phản hồi. Khi service chậm, hàng đợi hoặc số request đồng thời tăng, hoặc generator không tạo đủ tải dự kiến — achieved load thấp hơn offered load, và phải báo điều đó. Nếu mục tiêu là giữ một arrival rate mà lại dùng closed model, kết quả bỏ qua phần thời gian chờ lẽ ra đã tích luỹ khi tải vẫn tiếp tục tới. Hiện tượng này gọi là **coordinated omission**: chính lúc hệ thống chậm nhất, generator gửi ít nhất, nên phân bố đo được trông đẹp hơn thực tế.
 
 | | Closed (bài này) | Open (SYS-08) |
 |---|---|---|
 | Biến điều khiển | Số worker / concurrency | Arrival rate (request/giây) |
 | Server chậm thì | Tốc độ gửi giảm | Hàng đợi / concurrency tăng |
-| Throughput là | **Output** của thí nghiệm | Input mong muốn; cần so offered với achieved |
+| Throughput là | **Output** của thí nghiệm | Input mong muốn; cần so offered load với achieved load |
 | Hợp với câu hỏi | Trải nghiệm của một luồng nối tiếp | Hệ thống dưới dòng khách độc lập |
 
-Concurrency 1 cũng **không** phải «một người dùng thật»: không có think time, không có hành trình nhiều endpoint, không có độ trễ mạng ngoài loopback. Throughput thu được là kết quả của thí nghiệm này — không phải offered RPS, càng không phải công suất tối đa.
+Concurrency 1 cũng **không** phải «một người dùng thật»: không có think time, hành trình nhiều endpoint hay độ trễ mạng ngoài loopback. Throughput thu được là output của thí nghiệm này — không phải offered load, càng không phải công suất tối đa.
 
 ## 6. Thực hành có thể chạy lại
 
@@ -180,7 +180,7 @@ npx tsx articles/system-testing-performance-test/baseline.ts
 npm run typecheck
 ```
 
-Không cần mở server trước. Script lắp app thật với kho bộ nhớ, mở cổng ngẫu nhiên trên `127.0.0.1` và **không nhận URL bên ngoài** — không thể vô tình bắn tải vào production. Server được đóng trong `finally`.
+Script lắp app thật với kho bộ nhớ, mở cổng ngẫu nhiên trên `127.0.0.1` và **không nhận URL bên ngoài** — không thể vô tình bắn tải vào production. Server được đóng trong `finally`.
 
 ### 6.1. Lắp hệ thống và cố định thời gian nghiệp vụ
 
@@ -190,7 +190,7 @@ const server = createApp(system.deps, { logErrors: false }).listen(0, '127.0.0.1
 await once(server, 'listening');
 ```
 
-`FixedClock` cố định **giờ nghiệp vụ** để giá không đổi. Nó không được dùng để đo thời gian: đồng hồ đứng yên thì mọi latency bằng 0. Hai loại đồng hồ có hai vai trò khác nhau.
+`FixedClock` cố định **giờ nghiệp vụ** để giá không đổi. Nó không được dùng để đo thời gian: đồng hồ đứng yên thì mọi latency bằng 0.
 
 ### 6.2. Một mẫu đo: thời gian, status, oracle và lỗi
 
@@ -215,10 +215,10 @@ async function sample() {
 }
 ```
 
-Ba chi tiết đáng chú ý:
+Ba chi tiết cần chú ý:
 
-- `performance.now()` là đồng hồ đơn điệu cho khoảng thời gian, không bị ảnh hưởng khi giờ hệ thống bị chỉnh.
-- Lỗi transport rơi vào `catch` nhưng **vẫn trả về một mẫu** có `ms`, `valid: false` và tên lỗi. Request timeout không bị bỏ khỏi phân bố mà không báo lỗi.
+- `performance.now()` là đồng hồ đơn điệu, không bị ảnh hưởng khi giờ hệ thống bị chỉnh.
+- Lỗi transport rơi vào `catch` nhưng **vẫn trả về một mẫu** có `ms`, `valid: false` và tên lỗi. Request timeout không bị lặng lẽ bỏ khỏi phân bố.
 - `AbortSignal.timeout(2_000)` là deadline, không phải trần của số đo. Nếu event loop nghẽn, thời gian quan sát có thể vượt 2.000 ms; script không «kẹp» số đo về 2.000.
 
 ### 6.3. Warm-up có oracle, reset, rồi đo
@@ -231,7 +231,7 @@ for (let i = 0; i < 50; i++) {
 await system.reset(); // warm-up không làm tăng kích thước dataset đo
 ```
 
-Nếu warm-up sai oracle, script dừng ngay. Đo thời gian của một hệ thống đang trả sai là đo nhầm đối tượng.
+Warm-up sai oracle thì script dừng ngay: đo thời gian của một hệ thống đang trả sai là đo nhầm đối tượng.
 
 ### 6.4. Tính percentile và gate
 
@@ -245,19 +245,19 @@ const failures = samples.filter(s => !s.valid).length;
 
 ### 6.5. Đầu ra và tài nguyên
 
-Script ghi `reports/performance/sys07-baseline.json` (thư mục `reports/` không được commit) gồm thời điểm UTC, thông tin máy, bảng thiết kế, summary và toàn bộ 900 mẫu. Bản evidence của lượt được báo cáo là `baseline-observed.json`, commit cùng lab; chạy lại **không** ghi đè nó.
+Script ghi `reports/performance/sys07-baseline.json` (thư mục `reports/` không được commit) gồm thời điểm UTC, thông tin máy, bảng thiết kế, summary và toàn bộ 900 mẫu. Bằng chứng của lượt báo cáo gốc là `baseline-observed.json`, commit cùng lab; chạy lại **không** ghi đè nó.
 
-CPU là delta user + system của **cả tiến trình** (client và server) — `combinedCpuMs`. RSS là ảnh chụp đầu và cuối mỗi vòng, **không** phải peak. Không suy ra memory leak chỉ từ việc RSS tăng: V8 có thể giữ bộ nhớ đã cấp phát, và mỗi vòng tích luỹ 300 quote theo thiết kế. Muốn chứng minh leak cần chạy dài, có bằng chứng heap/GC và so ở trạng thái dữ liệu tương đương.
+CPU là delta user + system của **cả tiến trình** (client và server) — `combinedCpuMs`. RSS là ảnh chụp đầu và cuối mỗi vòng, **không** phải peak. Không suy ra memory leak chỉ từ việc RSS tăng: V8 có thể giữ bộ nhớ đã cấp phát, và mỗi vòng tích luỹ 300 quote theo thiết kế.
 
 ## 7. Kết quả thực đo và cách đọc
 
-### 7.1. Expected
+### 7.1. Mong đợi
 
-Script hoàn tất exit 0; 3 vòng × 300 mẫu; 0 lỗi oracle; gate minh hoạ đạt cả 3 vòng; file JSON có đủ mẫu. Script **không** assert các con số latency cụ thể — chúng là quan sát, không phải kỳ vọng.
+Script hoàn tất exit 0; 3 vòng × 300 mẫu; 0 lỗi oracle; gate minh hoạ đạt cả 3 vòng; file JSON có đủ mẫu. Script **không** assert các con số latency cụ thể — chúng là quan sát, không phải mong đợi.
 
-### 7.2. Observed — lượt được báo cáo
+### 7.2. Thực tế — báo cáo gốc (13/11/2026)
 
-Lượt ngày 13/11/2026, kết thúc 20:52:47 giờ Việt Nam (13:52:47 UTC trong JSON). Windows 10.0.26300, Node v24.15.0, Intel Core i7-10700K 3,80 GHz, 16 logical CPU, RAM ~31,9 GiB. Không ghi nhận CPU nền của ứng dụng khác — đó là một hạn chế kiểm soát môi trường. Lệnh exit 0; 1.050 request (150 warm-up + 900 đo), không lỗi. `npm run typecheck` đạt.
+Lượt chạy kết thúc 20:52:47 giờ Việt Nam (13:52:47 UTC trong JSON). Windows 10.0.26300, Node v24.15.0, Intel Core i7-10700K 3,80 GHz, 16 logical CPU, RAM ~31,9 GiB. Không ghi nhận CPU nền của ứng dụng khác — một hạn chế về kiểm soát môi trường. Lệnh exit 0; 1.050 request (150 warm-up + 900 đo), không lỗi. `npm run typecheck` đạt.
 
 | Vòng | Mẫu | Lỗi | p50 ms | p95 ms | p99 ms | Max ms | Thời gian đo ms | Valid RPS | CPU chung ms |
 |---|---:|---:|---:|---:|---:|---:|---:|---:|---:|
@@ -269,19 +269,19 @@ RSS đầu/cuối (byte): vòng 1 139.264.000 / 164.614.144; vòng 2 171.724.800
 
 ### 7.3. Đọc bảng mà không nói quá
 
-**Gate đạt, nhưng cửa sổ rất ngắn.** Mỗi vòng chỉ kéo dài 0,15–0,23 giây. Các giá trị RPS là số *chuẩn hoá* từ một cửa sổ ngắn; chúng không chứng minh duy trì được tốc độ đó trong một giây, một giờ, hay với DB và mạng thật. p95 dưới 1,2 ms không chứng minh gì về R-NFR-03.
+**Gate đạt, nhưng cửa sổ rất ngắn.** Mỗi vòng chỉ kéo dài 0,15–0,23 giây. Các giá trị RPS là số *chuẩn hoá* từ cửa sổ đó; chúng không chứng minh duy trì được tốc độ đó trong một giây, một giờ, hay với DB và mạng thật.
 
-**Vòng sau nhanh hơn — chưa biết vì sao.** p50 giảm từ 0,688 xuống 0,440 ms. Có thể do JIT, tái sử dụng kết nối, cache hoặc nhiễu máy; dữ liệu này chưa cô lập nguyên nhân nên không kết luận «phần mềm đã tối ưu». Cũng không được chọn riêng vòng 3 làm đại diện rồi bỏ hai vòng còn lại.
+**Vòng sau nhanh hơn — chưa biết vì sao.** p50 giảm từ 0,688 xuống 0,440 ms. Có thể do JIT, tái sử dụng kết nối, cache hoặc nhiễu máy; dữ liệu chưa cô lập nguyên nhân nên không kết luận «phần mềm đã tối ưu». Cũng không chọn riêng vòng 3 làm đại diện.
 
-**Đuôi tồn tại dù median nhỏ.** Max 5–6 ms, gấp gần 10 lần p50. Tính lại từ `baseline-observed.json`: mỗi vòng có 2–3 mẫu vượt 2 ms. Với 300 mẫu, p99 chỉ là mẫu thứ 297 — thêm hoặc bớt một mẫu chậm là p99 đổi rõ rệt.
+**Đuôi tồn tại dù median nhỏ.** Max 5–6 ms, gấp khoảng 8–14 lần p50 của cùng vòng. Tính lại từ `baseline-observed.json`: mỗi vòng có 2–3 mẫu vượt 2 ms. Với 300 mẫu, thêm hoặc bớt một mẫu chậm là p99 đổi rõ rệt.
 
-**Ví dụ không lấy trung bình p95 — bằng chính dữ liệu này.** Trung bình ba p95 là (1,139 + 0,950 + 0,691) / 3 ≈ **0,927 ms**. Gộp 900 mẫu gốc rồi tính nearest-rank, p95 thật của cả lượt là **0,990 ms**. Chênh lệch ở đây nhỏ vì ba vòng gần nhau; khi các vòng có phân bố khác hẳn (ví dụ một vòng 10 ms, một vòng 100 ms), trung bình các p95 có thể sai rất xa. Hai con số trên được tính lại từ file evidence đã lưu, không phải phép đo mới.
+**Ví dụ không lấy trung bình p95 — bằng chính dữ liệu này.** Trung bình ba p95 là (1,139 + 0,950 + 0,691) / 3 ≈ **0,927 ms**. Gộp 900 mẫu gốc rồi tính nearest-rank, p95 thật của cả lượt là **0,990 ms**. Chênh lệch nhỏ vì ba vòng gần nhau; khi các vòng có phân bố khác hẳn, trung bình các p95 có thể sai rất xa (xem Bài 2). Hai con số trên được tính lại từ file bằng chứng đã lưu, không phải phép đo mới.
 
-**CPU lớn hơn wall time không phải lỗi.** Vòng 1 đo 226 ms wall nhưng `combinedCpuMs` 313: tiến trình Node có hoạt động trên nhiều thread (GC, I/O). Và đó là CPU của client **cộng** server — không phải «server tốn 313 ms CPU».
+**CPU lớn hơn wall time không phải lỗi.** Vòng 1 đo 226 ms wall nhưng `combinedCpuMs` 313: tiến trình Node chạy trên nhiều thread (GC, I/O). Đó cũng là CPU của client **cộng** server, không phải «server tốn 313 ms CPU».
 
-### 7.4. Observed — chạy lại khi biên tập bài, không dùng để so sánh
+### 7.4. Thực tế — chạy lại khi biên tập (13/11/2026)
 
-Khi viết bài (13/11/2026, 15:47 UTC; Windows, Node v22.18.0), script được chạy lại **chỉ để xác nhận nó còn thực thi**. Lúc đó máy đang chạy song song nhiều bộ test khác, tức vi phạm entry criteria của chính bài này:
+Lượt này (15:47 UTC; Windows, Node v22.18.0) **chỉ để xác nhận script còn thực thi**, không dùng để so sánh. Lúc đó máy đang chạy song song nhiều bộ test khác — vi phạm entry criteria của chính bài này:
 
 | Vòng | Mẫu | Lỗi | p95 ms | Valid RPS | Gate |
 |---|---:|---:|---:|---:|---|
@@ -289,7 +289,7 @@ Khi viết bài (13/11/2026, 15:47 UTC; Windows, Node v22.18.0), script được
 | 2 | 300 | 0 | 1,978 | 917 | đạt |
 | 3 | 300 | 0 | 3,226 | 590 | đạt |
 
-Exit 0, không lỗi oracle — script vẫn đúng. Nhưng p95 cao gấp 2–4 lần và RPS thấp hơn một nửa so với lượt được báo cáo. Đây **không** phải regression của phần mềm: đã đổi cùng lúc phiên bản Node và mức tải nền. Chính sự chênh lệch này là bài học: hai lượt chỉ so được khi workload, cấu hình và môi trường giống nhau, và khi tải nền được kiểm soát. Bảng 7.2 là bằng chứng của bài; bảng 7.4 chỉ là kiểm tra khả năng thực thi.
+Exit 0, không lỗi oracle — script vẫn đúng. Nhưng p95 cao gấp khoảng 2–5 lần và RPS chỉ còn khoảng 30–58% so với báo cáo gốc. Chưa thể coi đây là regression của phần mềm: phiên bản Node và tải nền đã đổi cùng lúc, nên không tách được nguyên nhân. Bài học: hai lượt chỉ so được khi workload, cấu hình, môi trường và tải nền giống nhau. Bảng 7.2 là bằng chứng của bài; bảng 7.4 chỉ kiểm khả năng thực thi.
 
 ## 8. Điều tra và ra quyết định
 
@@ -302,7 +302,7 @@ Exit 0, không lỗi oracle — script vẫn đúng. Nhưng p95 cao gấp 2–4 
 | Timeout tăng | Service hoặc generator nghẽn | Event loop delay, socket, hàng đợi DB, tải thực đạt |
 | Hai lượt lệch nhau nhiều | Môi trường hoặc cấu hình khác | Diff phiên bản runtime, tải nền, cấu hình máy |
 
-Ví dụ một kết luận đúng mức cho lượt 7.2:
+Một kết luận đúng mức cho lượt 7.2:
 
 > Trong lab bộ nhớ, loopback, closed model concurrency 1, 900 mẫu `POST /api/quotes` đều đạt oracle, p95 từng vòng 0,69–1,14 ms, đạt gate minh hoạ. Kết quả là baseline phương pháp; không đánh giá R-NFR-03, không phải công suất, chưa kiểm DB server, mạng thật hay tải đồng thời.
 
@@ -316,23 +316,23 @@ Các mục dưới đây là **thiết kế mở rộng chưa được thực th
 
 Tình huống: đội muốn biết `POST /api/quotes` có đạt R-NFR-03 không trước đợt khuyến mãi.
 
-Cách giải: tách load generator khỏi server (máy hoặc ít nhất tiến trình riêng); dùng PostgreSQL server với kích thước dữ liệu, index và connection pool đại diện; thay bản đồ giả bằng MapViet sandbox hoặc một stub có độ trễ được đo từ thực tế và ghi rõ là stub. Ghi phiên bản build, cấu hình, CPU/RAM, mạng, trạng thái cache, dependency. Chạy đủ dài để thấy steady state, và kiểm generator **không** bão hoà trước server — nếu CPU generator 100%, con số là giới hạn của generator.
+Cách làm: tách load generator khỏi server (máy hoặc ít nhất tiến trình riêng); dùng PostgreSQL server với kích thước dữ liệu, index và connection pool đại diện; thay bản đồ giả bằng MapViet sandbox hoặc một stub có độ trễ đo từ thực tế, ghi rõ là stub. Ghi phiên bản build, cấu hình, CPU/RAM, mạng, trạng thái cache, dependency. Chạy đủ dài để thấy steady state và kiểm generator **không** bão hoà trước server: nếu CPU generator 100%, con số là giới hạn của generator.
 
 ### 9.2. SLI/SLO và workload mix
 
-Một mục tiêu dùng được có đối tượng, cửa sổ thời gian, mức tải và tiêu chí lỗi. Ví dụ *giả định* để luyện viết: «báo giá hợp lệ p95 < 300 ms ở 50 arrival/giây trong 10 phút, lỗi < 1%». Các số này không phải cam kết sản phẩm. Khi có nhiều loại request (ride/parcel/food), đo và báo theo từng nhóm: percentile gộp có thể che một nhóm ít request nhưng rất chậm — ví dụ food với danh sách món dài.
+Một mục tiêu dùng được phải có đối tượng, cửa sổ thời gian, mức tải và tiêu chí lỗi. Ví dụ *giả định* để luyện viết: «báo giá hợp lệ p95 < 300 ms ở 50 arrival/giây trong 10 phút, lỗi < 1%». Các số này không phải cam kết sản phẩm. Khi workload có nhiều loại request (ride/parcel/food), đo và báo theo từng nhóm: percentile gộp có thể che một nhóm ít request nhưng rất chậm — ví dụ food với danh sách món dài.
 
 ### 9.3. Độ tin cậy thống kê
 
-Ba vòng ngắn không đủ ước lượng tail latency ổn định. Tăng thời lượng và số mẫu, lặp ở điều kiện có kiểm soát (nhiều tiến trình độc lập, có thể nhiều máy), công bố biến thiên giữa các lượt. Không gộp số của các cấu hình khác nhau thành một SLO. So trước/sau một thay đổi cần cùng workload và môi trường; nếu đổi nhiều yếu tố một lúc như mục 7.4, không thể quy nguyên nhân cho yếu tố nào.
+Ba vòng ngắn không đủ ước lượng tail latency ổn định. Hãy tăng thời lượng và số mẫu, lặp trong điều kiện có kiểm soát (nhiều tiến trình độc lập, có thể nhiều máy) và công bố biến thiên giữa các lượt. Không gộp số của các cấu hình khác nhau thành một SLO. So trước/sau một thay đổi cần cùng workload và môi trường; đổi nhiều yếu tố một lúc như mục 7.4 thì không quy được nguyên nhân.
 
 ### 9.4. Little's Law để kiểm tính hợp lý
 
-Trong điều kiện ổn định, L ≈ λW: số request trung bình trong hệ thống bằng throughput nhân thời gian trung bình trong cùng ranh giới. Với closed concurrency 1 và không think time, L = 1 nên λ ≈ 1/W. Kiểm bằng vòng 3: mean latency tính từ mẫu gốc là 0,515 ms, 1/0,000515 ≈ 1.940/giây — khớp `validRps` 1.938. Nếu hai số này lệch xa, có thể script tính sai cửa sổ hoặc có thời gian chết giữa các request. Little's Law dùng để phát hiện số liệu không nhất quán, không thay phép đo, và càng không cho phép nhân 1.938 với 16 CPU để «dự đoán công suất».
+Trong điều kiện ổn định, L ≈ λW: số request trung bình trong hệ thống bằng throughput nhân thời gian trung bình trong cùng ranh giới. Với closed concurrency 1 và không think time, L = 1 nên λ ≈ 1/W. Kiểm bằng vòng 3: mean latency tính từ mẫu gốc là 0,515 ms, 1/0,000515 ≈ 1.940/giây — khớp `validRps` 1.938. Nếu hai số lệch xa, có thể script tính sai cửa sổ hoặc có thời gian chết giữa các request. Little's Law giúp phát hiện số liệu không nhất quán; nó không thay phép đo, càng không cho phép nhân 1.938 với 16 CPU để «dự đoán công suất».
 
 ### 9.5. Profiling và tối ưu có kiểm chứng
 
-Khi đã xác định một nút thắt, thay **một** yếu tố, chạy lại cùng bài đo và chạy lại functional/regression. Một «tối ưu» bỏ bước lưu quote sẽ làm latency đẹp hơn nhưng phá R-QUOTE-01 và luồng đặt từ quote. Theo dõi đồng thời độ đúng, tail latency, error rate và tài nguyên. Không dùng thời gian chạy suite Vitest làm proxy cho latency sản phẩm.
+Khi đã xác định nút thắt, thay **một** yếu tố, chạy lại cùng phép đo và cả functional/regression. Một «tối ưu» bỏ bước lưu quote làm latency đẹp hơn nhưng phá R-QUOTE-01 và luồng đặt từ quote. Theo dõi đồng thời độ đúng, tail latency, error rate và tài nguyên. Không dùng thời gian chạy suite Vitest làm proxy cho latency sản phẩm.
 
 ## 10. Anti-pattern, giới hạn và đánh đổi
 
@@ -351,7 +351,7 @@ Khi đã xác định một nút thắt, thay **một** yếu tố, chạy lại
 <p>Lab không có DB server, MapViet, TLS, mạng WAN, payment provider ngoài, nhiều người dùng hay tải mở. Không đo thời gian khởi động, không đo peak RSS, không chạy steady state dài, không chạy trên nhiều tiến trình/máy độc lập. Client và server chung tiến trình nên CPU/RSS không tách được. Không thực hiện Load hay Stress Test. Không có lỗi sản phẩm được phát hiện ở lượt đo — điều đó <b>không</b> có nghĩa là không có bottleneck.</p>
 </div>
 
-**Đánh đổi chi phí/phạm vi:** baseline này chạy dưới một giây và không cần hạ tầng, nên phù hợp để luyện phương pháp và phát hiện thay đổi thô (ví dụ một commit làm p95 local tăng 10 lần). Đổi lại, nó không trả lời được câu hỏi nào về production. Một phép đo đại diện cần môi trường riêng, dữ liệu, thời gian chạy và người đọc kết quả — tốn hơn nhiều, nên chỉ làm khi câu hỏi đáng giá đó.
+**Đánh đổi chi phí/phạm vi:** baseline này chạy dưới một giây, không cần hạ tầng — hợp để luyện phương pháp và phát hiện thay đổi thô (ví dụ một commit làm p95 local tăng 10 lần), nhưng không trả lời câu hỏi nào về production. Phép đo đại diện cần môi trường riêng, dữ liệu, thời gian chạy và người đọc kết quả, nên chỉ làm khi câu hỏi xứng đáng.
 
 ## 11. Bài tập và câu hỏi tự kiểm
 
@@ -408,11 +408,11 @@ Khi đã xác định một nút thắt, thay **một** yếu tố, chạy lại
 <p>Bỏ attempt lỗi — thường là timeout, tức những mẫu chậm nhất — làm phân bố trông đẹp hơn trải nghiệm thật. Giữ chúng trong phân bố và tính riêng error rate cho thấy cả tốc độ lẫn chất lượng.</p>
 </details>
 
-**Câu 4.** Lượt chạy lại ở mục 7.4 có p95 cao gấp 2–4 lần. Có nên mở defect hiệu năng không?
+**Câu 4.** Lượt chạy lại ở mục 7.4 có p95 cao gấp khoảng 2–5 lần. Có nên mở defect hiệu năng không?
 
 <details>
 <summary><b>Đáp án</b></summary>
-<p>Chưa. Hai lượt khác phiên bản Node và lượt sau chạy khi máy đang tải nặng — vi phạm entry criteria. Cần chạy lại trong điều kiện có kiểm soát, cùng cấu hình với lượt gốc, nhiều lần. Chỉ khi chênh lệch vẫn còn mới điều tra như một regression.</p>
+<p>Chưa. Hai lượt khác phiên bản Node và lượt sau chạy khi máy đang tải nặng — vi phạm entry criteria. Cần chạy lại trong điều kiện có kiểm soát, cùng cấu hình với lượt gốc, nhiều lần. Chênh lệch vẫn còn thì mới điều tra như regression.</p>
 </details>
 
 **Câu 5.** Trong closed model, khi server chậm đi gấp đôi, tốc độ gửi của generator thay đổi thế nào, và vì sao điều đó nguy hiểm khi mục tiêu là kiểm arrival rate?
@@ -427,9 +427,9 @@ Khi đã xác định một nút thắt, thay **một** yếu tố, chạy lại
 Các nguồn ngoài được tra cứu 13/11/2026.
 
 - Grafana k6 — Load test types: https://grafana.com/docs/k6/latest/testing-guides/test-types/ (phân biệt smoke tải thấp, average-load, stress, soak, spike, breakpoint).
-- Grafana k6 — Metrics: https://grafana.com/docs/k6/latest/using-k6/metrics/ (nhóm metric request/error/duration; để đối chiếu với ranh giới đo của lab).
+- Grafana k6 — Metrics: https://grafana.com/docs/k6/latest/using-k6/metrics/ (nhóm metric request/error/duration, đối chiếu với ranh giới đo của lab).
 - Grafana k6 — Open and closed models: https://grafana.com/docs/k6/latest/using-k6/scenarios/concepts/open-vs-closed/ (quan hệ giữa thời gian iteration và tốc độ gửi).
-- Node.js — Performance measurement APIs: https://nodejs.org/api/perf_hooks.html (`performance.now()`); lab đã chạy trên Node v24.15.0 (lượt báo cáo) và v22.18.0 (lượt kiểm thực thi).
+- Node.js — Performance measurement APIs: https://nodejs.org/api/perf_hooks.html (`performance.now()`).
 - ISTQB, *Certified Tester Foundation Level Syllabus v4.0.1* (2024): https://istqb.org/wp-content/uploads/2024/11/ISTQB_CTFL_Syllabus_v4.0.1.pdf — thuật ngữ test type phi chức năng; thiết kế đo trong bài là hướng dẫn thực tiễn của series.
 - Lab Tới Nơi: `SPEC.md` (R-API-07, R-FARE-01…08, R-QUOTE-01, R-NFR-03, R-NFR-07), `baseline.ts`, `baseline-observed.json` — https://github.com/rickymta/antblog/tree/main/examples/toi-noi-testing/articles/system-testing-performance-test
 - Bài liên quan: [Non-functional testing tổng quan](/articles/non-functional-testing-tong-quan) · [SYS-01 Smoke Test](/articles/system-testing-smoke-test) · [SYS-03 Functional Test](/articles/system-testing-functional-test) · [SYS-06 Regression Test](/articles/system-testing-regression-test)

@@ -1,14 +1,14 @@
 ---
 slug: system-testing-stress-test
 title: "Stress Test: quan sát Tới Nơi suy giảm thế nào khi tải vượt mức dự kiến"
-summary: "Bài thực hành stress testing trên lab Tới Nơi: phân biệt stress với load, spike, breakpoint và recovery; xác định thuộc tính phải giữ khi quá tải; thiết kế profile bước 30 → 150 → 600 → 30 yêu cầu/giây có trần in-flight, deadline và điều kiện dừng; đọc kết quả thực đo mà không biến 'chưa thấy điểm gãy' thành 'capacity 600/s'."
+summary: "Stress testing trên lab Tới Nơi: phân biệt stress với load, spike, breakpoint, recovery; xác định thuộc tính phải giữ khi quá tải; thiết kế profile bước 30 → 150 → 600 → 30 request/giây có trần, deadline, điều kiện dừng; đọc kết quả mà không biến «chưa thấy điểm gãy» thành «capacity 600/s»."
 category: testing
 level: advanced
 tags: [testing, sys-09, stress-testing, performance-testing, open-model, backpressure, graceful-degradation, percentile, test-oracle, toi-noi]
 language: vi
 ---
 
-Tối thứ Sáu, Tới Nơi chạy khuyến mãi «giảm 50% chuyến đầu tuần». Lượng báo giá tăng gấp nhiều lần so với giờ cao điểm thường. Có ba kiểu hỏng rất khác nhau có thể xảy ra: hệ thống trả chậm dần, hệ thống bắt đầu từ chối yêu cầu, hoặc — tệ nhất — vẫn trả 200 nhưng giá sai. Khi chiến dịch kết thúc, traffic giảm nhưng hàng đợi có thể vẫn còn. Bài này trả lời: **làm sao thiết kế một thí nghiệm tải cao có ranh giới, biết trước điều gì được phép xấu đi và điều gì tuyệt đối không, rồi đọc kết quả mà không kết luận quá những gì đã đo.** Lab là một profile bước 30 → 150 → 600 → 30 yêu cầu/giây vào `POST /api/quotes`, có trần, deadline và điều kiện dừng, kèm kết quả thực đo ngày 13/11/2026.
+Tối thứ Sáu, Tới Nơi chạy khuyến mãi «giảm 50% chuyến đầu tuần», lượng báo giá tăng gấp nhiều lần giờ cao điểm thường. Có ba kiểu hỏng rất khác nhau: hệ thống trả chậm dần, bắt đầu từ chối request, hoặc — tệ nhất — vẫn trả 200 nhưng giá sai. Khi chiến dịch kết thúc, traffic giảm nhưng hàng đợi có thể vẫn còn. Bài này trả lời: **làm sao thiết kế thí nghiệm tải cao có ranh giới, biết trước điều gì được phép xấu đi và điều gì tuyệt đối không, rồi đọc kết quả mà không kết luận quá những gì đã đo.** Lab là một profile bước 30 → 150 → 600 → 30 request/giây vào `POST /api/quotes`, có trần, deadline và điều kiện dừng, kèm kết quả từ báo cáo gốc ngày 13/11/2026.
 
 <div class="tkh-callout">
 <span class="tkh-callout-title">Thông tin bài · SYS-09</span>
@@ -28,17 +28,17 @@ Tối thứ Sáu, Tới Nơi chạy khuyến mãi «giảm 50% chuyến đầu t
 
 ### 1.1. Câu hỏi thật sự của stress test
 
-Câu hỏi «server có chết không?» là câu hỏi kém. Một hệ thống không chết nhưng trả giá 0 đồng cho mọi chuyến còn nguy hiểm hơn một hệ thống trả 503 rõ ràng. Với Tới Nơi trong đêm khuyến mãi, đội vận hành cần biết:
+«Server có chết không?» là câu hỏi kém. Hệ thống không chết nhưng trả giá 0 đồng cho mọi chuyến còn nguy hiểm hơn hệ thống trả 503 rõ ràng. Trong đêm khuyến mãi, đội vận hành Tới Nơi cần biết:
 
 - **Suy giảm ở đâu:** latency tăng ở endpoint nào, từ mức tải nào; lỗi xuất hiện dưới dạng gì.
 - **Giữ được gì:** giá báo vẫn đúng, không ghi trùng chuyến, không trừ tiền sai — kể cả khi chậm.
-- **Trở lại thế nào:** khi tải giảm, hệ thống có quay về trạng thái phục vụ bình thường không, sau bao lâu, còn backlog không.
+- **Trở lại thế nào:** khi tải giảm, hệ thống có về lại trạng thái phục vụ bình thường không, sau bao lâu, còn backlog không.
 
-Stress test là thí nghiệm có chủ đích để quan sát ba điều đó **ở mức tải cao hơn mức thường đã xác định**, với giới hạn an toàn rõ ràng. Stress test không phải cuộc thi làm sập máy.
+Stress test là thí nghiệm có chủ đích để quan sát ba điều đó **ở mức tải cao hơn mức thường đã xác định**, với giới hạn an toàn rõ ràng — không phải cuộc thi làm sập máy.
 
 ### 1.2. Đối tượng và điều kiện tiên quyết
 
-Bài dành cho QA/SDET và developer đã đọc [SYS-07](/articles/system-testing-performance-test) và [SYS-08](/articles/system-testing-load-test): hiểu p50/p95/p99, phân biệt offered load với achieved load, open model (lập lịch theo thời gian, không chờ response) với closed model (số người dùng ảo cố định), và hiểu vì sao dropped iteration ở generator khác với lỗi server.
+Bài dành cho QA/SDET và developer đã đọc [SYS-07](/articles/system-testing-performance-test) và [SYS-08](/articles/system-testing-load-test): hiểu p50/p95/p99, phân biệt offered load với achieved load, open model (lập lịch theo thời gian, không chờ response) với closed model (số VU cố định), và vì sao slot bị drop ở generator khác với lỗi server.
 
 Cần Node ≥ 22.12, dependency của lab đã cài bằng `npm ci`. Không cần PostgreSQL ngoài, không cần k6: lab dùng một script Node tự viết với PGlite.
 
@@ -48,14 +48,14 @@ Sau bài này, bạn có thể:
 
 1. Phân biệt stress với load, spike, soak, breakpoint và recovery test bằng **mục tiêu**, không bằng con số tải.
 2. Viết ra trước khi chạy: thuộc tính bắt buộc giữ (oracle nghiệp vụ), thuộc tính được phép suy giảm (latency, drop có kiểm soát), và điều kiện dừng.
-3. Đọc một báo cáo stress theo thứ tự đúng: `planned = sent + dropped` → lỗi trên request đã gửi → lý do drop → rồi mới đến latency và throughput.
+3. Đọc một báo cáo stress theo thứ tự đúng: `planned = sent + dropped` → lỗi trên request đã gửi → lý do drop → latency và throughput.
 4. Giải thích vì sao «600/s không lỗi» **không** được viết thành «capacity 600/s», và vì sao «health 200 sau tải» không phải bằng chứng phục hồi.
 
 ## 2. Stress, spike, breakpoint và những thứ dễ nhầm
 
 ### 2.1. Định nghĩa dùng trong series
 
-**Stress testing** đánh giá hành vi của hệ thống dưới tải cao hơn mức thường đã xác định. Tài liệu k6 nhấn mạnh hai điểm mà bài này giữ nguyên: phải có baseline/load test trước để biết «bình thường» là gì, và mức tăng phụ thuộc rủi ro của hệ thống — không có tỷ lệ nhân cố định nào đúng cho mọi nơi.
+**Stress testing** đánh giá hành vi của hệ thống dưới tải cao hơn mức thường đã xác định. Tài liệu k6 nhấn mạnh hai điểm: phải có baseline/load test trước để biết «bình thường» là gì, và mức tăng phụ thuộc rủi ro của hệ thống, không có tỷ lệ nhân cố định.
 
 | Loại kiểm | Mục tiêu | Yếu tố quyết định |
 |---|---|---|
@@ -66,27 +66,27 @@ Sau bài này, bạn có thể:
 | Breakpoint | Tìm giới hạn theo tiêu chí định trước | Tăng đủ xa, generator đủ mạnh, tiêu chí dừng rõ |
 | Recovery | Khả năng phục hồi sau sự cố | Failure model, thời gian, toàn vẹn dữ liệu (SYS-14) |
 
-Lab của bài là **stress dạng bước có giới hạn**: bốn mức tải cố định, mỗi mức drain xong mới sang mức sau. Lab này không phải ramp tuyến tính, không phải spike production và không phải breakpoint.
+Lab của bài là **stress dạng bước có giới hạn**: bốn mức tải cố định, mỗi mức drain xong mới sang mức sau — không phải ramp tuyến tính, spike production hay breakpoint.
 
 ### 2.2. Mức «bình thường» đến từ đâu
 
-Mức 30/s là **normal giả định** kế thừa từ bài Load (profile 10 → 30 → 10/s), không phải telemetry production của Tới Nơi. SPEC có R-NFR-07 nêu mức tải tham chiếu của hệ thống đích — khoảng 70 chuyến tạo mới/giây lúc cao điểm — và ghi rõ đó «không phải mục tiêu, để dựng mô hình tải». Hai con số này không mâu thuẫn: lab chỉ có một endpoint báo giá trên một tiến trình, nên dùng mức nhỏ hơn và tự nhận là giả định.
+Mức 30/s là **normal giả định** kế thừa từ SYS-08 (profile 10 → 30 → 10/s), không phải telemetry production của Tới Nơi. SPEC có R-NFR-07 nêu mức tải tham chiếu của hệ thống đích — khoảng 70 chuyến tạo mới/giây lúc cao điểm — và ghi rõ đó «không phải mục tiêu, để dựng mô hình tải». Hai con số không mâu thuẫn: lab chỉ có một endpoint báo giá trên một tiến trình nên dùng mức nhỏ hơn, ghi rõ là giả định.
 
 150/s (gấp 5) và 600/s (gấp 20) được chọn để **học cách quan sát** mức cao hơn trong một máy, không phải để tuyên bố giới hạn của Tới Nơi.
 
 ### 2.3. «Suy giảm có kiểm soát» là một hợp đồng
 
-Khi quá tải, hệ thống có nhiều cách phản ứng hợp lệ — miễn là có hợp đồng:
+Khi quá tải, hệ thống có nhiều cách phản ứng hợp lệ, miễn là có hợp đồng:
 
-- **429** nghĩa là client vượt quota của mình; SPEC có quota cho tạo chuyến (R-API-13, 5 yêu cầu/60 giây/khách, kèm `Retry-After`), **không** có quota cho báo giá.
+- **429** nghĩa là client vượt quota của mình; SPEC có quota cho tạo chuyến (R-API-13, 5 request/60 giây/khách, kèm `Retry-After`), **không** có quota cho báo giá.
 - **503** nghĩa là service tạm không nhận thêm; client nên lùi lại.
-- **Timeout phía client** không cho biết server đã thực hiện thao tác hay chưa. Với báo giá thì vô hại; với đặt chuyến hay thanh toán thì phải đối soát.
+- **Timeout phía client** không cho biết server đã thực hiện thao tác hay chưa: vô hại với báo giá, nhưng với đặt chuyến hay thanh toán thì phải đối soát.
 
-Ngược lại, có những thứ **không bao giờ** được coi là «suy giảm chấp nhận được»: tính sai tiền, ghi trùng chuyến, báo thanh toán thành công khi chưa thu. Một stress test thiếu oracle nghiệp vụ sẽ không phân biệt được hai nhóm này.
+Ngược lại, có thứ **không bao giờ** là «suy giảm chấp nhận được»: tính sai tiền, ghi trùng chuyến, báo thanh toán thành công khi chưa thu. Stress test thiếu oracle nghiệp vụ không phân biệt được hai nhóm này.
 
 <div class="tkh-callout tkh-callout--warn">
 <span class="tkh-callout-title">Đừng nhầm với «smoke» của k6</span>
-<p>Trong tài liệu k6, «smoke test» là chạy tải rất thấp để kiểm script trước khi đo. Đó khác với smoke build ở <a href="/articles/system-testing-smoke-test">SYS-01</a>. Tương tự, «recovery» trong bài này chỉ là quan sát sau khi giảm tải; recovery test theo failure model, RTO/RPO và restore nằm ở SYS-14.</p>
+<p>«Smoke test» của k6 là chạy tải rất thấp để kiểm script, khác smoke build ở <a href="/articles/system-testing-smoke-test">SYS-01</a>. Tương tự, «recovery» trong bài này chỉ là quan sát sau khi giảm tải; recovery test theo failure model, RTO/RPO và restore nằm ở SYS-14.</p>
 </div>
 
 ## 3. Test basis, rủi ro và oracle
@@ -102,24 +102,24 @@ Ngược lại, có những thứ **không bao giờ** được coi là «suy gi
 | R-NFR-03 | p95 của `POST /api/quotes` dưới 500 ms (hệ thống đích) |
 | R-API-15 | `GET /api/health` trả 200 `{ "status": "ok" }` |
 
-Oracle tiền 35.000 tính tay từ bảng cước, không gọi lại calculator của sản phẩm. Ngưỡng 500 ms lấy từ R-NFR-03; trong lab nó là **reference envelope**, không phải cam kết hiệu năng của bản lab một tiến trình.
+Oracle tiền 35.000 tính tay từ bảng cước, không gọi lại calculator của sản phẩm. Ngưỡng 500 ms lấy từ R-NFR-03; trong lab nó chỉ là **reference envelope**, không phải cam kết hiệu năng.
 
 ### 3.2. Rủi ro được nhắm tới
 
 1. Dưới tải, response vẫn 200 nhưng nội dung sai (giá, thiếu `quoteId`) — **rủi ro dữ liệu**.
-2. Latency đuôi (p99) tăng nhanh hơn p50 khi số yêu cầu đồng thời tăng — **rủi ro trải nghiệm**.
+2. Latency đuôi (p99) tăng nhanh hơn p50 khi số request đồng thời tăng — **rủi ro trải nghiệm**.
 3. Sau khi giảm tải, hệ thống không về lại mức bình thường — **rủi ro phục hồi**.
-4. Generator không giữ được lịch, khiến báo cáo «server chịu được» trong khi tải thật chưa được gửi — **rủi ro đo sai**.
+4. Generator không giữ được lịch, báo cáo ghi «server chịu được» trong khi tải thật chưa được gửi — **rủi ro đo sai**.
 
-Rủi ro 4 hay bị bỏ qua nhất. Một script closed-model chậm lại cùng server sẽ tự giảm tải và báo «không lỗi».
+Rủi ro 4 hay bị bỏ qua nhất: script closed model chậm lại cùng server sẽ tự giảm tải và báo «không lỗi» — chính là coordinated omission ở SYS-07.
 
-### 3.3. Tiêu chí bắt đầu và kết thúc
+### 3.3. Entry và exit criteria
 
-**Entry:** có kết quả SYS-07/08 trên cùng máy; dependency cài theo lockfile; SUT là server loopback do script tự dựng, không nhận URL ngoài; không chạy song song với tác vụ nặng khác.
+**Entry:** có kết quả SYS-07/08 trên cùng máy; dependency cài theo lockfile; hệ thống đang kiểm (system under test) là server loopback do script tự dựng, không nhận URL ngoài; không chạy song song với tác vụ nặng khác.
 
 **Exit của bài tập** (đúng như mã nguồn): exit code 0 khi (a) không có request lỗi ở bất kỳ bước nào, (b) baseline và return-low nằm trong envelope — không drop, không lỗi, p95 < 500 ms, (c) probe báo giá sau tải đúng oracle, (d) health trả 200. Ở elevated và high, p95 vượt 500 ms hoặc drop được **ghi nhận là suy giảm**, không tự làm exit 1.
 
-Exit 0 vì thế chỉ có nghĩa các điều kiện bắt buộc đã đạt. Exit 0 **không** nói mọi slot tải cao đã được gửi đủ. Nếu mục tiêu release yêu cầu «không drop ở 600/s», phải đưa tiêu chí đó vào gate **trước khi chạy**; đổi tiêu chí sau khi thấy kết quả là làm sai thí nghiệm.
+Vì thế exit 0 chỉ nghĩa là các điều kiện bắt buộc đã đạt, **không** nói mọi slot tải cao đã được gửi đủ. Nếu mục tiêu release yêu cầu «không drop ở 600/s», phải đưa tiêu chí đó vào gate **trước khi chạy**; đổi tiêu chí sau khi thấy kết quả là làm sai thí nghiệm.
 
 ## 4. Thiết kế thí nghiệm có ranh giới
 
@@ -127,7 +127,7 @@ Exit 0 vì thế chỉ có nghĩa các điều kiện bắt buộc đã đạt. 
 
 | Mục | Thiết kế |
 |---|---|
-| SUT | Express + use case + repository + PGlite, cùng tiến trình với generator |
+| Hệ thống đang kiểm | Express + use case + repository + PGlite, cùng tiến trình với generator |
 | Profile | baseline 30/s×3s → elevated 150/s×4s → high 600/s×4s → return-low 30/s×3s |
 | Quy mô | 3.180 slots, cộng 20 warm-up, một quote probe cuối và một health |
 | Request | C001, ride SG bike 5 km, không voucher, 09:00 giờ VN (FixedClock), không mưa |
@@ -169,18 +169,18 @@ Exit 0 vì thế chỉ có nghĩa các điều kiện bắt buộc đã đạt. 
 <figcaption><b>Hình 1 · Profile bước và guard của lab SYS-09.</b> Mỗi bậc drain hết request đang chạy rồi mới sang bậc sau, nên timeline thực dài hơn 14 giây theo lịch. Chiều cao các bậc chỉ minh hoạ tương đối.</figcaption>
 </figure>
 
-Hai hệ quả của thiết kế cần nói thẳng:
+Hai hệ quả của thiết kế:
 
-- **Drain giữa các bước** làm thí nghiệm dễ đọc (mỗi bucket chỉ chứa request của bước đó) nhưng che mất backlog liên tục. Đây không phải ramp không gián đoạn.
-- **Safety stop dùng chung bộ đếm lỗi toàn cục.** Nếu đã kích hoạt ở bước high, các slot return-low cũng bị bỏ; probe cuối vẫn chạy một lần nhưng không thay thế được phase giảm tải.
+- **Drain giữa các bước** làm thí nghiệm dễ đọc (mỗi bucket chỉ chứa request của bước đó) nhưng che mất backlog liên tục.
+- **Safety stop dùng chung bộ đếm lỗi toàn cục.** Nếu kích hoạt ở bước high, các slot return-low cũng bị bỏ; probe cuối vẫn chạy nhưng không thay được phase giảm tải.
 
 ### 4.2. Bảng test case
 
-Bản nháp chỉ mô tả các bước; bài này đặt ID để dễ báo cáo. Mọi test case chạy trong một lần thực thi script.
+Mọi test case chạy trong một lần thực thi script.
 
-| ID | Requirement / rủi ro | Precondition | Input | Action | Expected | Cleanup |
+| ID | Requirement / rủi ro | Precondition | Input | Action | Mong đợi | Cleanup |
 |---|---|---|---|---|---|---|
-| ST-01 | Script và SUT sẵn sàng (rủi ro đo sai) | Server loopback mới, PGlite mới | 20 báo giá chuẩn | Gửi tuần tự | Cả 20 đúng oracle; lỗi ⇒ dừng toàn bộ | `system.reset()` |
+| ST-01 | Script và hệ thống đang kiểm sẵn sàng (rủi ro đo sai) | Server loopback mới, PGlite mới | 20 báo giá chuẩn | Gửi tuần tự | Cả 20 đúng oracle; lỗi ⇒ dừng toàn bộ | `system.reset()` |
 | ST-02 | R-API-07, R-FARE, R-NFR-03 | Sau reset | 30/s × 3s | Open slots | 90 sent, 0 drop, 0 lỗi, p95 < 500 ms | Drain |
 | ST-03 | Rủi ro dữ liệu, latency | Dữ liệu từ ST-02 | 150/s × 4s | Open slots | 0 lỗi bắt buộc; drop/p95 ghi nhận | Drain |
 | ST-04 | Rủi ro dữ liệu, latency đuôi, đo sai | Dữ liệu tích luỹ | 600/s × 4s | Open slots | 0 lỗi bắt buộc; drop/p95 ghi nhận | Drain |
@@ -199,7 +199,7 @@ npx tsx articles/system-testing-stress-test/stress.ts
 npm run typecheck
 ```
 
-Script tự tạo server trên `127.0.0.1` cổng ngẫu nhiên, ghi raw JSON vào `reports/stress/sys09-stress.json` tương đối với thư mục chạy, in bản tóm tắt (không kèm samples) ra stdout và đóng server, DB trong `finally`. Chỉ nên chạy khi máy rảnh: mọi tác vụ nặng khác đều cạnh tranh CPU với cả generator lẫn SUT.
+Script tự tạo server trên `127.0.0.1` cổng ngẫu nhiên, ghi raw JSON vào `reports/stress/sys09-stress.json` tương đối với thư mục chạy, in bản tóm tắt (không kèm samples) ra stdout và đóng server, DB trong `finally`.
 
 ### 5.2. Mỗi request là một phép kiểm nghiệp vụ
 
@@ -215,9 +215,9 @@ valid = status === 200 && body.quote?.total === 35_000 && typeof body.quote.quot
 if (!valid) error = 'HTTP_OR_BUSINESS_ORACLE';
 ```
 
-Đây là điểm khác biệt quan trọng nhất so với một script «bắn request đếm status»: mỗi response phải đúng **cả HTTP lẫn tiền**. Request lỗi vẫn được tính vào percentile — latency của request thất bại không bị loại khỏi phân bố. Timeout và lỗi transport rơi vào nhánh `catch`, ghi tên lỗi (ví dụ `TimeoutError`).
+Khác biệt quan trọng nhất so với script «bắn request đếm status»: mỗi response phải đúng **cả HTTP lẫn tiền**. Request lỗi vẫn được tính vào percentile. Timeout và lỗi transport rơi vào nhánh `catch`, ghi tên lỗi (ví dụ `TimeoutError`).
 
-Endpoint báo giá ghi dữ liệu (R-QUOTE-01), nên số bản ghi tăng dần qua bốn bước. Đó là chủ đích: dùng `GET /api/health` thay workload nghiệp vụ sẽ không chạm DB và không nói gì về suy giảm thật.
+Endpoint báo giá ghi dữ liệu (R-QUOTE-01), nên số bản ghi tăng dần qua bốn bước — đó là chủ đích.
 
 ### 5.3. Ba lý do bỏ slot, theo thứ tự ưu tiên
 
@@ -227,11 +227,11 @@ const reason = failureCount >= 10 ? 'failure-stop' : lagMs > maxLagMs ? 'schedul
 if (reason) { dropped.push({ slot, lagMs, reason }); continue; }
 ```
 
-- `failure-stop`: guard an toàn, giới hạn tác động khi SUT đã hỏng.
-- `scheduler-late`: **generator** không giữ được lịch. Slot này chưa bao giờ tới server, nên không được gọi là «server từ chối».
-- `in-flight-cap`: số request đang chờ đã chạm trần — dấu hiệu request giữ slot lâu hơn, nhưng cũng là giới hạn do ta đặt.
+- `failure-stop`: guard an toàn, giới hạn tác động khi hệ thống đang kiểm đã hỏng.
+- `scheduler-late`: **generator** không giữ được lịch. Slot chưa bao giờ tới server, nên không gọi là «server từ chối».
+- `in-flight-cap`: số request đang chờ chạm trần — dấu hiệu request giữ slot lâu hơn, nhưng cũng là giới hạn do ta đặt.
 
-Một lưu ý: dừng theo lỗi có độ trễ. Các request đang bay khi bộ đếm chạm 10 vẫn có thể lỗi tiếp, nên tổng lỗi có thể vượt 10. Không gọi 10 là trần tuyệt đối.
+Lưu ý: dừng theo lỗi có độ trễ — request đang bay khi bộ đếm chạm 10 vẫn có thể lỗi tiếp, nên tổng lỗi có thể vượt 10.
 
 ### 5.4. Drain, rồi mới tính số liệu từng bước
 
@@ -244,7 +244,7 @@ const sorted = samples.map(s => s.latencyMs).sort((a, b) => a - b);
 const p = (q: number) => sorted.length ? sorted[Math.ceil(q * sorted.length) - 1]! : null;
 ```
 
-Percentile dùng nearest-rank trên toàn bộ samples của **từng bước**. Không gộp bốn bước thành một p95: con số gộp sẽ bị 2.400 request của bước high kéo, nhưng cũng có thể che bước tệ nhất khi bước đó ít request. Script còn ghi `completedInWindow` (số request hoàn tất trước khi cửa sổ lịch kết thúc) để không nhầm «gửi đủ 600/giây» với «hoàn tất 600/giây».
+Percentile dùng nearest-rank trên toàn bộ samples của **từng bước**. Không gộp bốn bước thành một p95: con số gộp bị 2.400 request của bước high kéo, và có thể che bước tệ nhất khi bước đó ít request. Script còn ghi `completedInWindow` (số request hoàn tất trước khi cửa sổ lịch kết thúc) để không nhầm «gửi đủ 600/giây» với «hoàn tất 600/giây».
 
 ### 5.5. Gate cuối
 
@@ -252,21 +252,21 @@ Percentile dùng nearest-rank trên toàn bộ samples của **từng bước**.
 if (results.some(r => r.errors > 0 || (['baseline', 'return-low'].includes(r.name) && !r.withinReferenceEnvelope)) || !postLoadProbe.valid || health.status !== 200) process.exitCode = 1;
 ```
 
-Raw JSON được ghi **trước** khi quyết định exit code, để một lần chạy thất bại vẫn để lại bằng chứng điều tra.
+Raw JSON được ghi **trước** khi quyết định exit code, để lần chạy thất bại vẫn để lại bằng chứng điều tra.
 
 ## 6. Kết quả thực đo và cách đọc
 
 ### 6.1. Môi trường của lần chạy
 
-Lần chạy làm evidence kết thúc lúc 21:29:50 giờ Việt Nam ngày 13/11/2026 (`measuredAtUtc` 2026-11-13T14:29:50.931Z): Windows 10.0.26300, Node v24.15.0, Intel Core i7-10700K, 16 logical CPU, RAM 34.245.918.720 byte; lệnh chạy từ root với `npx --prefix examples/toi-noi-testing tsx …`, exit 0, `npm run typecheck` đạt. File gốc đã được lưu thành `stress-observed.json` cạnh script; báo cáo đã kiểm độc lập rằng counts, error count và p95 khớp raw samples.
+Lần chạy làm bằng chứng kết thúc lúc 21:29:50 giờ Việt Nam ngày 13/11/2026 (`measuredAtUtc` 2026-11-13T14:29:50.931Z): Windows 10.0.26300, Node v24.15.0, Intel Core i7-10700K, 16 logical CPU, RAM 34.245.918.720 byte; lệnh chạy từ root với `npx --prefix examples/toi-noi-testing tsx …`, exit 0, `npm run typecheck` đạt. File gốc được lưu thành `stress-observed.json` cạnh script; báo cáo đã kiểm độc lập rằng counts, error count và p95 khớp raw samples.
 
-Khi biên tập bài (cùng ngày), script **không** được chạy lại: máy đang chạy song song các lab khác, mọi số đo mới sẽ bị nhiễm tải ngoài. Các con số dưới đây đều đọc từ `stress-observed.json`.
+Khi biên tập (cùng ngày), script **không** được chạy lại: máy đang chạy song song các lab khác, số đo mới sẽ bị nhiễu. Mọi con số dưới đây đọc từ `stress-observed.json`.
 
-### 6.2. Expected và observed
+### 6.2. Mong đợi và thực tế
 
-Expected theo thiết kế: baseline và return-low trong envelope; không request lỗi ở bất kỳ bước nào; probe đúng 35.000 và health 200. Elevated/high: chưa có kỳ vọng định lượng — đó là phần cần quan sát.
+**Mong đợi** (theo thiết kế): baseline và return-low trong envelope; không request lỗi ở bất kỳ bước nào; probe đúng 35.000 và health 200. Elevated/high: chưa có mong đợi định lượng — phần cần quan sát.
 
-Observed:
+**Thực tế — báo cáo gốc (13/11/2026):**
 
 | Bước | Target | Sent / dropped / errors | p50 ms | p95 ms | p99 ms | Peak in-flight | Hoàn tất trong cửa sổ | Valid RPS gồm drain |
 |---|---|---|---:|---:|---:|---:|---:|---:|
@@ -275,27 +275,27 @@ Observed:
 | high | 600/s × 4s | 2.400 / 0 / 0 | 5,47 | 15,15 | 22,80 | 24 | 2.393 | 598,34 |
 | return-low | 30/s × 3s | 90 / 0 / 0 | 2,34 | 6,10 | 8,67 | 1 | 90 | 29,93 |
 
-Probe báo giá sau tải: HTTP 200, đúng oracle, 2,83 ms. Health: 200 `{ "status": "ok" }`. Mọi response trong bốn bước có status 200. Cả bốn bước nằm trong reference envelope, `planned = sent + dropped` đúng ở mọi bước (3.180 = 3.180 + 0).
+Probe báo giá sau tải: HTTP 200, đúng oracle, 2,83 ms. Health: 200 `{ "status": "ok" }`. Mọi response trong bốn bước có status 200; cả bốn bước nằm trong reference envelope; `planned = sent + dropped` đúng ở mọi bước (3.180 = 3.180 + 0).
 
 ### 6.3. Đọc từng dòng, theo thứ tự đúng
 
-1. **Đủ tải chưa?** Không có slot nào bị drop, kể cả `scheduler-late`: generator giữ được lịch ở mọi mức. Độ trễ lịch lớn nhất mỗi bước khoảng 15,6–20,2 ms, dưới ngưỡng 100 ms.
+1. **Đủ tải chưa?** Không slot nào bị drop, kể cả `scheduler-late`: generator giữ được lịch ở mọi mức. Độ trễ lịch lớn nhất mỗi bước khoảng 15,6–20,2 ms, dưới ngưỡng 100 ms.
 2. **Có lỗi không?** Không có request lỗi, không response sai tiền.
-3. **Suy giảm thế nào?** p50 tăng từ 3,11 lên 5,47 ms, p99 từ 11,36 lên 22,80 ms; peak in-flight tăng từ 1 lên 24 — request giữ slot lâu hơn khi tải tăng. Đó là suy giảm có thật nhưng nhỏ, còn rất xa 500 ms.
+3. **Suy giảm thế nào?** p50 tăng từ 3,11 lên 5,47 ms, p99 từ 11,36 lên 22,80 ms; peak in-flight tăng từ 1 lên 24 — request giữ slot lâu hơn khi tải tăng. Suy giảm có thật nhưng nhỏ, còn rất xa 500 ms.
 4. **«600/s» nghĩa là gì?** 2.400 request được **gửi** trong 4 giây theo lịch; 2.393 hoàn tất trong cửa sổ, 7 hoàn tất ở phần đuôi (elapsed gồm drain ≈ 4.011,08 ms). Valid RPS gồm drain là 598,34 — không phải 600.
-5. **Sau giảm tải?** Return-low có p95 6,10 ms, thấp hơn cả baseline. Không nên đọc thành «hệ thống nhanh hơn sau stress»; chênh lệch vài mili-giây trên một tiến trình có thể do JIT đã nóng, cache, hoặc nhiễu lịch của hệ điều hành. Lab chưa có dữ liệu để chọn giữa các giả thuyết này.
+5. **Sau giảm tải?** Return-low có p95 6,10 ms, thấp hơn cả baseline. Không nên đọc thành «hệ thống nhanh hơn sau stress»: chênh lệch vài mili-giây trong một tiến trình có thể do JIT đã nóng, cache hoặc nhiễu lịch của hệ điều hành, và lab chưa có dữ liệu để chọn giữa các giả thuyết.
 
-Một quan sát nhỏ đáng ghi: độ trễ lịch ~15,6 ms xuất hiện ngay cả ở 30/s, khi gần như không có tải. Một giả thuyết hợp lý là độ phân giải timer mặc định trên Windows; bài **chưa** kiểm chứng giả thuyết này. Nếu đúng, nó là đặc tính của generator trên máy này, không phải của SUT.
+Độ trễ lịch ~15,6 ms xuất hiện ngay cả ở 30/s, khi gần như không có tải. Giả thuyết hợp lý — **chưa** kiểm chứng — là độ phân giải timer mặc định trên Windows; nếu đúng, đó là đặc tính của generator trên máy này, không phải của hệ thống đang kiểm.
 
 ### 6.4. Kết luận được phép viết
 
-> Trong lab một tiến trình (Node v24.15.0, i7-10700K, PGlite một kết nối), endpoint báo giá giữ đúng oracle tiền ở cả bốn mức 30/150/600/30 yêu cầu/giây; latency đuôi và in-flight tăng theo tải nhưng p95 vẫn ≤ 15,15 ms. **Chưa quan sát thấy điểm gãy** trong giới hạn đã thử. Các nhánh `in-flight-cap`, `scheduler-late`, `failure-stop` có trong mã nhưng **không được kích hoạt** trong lần chạy này.
+> Trong lab một tiến trình (Node v24.15.0, i7-10700K, PGlite một kết nối), endpoint báo giá giữ đúng oracle tiền ở cả bốn mức 30/150/600/30 request/giây; latency đuôi và in-flight tăng theo tải nhưng p95 vẫn ≤ 15,15 ms. **Chưa quan sát thấy điểm gãy** trong giới hạn đã thử. Các nhánh `in-flight-cap`, `scheduler-late`, `failure-stop` có trong mã nhưng **không được kích hoạt** trong lần chạy này.
 
-Không được viết: «capacity Tới Nơi ≥ 600/s», «hệ thống phục hồi hoàn toàn», «đạt R-NFR-03 cho production». Không có lỗi sản phẩm được phát hiện; điều đó không chứng minh không có lỗi dưới tải khác.
+Không được viết: «capacity Tới Nơi ≥ 600/s», «hệ thống phục hồi hoàn toàn», «đạt R-NFR-03 cho production». Không phát hiện lỗi sản phẩm; điều đó không chứng minh không có lỗi dưới tải khác.
 
 ## 7. Đọc kết quả theo nguyên nhân có thể kiểm chứng
 
-Lần chạy đo được «sạch», nhưng một báo cáo stress hữu ích phải sẵn cách đọc cho lần chạy không sạch:
+Lần chạy trong báo cáo gốc «sạch», nhưng cần sẵn cách đọc cho lần chạy không sạch:
 
 | Mẫu quan sát | Điều có thể suy ra | Chưa thể kết luận | Bằng chứng tiếp theo |
 |---|---|---|---|
@@ -307,39 +307,39 @@ Lần chạy đo được «sạch», nhưng một báo cáo stress hữu ích p
 | Return-low đạt, probe đúng | Sau drain, luồng đã chọn vẫn hoạt động | Phục hồi đầy đủ mọi tài nguyên, RTO | Timeline liên tục, nhiều cửa sổ ổn định |
 | Mọi mức đều đạt | Chưa thấy failure trong giới hạn thử | Đã tìm được capacity | Thiết kế thí nghiệm mới, không tăng tải vô hạn |
 
-Đừng ép kết quả phải có lỗi để «đúng bài Stress». Nếu 600/s vẫn đạt, bước tiếp theo là một thí nghiệm mới với phạm vi và tài nguyên phù hợp — ưu tiên tách generator khỏi SUT trước khi nâng target.
+Đừng ép kết quả phải có lỗi để «đúng bài Stress». Nếu 600/s vẫn đạt, thí nghiệm tiếp theo nên tách generator khỏi hệ thống đang kiểm trước khi nâng target.
 
-**Ví dụ quyết định cho một lần chạy giả định không sạch:** «High: 2.400 planned, 2.010 sent, 390 drop (`in-flight-cap`), 0 lỗi oracle, p95 1.240 ms. Return-low đạt envelope, probe đúng. Kết luận: hệ thống giữ đúng dữ liệu nhưng không xử lý kịp 600/s trong cấu hình này; chưa phân biệt được giới hạn SUT với giới hạn máy. Đề xuất: tách generator, đo CPU từng tiến trình, lặp lại high.» Các con số trong ví dụ này là minh hoạ, **không** phải kết quả đã đo.
+**Ví dụ quyết định cho một lần chạy giả định không sạch:** «High: 2.400 planned, 2.010 sent, 390 drop (`in-flight-cap`), 0 lỗi oracle, p95 1.240 ms. Return-low đạt envelope, probe đúng. Kết luận: hệ thống giữ đúng dữ liệu nhưng không xử lý kịp 600/s trong cấu hình này; chưa phân biệt được giới hạn của hệ thống đang kiểm với giới hạn máy. Đề xuất: tách generator, đo CPU từng tiến trình, lặp lại high.» Các con số trong ví dụ này là minh hoạ, **không** phải kết quả đã đo.
 
 ## 8. Mở rộng nâng cao
 
 ### 8.1. Graceful degradation và backpressure
 
-Hệ thống thật có thể dùng hàng đợi hữu hạn, admission control, rate limit hoặc circuit breaker. Test cần xác định trước: khi nào hệ thống từ chối, response có giúp client retry đúng không (`Retry-After`, mã lỗi phân biệt được), và giao dịch **đã nhận** có hoàn tất đúng không. Hàng đợi không giới hạn thường cho throughput đẹp lúc đầu rồi latency tăng và cạn bộ nhớ — throughput cao ban đầu không chứng minh ổn định.
+Hệ thống thật có thể dùng hàng đợi hữu hạn, admission control, rate limit hoặc circuit breaker. Test cần xác định trước: khi nào hệ thống từ chối, response có giúp client retry đúng không (`Retry-After`, mã lỗi phân biệt được), giao dịch **đã nhận** có hoàn tất đúng không. Hàng đợi không giới hạn thường cho throughput đẹp lúc đầu, rồi latency tăng và cạn bộ nhớ.
 
-Ví dụ Tới Nơi: nếu báo giá phụ thuộc dịch vụ bản đồ MapViet (R-NFR-03 nói rõ điều này với hệ thống đích), một chiến lược suy giảm hợp lý là trả 503 nhanh khi MapViet quá tải, thay vì giữ kết nối tới khi client timeout. Stress test phải kiểm cả hai: thời gian từ chối và việc không có báo giá sai lọt ra.
+Ví dụ: nếu báo giá phụ thuộc dịch vụ bản đồ MapViet (R-NFR-03 nêu rõ với hệ thống đích), một chiến lược suy giảm hợp lý là trả 503 nhanh khi MapViet quá tải, thay vì giữ kết nối tới khi client timeout. Stress test phải kiểm cả thời gian từ chối lẫn việc không có báo giá sai lọt ra.
 
 ### 8.2. Retry amplification
 
-Khi nhiều client retry ngay lúc timeout, tải mới và tải retry cộng dồn — một đợt chậm nhỏ có thể tự khuếch đại thành sự cố. Workload cần tách **attempt** khỏi **logical transaction**, ghi retry count và idempotency key; kiểm backoff, jitter và retry budget khi có yêu cầu tương ứng. Lab hiện không retry request báo giá, nên **chưa mô phỏng retry storm**.
+Khi nhiều client retry ngay lúc timeout, tải mới và tải retry cộng dồn — một đợt chậm nhỏ có thể tự khuếch đại thành sự cố. Workload cần tách **attempt** khỏi **logical transaction**, ghi retry count và idempotency key; kiểm backoff, jitter và retry budget nếu có yêu cầu. Lab hiện không retry request báo giá, nên **chưa mô phỏng retry storm**.
 
 ### 8.3. Không mất toàn vẹn dưới áp lực
 
-Với đặt chuyến và thanh toán, kiểm invariant trong hoặc sau tải: số chuyến bằng số logical transaction thành công, không trừ tiền hai lần (R-NFR-05 giới hạn 2 lần thử lại cùng khoá idempotency), sự kiện khớp trạng thái. Timeout không đồng nghĩa chưa ghi dữ liệu; test phải đối soát các transaction có kết quả không rõ, không được gửi khoá mới rồi coi đó là retry an toàn. Lab chỉ báo giá; tranh chấp ví và dispatch thuộc phạm vi SYS-13 và cần PostgreSQL nhiều kết nối.
+Với đặt chuyến và thanh toán, kiểm invariant trong hoặc sau tải: số chuyến bằng số logical transaction thành công, không trừ tiền hai lần (R-NFR-05 giới hạn 2 lần thử lại cùng khoá idempotency), sự kiện khớp trạng thái. Timeout không đồng nghĩa chưa ghi dữ liệu: phải đối soát transaction có kết quả không rõ, không gửi khoá mới rồi coi là retry an toàn. Lab chỉ báo giá; tranh chấp ví và dispatch thuộc SYS-13, cần PostgreSQL nhiều kết nối.
 
 ### 8.4. Đo recovery có thời gian
 
-Muốn có con số time-to-recover, phải định nghĩa trước trạng thái «đã phục hồi» — ví dụ giả định: ba cửa sổ 10 giây liên tiếp ở tải thường có 0 lỗi và p95 dưới ngưỡng, backlog về mức chấp nhận. Ghi thời điểm giảm tải và thời điểm đạt điều kiện để tính khoảng cách. Cần scheduler theo một timeline chung (không drain giữa high và low), gắn mỗi request với bước đã phát ra nó, và tách thời gian drain do harness khỏi hành vi hệ thống. Một probe xanh không chứng minh ổn định.
+Muốn đo time-to-recover, phải định nghĩa trước trạng thái «đã phục hồi» — ví dụ giả định: ba cửa sổ 10 giây liên tiếp ở tải thường có 0 lỗi và p95 dưới ngưỡng, backlog về mức chấp nhận — rồi đo từ lúc giảm tải tới lúc đạt điều kiện. Cần scheduler theo một timeline chung, không drain giữa high và low (xem Bài 5).
 
 ### 8.5. Autoscaling và capacity planning
 
-Trên staging có autoscaler, ghi số replica, thời gian khởi động, readiness, độ sâu hàng đợi và saturation từng instance. Tải tăng nhanh hơn tốc độ scale có thể gây lỗi tạm thời dù capacity cuối đủ — đó chính là chỗ spike test khác stress test. Không lấy 600/s của một phiên PGlite rồi nhân số node để dự báo chi phí cluster; capacity planning cần workload đại diện (tỷ lệ báo giá/đặt/đọc), dữ liệu cỡ thật và margin rủi ro.
+Trên staging có autoscaler, cần ghi số replica, thời gian khởi động, readiness, độ sâu hàng đợi và saturation từng instance. Tải tăng nhanh hơn tốc độ scale có thể gây lỗi tạm thời dù capacity cuối đủ — chỗ spike test khác stress test. Đừng lấy 600/s của một phiên PGlite nhân số node để dự báo chi phí cluster; capacity planning cần workload đại diện (tỷ lệ báo giá/đặt/đọc), dữ liệu cỡ thật và margin rủi ro.
 
 ## 9. Anti-pattern, giới hạn và đánh đổi
 
-**Anti-pattern hay gặp:**
+**Anti-pattern:**
 
-- Chạy stress lên production hoặc endpoint bên ngoài khi chưa thuộc phạm vi được phép.
+- Chạy stress lên production hoặc endpoint bên ngoài khi chưa được phép.
 - Bỏ guard để «cố tìm crash»; tăng tải vô hạn đến khi máy treo.
 - Gọi mọi drop là 503 của server; gọi generator chậm là server chậm.
 - Báo «phục hồi hoàn toàn» vì health xanh.
@@ -352,7 +352,7 @@ Trên staging có autoscaler, ghi số replica, thời gian khởi động, read
 <p>Generator, server và PGlite chạy chung một tiến trình và một event loop, một kết nối DB, dữ liệu nhỏ. Profile chỉ 14 giây theo lịch cộng drain và warm-up: không phải soak, không đo rò rỉ bộ nhớ, không đo RTO/RPO hay crash recovery. Không có telemetry CPU/DB tách client–server. Các nhánh drop và safety stop chỉ được chứng minh là <b>có trong mã</b>, chưa được kích hoạt bằng thực nghiệm. Script là Node tự viết, không phải k6 đã chạy. Không suy ra capacity production hay độ ổn định dài hạn.</p>
 </div>
 
-**Đánh đổi chi phí/phạm vi:** một profile ngắn, chạy local, rẻ và tái hiện được — đủ để luyện thiết kế oracle, guard và cách đọc. Muốn trả lời câu hỏi capacity thật, chi phí tăng mạnh: môi trường cô lập giống production, generator phân tán, dữ liệu cỡ thật, monitoring đầy đủ và thời gian quan sát dài. Hãy chọn mức đầu tư theo câu hỏi cần trả lời, không theo số request lớn nhất có thể bắn.
+**Đánh đổi chi phí/phạm vi:** profile ngắn, chạy local, rẻ và tái hiện được — đủ để luyện thiết kế oracle, guard và cách đọc. Trả lời câu hỏi capacity thật thì chi phí tăng mạnh: môi trường cô lập giống production, generator phân tán, dữ liệu cỡ thật, monitoring đầy đủ và thời gian quan sát dài. Chọn mức đầu tư theo câu hỏi cần trả lời, không theo số request lớn nhất có thể bắn.
 
 ## 10. Bài tập và câu hỏi tự kiểm
 
@@ -366,7 +366,7 @@ Trên staging có autoscaler, ghi số replica, thời gian khởi động, read
 
 <details>
 <summary><b>Lời giải gợi ý</b></summary>
-<p><b>1.</b> «Ở 600/s, 10% slot không được gửi; các request đã gửi không lỗi. Chưa xác định drop do generator hay do SUT giữ slot lâu; mức high <b>không đạt</b> nếu tiêu chí release là không drop.» Exit 0 chỉ nói điều kiện bắt buộc của bài đạt; phải đọc planned/sent và lý do drop.</p>
+<p><b>1.</b> «Ở 600/s, 10% slot không được gửi; các request đã gửi không lỗi. Chưa xác định drop do generator hay do hệ thống đang kiểm giữ slot lâu; mức high <b>không đạt</b> nếu tiêu chí release là không drop.» Exit 0 chỉ nói điều kiện bắt buộc của bài đạt; phải đọc planned/sent và lý do drop.</p>
 <p><b>2.</b> Script đã fail (<code>!postLoadProbe.valid</code> ⇒ exit 1). Báo cáo: tiến trình còn sống nhưng nghiệp vụ sai; 34.500 khớp cước trước bước làm tròn R-FARE-08, gợi ý lỗi ở bước làm tròn sau tải — cần tái hiện ở tải thấp, không gọi là «recovery thành công».</p>
 <p><b>3.</b> Ví dụ: <code>dropReasons: Object.groupBy(dropped, d =&gt; d.reason)</code> rồi đếm, hoặc reduce tương đương nếu môi trường không hỗ trợ. <code>scheduler-late</code> chỉ về generator, <code>in-flight-cap</code> chỉ về thời gian giữ slot, <code>failure-stop</code> chỉ về lỗi đã xảy ra trước đó — ba hướng điều tra khác nhau.</p>
 <p><b>4.</b> Cần retry budget, backoff có jitter, logical transaction ID tách khỏi attempt; báo cáo cả offered load mới và tải retry. Nếu chuyển sang đặt chuyến, mọi retry phải cùng <code>Idempotency-Key</code> và kiểm không tạo chuyến trùng.</p>
@@ -438,9 +438,9 @@ Trên staging có autoscaler, ghi số replica, thời gian khởi động, read
 ## 11. Tài liệu tham khảo
 
 - Grafana k6 — *Load test types*: https://grafana.com/docs/k6/latest/testing-guides/test-types/ — phân loại smoke, average-load, stress, soak, spike, breakpoint (tra cứu 13/11/2026).
-- Grafana k6 — *Stress testing*: https://grafana.com/docs/k6/latest/testing-guides/test-types/stress-testing/ — tải cao hơn thông thường, cần baseline/load trước, mức tăng tuỳ hệ thống (tra cứu 13/11/2026). Bài dùng k6 làm nguồn thuật ngữ; script lab là Node tự viết.
-- Phòng lab: `SPEC.md` (R-API-07, R-API-15, R-FARE-01…08, R-QUOTE-01, R-NFR-03, R-NFR-07) và mã bài — https://github.com/rickymta/antblog/tree/main/examples/toi-noi-testing/articles/system-testing-stress-test
-- Evidence: `stress-observed.json` cùng thư mục, đo ngày 13/11/2026 (Node v24.15.0, Windows 10.0.26300, i7-10700K).
+- Grafana k6 — *Stress testing*: https://grafana.com/docs/k6/latest/testing-guides/test-types/stress-testing/ — tải cao hơn thông thường, cần baseline/load trước, mức tăng tuỳ hệ thống (tra cứu 13/11/2026).
+- Lab Tới Nơi: `SPEC.md` (R-API-07, R-API-15, R-FARE-01…08, R-QUOTE-01, R-NFR-03, R-NFR-07) và mã bài — https://github.com/rickymta/antblog/tree/main/examples/toi-noi-testing/articles/system-testing-stress-test
+- Bằng chứng: `stress-observed.json` cùng thư mục (báo cáo gốc 13/11/2026, cấu hình máy ở mục 6.1).
 - Bài liên quan: [SYS-07 · Performance Test](/articles/system-testing-performance-test) · [SYS-08 · Load Test](/articles/system-testing-load-test) · [Non-functional testing tổng quan](/articles/non-functional-testing-tong-quan) · [SYS-13 · Data Integrity Test](/articles/system-testing-data-integrity-test) · [SYS-14 · Recovery Test](/articles/system-testing-recovery-test)
 
 Bài tiếp theo: [SYS-10 · Security Test – Pen test](/articles/system-testing-security-pentest).

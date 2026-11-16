@@ -80,7 +80,7 @@ npx tsx articles/system-testing-release-dossier/build-dossier.ts
 npx tsx articles/system-testing-release-dossier/build-dossier.ts --gate
 ```
 
-`rules.ts` là hàm thuần `assess(evidence, candidate, signOff?)`. `registry.ts` khai báo 17 mục (SYS-14 tách phần restore drill thành SYS-14R): 10 mục `vitest` được chạy lại, 7 mục lấy từ báo cáo và gắn với commit đã **thêm** báo cáo đó (`git log --diff-filter=A`). `build-dossier.ts` chạy lại 10 thư mục Vitest bằng JSON reporter, đọc HEAD, trạng thái working tree **của lab**, diff từ commit của từng bằng chứng tới HEAD, áp luật và ghi `reports/release-dossier.{md,json}` (bị git ignore). `--gate` trả exit 1 khi đề xuất chưa tới READY_FOR_SIGN_OFF.
+`rules.ts` là hàm thuần `assess(evidence, candidate, signOff?)`. `registry.ts` khai báo 17 mục (SYS-14 tách phần restore drill thành SYS-14R): 9 mục `vitest` được chạy lại, 8 mục lấy từ báo cáo và gắn với commit đã **thêm** báo cáo đó (`git log --diff-filter=A`). `build-dossier.ts` chạy lại 9 thư mục Vitest bằng JSON reporter, đọc HEAD, trạng thái working tree **của lab**, diff từ commit của từng bằng chứng tới HEAD, áp luật và ghi `reports/release-dossier.{md,json}` (bị git ignore). `--gate` trả exit 1 khi đề xuất chưa tới READY_FOR_SIGN_OFF.
 
 Một mục được coi là còn mới khi: không có tệp nào trong `watchPaths` của nó xuất hiện trong `git diff --name-only <commit bằng chứng> HEAD`. Vì vậy sửa tài liệu không làm cũ bằng chứng, còn sửa `src/web/` làm cũ SYS-05, SYS-11 và SYS-12.
 

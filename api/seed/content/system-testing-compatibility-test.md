@@ -1,7 +1,7 @@
 ---
 slug: system-testing-compatibility-test
 title: "Compatibility Test: cùng chức năng Tới Nơi trên những cấu hình nào?"
-summary: "Bài thực hành compatibility testing: tách các trục browser, engine, OS, viewport, input, locale và timezone; lập support matrix theo rủi ro thay vì nhân mọi tổ hợp; giữ oracle nghiệp vụ cố định giữa các cấu hình; chạy hai hành trình trên ba Playwright project và ghi đúng phiên bản browser thực chạy, kèm giới hạn của emulation."
+summary: "Compatibility testing thực hành: tách các trục browser, engine, OS, viewport, input, locale, timezone; lập support matrix theo rủi ro; giữ oracle nghiệp vụ cố định giữa các cấu hình; chạy hai hành trình trên ba Playwright project, ghi phiên bản browser thực chạy và giới hạn của emulation."
 category: testing
 level: intermediate
 tags: [testing, sys-11, compatibility-testing, cross-browser, responsive, playwright, support-matrix, locale, emulation]
@@ -17,7 +17,7 @@ Trên laptop của developer, trang đặt xe của Tới Nơi chạy trơn tru.
 <tr><th scope="row">Series</th><td>Kiểm thử hệ thống Tới Nơi · Phần 2</td></tr>
 <tr><th scope="row">Cấp độ</th><td>Trung cấp — đã đọc System Test, biết Playwright cơ bản</td></tr>
 <tr><th scope="row">Test level / hướng kiểm</th><td>System · Non-functional (compatibility), giữ oracle chức năng làm điều kiện đạt</td></tr>
-<tr><th scope="row">Bài cần đọc trước</th><td><a href="/articles/system-testing-security-pentest">SYS-10 Security Test – Pen test</a>; hành trình UI và server riêng ở <a href="/articles/system-testing-system-test">SYS-05 System Test</a>; nhóm đặc tính chất lượng ở <a href="/articles/non-functional-testing-tong-quan">Non-functional testing tổng quan</a></td></tr>
+<tr><th scope="row">Bài cần đọc trước</th><td><a href="/articles/system-testing-security-pentest">SYS-10 · Security Test – Pen test</a>; hành trình UI và server riêng ở <a href="/articles/system-testing-system-test">SYS-05 · System Test</a>; nhóm đặc tính chất lượng ở <a href="/articles/non-functional-testing-tong-quan">Non-functional testing tổng quan</a></td></tr>
 <tr><th scope="row">Thực hành</th><td>Lab (code): 2 test case CP-01…02 × 3 Playwright project (Chrome desktop vi-VN, Edge desktop en-US/New York, Chrome 390×844 touch emulation), server PGlite riêng cổng 3116 — <code>examples/toi-noi-testing/articles/system-testing-compatibility-test/</code>, config <code>compatibility.config.ts</code></td></tr>
 <tr><th scope="row">Nguồn chính</th><td>Playwright Projects và Emulation; <code>SPEC.md</code> của lab (R-UI-01, R-UI-04, R-FARE, R-FOOD, R-CANCEL-01)</td></tr>
 </tbody>
@@ -28,7 +28,7 @@ Trên laptop của developer, trang đặt xe của Tới Nơi chạy trơn tru.
 
 ### 1.1. Vì sao backend xanh vẫn chưa đủ
 
-Ở [SYS-05](/articles/system-testing-system-test), ba hành trình khách–tài xế chạy xanh trên **một** cấu hình: Chrome headless, viewport mặc định, máy của người viết. Kết luận đúng của bài đó là «hệ thống hoạt động trong ranh giới đã vẽ». Kết luận đó không nói gì về:
+Ở [SYS-05 · System Test](/articles/system-testing-system-test), ba hành trình khách–tài xế chạy xanh trên **một** cấu hình: Chrome headless, viewport mặc định, máy của người viết. Kết luận đúng của bài đó là «hệ thống hoạt động trong ranh giới đã vẽ». Kết luận đó không nói gì về:
 
 - Edge, Firefox hay Safari có thao tác được form không;
 - màn hình hẹp có bị tràn ngang, nút có bấm được bằng chạm không;
@@ -38,7 +38,7 @@ Những lỗi đó không nằm trong use case hay SQL. Chúng nằm ở chỗ *
 
 ### 1.2. Đối tượng và điều kiện tiên quyết
 
-Bài dành cho tester/SDET đã viết được Playwright test, hiểu khái niệm system under test và đã đọc SYS-05. Cần Node ≥ 22.12, Chrome và Edge cài sẵn trên máy (lab dùng `channel`, không tải browser riêng).
+Bài dành cho tester/SDET đã viết được Playwright test, hiểu khái niệm hệ thống đang kiểm (system under test) và đã đọc SYS-05. Cần Node ≥ 22.12, Chrome và Edge cài sẵn trên máy (lab dùng `channel`, không tải browser riêng).
 
 ### 1.3. Mục tiêu đo được
 
@@ -56,7 +56,7 @@ Sau bài này, bạn có thể:
 
 Compatibility testing đánh giá khả năng hệ thống **hoạt động trong hoặc cùng với** những môi trường, nền tảng và phiên bản đã chọn. Với web, các trục thường gặp là browser, engine, OS, thiết bị, viewport, phương thức nhập, locale và timezone. Với hệ thống có nhiều client, trục còn gồm phiên bản API, schema dữ liệu, phiên bản ứng dụng mobile và phần mềm cùng tồn tại trên máy.
 
-Điểm then chốt: compatibility không phải một checklist browser. Mỗi trục trả lời một câu hỏi khác, và một trục **không thay được** trục khác.
+Compatibility không phải một checklist browser. Mỗi trục trả lời một câu hỏi khác, và một trục **không thay được** trục khác.
 
 | Trục | Ví dụ | Chưa chứng minh được nếu chỉ có trục này |
 |---|---|---|
@@ -70,14 +70,14 @@ Compatibility testing đánh giá khả năng hệ thống **hoạt động tron
 
 - **Responsive vs cross-browser.** Responsive testing tập trung bố cục theo kích thước khung. Cross-browser testing xét hành vi giữa các browser. Một trang có thể responsive hoàn hảo trên Chrome mà vẫn hỏng sự kiện `change` trên engine khác.
 - **Emulation vs thiết bị thật.** Playwright đặt được viewport, `isMobile`, `hasTouch`, locale, timezone. Emulation **không** đổi OS, không bật bàn phím ảo, không có native picker hay giới hạn phần cứng của điện thoại.
-- **Compatibility vs accessibility/usability.** Nút bấm được trên mọi cấu hình chưa chắc có tên truy cập đúng, càng chưa chắc người dùng hiểu cách dùng. Hai chủ đề đó có bài riêng ([SYS-12](/articles/system-testing-usability-test)).
+- **Compatibility vs accessibility/usability.** Nút bấm được trên mọi cấu hình chưa chắc có tên truy cập đúng, càng chưa chắc người dùng hiểu cách dùng. Usability có bài riêng ([SYS-12](/articles/system-testing-usability-test)); accessibility trong series chỉ được kiểm bổ trợ ở bài đó.
 - **Project vs browser.** Trong Playwright, một *project* là một tổ hợp cấu hình. Ba project không có nghĩa ba browser — ở lab này là hai browser và một biến thể của Chrome.
 
 ### 2.3. Khi nào áp dụng, ưu và nhược điểm
 
 Compatibility test có giá trị nhất khi: sản phẩm có support policy công khai; analytics cho thấy tỉ lệ người dùng đáng kể trên một cấu hình; vừa nâng cấp framework UI, CSS hay polyfill; hoặc vừa có báo lỗi «chỉ máy tôi bị».
 
-Ưu điểm: bắt được lỗi môi trường mà mọi test API bỏ sót, chạy lại được cùng test case trên nhiều cấu hình với chi phí viết test một lần. Nhược điểm: số tổ hợp tăng theo cấp số nhân, browser tự cập nhật làm kết quả trôi theo thời gian, và test tự động chỉ kiểm được những gì có assertion — phần «nhìn có ổn không» vẫn cần người.
+Ưu điểm: bắt được lỗi môi trường mà test API bỏ sót, và chạy lại cùng test case trên nhiều cấu hình với chi phí viết test một lần. Nhược điểm: số tổ hợp tăng theo cấp số nhân, browser tự cập nhật làm kết quả trôi theo thời gian, và test tự động chỉ kiểm được những gì có assertion — phần «nhìn có ổn không» vẫn cần người.
 
 ## 3. Test basis, rủi ro và support matrix
 
@@ -89,7 +89,7 @@ Trong dự án thật, support matrix được lập từ: analytics phân bố 
 - **Best-effort** — kiểm định kỳ, lỗi được xếp ưu tiên nhưng không chặn.
 - **Chưa hỗ trợ** — ghi rõ, không kiểm, không hứa.
 
-Không hứa «mọi thiết bị» khi chỉ có vài test. Và vì browser tự cập nhật, chỉ ghi «Chrome» là không đủ để tái hiện; phải lưu **phiên bản** của từng lượt chạy.
+Không hứa «mọi thiết bị» khi chỉ có vài test. Vì browser tự cập nhật, chỉ ghi «Chrome» là không đủ để tái hiện; phải lưu **phiên bản** của từng lượt chạy.
 
 ### 3.2. Ma trận thử nghiệm của bài
 
@@ -101,7 +101,7 @@ Lab tận dụng hai browser đã cài trên máy Windows và một cấu hình 
 | `edge-desktop-en` | Edge | 1280×800 | en-US / America/New_York | click |
 | `chrome-narrow-touch` | Chrome | 390×844 | vi-VN / Asia/Ho_Chi_Minh | tap; `isMobile` + `hasTouch` emulation |
 
-Đây là matrix bài tập, **không** phải support policy của Tới Nơi. Ba giới hạn cần nói ngay từ đầu:
+Đây là matrix bài tập, **không** phải support policy của Tới Nơi. Ba giới hạn cần nói ngay:
 
 1. Chrome và Edge đều thuộc họ Chromium. Không có Firefox (Gecko) hay Safari/WebKit trong matrix.
 2. `chrome-narrow-touch` là emulation trên Windows, không phải Android hay iPhone thật.
@@ -143,7 +143,7 @@ Lab tận dụng hai browser đã cài trên máy Windows và một cấu hình 
 
 ### 3.3. Rủi ro được chọn
 
-| Rủi ro | Biểu hiện với khách | Case |
+| Rủi ro | Biểu hiện với khách | Test case |
 |---|---|---|
 | Control không thao tác được trên một cấu hình | Bấm «Báo giá»/«Đặt chuyến» không có tác dụng | CP-01 |
 | Tiền đổi định dạng theo locale browser | `35,000 đ` hoặc `35.000 ₫` trên máy tiếng Anh | CP-01, CP-02 |
@@ -199,7 +199,7 @@ Ngược lại, có những khác biệt **không** được chấp nhận dù s
 
 ### 5.2. Bảng test case
 
-| ID | Requirement / rủi ro | Precondition | Input | Action | Expected result | Cleanup |
+| ID | Requirement / rủi ro | Tiền điều kiện | Input | Hành động | Mong đợi | Cleanup |
 |---|---|---|---|---|---|---|
 | CP-01 | R-UI-01, R-UI-04, R-FARE-01…08, R-CANCEL-01; control, tiền, vòng đời UI | Reset, 09:00 VN | ride, bike, 5 km | Nhập 5 → kiểm tràn → Báo giá → Đặt → kiểm tràn → Huỷ | `35.000 đ`; cao điểm «Không»; «Đang tìm tài xế» → «Đã huỷ»; «Phí huỷ: 0 đ»; nút huỷ disabled; không tràn ngang | Context đóng; reset ở test kế |
 | CP-02 | R-UI-01, R-UI-04, R-FOOD-01, R-FOOD-04, R-FARE-02; trường động, select, negative path | Reset, 09:00 VN | food 5 km, rồi ride 0,1 km | Chọn food → Báo giá → kiểm tràn → chọn ride → nhập 0.1 → Báo giá → kiểm tràn | Ô tiền món hiện rồi ẩn; loại xe disabled rồi enabled; `95.000 đ`; nút đặt disabled sau khi đổi dịch vụ; lỗi chứa «Quãng đường» | Như trên |
@@ -208,11 +208,11 @@ Vì sao chỉ hai test case? Các tổ hợp giá đã được khoá nhanh ở 
 
 ### 5.3. Entry và exit criteria
 
-- **Entry:** matrix đã xác định; Chrome và Edge có sẵn; server riêng khởi động được; dữ liệu chuẩn; lệnh chạy đúng config.
-- **Exit của bài tập:** sáu execution pass, không retry, typecheck đạt, khoảng trống ghi rõ.
-- **Exit của release thật:** theo support policy; có thể đòi engine, OS và thiết bị thật nằm ngoài matrix này.
+- **Entry criteria:** matrix đã xác định; Chrome và Edge có sẵn; server riêng khởi động được; dữ liệu chuẩn; lệnh chạy đúng config.
+- **Exit criteria của bài tập:** sáu execution pass, không retry, typecheck đạt, khoảng trống ghi rõ.
+- **Exit criteria của release thật:** theo support policy; có thể đòi engine, OS và thiết bị thật nằm ngoài matrix này.
 
-Một quy tắc quan trọng: test case **không chạy** vì thiếu browser khác với test case **fail**. «Skipped Safari» không bao giờ được đếm là «Safari pass».
+Test case **không chạy** vì thiếu browser khác với test case **fail**. «Skipped Safari» không bao giờ được đếm là «Safari pass».
 
 ## 6. Thực hành với Playwright projects
 
@@ -269,7 +269,7 @@ test.beforeEach(async ({ request, browser }, info) => {
 });
 ```
 
-Lưu ý `beforeEach` assert mã 200 của reset và clock. Nếu bước chuẩn bị hỏng, test dừng ngay ở đó — failure sẽ chỉ vào môi trường, không bị đọc nhầm thành lỗi giao diện.
+`beforeEach` assert mã 200 của reset và clock. Nếu bước chuẩn bị hỏng, test dừng ngay — failure chỉ vào môi trường, không bị đọc nhầm thành lỗi giao diện.
 
 ### 6.4. Input và oracle bố cục
 
@@ -286,7 +286,7 @@ async function noHorizontalOverflow(page: Page) {
 }
 ```
 
-Project `chrome-narrow-touch` dùng `tap()` thật trong context có `hasTouch`; desktop dùng `click()`. Tuy nhiên, việc điền ô bằng `fill()` và chọn bằng `selectOption()` vẫn là automation: chưa mô phỏng bàn phím ảo che nửa màn hình hay native picker của Android/iOS. Tolerance 1 px tránh báo lỗi giả do làm tròn sub-pixel.
+Project `chrome-narrow-touch` dùng `tap()` thật trong context có `hasTouch`; desktop dùng `click()`. Còn việc điền ô bằng `fill()` và chọn bằng `selectOption()` vẫn là automation: chưa mô phỏng bàn phím ảo che nửa màn hình hay native picker của Android/iOS. Tolerance 1 px tránh báo lỗi giả do làm tròn sub-pixel.
 
 ### 6.5. Phần thân CP-01
 
@@ -339,13 +339,13 @@ CP-02 nhắm vào sự kiện `change` của `<select>` — loại hành vi các
 
 ## 7. Kết quả thực đo và cách đọc lỗi
 
-### 7.1. Expected
+### 7.1. Mong đợi
 
 Sáu execution pass (2 test case × 3 project), không retry; typecheck exit 0. Mỗi execution in một dòng JSON metadata môi trường.
 
-### 7.2. Observed — báo cáo lab ngày 13/11/2026
+### 7.2. Thực tế — báo cáo gốc (13/11/2026)
 
-Báo cáo gốc (Windows, Node v24.15.0, lệnh `npx playwright test --config compatibility.config.ts`):
+Môi trường: Windows, Node v24.15.0, lệnh `npx playwright test --config compatibility.config.ts`.
 
 | Project | Browser thực đo | Kết quả |
 |---|---|---|
@@ -355,9 +355,9 @@ Báo cáo gốc (Windows, Node v24.15.0, lệnh `npx playwright test --config co
 
 Tổng 6 execution pass trong 10,8 giây, không retry; `npm run typecheck` exit 0. Có cảnh báo terminal về NO_COLOR/FORCE_COLOR, không ảnh hưởng kết quả.
 
-### 7.3. Observed — chạy lại khi biên tập bài, cùng ngày
+### 7.3. Thực tế — chạy lại khi biên tập (13/11/2026)
 
-Chạy lại trên Windows 11, Node v22.18.0, Playwright 1.64.1, cùng lệnh:
+Môi trường: Windows 11, Node v22.18.0, Playwright 1.64.1, cùng lệnh:
 
 ```text
 Running 6 tests using 1 worker
@@ -371,7 +371,7 @@ Running 6 tests using 1 worker
   6 passed (18.9s)
 ```
 
-Metadata in ra cho thấy Chrome đã tự cập nhật lên **157.0.8103.78** (báo cáo gốc: .51); Edge vẫn **157.0.4341.46**. Đây chính là lý do phải ghi phiên bản từng lượt: hai lượt «Chrome pass» trong cùng một ngày không chạy trên cùng một binary. Thời gian của lượt chạy lại dài hơn vì máy đang chạy song song các tác vụ khác; số giây ở đây không phải số đo hiệu năng.
+Metadata in ra cho thấy Chrome đã tự cập nhật lên **157.0.8103.78** (báo cáo gốc: .51); Edge vẫn **157.0.4341.46**. Đây là lý do phải ghi phiên bản từng lượt: hai lượt «Chrome pass» trong cùng một ngày không chạy trên cùng một binary. Lượt chạy lại lâu hơn vì máy đang chạy song song các tác vụ khác; số giây ở đây không phải số đo hiệu năng.
 
 ### 7.4. Diễn giải
 
@@ -405,7 +405,7 @@ Browser × OS × viewport × locale × input tăng rất nhanh. Pairwise testing
 
 ### 8.4. Locale, timezone và định dạng nhập
 
-Ô số nhận dấu phẩy hay dấu chấm, chuỗi Unicode, font fallback cho tiếng Việt, tên địa chỉ dài, ngày chuyển giờ mùa hè (DST) đều có thể sinh lỗi khác nhau theo cấu hình. Phân biệt **locale hiển thị** với **quy tắc nghiệp vụ**: giá tính theo giờ Việt Nam, nhưng hạn báo giá hiển thị cho người ở New York có thể theo giờ địa phương nếu sản phẩm thiết kế như vậy. Cần thống nhất kết quả mong đợi trước; đừng tự coi mọi khác biệt ngày giờ là bug.
+Ô số nhận dấu phẩy hay dấu chấm, chuỗi Unicode, font fallback cho tiếng Việt, tên địa chỉ dài, ngày chuyển giờ mùa hè (DST) đều có thể sinh lỗi khác nhau theo cấu hình. Phân biệt **locale hiển thị** với **quy tắc nghiệp vụ**: giá tính theo giờ Việt Nam, nhưng hạn báo giá hiển thị cho người ở New York có thể theo giờ địa phương nếu sản phẩm thiết kế như vậy. Cần thống nhất kết quả mong đợi trước; đừng tự coi mọi khác biệt ngày giờ là defect.
 
 ### 8.5. Visual regression có baseline
 
@@ -423,9 +423,9 @@ Nếu thêm so sánh screenshot, tạo baseline theo từng project/font/OS và 
 - Đếm Chrome và Edge là hai engine độc lập.
 - Kiểm đúng viewport nhưng dùng chung storage/cookie bẩn giữa các cấu hình.
 - Đổi locale rồi kỳ vọng giao diện tự dịch khi SPEC không yêu cầu.
-- Lấy output của browser đầu tiên làm expected cho các browser sau.
+- Lấy output của browser đầu tiên làm kết quả mong đợi cho các browser sau.
 - Chỉ assert «không có lỗi console» và gọi đó là tương thích.
-- Bật retry để làm xanh một project hay chập chờn.
+- Bật retry để làm xanh một project flaky.
 
 ### 9.2. Giới hạn bằng chứng của lab
 
@@ -515,6 +515,6 @@ Nguồn ngoài tra cứu 13/11/2026.
 - Playwright — *Emulation*: viewport, `isMobile`, `hasTouch`, locale, timezone và phạm vi của emulation. https://playwright.dev/docs/emulation
 - ISTQB, *Certified Tester Foundation Level Syllabus v4.0.1* — test types và đặc tính chất lượng phi chức năng (dùng để chuẩn hoá thuật ngữ). https://istqb.org/wp-content/uploads/2024/11/ISTQB_CTFL_Syllabus_v4.0.1.pdf
 - Phòng lab: `SPEC.md` (R-UI-01, R-UI-04, R-FARE-01…08, R-FOOD-01, R-FOOD-04, R-CANCEL-01), `compatibility.config.ts` và spec của bài — https://github.com/rickymta/antblog/tree/main/examples/toi-noi-testing/articles/system-testing-compatibility-test
-- Bài liên quan: [Dự án mẫu Tới Nơi](/articles/du-an-mau-toi-noi) · [Non-functional testing tổng quan](/articles/non-functional-testing-tong-quan) · [SYS-05 System Test](/articles/system-testing-system-test) · [SYS-10 Security Test – Pen test](/articles/system-testing-security-pentest)
+- Bài liên quan: [Dự án mẫu Tới Nơi](/articles/du-an-mau-toi-noi) · [Non-functional testing tổng quan](/articles/non-functional-testing-tong-quan) · [SYS-05 · System Test](/articles/system-testing-system-test) · [SYS-10 · Security Test – Pen test](/articles/system-testing-security-pentest)
 
 Bài tiếp theo: [SYS-12 · Usability Test](/articles/system-testing-usability-test).

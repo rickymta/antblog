@@ -1,14 +1,14 @@
 ---
 slug: system-testing-load-test
 title: "Load Test: tải dự kiến có thực sự được tạo ra và xử lý đúng?"
-summary: "Load testing qua API báo giá của Tới Nơi: dựng workload từ nghiệp vụ, phân biệt arrival rate, request rate, concurrency và VU, viết scheduler open-model không chờ response, đối soát planned = sent + dropped, gate đặt trước khi đo và đọc một lượt 300 request thực đo trên PGlite mà không suy ra công suất (capacity) của môi trường production."
+summary: "Load testing API báo giá Tới Nơi: dựng workload từ nghiệp vụ, phân biệt arrival rate, request rate, concurrency và VU, viết scheduler open model không chờ response, đối soát planned = sent + dropped, đặt gate trước khi đo và đọc lượt 300 request trên PGlite mà không suy ra capacity production."
 category: testing
 level: advanced
 tags: [testing, sys-08, load-testing, performance-testing, arrival-rate, workload-model, open-model, k6, pglite, test-oracle]
 language: vi
 ---
 
-Báo cáo tải ghi «p95 = 6 ms, 0 lỗi, PASS». Nghe rất đẹp — cho tới khi ai đó hỏi: kế hoạch là 30 request mỗi giây, vậy thực tế đã *gửi* được bao nhiêu? Nếu generator chỉ gửi được một nửa vì nó tự chờ response, thì 0 lỗi kia là 0 lỗi của một thí nghiệm khác, nhẹ hơn thí nghiệm ta định làm. Bài này trả lời: **làm sao chắc rằng tải dự kiến đã thực sự được tạo ra, được xử lý đúng nghiệp vụ, và con số cuối báo cáo được phép nói điều gì.** Ví dụ là endpoint báo giá `POST /api/quotes` của lab Tới Nơi, chạy trên PGlite với một scheduler gửi theo lịch.
+Báo cáo tải ghi «p95 = 6 ms, 0 lỗi, PASS». Nghe rất đẹp — cho tới khi ai đó hỏi: kế hoạch là 30 request mỗi giây, vậy thực tế đã *gửi* được bao nhiêu? Nếu generator chỉ gửi được một nửa vì tự chờ response, thì 0 lỗi kia thuộc về một thí nghiệm khác, nhẹ hơn thí nghiệm ta định làm. Bài này trả lời: **làm sao chắc rằng tải dự kiến đã thực sự được tạo ra, được xử lý đúng nghiệp vụ, và con số cuối báo cáo được phép nói điều gì.** Ví dụ là endpoint báo giá `POST /api/quotes` của lab Tới Nơi, chạy trên PGlite với một scheduler gửi theo lịch.
 
 <div class="tkh-callout">
 <span class="tkh-callout-title">Thông tin bài · SYS-08</span>
@@ -28,17 +28,17 @@ Báo cáo tải ghi «p95 = 6 ms, 0 lỗi, PASS». Nghe rất đẹp — cho t�
 
 ### 1.1. Vì sao baseline của SYS-07 chưa đủ
 
-Ở [SYS-07](/articles/system-testing-performance-test), một worker gửi request mới **chỉ khi request trước đã xong**. Đó là mô hình *closed loop*: tốc độ gửi tự điều chỉnh theo tốc độ trả lời. Khi server chậm đi, generator cũng chậm theo — và báo cáo vẫn có thể ghi «0 lỗi».
+Ở [SYS-07](/articles/system-testing-performance-test), một worker gửi request mới **chỉ khi request trước đã xong**. Đó là *closed model*: tốc độ gửi tự điều chỉnh theo tốc độ trả lời. Server chậm đi thì generator cũng chậm theo — và báo cáo vẫn có thể ghi «0 lỗi».
 
-Người dùng Tới Nơi không cư xử như vậy. Lúc 17:00, khách mới vẫn tiếp tục mở ứng dụng và bấm báo giá, bất kể những khách trước đang chờ lâu hay nhanh. Tải đến theo *nhịp đến* (arrival), không theo nhịp hoàn tất. Muốn đánh giá hệ thống ở một mức tải dự kiến, ta cần trả lời tách bạch ba câu:
+Khách Tới Nơi không cư xử như vậy: lúc 17:00, khách mới vẫn mở ứng dụng và bấm báo giá, bất kể khách trước chờ lâu hay nhanh. Tải đến theo *nhịp đến* (arrival), không theo nhịp hoàn tất. Muốn đánh giá hệ thống ở mức tải dự kiến, cần trả lời tách bạch ba câu:
 
-1. Ta **định** gửi bao nhiêu (planned)?
-2. Ta **thực gửi** được bao nhiêu (sent), số còn lại bị bỏ vì lý do gì (dropped)?
+1. Ta **định** gửi bao nhiêu (planned — offered load)?
+2. Ta **thực gửi** được bao nhiêu (sent — achieved load), số còn lại bị bỏ vì lý do gì (dropped)?
 3. Hệ thống **xử lý đúng** được bao nhiêu, nhanh tới đâu?
 
 ### 1.2. Đối tượng và điều kiện tiên quyết
 
-Bài dành cho QA/SDET và developer đã đọc SYS-07: biết p95/p99 theo nearest-rank, phân biệt throughput với goodput, hiểu vì sao phải lưu mẫu gốc. Cần đọc được TypeScript async (`Promise`, `Set`, `await`) và biết `fetch`. Không cần cài k6: lab dùng một scheduler nhỏ tự viết để mọi dòng logic đều đọc được.
+Bài dành cho QA/SDET và developer đã đọc SYS-07: biết p95/p99 theo nearest-rank, phân biệt throughput với goodput, hiểu vì sao phải lưu mẫu gốc. Cần đọc được TypeScript async (`Promise`, `Set`, `await`) và `fetch`. Không cần k6: lab dùng một scheduler nhỏ tự viết để mọi dòng logic đều đọc được.
 
 ### 1.3. Mục tiêu đo được
 
@@ -46,13 +46,13 @@ Sau bài, bạn có thể:
 
 - Viết workload model cho một endpoint từ dữ liệu nghiệp vụ, ghi rõ phần nào là giả định.
 - Phân biệt arrival rate, request rate, concurrency, VU, throughput; ước lượng concurrency từ arrival rate và thời gian một iteration.
-- Đọc và sửa một scheduler open-model: gửi theo lịch, không `await` response trong vòng slot, đo scheduler lag, ghi drop có lý do.
+- Đọc và sửa một scheduler open model: gửi theo lịch, không `await` response trong vòng slot, đo scheduler lag, ghi drop có lý do.
 - Kiểm tra bất biến đối soát `planned = sent + dropped` và đặt gate gồm cả drop, lỗi nghiệp vụ lẫn latency trước khi chạy.
 - Đọc báo cáo theo thứ tự đúng và phân biệt «generator không đạt tải» với «hệ thống không chịu nổi».
 
 ## 2. Khái niệm và những điều dễ nhầm
 
-**Load testing** đánh giá hệ thống ở mức tải được xác định là bình thường hoặc dự kiến, với tiêu chí về latency, lỗi, throughput và tài nguyên. Trong phân loại của Grafana k6, load test ở mức trung bình (average-load) khác smoke tải thấp, stress, spike, soak và breakpoint ở *mục tiêu* chứ không ở công cụ. Load test cần một **mức tải mục tiêu có căn cứ**; stress test ([SYS-09](/articles/system-testing-stress-test)) mới cố ý đi vượt mức đó.
+**Load testing** đánh giá hệ thống ở mức tải được xác định là bình thường hoặc dự kiến, với tiêu chí về latency, lỗi, throughput và tài nguyên. Theo phân loại của Grafana k6, average-load khác smoke tải thấp, stress, spike, soak và breakpoint ở *mục tiêu*, không ở công cụ. Load test cần **mức tải mục tiêu có căn cứ**; stress test ([SYS-09](/articles/system-testing-stress-test)) mới cố ý vượt mức đó.
 
 «Tải» không chỉ là số người dùng. Nó gồm loại request, nhịp đến, hành trình nhiều bước, dữ liệu, thời gian chạy và trạng thái cache/DB. Năm đại lượng sau thường bị dùng lẫn:
 
@@ -78,14 +78,14 @@ Hai mô hình sinh tải:
 
 ### 3.1. Trong dự án thật
 
-Workload model bắt đầu từ dữ liệu nghiệp vụ, không từ «cho 100 user chạy thử». Với báo giá của Tới Nơi, các câu hỏi cần có số liệu:
+Workload model bắt đầu từ dữ liệu nghiệp vụ, không từ «cho 100 user chạy thử». Với báo giá Tới Nơi, cần số liệu cho các câu hỏi:
 
 - Số phiên hoạt động theo giờ trong ngày; tỷ lệ cao điểm 11–13 h và 17–19 h (khớp khung giờ R-FARE-04).
 - Một khách báo giá bao nhiêu lần trước khi đặt, hoặc bỏ đi không đặt.
 - Phân bố theo dịch vụ (ride/parcel/food), thành phố, loại xe, quãng đường.
 - Tỷ lệ đọc/ghi: một chuyến kéo theo nhiều lần hỏi lại trạng thái (trang khách hỏi mỗi 2 giây theo R-NFR-04).
 
-Từ đó suy ra arrival rate **cho từng endpoint**, không chia đều tải tuỳ ý. Ví dụ giả định: 3 lần báo giá cho mỗi chuyến đặt ⇒ báo giá chiếm phần lớn request ghi, còn polling chiếm phần lớn request đọc.
+Từ đó suy ra arrival rate **cho từng endpoint**, không chia đều tải tuỳ ý. Ví dụ giả định: 3 lần báo giá cho mỗi chuyến đặt ⇒ báo giá chiếm phần lớn request ghi, polling chiếm phần lớn request đọc.
 
 ### 3.2. Thiết kế lab và giới hạn của nó
 
@@ -102,17 +102,17 @@ Oracle 35.000 tính tay từ SPEC, không gọi lại calculator: xe máy 12.000
 
 Ba lựa chọn có chủ đích:
 
-- **Không reset giữa các bước**: sau warm-up 20 request, dữ liệu được reset một lần; sau đó số quote tăng từ 0 lên 300 qua ba bước, phản ánh lượng dữ liệu ghi tích luỹ trong lượt này.
-- **Không dùng voucher**: voucher có giới hạn lượt, sẽ làm thay đổi cơ cấu lỗi giữa chừng.
+- **Không reset giữa các bước**: dữ liệu chỉ được reset một lần sau warm-up 20 request; sau đó số quote tăng từ 0 lên 300 qua ba bước, phản ánh dữ liệu ghi tích luỹ.
+- **Không dùng voucher**: voucher có giới hạn lượt, sẽ đổi cơ cấu lỗi giữa chừng.
 - **Không đặt chuyến**: R-API-13 giới hạn 5 lần `POST /api/trips`/60 giây/khách; R-API-07 ghi rõ endpoint báo giá «không bị giới hạn tần suất». Chọn endpoint không có limiter là chọn đúng đối tượng cho câu hỏi này, **không phải** tắt limiter để kết quả đẹp.
 
-## 4. Scheduler open-model: gửi theo lịch, không đợi response
+## 4. Scheduler open model: gửi theo lịch, không đợi response
 
 ### 4.1. Nguyên lý
 
-Với tốc độ r slot/giây, slot thứ i có thời điểm dự kiến `due = t0 + i × 1000 / r`. Tới slot, script **khởi động** request rồi đi tiếp tới slot sau; nó chỉ giữ promise trong tập `active`. Response chậm không làm lịch dịch đi như ở closed loop.
+Với tốc độ r slot/giây, slot thứ i có thời điểm dự kiến `due = t0 + i × 1000 / r`. Tới slot, script **khởi động** request rồi đi tiếp tới slot sau; nó chỉ giữ promise trong tập `active`. Response chậm không làm lịch dịch đi như ở closed model.
 
-Nhưng generator cũng là một chương trình: event loop của Node có thể bận, timer có thể thức dậy muộn. Vì vậy phải đo **scheduler lag** = thời điểm thực sự xét slot − `due`. Không đo lag thì không phân biệt được «hệ thống chậm» với «máy sinh tải chậm».
+Nhưng generator cũng là một chương trình: event loop của Node có thể bận, timer có thể thức dậy muộn. Vì vậy phải đo **scheduler lag** = thời điểm thực sự xét slot − `due`; không có lag thì không phân biệt được «hệ thống chậm» với «máy sinh tải chậm».
 
 <figure class="tkh-fig">
 <div class="tkh-fig-box">
@@ -162,17 +162,17 @@ Lab đặt các giới hạn sau, tất cả cố định **trước** khi chạ
 | Dừng khi lỗi | Đã có 10 failure | Slot ghi `failure-stop` cho phần còn lại |
 | Timeout/request | 2 giây (deadline phía client) | Request tính là failure, lỗi `TimeoutError` |
 
-Thứ tự xét trong code là `failure-stop` → `scheduler-late` → `in-flight-cap`. Lịch vẫn đi tới hết profile kể cả khi đã dừng gửi, để bất biến `planned = sent + dropped` luôn đúng — không giả vờ các slot đó đã hoàn tất, cũng không lặng lẽ biến mất khỏi mẫu số.
+Thứ tự xét trong code là `failure-stop` → `scheduler-late` → `in-flight-cap`. Lịch vẫn đi hết profile kể cả khi đã dừng gửi, để bất biến `planned = sent + dropped` luôn đúng: các slot đó không được giả vờ đã hoàn tất, cũng không lặng lẽ biến khỏi mẫu số.
 
-Không gửi bù slot trễ là một quyết định quan trọng: nếu generator khựng 300 ms rồi gửi dồn 9 request cùng lúc, nó tạo ra một đỉnh tải nhân tạo mà workload model không hề mô tả.
+Không gửi bù slot trễ là quyết định có chủ đích: nếu generator khựng 300 ms rồi gửi dồn 9 request cùng lúc, nó tạo một đỉnh tải nhân tạo mà workload model không mô tả.
 
 ### 4.3. Scheduler này không phải k6
 
-Đây là scheduler nhỏ viết cho bài học, **không phải** executor của k6. k6 cũng có khái niệm *dropped iterations* và hướng dẫn cấp đủ VU cho executor arrival-rate, nhưng ngữ nghĩa counter phải đọc theo từng executor; đừng đồng nhất tên counter của lab với metric của mọi công cụ. Để đo quy mô lớn, dùng generator đã được kiểm chứng, chạy trên máy riêng.
+Đây là scheduler nhỏ viết cho bài học, **không phải** executor của k6. k6 cũng có *dropped iterations* và hướng dẫn cấp đủ VU cho executor arrival-rate, nhưng ngữ nghĩa counter phải đọc theo từng executor; đừng đồng nhất counter của lab với metric của mọi công cụ. Đo quy mô lớn thì dùng generator đã được kiểm chứng, chạy trên máy riêng.
 
 ### 4.4. Bước tải và drain
 
-Cuối mỗi bước, script chờ hết cửa sổ theo lịch, rồi **drain** — chờ mọi request còn chạy kết thúc — trước khi sang bước sau. Vì có drain, ba bước không phải một ramp liên tục theo thời gian tuyệt đối. Báo cáo ghi riêng thời lượng theo lịch và thời gian gồm drain để không che phần đuôi. Bước `return-low` chỉ quan sát tải thấp vài giây sau bước mục tiêu; nó chưa đủ để kết luận hồi phục sau sự cố — đó là việc của [SYS-14](/articles/system-testing-recovery-test).
+Cuối mỗi bước, script chờ hết cửa sổ theo lịch rồi **drain** — chờ mọi request còn chạy kết thúc — trước khi sang bước sau. Vì có drain, ba bước không phải một ramp liên tục. Báo cáo ghi riêng thời lượng theo lịch và thời gian gồm drain để không che phần đuôi. Bước `return-low` chỉ quan sát tải thấp vài giây sau bước mục tiêu, chưa đủ để kết luận hồi phục sau sự cố — đó là việc của [SYS-14](/articles/system-testing-recovery-test).
 
 ## 5. Metrics và gate đặt trước phép đo
 
@@ -191,13 +191,13 @@ Cuối mỗi bước, script chờ hết cửa sổ theo lịch, rồi **drain**
 | p50/p95/p99 | Nearest-rank trên mọi request đã gửi, **gồm** failed attempts |
 | Scheduler lag | Lag tối đa trên cả slot đã gửi lẫn slot bị drop |
 
-Slot bị drop không có latency, nên **không** được nhét số 0 vào percentile — làm thế sẽ kéo p95 xuống đúng lúc hệ thống tệ nhất. Khi một bước không gửi được request nào, latency và error rate là `null`, không phải 0, và gate phải fail.
+Slot bị drop không có latency, nên **không** được nhét số 0 vào percentile — làm thế kéo p95 xuống đúng lúc hệ thống tệ nhất. Bước không gửi được request nào có latency và error rate là `null`, không phải 0, và gate phải fail.
 
-Một chi tiết nearest-rank: p99 của bước chỉ có 30 mẫu là mẫu thứ ⌈0,99 × 30⌉ = 30, tức **chính là max**. Với 240 mẫu, p99 là mẫu thứ 238. Con số p99 trên 30 mẫu không phải ước lượng tail ổn định.
+Một chi tiết nearest-rank: p99 của bước chỉ có 30 mẫu là mẫu thứ ⌈0,99 × 30⌉ = 30, tức **chính là max**. Với 240 mẫu, p99 là mẫu thứ 238.
 
 ### 5.2. Gate
 
-Gate **giả định cho lab local**, khai báo trong code trước khi chạy: mỗi bước **zero drops, zero errors và p95 &lt; 500 ms**. Ba điều kiện đi cùng nhau vì mỗi điều kiện bịt một lỗ hổng của hai điều kiện kia:
+Gate là **giả định cho lab local**, khai báo trong code trước khi chạy: mỗi bước **zero drops, zero errors và p95 &lt; 500 ms**. Ba điều kiện đi cùng nhau vì mỗi điều kiện bịt lỗ hổng của hai điều kiện kia:
 
 - p95 thấp nhưng drop nhiều ⇒ hệ thống chưa được kiểm ở tải yêu cầu.
 - 0 drop, p95 thấp nhưng sai tiền ⇒ nhanh nhưng sai.
@@ -207,9 +207,9 @@ Không đổi ngưỡng sau khi xem số đo. Nếu ngưỡng sai, sửa nó tro
 
 ### 5.3. Entry và exit
 
-**Entry**: functional smoke của endpoint đúng ([SYS-01](/articles/system-testing-smoke-test)); dataset, endpoint và mức tải mục tiêu đã ghi; môi trường thuộc quyền kiểm thử; không có benchmark khác chạy cùng máy nếu muốn giảm nhiễu.
+**Entry**: functional smoke của endpoint đúng ([SYS-01](/articles/system-testing-smoke-test)); dataset, endpoint và mức tải mục tiêu đã ghi; môi trường thuộc quyền kiểm thử; không chạy benchmark khác cùng máy để giảm nhiễu.
 
-**Exit của bài tập**: đối soát khớp, chạy đủ profile, gate đạt, raw evidence được lưu, giới hạn được công bố. Nếu fail do generator, kết luận là *thí nghiệm chưa đạt tải yêu cầu* — chưa được nói server không chịu nổi.
+**Exit của bài tập**: đối soát khớp, chạy đủ profile, gate đạt, bằng chứng gốc được lưu, giới hạn được công bố. Nếu fail do generator, kết luận là *thí nghiệm chưa đạt tải yêu cầu* — chưa được nói server không chịu nổi.
 
 ## 6. Thực hành có thể chạy lại
 
@@ -223,7 +223,7 @@ npx tsx articles/system-testing-load-test/load.ts
 npm run typecheck
 ```
 
-Script tự tạo PGlite và HTTP server trên cổng loopback ngẫu nhiên, không nhận URL bên ngoài và không dùng DB của người dùng. Mỗi lượt mới ghi `reports/load/sys08-load.json`; evidence đã commit nằm riêng ở `load-observed.json` và không bị ghi đè.
+Script tự tạo PGlite và HTTP server trên cổng loopback ngẫu nhiên, không nhận URL bên ngoài và không dùng DB của người dùng. Mỗi lượt mới ghi `reports/load/sys08-load.json`; bằng chứng đã commit nằm riêng ở `load-observed.json` và không bị ghi đè.
 
 ### 6.2. Dựng hệ thống và request có oracle
 
@@ -232,7 +232,7 @@ const system = await createPgliteSystem({ clock: new FixedClock(vnTime(2026, 11,
 const server = createApp(system.deps, { logErrors: false }).listen(0, '127.0.0.1');
 ```
 
-Đồng hồ cố định 09:00 để giá không trượt sang giờ cao điểm giữa chừng. Mỗi request mang oracle của chính nó:
+Đồng hồ cố định 09:00 để giá không trượt sang giờ cao điểm. Mỗi request mang oracle của chính nó:
 
 ```ts
 const res = await fetch(url, {
@@ -245,7 +245,7 @@ const body = await res.json() as { quote?: { total?: number; quoteId?: string } 
 valid = status === 200 && body.quote?.total === 35_000 && typeof body.quote.quoteId === 'string';
 ```
 
-Latency đo từ trước `fetch` tới sau khi parse JSON và kiểm oracle — tức gồm client, loopback, server, PGlite và xử lý response. Đây là ranh giới đo của lab, không giống hệt `http_req_duration` của k6.
+Latency đo từ trước `fetch` tới sau khi parse JSON và kiểm oracle (như SYS-07), nên gồm client, loopback, server, PGlite và xử lý response — không giống hệt `http_req_duration` của k6.
 
 ### 6.3. Vòng slot — phần cốt lõi
 
@@ -268,7 +268,7 @@ for (let slot = 0; slot < planned; slot++) {
 
 - `await sleep(...)` chỉ chờ **tới due time**, không chờ HTTP response.
 - `send().then(...)` ghi mẫu khi request xong; vòng lặp không đứng đợi.
-- Không có `await send()` trong vòng slot. Viết `await send()` ở đây là quay lại closed loop mà không ai nhận ra — lỗi thiết kế phổ biến nhất khi tự viết generator.
+- Không có `await send()` trong vòng slot. Viết `await send()` ở đây là quay lại closed model mà không ai nhận ra — lỗi thiết kế phổ biến nhất khi tự viết generator.
 
 Sau vòng slot, chờ hết cửa sổ rồi drain:
 
@@ -290,13 +290,13 @@ const p = (q: number) => sorted.length ? sorted[Math.ceil(q * sorted.length) - 1
 illustrativeGatePassed: dropped.length === 0 && errors === 0 && p95 !== null && p95 < 500,
 ```
 
-`p95 !== null` là điều kiện nhỏ nhưng thiết yếu: một bước không gửi được gì phải fail, không được lọt qua vì «không có latency xấu».
+`p95 !== null` nhỏ nhưng thiết yếu: bước không gửi được gì phải fail, không lọt qua vì «không có latency xấu».
 
-### 6.5. Expected và observed
+### 6.5. Mong đợi và thực tế
 
-**Expected** (đặt trước khi chạy): planned = 300, sent = 300, dropped = 0, errors = 0, cả ba bước đạt gate, exit 0. Số latency không được hardcode vì phụ thuộc máy.
+**Mong đợi** (đặt trước khi chạy): planned = 300, sent = 300, dropped = 0, errors = 0, cả ba bước đạt gate, exit 0. Số latency không được hardcode vì phụ thuộc máy.
 
-**Observed** — lượt ghi trong `load-observed.json`, đo lúc 14:09:09 UTC ngày 13/11/2026 (21:09:09 giờ Việt Nam) trên Windows 10.0.26300, Node v24.15.0, Intel Core i7-10700K, 16 logical CPU, RAM 34.245.918.720 byte; exit 0; typecheck lab đạt:
+**Thực tế — báo cáo gốc (13/11/2026)** — lượt ghi trong `load-observed.json`, đo lúc 14:09:09 UTC (21:09:09 giờ Việt Nam) trên Windows 10.0.26300, Node v24.15.0, Intel Core i7-10700K, 16 logical CPU, RAM 34.245.918.720 byte; exit 0; typecheck lab đạt:
 
 | Bước | Lịch | Planned / sent / drop / lỗi | p50 ms | p95 ms | p99 ms | Valid RPS gồm drain | Lag tối đa ms | Peak in-flight |
 |---|---|---|---:|---:|---:|---:|---:|---:|
@@ -304,19 +304,19 @@ illustrativeGatePassed: dropped.length === 0 && errors === 0 && p95 !== null && 
 | target | 30/s × 8 s | 240 / 240 / 0 / 0 | 2,96 | 6,31 | 10,37 | 29,95 | 16,48 | 1 |
 | return-low | 10/s × 3 s | 30 / 30 / 0 / 0 | 2,63 | 10,09 | 10,21 | 9,97 | 15,24 | 1 |
 
-Mọi request hoàn tất trong cửa sổ của bước (`completedInWindow` = sent ở cả ba bước). Thời gian gồm drain là 3.002,5 ms, 8.012,7 ms và 3.009,0 ms — gần như trùng cửa sổ lịch vì không có request nào treo tới cuối. Báo cáo của lượt đó còn kiểm JSON độc lập: `planned = sent + dropped`, số mẫu, số drop slot, failure count và p95 khớp summary.
+Mọi request hoàn tất trong cửa sổ của bước (`completedInWindow` = sent ở cả ba bước). Thời gian gồm drain là 3.002,5 ms, 8.012,7 ms và 3.009,0 ms — gần trùng cửa sổ lịch vì không request nào treo tới cuối. Báo cáo của lượt đó còn kiểm JSON độc lập: `planned = sent + dropped`, số mẫu, số drop slot, failure count và p95 khớp summary.
 
-Bài viết **không** chạy lại script khi biên tập: máy đang chạy các tác vụ khác, số đo mới sẽ bị nhiễu và không so được với lượt trên. Mọi số liệu ở đây là của lượt 13/11/2026 kèm cấu hình máy đã ghi.
+Script **không** được chạy lại khi biên tập: máy đang chạy các tác vụ khác, số đo mới sẽ bị nhiễu và không so được với lượt trên. Mọi số liệu ở đây lấy từ báo cáo gốc, kèm cấu hình máy đã ghi.
 
 ### 6.6. Đọc kỹ kết quả «đẹp»
 
-Ba quan sát làm câu kết luận nhỏ lại:
+Ba quan sát thu hẹp kết luận:
 
-1. **Peak in-flight = 1 ở cả ba bước.** Latency khoảng 3 ms, còn khoảng cách giữa hai slot ở 30/s là 33 ms; request luôn xong trước khi slot sau tới. Open model đúng về thiết kế, nhưng lượt này **chưa tạo ra overlap** — nên chưa có gì để phân biệt nó với closed loop. Ước lượng theo quan hệ concurrency ≈ arrival rate × thời gian một iteration: 30/s × 0,003 s ≈ 0,09, khớp với peak 1.
-2. **Các nhánh drop chưa được kích hoạt.** Không slot nào chạm cap 20, lag 100 ms hay 10 failure. Vậy lượt này chưa kiểm nghiệm hành vi khi quá tải; đó là thí nghiệm riêng của SYS-09.
-3. **Lag tối đa khoảng 15–16 ms ở mọi bước, kể cả bước 10/s.** Lag không tăng theo tải, gợi ý nguồn gốc nằm ở độ phân giải timer của hệ điều hành hơn là ở server. Đây là *giả thuyết* chưa được kiểm; nó dưới ngưỡng 100 ms nên không gây drop, nhưng là lý do phải đo lag thay vì giả định timer chính xác.
+1. **Peak in-flight = 1 ở cả ba bước.** Latency khoảng 3 ms, còn khoảng cách giữa hai slot ở 30/s là 33 ms; request luôn xong trước khi slot sau tới. Open model đúng về thiết kế, nhưng lượt này **chưa tạo ra overlap** — nên chưa có gì để phân biệt nó với closed model. Ước lượng theo quan hệ concurrency ≈ arrival rate × thời gian một iteration: 30/s × 0,003 s ≈ 0,09, khớp với peak 1.
+2. **Các nhánh drop chưa được kích hoạt.** Không slot nào chạm cap 20, lag 100 ms hay 10 failure. Lượt này chưa kiểm hành vi khi quá tải — thí nghiệm riêng của SYS-09.
+3. **Lag tối đa khoảng 15–16 ms ở mọi bước, kể cả bước 10/s.** Lag không tăng theo tải, gợi ý nguồn gốc là độ phân giải timer của hệ điều hành hơn là server — một *giả thuyết* chưa được kiểm. Lag dưới ngưỡng 100 ms nên không gây drop, nhưng đó là lý do phải đo lag thay vì giả định timer chính xác.
 
-Kết luận được phép: *đạt tải giả định 30 arrival/s trong lab local với oracle nghiệp vụ đúng trên 300/300 response*. Chưa xác định capacity hay bottleneck.
+Kết luận được phép: *đạt tải giả định 30 arrival/s trong lab local, oracle nghiệp vụ đúng trên 300/300 response*. Chưa xác định capacity hay bottleneck.
 
 ## 7. Đọc báo cáo và phân loại lỗi
 
@@ -335,44 +335,44 @@ Phân loại kết luận theo bằng chứng:
 
 - **Thí nghiệm không hợp lệ** — drop do generator hoặc lag lớn: chưa đạt tải yêu cầu, chạy lại sau khi sửa generator.
 - **Failure hiệu năng** — gửi đủ, đúng nghiệp vụ, nhưng p95 vượt gate.
-- **Failure chức năng dưới tải** — response sai tiền dù tải thấp hay cao: điều tra độc lập với latency, mức ưu tiên cao hơn tối ưu tốc độ.
+- **Failure chức năng dưới tải** — response sai tiền, dù tải thấp hay cao: điều tra độc lập với latency, ưu tiên cao hơn tối ưu tốc độ.
 
 ## 8. Mở rộng nâng cao
 
 ### 8.1. Ước lượng worker và nhận biết saturation
 
-Trong điều kiện ổn định, concurrency trung bình ≈ arrival rate × thời gian trung bình một iteration. Ví dụ giả định: 30/s và 0,2 s ⇒ khoảng 6 tác vụ đang chạy. Nhưng mean không phải cam kết: khi p99 cao, số slot bận vượt xa ước lượng và tạo drop. Cần headroom cho tail. Tăng cap chỉ có ý nghĩa khi generator và hệ thống còn tài nguyên — nếu không, ta chỉ chuyển drop thành timeout.
+Trong điều kiện ổn định, concurrency trung bình ≈ arrival rate × thời gian trung bình một iteration. Ví dụ giả định: 30/s và 0,2 s ⇒ khoảng 6 tác vụ đang chạy. Nhưng đó là trung bình: khi p99 cao, số slot bận vượt xa ước lượng và tạo drop, nên cần headroom cho tail. Tăng cap chỉ có ý nghĩa khi generator và hệ thống còn tài nguyên; nếu không, ta chỉ đổi drop thành timeout.
 
-Dấu hiệu saturation khi tăng dần tải theo bước: throughput hoàn tất ngừng tăng theo arrival, latency và in-flight tăng nhanh, rồi drop xuất hiện. Điểm uốn đó là thông tin cho capacity planning — nhưng tìm nó là mục tiêu của stress/breakpoint, không phải load test.
+Dấu hiệu saturation khi tăng tải theo bước: throughput hoàn tất ngừng tăng theo arrival, latency và in-flight tăng nhanh, rồi drop xuất hiện. Điểm uốn đó phục vụ capacity planning, nhưng tìm nó là mục tiêu của stress/breakpoint, không phải load test.
 
 ### 8.2. Workload mix và dữ liệu thực tế
 
-Mở rộng sang ride/parcel/food, quãng đường và thành phố theo phân bố có căn cứ. Với tạo chuyến, cần đủ khách và tài xế, idempotency key riêng cho mỗi iteration và chính sách cleanup. Đừng tạo hàng nghìn request với cùng `Idempotency-Key` rồi tuyên bố đã kiểm throughput tạo chuyến: theo R-IDEM, phần lớn chỉ là replay kết quả đã lưu. Tách giao dịch mới và replay thành hai metric.
+Mở rộng workload sang ride/parcel/food, quãng đường và thành phố theo phân bố có căn cứ. Với tạo chuyến, cần đủ khách và tài xế, idempotency key riêng mỗi iteration và chính sách cleanup. Đừng tạo hàng nghìn request với cùng `Idempotency-Key` rồi tuyên bố đã kiểm throughput tạo chuyến: theo R-IDEM, phần lớn chỉ là replay kết quả đã lưu. Tách giao dịch mới và replay thành hai metric.
 
 ### 8.3. Tải đọc/ghi và DB lớn
 
-300 quote mới trên DB nhỏ chưa mô phỏng index, buffer, cache của dữ liệu nhiều tháng. Dựng dataset đại diện, xem query plan, connection pool, lock/wait/IO. Không chỉ tăng VU mà bỏ qua kích thước dữ liệu. PGlite một kết nối không thay được thí nghiệm nhiều transaction trên PostgreSQL server thật ([SYS-13](/articles/system-testing-data-integrity-test) gặp đúng giới hạn này).
+300 quote mới trên DB nhỏ chưa mô phỏng index, buffer, cache của dữ liệu nhiều tháng. Dựng dataset đại diện, xem query plan, connection pool, lock/wait/IO — đừng chỉ tăng VU mà bỏ qua kích thước dữ liệu. PGlite một kết nối không thay được thí nghiệm nhiều transaction trên PostgreSQL server thật ([SYS-13](/articles/system-testing-data-integrity-test) gặp đúng giới hạn này).
 
 ### 8.4. Rate theo endpoint và tail latency
 
-Một iteration nghiệp vụ «khách đặt xe» có thể gồm báo giá, đặt chuyến và nhiều lần hỏi trạng thái. 30 iteration/s lúc đó không còn là 30 request/s. Ghi metric theo operation; percentile gộp có thể che một endpoint ít traffic nhưng chậm. Khi sinh tải theo lịch, đo cả lag tại generator lẫn latency sau khi request thực gửi để thấy phần thời gian chờ trước khi gửi — nếu bỏ phần này, ta mắc *coordinated omission* đã nói ở SYS-07.
+Một iteration «khách đặt xe» có thể gồm báo giá, đặt chuyến và nhiều lần hỏi trạng thái; 30 iteration/s lúc đó không còn là 30 request/s. Ghi metric theo operation, vì percentile gộp có thể che một endpoint ít traffic nhưng chậm. Khi sinh tải theo lịch, đo cả lag tại generator lẫn latency sau khi request thực gửi để thấy phần thời gian chờ trước khi gửi — bỏ phần này là mắc *coordinated omission* đã nói ở SYS-07.
 
 ### 8.5. So sánh release và độ tin cậy của kết luận
 
-So baseline với candidate trên cùng máy, dữ liệu, profile, chính sách cache và đủ thời gian. Lặp nhiều lượt để thấy biến thiên; không kết luận từ vài ms chênh lệch ở một lượt 14 giây. Threshold theo SLO và mục tiêu thí nghiệm, đặt trước khi chạy; luôn giữ oracle nghiệp vụ khi tối ưu. Trong pipeline, load test ngắn kiểu lab hợp với gate «không thoái lui rõ rệt», còn load test dài trên môi trường riêng hợp với quyết định release.
+So baseline với candidate trên cùng máy, dữ liệu, profile, chính sách cache và đủ thời gian. Lặp nhiều lượt để thấy biến thiên; không kết luận từ vài ms chênh lệch ở một lượt 14 giây. Threshold theo SLO và mục tiêu thí nghiệm, đặt trước khi chạy; giữ oracle nghiệp vụ khi tối ưu.
 
 ### 8.6. Tách generator khỏi hệ thống
 
-Trong lab, client, server và PGlite cùng một process, cùng CPU và event loop. Request của client và xử lý của server tranh cùng tài nguyên; lag của generator và latency của server không tách được hoàn toàn. Bước tiếp theo hợp lý: server một process, generator process/máy khác, đồng bộ cấu hình, đo CPU/mạng ở cả hai phía. Tách process không tự động xoá nhiễu — chỉ làm cho nhiễu đo được.
+Trong lab, client, server và PGlite chung một process, CPU và event loop, nên lag của generator và latency của server không tách được hoàn toàn. Bước tiếp theo hợp lý: server một process, generator ở process/máy khác, đồng bộ cấu hình, đo CPU/mạng ở cả hai phía. Tách process không tự xoá nhiễu, chỉ làm cho nhiễu đo được.
 
 ## 9. Anti-pattern, giới hạn và đánh đổi
 
-Những cách làm tạo kết luận thiếu căn cứ:
+**Anti-pattern:**
 
 - Ghi «100 users» mà không mô tả hành vi, nhịp đến, dữ liệu.
 - Chỉnh `sleep` cho tới khi ra RPS mong muốn rồi bỏ đo scheduler lag.
 - Báo p95 chỉ trên response thành công, hoặc nhét slot drop vào percentile bằng số 0.
-- `await send()` trong vòng slot — vô tình quay về closed loop.
+- `await send()` trong vòng slot — vô tình quay về closed model.
 - Mọi request dùng chung một idempotency key.
 - Chạy chưa đủ tải nhưng vẫn ghi PASS.
 - Lấy số loopback một process để dự báo cluster production.
@@ -383,7 +383,7 @@ Những cách làm tạo kết luận thiếu căn cứ:
 <p>Profile chỉ 14 giây theo lịch, có drain giữa các bước — không phải steady-state dài hay soak. Client/server/PGlite cùng process, một DB connection, dữ liệu nhỏ, một khách. Không thu CPU/DB telemetry tách biệt. Không có browser, mạng ngoài, provider thanh toán, generator riêng hay k6 thực thi. Các nhánh drop/stop không được kích hoạt ở lượt đo. Bài không chứng minh giới hạn hệ thống; bước giảm về tải thấp không thay Recovery Test. Không so chênh lệch với SYS-07 như phép đo tác động của DB, vì cả workload lẫn storage đều đã đổi.</p>
 </div>
 
-Đánh đổi chi phí/phạm vi: profile ngắn trên một máy rẻ, chạy được trong pipeline, phát hiện sớm thoái lui lớn và lỗi «nhanh nhưng sai». Đổi lại, nó không trả lời câu hỏi capacity. Load test có ý nghĩa cho release cần môi trường gần production, dữ liệu đại diện, generator riêng và thời gian chạy dài — tốn hơn nhiều, nên chỉ chạy ở mốc quyết định.
+**Đánh đổi chi phí/phạm vi:** profile ngắn trên một máy rẻ, chạy được trong pipeline, phát hiện sớm thoái lui lớn và lỗi «nhanh nhưng sai», nhưng không trả lời câu hỏi capacity. Load test có ý nghĩa cho release cần môi trường gần production, dữ liệu đại diện, generator riêng và thời gian chạy dài — tốn hơn nhiều, nên chỉ chạy ở mốc quyết định.
 
 ## 10. Bài tập và câu hỏi tự kiểm
 
@@ -393,7 +393,7 @@ Những cách làm tạo kết luận thiếu căn cứ:
 
 <details>
 <summary><b>Lời giải gợi ý</b></summary>
-<p>Không. Drop rate = 30/300 = 10%: hệ thống chưa được kiểm ở tải mục tiêu. 0 lỗi trên 270 request đã gửi không bù được 30 slot bị bỏ. Bước tiếp theo là đọc lý do drop: <code>in-flight-cap</code> hay <code>scheduler-late</code> chỉ về hai hướng điều tra khác nhau.</p>
+<p>Không. Drop rate = 30/300 = 10%: hệ thống chưa được kiểm ở tải mục tiêu; 0 lỗi trên 270 request đã gửi không bù được 30 slot bị bỏ. Bước tiếp theo là đọc lý do drop: <code>in-flight-cap</code> hay <code>scheduler-late</code> chỉ về hai hướng điều tra khác nhau.</p>
 </details>
 
 **Bài 2 (trung bình).** Arrival 50/s, một iteration trung bình 0,4 s. Concurrency trung bình khoảng bao nhiêu, và cap 20 có đủ không?
@@ -414,7 +414,7 @@ Những cách làm tạo kết luận thiếu căn cứ:
 
 <details>
 <summary><b>Lời giải gợi ý</b></summary>
-<p>Với latency ~3 ms và khoảng slot 33 ms, request luôn xong trước slot sau, nên closed loop và open model cho kết quả gần như giống nhau ở lab này (peak in-flight = 1). Nhưng khi server chậm hơn khoảng slot, <code>await send()</code> sẽ đẩy lùi lịch: slot đến muộn, lag vượt 100 ms và bị drop là <code>scheduler-late</code> — hoặc tệ hơn, nếu bỏ cả rào lag, tải thực tế giảm đi mà không ai hay. Thay đổi phá mô hình workload; test xanh chỉ vì điều kiện hiện tại không phơi lỗi.</p>
+<p>Với latency ~3 ms và khoảng slot 33 ms, request luôn xong trước slot sau, nên closed model và open model cho kết quả gần như giống nhau ở lab này (peak in-flight = 1). Nhưng khi server chậm hơn khoảng slot, <code>await send()</code> sẽ đẩy lùi lịch: slot đến muộn, lag vượt 100 ms và bị drop là <code>scheduler-late</code> — hoặc tệ hơn, nếu bỏ cả rào lag, tải thực tế giảm đi mà không ai hay. Thay đổi phá mô hình workload; test xanh chỉ vì điều kiện hiện tại không phơi lỗi.</p>
 </details>
 
 **Bài 5 (nâng cao).** Thiết kế lại thí nghiệm để generator và server ở hai process (hoặc hai máy).
@@ -451,14 +451,14 @@ Những cách làm tạo kết luận thiếu căn cứ:
 
 <details>
 <summary><b>Đáp án</b></summary>
-<p>Đã kiểm: hệ thống xử lý đúng 30 arrival/s khi request không chồng nhau. Chưa kiểm: hành vi khi có overlap thật, tranh chấp DB, cap và các nhánh drop. Open model đúng về thiết kế nhưng điều kiện chưa phơi ra khác biệt với closed loop.</p>
+<p>Đã kiểm: hệ thống xử lý đúng 30 arrival/s khi request không chồng nhau. Chưa kiểm: hành vi khi có overlap thật, tranh chấp DB, cap và các nhánh drop. Open model đúng về thiết kế nhưng điều kiện chưa phơi ra khác biệt với closed model.</p>
 </details>
 
 **Câu 5.** Vì sao script không gửi bù slot bị trễ quá 100 ms?
 
 <details>
 <summary><b>Đáp án</b></summary>
-<p>Gửi bù dồn nhiều request vào một thời điểm, tạo spike nhân tạo không có trong workload model. Ghi drop kèm lý do giữ thí nghiệm trung thực: báo cáo cho thấy generator đã không theo kịp lịch.</p>
+<p>Gửi bù dồn nhiều request vào một thời điểm, tạo spike nhân tạo không có trong workload model. Ghi drop kèm lý do giữ thí nghiệm trung thực: báo cáo cho thấy generator không theo kịp lịch.</p>
 </details>
 
 ## 11. Tài liệu tham khảo
@@ -467,9 +467,9 @@ Các nguồn ngoài được tra cứu 13/11/2026.
 
 - Grafana k6 — Load test types: https://grafana.com/docs/k6/latest/testing-guides/test-types/ (phân biệt smoke, average-load, stress, soak, spike, breakpoint theo mục tiêu).
 - Grafana k6 — Arrival-rate VU allocation: https://grafana.com/docs/k6/latest/using-k6/scenarios/concepts/arrival-rate-vu-allocation/ (cần đủ VU cho lịch arrival; quan hệ với thời gian iteration).
-- Grafana k6 — Dropped iterations: https://grafana.com/docs/k6/latest/using-k6/scenarios/concepts/dropped-iterations/ (nguyên nhân cấu hình và hệ thống; đưa drop vào tiêu chí đánh giá). Script trong bài **không** phải k6 và bài không tuyên bố đã chạy k6.
+- Grafana k6 — Dropped iterations: https://grafana.com/docs/k6/latest/using-k6/scenarios/concepts/dropped-iterations/ (nguyên nhân cấu hình và hệ thống; đưa drop vào tiêu chí đánh giá).
 - ISTQB, *Certified Tester Foundation Level Syllabus v4.0.1* (2024) — https://istqb.org/wp-content/uploads/2024/11/ISTQB_CTFL_Syllabus_v4.0.1.pdf: thuật ngữ test type phi chức năng. Cách dựng scheduler và gate là thực hành của series.
-- Lab Tới Nơi: `SPEC.md` (R-API-07, R-API-13, R-FARE-01…08, R-QUOTE-01, R-IDEM, R-NFR-03, R-NFR-07), script `load.ts`, evidence `load-observed.json` — https://github.com/rickymta/antblog/tree/main/examples/toi-noi-testing/articles/system-testing-load-test
+- Lab Tới Nơi: `SPEC.md` (R-API-07, R-API-13, R-FARE-01…08, R-QUOTE-01, R-IDEM, R-NFR-03, R-NFR-07), script `load.ts`, bằng chứng `load-observed.json` — https://github.com/rickymta/antblog/tree/main/examples/toi-noi-testing/articles/system-testing-load-test
 - Bài liên quan: [SYS-07 Performance Test](/articles/system-testing-performance-test) · [SYS-09 Stress Test](/articles/system-testing-stress-test) · [SYS-03 Functional Test](/articles/system-testing-functional-test) · [Non-functional testing tổng quan](/articles/non-functional-testing-tong-quan)
 
 Bài tiếp theo: [SYS-09 · Stress Test](/articles/system-testing-stress-test).
