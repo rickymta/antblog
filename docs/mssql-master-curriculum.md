@@ -57,20 +57,22 @@ Lộ trình: `mssql-2022-qua-toi-noi` — **đã viết đủ 10 bài ngày 16/1
 
 ## P02 · T-SQL cho nghiệp vụ
 
-Đầu vào: P01. Đầu ra: bộ truy vấn có expected output, đối soát số dòng và tổng tiền. Lộ trình dự kiến `mssql-2022-qua-toi-noi-phan-02`.
+Đầu vào: P01. Đầu ra: bộ truy vấn có expected output, đối soát số dòng và tổng tiền.
+
+Lộ trình: `mssql-2022-qua-toi-noi-phan-02` — **đã viết đủ 10 bài ngày 17/11/2026**. Lab: `examples/toi-noi-mssql/p02` (SQL Server **2022 CU28 thật**; lược đồ P01 + bộ dữ liệu 30 ngày **giống hệt từng dòng** lab PostgreSQL P02, đã đối chiếu 28.576 dòng; 16 file, 331 kiểm tra PASS; `OUTPUT.txt`). Chưa seed/deploy lên website.
 
 | ID | Bài / slug | Mức | Làm được sau bài / sản phẩm thực hành | Trạng thái |
 |---|---|---|---|---|
-| MS-011 | NULL, CASE, ISNULL và COALESCE<br>`mssql-null-case-isnull-coalesce` | CB | Phân biệt thiếu dữ liệu, không áp dụng và 0; khác biệt kiểu trả về của ISNULL | Dự kiến |
-| MS-012 | Tổng hợp: GROUP BY, HAVING, ROLLUP và GROUPING SETS<br>`mssql-group-by-rollup-grouping-sets` | CB | Báo cáo theo thành phố/dịch vụ có dòng tổng, mẫu số rõ ràng | Dự kiến |
-| MS-013 | JOIN, APPLY và số dòng sau khi nối<br>`mssql-join-apply-cardinality` | CB | Không nhân đôi tổng tiền; CROSS/OUTER APPLY lấy "N dòng mới nhất mỗi nhóm" | Dự kiến |
-| MS-014 | Subquery, EXISTS, CTE và bảng tạm<br>`mssql-subquery-exists-cte-temp-table` | TB | Tách truy vấn đối soát thành bước kiểm chứng; #temp vs biến bảng | Dự kiến |
-| MS-015 | Window function và mệnh đề WINDOW (SQL Server 2022)<br>`mssql-window-function-window-clause` | TB | Luỹ kế, xếp hạng, LAG/LEAD với frame tường minh | Dự kiến |
-| MS-016 | Ngày giờ, AT TIME ZONE, DATETRUNC và DATE_BUCKET<br>`mssql-ngay-gio-at-time-zone-date-bucket` | TB | Bộ lọc ngày nghiệp vụ theo giờ VN, gom theo khung 15 phút | Dự kiến |
-| MS-017 | Upsert: MERGE và các mẫu an toàn hơn<br>`mssql-upsert-merge` | TB | Nhập dữ liệu có quy tắc cập nhật; rủi ro của MERGE khi đồng thời | Dự kiến |
-| MS-018 | Phân trang lịch sử chuyến: OFFSET/FETCH và keyset<br>`mssql-phan-trang-keyset` | NC | Chứng minh điều kiện trang kế tiếp với khoá sắp xếp trùng | Dự kiến |
-| MS-019 | Recursive CTE với cây khu vực<br>`mssql-recursive-cte-cay-khu-vuc` | NC | Duyệt cây có MAXRECURSION, phát hiện chu trình | Dự kiến |
-| MS-020 | Thực hành: truy vấn vận hành và đối soát thanh toán<br>`mssql-thuc-hanh-tsql-doi-soat` | NC | Bàn giao T-SQL, expected output và giải thích chênh lệch | Dự kiến |
+| MS-011 | NULL, CASE, ISNULL và COALESCE<br>`mssql-null-case-isnull-coalesce` | CB | Phân biệt thiếu dữ liệu, không áp dụng và 0; khác biệt kiểu trả về của ISNULL | Đã viết |
+| MS-012 | Tổng hợp: GROUP BY, HAVING, ROLLUP và GROUPING SETS<br>`mssql-group-by-rollup-grouping-sets` | CB | Báo cáo theo thành phố/dịch vụ có dòng tổng, mẫu số rõ ràng | Đã viết |
+| MS-013 | JOIN, APPLY và số dòng sau khi nối<br>`mssql-join-apply-cardinality` | CB | Không nhân đôi tổng tiền; CROSS/OUTER APPLY lấy "N dòng mới nhất mỗi nhóm" | Đã viết |
+| MS-014 | Subquery, EXISTS, CTE và bảng tạm<br>`mssql-subquery-exists-cte-temp-table` | TB | Tách truy vấn đối soát thành bước kiểm chứng; #temp vs biến bảng | Đã viết |
+| MS-015 | Window function và mệnh đề WINDOW (SQL Server 2022)<br>`mssql-window-function-window-clause` | TB | Luỹ kế, xếp hạng, LAG/LEAD với frame tường minh | Đã viết |
+| MS-016 | Ngày giờ, AT TIME ZONE, DATETRUNC và DATE_BUCKET<br>`mssql-ngay-gio-at-time-zone-date-bucket` | TB | Bộ lọc ngày nghiệp vụ theo giờ VN, gom theo khung 15 phút | Đã viết |
+| MS-017 | Upsert: MERGE và các mẫu an toàn hơn<br>`mssql-upsert-merge` | TB | Nhập dữ liệu có quy tắc cập nhật; rủi ro của MERGE khi đồng thời | Đã viết |
+| MS-018 | Phân trang lịch sử chuyến: OFFSET/FETCH và keyset<br>`mssql-phan-trang-keyset` | NC | Chứng minh điều kiện trang kế tiếp với khoá sắp xếp trùng | Đã viết |
+| MS-019 | Recursive CTE với cây khu vực<br>`mssql-recursive-cte-cay-khu-vuc` | NC | Duyệt cây có MAXRECURSION, phát hiện chu trình | Đã viết |
+| MS-020 | Thực hành: truy vấn vận hành và đối soát thanh toán<br>`mssql-thuc-hanh-tsql-doi-soat` | NC | Bàn giao T-SQL, expected output và giải thích chênh lệch | Đã viết |
 
 ## P03 · Lưu trữ, index và execution plan
 

@@ -1,0 +1,1255 @@
+
+-- ==================== p01/00-reset.sql ====================
+Changed database context to 'master'.
+Đã xoá database ToiNoi cũ
+Changed database context to 'ToiNoi'.
+database_hien_tai|login|user_trong_db|schema_mac_dinh|collation_db
+-----------------|-----|-------------|---------------|------------
+ToiNoi|sa|dbo|dbo|Vietnamese_100_CI_AS
+phien_ban|cu|edition
+---------|--|-------
+16.0.4325.4|CU28|Developer Edition (64-bit)
+
+-- ==================== p01/01-schema.sql ====================
+Changed database context to 'ToiNoi'.
+stt|cot|kieu|null_|mac_dinh
+---|---|----|-----|--------
+1|id|uniqueidentifier|NOT NULL|df_trips_id
+2|code|bigint|NOT NULL|IDENTITY
+3|kind|varchar(10)|NOT NULL|
+4|city_id|smallint|NOT NULL|
+5|customer_id|uniqueidentifier|NOT NULL|
+6|driver_id|uniqueidentifier|NULL|
+7|merchant_id|uniqueidentifier|NULL|
+8|status|varchar(12)|NOT NULL|df_trips_status
+9|fare|int|NOT NULL|
+10|requested_at|datetimeoffset(3)|NOT NULL|df_trips_requested_at
+11|accepted_at|datetimeoffset(3)|NULL|
+12|completed_at|datetimeoffset(3)|NULL|
+13|updated_at|datetimeoffset(3)|NOT NULL|df_trips_updated_at
+index_name|type_desc|la_pk|duy_nhat|cot_khoa
+----------|---------|-----|--------|--------
+uq_trips_code|CLUSTERED|0|1|code
+pk_trips|NONCLUSTERED|1|1|id
+ix_trips_city_requested|NONCLUSTERED|0|0|city_id, requested_at
+ix_trips_customer_requested|NONCLUSTERED|0|0|customer_id, requested_at
+ix_trips_driver_id|NONCLUSTERED|0|0|driver_id
+
+-- ==================== p02/00-mo-rong-schema.sql ====================
+Changed database context to 'ToiNoi'.
+bang
+----
+areas
+cities
+customers
+drivers
+merchants
+payments
+trip_events
+trip_ratings
+trips
+PASS số bảng trong schema toinoi = 9
+
+-- ==================== p02/01-fixture.sql ====================
+Changed database context to 'ToiNoi'.
+PASS kế hoạch: số chuyến = 3174
+PASS kế hoạch: mã trùng = 0
+PASS trips đã nạp = 3174
+PASS IDENT_CURRENT(trips) sau khi nạp = 103173
+PASS trip_events đã nạp = 20685
+PASS trip_ratings đã nạp = 1891
+PASS payments thường đã nạp = 2821
+PASS A1 103165 thu thiếu = 1
+PASS A2 102235 ví trừ cước cũ = 1
+PASS ca khó: giao dịch thêm = 3
+PASS D1 100724 = 1
+PASS D2 101084 = 1
+PASS D5, D6 = 2
+PASS D3, D4, D7 = 3
+cities|areas|customers|drivers|merchants|trips|trip_events|trip_ratings|payments
+------|-----|---------|-------|---------|-----|-----------|------------|--------
+3|34|601|54|25|3174|20685|1891|2826
+PASS doanh thu chuyến hoàn thành (đ) = 182287000
+
+-- ==================== p02/02-kiem-tra-fixture.sql ====================
+Changed database context to 'ToiNoi'.
+tp|kind|tong|hoan_thanh|huy_truoc_nhan|huy_sau_nhan|dang_chay
+--|----|----|----------|--------------|------------|---------
+DN|food|210|173|27|10|0
+DN|parcel|72|68|1|3|0
+DN|ride|178|148|17|12|1
+HN|food|505|413|63|27|2
+HN|parcel|165|145|4|16|0
+HN|ride|438|383|41|14|0
+SG|food|717|615|70|32|0
+SG|parcel|252|196|16|39|1
+SG|ride|637|566|56|13|2
+status|so_chuyen
+------|---------
+requested|1
+searching|1
+accepted|1
+arriving|1
+picked_up|1
+in_transit|1
+completed|2707
+cancelled|461
+khong_tai_xe|khong_quan|mat_gps|cuoc_0d
+------------|----------|-------|-------
+297|1742|36|38
+chuyen_lech_ngay_utc
+--------------------
+383
+code|requested_at|gio_utc
+----|------------|-------
+101489|2026-10-15 00:00:00.000 +07:00|2026-10-14 17:00:00.000 +00:00
+101502|2026-10-15 06:59:59.000 +07:00|2026-10-14 23:59:59.000 +00:00
+101503|2026-10-15 07:00:00.000 +07:00|2026-10-15 00:00:00.000 +00:00
+101594|2026-10-15 23:59:59.500 +07:00|2026-10-15 16:59:59.500 +00:00
+101595|2026-10-16 00:00:00.000 +07:00|2026-10-15 17:00:00.000 +00:00
+so_nhom|so_chuyen|nhom_lon_nhat
+-------|---------|-------------
+148|305|6
+requested_at|so_chuyen|ma_dau|ma_cuoi
+------------|---------|------|-------
+2026-10-10 09:00:00.000 +07:00|6|100971|100976
+2026-10-18 14:30:00.000 +07:00|4|101882|101885
+2026-10-05 13:12:00.000 +07:00|3|100489|100491
+2026-10-15 13:12:00.000 +07:00|3|101541|101543
+2026-10-30 13:12:00.000 +07:00|3|103116|103118
+so_danh_gia|bo_trong_sao|bo_qua_tip|tip_0d
+-----------|------------|----------|------
+1891|153|541|660
+kind|method|status|so_gd|tong_tien
+----|------|------|-----|---------
+adjustment|wallet|succeeded|2|-5000
+charge|card|failed|9|755000
+charge|card|pending|1|57000
+charge|card|succeeded|698|47940000
+charge|cash|succeeded|1054|69524000
+charge|wallet|failed|87|6343000
+charge|wallet|succeeded|962|66176000
+refund|card|succeeded|12|1008000
+refund|wallet|succeeded|1|72000
+so_gd|so_chuyen
+-----|---------
+0|485
+1|2552
+2|137
+chuyen_ky_thang_10|doanh_thu
+------------------|---------
+3168|182287000
+PASS K1 trạng thái ↔ tài xế ↔ mốc = 0
+PASS K2 tài xế/quán khác thành phố = 0
+Warning: Null value is eliminated by an aggregate or other SET operation.
+PASS K3 tài xế busy lệch chuyến đang chạy = 0
+PASS K4 updated_at nhỏ hơn mốc khác = 0
+PASS K5 lịch sử lệch chuyến = 0
+PASS K6 đánh giá sai chỗ = 0
+PASS K7 giao dịch sai chỗ = 0
+PASS K8 khu đón sai cấp/thành phố = 0
+PASS K9 cây khu vực sai tầng = 0
+
+-- ==================== p02/11-null-case-isnull-coalesce.sql ====================
+Changed database context to 'ToiNoi'.
+null_bang_null|null_khac_1|null_is_null|null_distinct_null|mot_distinct_null
+--------------|-----------|------------|------------------|-----------------
+UNKNOWN|UNKNOWN|TRUE|FALSE|TRUE
+bang_null|is_null
+---------|-------
+0|297
+PASS 1 driver_id = NULL = 0
+PASS 1 driver_id IS NULL = 297
+PASS 1 ANSI_NULLS OFF: driver_id = NULL = 297
+y_nghia_cot_driver_id|so_chuyen
+---------------------|---------
+có tài xế|2877
+không áp dụng — huỷ trước khi có người nhận|295
+chưa có — đang tìm tài xế|2
+PASS 2 huỷ trước khi nhận (nhánh đúng thứ tự) = 295
+PASS 2 huỷ trước khi nhận (nhánh cancelled đặt đầu) = 461
+PASS 2 CASE stars WHEN NULL = 0
+PASS 2 CASE WHEN stars IS NULL = 153
+tinh_trang_danh_gia|so_chuyen
+-------------------|---------
+có sao|1738
+thiếu — chưa đánh giá|816
+không áp dụng — chuyến huỷ|461
+thiếu — mở màn đánh giá, bỏ trống sao|153
+PASS 3 chuyến hoàn thành chưa đánh giá = 816
+so_danh_gia|co_sao|avg_int|diem_tb_dung|diem_tb_sai
+-----------|------|-------|------------|-----------
+1891|1738|4|4.22|3.88
+Warning: Null value is eliminated by an aggregate or other SET operation.
+PASS 4 AVG(stars) kiểu = int
+PASS 4 AVG(stars) cắt thành số nguyên = 4
+PASS 4 điểm TB đúng (decimal) = 4.22
+PASS 4 điểm TB sai (ISNULL 0) = 3.88
+tong|nam_sao|khac_nam_sao|khong_ro
+----|-------|------------|--------
+1891|896|842|153
+PASS 4 DN 20/10 COUNT(*) = 0
+PASS 4 DN 20/10 SUM(fare) = NULL
+so_danh_gia|co_tra_loi_tip|chon_0d|tong_tip|tb_tren_nguoi_tra_loi|tb_tren_moi_luot|tb_moi_luot_avg_int
+-----------|--------------|-------|--------|---------------------|----------------|-------------------
+1891|1350|660|5565000|4122|2943|2942
+Warning: Null value is eliminated by an aggregate or other SET operation.
+PASS 5 tip TB trên người trả lời = 4122
+PASS 5 tip TB trên mỗi lượt (làm tròn) = 2943
+PASS 5 tip TB trên mỗi lượt (AVG int) = 2942
+cong_hai_tong|tong_cua_tong_dong|tong_dong_isnull
+-------------|------------------|----------------
+134142000|98163000|134142000
+Warning: Null value is eliminated by an aggregate or other SET operation.
+PASS 5 cộng hai tổng = 134142000
+PASS 5 SUM(fare + tip) = 98163000
+chuyen_hoan_thanh|cuoc_0d|avg_int|tb_moi_chuyen|tb_chuyen_co_thu
+-----------------|-------|-------|-------------|----------------
+2707|31|67339|67339|68119
+Warning: Null value is eliminated by an aggregate or other SET operation.
+PASS 6 cước TB mọi chuyến hoàn thành = 67339
+PASS 6 cước TB chuyến có thu = 68119
+code|khu_isnull|khu_coalesce|kieu_isnull|kieu_coalesce
+----|----------|------------|-----------|-------------
+100072|không r? (m?|không rõ (mất GPS)|varchar|nvarchar
+PASS 7a ISNULL cắt còn 12 ký tự = 12
+PASS 7a COALESCE giữ nguyên chuỗi = không rõ (mất GPS)
+ 
+-
+PASS 7b ISNULL(d.code, chữ) — lỗi 245: Conversion failed when converting the nvarchar value 'đang tìm…' to data type int.
+ 
+-
+PASS 7b COALESCE(d.code, chữ) — lỗi 245: Conversion failed when converting the nvarchar value 'đang tìm…' to data type int.
+cot|is_nullable
+---|-----------
+tip_isnull|0
+tip_coalesce|1
+PASS 7c ISNULL(tip, 0) is_nullable = 0
+PASS 7c COALESCE(tip, 0) is_nullable = 1
+PASS 7d ISNULL ba đối số — lỗi 174: The isnull function requires 2 argument(s).
+code|kind|status|quan|khu_don|tai_xe
+----|----|------|----|-------|------
+100001|food|cancelled|Mì Quảng Lab 207|HN-TA-01|— (huỷ trước khi nhận)
+100002|food|completed|Bún Chả Lab 106|SG-DO-03|8117
+100007|ride|completed|— (không áp dụng)|HN-BA-02|8217
+100072|parcel|completed|— (không áp dụng)|không rõ (mất GPS)|8110
+103172|food|searching|Gà Rán Lab 205|HN-TT-03|đang tìm…
+PASS 8 IIF(stars >= 4, 0, 1): dưới 4 sao + NULL = 456
+tong|o_111|khac_111|khac_biet_111
+----|-----|--------|-------------
+3174|162|2976|3012
+PASS 9 pickup_area_id <> 111 = 2976
+PASS 9 IS DISTINCT FROM 111 = 3012
+PASS 9 cách cũ ISNULL(…, -1) <> 111 = 3012
+code|tong|ty_le_huy_pct
+----|----|-------------
+PASS 10 tỉ lệ huỷ 20/10 chia cho 0 — lỗi 8134: Divide by zero error encountered.
+Division by zero occurred.
+PASS 10 ANSI_WARNINGS OFF: 100 / 0 = NULL
+code|tong|pct_chia_nguyen|ty_le_huy_pct|hien_thi
+----|----|---------------|-------------|--------
+DN|0|NULL|NULL|không có chuyến
+HN|37|13|13.5|13.5
+SG|49|14|14.3|14.3
+Warning: Null value is eliminated by an aggregate or other SET operation.
+PASS 10 tỉ lệ huỷ HN 20/10 = 13.5
+PASS 10 tỉ lệ huỷ SG 20/10 = 14.3
+PASS 10 tỉ lệ huỷ DN 20/10 là NULL = 1
+y_nghia_merchant_id|so_chuyen
+-------------------|---------
+không áp dụng — không phải đơn đồ ăn|1742
+có quán|1432
+PASS BT1 đơn đồ ăn thiếu quán = 0
+tp|sai_cong_trong_sum|cuoc_cong_tip
+--|------------------|-------------
+DN|13866000|27221000
+HN|34957000|64981000
+SG|49340000|95650000
+Warning: Null value is eliminated by an aggregate or other SET operation.
+PASS BT2 SG SUM(fare + tip) = 49340000
+PASS BT2 SG cước + tip = 95650000
+tp|hoan_thanh|co_sao|diem_tb|hien_thi
+--|----------|------|-------|--------
+DN|0|0|NULL|không có chuyến
+HN|32|22|4.23|4.23
+SG|42|28|4.39|4.39
+Warning: Null value is eliminated by an aggregate or other SET operation.
+PASS BT3 HN điểm TB 20/10 = 4.23
+PASS BT3 SG điểm TB 20/10 = 4.39
+
+-- ==================== p02/12-group-by-rollup.sql ====================
+Changed database context to 'ToiNoi'.
+so_chuyen|co_tai_xe|co_quan|so_tai_xe_khac_nhau|so_khach_khac_nhau|so_chuyen_big
+---------|---------|-------|-------------------|------------------|-------------
+3174|2877|1432|52|576|3174
+Warning: Null value is eliminated by an aggregate or other SET operation.
+PASS 1 số tài xế khác nhau = 52
+PASS 1 số khách khác nhau = 576
+kieu_sum|kieu_avg|kieu_count|kieu_count_big
+--------|--------|----------|--------------
+int|int|int|bigint
+PASS 1 kiểu SUM(int) = int
+PASS 1 kiểu AVG(int) = int
+PASS 1 kiểu COUNT_BIG = bigint
+ 
+-
+PASS 1 SUM(fare * 12) tràn int — lỗi 8115: Arithmetic overflow error converting expression to data type int.
+PASS 1 SUM(CAST(fare AS bigint) * 12) = 2187444000
+tp|kind|da_ket_thuc|hoan_thanh|huy|ty_le_huy_pct|doanh_thu|cuoc_tb
+--|----|-----------|----------|---|-------------|---------|-------
+DN|food|210|173|37|17.6|14902000|86139
+DN|parcel|72|68|4|5.6|3380000|49706
+DN|ride|177|148|29|16.4|8134000|54959
+HN|food|503|413|90|17.9|35025000|84806
+HN|parcel|165|145|20|12.1|7041000|48559
+HN|ride|438|383|55|12.6|20925000|54634
+SG|food|717|615|102|14.2|52898000|86013
+SG|parcel|251|196|55|21.9|9290000|47398
+SG|ride|635|566|69|10.9|30692000|54226
+PASS 2 chuyến trong kỳ = 3168
+PASS 2 tỉ lệ huỷ SG parcel = 21.9
+tp|a_chia_nguyen|a_pct_nguyen|a_pct_dung|b_avg_int_moi_chuyen|b_cuoc_tb_sai|b_cuoc_tb_dung|c_pct_sai_mau
+--|-------------|------------|----------|--------------------|-------------|--------------|-------------
+DN|0|15|15.25|68010|68011|67907|17.99
+HN|0|14|14.92|68348|68348|66940|17.53
+SG|0|14|14.10|68269|68269|67451|16.41
+Warning: Null value is eliminated by an aggregate or other SET operation.
+PASS 3a SG tỉ lệ huỷ chia nguyên = 14
+PASS 3a SG tỉ lệ huỷ đúng = 14.10
+PASS 3b SG cước TB gồm chuyến huỷ = 68269
+PASS 3b SG cước TB đúng = 67451
+PASS 3b0 DN AVG(fare) int (cắt) = 68010
+PASS 3b0 DN AVG decimal làm tròn = 68011
+PASS 4 cột không nhóm, không tổng hợp — lỗi 8120: Column 'toinoi.trips.kind' is invalid in the select list because it is not contained in either an aggregate function or the GROUP BY clause.
+PASS 4 nhóm theo khoá chính vẫn lỗi — lỗi 8120: Column 'toinoi.cities.code' is invalid in the select list because it is not contained in either an aggregate function or the GROUP BY clause.
+id|code|name|so_chuyen
+--|----|----|---------
+1|SG|TP. Hồ Chí Minh|1606
+2|HN|Hà Nội|1108
+3|DN|Đà Nẵng|460
+tp|kind|da_ket_thuc|ty_le_huy_pct
+--|----|-----------|-------------
+SG|parcel|251|21.9
+HN|food|503|17.9
+DN|food|210|17.6
+DN|ride|177|16.4
+PASS 5 HAVING dùng tên cột của SELECT — lỗi 207: Invalid column name 'so_chuyen'.
+tai_xe|tp|hoan_thanh|doanh_thu
+------|--|----------|---------
+8101|SG|68|4736000
+8109|SG|68|4744000
+8120|SG|66|4158000
+8108|SG|64|4085000
+8124|SG|64|4346000
+8107|SG|63|4539000
+8210|HN|63|4160000
+tp|so_tai_xe|danh_sach
+--|---------|---------
+HN|1|8210
+SG|6|8101, 8107, 8108, 8109, 8120, 8124
+PASS 5 tài xế >= 63 chuyến = 8101, 8107, 8108, 8109, 8120, 8124, 8210
+tp|kind|hoan_thanh|doanh_thu
+--|----|----------|---------
+DN|food|173|14902000
+DN|parcel|68|3380000
+DN|ride|148|8134000
+DN|(mọi dịch vụ)|389|26416000
+HN|food|413|35025000
+HN|parcel|145|7041000
+HN|ride|383|20925000
+HN|(mọi dịch vụ)|941|62991000
+SG|food|615|52898000
+SG|parcel|196|9290000
+SG|ride|566|30692000
+SG|(mọi dịch vụ)|1377|92880000
+TỔNG|(mọi dịch vụ)|2707|182287000
+Warning: Null value is eliminated by an aggregate or other SET operation.
+PASS 6 ROLLUP số dòng (9 + 3 + 1) = 13
+PASS 6 ROLLUP tổng hoàn thành = 2707
+PASS 6 ROLLUP tổng doanh thu = 182287000
+PASS 6 truy vấn độc lập: hoàn thành = 2707
+PASS 6 truy vấn độc lập: doanh thu = 182287000
+nhan_isnull|nhan_grouping|so_chuyen
+-----------|-------------|---------
+TONG|không rõ (mất GPS)|4
+DN-BI-01|DN-BI-01|112
+DN-BI-02|DN-BI-02|119
+DN-TT-01|DN-TT-01|113
+DN-TT-02|DN-TT-02|112
+TONG|TỔNG|460
+PASS 6 số dòng nhãn TONG khi dùng ISNULL = 2
+cap|tp|kind|da_ket_thuc|ty_le_huy_pct
+---|--|----|-----------|-------------
+1|DN|*|459|15.3
+1|HN|*|1106|14.9
+1|SG|*|1603|14.1
+2|*|food|1430|16.0
+2|*|parcel|488|16.2
+2|*|ride|1250|12.2
+3|*|*|3168|14.6
+PASS 7 GROUPING SETS số dòng (9 + 3 + 3 + 1) = 16
+PASS 7 CUBE số dòng = 16
+PASS 7 tỉ lệ huỷ cả tháng = 14.55
+PASS 7 trung bình cộng 9 tỉ lệ (sai) = 14.35
+tp|hoan_thanh|co_danh_gia|do_phu_pct|co_sao|diem_tb
+--|----------|-----------|----------|------|-------
+DN|389|266|68.4|251|4.30
+HN|941|670|71.2|619|4.17
+SG|1377|955|69.4|868|4.23
+Warning: Null value is eliminated by an aggregate or other SET operation.
+PASS 8 điểm TB Đà Nẵng = 4.30
+kind|so_khach|hoan_thanh|chuyen_moi_khach
+----|--------|----------|----------------
+food|441|1201|2.72
+parcel|241|409|1.70
+ride|421|1097|2.61
+TỔNG|569|2707|4.76
+Warning: Null value is eliminated by an aggregate or other SET operation.
+PASS 9 cộng khách ba dịch vụ = 1103
+PASS 9 khách thật (dòng TỔNG) = 569
+kind|da_ket_thuc|hoan_thanh|huy|ty_le_huy_pct|doanh_thu|cuoc_tb
+----|-----------|----------|---|-------------|---------|-------
+food|1430|1201|229|16.0|102825000|85616
+parcel|488|409|79|16.2|19711000|48193
+ride|1250|1097|153|12.2|59751000|54468
+TỔNG|3168|2707|461|14.6|182287000|67339
+PASS BT1 tỉ lệ huỷ food = 16.0
+PASS BT1 trung bình cộng ba tỉ lệ (sai) = 14.8
+quan|tp|so_don|ty_le_huy_pct
+----|--|------|-------------
+Bún Bò Lab 201|HN|63|27.0
+Bún Bò Lab 101|SG|70|24.3
+Bánh Mì Lab 203|HN|58|22.4
+Gà Rán Lab 105|SG|54|20.4
+PASS BT2 số quán = 4
+tai_xe|hoan_thanh|co_sao|diem_tb
+------|----------|------|-------
+8202|49|36|3.94
+8211|55|40|3.95
+8215|55|39|3.95
+8209|58|38|3.97
+Warning: Null value is eliminated by an aggregate or other SET operation.
+PASS BT3 đúng: >= 35 lượt có sao, TB < 4 = 4
+PASS BT3 sai: ngưỡng trên COUNT(*) = 6
+
+-- ==================== p02/13-join-apply.sql ====================
+Changed database context to 'ToiNoi'.
+code|fare|method|status|amount
+----|----|------|------|------
+100041|127000|card|succeeded|127000
+100042|82000|card|failed|82000
+100042|82000|card|succeeded|82000
+100048|119000|wallet|succeeded|104000
+100048|119000|card|succeeded|15000
+PASS 1 bốn chuyến: Σ fare đúng = 404000
+PASS 1 bốn chuyến: số dòng INNER JOIN = 5
+PASS 1 bốn chuyến: Σ fare sau INNER JOIN = 529000
+PASS 1 bốn chuyến: số dòng LEFT JOIN = 6
+PASS 1 bốn chuyến: Σ fare sau LEFT JOIN = 605000
+chuyen_hoan_thanh|dong_inner_join|dong_left_join
+-----------------|---------------|--------------
+2707|2800|2832
+so_dong|so_chuyen|tong_cuoc_SAI|tong_gd_moi_trang_thai
+-------|---------|-------------|----------------------
+2800|2675|191644000|189686000
+PASS 2 số dòng sau INNER JOIN = 2800
+PASS 2 số chuyến còn lại = 2675
+PASS 2 Σ cước SAI sau JOIN = 191644000
+PASS 2 SUM(DISTINCT t.fare) = 11259000
+PASS 2 cước cộng thừa (chuyến 2 dòng) = 9433000
+PASS 2 số chuyến rơi khỏi INNER JOIN = 32
+PASS 2 cước rơi khỏi INNER JOIN = 76000
+so_dong_gd|so_chuyen
+----------|---------
+1|2550
+2|125
+PASS 3 trip_ratings.trip_id lặp = 0
+PASS 3 trips LEFT JOIN trip_ratings = 2707
+PASS 3 payments.trip_id lặp = 137
+PASS 3 trip_events.trip_id lặp = 3173
+so_dong|so_chuyen|tong_cuoc|tong_thuc_thu
+-------|---------|---------|-------------
+2707|2707|182287000|182531000
+PASS 4 gom trước: Σ cước = 182287000
+PASS 4 gom trước: Σ thực thu = 182531000
+cross_apply_khong_group_by|cross_apply_group_by|outer_apply_group_by
+--------------------------|--------------------|--------------------
+2707|2674|2707
+PASS 5 CROSS APPLY tổng hợp: Σ thực thu = 182531000
+PASS 5 CROSS APPLY có GROUP BY: số chuyến = 2674
+loai|so_chuyen|ma_chuyen
+----|---------|---------
+cước 0 đ — không cần thu|31|NULL
+CÓ cước nhưng chưa thu|2|100724, 101084
+PASS 6 NOT EXISTS = 33
+PASS 6 LEFT JOIN … IS NULL = 33
+dieu_kien_o_WHERE|dieu_kien_o_ON
+-----------------|--------------
+2674|2707
+PASS 6 điều kiện ở WHERE = 2674
+code|so_gd|so_su_kien|so_dong_sau_noi|cuoc|sum_amount_SAI
+----|-----|----------|---------------|----|--------------
+100042|2|7|14|82000|1148000
+PASS 7 Σ thu thành công = 183640000
+PASS 7 Σ thu sau JOIN trip_events = 1283272000
+PASS 8 nhiều–một: trước = 2707
+PASS 8 nhiều–một: sau = 2707
+join_dem_dong|join_distinct|exists_dem_chuyen
+-------------|-------------|-----------------
+1050|961|961
+PASS 8 EXISTS: chuyến từng dùng ví = 961
+tai_xe|chuyen|requested_at|fare
+------|------|------------|----
+8217|103139|2026-10-30 18:04:00.000 +07:00|88000
+8217|103117|2026-10-30 13:12:00.000 +07:00|60000
+8218|103153|2026-10-30 19:44:00.000 +07:00|100000
+8218|103131|2026-10-30 16:52:00.000 +07:00|14000
+8219|NULL|NULL|NULL
+8220|NULL|NULL|NULL
+PASS 9 tài xế Hà Nội = 20
+PASS 9 CROSS APPLY TOP (2): số dòng = 36
+PASS 9 OUTER APPLY TOP (2): số dòng = 38
+code|fare|method|status|amount
+----|----|------|------|------
+100041|127000|card|succeeded|127000
+100042|82000|card|succeeded|82000
+100048|119000|card|succeeded|15000
+100724|76000|NULL|NULL|NULL
+method|so_gd|sai_sum_fare|da_thu
+------|-----|------------|------
+card|686|48371000|46932000
+cash|1054|69538000|69524000
+wallet|963|66580000|66075000
+PASS BT1 Σ fare theo dòng giao dịch (sai) = 184489000
+PASS BT1 Σ đã thu = 182531000
+Warning: Null value is eliminated by an aggregate or other SET operation.
+Warning: Null value is eliminated by an aggregate or other SET operation.
+so_dong_sai|diem_tb_sai|so_dong|diem_tb|so_gd
+-----------|-----------|-------|-------|-----
+2832|4.24|2707|4.22|2800
+PASS BT2 số dòng sau hai LEFT JOIN = 2832
+PASS BT2 điểm TB bị lệch = 4.24
+PASS BT2 sau khi gom: số dòng = 2707
+PASS BT2 sau khi gom: điểm TB = 4.22
+tp|code|fare
+--|----|----
+DN|NULL|NULL
+HN|102088|142000
+HN|102107|142000
+HN|102098|134000
+SG|102045|148000
+SG|102099|142000
+SG|102092|134000
+PASS BT3 CROSS APPLY số dòng = 6
+PASS BT3 OUTER APPLY số dòng = 7
+
+-- ==================== p02/14-subquery-exists-cte.sql ====================
+Changed database context to 'ToiNoi'.
+tb_kieu_int|tb_kieu_decimal
+-----------|---------------
+67339|67339.120797
+PASS 1a AVG int / decimal = 67339 / 67339.120797
+tp|tren_tb_thanh_pho
+--|-----------------
+DN|190
+HN|436
+SG|636
+PASS 1b subquery trong hàm gộp — lỗi 130: Cannot perform an aggregate function on an expression containing an aggregate or a subquery.
+tp|hoan_thanh|tren_tb_thanh_pho|tb_thanh_pho
+--|----------|-----------------|------------
+DN|389|190|67907.455012
+HN|941|436|66940.488841
+SG|1377|636|67450.980392
+PASS 1c trên TB thành phố = DN:190 HN:436 SG:636
+code|so_tien
+----|-------
+PASS 1d subquery vô hướng trả 2 dòng — lỗi 512: Subquery returned more than 1 value. This is not permitted when the subquery follows =, !=, <, <= , >, >= or when the subquery is used as an expression.
+PASS 1e cùng câu, chuyến 100041 (1 giao dịch) = 127000
+dung_in|dung_exists|dung_join
+-------|-----------|---------
+266|266|461
+PASS 2 IN / EXISTS / JOIN = 266 / 266 / 461
+PASS 3a driver_id NULL = 297
+not_in
+------
+PASS 3b NOT IN = 0
+not_exists|created_at
+----------|----------
+8219|2026-10-29 09:00:00.000 +07:00
+8220|2026-10-29 09:00:00.000 +07:00
+PASS 3c NOT EXISTS = 8219,8220
+PASS 3d NOT IN + IS NOT NULL = 2
+b1_pham_vi|b2_chuyen_co_gd|b3_sau_ghep|b3_chuyen_khac_nhau|b4_lech
+----------|---------------|-----------|-------------------|-------
+3168|2688|3168|3168|7
+ma|status|phai_thu|thuc_thu|chenh
+--|------|--------|--------|-----
+100724|completed|76000|0|-76000
+101084|completed|98000|0|-98000
+101310|completed|85000|170000|85000
+101987|cancelled|0|-72000|-72000
+102443|completed|54000|45000|-9000
+102642|completed|38000|380000|342000
+102739|cancelled|0|96000|96000
+TỔNG b4|NULL|351000|619000|268000
+TỔNG b3|NULL|182287000|182555000|268000
+PASS 4 kiểm kê b1/b2/b3/b3 khác nhau/b4 = 3168/2688/3168/3168/7 chênh b4=268000 chênh b3=268000 mã=100724,101084,101310,101987,102443,102642,102739
+PASS 5a CTE tự JOIN (tính 2 lần) = 0
+PASS 5b bảng tạm tự JOIN (tính 1 lần) = 3
+so_dong|so_chuyen|so_lech|tong_chenh
+-------|---------|-------|----------
+3168|3168|7|268000
+PASS 6a #doi_soat dòng/lệch/chênh = 3168/7/268000
+PASS 6b SQL động đọc được #doi_soat = 3168
+PASS 6c SQL động không thấy biến bảng — lỗi 1087: Must declare the table variable "@bien".
+bang_tam_sau_rollback|bien_bang_sau_rollback
+---------------------|----------------------
+0|1
+PASS 6d sau ROLLBACK: #tạm / @biến = 0 / 1
+ 
+-
+439
+ 
+-
+439
+ 
+-
+439
+doi_tuong|so_dong_biet|uoc_luong
+---------|------------|---------
+bảng tạm #doi_soat|3168.0|439.0
+biến bảng (mặc định, mức tương thích 160)|3168.0|950.39999999999998
+biến bảng, tắt deferred compilation|0.0|1.0
+PASS 6e ước lượng: bảng tạm | biến bảng | biến bảng cũ = 3168→439.0 | 3168→950.4 | 0→1.0
+PASS BT1 khách hoàn thành nhưng chưa đánh giá = 32
+status|so_chuyen_lech|chenh
+------|--------------|-----
+cancelled|2|24000
+completed|5|244000
+PASS BT2 lệch theo trạng thái = cancelled:2:24000 completed:5:244000
+PASS BT3 EXCEPT = 8219,8220
+
+-- ==================== p02/15-window-function.sql ====================
+Changed database context to 'ToiNoi'.
+ngay|so_chuyen|doanh_thu|luy_ke|tb7_lich_day|tb7_rows_thua
+----|---------|---------|------|------------|-------------
+2026-10-17|13|718000|15952000|927429|927429
+2026-10-18|16|945000|16897000|859857|859857
+2026-10-19|11|637000|17534000|828571|828571
+2026-10-20|0|0|17534000|672571|NULL
+2026-10-21|14|872000|18406000|677286|797143
+2026-10-22|11|785000|19191000|679000|789429
+2026-10-23|13|941000|20132000|699714|813429
+2026-10-24|14|787000|20919000|709571|812143
+PASS 1a TB7 lịch đủ / ROWS thưa 19–21/10 = 19/10=828571/828571 20/10=672571/NULL 21/10=677286/797143
+PASS 1b lịch DN = 30 ngày, luỹ kế cuối 26416000
+PASS 1c RANGE 6 PRECEDING — lỗi 4194: RANGE is only supported with UNBOUNDED and CURRENT ROW window frame delimiters.
+PASS 1d GROUPS — lỗi 102: Incorrect syntax near 'GROUPS'.
+code|requested_at|fare|dem_mac_dinh|luy_ke_mac_dinh|dem_rows|luy_ke_rows
+----|------------|----|------------|---------------|--------|-----------
+100130|2026-10-02 10:15:00.000 +07:00|45000|1|45000|1|45000
+100500|2026-10-05 15:40:00.000 +07:00|75000|2|120000|2|120000
+100669|2026-10-07 09:20:00.000 +07:00|57000|3|177000|3|177000
+100971|2026-10-10 09:00:00.000 +07:00|24000|9|462000|4|201000
+100972|2026-10-10 09:00:00.000 +07:00|53000|9|462000|5|254000
+100973|2026-10-10 09:00:00.000 +07:00|20000|9|462000|6|274000
+100974|2026-10-10 09:00:00.000 +07:00|49000|9|462000|7|323000
+100975|2026-10-10 09:00:00.000 +07:00|78000|9|462000|8|401000
+100976|2026-10-10 09:00:00.000 +07:00|61000|9|462000|9|462000
+101224|2026-10-12 11:05:00.000 +07:00|27000|10|489000|10|489000
+PASS 2a đếm mặc định / ROWS quanh lô 10/10 = 100669:3/3 100971:9/4 100972:9/5 100973:9/6 100974:9/7 100975:9/8 100976:9/9 101224:10/10
+PASS 2b luỹ kế mặc định cả lô 10/10 (min/max) = 462000/462000
+PASS 2c khách doanh nghiệp = 18 chuyến, tổng 809000
+tp|tai_xe|hoan_thanh|so_thu_tu|hang|hang_lien_tuc
+--|------|----------|---------|----|-------------
+DN|8305|44|1|1|1
+DN|8304|41|2|2|2
+DN|8302|40|3|3|3
+DN|8310|40|4|3|3
+HN|8210|63|1|1|1
+HN|8216|60|2|2|2
+HN|8205|59|3|3|3
+SG|8101|68|1|1|1
+SG|8109|68|2|1|1
+SG|8120|66|3|3|2
+SG|8108|64|4|4|3
+SG|8124|64|5|4|3
+PASS 3a SG row_number/rank/dense_rank = SG-8101:68:1/1/1 SG-8109:68:2/1/1 SG-8120:66:3/3/2 SG-8108:64:4/4/3 SG-8124:64:5/4/3
+PASS 3b số người dense_rank<=3 DN/HN/SG = 4/3/5
+nhom_4|so_tai_xe|it_nhat|nhieu_nhat
+------|---------|-------|----------
+1|6|63|68
+2|6|57|62
+3|6|53|57
+4|6|42|52
+PASS 3c NTILE(4) SG = 1:6 2:6 3:6 4:6
+PASS 3d hàm cửa sổ trong WHERE — lỗi 4108: Windowed functions can only appear in the SELECT or ORDER BY clauses.
+code|requested_at|kind|dich_vu_truoc|phut_tu_chuyen_truoc|chuyen_sau|chuyen_thu
+----|------------|----|-------------|--------------------|----------|----------
+100008|2026-10-01 06:12:00.000 +07:00|ride|NULL|NULL|100149|1
+100149|2026-10-02 12:45:00.000 +07:00|ride|ride|1833|100215|2
+100215|2026-10-03 07:04:00.000 +07:00|ride|ride|1099|100259|3
+100259|2026-10-03 13:02:00.000 +07:00|ride|ride|358|100277|4
+100277|2026-10-03 17:01:00.000 +07:00|ride|ride|239|100369|5
+100369|2026-10-04 12:07:00.000 +07:00|ride|ride|1146|100429|6
+PASS 4a LAG phút giữa hai chuyến = 100008:NULL 100149:1833 100215:1099 100259:358 100277:239 100369:1146
+code|chuyen_dau|last_value_sai|chuyen_cuoi
+----|----------|--------------|-----------
+100008|100008|100008|103123
+100149|100008|100149|103123
+100215|100008|100215|103123
+100259|100008|100259|103123
+PASS 5a LAST_VALUE sai / đúng = 100008:100008/103123 100149:100149/103123 100215:100215/103123
+ngay|doanh_thu|lag_thuong|ngay_co_du_lieu_truoc
+----|---------|----------|---------------------
+2026-10-19|637000|945000|945000
+2026-10-20|NULL|637000|637000
+2026-10-21|872000|NULL|637000
+2026-10-22|785000|872000|872000
+PASS 5b LAG / LAST_VALUE IGNORE NULLS 20–21/10 = 20/10=637000/637000 21/10=NULL/637000
+PASS 5c LAG IGNORE NULLS 21/10 = 637000
+tp|doanh_thu|tong|ty_trong_pct
+--|---------|----|------------
+SG|92880000|182287000|50.95
+HN|62991000|182287000|34.56
+DN|26416000|182287000|14.49
+PASS 6 tỉ trọng doanh thu = DN:14.49 HN:34.56 SG:50.95
+PASS 7a WINDOW ở mức 150 — lỗi 102: Incorrect syntax near 'w'.
+PASS 7b GENERATE_SERIES ở mức 150 — lỗi 208: Invalid object name 'GENERATE_SERIES'.
+PASS 7c IGNORE NULLS + DATE_BUCKET ở mức 150 = 10/07:30
+PASS 7d mức tương thích sau khi đặt lại = 160
+PASS BT1 ROW_NUMBER = 1 = DN:101355 HN:101699 SG:101601
+PASS BT1 cước tối đa mỗi thành phố = DN:150000 HN:149000 SG:150000
+PASS BT1 RANK = 1 = DN:101355 DN:101431 HN:101699 HN:101913 HN:102014 HN:102037 SG:101601 SG:101725 SG:101741 SG:101892 SG:101984
+PASS BT2 khoảng nghỉ dài nhất = 102372→102664:3477 phút
+PASS BT3 tỉ trọng dịch vụ ở DN = DN-food:56.41 DN-parcel:12.80 DN-ride:30.79
+
+-- ==================== p02/16-ngay-gio-mui-gio.sql ====================
+Changed language setting to us_english.
+Changed database context to 'ToiNoi'.
+code|nhu_da_luu|switchoffset_utc|at_time_zone_utc|at_time_zone_vn|do_lech_phut|bo_do_lech
+----|----------|----------------|----------------|---------------|------------|----------
+101503|2026-10-15 07:00:00.000 +07:00|2026-10-15 00:00:00.000 +00:00|2026-10-15 00:00:00.000 +00:00|2026-10-15 07:00:00.000 +07:00|420|2026-10-15 07:00:00.000
+PASS 1a 101503 UTC | VN | độ lệch = 2026-10-15 00:00:00.000 +00:00 | 2026-10-15 07:00:00.000 +07:00 | 420
+PASS 1b sys.time_zone_info = 141 tên; VN +07:00
+a_nua_mo|b_doi_gio_vn_roi_cat|c_cat_theo_do_lech_luu|d_cat_theo_utc_SAI|e_between_235959_SAI|f_between_ngay_sau_SAI|g_moc_khong_do_lech_SAI
+--------|--------------------|----------------------|------------------|--------------------|----------------------|-----------------------
+106|106|106|105|105|107|105
+PASS 2a bảy cách đếm 15/10 = 106|106|106|105|105|107|105
+PASS 2b dữ liệu ghi +00:00: nửa mở | CAST date | AT TIME ZONE rồi cắt = 106|105|106
+code|requested_at|a_nua_mo|e_between_235959|f_between_ngay_sau|d_ngay_utc
+----|------------|--------|----------------|------------------|----------
+101489|2026-10-15 00:00:00.000 +07:00|1|1|1|0
+101502|2026-10-15 06:59:59.000 +07:00|1|1|1|0
+101503|2026-10-15 07:00:00.000 +07:00|1|1|1|1
+101594|2026-10-15 23:59:59.500 +07:00|1|0|1|1
+101595|2026-10-16 00:00:00.000 +07:00|0|0|1|1
+PASS 3a năm chuyến biên (a e f d) = 101489:1110 101502:1110 101503:1111 101594:1011 101595:0011
+tu|tu_cach_2|den_truoc|so_chuyen
+--|---------|---------|---------
+2026-10-15 00:00:00.000 +07:00|2026-10-15 00:00:00.000 +07:00|2026-10-16 00:00:00.000 +07:00|106
+PASS 3b biên từ tham số ngày = 2026-10-15 00:00:00.000 +07:00 | 2026-10-16 00:00:00.000 +07:00 | 106 | cùng khoảnh khắc
+moc_999|moc_997|between_999|between_997|nua_mo
+-------|-------|-----------|-----------|------
+2026-10-16 00:00:00.000|2026-10-15 23:59:59.997|107|106|106
+PASS 4a datetime .999 / .997 / nửa mở = 2026-10-16 00:00:00.000 | 107/106/106
+cung_ngay_vn_cach_2_gio|khac_ngay_vn_cach_nua_giay|bo_do_lech_roi_tinh|gio_theo_gia_tri_luu
+-----------------------|--------------------------|-------------------|--------------------
+1|0|1|6
+PASS 5a DATEDIFF theo UTC / DATEPART theo giá trị lưu = 1|0|1|6
+ngay|theo_ngay_vn|theo_ngay_utc
+----|------------|-------------
+2026-10-14|100|102
+2026-10-15|106|105
+2026-10-16|103|104
+PASS 6a ngày VN / ngày UTC = 14/10:100/102 15/10:106/105 16/10:103/104
+PASS 6b kỳ 01–30/10 VN / ngày UTC tương ứng / chuyến lệch ngày = 3168 / 3174 / 383
+gio_vn|so_chuyen
+------|---------
+0|68
+1|28
+2|39
+3|39
+4|25
+5|61
+6|123
+7|193
+PASS 7a chuyến theo giờ VN 0–7 = 0:68 1:28 2:39 3:39 4:25 5:61 6:123 7:193
+datetrunc_day|date_bucket_day|date_bucket_day_goc_vn|date_bucket_15_phut|datetrunc_month|date_bucket_month
+-------------|---------------|----------------------|-------------------|---------------|-----------------
+2026-10-15 00:00:00.000 +07:00|2026-10-14 07:00:00.000 +07:00|2026-10-15 00:00:00.000 +07:00|2026-10-15 06:45:00.000 +07:00|2026-10-01 00:00:00.000 +07:00|2026-10-01 07:00:00.000 +07:00
+PASS 8a DATETRUNC / DATE_BUCKET trên 06:59:59 +07:00 = 2026-10-15 00:00:00.000 +07:00 | 2026-10-14 07:00:00.000 +07:00 | 2026-10-15 00:00:00.000 +07:00 | 2026-10-15 06:45:00.000 +07:00 | 2026-10-01 07:00:00.000 +07:00
+PASS 8b đếm 15/10: DATE_BUCKET không origin / có origin VN / DATETRUNC = 105/106/106
+khung_15_phut|so_chuyen
+-------------|---------
+07:00|3
+07:15|1
+07:30|1
+07:45|3
+08:00|1
+08:15|1
+08:30|1
+08:45|3
+PASS 8c khung 15 phút 07:00–09:00 ngày 15/10 = 07:00:3 07:15:1 07:30:1 07:45:3 08:00:1 08:15:1 08:30:1 08:45:3
+PASS 8d khung 15 phút đông nhất = 2026-10-10 09:00:00.000 +07:00 : 7
+datefirst|weekday|ten_thu|datetrunc_week|datetrunc_iso_week|date_bucket_week
+---------|-------|-------|--------------|------------------|----------------
+7|5|Thursday|2026-10-11|2026-10-12|2026-10-12
+PASS 9a DATEFIRST 7 = 7|5|2026-10-11|2026-10-12|2026-10-12
+PASS 9b DATEFIRST 1 = 1|4|2026-10-12|2026-10-12|2026-10-12
+thu_0_la_thu_hai|so_chuyen
+----------------|---------
+0|403
+1|385
+2|402
+3|505
+4|502
+5|490
+6|487
+PASS 9c chuyến theo thứ (0 = thứ Hai) = 0:403 1:385 2:402 3:505 4:502 5:490 6:487
+bat_dau|dateadd_giu_do_lech|doi_ve_gio_dia_phuong|cong_tren_dong_ho|so_gio_cua_ngay
+-------|-------------------|---------------------|-----------------|---------------
+2026-11-01 00:00:00 -04:00|2026-11-02 00:00:00 -04:00|2026-11-01 23:00:00 -05:00|2026-11-02 00:00:00 -05:00|25
+PASS 10a New York 01/11/2026 = 2026-11-01 00:00:00 -04:00 | 2026-11-01 23:00:00 -05:00 | 2026-11-02 00:00:00 -05:00 | 25
+PASS 10b 01:30 xảy ra hai lần = 2026-11-01 01:30:00 -04:00 | 2026-11-01 01:30:00 -04:00 | 2026-11-01 01:30:00 -05:00
+PASS 10c Việt Nam +1 ngày | +24 giờ = 2026-10-16 00:00:00 +07:00 | 2026-10-16 00:00:00 +07:00
+PASS BT1 doanh thu 15/10 = 89 chuyến, 5862000 đ
+PASS BT2 DN 19–21/10 = 19/10:13 20/10:0 21/10:17
+PASS BT3 phút đặt → hoàn thành = food:29.0 parcel:28.0 ride:28.4
+
+-- ==================== p02/17-upsert-merge.sql ====================
+Changed database context to 'ToiNoi'.
+hanh_dong|so_dong
+---------|-------
+INSERT|5
+PASS MERGE lô 1: @@ROWCOUNT = 5
+PASS MERGE lô 1: hành động = INSERT BB-01, INSERT BB-02, INSERT BB-03, INSERT NC-01, INSERT TR-01
+Msg 2627: Violation of PRIMARY KEY constraint 'pk_menu_items'. Cannot insert duplicate key in object 'toinoi.menu_items'. The duplicate key value is (e1000000-0000-4000-8000-000000000101, BB-04).
+PASS MERGE lô 2 ngây thơ: số lỗi = 2627
+PASS MERGE lô 2 ngây thơ: thông báo nhắc pk_menu_items = có
+Msg 2627: Violation of UNIQUE KEY constraint 'uq_menu_items_name'. Cannot insert duplicate key in object 'toinoi.menu_items'. The duplicate key value is (e1000000-0000-4000-8000-000000000101, Nước cam).
+PASS MERGE lô 2 đã khử trùng lặp: số lỗi = 2627
+PASS MERGE lô 2 đã khử trùng lặp: thông báo nhắc uq_menu_items_name = có
+Msg 547: The MERGE statement conflicted with the FOREIGN KEY constraint "fk_menu_items_merchant". The conflict occurred in database "ToiNoi", table "toinoi.merchants", column 'id'.
+PASS MERGE lô 2 bỏ BB-05: số lỗi = 547
+PASS menu_items sau ba câu lỗi = 5
+line_no|sku|ket_qua
+-------|---|-------
+1|BB-01|CẬP NHẬT
+2|BB-02|BỎ QUA — không có gì thay đổi (R3)
+3|BB-03|BỎ QUA — cũ hơn dữ liệu đang có (R2)
+4|TR-01|CẬP NHẬT
+5|BB-04|BỎ QUA — có dòng mới hơn trong cùng lô (R4)
+6|BB-04|THÊM
+7|BB-05|TỪ CHỐI — trùng tên món khác (R5)
+8|XX-01|TỪ CHỐI — quán không tồn tại (R5)
+PASS xem trước lô 2 = 1 CẬP NHẬT | 2 BỎ QUA — không có gì thay đổi (R3) | 3 BỎ QUA — cũ hơn dữ liệu đang có (R2) | 4 CẬP NHẬT | 5 BỎ QUA — có dòng mới hơn trong cùng lô (R4) | 6 THÊM | 7 TỪ CHỐI — trùng tên món khác (R5) | 8 TỪ CHỐI — quán không tồn tại (R5)
+hanh_dong|sku|gia_cu|gia_moi|con_ban
+---------|---|------|-------|-------
+UPDATE|BB-01|55000|59000|1
+INSERT|BB-04|NULL|52000|1
+UPDATE|TR-01|5000|5000|0
+PASS MERGE đúng quy tắc: @@ROWCOUNT = 3
+PASS MERGE đúng quy tắc: OUTPUT = UPDATE BB-01 55000→59000 1, INSERT BB-04 →52000 1, UPDATE TR-01 5000→5000 0
+PASS sau ROLLBACK: menu_items = 5
+PASS nguồn sau R4 + R5 = 5
+hanh_dong|sku|gia_cu|gia_moi
+---------|---|------|-------
+UPDATE|BB-01|55000|59000
+UPDATE|TR-01|5000|5000
+hanh_dong|sku|gia_moi
+---------|---|-------
+INSERT|BB-04|52000
+PASS mẫu UPDATE rồi INSERT: số dòng cập nhật = 2
+PASS mẫu UPDATE rồi INSERT: số dòng thêm = 1
+sku|name|price|is_available|source_updated_at|updated_by_batch
+---|----|-----|------------|-----------------|----------------
+BB-01|Bún bò đặc biệt|59000|1|2026-10-28 09:00:00.000 +07:00|2
+BB-02|Bún bò tái|45000|1|2026-10-20 08:00:00.000 +07:00|1
+BB-03|Bún bò chả|45000|1|2026-10-20 08:00:00.000 +07:00|1
+BB-04|Bún bò giò|52000|1|2026-10-28 09:30:00.000 +07:00|2
+NC-01|Nước cam|25000|1|2026-10-20 08:00:00.000 +07:00|1
+TR-01|Trà đá|5000|0|2026-10-28 09:00:00.000 +07:00|2
+PASS menu_items sau lô 2 = BB-01 59000 1 lô2, BB-02 45000 1 lô1, BB-03 45000 1 lô1, BB-04 52000 1 lô2, NC-01 25000 1 lô1, TR-01 5000 0 lô2
+PASS gửi lại lô 2 bằng MERGE: @@ROWCOUNT = 0
+PASS gửi lại lô 2 bằng MERGE: số dòng OUTPUT = 0
+PASS gửi lại lô 2 bằng UPDATE + INSERT = 0 + 0
+Msg 8672: The MERGE statement attempted to UPDATE or DELETE the same row more than once. This happens when a target row matches more than one source row. A MERGE statement cannot UPDATE/DELETE the same row of the target table multiple times. Refine the ON clause to ensure a target row matches at most one source row, or use the GROUP BY clause to group the source rows.
+PASS MERGE nguồn trùng khoá đã có: số lỗi = 8672
+hanh_dong|quan|sku
+---------|----|---
+UPDATE|101|NC-01
+UPDATE|102|PH-01
+UPDATE|102|PH-02
+PASS BY SOURCE không lọc quán: dòng bị tắt = 101/NC-01, 102/PH-01, 102/PH-02
+PASS BY SOURCE có điều kiện quán: dòng bị tắt = 101/NC-01
+PASS MERGE thiếu dấu chấm phẩy — lỗi 10713: A MERGE statement must be terminated by a semi-colon (;).
+PASS menu_items không đổi sau mục 8–10 = BB-01 59000 1, BB-02 45000 1, BB-03 45000 1, BB-04 52000 1, NC-01 25000 1, TR-01 5000 0
+PASS Bài 1: chỉ thêm món mới = INSERT CF-01 22000
+PASS Bài 1: BB-01 giữ giá = 59000
+PASS Bài 2: MERGE vào CTE lọc quán = 101/CF-01, 101/NC-01
+PASS Bài 3: lỗi khi có điều kiện = 0
+PASS Bài 3: @@ROWCOUNT = 0
+
+-- ==================== p02/18-phan-trang-keyset.sql ====================
+Changed database context to 'ToiNoi'.
+vi_tri|trang|code|requested_at
+------|-----|----|------------
+1|1|102897|2026-10-28 10:30:00.000 +07:00
+2|1|102611|2026-10-25 14:10:00.000 +07:00
+3|1|102149|2026-10-21 08:50:00.000 +07:00
+4|1|101885|2026-10-18 14:30:00.000 +07:00
+5|1|101884|2026-10-18 14:30:00.000 +07:00
+6|2|101883|2026-10-18 14:30:00.000 +07:00
+7|2|101882|2026-10-18 14:30:00.000 +07:00
+8|2|101555|2026-10-15 16:45:00.000 +07:00
+9|2|101224|2026-10-12 11:05:00.000 +07:00
+10|2|100976|2026-10-10 09:00:00.000 +07:00
+11|3|100975|2026-10-10 09:00:00.000 +07:00
+12|3|100974|2026-10-10 09:00:00.000 +07:00
+13|3|100973|2026-10-10 09:00:00.000 +07:00
+14|3|100972|2026-10-10 09:00:00.000 +07:00
+15|3|100971|2026-10-10 09:00:00.000 +07:00
+16|4|100669|2026-10-07 09:20:00.000 +07:00
+17|4|100500|2026-10-05 15:40:00.000 +07:00
+18|4|100130|2026-10-02 10:15:00.000 +07:00
+PASS thứ tự 18 chuyến = 102897,102611,102149,101885,101884,101883,101882,101555,101224,100976,100975,100974,100973,100972,100971,100669,100500,100130
+code|requested_at
+----|------------
+101883|2026-10-18 14:30:00.000 +07:00
+101882|2026-10-18 14:30:00.000 +07:00
+101555|2026-10-15 16:45:00.000 +07:00
+101224|2026-10-12 11:05:00.000 +07:00
+100976|2026-10-10 09:00:00.000 +07:00
+PASS OFFSET 5: trang 2 = 101883,101882,101555,101224,100976
+code|requested_at
+----|------------
+102897|2026-10-28 10:30:00.000 +07:00
+102611|2026-10-25 14:10:00.000 +07:00
+102149|2026-10-21 08:50:00.000 +07:00
+101885|2026-10-18 14:30:00.000 +07:00
+101884|2026-10-18 14:30:00.000 +07:00
+code|requested_at
+----|------------
+101555|2026-10-15 16:45:00.000 +07:00
+101224|2026-10-12 11:05:00.000 +07:00
+100976|2026-10-10 09:00:00.000 +07:00
+100975|2026-10-10 09:00:00.000 +07:00
+100974|2026-10-10 09:00:00.000 +07:00
+PASS con trỏ một cột, < = 101555,101224,100976,100975,100974
+PASS con trỏ một cột, <= = 101885,101884,101883,101882,101555
+PASS so sánh bộ (requested_at, code) < (…) — lỗi 4145: An expression of non-boolean type specified in a context where a condition is expected, near ','.
+code|requested_at
+----|------------
+101883|2026-10-18 14:30:00.000 +07:00
+101882|2026-10-18 14:30:00.000 +07:00
+101555|2026-10-15 16:45:00.000 +07:00
+101224|2026-10-12 11:05:00.000 +07:00
+100976|2026-10-10 09:00:00.000 +07:00
+PASS keyset trang 2 = 101883,101882,101555,101224,100976
+PASS keyset trang 3 = 100975,100974,100973,100972,100971
+PASS ngược chiều: trang 1 = 102897,102611,102149,101882,101883
+code|requested_at
+----|------------
+101884|2026-10-18 14:30:00.000 +07:00
+101885|2026-10-18 14:30:00.000 +07:00
+101555|2026-10-15 16:45:00.000 +07:00
+101224|2026-10-12 11:05:00.000 +07:00
+100971|2026-10-10 09:00:00.000 +07:00
+PASS ngược chiều: trang 2 = 101884,101885,101555,101224,100971
+PASS TOP trong phần đệ quy của CTE — lỗi 461: The TOP or OFFSET operator is not allowed in the recursive part of a recursive common table expression 'trang'.
+so_trang|ma
+--------|--
+1|102897,102611,102149,101885,101884
+2|101883,101882,101555,101224,100976
+3|100975,100974,100973,100972,100971
+4|100669,100500,100130
+PASS số dòng mỗi trang = 1:5 2:5 3:5 4:3
+tong_ma_qua_cac_trang|ma_khac_nhau|so_chuyen
+---------------------|------------|---------
+18|18|18
+PASS tổng mã / mã khác nhau = 18/18
+PASS dòng lệch giữa ghép trang và bảng đối chiếu = 0
+PASS con trỏ một cột < qua mọi trang = 3 trang có dòng, 13 mã khác nhau
+PASS con trỏ một cột <= (chốt 8 trang) = 8 trang, 40 dòng, 14 mã khác nhau
+PASS con trỏ <=: trang 4 … 8 = 4:100976,100975,100974,100973,100972 5:100976,100975,100974,100973,100972 6:100976,100975,100974,100973,100972 7:100976,100975,100974,100973,100972 8:100976,100975,100974,100973,100972
+PASS thiếu ngoặc: số dòng sau con trỏ = 13
+PASS đủ ngoặc: số dòng sau con trỏ = 13
+chuyen_moi
+----------
+103174
+PASS mã chuyến mới (trong giao dịch) = 103174
+code|requested_at
+----|------------
+101884|2026-10-18 14:30:00.000 +07:00
+101883|2026-10-18 14:30:00.000 +07:00
+101882|2026-10-18 14:30:00.000 +07:00
+101555|2026-10-15 16:45:00.000 +07:00
+101224|2026-10-12 11:05:00.000 +07:00
+PASS OFFSET 5 sau khi có chuyến mới = 101884,101883,101882,101555,101224
+PASS keyset sau khi có chuyến mới = 101883,101882,101555,101224,100976
+PASS IDENT_CURRENT sau ROLLBACK = 103174
+PASS IDENT_CURRENT sau khi đặt lại = 103173
+PASS số chuyến KHDN sau ROLLBACK = 18
+PASS Bài 1: trang trước của trang 3 = 101883,101882,101555,101224,100976
+PASS Bài 2: TOP (6) ở trang 3 / trang 4 = 6/3
+PASS Bài 3: ghép trang ngược chiều = 102897,102611,102149,101882,101883,101884,101885,101555,101224,100971,100972,100973,100974,100975,100976,100669,100500,100130
+PASS Bài 3: tổng mã / mã khác nhau = 18/18
+
+-- ==================== p02/19-cay-khu-vuc.sql ====================
+Changed database context to 'ToiNoi'.
+n
+-
+1
+2
+3
+4
+5
+PASS đếm 1 → 5 = 1,2,3,4,5
+PASS WITH RECURSIVE (cú pháp PostgreSQL) — lỗi 102: Incorrect syntax near 'dem'.
+PASS UNION thay cho UNION ALL — lỗi 252: Recursive common table expression 'dem' does not contain a top-level UNION ALL operator.
+PASS kiểu cột lệch giữa neo và đệ quy — lỗi 240: Types don't match between the anchor and the recursive part in column "duong_di" of recursive query "cay".
+do_sau|code|name|duong_di
+------|----|----|--------
+0|SG|TP. Hồ Chí Minh|SG
+1|SG-DO|Phía Đông|SG/SG-DO
+2|SG-DO-01|Khu 01|SG/SG-DO/SG-DO-01
+2|SG-DO-02|Khu 02|SG/SG-DO/SG-DO-02
+2|SG-DO-03|Khu 03|SG/SG-DO/SG-DO-03
+1|SG-NA|Phía Nam|SG/SG-NA
+2|SG-NA-01|Khu 01|SG/SG-NA/SG-NA-01
+2|SG-NA-02|Khu 02|SG/SG-NA/SG-NA-02
+1|SG-TA|Phía Tây|SG/SG-TA
+2|SG-TA-01|Khu 01|SG/SG-TA/SG-TA-01
+2|SG-TA-02|Khu 02|SG/SG-TA/SG-TA-02
+1|SG-TT|Trung tâm|SG/SG-TT
+2|SG-TT-01|Khu 01|SG/SG-TT/SG-TT-01
+2|SG-TT-02|Khu 02|SG/SG-TT/SG-TT-02
+2|SG-TT-03|Khu 03|SG/SG-TT/SG-TT-03
+PASS cây SG theo chiều sâu = 0:SG 1:SG-DO 2:SG-DO-01 2:SG-DO-02 2:SG-DO-03 1:SG-NA 2:SG-NA-01 2:SG-NA-02 1:SG-TA 2:SG-TA-01 2:SG-TA-02 1:SG-TT 2:SG-TT-01 2:SG-TT-02 2:SG-TT-03
+bac|code|level
+---|----|-----
+0|HN-TA-02|zone
+1|HN-TA|district
+2|HN|city
+PASS tổ tiên của HN-TA-02 = HN-TA-02 > HN-TA > HN
+ 
+-
+PASS đếm tới 200 với MAXRECURSION mặc định — lỗi 530: The statement terminated. The maximum recursion 100 has been exhausted before statement completion.
+PASS đếm tới 200 với MAXRECURSION 200 = 200
+PASS MAXRECURSION vượt 32767 — lỗi 310: The value 32768 specified for the MAXRECURSION option exceeds the allowed maximum of 32767.
+n
+-
+1
+2
+3
+4
+Msg 530: The statement terminated. The maximum recursion 3 has been exhausted before statement completion.
+PASS MAXRECURSION 3 khi cần 9 vòng = 530
+code|level|so_chuyen|doanh_thu
+----|-----|---------|---------
+DN|city|456|26124000
+DN-BI|district|231|13618000
+DN-TT|district|225|12506000
+HN|city|1094|62246000
+HN-BA|district|340|19456000
+HN-NA|district|0|0
+HN-TA|district|295|16496000
+HN-TT|district|459|26294000
+SG|city|1588|92143000
+SG-DO|district|481|28484000
+SG-NA|district|315|17353000
+SG-TA|district|315|18523000
+SG-TT|district|477|27783000
+Warning: Null value is eliminated by an aggregate or other SET operation.
+PASS cộng dồn theo cây = DN 456 26124000, DN-BI 231 13618000, DN-TT 225 12506000, HN 1094 62246000, HN-BA 340 19456000, HN-NA 0 0, HN-TA 295 16496000, HN-TT 459 26294000, SG 1588 92143000, SG-DO 481 28484000, SG-NA 315 17353000, SG-TA 315 18523000, SG-TT 477 27783000
+qua_cay|truc_tiep|mat_gps
+-------|---------|-------
+3138|3138|36
+PASS qua cây | trực tiếp | mất GPS = 3138 | 3138 | 36
+tong_nut|di_toi_tu_goc|sau_nhat|so_la
+--------|-------------|--------|-----
+34|34|2|22
+PASS tổng nút | đi tới từ gốc | sâu nhất | số lá = 34 | 34 | 2 | 22
+PASS Bài 1: lá của HN = HN/HN-BA/HN-BA-01, HN/HN-BA/HN-BA-02, HN/HN-NA, HN/HN-TA/HN-TA-01, HN/HN-TA/HN-TA-02, HN/HN-TT/HN-TT-01, HN/HN-TT/HN-TT-02, HN/HN-TT/HN-TT-03
+PASS Bài 2: vùng doanh thu cao nhất mỗi thành phố = DN-BI 13618000, HN-TT 26294000, SG-DO 28484000
+PASS Bài 3: hierarchyid của 211 | cấp | số chuyến HN = /2/21/211/ | 3 | 1094
+
+-- ==================== p02/19-chu-trinh.sql ====================
+Changed database context to 'ToiNoi'.
+id|code|cha_cu|cha_moi
+--|----|------|-------
+21|HN-TT|2|221
+22|HN-TA|2|211
+PASS đảo cha hai vùng HN (mọi ràng buộc vẫn qua) = 21:2→221, 22:2→211
+PASS CHECK của areas bị tắt hoặc không tin cậy = 0
+số nút dưới HN | số chuyến HN: 5 | 340
+PASS cây HN sau khi đảo cha (số nút | số chuyến) = 5 | 340
+bac|code
+---|----
+0|HN-TT-01
+1|HN-TT
+2|HN-TA-01
+3|HN-TA
+4|HN-TT-01
+5|HN-TT
+PASS đi lên từ HN-TT-01 với chốt độ sâu = HN-TT-01 > HN-TT > HN-TA-01 > HN-TA > HN-TT-01 > HN-TT
+bac|code|da_qua|la_chu_trinh
+---|----|------|------------
+0|HN-TT-01|/211/|0
+1|HN-TT|/211/21/|0
+2|HN-TA-01|/211/21/221/|0
+3|HN-TA|/211/21/221/22/|0
+4|HN-TT-01|/211/21/221/22/211/|1
+PASS dòng cuối khi phát hiện vòng = /211/21/221/22/211/ 1
+id|code
+--|----
+21|HN-TT
+22|HN-TA
+211|HN-TT-01
+212|HN-TT-02
+213|HN-TT-03
+221|HN-TA-01
+222|HN-TA-02
+PASS nút không tới được từ gốc = HN-TT, HN-TA, HN-TT-01, HN-TT-02, HN-TT-03, HN-TA-01, HN-TA-02
+id|code|vong
+--|----|----
+21|HN-TT|/21/221/22/211/
+22|HN-TA|/22/211/21/221/
+211|HN-TT-01|/211/21/221/22/
+221|HN-TA-01|/221/22/211/21/
+PASS nút nằm trên vòng = 21 /21/221/22/211/, 22 /22/211/21/221/, 211 /211/21/221/22/, 221 /221/22/211/21/
+Msg 530: The statement terminated. The maximum recursion 100 has been exhausted before statement completion.
+PASS truy vấn trần trên vòng (lỗi | XACT_STATE) = 530 | -1
+PASS sau ROLLBACK (nút không tới gốc | cha của 21, 22) = 0 | 21:2,22:2
+
+-- ==================== p02/20-doi-soat-thanh-toan.sql ====================
+Changed database context to 'ToiNoi'.
+PASS V1 CREATE VIEW sau một câu khác trong cùng batch — lỗi 111: 'CREATE VIEW' must be the first statement in a query batch.
+voi_isnull|voi_coalesce
+----------|------------
+(không có giao d?ch)|(không có giao dịch)
+PASS V2 ISNULL(varchar, N…) = (không có giao d?ch)
+PASS V2 COALESCE(varchar, N…) = (không có giao dịch)
+so_chuyen|tong_phai_thu|tong_thuc_thu|chenh
+---------|-------------|-------------|-----
+3168|182287000|182555000|268000
+PASS 1 số chuyến trong phạm vi = 3168
+PASS 1 tổng phải thu (đ) = 182287000
+PASS 1 tổng thực thu (đ) = 182555000
+PASS 1 chênh (đ) = 268000
+dong_so|chuyen_khac_nhau|dem_doc_lap
+-------|----------------|-----------
+3168|3168|3168
+PASS 1 dòng sổ | chuyến khác nhau | đếm độc lập = 3168|3168|3168
+PASS 1 giao dịch ngoài sổ = 0
+kind|so_gd|tong_tien
+----|-----|---------
+adjustment|2|-5000
+charge|2714|183640000
+refund|13|1080000
+PASS 1 cầu nối charge − refund + adjustment (đ) = 182555000
+PASS 1 giao dịch không đổi tiền = failed:96, pending:1
+PASS 1 SUM(int) tràn khi cộng 12 tháng — lỗi 8115: Arithmetic overflow error converting expression to data type int.
+PASS 1 cùng tổng với CAST(… AS bigint) = 2203680000
+code|ngay|tp|kind|status|phai_thu|thuc_thu|chenh|loai_lech|chi_tiet
+----|----|--|----|------|--------|--------|-----|---------|--------
+100724|2026-10-07|HN|ride|completed|76000|0|-76000|3 THIẾU THANH TOÁN|(không có giao dịch)
+101084|2026-10-11|DN|food|completed|98000|0|-98000|3 THIẾU THANH TOÁN|charge/card/failed/98000
+101310|2026-10-13|SG|food|completed|85000|170000|85000|4 THU TRÙNG|charge/wallet/succeeded/85000, charge/wallet/succeeded/85000
+101987|2026-10-19|SG|ride|cancelled|0|-72000|-72000|1 HOÀN KHÔNG CÓ THU|refund/wallet/succeeded/72000
+102443|2026-10-24|HN|parcel|completed|54000|45000|-9000|5 LỆCH SỐ TIỀN|charge/cash/succeeded/45000
+102642|2026-10-25|SG|ride|completed|38000|380000|342000|5 LỆCH SỐ TIỀN|charge/card/succeeded/380000
+102739|2026-10-26|SG|food|cancelled|0|96000|96000|2 THU CHUYẾN HUỶ|charge/wallet/succeeded/96000
+PASS 2 đáp án mã:loại:chênh = 100724:3:-76000, 101084:3:-98000, 101310:4:85000, 101987:1:-72000, 102443:5:-9000, 102642:5:342000, 102739:2:96000
+loai|so_chuyen|tong_chenh
+----|---------|----------
+1 HOÀN KHÔNG CÓ THU|1|-72000
+2 THU CHUYẾN HUỶ|1|96000
+3 THIẾU THANH TOÁN|2|-174000
+4 THU TRÙNG|1|85000
+5 LỆCH SỐ TIỀN|2|333000
+TỔNG|7|268000
+PASS 2 theo loại loại:số chuyến:chênh = 1:1:-72000, 2:1:96000, 3:2:-174000, 4:1:85000, 5:2:333000, T:7:268000
+hop_le|do_dai|phan_tu_dau
+------|------|-----------
+1|1196|{"ma_chuyen":100724,"ngay":"2026-10-07","tp":"HN","dich_vu":"ride","trang_thai":"completed","phai_thu":76000,"thuc_thu":0,"chenh":-76000,"loai_lech":"3 THIẾU THANH TOÁN"}
+PASS 2 JSON đọc lại: số dòng | tổng chênh = 7|268000
+nhom|so_chuyen|tong_tien_charge
+----|---------|----------------
+KHỚP — hoàn thành, có thu|2671|181941000
+KHỚP — chuyến huỷ, không giao dịch|447|0
+KHỚP — hoàn thành cước 0 đ, không cần thu|31|0
+KHỚP — chuyến huỷ, đã hoàn đủ|12|1008000
+LỆCH|7|691000
+TỔNG|3168|183640000
+PASS 3 nhóm số chuyến:tiền charge = 2671:181941000, 447:0, 31:0, 12:1008000, 7:691000
+code|status|phai_thu|thuc_thu|loai_lech|chi_tiet
+----|------|--------|--------|---------|--------
+100042|completed|82000|82000|NULL|charge/card/failed/82000, charge/card/succeeded/82000
+100048|completed|119000|119000|NULL|charge/wallet/succeeded/104000, charge/card/succeeded/15000
+102235|completed|72000|72000|NULL|charge/wallet/succeeded/82000, adjustment/wallet/succeeded/-10000
+103162|completed|57000|57000|NULL|charge/card/succeeded/57000, charge/card/pending/57000
+103165|completed|28000|28000|NULL|charge/cash/succeeded/23000, adjustment/wallet/succeeded/5000
+PASS 4 năm ca khó không bị báo = 5
+code|status|phai_thu|thuc_thu|loai_lech|chi_tiet
+----|------|--------|--------|---------|--------
+100366|cancelled|0|0|NULL|charge/card/succeeded/103000, refund/card/succeeded/103000
+PASS 4 chuyến huỷ đã hoàn đủ, không bị báo = 12
+PASS 4 chuyến trả một phần, không bị báo = 26
+ngay_tho_a|ngay_tho_b|quy_tac_dung
+----------|----------|------------
+115|42|7
+PASS 4 quy tắc ngây thơ A báo = 115
+PASS 4 quy tắc ngây thơ B báo | trong đó lệch thật = 42|4
+PASS 4 quy tắc ngây thơ B bỏ sót = 101987, 102443, 102642
+ngay|theo_ngay_dat_chuyen|theo_ngay_giao_dich
+----|--------------------|-------------------
+2026-10-15|5862000|5823000
+2026-10-16|5244000|5228000
+PASS 5 ngày:theo ngày đặt:theo ngày giao dịch = 2026-10-15:5862000:5823000, 2026-10-16:5244000:5228000
+theo_ngay_dat_chuyen|theo_ngay_giao_dich_thang_10|ghi_nhan_tu_31_10
+--------------------|----------------------------|-----------------
+182555000|182550000|5000
+code|kind|amount|paid_at_vn
+----|----|------|----------
+103165|adjustment|5000|2026-10-31 00:05:29.000 +07:00
+PASS 5 tháng: ngày đặt | ngày giao dịch | từ 31/10 = 182555000|182550000|5000
+code|provider_ref|amount|paid_at_vn
+----|------------|------|----------
+103162|TH-103162-P|57000|2026-10-30 22:17:37.000 +07:00
+PASS 6 pending cần theo dõi = 103162:TH-103162-P
+PASS 6 giả định pending → succeeded = 103162:4 THU TRÙNG:57000
+PASS 6 sau ROLLBACK vẫn = pending
+tp|so_chuyen|phai_thu|thuc_thu|chenh|so_lech
+--|---------|--------|--------|-----|-------
+DN|459|26416000|26318000|-98000|1
+HN|1106|62991000|62906000|-85000|2
+SG|1603|92880000|93331000|451000|4
+TONG|3168|182287000|182555000|268000|7
+PASS BT1 thành phố:chênh:số lệch = DN:-98000:1, HN:-85000:2, SG:451000:4, TONG:268000:7
+PASS BT1 STRING_AGG trong GROUPING SETS — lỗi 8710: Aggregate functions that are used with CUBE, ROLLUP, or GROUPING SET queries must provide for the merging of subaggregates. To fix this problem, remove the aggregate function or write the query using UNION ALL over GROUP BY clauses.
+tp|ma_lech
+--|-------
+DN|101084
+HN|100724, 102443
+SG|101310, 101987, 102642, 102739
+cach|ket_qua
+----|-------
+a|119000:109000:-10000:5 LỆCH SỐ TIỀN | 8:258000
+b|119000:109000:-10000:5 LỆCH SỐ TIỀN | 8:258000
+c|109000:109000:0:khớp | 7:268000
+PASS BT2 (a) chỉ refund = 119000:109000:-10000:5 LỆCH SỐ TIỀN | 8:258000
+PASS BT2 (b) chỉ adjustment = 119000:109000:-10000:5 LỆCH SỐ TIỀN | 8:258000
+PASS BT2 (c) sửa cước + adjustment = 109000:109000:0:khớp | 7:268000
+PASS BT2 sau ROLLBACK cước:số giao dịch của 100048 = 119000:2
+code|method|amount|cach_giay
+----|------|------|---------
+101310|wallet|85000|3
+PASS BT3 cặp thu trùng chặt = 101310:wallet:3
+PASS cuối file trips | payments | doanh thu = 3174|2826|182287000
+
+-- [lab] File đã chạy: 16
+-- [lab] PASS: 331
+-- [lab] FAIL: 0
+-- [lab] KẾT QUẢ: ĐẠT

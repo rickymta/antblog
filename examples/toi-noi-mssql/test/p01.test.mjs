@@ -38,8 +38,3 @@ test('rollback của 06 chạy lặp được hai lần', () => {
     assert.match(out, /PASS R2 số biển số đã sao lưu = 7/);
   }
 });
-
-// Chạy cuối để database ToiNoi giữ trạng thái đầy đủ sau 00 → 07 (DBStudio, bài viết).
-test('trả database về trạng thái sau p01', () => {
-  assert.equal(run('p01').status, 0);
-});

@@ -3,7 +3,7 @@
 --   node run.mjs p01/00-reset.sql p01/thu-nghiem/ms004-kieu-du-lieu.sql
 
 SET NOCOUNT ON;
-USE ToiNoi;
+USE [$(LAB_DB)];
 GO
 
 -- ------------------------------------------------ 1. Thiếu tiền tố N'…'

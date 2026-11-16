@@ -6158,5 +6158,105 @@
       "BOOKING",
       "TRIP"
     ]
+  },
+  "mssql-null-case-isnull-coalesce": {
+    "title": "NULL",
+    "subtitle": "SQL Server 2022 · NULL, ISNULL, COALESCE",
+    "diagram": "flow",
+    "labels": [
+      "THIẾU",
+      "KHÔNG ÁP DỤNG",
+      "0"
+    ]
+  },
+  "mssql-group-by-rollup-grouping-sets": {
+    "title": "ROLLUP",
+    "subtitle": "SQL Server 2022 · GROUP BY và GROUPING SETS",
+    "diagram": "blocks",
+    "labels": [
+      "GROUP BY",
+      "ROLLUP",
+      "GROUPING SETS"
+    ]
+  },
+  "mssql-join-apply-cardinality": {
+    "title": "JOIN / APPLY",
+    "subtitle": "SQL Server 2022 · Số dòng sau khi nối",
+    "diagram": "map",
+    "labels": [
+      "TRIPS",
+      "PAYMENTS",
+      "APPLY"
+    ]
+  },
+  "mssql-subquery-exists-cte-temp-table": {
+    "title": "CTE",
+    "subtitle": "SQL Server 2022 · Subquery, EXISTS, bảng tạm",
+    "diagram": "layers",
+    "labels": [
+      "SUBQUERY",
+      "EXISTS",
+      "CTE"
+    ]
+  },
+  "mssql-window-function-window-clause": {
+    "title": "WINDOW",
+    "subtitle": "SQL Server 2022 · Window function",
+    "diagram": "matrix",
+    "labels": [
+      "ROWS",
+      "RANGE",
+      "WINDOW"
+    ]
+  },
+  "mssql-ngay-gio-at-time-zone-date-bucket": {
+    "title": "DATE_BUCKET",
+    "subtitle": "SQL Server 2022 · Ngày giờ và múi giờ",
+    "diagram": "cycle",
+    "labels": [
+      "+07:00",
+      "UTC",
+      "DATETRUNC"
+    ]
+  },
+  "mssql-upsert-merge": {
+    "title": "MERGE",
+    "subtitle": "SQL Server 2022 · Upsert an toàn",
+    "diagram": "split",
+    "labels": [
+      "MATCHED",
+      "NOT MATCHED",
+      "$ACTION"
+    ]
+  },
+  "mssql-phan-trang-keyset": {
+    "title": "KEYSET",
+    "subtitle": "SQL Server 2022 · Phân trang lịch sử chuyến",
+    "diagram": "pages",
+    "labels": [
+      "OFFSET",
+      "KEYSET",
+      "TIE-BREAKER"
+    ]
+  },
+  "mssql-recursive-cte-cay-khu-vuc": {
+    "title": "RECURSIVE",
+    "subtitle": "SQL Server 2022 · Cây khu vực",
+    "diagram": "network",
+    "labels": [
+      "CITY",
+      "DISTRICT",
+      "ZONE"
+    ]
+  },
+  "mssql-thuc-hanh-tsql-doi-soat": {
+    "title": "PHẦN 2 · LAB",
+    "subtitle": "SQL Server 2022 · Đối soát thanh toán",
+    "diagram": "target",
+    "labels": [
+      "PHẢI THU",
+      "THỰC THU",
+      "CHÊNH LỆCH"
+    ]
   }
 }

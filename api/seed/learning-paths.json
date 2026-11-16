@@ -138,6 +138,26 @@
     "status": "published"
   },
   {
+    "slug": "mssql-2022-qua-toi-noi-phan-02",
+    "title": "SQL Server 2022 · Phần 2 · T-SQL cho nghiệp vụ",
+    "description": "Truy vấn dữ liệu chuyến và thanh toán 30 ngày của Tới Nơi bằng T-SQL: NULL, ISNULL và COALESCE, GROUP BY với ROLLUP và GROUPING SETS, JOIN và APPLY không nhân đôi tiền, subquery/EXISTS/CTE và bảng tạm, window function với mệnh đề WINDOW của SQL Server 2022, AT TIME ZONE, DATETRUNC và DATE_BUCKET, MERGE và các mẫu upsert an toàn hơn, phân trang keyset, recursive CTE trên cây khu vực — kết thúc bằng bài thực hành đối soát thanh toán có expected output.",
+    "level": "intermediate",
+    "category": "mssql",
+    "articles": [
+      "mssql-null-case-isnull-coalesce",
+      "mssql-group-by-rollup-grouping-sets",
+      "mssql-join-apply-cardinality",
+      "mssql-subquery-exists-cte-temp-table",
+      "mssql-window-function-window-clause",
+      "mssql-ngay-gio-at-time-zone-date-bucket",
+      "mssql-upsert-merge",
+      "mssql-phan-trang-keyset",
+      "mssql-recursive-cte-cay-khu-vuc",
+      "mssql-thuc-hanh-tsql-doi-soat"
+    ],
+    "status": "published"
+  },
+  {
     "slug": "mongodb-8-qua-toi-noi",
     "title": "MongoDB · Phần 1 · Nền tảng và mô hình document",
     "description": "Bắt đầu MongoDB 8.0 từ dữ liệu chuyến xe của Tới Nơi: MongoDB nằm ở đâu, dựng lab replica set và kết nối bằng DBStudio, document – BSON – _id, kiểu dữ liệu cho tiền và thời gian, schema validation và index unique, ghi và đọc dữ liệu, nhúng hay tham chiếu, đổi schema khi không có ALTER TABLE — kết thúc bằng bài thực hành bàn giao mô hình có kiểm tra ràng buộc.",

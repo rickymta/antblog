@@ -24,7 +24,7 @@
 --   * Định danh: `uniqueidentifier` + mã số dễ đọc `code` cho người vận hành.
 
 SET NOCOUNT ON;
-USE ToiNoi;
+USE [$(LAB_DB)];
 GO
 
 -- ---------------------------------------------------------------------------

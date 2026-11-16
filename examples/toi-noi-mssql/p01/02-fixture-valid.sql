@@ -19,7 +19,7 @@
 -- code page của collation trước khi lưu — MS-004 cho thấy chữ nào bị mất.
 
 SET NOCOUNT ON;
-USE ToiNoi;
+USE [$(LAB_DB)];
 GO
 
 INSERT INTO toinoi.cities (id, code, name) VALUES

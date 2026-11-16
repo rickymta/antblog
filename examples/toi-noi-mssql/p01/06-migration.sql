@@ -12,7 +12,7 @@
 
 SET NOCOUNT ON;
 SET XACT_ABORT ON;
-USE ToiNoi;
+USE [$(LAB_DB)];
 GO
 
 -- ------------------------------------------------------- Bước 1. EXPAND

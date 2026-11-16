@@ -25,6 +25,7 @@ services:
       - toinoi-mssql2022-data:/var/opt/mssql
       # File SQL của các phần, chỉ đọc: trong container là /lab/p01/*.sql …
       - ./p01:/lab/p01:ro
+      - ./p02:/lab/p02:ro
     healthcheck:
       test: ["CMD-SHELL", "/opt/mssql-tools18/bin/sqlcmd -C -S localhost -U sa -P \"$$MSSQL_SA_PASSWORD\" -Q \"SELECT 1\" -b -o /dev/null"]
       interval: 5s

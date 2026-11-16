@@ -17,7 +17,7 @@
 -- câu lệnh có lỡ thành công, dữ liệu vẫn giữ nguyên 3/6/6/3/15.
 
 SET NOCOUNT ON;
-USE ToiNoi;
+USE [$(LAB_DB)];
 GO
 
 -- ---------------------------------------------------------------- NOT NULL (3)

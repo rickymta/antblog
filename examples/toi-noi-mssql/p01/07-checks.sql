@@ -6,7 +6,7 @@
 -- diễn đạt được — nên phải kiểm định kỳ, hoặc giữ bằng code/transaction.
 
 SET NOCOUNT ON;
-USE ToiNoi;
+USE [$(LAB_DB)];
 GO
 
 DECLARE @v int;

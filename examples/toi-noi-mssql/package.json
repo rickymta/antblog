@@ -2,7 +2,7 @@
   "name": "toi-noi-mssql-lab",
   "private": true,
   "type": "module",
-  "description": "Lab SQL Server 2022 qua dự án Tới Nơi — SQL Server chạy trong Docker, sqlcmd chạy bên trong container; runner Node không có dependency",
+  "description": "Lab SQL Server 2022 qua dự án Tới Nơi — SQL Server chạy trong Docker, sqlcmd chạy bên trong container; runner Node không có dependency. P02 dùng lại lược đồ P01 và bộ dữ liệu 30 ngày giống hệt lab PostgreSQL",
   "engines": {
     "node": ">=22"
   },
@@ -13,6 +13,8 @@
     "p01:output": "node run.mjs p01 > p01/OUTPUT.txt",
     "p01:rollback": "node run.mjs p01/06-migration-rollback.sql",
     "p01:thu-nghiem": "node run.mjs p01/00-reset.sql p01/thu-nghiem/ms004-kieu-du-lieu.sql",
-    "test": "node --test \"test/*.test.mjs\""
+    "p02": "node run.mjs p01/00-reset.sql p01/01-schema.sql p02",
+    "p02:output": "node run.mjs p01/00-reset.sql p01/01-schema.sql p02 > p02/OUTPUT.txt",
+    "test": "node --test --test-concurrency=1 \"test/*.test.mjs\""
   }
 }

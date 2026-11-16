@@ -2,7 +2,8 @@
 // Runner của lab "SQL Server qua dự án Tới Nơi".
 //
 //   node run.mjs p01                       # mọi p01/NN-*.sql theo thứ tự tên
-//   node run.mjs p01/00-reset.sql p01/01-schema.sql p01/thu-nghiem/ms004-unicode.sql
+//   node run.mjs p01/00-reset.sql p01/01-schema.sql p02
+//   LAB_DB=ToiNoi_thu node run.mjs p01     # chạy trên database khác (mặc định ToiNoi)
 //
 // Mỗi file chạy bằng một lần gọi sqlcmd BÊN TRONG container `db` (không cần cài
 // công cụ nào trên máy): `docker compose exec -T db sqlcmd … -i /lab/<file>`.
@@ -19,6 +20,9 @@ import { fileURLToPath } from 'node:url';
 
 const root = dirname(fileURLToPath(import.meta.url));
 const SA_PASSWORD = process.env.MSSQL_SA_PASSWORD ?? 'ToiNoi_lab_2022!';
+// Tên database của lab; đổi bằng LAB_DB=… để chạy song song trên database riêng.
+const LAB_DB = process.env.LAB_DB ?? 'ToiNoi';
+if (!/^[A-Za-z][A-Za-z0-9_]{0,63}$/.test(LAB_DB)) throw new Error('LAB_DB không hợp lệ: ' + LAB_DB);
 const SQLCMD = '/opt/mssql-tools18/bin/sqlcmd';
 
 function expand(arg) {
@@ -53,6 +57,7 @@ for (const file of files) {
       'compose', 'exec', '-T', 'db', SQLCMD,
       '-C', '-S', 'localhost', '-U', 'sa', '-P', SA_PASSWORD,
       '-b', '-I', '-W', '-s', '|', '-f', 'i:65001,o:65001',
+      '-v', `LAB_DB=${LAB_DB}`,
       '-i', inContainer,
     ],
     { cwd: root, encoding: 'utf8', env: { ...process.env, MSYS_NO_PATHCONV: '1' } },

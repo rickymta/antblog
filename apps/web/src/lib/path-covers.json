@@ -328,5 +328,10 @@
     "source": "test-case-design-test-analysis-test-condition",
     "topic": "testing",
     "number": 5
+  },
+  "mssql-2022-qua-toi-noi-phan-02": {
+    "source": "mssql-null-case-isnull-coalesce",
+    "topic": "mssql",
+    "number": 2
   }
 }

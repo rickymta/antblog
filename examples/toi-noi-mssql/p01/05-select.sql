@@ -2,7 +2,7 @@
 -- (MS-007). Chạy sau 00 → 04.
 
 SET NOCOUNT ON;
-USE ToiNoi;
+USE [$(LAB_DB)];
 GO
 
 -- S1. Chuyến đang chạy (chưa kết thúc), mới nhất trước.

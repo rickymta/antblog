@@ -5,6 +5,7 @@ Mã thực hành cho loạt bài **SQL Server 2022 qua dự án Tới Nơi**. Đ
 | Phần | Chủ đề | Thư mục | Trạng thái |
 |---|---|---|---|
 | P01 | Nền tảng và mô hình dữ liệu | [`p01/`](p01/README.md) | 8 file SQL, `OUTPUT.txt`, thí nghiệm, test — **đã chạy trên SQL Server 2022 CU28 thật** (80 PASS, 0 FAIL) |
+| P02 | T-SQL cho nghiệp vụ | [`p02/`](p02/README.md) | 14 file SQL trên lược đồ P01, dữ liệu 30 ngày giống hệt lab PostgreSQL, `OUTPUT.txt`, test — **đã chạy trên SQL Server 2022 CU28 thật** (331 PASS, 0 FAIL) |
 
 ## Phiên bản cố định
 
@@ -22,7 +23,8 @@ Mã thực hành cho loạt bài **SQL Server 2022 qua dự án Tới Nơi**. Đ
 cd examples/toi-noi-mssql
 npm run db:up        # docker compose up -d --wait — chờ healthcheck "healthy"
 npm run p01          # 00 → 07 trên database ToiNoi mới, in kết quả + bảng đếm
-npm test             # chạy lại p01, so với OUTPUT.txt, thử rollback và thí nghiệm
+npm run p02          # lược đồ P01 + p02/00 → 20 (dữ liệu 30 ngày), ~1 phút
+npm test             # chạy lại p01 và p02, so với OUTPUT.txt (tuần tự, ~1 phút)
 npm run db:down      # docker compose down -v — dừng và XOÁ dữ liệu lab
 ```
 
@@ -35,7 +37,7 @@ Kết quả mong đợi của `npm run p01` kết thúc bằng:
 -- [lab] KẾT QUẢ: ĐẠT
 ```
 
-**Runner.** `run.mjs` gọi `docker compose exec -T db sqlcmd … -i /lab/<file>` cho từng file (thư mục `p01` được mount chỉ đọc vào `/lab/p01`). Mỗi file là một phiên kết nối riêng. Tuỳ chọn sqlcmd: `-C` (tin chứng chỉ tự ký của container), `-b` (lỗi không bắt ⇒ dừng file, runner báo FAIL), `-I` (QUOTED_IDENTIFIER ON), `-W -s "|"` (cột gọn, ngăn bằng `|`), `-f i:65001,o:65001` (UTF-8 cho chữ tiếng Việt).
+**Runner.** `run.mjs` gọi `docker compose exec -T db sqlcmd … -i /lab/<file>` cho từng file (thư mục `p01`, `p02` được mount chỉ đọc vào `/lab/p01`, `/lab/p02`). Tên database truyền vào script qua biến sqlcmd `$(LAB_DB)`, mặc định `ToiNoi`; `LAB_DB=ToiNoi_thu node run.mjs …` chạy trên database riêng mà không đụng tới lab chính. Mỗi file là một phiên kết nối riêng. Tuỳ chọn sqlcmd: `-C` (tin chứng chỉ tự ký của container), `-b` (lỗi không bắt ⇒ dừng file, runner báo FAIL), `-I` (QUOTED_IDENTIFIER ON), `-W -s "|"` (cột gọn, ngăn bằng `|`), `-f i:65001,o:65001` (UTF-8 cho chữ tiếng Việt).
 
 **Kiểm tra trong SQL.** `00-reset.sql` tạo schema `lab` với hai thủ tục: `lab.expect_error` (chạy một câu trong transaction rồi ROLLBACK, PASS khi lỗi đúng số hiệu và đúng tên ràng buộc) và `lab.expect_value`. Runner đếm các dòng bắt đầu bằng `PASS ` / `FAIL `.
 
@@ -46,7 +48,7 @@ Kết quả mong đợi của `npm run p01` kết thúc bằng:
 | Máy chủ / cổng | `127.0.0.1` / `14330` (chỉ mở trên máy của bạn) |
 | Đăng nhập | `sa` / `ToiNoi_lab_2022!` — mật khẩu giữ chỗ cho lab, không dùng ở đâu khác |
 | TLS | Chứng chỉ tự ký: DBStudio chọn chế độ TLS "Ưu tiên" hoặc "Bắt buộc" (không xác minh chứng chỉ); sqlcmd thêm `-C`; ADO.NET thêm `TrustServerCertificate=True` |
-| Database | `ToiNoi` (sau khi chạy `p01/00-reset.sql`) |
+| Database | `ToiNoi` — sau `npm test` ở trạng thái cuối của P02 |
 
 Chuỗi dán vào ô "URI kết nối" của DBStudio:
 

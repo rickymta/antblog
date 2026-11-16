@@ -16,7 +16,7 @@
 
 SET NOCOUNT ON;
 SET XACT_ABORT ON;   -- lỗi giữa transaction ⇒ huỷ cả transaction
-USE ToiNoi;
+USE [$(LAB_DB)];
 GO
 
 -- ------------------------------------------------------------ 1. Khách đặt

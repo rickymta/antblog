@@ -3691,6 +3691,137 @@
       "aliases": [
         "Sch-M"
       ]
+    },
+    {
+      "id": "three-valued-logic",
+      "use": "logic ba giá trị",
+      "english": "three-valued logic",
+      "glossary": true,
+      "definition": "Cách SQL đánh giá điều kiện với ba kết quả TRUE, FALSE và UNKNOWN. So sánh bất kỳ giá trị nào với NULL bằng = hay <> ra UNKNOWN; WHERE chỉ giữ dòng ra TRUE, còn CHECK cho qua dòng ra UNKNOWN."
+    },
+    {
+      "id": "data-type-precedence",
+      "use": "thứ tự ưu tiên kiểu dữ liệu",
+      "english": "data type precedence",
+      "glossary": true,
+      "definition": "Quy tắc của SQL Server quyết định kiểu kết quả khi một biểu thức trộn nhiều kiểu: giá trị kiểu thấp được đổi sang kiểu cao hơn (ví dụ nvarchar sang int). COALESCE theo quy tắc này, còn ISNULL lấy kiểu của đối số đầu."
+    },
+    {
+      "id": "apply-operator",
+      "use": "APPLY",
+      "english": "APPLY operator",
+      "keepEnglish": true,
+      "caseSensitive": true,
+      "glossary": true,
+      "definition": "Toán tử của T-SQL trong mệnh đề FROM: chạy một biểu thức bảng cho từng dòng bên trái và dùng được cột của dòng đó. CROSS APPLY bỏ dòng khi bên phải rỗng (như INNER JOIN), OUTER APPLY giữ lại với NULL (như LEFT JOIN).",
+      "aliases": [
+        "CROSS APPLY",
+        "OUTER APPLY"
+      ]
+    },
+    {
+      "id": "anti-join",
+      "use": "anti-join",
+      "english": "anti-join",
+      "keepEnglish": true,
+      "glossary": true,
+      "definition": "Phép lấy các dòng của bảng thứ nhất KHÔNG có dòng khớp ở bảng thứ hai, ví dụ chuyến hoàn thành chưa có giao dịch thành công. Viết bằng NOT EXISTS hoặc LEFT JOIN … WHERE khoá bên phải IS NULL; tránh NOT IN khi cột có thể NULL."
+    },
+    {
+      "id": "window-function",
+      "use": "window function",
+      "english": "window function",
+      "keepEnglish": true,
+      "glossary": true,
+      "definition": "Hàm tính trên một tập dòng liên quan tới dòng hiện tại, mô tả bằng OVER (PARTITION BY, ORDER BY, frame), mà không gộp các dòng lại như GROUP BY. Dùng cho luỹ kế, trung bình trượt, xếp hạng và so sánh với dòng trước/sau.",
+      "aliases": [
+        "hàm cửa sổ"
+      ]
+    },
+    {
+      "id": "window-frame",
+      "use": "window frame",
+      "english": "window frame",
+      "keepEnglish": true,
+      "glossary": true,
+      "definition": "Phần của mệnh đề OVER chỉ ra dòng nào trong nhóm được đưa vào phép tính (ROWS hoặc RANGE BETWEEN … AND …). Có ORDER BY mà không ghi frame thì mặc định là RANGE từ đầu nhóm tới dòng hiện tại, gồm cả các dòng hoà."
+    },
+    {
+      "id": "temp-table",
+      "use": "bảng tạm",
+      "english": "temporary table",
+      "glossary": true,
+      "definition": "Bảng chỉ tồn tại trong phiên tạo ra nó; trên SQL Server tên bắt đầu bằng # và nằm trong tempdb. Có statistics và index như bảng thường, thấy được trong SQL động của phiên, bị ROLLBACK huỷ dòng đã ghi, tự xoá khi phiên đóng.",
+      "aliases": [
+        "temp table"
+      ]
+    },
+    {
+      "id": "table-variable",
+      "use": "biến bảng",
+      "english": "table variable",
+      "glossary": true,
+      "definition": "Biến kiểu bảng của T-SQL (DECLARE @t TABLE …), sống trong batch khai báo nó. Không có statistics, không bị ROLLBACK huỷ dòng đã ghi, không thấy được trong SQL động; dữ liệu vẫn nằm trong tempdb chứ không chỉ trong RAM."
+    },
+    {
+      "id": "compatibility-level",
+      "use": "compatibility level",
+      "english": "database compatibility level",
+      "keepEnglish": true,
+      "glossary": true,
+      "definition": "Thiết lập của từng database trên SQL Server quyết định hành vi T-SQL và bộ tối ưu theo phiên bản nào (160 = SQL Server 2022). Một số cú pháp mới như mệnh đề WINDOW hay GENERATE_SERIES chỉ chạy ở mức 160."
+    },
+    {
+      "id": "upsert",
+      "use": "upsert",
+      "english": "upsert",
+      "keepEnglish": true,
+      "glossary": true,
+      "definition": "Thao tác ghi \"có thì cập nhật, chưa có thì thêm\" theo một khoá. PostgreSQL có INSERT … ON CONFLICT; SQL Server dùng MERGE hoặc UPDATE rồi INSERT … WHERE NOT EXISTS trong một transaction, cần khoá phù hợp khi nhiều phiên cùng chạy."
+    },
+    {
+      "id": "merge-statement",
+      "use": "MERGE",
+      "english": "MERGE statement",
+      "keepEnglish": true,
+      "caseSensitive": true,
+      "glossary": true,
+      "definition": "Câu lệnh SQL nối một nguồn với bảng đích theo điều kiện ON rồi chọn hành động cho từng dòng: WHEN MATCHED (UPDATE/DELETE), WHEN NOT MATCHED (INSERT), WHEN NOT MATCHED BY SOURCE. Mỗi dòng đích chỉ được khớp một dòng nguồn."
+    },
+    {
+      "id": "keyset-pagination",
+      "use": "phân trang keyset",
+      "english": "keyset pagination",
+      "glossary": true,
+      "definition": "Cách phân trang lấy các dòng đứng ngay sau dòng cuối của trang trước theo một khoá sắp xếp duy nhất (ví dụ giờ đặt + mã chuyến), thay vì bỏ qua N dòng bằng OFFSET. Không lặp hay mất dòng khi dữ liệu thay đổi.",
+      "aliases": [
+        "seek pagination"
+      ]
+    },
+    {
+      "id": "maxrecursion",
+      "use": "MAXRECURSION",
+      "english": "MAXRECURSION query hint",
+      "keepEnglish": true,
+      "caseSensitive": true,
+      "glossary": true,
+      "definition": "Query hint của SQL Server giới hạn số vòng đệ quy của recursive CTE trong một câu lệnh: mặc định 100, tối đa 32767, 0 là không giới hạn. Vượt giới hạn thì câu lệnh dừng với lỗi 530."
+    },
+    {
+      "id": "grouping-sets",
+      "use": "GROUPING SETS",
+      "english": "GROUPING SETS",
+      "keepEnglish": true,
+      "caseSensitive": true,
+      "glossary": true,
+      "definition": "Mệnh đề của GROUP BY cho phép tính nhiều cách gom nhóm trong một truy vấn, ví dụ GROUPING SETS ((loai), ()) cho từng loại và dòng tổng; ROLLUP và CUBE là dạng viết tắt. Hàm GROUPING() cho biết dòng nào là dòng tổng."
+    },
+    {
+      "id": "timing-difference",
+      "use": "chênh lệch thời điểm",
+      "english": "timing difference",
+      "glossary": true,
+      "definition": "Khoản chênh trong đối soát do hai nguồn ghi nhận cùng một khoản tiền vào hai kỳ hoặc hai ngày khác nhau (ví dụ ngày đặt chuyến và ngày giao dịch), không phải lỗi; biên bản phải ghi rõ dùng mốc nào."
     }
   ],
   "patterns": [

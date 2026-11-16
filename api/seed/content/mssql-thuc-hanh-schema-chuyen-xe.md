@@ -323,4 +323,4 @@ fk_trips_merchant_city|city_id|có</code></pre>
 - [Microsoft Learn · sys.check_constraints](https://learn.microsoft.com/sql/relational-databases/system-catalog-views/sys-check-constraints-transact-sql): cột `is_disabled`, `is_not_trusted` dùng trong K8.
 - Lab: `examples/toi-noi-mssql/p01`: `README.md`, các tệp `00` … `07`, `OUTPUT.txt`, `test/p01.test.mjs`.
 
-Bài tiếp theo, mở đầu Phần 2 · T-SQL cho nghiệp vụ (đang viết): NULL, CASE, ISNULL và COALESCE trong dữ liệu chuyến.
+Bài tiếp theo, mở đầu Phần 2 · T-SQL cho nghiệp vụ: [MS-011 · NULL, CASE, ISNULL và COALESCE](/articles/mssql-null-case-isnull-coalesce).

@@ -16,18 +16,18 @@ SET NOCOUNT ON;
 USE master;
 GO
 
-IF DB_ID(N'ToiNoi') IS NOT NULL
+IF DB_ID(N'$(LAB_DB)') IS NOT NULL
 BEGIN
-    ALTER DATABASE ToiNoi SET SINGLE_USER WITH ROLLBACK IMMEDIATE;
-    DROP DATABASE ToiNoi;
-    PRINT N'Đã xoá database ToiNoi cũ';
+    ALTER DATABASE [$(LAB_DB)] SET SINGLE_USER WITH ROLLBACK IMMEDIATE;
+    DROP DATABASE [$(LAB_DB)];
+    PRINT N'Đã xoá database $(LAB_DB) cũ';
 END;
 GO
 
-CREATE DATABASE ToiNoi COLLATE Vietnamese_100_CI_AS;
+CREATE DATABASE [$(LAB_DB)] COLLATE Vietnamese_100_CI_AS;
 GO
 
-USE ToiNoi;
+USE [$(LAB_DB)];
 GO
 
 CREATE SCHEMA toinoi AUTHORIZATION dbo;
@@ -91,7 +91,7 @@ SELECT DB_NAME()                                   AS database_hien_tai,
        SUSER_SNAME()                               AS login,
        USER_NAME()                                 AS user_trong_db,
        SCHEMA_NAME()                               AS schema_mac_dinh,
-       CONVERT(nvarchar(128), DATABASEPROPERTYEX(N'ToiNoi', 'Collation')) AS collation_db;
+       CONVERT(nvarchar(128), DATABASEPROPERTYEX(N'$(LAB_DB)', 'Collation')) AS collation_db;
 
 SELECT CONVERT(nvarchar(20), SERVERPROPERTY('ProductVersion'))     AS phien_ban,
        CONVERT(nvarchar(20), SERVERPROPERTY('ProductUpdateLevel')) AS cu,
