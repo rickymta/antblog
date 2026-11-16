@@ -302,17 +302,17 @@
   "testing-s06-unit-component-testing": {
     "source": "unit-testing-fundamentals",
     "topic": "testing",
-    "number": 5
+    "number": 6
   },
   "testing-sys-p01-kiem-thu-he-thong": {
     "source": "system-testing-smoke-test",
     "topic": "testing",
-    "number": 6
+    "number": 7
   },
   "testing-sys-p02-kiem-thu-he-thong": {
     "source": "system-testing-stress-test",
     "topic": "testing",
-    "number": 7
+    "number": 8
   },
   "da-p01-nen-tang-phan-tich-du-lieu": {
     "source": null,
@@ -323,5 +323,10 @@
     "source": "mssql-la-gi-va-vai-tro-trong-toi-noi",
     "topic": "mssql",
     "number": 1
+  },
+  "testing-tcd-thiet-ke-test-case": {
+    "source": "test-case-design-test-analysis-test-condition",
+    "topic": "testing",
+    "number": 5
   }
 }

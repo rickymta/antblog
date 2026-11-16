@@ -1175,6 +1175,27 @@
     "status": "published"
   },
   {
+    "slug": "testing-tcd-thiet-ke-test-case",
+    "title": "Thiết kế Test Case · từ đặc tả đến bộ test chạy được",
+    "description": "Nhánh thực hành thiết kế test case trên Tới Nơi: test analysis ra test condition, giải phẫu một test case, test case logic và cụ thể, kết quả mong đợi và test oracle, test data độc lập và tất định, phối hợp kỹ thuật hộp đen, test case từ user story và acceptance criteria, ma trận truy vết, ưu tiên và review bộ test — kết thúc bằng capstone thiết kế trọn bộ test cho đặt chuyến từ báo giá, mỗi bài có lab chạy lại được.",
+    "level": "intermediate",
+    "priority": 55,
+    "category": "testing",
+    "articles": [
+      "test-case-design-test-analysis-test-condition",
+      "test-case-design-giai-phau-test-case",
+      "test-case-design-logic-va-cu-the",
+      "test-case-design-expected-result-test-oracle",
+      "test-case-design-test-data",
+      "test-case-design-phoi-hop-ky-thuat",
+      "test-case-design-user-story-acceptance-criteria",
+      "test-case-design-traceability-matrix",
+      "test-case-design-uu-tien-review-bao-tri",
+      "test-case-design-thuc-hanh-dat-chuyen"
+    ],
+    "status": "published"
+  },
+  {
     "slug": "testing-s06-unit-component-testing",
     "title": "Testing · Series 06 · Unit Testing & Component Testing",
     "description": "Thực hành unit testing trên Tới Nơi: AAA, FIRST, thiết kế test Pricing Engine, test doubles và cô lập phụ thuộc thời gian/thời tiết. Đã có TEST-055–058; series đang được viết tiếp.",

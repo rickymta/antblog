@@ -1,6 +1,6 @@
 # Master Curriculum — Kiểm thử phần mềm theo ISTQB qua dự án Tới Nơi
 
-Nhánh thực hành bổ sung: [Kiểm thử hệ thống — lộ trình 16 bài từ lý thuyết đến nâng cao](system-testing-roadmap.md), dùng mã SYS-01…SYS-16 riêng. Đã bắt đầu bản nháp Smoke Test và lab; không tính các bài đang lên kế hoạch vào tổng nội dung hoàn tất bên dưới.
+Nhánh thực hành bổ sung: [Thiết kế Test Case — 10 bài TCD-01…TCD-10](test-case-design-curriculum.md) (đã viết, learning path `testing-tcd-thiet-ke-test-case`) và [Kiểm thử hệ thống — lộ trình 16 bài từ lý thuyết đến nâng cao](system-testing-roadmap.md), dùng mã SYS-01…SYS-16 riêng. Đã bắt đầu bản nháp Smoke Test và lab; không tính các bài đang lên kế hoạch vào tổng nội dung hoàn tất bên dưới.
 
 Bản quản lý toàn bộ chuyên mục Testing của Tech Knowledge Hub (antblog.xyz), dựng theo §13 của tài liệu định hướng `toi-noi-testing-antblog.md`. Gồm **162 bài** trong **12 series** và **1 bài thực hành cuối Series 01**, tổng thời lượng đọc dự kiến khoảng **47 giờ 51 phút**.
 

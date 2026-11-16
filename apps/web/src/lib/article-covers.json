@@ -6058,5 +6058,105 @@
       "FIXTURE",
       "CHECKS"
     ]
+  },
+  "test-case-design-test-analysis-test-condition": {
+    "title": "TEST CONDITIONS",
+    "subtitle": "Read the test basis. Decide what to test.",
+    "diagram": "flow",
+    "labels": [
+      "TEST BASIS",
+      "ANALYSIS",
+      "CONDITIONS"
+    ]
+  },
+  "test-case-design-giai-phau-test-case": {
+    "title": "TEST CASE ANATOMY",
+    "subtitle": "Every field earns its place",
+    "diagram": "checklist",
+    "labels": [
+      "PRECONDITION",
+      "STEPS",
+      "EXPECTED"
+    ]
+  },
+  "test-case-design-logic-va-cu-the": {
+    "title": "LOGICAL → CONCRETE",
+    "subtitle": "From intent to executable cases",
+    "diagram": "blocks",
+    "labels": [
+      "LOGICAL",
+      "CONCRETE",
+      "SUITE"
+    ]
+  },
+  "test-case-design-expected-result-test-oracle": {
+    "title": "TEST ORACLE",
+    "subtitle": "Know the right answer before you run",
+    "diagram": "target",
+    "labels": [
+      "EXPECTED",
+      "ACTUAL",
+      "VERDICT"
+    ]
+  },
+  "test-case-design-test-data": {
+    "title": "TEST DATA",
+    "subtitle": "Independent, deterministic, synthetic",
+    "diagram": "storage",
+    "labels": [
+      "BUILDER",
+      "FIXTURE",
+      "CLOCK"
+    ]
+  },
+  "test-case-design-phoi-hop-ky-thuat": {
+    "title": "COMBINE TECHNIQUES",
+    "subtitle": "Partitions, boundaries and rules in one suite",
+    "diagram": "split",
+    "labels": [
+      "POSITIVE",
+      "↔",
+      "NEGATIVE"
+    ]
+  },
+  "test-case-design-user-story-acceptance-criteria": {
+    "title": "GIVEN · WHEN · THEN",
+    "subtitle": "Acceptance criteria become test cases",
+    "diagram": "flow",
+    "labels": [
+      "STORY",
+      "CRITERIA",
+      "TESTS"
+    ]
+  },
+  "test-case-design-traceability-matrix": {
+    "title": "TRACEABILITY MATRIX",
+    "subtitle": "Every requirement, every test, both ways",
+    "diagram": "matrix",
+    "labels": [
+      "REQUIREMENTS",
+      "TESTS",
+      "COVERAGE"
+    ]
+  },
+  "test-case-design-uu-tien-review-bao-tri": {
+    "title": "PRIORITIZE & REVIEW",
+    "subtitle": "Run what matters first. Keep it maintainable.",
+    "diagram": "checklist",
+    "labels": [
+      "RISK",
+      "COVERAGE",
+      "REVIEW"
+    ]
+  },
+  "test-case-design-thuc-hanh-dat-chuyen": {
+    "title": "TEST CASE DESIGN LAB",
+    "subtitle": "Toi Noi · Booking from quote, end to end",
+    "diagram": "map",
+    "labels": [
+      "QUOTE",
+      "BOOKING",
+      "TRIP"
+    ]
   }
 }

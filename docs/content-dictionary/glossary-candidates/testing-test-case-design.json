@@ -1,0 +1,605 @@
+{
+  "version": 1,
+  "category": "testing",
+  "series": "Thiết kế Test Case (TCD-01…TCD-10, slug test-case-design-*)",
+  "generatedAt": "2026-11-17",
+  "source": {
+    "articles": 10,
+    "checkedAgainst": "api/seed/terminology.json (working tree 17/11/2026) và glossary-candidates/postgresql.json",
+    "occurrencesMethod": "Cùng cách đếm với postgresql.json: occurrences = số bài trong 10 bài của series có ít nhất một chỗ khớp term/english/aliases; mentions = tổng chỗ khớp. Bỏ frontmatter, khối code, inline code, <pre>/<code>/<svg>, thẻ HTML, đích liên kết, URL. Ranh giới từ Unicode, cụm dài thắng. outsideSeriesArticles = số bài ngoài series khớp. Ước lượng trên vì vẫn tính heading và link."
+  },
+  "conflicts": [
+    {
+      "candidate": "test-basis",
+      "existingId": "test-basis",
+      "action": "keep-existing",
+      "note": "Đã có trong terminology.json, định nghĩa đúng với series."
+    },
+    {
+      "candidate": "test-condition",
+      "existingId": "test-condition",
+      "action": "keep-existing",
+      "note": "Đã có (alias «test conditions»), đúng nghĩa với series."
+    },
+    {
+      "candidate": "coverage-item",
+      "existingId": "coverage-item",
+      "action": "keep-existing",
+      "note": "Đã có, đúng nghĩa."
+    },
+    {
+      "candidate": "precondition",
+      "existingId": "precondition",
+      "action": "update-existing-definition",
+      "note": "Mục có sẵn định nghĩa theo use case (BA). Series testing dùng «tiền điều kiện» cho test case (8/10 bài). Đề xuất định nghĩa bao cả hai nghĩa.",
+      "proposedDefinition": "Điều kiện phải đúng trước khi một thao tác, use case hoặc test case bắt đầu: trạng thái hệ thống, dữ liệu và môi trường. Với test case, tiền điều kiện mô tả trạng thái cần có, không phải lịch sử chạy của test case khác."
+    },
+    {
+      "candidate": "impact-analysis",
+      "existingId": "impact-analysis",
+      "action": "keep-existing",
+      "note": "Đã có; định nghĩa chung đã bao gồm test case. TCD-08, TCD-09 dùng đúng nghĩa này."
+    },
+    {
+      "candidate": "testability",
+      "existingId": "testability",
+      "action": "add-alias-to-existing",
+      "note": "Đã có. Series dùng thêm dạng «khả năng kiểm thử» (2 bài).",
+      "proposedAliases": [
+        "khả năng kiểm thử"
+      ]
+    },
+    {
+      "candidate": "test-case",
+      "existingId": "test-case",
+      "action": "wording-ok",
+      "note": "Không cần mục mới. Định nghĩa có sẵn dùng «điều kiện đầu» trong khi series thống nhất «tiền điều kiện»; có thể sửa chữ.",
+      "proposedDefinition": "Một tình huống kiểm thử cụ thể gồm tiền điều kiện, dữ liệu vào, các bước thực hiện và kết quả mong đợi."
+    },
+    {
+      "candidate": "test-oracle",
+      "existingId": "test-oracle",
+      "action": "keep-existing",
+      "note": "Đúng nghĩa. oracle-problem và partial-oracle để ở deferred; cụm dài thắng nên không tranh chữ «oracle»."
+    },
+    {
+      "candidate": "traceability",
+      "existingId": "traceability",
+      "action": "related",
+      "note": "Giữ mục chung. Đề xuất mục riêng traceability-matrix cho «ma trận truy vết». Không thêm alias «truy vết» vào traceability vì «truy vết» còn dùng cho tracing/observability ở chuyên mục khác."
+    },
+    {
+      "candidate": "acceptance-criteria",
+      "existingId": "acceptance-criteria",
+      "action": "no-action",
+      "note": "TCD-07 dùng đúng dạng có sẵn; hai dạng scenario/rule giải thích trong bài, không tách mục."
+    },
+    {
+      "candidate": "fixture",
+      "existingId": "fixture",
+      "action": "no-action",
+      "note": "TCD-05 dùng «fixture dùng chung»; chữ «fixture» đã khớp mục có sẵn, không tách mục shared fixture."
+    },
+    {
+      "candidate": "idempotency",
+      "existingId": "idempotency",
+      "action": "no-action",
+      "note": "TCD-09/10 dùng «idempotency key», đã là alias có sẵn."
+    },
+    {
+      "candidate": "rate-limit",
+      "existingId": "rate-limit",
+      "action": "no-action",
+      "note": "«giới hạn tần suất» đã là alias có sẵn."
+    }
+  ],
+  "terms": [
+    {
+      "slug": "logical-test-case",
+      "term": "test case logic",
+      "english": "logical test case",
+      "aliases": [
+        "high-level test case"
+      ],
+      "shortDefinition": "Test case mô tả tiền điều kiện, đầu vào và kết quả mong đợi ở mức trừu tượng (lớp giá trị, quy tắc), chưa gắn giá trị cụ thể. Ổn định khi dữ liệu đổi và dùng lại được với nhiều bộ test data.",
+      "caseSensitive": false,
+      "autoLink": true,
+      "categories": [
+        "testing"
+      ],
+      "relatedArticleSlugs": [
+        "test-case-design-logic-va-cu-the"
+      ],
+      "occurrences": 5,
+      "mentions": 52,
+      "outsideSeriesArticles": 0
+    },
+    {
+      "slug": "concrete-test-case",
+      "term": "test case cụ thể",
+      "english": "concrete test case",
+      "aliases": [
+        "low-level test case"
+      ],
+      "shortDefinition": "Test case có giá trị cụ thể cho tiền điều kiện, đầu vào và kết quả mong đợi, chạy được mà không cần diễn giải thêm. Thường sinh từ một test case logic cộng một dòng test data.",
+      "caseSensitive": false,
+      "autoLink": true,
+      "categories": [
+        "testing"
+      ],
+      "relatedArticleSlugs": [
+        "test-case-design-logic-va-cu-the"
+      ],
+      "occurrences": 5,
+      "mentions": 42,
+      "outsideSeriesArticles": 3
+    },
+    {
+      "slug": "test-analysis",
+      "term": "test analysis",
+      "shortDefinition": "Hoạt động phân tích test basis để xác định cần kiểm thử cái gì, dưới dạng các test condition có ưu tiên; đồng thời phát hiện chỗ thiếu, mơ hồ hoặc mâu thuẫn trong đặc tả.",
+      "caseSensitive": false,
+      "autoLink": true,
+      "categories": [
+        "testing"
+      ],
+      "relatedArticleSlugs": [
+        "test-case-design-test-analysis-test-condition"
+      ],
+      "occurrences": 8,
+      "mentions": 61,
+      "outsideSeriesArticles": 6
+    },
+    {
+      "slug": "test-procedure",
+      "term": "test procedure",
+      "shortDefinition": "Chuỗi test case theo thứ tự thực hiện, kèm các bước dựng tiền điều kiện (setup) và dọn dẹp sau khi chạy (teardown).",
+      "caseSensitive": false,
+      "autoLink": true,
+      "categories": [
+        "testing"
+      ],
+      "relatedArticleSlugs": [
+        "test-case-design-logic-va-cu-the"
+      ],
+      "occurrences": 7,
+      "mentions": 39,
+      "outsideSeriesArticles": 3
+    },
+    {
+      "slug": "test-suite",
+      "term": "test suite",
+      "shortDefinition": "Tập test procedure hoặc test script được chạy cùng nhau trong một lần chạy, gom theo mục đích như smoke hay regression.",
+      "caseSensitive": false,
+      "autoLink": true,
+      "categories": [
+        "testing"
+      ],
+      "relatedArticleSlugs": [
+        "test-case-design-logic-va-cu-the"
+      ],
+      "occurrences": 7,
+      "mentions": 25,
+      "outsideSeriesArticles": 5,
+      "reviewNote": "Nghĩa giống nhau giữa testing và automation; an toàn nếu dò toàn site (5 bài ngoài series)."
+    },
+    {
+      "slug": "test-execution-schedule",
+      "term": "test execution schedule",
+      "shortDefinition": "Lịch chạy các test suite và test procedure trong một chu kỳ kiểm thử, sắp theo phụ thuộc giữa các ca trước, rồi theo ưu tiên.",
+      "caseSensitive": false,
+      "autoLink": true,
+      "categories": [
+        "testing"
+      ],
+      "relatedArticleSlugs": [
+        "test-case-design-logic-va-cu-the",
+        "test-case-design-uu-tien-review-bao-tri"
+      ],
+      "occurrences": 6,
+      "mentions": 27,
+      "outsideSeriesArticles": 2
+    },
+    {
+      "slug": "postcondition",
+      "term": "hậu điều kiện",
+      "english": "postcondition",
+      "shortDefinition": "Trạng thái hệ thống sau khi test case chạy xong: dữ liệu nào đã đổi, cần dọn gì, và test case kế tiếp có thể dựa vào trạng thái nào.",
+      "caseSensitive": false,
+      "autoLink": true,
+      "categories": [
+        "testing"
+      ],
+      "relatedArticleSlugs": [
+        "test-case-design-giai-phau-test-case"
+      ],
+      "occurrences": 6,
+      "mentions": 29,
+      "outsideSeriesArticles": 3
+    },
+    {
+      "slug": "expected-result",
+      "term": "kết quả mong đợi",
+      "english": "expected result",
+      "shortDefinition": "Hành vi quan sát được mà đối tượng kiểm thử phải tạo ra trong điều kiện đã định, suy ra từ test basis chứ không chép từ hệ thống đang chạy, để so với kết quả thực tế.",
+      "caseSensitive": false,
+      "autoLink": true,
+      "categories": [
+        "testing"
+      ],
+      "relatedArticleSlugs": [
+        "test-case-design-expected-result-test-oracle",
+        "test-case-design-giai-phau-test-case"
+      ],
+      "occurrences": 10,
+      "mentions": 170,
+      "outsideSeriesArticles": 51,
+      "reviewNote": "51 bài ngoài series có «kết quả mong đợi», đều cùng nghĩa kiểm thử; an toàn nếu dò toàn site."
+    },
+    {
+      "slug": "positive-test-case",
+      "term": "ca dương",
+      "english": "positive test case",
+      "aliases": [
+        "positive test"
+      ],
+      "shortDefinition": "Test case dùng toàn giá trị hợp lệ và mong đợi hệ thống xử lý thành công. Một ca dương có thể gộp nhiều phân vùng hợp lệ của các tham số khác nhau để giảm số ca.",
+      "caseSensitive": false,
+      "autoLink": true,
+      "categories": [
+        "testing"
+      ],
+      "relatedArticleSlugs": [
+        "test-case-design-phoi-hop-ky-thuat"
+      ],
+      "occurrences": 4,
+      "mentions": 36,
+      "outsideSeriesArticles": 0,
+      "reviewNote": "«ca dương» không khớp bài nào ngoài series."
+    },
+    {
+      "slug": "negative-test-case",
+      "term": "ca âm",
+      "english": "negative test case",
+      "aliases": [
+        "negative test"
+      ],
+      "shortDefinition": "Test case dùng giá trị không hợp lệ hoặc tình huống sai và mong đợi hệ thống từ chối đúng cách, đúng mã lỗi. Mỗi ca âm nên chỉ chứa một giá trị sai để lỗi đầu tiên không che lỗi khác.",
+      "caseSensitive": false,
+      "autoLink": true,
+      "categories": [
+        "testing"
+      ],
+      "relatedArticleSlugs": [
+        "test-case-design-phoi-hop-ky-thuat"
+      ],
+      "occurrences": 5,
+      "mentions": 51,
+      "outsideSeriesArticles": 2,
+      "reviewNote": "«ca âm» ngắn; chỉ 2 bài ngoài series khớp. Soát lại bằng nút «Bài chứa keyword này» sau khi seed."
+    },
+    {
+      "slug": "single-fault-assumption",
+      "term": "single fault",
+      "english": "single fault assumption",
+      "shortDefinition": "Nguyên tắc mỗi ca âm chỉ chứa đúng một giá trị vi phạm, các tham số khác hợp lệ, để hệ thống báo lỗi nào thì biết chắc lỗi đó đến từ giá trị nào.",
+      "caseSensitive": false,
+      "autoLink": true,
+      "categories": [
+        "testing"
+      ],
+      "relatedArticleSlugs": [
+        "test-case-design-phoi-hop-ky-thuat"
+      ],
+      "occurrences": 3,
+      "mentions": 21,
+      "outsideSeriesArticles": 0
+    },
+    {
+      "slug": "traceability-matrix",
+      "term": "ma trận truy vết",
+      "english": "traceability matrix",
+      "aliases": [
+        "RTM"
+      ],
+      "shortDefinition": "Bảng nối các phần tử test basis với test condition, test case, kết quả chạy và defect. Dùng để đo độ phủ, tìm yêu cầu chưa được kiểm và phân tích ảnh hưởng khi yêu cầu thay đổi.",
+      "caseSensitive": false,
+      "autoLink": true,
+      "categories": [
+        "testing"
+      ],
+      "relatedArticleSlugs": [
+        "test-case-design-traceability-matrix"
+      ],
+      "occurrences": 7,
+      "mentions": 106,
+      "outsideSeriesArticles": 12,
+      "reviewNote": "Không tranh chữ với mục traceability (mục đó không có alias tiếng Việt); cụm dài thắng nên «ma trận truy vết» thuộc mục này."
+    },
+    {
+      "slug": "requirement-coverage",
+      "term": "độ phủ yêu cầu",
+      "english": "requirement coverage",
+      "shortDefinition": "Tỉ lệ yêu cầu trong phạm vi có ít nhất một test case truy về. Chỉ đo sự có mặt của liên kết, không đo test case kiểm kỹ tới mức nào.",
+      "caseSensitive": false,
+      "autoLink": true,
+      "categories": [
+        "testing"
+      ],
+      "relatedArticleSlugs": [
+        "test-case-design-traceability-matrix"
+      ],
+      "occurrences": 2,
+      "mentions": 11,
+      "outsideSeriesArticles": 1
+    },
+    {
+      "slug": "orphan-test-case",
+      "term": "test case mồ côi",
+      "english": "orphan test case",
+      "shortDefinition": "Test case không truy về phần tử test basis nào còn tồn tại, do thiếu liên kết hoặc trỏ vào mã yêu cầu đã bị xoá hay đổi tên.",
+      "caseSensitive": false,
+      "autoLink": true,
+      "categories": [
+        "testing"
+      ],
+      "relatedArticleSlugs": [
+        "test-case-design-traceability-matrix"
+      ],
+      "occurrences": 2,
+      "mentions": 7,
+      "outsideSeriesArticles": 0
+    },
+    {
+      "slug": "atdd",
+      "term": "ATDD",
+      "english": "Acceptance Test-Driven Development",
+      "shortDefinition": "Cách làm test-first: đội cùng viết test case từ acceptance criteria trước khi cài đặt user story, rồi dùng chúng làm yêu cầu chạy được để xác nhận story đã xong.",
+      "caseSensitive": true,
+      "autoLink": true,
+      "categories": [
+        "testing"
+      ],
+      "relatedArticleSlugs": [
+        "test-case-design-user-story-acceptance-criteria"
+      ],
+      "occurrences": 1,
+      "mentions": 16,
+      "outsideSeriesArticles": 5,
+      "reviewNote": "caseSensitive để không khớp chuỗi chữ thường."
+    },
+    {
+      "slug": "given-when-then",
+      "term": "Given/When/Then",
+      "aliases": [
+        "Given–When–Then",
+        "Given-When-Then",
+        "Gherkin"
+      ],
+      "shortDefinition": "Mẫu viết acceptance criteria dạng kịch bản: Given (bối cảnh ban đầu), When (hành động), Then (kết quả quan sát được). Gherkin là cú pháp phổ biến dùng mẫu này.",
+      "caseSensitive": false,
+      "autoLink": true,
+      "categories": [
+        "testing"
+      ],
+      "relatedArticleSlugs": [
+        "test-case-design-user-story-acceptance-criteria"
+      ],
+      "occurrences": 1,
+      "mentions": 16,
+      "outsideSeriesArticles": 6,
+      "reviewNote": "Các bài dùng ba biến thể dấu (/, –, -). Gherkin là cú pháp dùng mẫu này nên ghép làm alias thay vì tách mục ít dùng."
+    },
+    {
+      "slug": "example-mapping",
+      "term": "example mapping",
+      "shortDefinition": "Kỹ thuật ngoài ISTQB: đội trao đổi về một user story bằng thẻ màu cho story, quy tắc, ví dụ và câu hỏi mở, để lộ chỗ mơ hồ trước khi viết acceptance criteria.",
+      "caseSensitive": false,
+      "autoLink": true,
+      "categories": [
+        "testing"
+      ],
+      "relatedArticleSlugs": [
+        "test-case-design-user-story-acceptance-criteria"
+      ],
+      "occurrences": 1,
+      "mentions": 8,
+      "outsideSeriesArticles": 3
+    },
+    {
+      "slug": "test-case-prioritization",
+      "term": "ưu tiên test case",
+      "english": "test case prioritization",
+      "shortDefinition": "Sắp thứ tự chạy test case theo rủi ro, độ phủ hoặc mức ưu tiên của yêu cầu, để ca mang nhiều thông tin nhất chạy trước; phụ thuộc giữa các ca vẫn phải được tôn trọng.",
+      "caseSensitive": false,
+      "autoLink": true,
+      "categories": [
+        "testing"
+      ],
+      "relatedArticleSlugs": [
+        "test-case-design-uu-tien-review-bao-tri"
+      ],
+      "occurrences": 5,
+      "mentions": 15,
+      "outsideSeriesArticles": 1
+    },
+    {
+      "slug": "test-case-specification",
+      "term": "test case specification",
+      "shortDefinition": "Tài liệu đặc tả một hay nhiều test case: định danh, mục tiêu, ưu tiên, truy vết, tiền điều kiện, đầu vào, kết quả mong đợi. Mẫu tham khảo có trong ISO/IEC/IEEE 29119-3.",
+      "caseSensitive": false,
+      "autoLink": true,
+      "categories": [
+        "testing"
+      ],
+      "relatedArticleSlugs": [
+        "test-case-design-giai-phau-test-case"
+      ],
+      "occurrences": 3,
+      "mentions": 6,
+      "outsideSeriesArticles": 0
+    }
+  ],
+  "deferred": [
+    {
+      "slug": "oracle-problem",
+      "term": "oracle problem",
+      "shortDefinition": "Tình huống không có cách khả thi, hoặc quá tốn kém, để biết kết quả đúng của một test. Thường giải bằng bất biến, quan hệ giữa các lần chạy hoặc một oracle tính lại độc lập.",
+      "caseSensitive": false,
+      "autoLink": true,
+      "categories": [
+        "testing"
+      ],
+      "relatedArticleSlugs": [
+        "test-case-design-expected-result-test-oracle",
+        "metamorphic-testing"
+      ],
+      "occurrences": 1,
+      "mentions": 5,
+      "outsideSeriesArticles": 2,
+      "deferReason": "Chỉ 1 bài trong series; gộp khi có thêm bài dùng (metamorphic, random testing)."
+    },
+    {
+      "slug": "partial-oracle",
+      "term": "oracle bộ phận",
+      "english": "partial oracle",
+      "shortDefinition": "Tính chất luôn phải đúng dùng để kiểm một phần kết quả khi không có giá trị chính xác, ví dụ «mỗi khoá idempotency chỉ trừ tiền một lần».",
+      "caseSensitive": false,
+      "autoLink": true,
+      "categories": [
+        "testing"
+      ],
+      "relatedArticleSlugs": [
+        "test-case-design-expected-result-test-oracle"
+      ],
+      "occurrences": 1,
+      "mentions": 6,
+      "outsideSeriesArticles": 1,
+      "deferReason": "Chỉ 1 bài; dễ lẫn ngữ cảnh với test-oracle."
+    },
+    {
+      "slug": "test-data-builder",
+      "term": "test data builder",
+      "shortDefinition": "Mẫu mã giúp mỗi test case tự dựng dữ liệu cần cho mình từ bộ giá trị mặc định, chỉ ghi phần khác mặc định; mỗi lần gọi trả đối tượng mới nên các ca không dùng chung dữ liệu.",
+      "caseSensitive": false,
+      "autoLink": true,
+      "categories": [
+        "testing"
+      ],
+      "relatedArticleSlugs": [
+        "test-case-design-test-data"
+      ],
+      "occurrences": 1,
+      "mentions": 4,
+      "outsideSeriesArticles": 0,
+      "deferReason": "Chỉ 1 bài (TCD-05)."
+    },
+    {
+      "slug": "test-suite-minimization",
+      "term": "rút gọn bộ test",
+      "english": "test suite minimization",
+      "shortDefinition": "Loại các test case thừa sao cho mọi coverage item của các kỹ thuật đã chọn vẫn được phủ. Thường dùng thuật toán tham lam, kết quả không chắc là bộ nhỏ nhất.",
+      "caseSensitive": false,
+      "autoLink": true,
+      "categories": [
+        "testing"
+      ],
+      "relatedArticleSlugs": [
+        "test-case-design-phoi-hop-ky-thuat"
+      ],
+      "occurrences": 1,
+      "mentions": 3,
+      "outsideSeriesArticles": 0,
+      "deferReason": "Chỉ 1 bài, 3 chỗ."
+    },
+    {
+      "slug": "test-completion-report",
+      "term": "test completion report",
+      "shortDefinition": "Báo cáo cuối một giai đoạn kiểm thử: phạm vi, kết quả chạy, độ phủ, defect còn mở và rủi ro còn lại, để hỗ trợ quyết định phát hành.",
+      "caseSensitive": false,
+      "autoLink": true,
+      "categories": [
+        "testing"
+      ],
+      "relatedArticleSlugs": [
+        "test-case-design-thuc-hanh-dat-chuyen"
+      ],
+      "occurrences": 1,
+      "mentions": 2,
+      "outsideSeriesArticles": 5,
+      "deferReason": "Chỉ 1 bài trong series; hợp với S12 (TEST-157) hơn, chờ bài đó."
+    },
+    {
+      "slug": "order-dependent-test",
+      "term": "phụ thuộc thứ tự",
+      "english": "order-dependent test",
+      "shortDefinition": "Test case cho kết quả khác nhau khi đổi thứ tự chạy, do dùng dữ liệu ca khác để lại mà không tự khai báo tiền điều kiện.",
+      "caseSensitive": false,
+      "autoLink": true,
+      "categories": [
+        "testing"
+      ],
+      "relatedArticleSlugs": [
+        "test-case-design-test-data"
+      ],
+      "occurrences": 3,
+      "mentions": 4,
+      "outsideSeriesArticles": 10,
+      "deferReason": "Dạng chữ «phụ thuộc thứ tự» quá chung (10 bài ngoài series), dễ bắt nhầm."
+    },
+    {
+      "slug": "synthetic-data",
+      "term": "dữ liệu giả lập",
+      "english": "synthetic data",
+      "shortDefinition": "Test data tạo ra cho kiểm thử, không lấy từ người thật; giống thật ở những đặc điểm mà quy tắc nghiệp vụ quan tâm.",
+      "caseSensitive": false,
+      "autoLink": true,
+      "categories": [
+        "testing"
+      ],
+      "relatedArticleSlugs": [
+        "test-case-design-test-data"
+      ],
+      "occurrences": 1,
+      "mentions": 7,
+      "outsideSeriesArticles": 7,
+      "deferReason": "«dữ liệu giả lập» khớp 7 bài ngoài series với nghĩa rộng hơn (demo, data analysis)."
+    },
+    {
+      "slug": "defect-masking",
+      "term": "che lỗi",
+      "english": "defect masking",
+      "shortDefinition": "Tình huống một lỗi hoặc một giá trị sai khiến lỗi khác không quan sát được, ví dụ hệ thống chỉ báo lỗi đầu tiên nên giá trị sai phía sau không bao giờ được kiểm.",
+      "caseSensitive": false,
+      "autoLink": true,
+      "categories": [
+        "testing"
+      ],
+      "relatedArticleSlugs": [
+        "test-case-design-phoi-hop-ky-thuat"
+      ],
+      "occurrences": 1,
+      "mentions": 11,
+      "outsideSeriesArticles": 19,
+      "deferReason": "«che lỗi» khớp 19 bài ngoài series, phần lớn với nghĩa che giấu lỗi trong code hoặc giao diện, không phải nghĩa kỹ thuật kiểm thử."
+    },
+    {
+      "slug": "blocked-test",
+      "term": "blocked",
+      "english": "blocked test",
+      "shortDefinition": "Trạng thái của test case không chạy được vì tiền điều kiện hoặc phụ thuộc chưa thoả; khác fail vì chưa nói gì về chất lượng của chức năng.",
+      "caseSensitive": false,
+      "autoLink": true,
+      "categories": [
+        "testing"
+      ],
+      "relatedArticleSlugs": [
+        "test-case-design-logic-va-cu-the"
+      ],
+      "occurrences": 2,
+      "mentions": 7,
+      "outsideSeriesArticles": 12,
+      "deferReason": "«blocked» quá chung (12 bài ngoài series: blocking I/O, thread, request bị chặn)."
+    }
+  ]
+}
