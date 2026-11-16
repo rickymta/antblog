@@ -676,6 +676,3021 @@
       "keepEnglish": true,
       "glossary": true,
       "definition": "Liên kết mở thẳng tới một màn hình cụ thể bên trong ứng dụng di động (ví dụ trang chi tiết một chuyến), thay vì chỉ mở màn hình đầu của app."
+    },
+    {
+      "id": "terraform",
+      "use": "Terraform",
+      "keepEnglish": true,
+      "glossary": true,
+      "definition": "Công cụ IaC khai báo hạ tầng bằng file HCL: bạn mô tả trạng thái mong muốn, Terraform so với trạng thái hiện tại và tạo, sửa, xoá cho khớp."
+    },
+    {
+      "id": "iam",
+      "use": "IAM",
+      "english": "Identity and Access Management",
+      "caseSensitive": true,
+      "glossary": true,
+      "definition": "Dịch vụ quản lý ai (user, role) được làm gì trên tài nguyên AWS nào, thông qua policy. Là lớp kiểm soát truy cập nền tảng của mọi dịch vụ AWS."
+    },
+    {
+      "id": "vpc",
+      "use": "VPC",
+      "english": "Virtual Private Cloud",
+      "caseSensitive": true,
+      "glossary": true,
+      "definition": "Mạng riêng ảo của bạn trên AWS, tách biệt với khách hàng khác. Bạn tự chia dải IP, subnet, bảng định tuyến và quyết định tài nguyên nào được ra Internet."
+    },
+    {
+      "id": "cloudwatch",
+      "use": "CloudWatch",
+      "keepEnglish": true,
+      "caseSensitive": true,
+      "glossary": true,
+      "definition": "Dịch vụ giám sát của AWS: thu metric, gom log, vẽ dashboard và đặt alarm để cảnh báo khi chỉ số vượt ngưỡng."
+    },
+    {
+      "id": "subnet",
+      "use": "subnet",
+      "keepEnglish": true,
+      "aliases": [
+        "subnets"
+      ],
+      "glossary": true,
+      "definition": "Một dải IP con trong VPC, nằm trong đúng một availability zone. Subnet public có đường ra Internet gateway, subnet private thì không, thường dành cho ứng dụng và cơ sở dữ liệu."
+    },
+    {
+      "id": "availability-zone",
+      "use": "availability zone",
+      "keepEnglish": true,
+      "aliases": [
+        "AZ",
+        "AZs",
+        "availability zones"
+      ],
+      "glossary": true,
+      "definition": "Một trung tâm dữ liệu (hoặc cụm) tách biệt về điện và mạng trong một region. Chạy tài nguyên ở hai AZ trở lên để một AZ hỏng thì dịch vụ vẫn sống."
+    },
+    {
+      "id": "ecs",
+      "use": "ECS",
+      "english": "Elastic Container Service",
+      "caseSensitive": true,
+      "glossary": true,
+      "definition": "Dịch vụ chạy và điều phối container của AWS. Bạn mô tả container trong task definition, ECS giữ đủ số task cần chạy và đăng ký chúng vào load balancer."
+    },
+    {
+      "id": "lambda",
+      "use": "Lambda",
+      "keepEnglish": true,
+      "caseSensitive": true,
+      "glossary": true,
+      "definition": "Dịch vụ chạy hàm theo sự kiện không cần quản lý máy chủ: AWS cấp tài nguyên khi có yêu cầu và tính tiền theo số lần gọi và thời gian chạy."
+    },
+    {
+      "id": "security-group",
+      "use": "security group",
+      "keepEnglish": true,
+      "aliases": [
+        "security groups"
+      ],
+      "glossary": true,
+      "definition": "Tường lửa ảo gắn vào instance, task hoặc ENI, cho phép lưu lượng vào/ra theo cổng, giao thức và nguồn. Có trạng thái: cho phép chiều đi thì chiều về tự được phép."
+    },
+    {
+      "id": "rds",
+      "use": "RDS",
+      "english": "Relational Database Service",
+      "caseSensitive": true,
+      "glossary": true,
+      "definition": "Dịch vụ cơ sở dữ liệu quan hệ được quản lý (PostgreSQL, MySQL…): AWS lo cài đặt, sao lưu, vá lỗi và failover."
+    },
+    {
+      "id": "dns",
+      "use": "DNS",
+      "english": "Domain Name System",
+      "caseSensitive": true,
+      "glossary": true,
+      "definition": "Hệ thống dịch tên miền thành địa chỉ IP. Trên AWS do Route 53 cung cấp."
+    },
+    {
+      "id": "secrets-manager",
+      "use": "Secrets Manager",
+      "keepEnglish": true,
+      "glossary": true,
+      "definition": "Dịch vụ lưu mật khẩu, API key và tự xoay vòng giá trị, mã hoá bằng KMS. Ứng dụng đọc secret lúc chạy thay vì ghi cứng trong code."
+    },
+    {
+      "id": "fargate",
+      "use": "Fargate",
+      "keepEnglish": true,
+      "glossary": true,
+      "definition": "Chế độ chạy container không cần quản lý máy chủ: bạn khai báo CPU và bộ nhớ cho task, AWS lo phần máy bên dưới. Dùng được với ECS và EKS."
+    },
+    {
+      "id": "alb",
+      "use": "ALB",
+      "english": "Application Load Balancer",
+      "caseSensitive": true,
+      "glossary": true,
+      "definition": "Load balancer tầng ứng dụng (HTTP/HTTPS) của AWS: nhận request từ Internet và chia cho các target theo đường dẫn, host hoặc header, kiểm tra sức khoẻ target."
+    },
+    {
+      "id": "eks",
+      "use": "EKS",
+      "english": "Elastic Kubernetes Service",
+      "caseSensitive": true,
+      "glossary": true,
+      "definition": "Dịch vụ Kubernetes được AWS quản lý: AWS vận hành control plane, bạn lo node (hoặc dùng Fargate) và workload chạy trên đó."
+    },
+    {
+      "id": "arn",
+      "use": "ARN",
+      "english": "Amazon Resource Name",
+      "aliases": [
+        "ARNs"
+      ],
+      "caseSensitive": true,
+      "glossary": true,
+      "definition": "Chuỗi định danh duy nhất của một tài nguyên AWS, dạng arn:aws:dịch-vụ:region:account:tên. Policy dùng ARN để chỉ đúng tài nguyên được cấp hoặc bị chặn quyền."
+    },
+    {
+      "id": "dynamodb",
+      "use": "DynamoDB",
+      "keepEnglish": true,
+      "caseSensitive": true,
+      "glossary": true,
+      "definition": "Cơ sở dữ liệu NoSQL key-value và document được quản lý, độ trễ thấp ở quy mô lớn. Truy vấn thiết kế quanh partition key và sort key."
+    },
+    {
+      "id": "aurora",
+      "use": "Aurora",
+      "keepEnglish": true,
+      "caseSensitive": true,
+      "glossary": true,
+      "definition": "Cơ sở dữ liệu quan hệ của AWS tương thích PostgreSQL/MySQL, tách tầng compute khỏi tầng lưu trữ dùng chung nên thêm reader và failover nhanh."
+    },
+    {
+      "id": "nat-gateway",
+      "use": "NAT gateway",
+      "keepEnglish": true,
+      "glossary": true,
+      "definition": "Cổng cho phép tài nguyên ở subnet private chủ động ra Internet mà không bị truy cập ngược vào. Tính tiền theo giờ và dung lượng, dễ thành khoản chi bất ngờ."
+    },
+    {
+      "id": "kms",
+      "use": "KMS",
+      "english": "Key Management Service",
+      "caseSensitive": true,
+      "glossary": true,
+      "definition": "Dịch vụ tạo và quản lý khoá mã hoá. Khoá không rời KMS; dịch vụ khác nhờ KMS mã hoá hoặc giải mã dữ liệu, và key policy quyết định ai được dùng khoá."
+    },
+    {
+      "id": "sqs",
+      "use": "SQS",
+      "english": "Simple Queue Service",
+      "caseSensitive": true,
+      "glossary": true,
+      "definition": "Hàng đợi tin nhắn được quản lý: bên gửi đẩy tin vào, bên nhận lấy ra xử lý theo nhịp của mình, giúp tách rời hai phía."
+    },
+    {
+      "id": "ebs",
+      "use": "EBS",
+      "english": "Elastic Block Store",
+      "caseSensitive": true,
+      "glossary": true,
+      "definition": "Ổ đĩa khối gắn vào EC2 hoặc node Kubernetes, giữ dữ liệu độc lập với vòng đời instance và có thể chụp snapshot."
+    },
+    {
+      "id": "sns",
+      "use": "SNS",
+      "english": "Simple Notification Service",
+      "caseSensitive": true,
+      "glossary": true,
+      "definition": "Dịch vụ pub/sub: phát một thông điệp tới nhiều người đăng ký cùng lúc như SQS, Lambda, email hoặc HTTP endpoint."
+    },
+    {
+      "id": "cloudtrail",
+      "use": "CloudTrail",
+      "keepEnglish": true,
+      "caseSensitive": true,
+      "glossary": true,
+      "definition": "Dịch vụ ghi lại mọi lệnh gọi API trên tài khoản AWS: ai làm gì, lúc nào, từ đâu. Dùng để điều tra sự cố và kiểm toán."
+    },
+    {
+      "id": "pod",
+      "use": "pod",
+      "keepEnglish": true,
+      "aliases": [
+        "pods"
+      ],
+      "caseSensitive": true,
+      "glossary": true,
+      "definition": "Đơn vị nhỏ nhất Kubernetes chạy: một hoặc vài container dùng chung mạng và ổ đĩa. Pod chết thì được thay bằng pod mới với IP khác."
+    },
+    {
+      "id": "multi-az",
+      "use": "Multi-AZ",
+      "keepEnglish": true,
+      "glossary": true,
+      "definition": "Cấu hình giữ bản dự phòng ở availability zone khác. Với RDS, dữ liệu được sao chép đồng bộ sang standby và tự chuyển sang đó khi instance chính hỏng."
+    },
+    {
+      "id": "vpc-endpoint",
+      "use": "VPC endpoint",
+      "keepEnglish": true,
+      "aliases": [
+        "VPC endpoints"
+      ],
+      "glossary": true,
+      "definition": "Lối riêng từ VPC tới dịch vụ AWS (S3, ECR, CloudWatch…) không đi qua Internet hay NAT, giảm chi phí và bề mặt tấn công."
+    },
+    {
+      "id": "eni",
+      "use": "ENI",
+      "english": "Elastic Network Interface",
+      "aliases": [
+        "ENIs"
+      ],
+      "caseSensitive": true,
+      "glossary": true,
+      "definition": "Card mạng ảo gắn vào instance hoặc task, mang IP riêng và security group. Task Fargate dùng chế độ awsvpc có ENI riêng."
+    },
+    {
+      "id": "pod-identity",
+      "use": "Pod Identity",
+      "keepEnglish": true,
+      "aliases": [
+        "IRSA",
+        "EKS Pod Identity"
+      ],
+      "caseSensitive": true,
+      "glossary": true,
+      "definition": "Cách cấp IAM role cho từng pod trên EKS để pod gọi dịch vụ AWS mà không cần access key. Thay thế dần cơ chế IRSA."
+    },
+    {
+      "id": "target-group",
+      "use": "target group",
+      "keepEnglish": true,
+      "aliases": [
+        "target groups"
+      ],
+      "glossary": true,
+      "definition": "Nhóm đích (instance, IP hoặc Lambda) mà load balancer chuyển request tới, kèm cấu hình health check để loại đích không khoẻ."
+    },
+    {
+      "id": "ttl",
+      "use": "TTL",
+      "english": "time to live",
+      "caseSensitive": true,
+      "glossary": true,
+      "definition": "Thời gian sống của một bản ghi hoặc mục dữ liệu trước khi hết hạn: cache DNS giữ bản ghi bao lâu, hoặc DynamoDB tự xoá item cũ."
+    },
+    {
+      "id": "eventbridge",
+      "use": "EventBridge",
+      "keepEnglish": true,
+      "caseSensitive": true,
+      "glossary": true,
+      "definition": "Bus sự kiện của AWS: nhận sự kiện từ dịch vụ hoặc ứng dụng, dùng rule để định tuyến tới đích như Lambda, SQS, hoặc chạy theo lịch."
+    },
+    {
+      "id": "task-definition",
+      "use": "task definition",
+      "keepEnglish": true,
+      "aliases": [
+        "task definitions"
+      ],
+      "glossary": true,
+      "definition": "Bản mô tả của ECS cho một nhóm container: image, CPU, bộ nhớ, biến môi trường, cổng, log và các role. Mỗi lần sửa tạo một revision mới."
+    },
+    {
+      "id": "health-check",
+      "use": "health check",
+      "keepEnglish": true,
+      "aliases": [
+        "health checks"
+      ],
+      "glossary": true,
+      "definition": "Phép kiểm tra định kỳ xem một target có đang phục vụ được không, thường gọi một đường dẫn như /health. Target lỗi liên tiếp sẽ bị đưa ra khỏi vòng chia tải."
+    },
+    {
+      "id": "ami",
+      "use": "AMI",
+      "english": "Amazon Machine Image",
+      "aliases": [
+        "AMIs"
+      ],
+      "caseSensitive": true,
+      "glossary": true,
+      "definition": "Ảnh máy gồm hệ điều hành và phần mềm cài sẵn, dùng làm khuôn để khởi tạo EC2 instance."
+    },
+    {
+      "id": "runbook",
+      "use": "runbook",
+      "keepEnglish": true,
+      "aliases": [
+        "runbooks"
+      ],
+      "glossary": true,
+      "definition": "Tài liệu từng bước để xử lý một sự cố hoặc thao tác vận hành quen thuộc, viết sẵn để người trực làm theo mà không phải nghĩ lại."
+    },
+    {
+      "id": "access-key",
+      "use": "access key",
+      "keepEnglish": true,
+      "aliases": [
+        "access keys"
+      ],
+      "glossary": true,
+      "definition": "Cặp khoá dài hạn (ID và secret) để gọi API AWS từ ngoài. Dễ bị lộ nên nên thay bằng role và credential tạm."
+    },
+    {
+      "id": "kubectl",
+      "use": "kubectl",
+      "keepEnglish": true,
+      "glossary": true,
+      "definition": "Công cụ dòng lệnh để làm việc với cụm Kubernetes: xem pod, áp dụng file cấu hình, đọc log, vào shell của container."
+    },
+    {
+      "id": "gitops",
+      "use": "GitOps",
+      "keepEnglish": true,
+      "glossary": true,
+      "definition": "Cách vận hành trong đó Git là nguồn sự thật của cấu hình triển khai; một công cụ như Argo CD tự đồng bộ cụm với những gì đã commit."
+    },
+    {
+      "id": "fan-out",
+      "use": "fan-out",
+      "keepEnglish": true,
+      "aliases": [
+        "fan out"
+      ],
+      "glossary": true,
+      "definition": "Mẫu phát một sự kiện cho nhiều bên xử lý độc lập, ví dụ một topic SNS đẩy sang nhiều hàng đợi SQS, mỗi hàng đợi phục vụ một consumer."
+    },
+    {
+      "id": "cloudfront",
+      "use": "CloudFront",
+      "keepEnglish": true,
+      "caseSensitive": true,
+      "glossary": true,
+      "definition": "CDN của AWS: lưu bản sao nội dung ở các edge location gần người dùng để tải nhanh hơn và che chắn origin phía sau."
+    },
+    {
+      "id": "node-group",
+      "use": "node group",
+      "keepEnglish": true,
+      "aliases": [
+        "node groups"
+      ],
+      "glossary": true,
+      "definition": "Nhóm EC2 instance cùng cấu hình làm worker node của cụm EKS. Managed node group để AWS lo việc tạo, nâng cấp và thay node."
+    },
+    {
+      "id": "resource-group",
+      "use": "resource group",
+      "keepEnglish": true,
+      "aliases": [
+        "resource groups"
+      ],
+      "glossary": true,
+      "definition": "Nhóm chứa các resource Azure có chung vòng đời, triển khai, cập nhật và xoá cùng nhau. Xoá cả nhóm là xoá hết resource bên trong."
+    },
+    {
+      "id": "entra-id",
+      "use": "Microsoft Entra ID",
+      "keepEnglish": true,
+      "aliases": [
+        "Entra ID",
+        "Entra",
+        "Azure AD"
+      ],
+      "glossary": true,
+      "definition": "Dịch vụ quản lý danh tính của Microsoft, lưu người dùng, nhóm, ứng dụng và cấp token xác thực cho chúng. Trước đây có tên Azure Active Directory."
+    },
+    {
+      "id": "key-vault",
+      "use": "Key Vault",
+      "keepEnglish": true,
+      "aliases": [
+        "Azure Key Vault"
+      ],
+      "glossary": true,
+      "definition": "Dịch vụ Azure lưu và cấp phát secret, khoá mã hoá và chứng chỉ có kiểm soát truy cập và nhật ký. Ứng dụng đọc secret từ đây thay vì giữ trong code hay biến môi trường."
+    },
+    {
+      "id": "container-apps",
+      "use": "Container Apps",
+      "keepEnglish": true,
+      "aliases": [
+        "Azure Container Apps",
+        "container app"
+      ],
+      "glossary": true,
+      "definition": "Dịch vụ chạy container trên Azure mà không phải quản lý cluster. Hỗ trợ ingress, revision, scale theo tải hoặc hàng đợi, kể cả scale về 0."
+    },
+    {
+      "id": "vnet",
+      "use": "VNet",
+      "english": "Virtual Network",
+      "glossary": true,
+      "definition": "Mạng riêng ảo trong Azure, chia thành các subnet. Resource trong cùng VNet nói chuyện với nhau qua địa chỉ riêng mà không đi ra Internet."
+    },
+    {
+      "id": "bicep",
+      "use": "Bicep",
+      "keepEnglish": true,
+      "glossary": true,
+      "definition": "Ngôn ngữ khai báo hạ tầng của Azure, biên dịch ra ARM template. Mô tả resource, module và parameter trong file, rồi triển khai lặp lại được."
+    },
+    {
+      "id": "rbac",
+      "use": "RBAC",
+      "english": "Role-Based Access Control",
+      "aliases": [
+        "Azure RBAC"
+      ],
+      "caseSensitive": true,
+      "glossary": true,
+      "definition": "Cơ chế cấp quyền theo vai trò: gán một role cho một danh tính tại một scope nhất định, thay vì cấp quyền lẻ từng thao tác."
+    },
+    {
+      "id": "private-endpoint",
+      "use": "private endpoint",
+      "keepEnglish": true,
+      "aliases": [
+        "private endpoints"
+      ],
+      "glossary": true,
+      "definition": "Giao diện mạng có IP riêng trong VNet, trỏ tới một dịch vụ PaaS như Key Vault hay PostgreSQL, để truy cập qua mạng riêng thay vì địa chỉ công khai."
+    },
+    {
+      "id": "log-analytics",
+      "use": "Log Analytics",
+      "keepEnglish": true,
+      "aliases": [
+        "Log Analytics workspace"
+      ],
+      "glossary": true,
+      "definition": "Kho log tập trung của Azure Monitor. Log từ ứng dụng và resource được gửi về workspace này để truy vấn bằng KQL và đặt cảnh báo."
+    },
+    {
+      "id": "sku",
+      "use": "SKU",
+      "keepEnglish": true,
+      "caseSensitive": true,
+      "glossary": true,
+      "definition": "Gói/cấu hình cụ thể của một dịch vụ Azure (kích thước, tier, tính năng), quyết định giá, giới hạn và tính năng khả dụng."
+    },
+    {
+      "id": "aks",
+      "use": "AKS",
+      "english": "Azure Kubernetes Service",
+      "caseSensitive": true,
+      "glossary": true,
+      "definition": "Dịch vụ Kubernetes do Azure quản lý: Azure vận hành control plane, còn bạn lo node, nâng cấp node pool và chạy workload."
+    },
+    {
+      "id": "acr",
+      "use": "ACR",
+      "english": "Azure Container Registry",
+      "aliases": [
+        "Container Registry"
+      ],
+      "caseSensitive": true,
+      "glossary": true,
+      "definition": "Kho chứa container image riêng trên Azure. CI đẩy image lên đây và Container Apps hay AKS kéo về để chạy."
+    },
+    {
+      "id": "azure-policy",
+      "use": "Azure Policy",
+      "keepEnglish": true,
+      "glossary": true,
+      "definition": "Dịch vụ đặt quy tắc cho resource Azure (ví dụ bắt buộc có tag, cấm public IP), với hiệu ứng audit hoặc deny. Nhiều policy gom lại thành một initiative."
+    },
+    {
+      "id": "waf",
+      "use": "WAF",
+      "english": "Web Application Firewall",
+      "caseSensitive": true,
+      "glossary": true,
+      "definition": "Tường lửa ứng dụng web, đọc được nội dung HTTP để chặn tấn công như SQL injection hay XSS. Trên Azure chạy trên Front Door hoặc Application Gateway."
+    },
+    {
+      "id": "image-digest",
+      "use": "image digest",
+      "keepEnglish": true,
+      "glossary": true,
+      "definition": "Mã SHA-256 của manifest container image. Khác tag có thể gắn lại, digest cố định nên chỉ ra chính xác image nào đang chạy."
+    },
+    {
+      "id": "kql",
+      "use": "KQL",
+      "english": "Kusto Query Language",
+      "caseSensitive": true,
+      "glossary": true,
+      "definition": "Ngôn ngữ truy vấn dùng trong Log Analytics và Application Insights, viết theo chuỗi toán tử nối bằng dấu |, để lọc, gom nhóm và vẽ biểu đồ log."
+    },
+    {
+      "id": "arm",
+      "use": "Azure Resource Manager",
+      "keepEnglish": true,
+      "glossary": true,
+      "definition": "Lớp quản lý chung của Azure: mọi thao tác tạo, sửa, xoá resource từ portal, CLI hay Bicep đều đi qua đây để kiểm quyền và ghi nhận."
+    },
+    {
+      "id": "control-plane",
+      "use": "control plane",
+      "keepEnglish": true,
+      "aliases": [
+        "management plane"
+      ],
+      "glossary": true,
+      "definition": "Mặt phẳng quản lý tài nguyên (tạo, cấu hình, xoá), tách khỏi data plane là nơi đọc ghi dữ liệu thật. Hai mặt phẳng cần hai nhóm quyền riêng."
+    },
+    {
+      "id": "data-plane",
+      "use": "data plane",
+      "keepEnglish": true,
+      "glossary": true,
+      "definition": "Mặt phẳng xử lý dữ liệu thật của dịch vụ, như đọc secret trong Key Vault hay ghi blob. Quyền ở data plane tách biệt với quyền quản lý resource."
+    },
+    {
+      "id": "service-bus",
+      "use": "Service Bus",
+      "keepEnglish": true,
+      "aliases": [
+        "Azure Service Bus"
+      ],
+      "glossary": true,
+      "definition": "Dịch vụ message broker của Azure với queue và topic, hỗ trợ session, dead-letter và gửi lại. Hợp cho message nghiệp vụ cần độ tin cậy."
+    },
+    {
+      "id": "event-hubs",
+      "use": "Event Hubs",
+      "keepEnglish": true,
+      "aliases": [
+        "Azure Event Hubs",
+        "event hub"
+      ],
+      "glossary": true,
+      "definition": "Dịch vụ nhận luồng sự kiện khối lượng lớn, chia theo partition, nhiều consumer group đọc độc lập. Hợp cho dữ liệu liên tục như vị trí GPS."
+    },
+    {
+      "id": "nsg",
+      "use": "NSG",
+      "english": "Network Security Group",
+      "caseSensitive": true,
+      "glossary": true,
+      "definition": "Bộ rule cho phép hoặc chặn lưu lượng mạng vào ra một subnet hoặc network interface, theo IP, port và giao thức. Hoạt động ở lớp 3-4, không đọc được nội dung HTTP."
+    },
+    {
+      "id": "soft-delete",
+      "use": "soft delete",
+      "keepEnglish": true,
+      "glossary": true,
+      "definition": "Cơ chế xoá mềm: resource bị xoá vẫn giữ tên và khôi phục được trong một thời gian. Muốn tạo lại cùng tên phải purge hoặc đợi hết hạn giữ."
+    },
+    {
+      "id": "federated-credential",
+      "use": "federated credential",
+      "keepEnglish": true,
+      "aliases": [
+        "federated credentials",
+        "federated identity credential"
+      ],
+      "glossary": true,
+      "definition": "Cấu hình trên Entra tin cậy token của một bên ngoài (GitHub Actions, cluster AKS) theo issuer, subject và audience, để đổi lấy token Azure mà không cần lưu secret."
+    },
+    {
+      "id": "application-insights",
+      "use": "Application Insights",
+      "keepEnglish": true,
+      "aliases": [
+        "App Insights"
+      ],
+      "glossary": true,
+      "definition": "Dịch vụ giám sát ứng dụng của Azure Monitor: thu trace từng request, dependency, exception và metric của ứng dụng để chẩn đoán lỗi và độ trễ."
+    },
+    {
+      "id": "service-principal",
+      "use": "service principal",
+      "keepEnglish": true,
+      "aliases": [
+        "service principals"
+      ],
+      "glossary": true,
+      "definition": "Danh tính của một ứng dụng trong một tenant, dùng để ứng dụng đăng nhập và nhận quyền. Khác user: không có người đứng sau, thường xác thực bằng secret hoặc federated credential."
+    },
+    {
+      "id": "workload-identity",
+      "use": "workload identity",
+      "keepEnglish": true,
+      "glossary": true,
+      "definition": "Cách để pod trong Kubernetes dùng danh tính Entra qua federated credential: pod trình token ServiceAccount, Entra đổi lấy token gọi dịch vụ Azure, không cần secret."
+    },
+    {
+      "id": "pim",
+      "use": "PIM",
+      "english": "Privileged Identity Management",
+      "caseSensitive": true,
+      "glossary": true,
+      "definition": "Dịch vụ của Entra cấp quyền cao theo kiểu just-in-time: quyền chỉ kích hoạt khi cần, có thời hạn và có thể cần duyệt, thay vì để quyền Owner nằm sẵn."
+    },
+    {
+      "id": "pitr",
+      "use": "PITR",
+      "english": "Point-in-Time Restore",
+      "caseSensitive": true,
+      "glossary": true,
+      "definition": "Khôi phục database về một thời điểm bất kỳ trong thời hạn lưu backup, dùng khi lỡ xoá hay migration hỏng. Khôi phục ra server mới chứ không ghi đè."
+    },
+    {
+      "id": "serverless",
+      "use": "serverless",
+      "keepEnglish": true,
+      "glossary": true,
+      "definition": "Mô hình chạy code không phải quản lý máy chủ: nền tảng tự cấp tài nguyên và scale, bạn trả theo mức dùng. Có thể scale về 0 khi không có tải."
+    },
+    {
+      "id": "keda",
+      "use": "KEDA",
+      "english": "Kubernetes Event-driven Autoscaling",
+      "caseSensitive": true,
+      "glossary": true,
+      "definition": "Bộ scale theo sự kiện cho Kubernetes và Container Apps, tăng giảm số replica theo độ dài hàng đợi, số message hay HTTP request thay vì chỉ theo CPU."
+    },
+    {
+      "id": "node-pool",
+      "use": "node pool",
+      "keepEnglish": true,
+      "aliases": [
+        "node pools",
+        "system pool",
+        "user pool"
+      ],
+      "glossary": true,
+      "definition": "Nhóm node cùng kích thước trong cluster AKS. System pool chạy thành phần hệ thống, user pool chạy ứng dụng; mỗi pool scale độc lập."
+    },
+    {
+      "id": "action-group",
+      "use": "action group",
+      "keepEnglish": true,
+      "aliases": [
+        "action groups"
+      ],
+      "glossary": true,
+      "definition": "Danh sách hành động mà alert của Azure Monitor kích hoạt khi bắn, như gửi email, SMS, gọi webhook hay chạy Function."
+    },
+    {
+      "id": "landing-zone",
+      "use": "landing zone",
+      "keepEnglish": true,
+      "aliases": [
+        "landing zones"
+      ],
+      "glossary": true,
+      "definition": "Môi trường Azure dựng sẵn theo chuẩn (mạng, danh tính, policy, giám sát) để các đội đặt workload vào đúng nền móng thay vì tự làm từ đầu."
+    },
+    {
+      "id": "paas",
+      "use": "PaaS",
+      "english": "Platform as a Service",
+      "caseSensitive": true,
+      "glossary": true,
+      "definition": "Mô hình dịch vụ nơi nhà cung cấp lo hạ tầng và hệ điều hành, bạn chỉ triển khai ứng dụng và dữ liệu. Ví dụ App Service, Azure SQL."
+    },
+    {
+      "id": "consumer-group",
+      "use": "consumer group",
+      "keepEnglish": true,
+      "aliases": [
+        "consumer groups"
+      ],
+      "glossary": true,
+      "definition": "Góc nhìn đọc độc lập lên một event hub hoặc topic: mỗi group giữ vị trí đọc riêng, nên nhiều hệ thống cùng đọc một luồng mà không giành nhau."
+    },
+    {
+      "id": "partition-key",
+      "use": "partition key",
+      "keepEnglish": true,
+      "aliases": [
+        "logical partition"
+      ],
+      "glossary": true,
+      "definition": "Trường dùng để chia dữ liệu thành các partition. Chọn kém thì tải dồn vào một chỗ và truy vấn tốn nhiều hơn; cùng giá trị luôn nằm cùng partition."
+    },
+    {
+      "id": "deployment-slot",
+      "use": "deployment slot",
+      "keepEnglish": true,
+      "aliases": [
+        "deployment slots"
+      ],
+      "glossary": true,
+      "definition": "Bản chạy riêng của App Service (hostname riêng) trên cùng plan, dùng để kiểm tra bản mới rồi swap sang production. Có setting ở lại slot khi swap."
+    },
+    {
+      "id": "request-unit",
+      "use": "RU",
+      "english": "Request Unit",
+      "aliases": [
+        "Request Units"
+      ],
+      "caseSensitive": true,
+      "glossary": true,
+      "definition": "Đơn vị đo chi phí xử lý của Cosmos DB, gộp CPU, bộ nhớ và I/O của một thao tác. Point read rẻ, query cắt ngang nhiều partition tốn RU hơn nhiều."
+    },
+    {
+      "id": "as-is",
+      "use": "as-is",
+      "keepEnglish": true,
+      "glossary": true,
+      "definition": "Mô tả quy trình hiện tại đúng như đang diễn ra, làm nền để so với trạng thái mong muốn (to-be) và tìm ra khoảng trống cần cải tiến."
+    },
+    {
+      "id": "to-be",
+      "use": "to-be",
+      "keepEnglish": true,
+      "glossary": true,
+      "definition": "Mô tả quy trình hoặc trạng thái mong muốn sau cải tiến, có mục tiêu rõ. Khoảng cách giữa to-be và as-is là đầu vào của gap analysis."
+    },
+    {
+      "id": "bpmn",
+      "use": "BPMN",
+      "english": "Business Process Model and Notation",
+      "caseSensitive": true,
+      "glossary": true,
+      "definition": "Ký pháp chuẩn để vẽ quy trình nghiệp vụ bằng các phần tử như task, event, gateway và lane, giúp BA, dev và tester đọc cùng một sơ đồ theo cùng một nghĩa."
+    },
+    {
+      "id": "state-model",
+      "use": "state model",
+      "english": "mô hình trạng thái",
+      "aliases": [
+        "transition table"
+      ],
+      "glossary": true,
+      "definition": "Mô hình liệt kê các trạng thái của một đối tượng (như chuyến đi) và những chuyển trạng thái hợp lệ giữa chúng, kèm điều kiện và tác nhân gây ra chuyển đổi."
+    },
+    {
+      "id": "non-functional-requirement",
+      "use": "NFR",
+      "english": "non-functional requirement",
+      "aliases": [
+        "yêu cầu phi chức năng",
+        "NFRs"
+      ],
+      "caseSensitive": true,
+      "glossary": true,
+      "definition": "Yêu cầu về chất lượng của hệ thống như tốc độ, độ sẵn sàng, bảo mật, không nói hệ thống làm gì. BA cần viết dạng đo được, ví dụ xử lý trong 2 giây ở 95% yêu cầu."
+    },
+    {
+      "id": "wireframe",
+      "use": "wireframe",
+      "keepEnglish": true,
+      "aliases": [
+        "wireframes"
+      ],
+      "glossary": true,
+      "definition": "Bản phác giao diện đơn giản, chỉ thể hiện bố cục và các trạng thái màn hình, dùng để kiểm tra mọi người có hiểu yêu cầu giống nhau hay không trước khi thiết kế chi tiết."
+    },
+    {
+      "id": "business-rule",
+      "use": "business rule",
+      "english": "quy tắc nghiệp vụ",
+      "aliases": [
+        "business rules",
+        "chính sách nghiệp vụ"
+      ],
+      "glossary": true,
+      "definition": "Quy định của tổ chức quyết định hệ thống được phép hoặc phải hành xử thế nào, độc lập với giao diện. Ví dụ: huỷ sau khi tài xế nhận chuyến quá 120 giây thì có phí."
+    },
+    {
+      "id": "moscow",
+      "use": "MoSCoW",
+      "keepEnglish": true,
+      "caseSensitive": true,
+      "glossary": true,
+      "definition": "Cách xếp ưu tiên yêu cầu thành bốn nhóm: Must, Should, Could và Won't (không làm lần này). Nhóm được chọn phải gắn với mục tiêu và ràng buộc của đợt phát hành."
+    },
+    {
+      "id": "brd",
+      "use": "BRD",
+      "english": "business requirements document",
+      "caseSensitive": true,
+      "glossary": true,
+      "definition": "Tài liệu yêu cầu nghiệp vụ, mô tả vì sao cần thay đổi, mục tiêu và phạm vi ở mức người ra quyết định. Khác SRS, nó chưa đi vào chi tiết chức năng hệ thống."
+    },
+    {
+      "id": "srs",
+      "use": "SRS",
+      "english": "software requirements specification",
+      "caseSensitive": true,
+      "glossary": true,
+      "definition": "Tài liệu đặc tả yêu cầu phần mềm, mô tả chi tiết chức năng, quy tắc và yêu cầu phi chức năng để dev và tester làm theo. Có thể thay bằng tài liệu gọn hơn tuỳ rủi ro."
+    },
+    {
+      "id": "business-case",
+      "use": "business case",
+      "keepEnglish": true,
+      "glossary": true,
+      "definition": "Luận cứ cho một khoản đầu tư: vấn đề, các phương án, chi phí, lợi ích kỳ vọng và rủi ro. Dùng để người tài trợ quyết định có nên làm hay không."
+    },
+    {
+      "id": "capability-map",
+      "use": "capability map",
+      "english": "bản đồ năng lực",
+      "glossary": true,
+      "definition": "Bản đồ liệt kê những việc tổ chức cần làm tốt (năng lực), độc lập với phòng ban hay hệ thống. Giúp thấy năng lực nào yếu và nên đầu tư trước để đạt mục tiêu."
+    },
+    {
+      "id": "service-blueprint",
+      "use": "service blueprint",
+      "keepEnglish": true,
+      "glossary": true,
+      "definition": "Sơ đồ mở rộng của customer journey, thêm phần khách không nhìn thấy: hoạt động hậu trường, hệ thống và quy trình hỗ trợ ở từng bước."
+    },
+    {
+      "id": "change-request",
+      "use": "change request",
+      "keepEnglish": true,
+      "aliases": [
+        "change requests"
+      ],
+      "glossary": true,
+      "definition": "Đề nghị chính thức thay đổi một yêu cầu hoặc hành vi đã được duyệt. Cần được đánh giá ảnh hưởng (impact analysis) trước khi chấp nhận."
+    },
+    {
+      "id": "impact-analysis",
+      "use": "impact analysis",
+      "english": "phân tích ảnh hưởng",
+      "glossary": true,
+      "definition": "Bước truy ra những phần bị ảnh hưởng khi một yêu cầu thay đổi: rule, test case, tài liệu, dữ liệu, đào tạo, vận hành. Giúp ước lượng chi phí và rủi ro trước khi quyết định."
+    },
+    {
+      "id": "gap-analysis",
+      "use": "gap analysis",
+      "keepEnglish": true,
+      "aliases": [
+        "gap list"
+      ],
+      "glossary": true,
+      "definition": "So sánh hiện trạng (as-is) với trạng thái mong muốn (to-be) để liệt kê các khoảng trống cần lấp, làm cơ sở xếp thứ tự các đợt thay đổi trong roadmap."
+    },
+    {
+      "id": "story-mapping",
+      "use": "story mapping",
+      "english": "bản đồ story",
+      "aliases": [
+        "story map"
+      ],
+      "glossary": true,
+      "definition": "Kỹ thuật xếp user story theo hành trình của người dùng để chia nhỏ công việc thành các lát cắt mà mỗi lát đều tạo ra giá trị dùng được xuyên suốt."
+    },
+    {
+      "id": "data-dictionary",
+      "use": "data dictionary",
+      "english": "từ điển dữ liệu",
+      "glossary": true,
+      "definition": "Bảng mô tả từng trường dữ liệu: ý nghĩa, đơn vị, miền giá trị, bắt buộc khi nào, nguồn và người phụ trách, để mọi bên hiểu cùng một nghĩa."
+    },
+    {
+      "id": "problem-statement",
+      "use": "problem statement",
+      "english": "phát biểu vấn đề",
+      "glossary": true,
+      "definition": "Câu mô tả vấn đề cần giải: ai gặp khó, ở tình huống nào, hậu quả ra sao, kèm chỉ số để đo. Viết trước khi bàn giải pháp để tránh nhảy vào xây tính năng."
+    },
+    {
+      "id": "stakeholder-map",
+      "use": "stakeholder map",
+      "english": "bản đồ bên liên quan",
+      "glossary": true,
+      "definition": "Bảng xác định ai bị ảnh hưởng bởi thay đổi, ai có quyền quyết định và mức quan tâm của từng người, để biết cần hỏi ai và xin duyệt từ ai."
+    },
+    {
+      "id": "telemetry",
+      "use": "telemetry",
+      "keepEnglish": true,
+      "glossary": true,
+      "definition": "Dữ liệu sự kiện do ứng dụng hoặc hệ thống tự gửi về để đo hành vi sử dụng. Chất lượng telemetry (thiếu, trùng, sai thời gian) quyết định số liệu có đáng tin hay không."
+    },
+    {
+      "id": "elicitation",
+      "use": "elicitation",
+      "keepEnglish": true,
+      "glossary": true,
+      "definition": "Hoạt động thu thập thông tin yêu cầu từ các bên liên quan qua phỏng vấn, workshop, quan sát hoặc tài liệu, kèm xác nhận lại để tránh hiểu sai."
+    },
+    {
+      "id": "ab-test",
+      "use": "A/B test",
+      "keepEnglish": true,
+      "aliases": [
+        "thử nghiệm A/B"
+      ],
+      "caseSensitive": true,
+      "glossary": true,
+      "definition": "So sánh hai phiên bản (A và B) trên các nhóm người dùng tương đương để xem thay đổi nào tạo ra khác biệt. Nhóm chia không ngẫu nhiên thì kết luận nhân quả yếu."
+    },
+    {
+      "id": "go-no-go",
+      "use": "go/no-go",
+      "keepEnglish": true,
+      "aliases": [
+        "go-no-go"
+      ],
+      "glossary": true,
+      "definition": "Quyết định cuối cùng trước phát hành: cho chạy (go) hoặc dừng (no-go), dựa trên bằng chứng nghiệm thu và các điều kiện đã thống nhất."
+    },
+    {
+      "id": "happy-path",
+      "use": "happy path",
+      "keepEnglish": true,
+      "glossary": true,
+      "definition": "Kịch bản mọi thứ diễn ra suôn sẻ, không lỗi và không ngoại lệ. Test chỉ chạy happy path chưa đủ để chứng minh rule cạnh tranh và ngoại lệ được xử lý đúng."
+    },
+    {
+      "id": "precondition",
+      "use": "precondition",
+      "english": "điều kiện tiên quyết",
+      "aliases": [
+        "tiền điều kiện"
+      ],
+      "glossary": true,
+      "definition": "Điều kiện phải đúng trước khi use case hoặc thao tác bắt đầu, ví dụ: chuyến phải đang ở trạng thái searching và người dùng là khách chủ lượt."
+    },
+    {
+      "id": "product-owner",
+      "use": "Product Owner",
+      "keepEnglish": true,
+      "aliases": [
+        "PO"
+      ],
+      "caseSensitive": true,
+      "glossary": true,
+      "definition": "Người chịu trách nhiệm về giá trị sản phẩm và thứ tự ưu tiên backlog, là người BA làm việc cùng để chốt mục tiêu, phạm vi và chấp nhận kết quả."
+    },
+    {
+      "id": "invariant",
+      "use": "invariant",
+      "keepEnglish": true,
+      "aliases": [
+        "invariants"
+      ],
+      "glossary": true,
+      "definition": "Điều kiện nghiệp vụ luôn phải đúng với một đối tượng, ví dụ chuyến đã huỷ không thể nhận lại. Hành vi của đối tượng có nhiệm vụ không để điều kiện này bị phá vỡ."
+    },
+    {
+      "id": "ddd",
+      "use": "DDD",
+      "english": "Domain-Driven Design",
+      "caseSensitive": true,
+      "glossary": true,
+      "definition": "Cách thiết kế phần mềm xoay quanh nghiệp vụ: chia ranh giới theo ngôn ngữ chung, mô hình hoá bằng aggregate, entity và value object thay vì xuất phát từ bảng dữ liệu."
+    },
+    {
+      "id": "dependency-injection",
+      "use": "dependency injection",
+      "keepEnglish": true,
+      "glossary": true,
+      "definition": "Kỹ thuật để đối tượng nhận các thành phần nó cần từ bên ngoài (thường qua constructor) thay vì tự tạo. Nhờ đó dễ thay bản cài đặt, ví dụ đổi chính sách tính cước khi test."
+    },
+    {
+      "id": "bounded-context",
+      "use": "bounded context",
+      "keepEnglish": true,
+      "glossary": true,
+      "definition": "Ranh giới trong đó một mô hình và thuật ngữ nghiệp vụ có nghĩa nhất quán, ví dụ 'chuyến' ở Booking khác 'chuyến' ở Dispatch. Không đồng nghĩa với một thư mục hay một service."
+    },
+    {
+      "id": "composition-root",
+      "use": "composition root",
+      "keepEnglish": true,
+      "glossary": true,
+      "definition": "Nơi duy nhất trong ứng dụng ghép các thành phần lại với nhau: chọn bản cài đặt cho từng abstraction rồi đăng ký vào DI container. Phần còn lại của code không tự tạo dependency."
+    },
+    {
+      "id": "entity-framework-core",
+      "use": "EF Core",
+      "english": "Entity Framework Core",
+      "glossary": true,
+      "definition": "ORM của .NET, ánh xạ class C# sang bảng cơ sở dữ liệu và dịch truy vấn LINQ thành SQL. Vẫn nên xem câu SQL sinh ra, vì EF Core không tự bảo đảm truy vấn hiệu quả."
+    },
+    {
+      "id": "dbcontext",
+      "use": "DbContext",
+      "keepEnglish": true,
+      "glossary": true,
+      "definition": "Đối tượng trung tâm của EF Core: giữ kết nối, cấu hình ánh xạ và theo dõi thay đổi để lưu bằng SaveChanges. Nên tạo ngắn hạn cho một use case, không dùng chung cho nhiều thao tác song song."
+    },
+    {
+      "id": "dto",
+      "use": "DTO",
+      "english": "Data Transfer Object",
+      "caseSensitive": true,
+      "glossary": true,
+      "definition": "Kiểu dữ liệu đơn giản chỉ để chuyển thông tin qua một ranh giới như API hay màn hình, không chứa nghiệp vụ. Tách khỏi entity để không lộ cấu trúc nội bộ."
+    },
+    {
+      "id": "mediator",
+      "use": "Mediator",
+      "keepEnglish": true,
+      "glossary": true,
+      "definition": "Thành phần đứng giữa nhận command/query và chuyển tới handler tương ứng, để nơi gọi không phụ thuộc trực tiếp handler. Thường kèm pipeline cho validation, logging."
+    },
+    {
+      "id": "read-model",
+      "use": "read model",
+      "keepEnglish": true,
+      "glossary": true,
+      "definition": "Mô hình dữ liệu dùng riêng cho việc đọc và hiển thị, ví dụ TripView chỉ có vài trường. Tách khỏi aggregate dùng để thay đổi trạng thái."
+    },
+    {
+      "id": "value-object",
+      "use": "value object",
+      "keepEnglish": true,
+      "aliases": [
+        "value objects"
+      ],
+      "glossary": true,
+      "definition": "Đối tượng không có danh tính riêng, được xác định hoàn toàn bằng giá trị và thường bất biến, ví dụ Money gồm số tiền và đơn vị tiền. Hai đối tượng cùng giá trị coi là bằng nhau."
+    },
+    {
+      "id": "domain-event",
+      "use": "domain event",
+      "keepEnglish": true,
+      "glossary": true,
+      "definition": "Sự kiện nghiệp vụ đã xảy ra bên trong domain, như chuyến vừa được nhận. Phát ra sau khi chuyển trạng thái hợp lệ; khác với integration event gửi ra hệ thống khác."
+    },
+    {
+      "id": "cancellation-token",
+      "use": "CancellationToken",
+      "keepEnglish": true,
+      "aliases": [
+        "cancellation token"
+      ],
+      "glossary": true,
+      "definition": "Đối tượng truyền xuyên các lời gọi async để báo hiệu tác vụ nên dừng, ví dụ khi client ngắt kết nối hoặc timeout. Phía nhận phải chủ động kiểm tra thì mới dừng thật."
+    },
+    {
+      "id": "async-await",
+      "use": "async/await",
+      "keepEnglish": true,
+      "glossary": true,
+      "definition": "Cú pháp C# viết code bất đồng bộ như code tuần tự. Khi await một thao tác I/O, phương thức tạm dừng và trả luồng về ThreadPool để phục vụ việc khác, không chặn luồng."
+    },
+    {
+      "id": "linq",
+      "use": "LINQ",
+      "keepEnglish": true,
+      "caseSensitive": true,
+      "glossary": true,
+      "definition": "Tập cú pháp truy vấn tích hợp trong C# để lọc, sắp xếp, nhóm và tổng hợp bộ sưu tập (Where, Select, OrderBy). Cùng cú pháp dùng được cho bộ nhớ lẫn database qua EF Core."
+    },
+    {
+      "id": "deferred-execution",
+      "use": "deferred execution",
+      "keepEnglish": true,
+      "aliases": [
+        "thực thi trì hoãn",
+        "query trì hoãn"
+      ],
+      "glossary": true,
+      "definition": "Truy vấn LINQ chưa chạy khi được khai báo mà chỉ chạy khi duyệt kết quả (foreach, ToList). Vì vậy dữ liệu nguồn đổi giữa chừng có thể làm kết quả khác đi."
+    },
+    {
+      "id": "nullable-reference-types",
+      "use": "nullable reference types",
+      "keepEnglish": true,
+      "glossary": true,
+      "definition": "Tính năng của C# cho phép đánh dấu tham chiếu có thể null (string?) hoặc không (string), để compiler cảnh báo khi quên kiểm tra. Chỉ là chú thích compile-time, không kiểm tra lúc chạy."
+    },
+    {
+      "id": "garbage-collector",
+      "use": "GC",
+      "english": "garbage collector",
+      "caseSensitive": true,
+      "glossary": true,
+      "definition": "Bộ thu gom rác của .NET, tự giải phóng bộ nhớ của đối tượng không còn được tham chiếu. Cấp phát nhiều đối tượng ngắn hạn làm GC chạy nhiều và có thể tăng độ trễ."
+    },
+    {
+      "id": "idisposable",
+      "use": "IDisposable",
+      "keepEnglish": true,
+      "aliases": [
+        "Dispose"
+      ],
+      "glossary": true,
+      "definition": "Interface cho đối tượng giữ tài nguyên ngoài bộ nhớ (kết nối, file, buffer), có Dispose để trả tài nguyên ngay. Dùng với using để luôn được gọi, kể cả khi có lỗi."
+    },
+    {
+      "id": "message-broker",
+      "use": "message broker",
+      "keepEnglish": true,
+      "glossary": true,
+      "definition": "Hệ thống trung gian nhận, lưu và chuyển thông điệp giữa các service, như Kafka hay RabbitMQ. Giúp tách bên gửi khỏi bên nhận và đệm khi một bên chậm."
+    },
+    {
+      "id": "guid",
+      "use": "GUID",
+      "keepEnglish": true,
+      "caseSensitive": true,
+      "glossary": true,
+      "definition": "Mã định danh 128-bit, gần như không bao giờ trùng, sinh được độc lập không cần database cấp. Kiểu Guid trong C# thường dùng làm ID hoặc token version."
+    },
+    {
+      "id": "minimal-api",
+      "use": "Minimal API",
+      "keepEnglish": true,
+      "glossary": true,
+      "definition": "Cách khai báo endpoint HTTP của ASP.NET Core bằng vài dòng code, không cần controller. Vẫn cần tổ chức, validation và kiểm thử khi ứng dụng lớn lên."
+    },
+    {
+      "id": "aspnet-core",
+      "use": "ASP.NET Core",
+      "keepEnglish": true,
+      "aliases": [
+        "ASP.NET"
+      ],
+      "glossary": true,
+      "definition": "Framework web của .NET để xây API và ứng dụng web, gồm routing, middleware, DI và xác thực. Các backend service của dự án chạy trên nền này."
+    },
+    {
+      "id": "tls",
+      "use": "TLS",
+      "english": "Transport Layer Security",
+      "caseSensitive": true,
+      "glossary": true,
+      "definition": "Giao thức mã hoá đường truyền giữa client và server (nền của HTTPS). Token bearer chỉ nên truyền qua TLS vì bản thân token không được mã hoá."
+    },
+    {
+      "id": "unique-constraint",
+      "use": "unique constraint",
+      "keepEnglish": true,
+      "glossary": true,
+      "definition": "Ràng buộc database không cho hai dòng trùng giá trị ở cột đã khai báo. Là nơi phân xử cuối cùng khi hai request đồng thời cùng ghi, ví dụ chống tạo trùng đặt chuyến."
+    },
+    {
+      "id": "strategy-pattern",
+      "use": "Strategy pattern",
+      "keepEnglish": true,
+      "aliases": [
+        "Strategy"
+      ],
+      "caseSensitive": true,
+      "glossary": true,
+      "definition": "Design pattern tách các cách tính khác nhau thành đối tượng cùng interface để đổi lúc chạy, như chính sách tính cước hay thuật toán ghép tài xế."
+    },
+    {
+      "id": "microservices",
+      "use": "microservices",
+      "keepEnglish": true,
+      "aliases": [
+        "microservice"
+      ],
+      "glossary": true,
+      "definition": "Kiến trúc chia hệ thống thành nhiều service nhỏ triển khai và vận hành độc lập, mỗi cái giữ dữ liệu riêng. Đổi lại cần xử lý lỗi mạng, nhất quán dữ liệu và vận hành phức tạp hơn."
+    },
+    {
+      "id": "future",
+      "use": "Future",
+      "keepEnglish": true,
+      "caseSensitive": true,
+      "glossary": true,
+      "definition": "Đối tượng Dart đại diện cho một kết quả sẽ có sau, như phản hồi từ server. Dùng await để chờ giá trị mà không chặn giao diện."
+    },
+    {
+      "id": "widget",
+      "use": "widget",
+      "keepEnglish": true,
+      "aliases": [
+        "widgets"
+      ],
+      "glossary": true,
+      "definition": "Khối dựng giao diện cơ bản của Flutter: một nút, một dòng chữ hay cả màn hình đều là widget, và widget lồng nhau thành cây widget mô tả giao diện."
+    },
+    {
+      "id": "sdk",
+      "use": "SDK",
+      "keepEnglish": true,
+      "aliases": [
+        "Software Development Kit"
+      ],
+      "caseSensitive": true,
+      "glossary": true,
+      "definition": "Bộ công cụ, thư viện và tài liệu để phát triển cho một nền tảng, như Flutter SDK, Android SDK. Cài đúng phiên bản mới build được."
+    },
+    {
+      "id": "lint",
+      "use": "lint",
+      "keepEnglish": true,
+      "aliases": [
+        "linter",
+        "lint rule"
+      ],
+      "glossary": true,
+      "definition": "Bộ quy tắc kiểm tra code tĩnh, không cần chạy app, để bắt lỗi tiềm ẩn và giữ phong cách thống nhất. Trong Dart, công cụ kiểm tra là dart analyze."
+    },
+    {
+      "id": "pubspec",
+      "use": "pubspec",
+      "keepEnglish": true,
+      "aliases": [
+        "pubspec.yaml"
+      ],
+      "glossary": true,
+      "definition": "Tệp pubspec.yaml mô tả một package Dart hay app Flutter: tên, phiên bản, thư viện phụ thuộc, và cả asset như ảnh, font cần đóng gói vào app."
+    },
+    {
+      "id": "emulator",
+      "use": "emulator",
+      "keepEnglish": true,
+      "aliases": [
+        "Android emulator"
+      ],
+      "glossary": true,
+      "definition": "Máy ảo Android chạy trên máy tính, tạo từ Android Studio, để chạy và thử app Android mà không cần điện thoại thật."
+    },
+    {
+      "id": "xcode",
+      "use": "Xcode",
+      "keepEnglish": true,
+      "glossary": true,
+      "definition": "Môi trường phát triển của Apple trên macOS. Flutter dùng nó để biên dịch, ký và đóng gói app iOS, kèm simulator."
+    },
+    {
+      "id": "riverpod",
+      "use": "Riverpod",
+      "keepEnglish": true,
+      "aliases": [
+        "flutter_riverpod"
+      ],
+      "glossary": true,
+      "definition": "Thư viện quản lý state cho Flutter dựa trên provider: khai báo state ở một chỗ, widget nào cần thì đọc và tự build lại khi state đổi, dễ thay bằng bản giả khi test."
+    },
+    {
+      "id": "flavor",
+      "use": "flavor",
+      "keepEnglish": true,
+      "aliases": [
+        "flavors"
+      ],
+      "glossary": true,
+      "definition": "Biến thể build của cùng một app, như dev, staging, prod, mỗi bản có cấu hình riêng (địa chỉ server, bundle ID, biểu tượng) để cài song song trên một máy."
+    },
+    {
+      "id": "build-context",
+      "use": "BuildContext",
+      "keepEnglish": true,
+      "caseSensitive": true,
+      "glossary": true,
+      "definition": "Đối tượng cho widget biết vị trí của nó trong cây widget. Nhờ nó, widget tìm được Theme, Navigator hay provider ở các widget cha phía trên."
+    },
+    {
+      "id": "setstate",
+      "use": "setState",
+      "keepEnglish": true,
+      "caseSensitive": true,
+      "glossary": true,
+      "definition": "Hàm của State trong StatefulWidget: báo cho Flutter rằng dữ liệu đã đổi để build lại widget này và cập nhật màn hình."
+    },
+    {
+      "id": "sealed-class",
+      "use": "sealed class",
+      "keepEnglish": true,
+      "glossary": true,
+      "definition": "Lớp Dart chỉ cho phép các lớp con khai báo trong cùng thư viện, nên trình biên dịch biết đủ các trường hợp và báo lỗi nếu switch bỏ sót nhánh nào."
+    },
+    {
+      "id": "widget-test",
+      "use": "widget test",
+      "keepEnglish": true,
+      "aliases": [
+        "widget tests"
+      ],
+      "glossary": true,
+      "definition": "Loại test dựng một widget trong môi trường giả lập, không cần máy thật, rồi tìm và kiểm các thành phần trên màn hình như chữ hay nút, mô phỏng cả thao tác chạm."
+    },
+    {
+      "id": "dart-define",
+      "use": "--dart-define",
+      "keepEnglish": true,
+      "aliases": [
+        "dart-define",
+        "--dart-define-from-file"
+      ],
+      "glossary": true,
+      "definition": "Tùy chọn dòng lệnh truyền giá trị cấu hình vào app lúc biên dịch, như địa chỉ API. Giá trị nằm trong binary nên không dùng để giấu bí mật."
+    },
+    {
+      "id": "stateful-widget",
+      "use": "StatefulWidget",
+      "keepEnglish": true,
+      "aliases": [
+        "StatelessWidget"
+      ],
+      "caseSensitive": true,
+      "glossary": true,
+      "definition": "Loại widget có đối tượng State đi kèm để giữ dữ liệu thay đổi theo thời gian, như ô nhập hay dịch vụ đang chọn. StatelessWidget thì không giữ state."
+    },
+    {
+      "id": "notifier",
+      "use": "Notifier",
+      "keepEnglish": true,
+      "aliases": [
+        "AsyncNotifier"
+      ],
+      "caseSensitive": true,
+      "glossary": true,
+      "definition": "Lớp của Riverpod giữ state và các hàm làm đổi state. AsyncNotifier là bản dành cho state tải bất đồng bộ, tự có sẵn trạng thái đang tải, có dữ liệu hoặc lỗi."
+    },
+    {
+      "id": "bundle-id",
+      "use": "bundle ID",
+      "keepEnglish": true,
+      "aliases": [
+        "application ID",
+        "applicationId"
+      ],
+      "glossary": true,
+      "definition": "Mã định danh duy nhất của app trên store, dạng com.congty.tenapp. iOS gọi là bundle ID, Android gọi là application ID."
+    },
+    {
+      "id": "isolate",
+      "use": "isolate",
+      "keepEnglish": true,
+      "aliases": [
+        "isolates"
+      ],
+      "glossary": true,
+      "definition": "Luồng chạy Dart có bộ nhớ riêng, không chia sẻ biến với isolate khác mà chỉ gửi tin nhắn qua lại. Dùng để chạy việc nặng ngoài isolate giao diện cho khỏi giật."
+    },
+    {
+      "id": "testflight",
+      "use": "TestFlight",
+      "keepEnglish": true,
+      "glossary": true,
+      "definition": "Dịch vụ của Apple để phát bản beta app iOS cho tester qua lời mời, trước khi phát hành lên App Store."
+    },
+    {
+      "id": "websocket",
+      "use": "WebSocket",
+      "keepEnglish": true,
+      "glossary": true,
+      "definition": "Kết nối hai chiều giữ mở giữa app và server, cho server đẩy dữ liệu ngay khi có, như vị trí tài xế, không cần app hỏi liên tục."
+    },
+    {
+      "id": "secure-storage",
+      "use": "secure storage",
+      "keepEnglish": true,
+      "aliases": [
+        "flutter_secure_storage"
+      ],
+      "glossary": true,
+      "definition": "Nơi lưu dữ liệu nhạy cảm như token trên máy, được mã hóa nhờ Keychain của iOS và Keystore của Android, thay cho lưu văn bản thường."
+    },
+    {
+      "id": "otp",
+      "use": "OTP",
+      "keepEnglish": true,
+      "aliases": [
+        "one-time password"
+      ],
+      "caseSensitive": true,
+      "glossary": true,
+      "definition": "Mã dùng một lần, thường gửi qua SMS, để xác nhận người dùng khi đăng nhập thay cho mật khẩu cố định. Hết hạn nhanh và chỉ dùng được một lần."
+    },
+    {
+      "id": "aab",
+      "use": "AAB",
+      "keepEnglish": true,
+      "aliases": [
+        "Android App Bundle"
+      ],
+      "caseSensitive": true,
+      "glossary": true,
+      "definition": "Định dạng gói app Android để đưa lên Google Play. Play dựa trên đó tạo APK tối ưu cho từng loại máy nên bản tải về nhỏ hơn."
+    },
+    {
+      "id": "fastlane",
+      "use": "fastlane",
+      "keepEnglish": true,
+      "glossary": true,
+      "definition": "Bộ công cụ dòng lệnh tự động hóa build, ký, tải app lên TestFlight hay Google Play, thay cho thao tác tay lặp lại."
+    },
+    {
+      "id": "app-store-connect",
+      "use": "App Store Connect",
+      "keepEnglish": true,
+      "glossary": true,
+      "definition": "Cổng web của Apple để quản lý app: tải bản build, điền metadata, khai privacy label, gửi duyệt và phát hành lên App Store."
+    },
+    {
+      "id": "inherited-widget",
+      "use": "InheritedWidget",
+      "keepEnglish": true,
+      "glossary": true,
+      "definition": "Widget của Flutter để chia sẻ dữ liệu xuống mọi widget con mà không phải truyền qua từng tầng. Nền tảng của Theme, Provider và nhiều cơ chế khác."
+    },
+    {
+      "id": "change-notifier",
+      "use": "ChangeNotifier",
+      "keepEnglish": true,
+      "glossary": true,
+      "definition": "Lớp có sẵn của Flutter giữ state và gọi notifyListeners để báo các widget đang nghe, giúp chúng build lại khi dữ liệu đổi."
+    },
+    {
+      "id": "go-router",
+      "use": "go_router",
+      "keepEnglish": true,
+      "aliases": [
+        "GoRouter"
+      ],
+      "glossary": true,
+      "definition": "Thư viện điều hướng cho Flutter theo kiểu khai báo đường dẫn, hỗ trợ deep link, màn hình lồng nhau và guard chặn khi chưa đăng nhập."
+    },
+    {
+      "id": "code-generation",
+      "use": "code generation",
+      "keepEnglish": true,
+      "aliases": [
+        "build_runner",
+        "freezed"
+      ],
+      "glossary": true,
+      "definition": "Cách để công cụ như build_runner sinh sẵn code lặp lại (parse JSON, lớp bất biến, provider) từ chú thích, thay cho viết tay dễ sai."
+    },
+    {
+      "id": "refresh-token",
+      "use": "refresh token",
+      "keepEnglish": true,
+      "glossary": true,
+      "definition": "Token sống lâu dùng để xin access token mới khi token cũ hết hạn, giúp người dùng khỏi đăng nhập lại. Phải lưu cẩn thận vì lộ là mất phiên."
+    },
+    {
+      "id": "golden-test",
+      "use": "golden test",
+      "keepEnglish": true,
+      "aliases": [
+        "golden file"
+      ],
+      "glossary": true,
+      "definition": "Test so ảnh chụp giao diện hiện tại với ảnh mẫu đã duyệt (golden file). Ảnh lệch là test hỏng, giúp phát hiện thay đổi giao diện ngoài ý muốn."
+    },
+    {
+      "id": "play-console",
+      "use": "Play Console",
+      "keepEnglish": true,
+      "aliases": [
+        "Google Play Console"
+      ],
+      "glossary": true,
+      "definition": "Cổng web của Google để quản lý app Android: tải AAB, chia kênh internal, closed, open, production, theo dõi duyệt và phát hành."
+    },
+    {
+      "id": "apns",
+      "use": "APNs",
+      "keepEnglish": true,
+      "aliases": [
+        "Apple Push Notification service"
+      ],
+      "caseSensitive": true,
+      "glossary": true,
+      "definition": "Dịch vụ thông báo đẩy của Apple. Mọi thông báo đến iPhone đều đi qua APNs, kể cả khi gửi bằng FCM."
+    },
+    {
+      "id": "hot-reload",
+      "use": "hot reload",
+      "keepEnglish": true,
+      "aliases": [
+        "hot restart"
+      ],
+      "glossary": true,
+      "definition": "Tính năng của Flutter nạp lại code vừa sửa vào app đang chạy mà không khởi động lại, nên thấy thay đổi giao diện gần như ngay. Hot restart thì chạy lại app và mất state."
+    },
+    {
+      "id": "null-safety",
+      "use": "null safety",
+      "keepEnglish": true,
+      "glossary": true,
+      "definition": "Cơ chế của Dart tách kiểu có thể null (String?) khỏi kiểu không bao giờ null (String), để lỗi dùng nhầm giá trị null bị bắt ngay lúc biên dịch."
+    },
+    {
+      "id": "provisioning-profile",
+      "use": "provisioning profile",
+      "keepEnglish": true,
+      "glossary": true,
+      "definition": "Tệp của Apple gắn app (bundle ID), certificate ký và danh sách thiết bị hoặc quyền được phép. iOS dùng nó để quyết định app nào được cài và chạy."
+    },
+    {
+      "id": "staged-rollout",
+      "use": "staged rollout",
+      "keepEnglish": true,
+      "aliases": [
+        "phased release"
+      ],
+      "glossary": true,
+      "definition": "Cách phát hành bản mới cho một tỉ lệ người dùng trước rồi tăng dần. Nếu có lỗi nghiêm trọng thì dừng sớm. App Store gọi là phased release."
+    },
+    {
+      "id": "platform-channel",
+      "use": "platform channel",
+      "keepEnglish": true,
+      "glossary": true,
+      "definition": "Kênh gửi tin nhắn giữa code Dart và code native của Android hoặc iOS, dùng khi cần tính năng hệ điều hành mà plugin chưa có."
+    },
+    {
+      "id": "eta",
+      "use": "ETA",
+      "english": "Estimated Time of Arrival",
+      "caseSensitive": true,
+      "glossary": true,
+      "definition": "Thời gian dự kiến để xe tới điểm đón hoặc điểm đến, tính từ đường đi và tốc độ ước lượng. Hệ thống ghép chuyến dùng ETA để so sánh các tài xế và chọn người đón khách nhanh nhất."
+    },
+    {
+      "id": "dijkstra",
+      "use": "Dijkstra",
+      "keepEnglish": true,
+      "aliases": [
+        "thuật toán Dijkstra"
+      ],
+      "glossary": true,
+      "definition": "Thuật toán tìm đường ngắn nhất trên đồ thị có trọng số không âm: mở rộng dần từ nút xuất phát, luôn xử lý nút có chi phí nhỏ nhất chưa chốt. Là nền cho định tuyến trên bản đồ đường bộ."
+    },
+    {
+      "id": "a-star",
+      "use": "A*",
+      "keepEnglish": true,
+      "aliases": [
+        "A-star"
+      ],
+      "caseSensitive": true,
+      "glossary": true,
+      "definition": "Biến thể của Dijkstra dùng hàm heuristic ước lượng chi phí còn lại tới đích để ưu tiên nút hứa hẹn, nên duyệt ít nút hơn. Kết quả vẫn đúng nếu heuristic không vượt chi phí thật."
+    },
+    {
+      "id": "map-matching",
+      "use": "bám đường",
+      "english": "map matching",
+      "aliases": [
+        "map-matching"
+      ],
+      "glossary": true,
+      "definition": "Bước gán chuỗi điểm GPS nhiễu của một xe vào đoạn đường thật trên bản đồ, để biết xe đang ở đường nào và đã đi được bao xa dọc tuyến."
+    },
+    {
+      "id": "haversine",
+      "use": "haversine",
+      "keepEnglish": true,
+      "aliases": [
+        "công thức haversine"
+      ],
+      "glossary": true,
+      "definition": "Công thức tính khoảng cách chim bay giữa hai toạ độ kinh độ - vĩ độ trên mặt cầu, dựa trên cung tròn lớn. Chính xác hơn phép xấp xỉ phẳng nhưng tốn tính toán hơn."
+    },
+    {
+      "id": "equirectangular",
+      "use": "equirectangular",
+      "keepEnglish": true,
+      "aliases": [
+        "xấp xỉ equirectangular"
+      ],
+      "glossary": true,
+      "definition": "Phép xấp xỉ khoảng cách coi vùng nhỏ như mặt phẳng, nhân chênh lệch kinh độ với cos của vĩ độ. Rất rẻ và đủ chính xác ở cự ly ngắn trong một thành phố."
+    },
+    {
+      "id": "detour-factor",
+      "use": "hệ số vòng",
+      "english": "detour factor",
+      "aliases": [
+        "hệ số đường vòng"
+      ],
+      "glossary": true,
+      "definition": "Tỉ số giữa quãng đường đi thật trên đường bộ và khoảng cách chim bay giữa hai điểm. Dùng để ước lượng nhanh quãng đường khi chưa chạy định tuyến, ví dụ làm phương án lùi."
+    },
+    {
+      "id": "wgs84",
+      "use": "WGS84",
+      "english": "World Geodetic System 1984",
+      "caseSensitive": true,
+      "glossary": true,
+      "definition": "Hệ toạ độ toàn cầu GPS và hầu hết dịch vụ bản đồ dùng, biểu diễn vị trí bằng vĩ độ và kinh độ theo độ. Khác với hệ toạ độ phẳng tính bằng mét."
+    },
+    {
+      "id": "bbox",
+      "use": "bbox",
+      "english": "bounding box",
+      "aliases": [
+        "khung bao"
+      ],
+      "caseSensitive": true,
+      "glossary": true,
+      "definition": "Hình chữ nhật nhỏ nhất, theo kinh độ và vĩ độ, bao trọn một vùng hoặc một đối tượng. Dùng để cắt dữ liệu bản đồ về khu vực cần xử lý, ví dụ khung TP.HCM."
+    },
+    {
+      "id": "openstreetmap",
+      "use": "OpenStreetMap",
+      "keepEnglish": true,
+      "aliases": [
+        "OSM"
+      ],
+      "caseSensitive": true,
+      "glossary": true,
+      "definition": "Bản đồ thế giới mở do cộng đồng đóng góp, dữ liệu tải về tự do theo giấy phép ODbL. Là nguồn dữ liệu đường bộ để dựng đồ thị định tuyến."
+    },
+    {
+      "id": "osm-pbf",
+      "use": "PBF",
+      "english": "Protocolbuffer Binary Format",
+      "aliases": [
+        "OSM PBF"
+      ],
+      "caseSensitive": true,
+      "glossary": true,
+      "definition": "Định dạng nhị phân gọn của dữ liệu OpenStreetMap, nhỏ và đọc nhanh hơn XML. Các công cụ định tuyến thường nạp tệp PBF để dựng đồ thị đường bộ."
+    },
+    {
+      "id": "odbl",
+      "use": "ODbL",
+      "english": "Open Database License",
+      "caseSensitive": true,
+      "glossary": true,
+      "definition": "Giấy phép dữ liệu mở của OpenStreetMap: được dùng và chỉnh sửa tự do nhưng phải ghi nguồn và chia sẻ lại dữ liệu dẫn xuất theo cùng điều kiện."
+    },
+    {
+      "id": "csr",
+      "use": "CSR",
+      "english": "Compressed Sparse Row",
+      "caseSensitive": true,
+      "glossary": true,
+      "definition": "Cách lưu đồ thị bằng vài mảng liền nhau: một mảng vị trí bắt đầu danh sách cạnh của mỗi nút và một mảng đích của các cạnh. Tiết kiệm bộ nhớ, duyệt nhanh nhờ truy cập liên tục."
+    },
+    {
+      "id": "r-tree",
+      "use": "R-tree",
+      "keepEnglish": true,
+      "glossary": true,
+      "definition": "Cấu trúc chỉ mục không gian gom các đối tượng hình học vào những hộp bao lồng nhau. Giúp tìm nhanh điểm hoặc đoạn đường gần một toạ độ mà không phải quét toàn bộ dữ liệu."
+    },
+    {
+      "id": "geohash",
+      "use": "geohash",
+      "keepEnglish": true,
+      "glossary": true,
+      "definition": "Cách mã hoá một vị trí thành chuỗi ký tự ngắn, trong đó tiền tố chung nghĩa là hai điểm cùng ô lưới. Dùng để chia bản đồ thành ô và tìm điểm lân cận."
+    },
+    {
+      "id": "k-ring",
+      "use": "k-ring",
+      "keepEnglish": true,
+      "glossary": true,
+      "definition": "Tập các ô H3 nằm trong k bước quanh một ô trung tâm, gồm chính ô đó. Dùng để lấy nhanh các điểm ở vùng lân cận, ví dụ tài xế gần khách."
+    },
+    {
+      "id": "contraction-hierarchies",
+      "use": "contraction hierarchies",
+      "keepEnglish": true,
+      "glossary": true,
+      "definition": "Kỹ thuật tăng tốc tìm đường: tiền xử lý đồ thị bằng cách thêm các cạnh tắt qua nút ít quan trọng, nhờ đó mỗi truy vấn chỉ duyệt rất ít nút. Đổi thời gian dựng trước lấy truy vấn nhanh."
+    },
+    {
+      "id": "alt-landmark",
+      "use": "ALT",
+      "english": "A*, Landmarks, Triangle inequality",
+      "caseSensitive": true,
+      "glossary": true,
+      "definition": "Biến thể của A* chọn trước vài nút mốc (landmark) và tính sẵn khoảng cách tới chúng, rồi dùng bất đẳng thức tam giác làm heuristic. Truy vấn duyệt ít nút hơn, đổi lại tốn công tiền xử lý."
+    },
+    {
+      "id": "edge-based-graph",
+      "use": "đồ thị theo cạnh",
+      "english": "edge-based graph",
+      "aliases": [
+        "Dijkstra theo cạnh"
+      ],
+      "glossary": true,
+      "definition": "Cách mô hình đồ thị mà mỗi trạng thái là một cạnh đường, không phải một nút. Nhờ vậy gán được chi phí cho từng kiểu rẽ và cấm rẽ hay quay đầu, điều Dijkstra theo nút không biểu diễn được."
+    },
+    {
+      "id": "turn-restriction",
+      "use": "cấm rẽ",
+      "english": "turn restriction",
+      "aliases": [
+        "quan hệ cấm rẽ"
+      ],
+      "glossary": true,
+      "definition": "Quy tắc giao thông cấm một hướng rẽ hay quay đầu tại một giao lộ, được lưu thành quan hệ trong dữ liệu OSM. Engine định tuyến phải áp dụng để không đề xuất đường vi phạm."
+    },
+    {
+      "id": "hungarian-algorithm",
+      "use": "Hungarian",
+      "english": "Hungarian algorithm",
+      "aliases": [
+        "thuật toán Hungarian",
+        "Kuhn-Munkres",
+        "Kuhn–Munkres"
+      ],
+      "glossary": true,
+      "definition": "Thuật toán giải bài toán gán: ghép mỗi tài xế với một khách sao cho tổng chi phí nhỏ nhất. Dùng để ghép theo lô thay vì ghép từng yêu cầu một."
+    },
+    {
+      "id": "kalman-filter",
+      "use": "bộ lọc Kalman",
+      "english": "Kalman filter",
+      "aliases": [
+        "Kalman"
+      ],
+      "glossary": true,
+      "definition": "Bộ lọc làm mượt chuỗi điểm đo nhiễu bằng cách kết hợp mô hình chuyển động với từng điểm đo. Dùng để giảm nhiễu GPS, đổi lại có thể làm trễ phản ứng khi xe đổi hướng đột ngột."
+    },
+    {
+      "id": "hmm",
+      "use": "HMM",
+      "english": "Hidden Markov Model",
+      "aliases": [
+        "Viterbi"
+      ],
+      "caseSensitive": true,
+      "glossary": true,
+      "definition": "Mô hình xác suất có trạng thái ẩn; ở bám đường, trạng thái ẩn là đoạn đường xe đang đi, còn điểm GPS là quan sát. Thuật toán Viterbi chọn chuỗi đoạn đường có khả năng cao nhất."
+    },
+    {
+      "id": "geocoding",
+      "use": "geocoding",
+      "keepEnglish": true,
+      "aliases": [
+        "geocode"
+      ],
+      "glossary": true,
+      "definition": "Quá trình đổi địa chỉ dạng chữ thành toạ độ trên bản đồ; chiều ngược lại gọi là reverse geocoding. Địa chỉ Việt Nam khó vì viết tắt, thiếu dấu và nhiều cách gọi."
+    },
+    {
+      "id": "geojson",
+      "use": "GeoJSON",
+      "keepEnglish": true,
+      "glossary": true,
+      "definition": "Định dạng JSON chuẩn để mô tả điểm, đường và vùng trên bản đồ. Xuất kết quả ra GeoJSON rồi mở bằng công cụ như geojson.io giúp nhìn thấy và gỡ lỗi dữ liệu không gian."
+    },
+    {
+      "id": "polyline",
+      "use": "polyline",
+      "keepEnglish": true,
+      "glossary": true,
+      "definition": "Đường gấp khúc gồm chuỗi điểm nối nhau, dùng biểu diễn tuyến đường. Có chuẩn mã hoá polyline nén chuỗi toạ độ thành một chuỗi ký tự ngắn để truyền đi."
+    },
+    {
+      "id": "osrm",
+      "use": "OSRM",
+      "english": "Open Source Routing Machine",
+      "caseSensitive": true,
+      "glossary": true,
+      "definition": "Engine định tuyến mã nguồn mở dùng dữ liệu OpenStreetMap, nổi tiếng tốc độ truy vấn nhanh. Cùng với Valhalla là lựa chọn tự vận hành thay vì trả tiền cho nhà cung cấp bản đồ."
+    },
+    {
+      "id": "dbscan",
+      "use": "DBSCAN",
+      "english": "Density-Based Spatial Clustering of Applications with Noise",
+      "caseSensitive": true,
+      "glossary": true,
+      "definition": "Thuật toán phân cụm theo mật độ: gom các điểm nằm sát nhau thành cụm và coi điểm lẻ là nhiễu. Dùng để tìm những chỗ đón khách hay lặp lại từ lịch sử."
+    },
+    {
+      "id": "hysteresis",
+      "use": "hysteresis",
+      "keepEnglish": true,
+      "glossary": true,
+      "definition": "Kỹ thuật thêm ngưỡng cách biệt trước khi đổi quyết định, để hệ thống không đổi qua đổi lại khi số liệu dao động quanh một mốc. Ví dụ chỉ định tuyến lại khi lệch tuyến vượt ngưỡng."
+    },
+    {
+      "id": "goroutine",
+      "use": "goroutine",
+      "keepEnglish": true,
+      "glossary": true,
+      "definition": "Luồng thực thi rất nhẹ của Go, do runtime quản lý, nên một chương trình có thể chạy hàng chục nghìn goroutine, ví dụ mỗi kết nối một goroutine. Thường giao tiếp qua channel."
+    },
+    {
+      "id": "redis",
+      "use": "Redis",
+      "keepEnglish": true,
+      "glossary": true,
+      "definition": "Kho dữ liệu trong bộ nhớ, truy cập rất nhanh, hay dùng làm cache hoặc lưu trạng thái mới nhất như vị trí hiện tại của tài xế."
+    },
+    {
+      "id": "t-test",
+      "use": "t-test",
+      "english": "Student's t-test",
+      "aliases": [
+        "kiểm định t"
+      ],
+      "glossary": true,
+      "definition": "Phép kiểm định thống kê so sánh trung bình của hai nhóm; bản ghép cặp so từng cặp đo cùng điều kiện. Dùng để biết chênh lệch giữa hai phương án là thật hay chỉ do ngẫu nhiên."
+    },
+    {
+      "id": "ground-truth",
+      "use": "ground truth",
+      "keepEnglish": true,
+      "glossary": true,
+      "definition": "Dữ liệu đúng đã biết trước, dùng làm chuẩn để đo độ chính xác của thuật toán. Ví dụ simulator biết vị trí thật rồi thêm nhiễu để đánh giá bộ lọc."
+    },
+    {
+      "id": "deadhead",
+      "use": "deadhead",
+      "english": "km rỗng",
+      "glossary": true,
+      "definition": "Quãng đường xe chạy mà không có khách, như lúc đi đón. Giảm km rỗng giúp tài xế bớt tốn xăng và thời gian, là một chỉ số cốt lõi khi tối ưu ghép chuyến."
+    },
+    {
+      "id": "type-hint",
+      "use": "type hint",
+      "keepEnglish": true,
+      "aliases": [
+        "type hints",
+        "chú thích kiểu"
+      ],
+      "glossary": true,
+      "definition": "Chú thích kiểu dữ liệu viết ngay trong mã Python, như distance_km: Decimal. Python không bắt buộc khi chạy, nhưng công cụ như mypy và trình soạn thảo dùng nó để phát hiện gắn nhầm kiểu từ sớm."
+    },
+    {
+      "id": "mypy",
+      "use": "mypy",
+      "keepEnglish": true,
+      "glossary": true,
+      "definition": "Công cụ kiểm tra kiểu tĩnh cho Python: đọc type hint và báo lỗi gắn sai kiểu ngay khi phân tích mã, không cần chạy chương trình."
+    },
+    {
+      "id": "pytest",
+      "use": "pytest",
+      "keepEnglish": true,
+      "glossary": true,
+      "definition": "Framework kiểm thử phổ biến nhất của Python. Test viết như hàm thường với assert thường, pytest tự tìm, chạy và báo chi tiết chỗ sai."
+    },
+    {
+      "id": "decimal",
+      "use": "Decimal",
+      "keepEnglish": true,
+      "caseSensitive": true,
+      "glossary": true,
+      "definition": "Kiểu số thập phân của thư viện chuẩn Python, tính chính xác theo cơ số 10. Dùng cho tiền và khoảng cách thay float để tránh sai số kiểu 0,1 + 0,2 khác 0,3."
+    },
+    {
+      "id": "dataclass",
+      "use": "dataclass",
+      "keepEnglish": true,
+      "aliases": [
+        "dataclasses",
+        "@dataclass"
+      ],
+      "glossary": true,
+      "definition": "Decorator của Python tự sinh __init__, __repr__ và phép so sánh cho class chỉ chứa dữ liệu, nên khỏi viết tay. Thêm frozen=True thì đối tượng bất biến."
+    },
+    {
+      "id": "context-manager",
+      "use": "context manager",
+      "keepEnglish": true,
+      "aliases": [
+        "context managers"
+      ],
+      "glossary": true,
+      "definition": "Đối tượng dùng với câu lệnh with để bọc một khối lệnh: tự chuẩn bị tài nguyên khi vào và dọn dẹp khi ra, kể cả khi khối lệnh ném lỗi, như đóng file hay đóng phiên."
+    },
+    {
+      "id": "iterator",
+      "use": "iterator",
+      "keepEnglish": true,
+      "aliases": [
+        "iterators"
+      ],
+      "glossary": true,
+      "definition": "Đối tượng trả về từng phần tử một qua next() cho tới khi hết. Vòng lặp for trong Python chạy trên iterator, còn generator là cách viết iterator ngắn gọn."
+    },
+    {
+      "id": "list-comprehension",
+      "use": "comprehension",
+      "keepEnglish": true,
+      "aliases": [
+        "list comprehension",
+        "comprehensions"
+      ],
+      "glossary": true,
+      "definition": "Cú pháp gọn để dựng list, dict hay set từ một dãy có lọc hoặc biến đổi, ví dụ [t.id for t in trips if t.fare > 0], thay cho vòng for kèm append."
+    },
+    {
+      "id": "asyncio",
+      "use": "asyncio",
+      "keepEnglish": true,
+      "glossary": true,
+      "definition": "Thư viện chuẩn của Python để viết chương trình bất đồng bộ trên một luồng: nhiều việc chờ I/O chạy xen kẽ nhờ async/await và event loop."
+    },
+    {
+      "id": "coroutine",
+      "use": "coroutine",
+      "keepEnglish": true,
+      "aliases": [
+        "coroutines"
+      ],
+      "glossary": true,
+      "definition": "Kết quả khi gọi hàm async def: một đối tượng đại diện cho việc chưa chạy, chỉ thực thi khi có await hoặc được đưa vào event loop."
+    },
+    {
+      "id": "event-loop",
+      "use": "event loop",
+      "keepEnglish": true,
+      "aliases": [
+        "vòng lặp sự kiện"
+      ],
+      "glossary": true,
+      "definition": "Vòng lặp trung tâm của asyncio, lần lượt chạy các coroutine sẵn sàng và chuyển sang việc khác khi một việc đang chờ I/O. Lời gọi chặn làm cả vòng lặp đứng."
+    },
+    {
+      "id": "gil",
+      "use": "GIL",
+      "english": "Global Interpreter Lock",
+      "caseSensitive": true,
+      "glossary": true,
+      "definition": "Khoá toàn cục của CPython, mỗi lúc chỉ cho một thread chạy bytecode Python. Vì vậy thread chỉ tăng tốc việc chờ I/O, không tăng tốc tính toán CPU thuần Python."
+    },
+    {
+      "id": "semaphore",
+      "use": "semaphore",
+      "keepEnglish": true,
+      "aliases": [
+        "semaphores"
+      ],
+      "glossary": true,
+      "definition": "Bộ đếm giới hạn số tác vụ được chạy đồng thời vào một tài nguyên, ví dụ chỉ cho 5 lời gọi cùng lúc tới dịch vụ ngoài; việc thứ sáu phải chờ."
+    },
+    {
+      "id": "thread-pool",
+      "use": "thread pool",
+      "keepEnglish": true,
+      "aliases": [
+        "thread pools"
+      ],
+      "glossary": true,
+      "definition": "Nhóm thread dựng sẵn để nhận việc theo lượt. Trong asyncio, to_thread đẩy hàm chặn sang đây để event loop vẫn rảnh."
+    },
+    {
+      "id": "traceback",
+      "use": "traceback",
+      "keepEnglish": true,
+      "aliases": [
+        "tracebacks"
+      ],
+      "glossary": true,
+      "definition": "Bản ghi chuỗi lời gọi hàm dẫn tới một ngoại lệ, in ra khi chương trình lỗi. Đọc từ dưới lên: dòng cuối nêu loại lỗi, các dòng trên chỉ ra nơi nó phát sinh."
+    },
+    {
+      "id": "middleware",
+      "use": "middleware",
+      "keepEnglish": true,
+      "glossary": true,
+      "definition": "Lớp mã chạy quanh mọi request của ứng dụng web, trước và sau handler, dùng cho việc chung như gắn request id, ghi log hay đo thời gian."
+    },
+    {
+      "id": "problem-details",
+      "use": "Problem Details",
+      "keepEnglish": true,
+      "aliases": [
+        "ProblemDetails",
+        "application/problem+json"
+      ],
+      "glossary": true,
+      "definition": "Định dạng chuẩn RFC 9457 để API trả lỗi dưới dạng JSON thống nhất với các trường như type, title, status, detail, giúp client xử lý lỗi theo mã thay vì đoán chuỗi."
+    },
+    {
+      "id": "asgi",
+      "use": "ASGI",
+      "english": "Asynchronous Server Gateway Interface",
+      "caseSensitive": true,
+      "glossary": true,
+      "definition": "Giao diện chuẩn giữa máy chủ web bất đồng bộ như uvicorn và ứng dụng Python như FastAPI. Nhờ nó, test có thể gọi thẳng vào app mà không mở cổng mạng."
+    },
+    {
+      "id": "orm",
+      "use": "ORM",
+      "english": "Object-Relational Mapping",
+      "caseSensitive": true,
+      "glossary": true,
+      "definition": "Lớp ánh xạ giữa class trong mã và bảng trong cơ sở dữ liệu, để đọc ghi bản ghi bằng đối tượng thay vì tự viết từng câu SQL. SQLAlchemy ORM là ví dụ."
+    },
+    {
+      "id": "unit-of-work",
+      "use": "unit of work",
+      "keepEnglish": true,
+      "aliases": [
+        "đơn vị làm việc",
+        "UoW"
+      ],
+      "glossary": true,
+      "definition": "Mẫu thiết kế gom nhiều thay đổi dữ liệu vào một giao dịch duy nhất: theo dõi đối tượng nào đổi, rồi commit tất cả cùng lúc hoặc rollback tất cả."
+    },
+    {
+      "id": "parquet",
+      "use": "Parquet",
+      "keepEnglish": true,
+      "glossary": true,
+      "definition": "Định dạng tệp lưu dữ liệu theo cột và có nén. Đọc riêng vài cột rất nhanh, nhẹ hơn CSV nhiều, nên hợp với phân tích dữ liệu lớn."
+    },
+    {
+      "id": "polars",
+      "use": "Polars",
+      "keepEnglish": true,
+      "caseSensitive": true,
+      "glossary": true,
+      "definition": "Thư viện xử lý bảng dữ liệu nhanh, viết bằng Rust, có chế độ lazy tối ưu truy vấn. Dùng thay hoặc song song với pandas khi dữ liệu lớn."
+    },
+    {
+      "id": "embedding",
+      "use": "embedding",
+      "keepEnglish": true,
+      "aliases": [
+        "embeddings"
+      ],
+      "glossary": true,
+      "definition": "Vector số do mô hình học máy tạo ra để biểu diễn một đối tượng như khuôn mặt. Hai đối tượng giống nhau thì vector nằm gần nhau, nên so sánh được bằng khoảng cách."
+    },
+    {
+      "id": "far-frr",
+      "use": "FAR",
+      "english": "False Accept Rate",
+      "aliases": [
+        "FRR"
+      ],
+      "caseSensitive": true,
+      "glossary": true,
+      "definition": "Hai tỷ lệ lỗi của hệ thống so khớp: FAR là tỷ lệ nhận nhầm người lạ thành đúng người, FRR là tỷ lệ từ chối nhầm đúng người. Đổi ngưỡng thì cái này giảm, cái kia tăng."
+    },
+    {
+      "id": "cer-wer",
+      "use": "CER",
+      "english": "Character Error Rate",
+      "aliases": [
+        "WER"
+      ],
+      "caseSensitive": true,
+      "glossary": true,
+      "definition": "Thước đo chất lượng OCR: CER là tỷ lệ ký tự đọc sai, WER là tỷ lệ từ đọc sai so với đáp án. Càng thấp càng tốt."
+    },
+    {
+      "id": "ocr",
+      "use": "OCR",
+      "english": "Optical Character Recognition",
+      "caseSensitive": true,
+      "glossary": true,
+      "definition": "Nhận dạng chữ trong ảnh và chuyển thành văn bản máy đọc được, như đọc số CCCD từ ảnh thẻ."
+    },
+    {
+      "id": "data-leakage",
+      "use": "rò rỉ nhãn",
+      "english": "data leakage",
+      "aliases": [
+        "label leakage"
+      ],
+      "glossary": true,
+      "definition": "Lỗi khi thông tin của đáp án hay của tương lai lọt vào dữ liệu huấn luyện, khiến số đo trông tốt hơn thực tế nhưng mô hình hỏng khi chạy thật."
+    },
+    {
+      "id": "shap",
+      "use": "SHAP",
+      "keepEnglish": true,
+      "caseSensitive": true,
+      "glossary": true,
+      "definition": "Phương pháp giải thích dự đoán của mô hình: tính mỗi đặc trưng đóng góp bao nhiêu vào điểm cho từng trường hợp, từ đó lý giải vì sao một chuyến bị đánh dấu rủi ro."
+    },
+    {
+      "id": "pr-auc",
+      "use": "PR-AUC",
+      "keepEnglish": true,
+      "caseSensitive": true,
+      "glossary": true,
+      "definition": "Diện tích dưới đường precision-recall, thước đo mô hình phân loại. Phù hợp dữ liệu mất cân bằng như gian lận, nơi ROC-AUC dễ cho số quá đẹp."
+    },
+    {
+      "id": "ruff",
+      "use": "ruff",
+      "keepEnglish": true,
+      "glossary": true,
+      "definition": "Công cụ kiểm tra phong cách và lỗi thường gặp (linter) kèm định dạng mã cho Python, viết bằng Rust nên rất nhanh."
+    },
+    {
+      "id": "pydantic",
+      "use": "Pydantic",
+      "keepEnglish": true,
+      "glossary": true,
+      "definition": "Thư viện Python kiểm tra và chuẩn hoá dữ liệu theo khai báo kiểu: nhận dữ liệu thô, trả đối tượng đúng kiểu hoặc báo lỗi có mã rõ ràng. FastAPI dùng nó để kiểm tra request."
+    },
+    {
+      "id": "sqlalchemy",
+      "use": "SQLAlchemy",
+      "keepEnglish": true,
+      "glossary": true,
+      "definition": "Thư viện Python làm việc với cơ sở dữ liệu quan hệ, gồm lớp Core viết truy vấn và lớp ORM ánh xạ class sang bảng, kèm Session quản lý giao dịch."
+    },
+    {
+      "id": "ledger",
+      "use": "sổ cái",
+      "english": "ledger",
+      "glossary": true,
+      "definition": "Nơi ghi lại mọi bút toán tài chính theo thứ tự thời gian. Số dư không lưu rời mà tính ra từ các bút toán, và bút toán đã ghi thì không sửa."
+    },
+    {
+      "id": "cargo",
+      "use": "Cargo",
+      "keepEnglish": true,
+      "glossary": true,
+      "definition": "Công cụ chính của Rust để tạo dự án, quản lý thư viện phụ thuộc, build, chạy test và phát hành. Cấu hình nằm ở Cargo.toml."
+    },
+    {
+      "id": "journal-entry",
+      "use": "bút toán",
+      "english": "journal entry",
+      "glossary": true,
+      "definition": "Một lần ghi sổ cho một sự kiện tiền, gồm nhiều posting cộng lại bằng 0. Ví dụ: khách trả cước chuyến thì một bút toán giảm ví khách, tăng khoản chờ về từ cổng thanh toán."
+    },
+    {
+      "id": "posting",
+      "use": "posting",
+      "keepEnglish": true,
+      "aliases": [
+        "postings"
+      ],
+      "caseSensitive": true,
+      "glossary": true,
+      "definition": "Một dòng trong bút toán: ghi một số tiền cộng hoặc trừ vào một tài khoản cụ thể. Các posting của cùng bút toán phải có tổng bằng 0."
+    },
+    {
+      "id": "trait",
+      "use": "trait",
+      "keepEnglish": true,
+      "aliases": [
+        "traits"
+      ],
+      "caseSensitive": true,
+      "glossary": true,
+      "definition": "Tập hành vi mà một kiểu Rust cam kết có, tương tự interface. Hàm generic dùng trait bound để yêu cầu \"kiểu nào có hành vi này đều được\"."
+    },
+    {
+      "id": "crate",
+      "use": "crate",
+      "keepEnglish": true,
+      "aliases": [
+        "crates"
+      ],
+      "caseSensitive": true,
+      "glossary": true,
+      "definition": "Đơn vị biên dịch và đóng gói của Rust: một thư viện hoặc một chương trình chạy được. Cargo tải và quản lý các crate phụ thuộc, thường lấy từ crates.io."
+    },
+    {
+      "id": "append-only",
+      "use": "append-only",
+      "keepEnglish": true,
+      "aliases": [
+        "chỉ được thêm vào"
+      ],
+      "glossary": true,
+      "definition": "Kiểu lưu trữ chỉ cho thêm bản ghi mới, không UPDATE hay DELETE bản cũ. Lịch sử không bị sửa lặng lẽ nên dễ kiểm toán; sai sót được sửa bằng bản ghi mới."
+    },
+    {
+      "id": "tokio",
+      "use": "tokio",
+      "keepEnglish": true,
+      "glossary": true,
+      "definition": "Thư viện chạy bất đồng bộ phổ biến nhất của Rust: runtime, task, timer, kênh và I/O mạng. Hầu hết service async như axum, sqlx đều chạy trên nó."
+    },
+    {
+      "id": "sqlx",
+      "use": "sqlx",
+      "keepEnglish": true,
+      "glossary": true,
+      "definition": "Thư viện truy vấn SQL bất đồng bộ cho Rust, hỗ trợ PostgreSQL. Có pool kết nối, migration và macro kiểm tra câu SQL lúc biên dịch, không phải ORM."
+    },
+    {
+      "id": "kafka",
+      "use": "Kafka",
+      "keepEnglish": true,
+      "aliases": [
+        "Apache Kafka"
+      ],
+      "glossary": true,
+      "definition": "Nền tảng truyền sự kiện phân tán: producer ghi thông điệp vào topic, consumer đọc theo thứ tự trong từng partition. Thường dùng để các service giao tiếp bất đồng bộ."
+    },
+    {
+      "id": "reversal-entry",
+      "use": "bút toán đảo",
+      "english": "reversal entry",
+      "aliases": [
+        "reversal",
+        "bút toán đảo ngược"
+      ],
+      "glossary": true,
+      "definition": "Bút toán mới đảo dấu các posting của bút toán sai và trỏ về bản gốc. Sổ cái chỉ thêm vào, nên sửa sai bằng cách ghi thêm chứ không UPDATE hay xoá dòng cũ."
+    },
+    {
+      "id": "panic",
+      "use": "panic",
+      "keepEnglish": true,
+      "aliases": [
+        "panic!"
+      ],
+      "caseSensitive": true,
+      "glossary": true,
+      "definition": "Lỗi không thể khắc phục khiến chương trình Rust dừng ngay (mặc định thoát mã 101). Dành cho bug vi phạm giả định, còn lỗi nghiệp vụ dự kiến thì trả Err."
+    },
+    {
+      "id": "reconciliation",
+      "use": "đối soát",
+      "english": "reconciliation",
+      "glossary": true,
+      "definition": "So khớp từng giao dịch trong sổ của mình với sao kê của bên thứ ba để tìm giao dịch lệch số tiền, thiếu bên nào hoặc trùng, rồi lập báo cáo xử lý."
+    },
+    {
+      "id": "serde",
+      "use": "serde",
+      "keepEnglish": true,
+      "glossary": true,
+      "definition": "Thư viện chuẩn để chuyển struct Rust sang và từ JSON hoặc định dạng khác. Chỉ cần derive Serialize và Deserialize, không phải viết code chuyển tay."
+    },
+    {
+      "id": "grpc",
+      "use": "gRPC",
+      "keepEnglish": true,
+      "caseSensitive": true,
+      "glossary": true,
+      "definition": "Giao thức gọi hàm từ xa chạy trên HTTP/2, message dạng protobuf. Hai service khác ngôn ngữ như Rust và C# dùng chung một file .proto để định nghĩa hợp đồng."
+    },
+    {
+      "id": "clippy",
+      "use": "clippy",
+      "keepEnglish": true,
+      "glossary": true,
+      "definition": "Bộ lint chính thức của Rust, chạy bằng cargo clippy. Nó chỉ ra đoạn code đúng nhưng dễ lỗi hoặc chưa theo thói quen chuẩn của ngôn ngữ."
+    },
+    {
+      "id": "double-entry",
+      "use": "bút toán kép",
+      "english": "double-entry bookkeeping",
+      "aliases": [
+        "double-entry",
+        "ghi sổ kép"
+      ],
+      "glossary": true,
+      "definition": "Cách ghi sổ mà mỗi giao dịch được ghi ít nhất hai dòng ngược chiều, tổng các dòng luôn bằng 0. Nhờ vậy tiền không tự sinh ra hay mất đi mà chỉ chuyển giữa các tài khoản."
+    },
+    {
+      "id": "closure",
+      "use": "closure",
+      "keepEnglish": true,
+      "aliases": [
+        "closures"
+      ],
+      "caseSensitive": true,
+      "glossary": true,
+      "definition": "Hàm ẩn danh viết nhanh tại chỗ, có thể dùng cả biến ở phạm vi bao quanh. Thường truyền cho map, filter hoặc tokio::spawn."
+    },
+    {
+      "id": "axum",
+      "use": "axum",
+      "keepEnglish": true,
+      "glossary": true,
+      "definition": "Framework web của Rust xây trên tokio và tower. Route chỉ về handler async; extractor lấy dữ liệu từ request như Path, Json, State."
+    },
+    {
+      "id": "chargeback",
+      "use": "chargeback",
+      "keepEnglish": true,
+      "glossary": true,
+      "definition": "Khoản tiền bị ngân hàng phát hành thẻ đòi lại sau khi chủ thẻ khiếu nại giao dịch. Hệ thống phải ghi nhận và xử lý riêng, khác với hoàn tiền do chính mình chủ động."
+    },
+    {
+      "id": "smart-pointer",
+      "use": "smart pointer",
+      "keepEnglish": true,
+      "aliases": [
+        "smart pointers"
+      ],
+      "glossary": true,
+      "definition": "Kiểu như Box, Rc, Arc giữ con trỏ kèm thêm hành vi: cấp phát heap, đếm số chủ sở hữu, chia sẻ giữa các luồng. Dùng khi một chủ duy nhất không đủ."
+    },
+    {
+      "id": "maker-checker",
+      "use": "maker-checker",
+      "keepEnglish": true,
+      "aliases": [
+        "maker/checker"
+      ],
+      "glossary": true,
+      "definition": "Quy tắc hai người: một người tạo thao tác nhạy cảm (maker), người khác duyệt (checker) thì mới có hiệu lực. Dùng cho việc như hoàn tiền hay bút toán đảo để tránh sai sót và gian lận."
+    },
+    {
+      "id": "webhook",
+      "use": "webhook",
+      "keepEnglish": true,
+      "aliases": [
+        "webhooks"
+      ],
+      "glossary": true,
+      "definition": "Địa chỉ HTTP của ta mà dịch vụ ngoài gọi tới khi có sự kiện, ví dụ PSP báo thanh toán xong. Cần kiểm chữ ký và chịu được việc gọi trễ hoặc trùng."
+    },
+    {
+      "id": "newtype",
+      "use": "newtype",
+      "keepEnglish": true,
+      "aliases": [
+        "newtype pattern"
+      ],
+      "glossary": true,
+      "definition": "Kiểu Rust bọc quanh một kiểu có sẵn, như Money bọc i64 hay AccountId bọc String. Compiler coi chúng là kiểu khác nhau, nên không nhầm tiền với mã tài khoản."
+    },
+    {
+      "id": "unsafe",
+      "use": "unsafe",
+      "keepEnglish": true,
+      "aliases": [
+        "unsafe code"
+      ],
+      "caseSensitive": true,
+      "glossary": true,
+      "definition": "Từ khoá cho phép làm vài việc compiler Rust không kiểm chứng được, như dùng con trỏ thô hay gọi hàm ngoài. Người viết tự chịu trách nhiệm đảm bảo đúng."
+    },
+    {
+      "id": "property-based-testing",
+      "use": "property test",
+      "english": "property-based testing",
+      "aliases": [
+        "property-based test",
+        "proptest"
+      ],
+      "glossary": true,
+      "definition": "Thay vì tự chọn vài input, ta mô tả tính chất luôn đúng (như tổng posting bằng 0) và công cụ sinh hàng trăm input ngẫu nhiên, rồi tự thu nhỏ ca lỗi."
+    },
+    {
+      "id": "openapi",
+      "use": "OpenAPI",
+      "keepEnglish": true,
+      "aliases": [
+        "Swagger"
+      ],
+      "caseSensitive": true,
+      "glossary": true,
+      "definition": "Chuẩn mô tả API HTTP bằng một file JSON hoặc YAML: đường dẫn, tham số, kiểu dữ liệu, mã lỗi. Từ file đó sinh tài liệu và client, hoặc dùng để kiểm hợp đồng."
+    },
+    {
+      "id": "opentelemetry",
+      "use": "OpenTelemetry",
+      "keepEnglish": true,
+      "aliases": [
+        "OTel"
+      ],
+      "glossary": true,
+      "definition": "Bộ chuẩn và SDK mở để thu trace, metric và log từ ứng dụng. Trace đi xuyên nhiều service và ngôn ngữ, nên một yêu cầu có thể theo dõi từ đầu đến cuối."
+    },
+    {
+      "id": "typestate",
+      "use": "typestate",
+      "keepEnglish": true,
+      "aliases": [
+        "typestate pattern"
+      ],
+      "glossary": true,
+      "definition": "Cách mã hoá trạng thái của đối tượng vào kiểu dữ liệu, để thao tác sai trạng thái (như capture trước khi authorize) không biên dịch được thay vì lỗi lúc chạy."
+    },
+    {
+      "id": "protobuf",
+      "use": "protobuf",
+      "english": "Protocol Buffers",
+      "aliases": [
+        "proto3"
+      ],
+      "glossary": true,
+      "definition": "Định dạng dữ liệu nhị phân gọn do Google tạo ra, cấu trúc khai báo trong file .proto rồi sinh code cho nhiều ngôn ngữ. gRPC dùng nó làm định dạng message."
+    },
+    {
+      "id": "borrow-checker",
+      "use": "borrow checker",
+      "keepEnglish": true,
+      "glossary": true,
+      "definition": "Bộ kiểm tra của compiler Rust, đảm bảo tại mỗi thời điểm một giá trị chỉ có nhiều chỗ đọc hoặc đúng một chỗ ghi. Vi phạm thì không biên dịch được."
+    },
+    {
+      "id": "hexagonal-architecture",
+      "use": "hexagonal architecture",
+      "keepEnglish": true,
+      "aliases": [
+        "hexagonal",
+        "ports and adapters",
+        "port và adapter"
+      ],
+      "glossary": true,
+      "definition": "Kiến trúc đặt logic nghiệp vụ ở giữa, giao tiếp ngoài qua các port (trait) và adapter cắm vào như PostgreSQL hay Kafka. Domain không phụ thuộc hạ tầng."
+    },
+    {
+      "id": "psp",
+      "use": "PSP",
+      "english": "payment service provider",
+      "caseSensitive": true,
+      "glossary": true,
+      "definition": "Đơn vị trung gian nhận và xử lý thanh toán cho doanh nghiệp, như cổng thanh toán hay ví điện tử. Hệ thống gửi yêu cầu thu tiền sang PSP rồi đối chiếu kết quả với sao kê."
+    },
+    {
+      "id": "consumer-offset",
+      "use": "commit offset",
+      "english": "consumer offset",
+      "glossary": true,
+      "definition": "Vị trí consumer Kafka đã xử lý tới trong một partition. Commit offset sau khi ghi sổ xong thì sự cố chỉ làm nhận lại thông điệp, không làm mất."
+    },
+    {
+      "id": "write-skew",
+      "use": "write skew",
+      "keepEnglish": true,
+      "aliases": [
+        "write-skew"
+      ],
+      "glossary": true,
+      "definition": "Hai transaction cùng đọc một điều kiện rồi mỗi bên cập nhật một dòng khác nhau, làm vỡ điều kiện chung. Chỉ SERIALIZABLE hoặc khoá phù hợp mới chặn được."
+    },
+    {
+      "id": "hmac",
+      "use": "HMAC",
+      "english": "hash-based message authentication code",
+      "aliases": [
+        "chữ ký HMAC"
+      ],
+      "caseSensitive": true,
+      "glossary": true,
+      "definition": "Chữ ký tạo bằng hàm băm cùng khoá bí mật chung. Bên nhận tính lại trên đúng byte nhận được; khớp thì tin thông điệp đến từ bên giữ khoá và không bị sửa."
+    },
+    {
+      "id": "test-level",
+      "use": "test level",
+      "keepEnglish": true,
+      "aliases": [
+        "test levels"
+      ],
+      "glossary": true,
+      "definition": "Nhóm hoạt động kiểm thử được tổ chức và quản lý cùng nhau, ứng với một giai đoạn phát triển. Có bốn mức: component, integration, system và acceptance."
+    },
+    {
+      "id": "test-type",
+      "use": "test type",
+      "keepEnglish": true,
+      "aliases": [
+        "test types",
+        "loại kiểm thử"
+      ],
+      "glossary": true,
+      "definition": "Nhóm hoạt động kiểm thử nhắm vào một đặc tính chất lượng cần kiểm, như chức năng, phi chức năng, cấu trúc hay thay đổi. Một test type có thể chạy ở nhiều test level."
+    },
+    {
+      "id": "defect",
+      "use": "defect",
+      "keepEnglish": true,
+      "aliases": [
+        "defects"
+      ],
+      "glossary": true,
+      "definition": "Chỗ sai nằm trong sản phẩm, như code, đặc tả hay tài liệu, khiến nó làm trái yêu cầu. Defect có thể nằm yên đến khi gây ra failure hoặc được review tìm thấy."
+    },
+    {
+      "id": "vitest",
+      "use": "Vitest",
+      "keepEnglish": true,
+      "glossary": true,
+      "definition": "Framework chạy test cho JavaScript và TypeScript, chạy nhanh, dùng để viết unit test và đo coverage trong các bài thực hành."
+    },
+    {
+      "id": "test-technique",
+      "use": "test technique",
+      "keepEnglish": true,
+      "aliases": [
+        "test techniques",
+        "kỹ thuật kiểm thử",
+        "test design technique"
+      ],
+      "glossary": true,
+      "definition": "Cách có hệ thống để chọn đầu vào và kết quả mong đợi khi thiết kế test case. Gồm nhóm black-box, white-box và experience-based."
+    },
+    {
+      "id": "coverage",
+      "use": "coverage",
+      "english": "độ phủ",
+      "aliases": [
+        "độ bao phủ",
+        "code coverage",
+        "test coverage"
+      ],
+      "glossary": true,
+      "definition": "Tỷ lệ phần tử đã được test chạm tới, như câu lệnh, nhánh hay yêu cầu, trên tổng số phần tử. Coverage cao cho biết test chạm tới đâu, chưa chứng minh hết lỗi."
+    },
+    {
+      "id": "test-basis",
+      "use": "test basis",
+      "keepEnglish": true,
+      "glossary": true,
+      "definition": "Tài liệu và thông tin làm gốc để suy ra test case, như đặc tả, user story, quy tắc nghiệp vụ hay chính code. Đổi test basis thì test case phải xem lại."
+    },
+    {
+      "id": "ci",
+      "use": "CI",
+      "english": "continuous integration",
+      "caseSensitive": true,
+      "glossary": true,
+      "definition": "Tích hợp liên tục: mỗi lần đẩy code, hệ thống tự build và chạy test để phát hiện lỗi sớm."
+    },
+    {
+      "id": "black-box-testing",
+      "use": "black-box",
+      "keepEnglish": true,
+      "aliases": [
+        "black-box test",
+        "black-box testing",
+        "kiểm thử hộp đen",
+        "hộp đen"
+      ],
+      "glossary": true,
+      "definition": "Cách thiết kế test chỉ dựa trên hành vi mô tả trong đặc tả, không xem cấu trúc bên trong. Ví dụ: phân vùng tương đương, giá trị biên, decision table."
+    },
+    {
+      "id": "component-testing",
+      "use": "component testing",
+      "english": "kiểm thử thành phần",
+      "aliases": [
+        "unit testing",
+        "component test",
+        "unit test"
+      ],
+      "glossary": true,
+      "definition": "Kiểm thử từng thành phần nhỏ, như một hàm hay module, tách riêng khỏi phần còn lại. Thường do developer viết và chạy rất nhanh."
+    },
+    {
+      "id": "system-testing",
+      "use": "system testing",
+      "keepEnglish": true,
+      "aliases": [
+        "system test"
+      ],
+      "glossary": true,
+      "definition": "Kiểm thử cả hệ thống hoàn chỉnh trong môi trường gần vận hành, bao gồm luồng nghiệp vụ đầu cuối lẫn các đặc tính phi chức năng."
+    },
+    {
+      "id": "static-testing",
+      "use": "static testing",
+      "english": "kiểm thử tĩnh",
+      "glossary": true,
+      "definition": "Kiểm tra sản phẩm mà không chạy phần mềm, như review đặc tả hay phân tích code. Static testing tìm trực tiếp defect, không cần chờ failure."
+    },
+    {
+      "id": "sit",
+      "use": "SIT",
+      "english": "system integration testing",
+      "caseSensitive": true,
+      "glossary": true,
+      "definition": "Kiểm thử cách hệ thống phối hợp với hệ thống bên ngoài như cổng thanh toán hay dịch vụ bản đồ, thường trên môi trường thật của đối tác hoặc sandbox."
+    },
+    {
+      "id": "test-condition",
+      "use": "test condition",
+      "keepEnglish": true,
+      "aliases": [
+        "test conditions"
+      ],
+      "glossary": true,
+      "definition": "Một điều kiện hoặc sự kiện có thể kiểm được trong hệ thống, rút ra từ test basis. Mỗi test condition được thiết kế thành một hay nhiều test case."
+    },
+    {
+      "id": "qa",
+      "use": "QA",
+      "english": "quality assurance",
+      "caseSensitive": true,
+      "glossary": true,
+      "definition": "Hoạt động và nhóm người lo đảm bảo chất lượng bằng cách cải thiện quy trình để ngăn lỗi, rộng hơn việc chạy test để tìm lỗi."
+    },
+    {
+      "id": "white-box-testing",
+      "use": "white-box",
+      "keepEnglish": true,
+      "aliases": [
+        "white-box test",
+        "white-box testing",
+        "kiểm thử hộp trắng",
+        "hộp trắng"
+      ],
+      "glossary": true,
+      "definition": "Cách thiết kế và đo test dựa trên cấu trúc bên trong của code, như câu lệnh, nhánh, điều kiện hay đường đi, để biết phần nào của code đã được chạy."
+    },
+    {
+      "id": "acceptance-testing",
+      "use": "acceptance testing",
+      "keepEnglish": true,
+      "aliases": [
+        "acceptance test"
+      ],
+      "glossary": true,
+      "definition": "Kiểm thử để quyết định có nhận sản phẩm hay không, từ góc nhìn người dùng hoặc khách hàng. Gồm UAT, OAT, nghiệm thu hợp đồng, quy định và alpha/beta."
+    },
+    {
+      "id": "testware",
+      "use": "testware",
+      "keepEnglish": true,
+      "glossary": true,
+      "definition": "Mọi sản phẩm làm ra trong quá trình kiểm thử và dùng lại được: test case, test data, script, kế hoạch, báo cáo, defect report."
+    },
+    {
+      "id": "integration-testing",
+      "use": "integration testing",
+      "keepEnglish": true,
+      "aliases": [
+        "integration test",
+        "component integration testing"
+      ],
+      "glossary": true,
+      "definition": "Kiểm thử cách các thành phần hay hệ thống phối hợp với nhau, nhắm vào lỗi ở giao diện và luồng dữ liệu giữa chúng."
+    },
+    {
+      "id": "anti-pattern",
+      "use": "anti-pattern",
+      "keepEnglish": true,
+      "aliases": [
+        "antipattern",
+        "anti-patterns"
+      ],
+      "glossary": true,
+      "definition": "Cách làm nghe có vẻ hợp lý nhưng lặp lại thường dẫn tới hậu quả xấu, như shared database giữa các service."
+    },
+    {
+      "id": "decision-table",
+      "use": "decision table",
+      "english": "bảng quyết định",
+      "aliases": [
+        "decision table testing",
+        "decision-table"
+      ],
+      "glossary": true,
+      "definition": "Bảng liệt kê các tổ hợp điều kiện và hành động tương ứng, giúp thiết kế test phủ hệ thống mọi tổ hợp của quy tắc nghiệp vụ."
+    },
+    {
+      "id": "test-object",
+      "use": "test object",
+      "keepEnglish": true,
+      "aliases": [
+        "test objects"
+      ],
+      "glossary": true,
+      "definition": "Thành phần hoặc hệ thống đang được kiểm thử, như một hàm, một service hay cả hệ thống. Test object thay đổi theo từng test level."
+    },
+    {
+      "id": "defect-report",
+      "use": "defect report",
+      "english": "báo cáo defect",
+      "aliases": [
+        "defect reports"
+      ],
+      "glossary": true,
+      "definition": "Tài liệu ghi một defect: triệu chứng, bước tái hiện, kết quả thực tế và mong đợi, mức độ ảnh hưởng, để developer sửa được mà không phải hỏi lại."
+    },
+    {
+      "id": "confirmation-testing",
+      "use": "confirmation testing",
+      "english": "kiểm thử xác nhận",
+      "aliases": [
+        "re-testing"
+      ],
+      "glossary": true,
+      "definition": "Chạy lại test case đã fail sau khi defect được sửa, để xác nhận lỗi đã hết. Khác regression testing là kiểm phần khác không bị ảnh hưởng."
+    },
+    {
+      "id": "exit-criteria",
+      "use": "exit criteria",
+      "english": "tiêu chí ra",
+      "glossary": true,
+      "definition": "Điều kiện phải đạt để coi một hoạt động test là xong, như hết defect chặn hoặc đạt mức coverage định trước."
+    },
+    {
+      "id": "assertion",
+      "use": "assertion",
+      "keepEnglish": true,
+      "aliases": [
+        "assertions"
+      ],
+      "glossary": true,
+      "definition": "Câu kiểm tra trong test so sánh kết quả thực tế với kết quả mong đợi. Test chỉ kiểm được những gì có assertion."
+    },
+    {
+      "id": "sdlc",
+      "use": "SDLC",
+      "english": "software development life cycle",
+      "caseSensitive": true,
+      "glossary": true,
+      "definition": "Vòng đời phát triển phần mềm, từ yêu cầu, thiết kế, lập trình, kiểm thử tới vận hành. Waterfall và Agile là hai cách tổ chức vòng đời này."
+    },
+    {
+      "id": "static-analysis",
+      "use": "static analysis",
+      "english": "phân tích tĩnh",
+      "aliases": [
+        "phân tích code tĩnh"
+      ],
+      "glossary": true,
+      "definition": "Dùng công cụ như trình biên dịch hay ESLint đọc code mà không chạy để tìm lỗi kiểu, biến chưa gán, vi phạm chuẩn hoặc độ phức tạp quá cao."
+    },
+    {
+      "id": "coverage-item",
+      "use": "coverage item",
+      "keepEnglish": true,
+      "aliases": [
+        "coverage items"
+      ],
+      "glossary": true,
+      "definition": "Đơn vị dùng để đo coverage của một kỹ thuật, như một nhánh, một giá trị biên hay một dòng trong decision table. Coverage bằng số item đã phủ chia cho tổng."
+    },
+    {
+      "id": "non-functional-testing",
+      "use": "non-functional testing",
+      "english": "kiểm thử phi chức năng",
+      "aliases": [
+        "non-functional test"
+      ],
+      "glossary": true,
+      "definition": "Kiểm thử hệ thống hoạt động tốt đến mức nào, không chỉ làm gì: hiệu năng, độ tin cậy, khả năng dùng, bảo mật, tính tương thích."
+    },
+    {
+      "id": "dynamic-testing",
+      "use": "dynamic testing",
+      "english": "kiểm thử động",
+      "glossary": true,
+      "definition": "Kiểm thử bằng cách chạy phần mềm với dữ liệu cụ thể để quan sát failure, rồi lần ngược về defect gây ra nó."
+    },
+    {
+      "id": "end-to-end-test",
+      "use": "end-to-end test",
+      "keepEnglish": true,
+      "aliases": [
+        "E2E",
+        "end-to-end testing",
+        "end-to-end tests"
+      ],
+      "glossary": true,
+      "definition": "Test đi qua toàn bộ luồng người dùng từ giao diện đến cơ sở dữ liệu và các dịch vụ liên quan, như đặt chuyến từ đầu đến cuối. Chậm hơn và dễ vỡ hơn test nhỏ."
+    },
+    {
+      "id": "statement-coverage",
+      "use": "statement coverage",
+      "english": "độ phủ câu lệnh",
+      "aliases": [
+        "statement testing"
+      ],
+      "glossary": true,
+      "definition": "Phần trăm câu lệnh thực thi được chạy qua ít nhất một lần khi test. Đạt 100% vẫn có thể bỏ sót nhánh chưa đi qua."
+    },
+    {
+      "id": "state-transition-testing",
+      "use": "state transition testing",
+      "english": "kiểm thử chuyển trạng thái",
+      "aliases": [
+        "state transition",
+        "bảng chuyển trạng thái"
+      ],
+      "glossary": true,
+      "definition": "Kỹ thuật thiết kế test từ sơ đồ trạng thái: chọn chuỗi sự kiện để phủ các trạng thái và chuyển đổi hợp lệ, cả chuyển đổi không được phép."
+    },
+    {
+      "id": "experience-based-testing",
+      "use": "experience-based testing",
+      "keepEnglish": true,
+      "aliases": [
+        "experience-based test",
+        "experience-based technique",
+        "experience-based test technique"
+      ],
+      "glossary": true,
+      "definition": "Nhóm kỹ thuật dựa vào kinh nghiệm và hiểu biết của tester để chọn test, gồm error guessing, exploratory testing và checklist-based testing."
+    },
+    {
+      "id": "entry-criteria",
+      "use": "entry criteria",
+      "english": "tiêu chí vào",
+      "glossary": true,
+      "definition": "Điều kiện phải có trước khi bắt đầu một hoạt động test hoặc buổi review, như tài liệu đã có phiên bản và môi trường sẵn sàng."
+    },
+    {
+      "id": "testability",
+      "use": "testability",
+      "keepEnglish": true,
+      "glossary": true,
+      "definition": "Mức độ dễ kiểm thử của hệ thống: có điều khiển được đầu vào, như giờ hay thời tiết, và quan sát được kết quả hay không."
+    },
+    {
+      "id": "branch-coverage",
+      "use": "branch coverage",
+      "english": "độ phủ nhánh",
+      "aliases": [
+        "decision coverage",
+        "branch testing",
+        "decision testing"
+      ],
+      "glossary": true,
+      "definition": "Phần trăm nhánh của code, tức kết quả true và false của mỗi quyết định, đã được chạy. Branch coverage 100% kéo theo statement coverage 100%."
+    },
+    {
+      "id": "inspection",
+      "use": "inspection",
+      "keepEnglish": true,
+      "aliases": [
+        "inspections",
+        "formal inspection"
+      ],
+      "glossary": true,
+      "definition": "Loại review hình thức nhất, có quy trình và vai trò rõ, nhằm tìm defect trong tài liệu hay code và cải thiện chính quy trình."
+    },
+    {
+      "id": "pairwise-testing",
+      "use": "pairwise testing",
+      "keepEnglish": true,
+      "aliases": [
+        "pairwise",
+        "all-pairs"
+      ],
+      "glossary": true,
+      "definition": "Kỹ thuật tổ hợp chọn bộ test sao cho mọi cặp giá trị của hai tham số bất kỳ xuất hiện ít nhất một lần, thay vì thử mọi tổ hợp."
+    },
+    {
+      "id": "root-cause",
+      "use": "root cause",
+      "english": "nguyên nhân gốc",
+      "glossary": true,
+      "definition": "Nguyên nhân sâu xa dẫn tới defect, như hiểu nhầm đặc tả hay thiếu review. Tìm được root cause thì sửa tận gốc, không chỉ sửa triệu chứng."
+    },
+    {
+      "id": "mc-dc",
+      "use": "MC/DC",
+      "english": "modified condition/decision coverage",
+      "aliases": [
+        "MCDC"
+      ],
+      "caseSensitive": true,
+      "glossary": true,
+      "definition": "Tiêu chí phủ yêu cầu từng điều kiện trong quyết định phức hợp được chứng minh là tự nó làm đổi kết quả của quyết định. Chặt hơn branch coverage."
+    },
+    {
+      "id": "error-guessing",
+      "use": "error guessing",
+      "keepEnglish": true,
+      "glossary": true,
+      "definition": "Kỹ thuật dựa trên kinh nghiệm: tester đoán những chỗ dễ lỗi, như lỗi thường gặp ở thanh toán hay huỷ, rồi thiết kế test nhắm thẳng vào đó."
+    },
+    {
+      "id": "exploratory-testing",
+      "use": "exploratory testing",
+      "keepEnglish": true,
+      "aliases": [
+        "kiểm thử khám phá"
+      ],
+      "glossary": true,
+      "definition": "Tester vừa học hệ thống vừa thiết kế và chạy test, dùng kết quả vừa có để chọn bước tiếp theo, thường theo một test charter."
+    },
+    {
+      "id": "maintenance-testing",
+      "use": "maintenance testing",
+      "keepEnglish": true,
+      "glossary": true,
+      "definition": "Kiểm thử khi hệ thống đang vận hành bị thay đổi, nâng cấp, di trú hoặc sắp ngừng dùng. Phạm vi kiểm được chọn dựa trên impact analysis."
+    },
+    {
+      "id": "t-sql",
+      "use": "T-SQL",
+      "english": "Transact-SQL",
+      "keepEnglish": true,
+      "glossary": true,
+      "caseSensitive": true,
+      "definition": "Phương ngữ SQL của Microsoft SQL Server và Azure SQL: SQL chuẩn cộng phần mở rộng như biến @x, TRY…CATCH, TOP, mệnh đề OUTPUT. Script T-SQL được chia thành batch, thường ngăn bằng dòng GO của công cụ client.",
+      "aliases": [
+        "Transact-SQL"
+      ]
+    },
+    {
+      "id": "clustered-index",
+      "use": "clustered index",
+      "english": "clustered index",
+      "keepEnglish": true,
+      "glossary": true,
+      "definition": "Index mà tầng lá chứa chính các dòng dữ liệu, sắp theo khoá của index; vì vậy nó quyết định thứ tự lưu của bảng và mỗi bảng có tối đa một. Trên SQL Server, PRIMARY KEY mặc định tạo clustered index nếu bảng chưa có.",
+      "aliases": [
+        "clustered key"
+      ]
+    },
+    {
+      "id": "nonclustered-index",
+      "use": "nonclustered index",
+      "english": "nonclustered index",
+      "keepEnglish": true,
+      "glossary": true,
+      "definition": "Index tách riêng khỏi dữ liệu bảng: tầng lá chứa khoá của index kèm con trỏ quay về dòng (clustered key, hoặc RID nếu bảng là heap). Một bảng có thể có nhiều nonclustered index."
+    },
+    {
+      "id": "collation",
+      "use": "collation",
+      "english": "collation",
+      "keepEnglish": true,
+      "glossary": true,
+      "definition": "Bộ quy tắc quyết định cách so sánh và sắp xếp chuỗi (phân biệt hoa thường, dấu, thứ tự chữ cái) và, với kiểu chuỗi không Unicode, bảng mã dùng để lưu ký tự. Ví dụ: Vietnamese_100_CI_AS."
+    },
+    {
+      "id": "identity-column",
+      "use": "IDENTITY",
+      "english": "identity column",
+      "keepEnglish": true,
+      "glossary": true,
+      "caseSensitive": true,
+      "definition": "Thuộc tính cột của SQL Server: database tự cấp số tăng dần theo giá trị bắt đầu và bước tăng, ví dụ IDENTITY(100000, 1). Dãy số không liên tục: câu lệnh lỗi hoặc bị rollback vẫn tiêu số.",
+      "aliases": [
+        "cột IDENTITY"
+      ]
+    },
+    {
+      "id": "output-clause",
+      "use": "mệnh đề OUTPUT",
+      "english": "OUTPUT clause",
+      "glossary": true,
+      "definition": "Mệnh đề T-SQL gắn vào INSERT, UPDATE, DELETE, MERGE để trả về các dòng vừa ghi, đọc từ bảng ảo inserted (giá trị sau) và deleted (giá trị trước). OUTPUT INTO ghi vào bảng hoặc biến bảng; bảng đích không được có trigger, CHECK hay khoá ngoại."
+    },
+    {
+      "id": "xact-abort",
+      "use": "XACT_ABORT",
+      "english": "SET XACT_ABORT",
+      "keepEnglish": true,
+      "glossary": true,
+      "caseSensitive": true,
+      "definition": "Tuỳ chọn phiên của SQL Server. Khi bật (ON), lỗi runtime trong transaction huỷ toàn bộ transaction và dừng batch; khi tắt (mặc định), nhiều lỗi chỉ huỷ câu lệnh bị lỗi, transaction vẫn mở và các câu trước vẫn có thể được commit."
+    },
+    {
+      "id": "tie-breaker",
+      "use": "tie-breaker",
+      "english": "tie-breaker",
+      "keepEnglish": true,
+      "glossary": true,
+      "definition": "Khoá sắp xếp cuối cùng có giá trị duy nhất (thường là khoá chính) thêm vào ORDER BY để các dòng bằng nhau ở những khoá trước có thứ tự xác định; cần cho TOP, phân trang OFFSET/FETCH và keyset."
+    },
+    {
+      "id": "sargable",
+      "use": "SARGable",
+      "english": "search-argumentable",
+      "keepEnglish": true,
+      "glossary": true,
+      "definition": "Điều kiện lọc mà bộ tối ưu truy vấn dùng được index để tìm thẳng tới vùng dữ liệu (seek), thường là so sánh trực tiếp trên cột. Bọc cột trong hàm, ép kiểu ngầm hoặc LIKE bắt đầu bằng % thường làm mất tính này."
+    },
+    {
+      "id": "functional-dependency",
+      "use": "phụ thuộc hàm",
+      "english": "functional dependency",
+      "glossary": true,
+      "definition": "Quan hệ X → Y giữa các cột: hai dòng cùng giá trị X thì buộc cùng giá trị Y. Đây là phát biểu về nghiệp vụ; dữ liệu hiện có chỉ phản bác được chứ không chứng minh được nó. Dùng để quyết định cột nào nằm ở bảng nào khi chuẩn hoá."
+    },
+    {
+      "id": "denormalization",
+      "use": "phi chuẩn hoá",
+      "english": "denormalization",
+      "glossary": true,
+      "definition": "Cố ý giữ một dữ kiện ở nhiều chỗ (cột suy ra, bộ đếm, bảng tổng hợp) để đọc nhanh hơn. Chỉ an toàn khi có nguồn dữ liệu gốc xác định, một đường ghi cùng transaction, truy vấn phát hiện lệch và cách dựng lại."
+    },
+    {
+      "id": "filtered-index",
+      "use": "filtered index",
+      "english": "filtered index",
+      "keepEnglish": true,
+      "glossary": true,
+      "definition": "Index chỉ chứa các dòng thoả mệnh đề WHERE của nó (PostgreSQL gọi là partial index). Nhỏ hơn index thường; khi gắn UNIQUE thì giữ được quy tắc \"duy nhất trong một tập con\", ví dụ mỗi tài xế chỉ một chuyến đang chạy.",
+      "aliases": [
+        "partial index"
+      ]
+    },
+    {
+      "id": "untrusted-constraint",
+      "use": "ràng buộc không tin cậy",
+      "english": "untrusted constraint",
+      "glossary": true,
+      "definition": "Trong SQL Server, CHECK hoặc FOREIGN KEY được thêm hay bật lại WITH NOCHECK: vẫn chặn dữ liệu mới nhưng chưa kiểm dữ liệu cũ, is_not_trusted = 1 và bộ tối ưu không dựa vào nó. ALTER TABLE … WITH CHECK CHECK CONSTRAINT đưa nó về tin cậy."
+    },
+    {
+      "id": "expand-contract",
+      "use": "expand–contract",
+      "english": "expand–contract migration",
+      "keepEnglish": true,
+      "glossary": true,
+      "definition": "Cách đổi schema không làm hỏng ứng dụng cũ: thêm cấu trúc mới tương thích (expand), triển khai app mới và điền dữ liệu (backfill), rồi mới siết ràng buộc hoặc gỡ cấu trúc cũ (contract) khi không còn bản app cũ nào chạy.",
+      "aliases": [
+        "expand → backfill → contract"
+      ]
+    },
+    {
+      "id": "sch-m-lock",
+      "use": "khoá Sch-M",
+      "english": "schema modification lock",
+      "glossary": true,
+      "definition": "Khoá SQL Server lấy khi đổi cấu trúc bảng (ALTER TABLE, DROP…). Nó chặn mọi phiên khác dùng bảng, kể cả SELECT, tới hết transaction. Lệnh chỉ sửa metadata giữ khoá rất ngắn; lệnh quét hay viết lại dòng giữ suốt thời gian chạy.",
+      "aliases": [
+        "Sch-M"
+      ]
     }
   ],
   "patterns": [
