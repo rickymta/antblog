@@ -122,7 +122,10 @@
       "definition": "Một tình huống kiểm thử cụ thể gồm điều kiện đầu, dữ liệu vào, các bước thực hiện và kết quả mong đợi.",
       "note": "Thống nhất \"test case\" (chốt 11/2026); không xen \"ca kiểm thử\", \"ca\", \"case\" trong cùng bài",
       "avoid": [
-        { "text": "ca kiểm thử", "severity": "low" }
+        {
+          "text": "ca kiểm thử",
+          "severity": "low"
+        }
       ]
     },
     {
@@ -133,8 +136,14 @@
       "definition": "Nguồn thời gian được truyền vào mã nghiệp vụ từ bên ngoài (dependency injection) thay vì gọi trực tiếp giờ hệ thống, để test có thể cố định thời điểm.",
       "note": "\"tiêm vào\" là dịch từng chữ của inject",
       "avoid": [
-        { "text": "đồng hồ tiêm vào", "severity": "medium" },
-        { "text": "đồng hồ được tiêm", "severity": "medium" }
+        {
+          "text": "đồng hồ tiêm vào",
+          "severity": "medium"
+        },
+        {
+          "text": "đồng hồ được tiêm",
+          "severity": "medium"
+        }
       ]
     },
     {
@@ -145,8 +154,14 @@
       "definition": "Lỗi xảy ra khi kết quả phụ thuộc vào thứ tự chạy của các thao tác đồng thời, ví dụ hai yêu cầu cùng nhận một chuyến và cả hai đều tưởng mình thành công.",
       "note": "Chỉ sửa khi \"cuộc đua\" mang nghĩa race condition; giữ các cách nói tự nhiên như \"thua cuộc đua\"",
       "avoid": [
-        { "text": "cuộc đua", "severity": "low" },
-        { "text": "lỗi đua", "severity": "low" }
+        {
+          "text": "cuộc đua",
+          "severity": "low"
+        },
+        {
+          "text": "lỗi đua",
+          "severity": "low"
+        }
       ]
     },
     {
@@ -154,6 +169,513 @@
       "use": "phiên bản",
       "english": "version",
       "note": "Văn xuôi dùng \"phiên bản\" (chốt 11/2026); giữ \"version\" trong tên trường, cấu hình, tên sản phẩm. Không có rule lint vì cần ngữ cảnh"
+    },
+    {
+      "id": "idempotency",
+      "use": "idempotency",
+      "keepEnglish": true,
+      "aliases": [
+        "idempotent",
+        "idempotency key"
+      ],
+      "glossary": true,
+      "definition": "Tính chất của một thao tác mà gọi một lần hay lặp lại nhiều lần đều cho cùng kết quả. Thường đi kèm idempotency key, để một yêu cầu bị gửi lại (do retry, mất mạng) không tạo thêm đơn hay trừ tiền hai lần."
+    },
+    {
+      "id": "outbox-pattern",
+      "use": "outbox",
+      "keepEnglish": true,
+      "aliases": [
+        "outbox pattern",
+        "transactional outbox"
+      ],
+      "glossary": true,
+      "definition": "Mẫu thiết kế ghi sự kiện cần phát vào một bảng outbox trong cùng transaction với dữ liệu nghiệp vụ, rồi một tiến trình riêng đọc bảng đó và gửi đi. Nhờ vậy không xảy ra cảnh dữ liệu đã lưu mà sự kiện bị mất, hoặc ngược lại."
+    },
+    {
+      "id": "saga",
+      "use": "saga",
+      "keepEnglish": true,
+      "aliases": [
+        "saga pattern"
+      ],
+      "glossary": true,
+      "definition": "Cách điều phối một nghiệp vụ trải qua nhiều dịch vụ bằng chuỗi bước, mỗi bước là một transaction cục bộ. Nếu một bước thất bại, các bước đã chạy được bù trừ bằng thao tác ngược (compensation) thay vì rollback toàn cục."
+    },
+    {
+      "id": "eventual-consistency",
+      "use": "eventual consistency",
+      "keepEnglish": true,
+      "aliases": [
+        "nhất quán cuối cùng"
+      ],
+      "glossary": true,
+      "definition": "Mô hình nhất quán trong đó các bản sao dữ liệu có thể tạm khác nhau sau một lần ghi, nhưng sẽ khớp nhau sau một khoảng thời gian nếu không có lần ghi mới."
+    },
+    {
+      "id": "dead-letter-queue",
+      "use": "dead-letter queue",
+      "keepEnglish": true,
+      "aliases": [
+        "dead letter queue",
+        "dead-letter",
+        "DLQ"
+      ],
+      "glossary": true,
+      "definition": "Hàng đợi riêng chứa các thông điệp xử lý thất bại quá số lần cho phép, để chúng không chặn hàng đợi chính và có thể được kiểm tra, sửa rồi xử lý lại sau."
+    },
+    {
+      "id": "at-least-once",
+      "use": "at-least-once",
+      "keepEnglish": true,
+      "glossary": true,
+      "definition": "Cam kết giao nhận thông điệp: mỗi thông điệp chắc chắn được giao ít nhất một lần nhưng có thể bị giao trùng, nên bên nhận phải xử lý idempotent hoặc khử trùng lặp."
+    },
+    {
+      "id": "exactly-once",
+      "use": "exactly-once",
+      "keepEnglish": true,
+      "glossary": true,
+      "definition": "Cam kết mỗi thông điệp được xử lý đúng một lần. Trong hệ phân tán, điều này thường đạt được bằng at-least-once kết hợp xử lý idempotent, chứ không phải nhờ mạng giao đúng một lần."
+    },
+    {
+      "id": "backoff",
+      "use": "backoff",
+      "keepEnglish": true,
+      "aliases": [
+        "exponential backoff"
+      ],
+      "glossary": true,
+      "definition": "Khoảng chờ giữa các lần thử lại sau lỗi, thường tăng dần theo cấp số nhân (exponential backoff), để không dồn thêm tải lên hệ thống đang quá tải."
+    },
+    {
+      "id": "jitter",
+      "use": "jitter",
+      "keepEnglish": true,
+      "glossary": true,
+      "definition": "Độ lệch ngẫu nhiên cộng vào một giá trị. Khi thử lại, jitter làm lệch thời điểm chờ để nhiều client không cùng retry một lúc; trong mô phỏng, jitter là nhiễu ngẫu nhiên quanh giá trị chuẩn."
+    },
+    {
+      "id": "rate-limit",
+      "use": "rate limit",
+      "keepEnglish": true,
+      "aliases": [
+        "rate limiting",
+        "giới hạn tần suất"
+      ],
+      "glossary": true,
+      "definition": "Giới hạn số yêu cầu một client hoặc một khoá được phép gửi trong một khoảng thời gian. Vượt ngưỡng thì yêu cầu bị từ chối (thường là HTTP 429) hoặc phải chờ."
+    },
+    {
+      "id": "backpressure",
+      "use": "backpressure",
+      "keepEnglish": true,
+      "glossary": true,
+      "definition": "Cơ chế để bên nhận báo cho bên gửi chậm lại khi xử lý không kịp, thay vì nhận hết rồi để hàng đợi và bộ nhớ phình ra đến mức sập."
+    },
+    {
+      "id": "connection-pool",
+      "use": "connection pool",
+      "keepEnglish": true,
+      "aliases": [
+        "pool kết nối",
+        "connection pooling"
+      ],
+      "glossary": true,
+      "definition": "Tập kết nối cơ sở dữ liệu được mở sẵn và dùng lại giữa các yêu cầu, để không tốn chi phí mở kết nối mới mỗi lần và không vượt số kết nối tối đa của server."
+    },
+    {
+      "id": "deadlock",
+      "use": "deadlock",
+      "keepEnglish": true,
+      "aliases": [
+        "khoá chết"
+      ],
+      "glossary": true,
+      "definition": "Tình trạng hai hay nhiều transaction chờ nhau giải phóng khoá theo vòng tròn nên không bên nào chạy tiếp được. Cơ sở dữ liệu thường phát hiện và huỷ một bên để phá vòng chờ."
+    },
+    {
+      "id": "mvcc",
+      "use": "MVCC",
+      "english": "Multi-Version Concurrency Control",
+      "caseSensitive": true,
+      "glossary": true,
+      "definition": "Cơ chế giữ nhiều phiên bản của một dòng dữ liệu, để thao tác đọc thấy một ảnh chụp nhất quán mà không chặn thao tác ghi, và ghi không chặn đọc. PostgreSQL dùng MVCC."
+    },
+    {
+      "id": "optimistic-concurrency",
+      "use": "optimistic concurrency",
+      "keepEnglish": true,
+      "aliases": [
+        "optimistic locking",
+        "khoá lạc quan"
+      ],
+      "glossary": true,
+      "definition": "Cách xử lý ghi đồng thời không khoá trước: mỗi bản ghi mang số phiên bản, khi cập nhật thì kiểm tra phiên bản chưa đổi. Nếu đã có người sửa trước thì cập nhật thất bại và phải đọc lại."
+    },
+    {
+      "id": "query-plan",
+      "use": "query plan",
+      "keepEnglish": true,
+      "aliases": [
+        "execution plan",
+        "kế hoạch truy vấn"
+      ],
+      "glossary": true,
+      "definition": "Các bước cơ sở dữ liệu chọn để thực thi một câu truy vấn: quét cả bảng hay dùng index, thứ tự join… Xem bằng lệnh EXPLAIN để tìm nguyên nhân truy vấn chậm."
+    },
+    {
+      "id": "cte",
+      "use": "CTE",
+      "english": "Common Table Expression",
+      "caseSensitive": true,
+      "glossary": true,
+      "definition": "Truy vấn con được đặt tên bằng mệnh đề WITH ở đầu câu SQL và dùng lại như một bảng tạm, giúp chia truy vấn dài thành các bước dễ đọc. Dạng đệ quy dùng để duyệt dữ liệu dạng cây."
+    },
+    {
+      "id": "replica",
+      "use": "replica",
+      "keepEnglish": true,
+      "aliases": [
+        "read replica"
+      ],
+      "glossary": true,
+      "definition": "Bản sao cơ sở dữ liệu được đồng bộ liên tục từ máy chính (primary), dùng để chia tải đọc hoặc thay máy chính khi failover. Dữ liệu trên replica có thể trễ hơn primary một chút."
+    },
+    {
+      "id": "failover",
+      "use": "failover",
+      "keepEnglish": true,
+      "glossary": true,
+      "definition": "Chuyển vai trò phục vụ từ máy chính đang hỏng sang máy dự phòng (thường là một replica), tự động hoặc thủ công, để hệ thống tiếp tục chạy."
+    },
+    {
+      "id": "rollback",
+      "use": "rollback",
+      "keepEnglish": true,
+      "glossary": true,
+      "definition": "Đưa hệ thống về trạng thái trước một thay đổi: huỷ các thao tác chưa commit của một transaction, hoặc quay về phiên bản triển khai trước khi bản mới gặp lỗi."
+    },
+    {
+      "id": "canary",
+      "use": "canary",
+      "keepEnglish": true,
+      "aliases": [
+        "canary release",
+        "canary deployment"
+      ],
+      "glossary": true,
+      "definition": "Cách phát hành đưa phiên bản mới cho một phần nhỏ người dùng hoặc lưu lượng trước, theo dõi tỉ lệ lỗi và độ trễ, rồi mới mở rộng dần hoặc rollback."
+    },
+    {
+      "id": "blue-green",
+      "use": "blue/green",
+      "keepEnglish": true,
+      "aliases": [
+        "blue-green",
+        "blue/green deployment",
+        "blue-green deployment"
+      ],
+      "glossary": true,
+      "definition": "Cách triển khai giữ hai môi trường giống nhau: bản đang phục vụ (blue) và bản chứa phiên bản mới (green). Kiểm tra xong thì chuyển lưu lượng sang green; có sự cố thì chuyển ngược lại ngay."
+    },
+    {
+      "id": "feature-flag",
+      "use": "feature flag",
+      "keepEnglish": true,
+      "aliases": [
+        "feature toggle"
+      ],
+      "glossary": true,
+      "definition": "Công tắc cấu hình bật hoặc tắt một tính năng lúc chạy mà không cần triển khai lại, thường dùng để phát hành dần hoặc tắt nhanh tính năng gặp lỗi."
+    },
+    {
+      "id": "autoscaling",
+      "use": "autoscaling",
+      "keepEnglish": true,
+      "aliases": [
+        "autoscale",
+        "auto scaling"
+      ],
+      "glossary": true,
+      "definition": "Tự động tăng hoặc giảm số máy, container hay instance theo tải (CPU, số yêu cầu, độ dài hàng đợi), để đủ sức chịu tải lúc cao điểm và bớt chi phí lúc vắng."
+    },
+    {
+      "id": "cold-start",
+      "use": "cold start",
+      "keepEnglish": true,
+      "glossary": true,
+      "definition": "Độ trễ thêm ở lần gọi đầu khi nền tảng phải khởi tạo môi trường chạy mới, như hàm serverless vừa được cấp phát hoặc ứng dụng vừa khởi động lại."
+    },
+    {
+      "id": "percentile-latency",
+      "use": "p95",
+      "english": "percentile",
+      "aliases": [
+        "p99",
+        "p90",
+        "p50"
+      ],
+      "glossary": true,
+      "definition": "Phân vị của một số đo, thường là độ trễ: p95 = 300 ms nghĩa là 95% yêu cầu hoàn tất trong 300 ms trở xuống. p99 tương tự với 99%, cho thấy phần đuôi chậm mà giá trị trung bình che mất."
+    },
+    {
+      "id": "sla",
+      "use": "SLA",
+      "english": "Service Level Agreement",
+      "caseSensitive": true,
+      "glossary": true,
+      "definition": "Cam kết về mức chất lượng dịch vụ giữa bên cung cấp và khách hàng (ví dụ độ sẵn sàng 99,9% mỗi tháng), thường kèm hình thức đền bù nếu không đạt."
+    },
+    {
+      "id": "slo",
+      "use": "SLO",
+      "english": "Service Level Objective",
+      "caseSensitive": true,
+      "glossary": true,
+      "definition": "Mục tiêu nội bộ cho một chỉ số chất lượng dịch vụ, ví dụ 99% yêu cầu có độ trễ dưới 500 ms trong 30 ngày. SLO thường đặt chặt hơn SLA để còn khoảng an toàn."
+    },
+    {
+      "id": "error-budget",
+      "use": "error budget",
+      "keepEnglish": true,
+      "aliases": [
+        "ngân sách lỗi"
+      ],
+      "glossary": true,
+      "definition": "Phần lỗi được phép trong một kỳ, suy ra từ SLO: SLO 99,9% cho phép 0,1% yêu cầu lỗi. Còn ngân sách thì được phát hành nhanh; tiêu gần hết thì ưu tiên sửa cho ổn định."
+    },
+    {
+      "id": "rpo",
+      "use": "RPO",
+      "english": "Recovery Point Objective",
+      "caseSensitive": true,
+      "glossary": true,
+      "definition": "Lượng dữ liệu tối đa chấp nhận mất khi có sự cố, tính bằng thời gian. RPO 5 phút nghĩa là sau khi khôi phục, chỉ được mất tối đa dữ liệu của 5 phút cuối."
+    },
+    {
+      "id": "rto",
+      "use": "RTO",
+      "english": "Recovery Time Objective",
+      "caseSensitive": true,
+      "glossary": true,
+      "definition": "Thời gian tối đa chấp nhận được để khôi phục dịch vụ sau sự cố, tính từ lúc sự cố xảy ra đến khi hệ thống phục vụ lại."
+    },
+    {
+      "id": "infrastructure-as-code",
+      "use": "IaC",
+      "english": "Infrastructure as Code",
+      "caseSensitive": true,
+      "glossary": true,
+      "definition": "Cách quản lý hạ tầng (máy chủ, mạng, phân quyền…) bằng tệp mã lưu trong Git, được review và áp dụng tự động thay vì thao tác tay trên console. Ví dụ: Terraform, Bicep, CloudFormation."
+    },
+    {
+      "id": "managed-identity",
+      "use": "managed identity",
+      "keepEnglish": true,
+      "glossary": true,
+      "definition": "Danh tính do Azure tự tạo và quản lý cho một tài nguyên (VM, App Service…), giúp tài nguyên đó xác thực với dịch vụ khác qua Microsoft Entra ID mà không phải lưu mật khẩu hay khoá bí mật trong cấu hình."
+    },
+    {
+      "id": "least-privilege",
+      "use": "quyền tối thiểu",
+      "english": "least privilege",
+      "glossary": true,
+      "definition": "Nguyên tắc chỉ cấp cho người dùng hoặc dịch vụ đúng những quyền cần cho việc của mình, không hơn, để thu hẹp thiệt hại nếu tài khoản bị lộ hoặc mã có lỗi."
+    },
+    {
+      "id": "oidc",
+      "use": "OIDC",
+      "english": "OpenID Connect",
+      "caseSensitive": true,
+      "glossary": true,
+      "definition": "Giao thức xác thực xây trên OAuth 2.0, cho phép ứng dụng xác minh người dùng (hoặc một pipeline CI) qua nhà cung cấp danh tính và nhận về ID token dạng JWT."
+    },
+    {
+      "id": "jwt",
+      "use": "JWT",
+      "english": "JSON Web Token",
+      "caseSensitive": true,
+      "glossary": true,
+      "definition": "Token gồm ba phần (header, payload, chữ ký) mã hoá base64url. Bên nhận kiểm tra chữ ký để tin các claim trong payload như người dùng, quyền, thời hạn, mà không cần tra cơ sở dữ liệu."
+    },
+    {
+      "id": "test-double",
+      "use": "test double",
+      "keepEnglish": true,
+      "glossary": true,
+      "definition": "Tên chung cho đối tượng thay thế một phụ thuộc thật trong lúc test, như stub, mock, fake hay spy, để test chạy nhanh, ổn định và kiểm soát được kết quả."
+    },
+    {
+      "id": "mock",
+      "use": "mock",
+      "keepEnglish": true,
+      "glossary": true,
+      "definition": "Test double được lập trình sẵn kỳ vọng về cách nó bị gọi (gọi hàm nào, bao nhiêu lần, với tham số gì); test thất bại nếu lời gọi thực tế không khớp kỳ vọng."
+    },
+    {
+      "id": "stub",
+      "use": "stub",
+      "keepEnglish": true,
+      "glossary": true,
+      "definition": "Test double trả về câu trả lời dựng sẵn cho các lời gọi trong test mà không kiểm tra nó được gọi ra sao. Dùng để cố định dữ liệu đến từ phụ thuộc bên ngoài."
+    },
+    {
+      "id": "fixture",
+      "use": "fixture",
+      "keepEnglish": true,
+      "aliases": [
+        "test fixture"
+      ],
+      "glossary": true,
+      "definition": "Dữ liệu và trạng thái được chuẩn bị sẵn để chạy test, như bản ghi mẫu, tệp đầu vào hay kết nối đã mở. Nhiều framework (pytest, xUnit) có cơ chế fixture để tạo và dọn chúng tự động."
+    },
+    {
+      "id": "test-oracle",
+      "use": "test oracle",
+      "keepEnglish": true,
+      "aliases": [
+        "oracle"
+      ],
+      "caseSensitive": true,
+      "glossary": true,
+      "definition": "Nguồn hoặc cách xác định kết quả mong đợi của một test để phán đúng sai: đặc tả, phép tính tay, hệ thống cũ, hay một quy tắc như \"tổng tiền không bao giờ âm\".",
+      "note": "caseSensitive để không khớp tên hệ quản trị cơ sở dữ liệu Oracle"
+    },
+    {
+      "id": "flaky-test",
+      "use": "flaky test",
+      "keepEnglish": true,
+      "aliases": [
+        "flaky"
+      ],
+      "glossary": true,
+      "definition": "Test lúc đạt lúc trượt dù mã không đổi, thường do phụ thuộc thời gian, thứ tự chạy, mạng hay dữ liệu dùng chung. Flaky test làm mất niềm tin vào bộ test nên cần sửa hoặc cách ly."
+    },
+    {
+      "id": "boundary-value",
+      "use": "giá trị biên",
+      "english": "boundary value",
+      "aliases": [
+        "phân tích giá trị biên",
+        "boundary value analysis"
+      ],
+      "glossary": true,
+      "definition": "Giá trị nằm tại hoặc sát ranh giới của một miền dữ liệu hợp lệ, ví dụ 0, 1, giá trị tối đa và tối đa + 1. Lỗi hay nằm ở biên, nên kỹ thuật phân tích giá trị biên chọn test case ngay tại đó."
+    },
+    {
+      "id": "equivalence-partitioning",
+      "use": "phân vùng tương đương",
+      "english": "equivalence partitioning",
+      "aliases": [
+        "equivalence partition"
+      ],
+      "glossary": true,
+      "definition": "Kỹ thuật chia dữ liệu vào thành các nhóm mà hệ thống được kỳ vọng xử lý giống nhau, rồi chọn một giá trị đại diện cho mỗi nhóm, để giảm số test case mà không bỏ sót loại đầu vào."
+    },
+    {
+      "id": "uat",
+      "use": "UAT",
+      "english": "User Acceptance Testing",
+      "caseSensitive": true,
+      "glossary": true,
+      "definition": "Kiểm thử chấp nhận người dùng: người dùng hoặc đại diện nghiệp vụ kiểm tra hệ thống theo tình huống thực tế, để quyết định có nghiệm thu và đưa vào sử dụng hay không."
+    },
+    {
+      "id": "acceptance-criteria",
+      "use": "acceptance criteria",
+      "keepEnglish": true,
+      "aliases": [
+        "tiêu chí chấp nhận"
+      ],
+      "glossary": true,
+      "definition": "Các điều kiện cụ thể, kiểm chứng được mà một user story hay tính năng phải thoả mãn mới được coi là xong, thường viết theo dạng Given–When–Then."
+    },
+    {
+      "id": "user-story",
+      "use": "user story",
+      "keepEnglish": true,
+      "glossary": true,
+      "definition": "Mô tả ngắn một nhu cầu từ góc nhìn người dùng, thường theo mẫu \"Là <vai trò>, tôi muốn <mục tiêu> để <lợi ích>\", kèm acceptance criteria."
+    },
+    {
+      "id": "use-case",
+      "use": "use case",
+      "keepEnglish": true,
+      "glossary": true,
+      "definition": "Mô tả chuỗi tương tác giữa một tác nhân (người dùng hoặc hệ thống khác) và hệ thống để đạt một mục tiêu, gồm luồng chính, luồng thay thế và các trường hợp lỗi."
+    },
+    {
+      "id": "stakeholder",
+      "use": "stakeholder",
+      "keepEnglish": true,
+      "glossary": true,
+      "definition": "Người hoặc nhóm có quyền lợi hay chịu ảnh hưởng từ một dự án, như khách hàng, người dùng, bộ phận vận hành, pháp chế. Cần xác định đủ stakeholder để thu thập và cân đối yêu cầu."
+    },
+    {
+      "id": "backlog",
+      "use": "backlog",
+      "keepEnglish": true,
+      "glossary": true,
+      "definition": "Danh sách công việc đã sắp thứ tự ưu tiên đang chờ làm của một sản phẩm (product backlog). Trong vận hành, backlog còn chỉ lượng việc hoặc thông điệp đang tồn đọng chưa xử lý."
+    },
+    {
+      "id": "traceability",
+      "use": "traceability",
+      "keepEnglish": true,
+      "glossary": true,
+      "definition": "Khả năng lần theo liên kết giữa yêu cầu, thiết kế, mã và test case, để biết mỗi yêu cầu đã được hiện thực và kiểm thử chưa, và một thay đổi ảnh hưởng tới đâu."
+    },
+    {
+      "id": "cohort",
+      "use": "cohort",
+      "keepEnglish": true,
+      "glossary": true,
+      "definition": "Nhóm người dùng có chung một mốc thời gian, thường là cùng tháng đăng ký hay lần mua đầu. Phân tích cohort theo dõi hành vi từng nhóm theo thời gian, ví dụ tỉ lệ quay lại sau 30 ngày."
+    },
+    {
+      "id": "grain",
+      "use": "grain",
+      "keepEnglish": true,
+      "glossary": true,
+      "definition": "Mức chi tiết của một dòng trong bảng dữ liệu, nhất là bảng fact: mỗi dòng là một chuyến, một ngày của một tài xế hay một sự kiện. Chốt grain trước để tránh đếm trùng khi join và tổng hợp."
+    },
+    {
+      "id": "cardinality",
+      "use": "cardinality",
+      "keepEnglish": true,
+      "glossary": true,
+      "definition": "Số giá trị khác nhau của một cột hoặc một nhãn. Cardinality cao (như mã người dùng) ảnh hưởng tới việc chọn index, và làm phình số chuỗi metric nếu dùng làm nhãn."
+    },
+    {
+      "id": "cqrs",
+      "use": "CQRS",
+      "english": "Command Query Responsibility Segregation",
+      "caseSensitive": true,
+      "glossary": true,
+      "definition": "Tách mô hình ghi (command) khỏi mô hình đọc (query) để mỗi phía được thiết kế và mở rộng riêng. Phía đọc thường là dữ liệu dựng sẵn cho màn hình, cập nhật từ sự kiện của phía ghi."
+    },
+    {
+      "id": "clean-architecture",
+      "use": "clean architecture",
+      "keepEnglish": true,
+      "glossary": true,
+      "definition": "Cách tổ chức mã theo các lớp đồng tâm: quy tắc nghiệp vụ nằm ở lõi, không phụ thuộc framework, cơ sở dữ liệu hay giao diện, và phụ thuộc chỉ được hướng vào trong."
+    },
+    {
+      "id": "h3",
+      "use": "H3",
+      "keepEnglish": true,
+      "caseSensitive": true,
+      "glossary": true,
+      "definition": "Hệ lưới lục giác phân cấp do Uber phát triển, chia bề mặt Trái Đất thành các ô lục giác ở nhiều độ phân giải. Mỗi ô có một mã, giúp gom nhóm và tra cứu các vị trí gần nhau nhanh."
+    },
+    {
+      "id": "deep-link",
+      "use": "deep link",
+      "keepEnglish": true,
+      "glossary": true,
+      "definition": "Liên kết mở thẳng tới một màn hình cụ thể bên trong ứng dụng di động (ví dụ trang chi tiết một chuyến), thay vì chỉ mở màn hình đầu của app."
     }
   ],
   "patterns": [

@@ -130,9 +130,14 @@ export function GlossaryPopover({ containerRef }: { containerRef: RefObject<HTML
   }, [active, reposition]);
 
   // Mở bằng bàn phím ⇒ đưa focus vào phần tử tương tác đầu tiên của hộp thoại (portal nằm cuối <body>, Tab không tới).
+  // Chờ có `pos`: lần render đầu hộp thoại còn `visibility: hidden` (đang đo), focus() vào phần tử ẩn không có tác dụng.
+  // Chỉ một lần cho mỗi lần mở — cuộn trang đổi `pos` nhưng không được kéo focus lại.
+  const focusedFor = useRef<Active | null>(null);
   useEffect(() => {
-    if (active?.pinned && active.fromKeyboard) popRef.current?.querySelector<HTMLElement>('button, a[href]')?.focus();
-  }, [active]);
+    if (!active?.pinned || !active.fromKeyboard || !pos || focusedFor.current === active) return;
+    focusedFor.current = active;
+    popRef.current?.querySelector<HTMLElement>('button, a[href]')?.focus();
+  }, [active, pos]);
 
   // Sự kiện trên thân bài.
   useEffect(() => {

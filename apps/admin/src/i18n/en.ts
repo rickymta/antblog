@@ -196,6 +196,8 @@ export const en: Messages = {
     emptyHint: 'Start with your first article.',
   },
   editor: {
+    glossary: 'Mark dictionary keywords',
+    glossaryHint: 'Underline terms from the dictionary so readers can see a quick definition. Untick for term-dense or round-up articles.',
     newTitle: 'New article',
     editTitle: 'Edit article',
     fieldTitle: 'Title',

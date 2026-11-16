@@ -194,6 +194,8 @@ export const vi = {
     emptyHint: 'Bắt đầu bằng bài viết đầu tiên.',
   },
   editor: {
+    glossary: 'Đánh dấu keyword của từ điển',
+    glossaryHint: 'Gạch chân thuật ngữ có trong từ điển để người đọc xem nhanh giải thích. Bỏ chọn nếu bài dày đặc thuật ngữ hoặc là bài tổng hợp.',
     newTitle: 'Bài viết mới',
     editTitle: 'Sửa bài viết',
     fieldTitle: 'Tiêu đề',

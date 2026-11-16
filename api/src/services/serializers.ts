@@ -186,7 +186,7 @@ export function toSeo(seo: IArticleSeo | undefined) {
 export async function toArticleDetail(a: IArticle, myReactions: string[]) {
   const [card] = await toArticleCards([a]);
   const learningPath = await learningPathRefFor(a);
-  return compact({ ...card!, content: a.content ?? '', seo: toSeo(a.seo), learningPath, myReactions });
+  return compact({ ...card!, content: a.content ?? '', seo: toSeo(a.seo), learningPath, myReactions, glossary: a.glossary === false ? false : undefined });
 }
 
 /** `AdminArticle`: có cả bài nháp; `withContent` = false cho danh sách. */
@@ -201,6 +201,7 @@ export async function toAdminArticles(articles: IArticle[], withContent: boolean
       seo: toSeo(a.seo),
       learningPathId: a.learningPathId ? idOf(a.learningPathId) : undefined,
       editedInCms: a.editedInCms === true ? true : undefined,
+      glossary: a.glossary === false ? false : undefined,
     });
   });
 }

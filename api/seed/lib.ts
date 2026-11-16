@@ -78,6 +78,8 @@ const frontmatter = z.object({
     })
     .optional(),
   publishedAt: z.coerce.date().optional(),
+  /** `glossary: false` = tắt đánh dấu keyword của từ điển cho cả bài. */
+  glossary: z.boolean().optional(),
 });
 
 function readJson(file: string, log: (m: string) => void): unknown | undefined {
@@ -199,6 +201,7 @@ export async function runSeed(opts: SeedOptions): Promise<SeedResult> {
       readingMinutes: computeReadingMinutes(body),
       status: 'published' as const,
       ...(meta.coverImageUrl ? { coverImageUrl: meta.coverImageUrl } : {}),
+      ...(meta.glossary === false ? { glossary: false } : {}),
     };
     const existing = await Article.findOne({ slug: meta.slug }).select({ publishedAt: 1, editedInCms: 1, categoryId: 1 }).lean();
     if (existing?.editedInCms === true && !opts.forceContent) {
@@ -219,7 +222,7 @@ export async function runSeed(opts: SeedOptions): Promise<SeedResult> {
         { _id: existing._id },
         {
           $set: { ...fields, publishedAt: existing.publishedAt ?? meta.publishedAt ?? new Date() },
-          $unset: { editedInCms: 1 },
+          $unset: { editedInCms: 1, ...(meta.glossary === false ? {} : { glossary: 1 }) },
         },
       );
       result.articles.updated++;
@@ -298,13 +301,16 @@ const terminologyFile = z.object({
       english: z.string().trim().optional(),
       glossary: z.boolean().optional(),
       definition: z.string().trim().max(300).optional(),
+      aliases: z.array(z.string().trim().min(1)).optional(),
+      caseSensitive: z.boolean().optional(),
     }),
   ),
 });
 
 /**
  * Seed `Term` từ các mục `glossary: true` có `definition` trong `terminology.json` (ngôn ngữ `vi`).
- * Tên tiếng Anh (nếu khác cách viết chuẩn) thành alias để cũng được dò trong bài.
+ * Tên tiếng Anh (nếu khác cách viết chuẩn) và `aliases` thành alias để cũng được dò trong bài.
+ * `caseSensitive` chỉ ghi khi có khai báo; nếu không thì giữ giá trị hiện có (mặc định `false`).
  */
 async function seedTerms(opts: SeedOptions, log: (m: string) => void): Promise<SeedResult['terms']> {
   const out = { upserted: 0, keptCms: 0 };
@@ -320,17 +326,24 @@ async function seedTerms(opts: SeedOptions, log: (m: string) => void): Promise<S
       continue;
     }
     const english = t.english && t.english.toLowerCase() !== t.use.toLowerCase() ? t.english : undefined;
+    const seen = new Set([t.use.toLowerCase()]);
+    const aliases = [english, ...(t.aliases ?? [])].filter((a): a is string => {
+      if (!a || seen.has(a.toLowerCase())) return false;
+      seen.add(a.toLowerCase());
+      return true;
+    });
     await Term.updateOne(
       { language: 'vi', slug: t.id },
       {
         $set: {
           term: t.use,
-          aliases: english ? [english] : [],
+          aliases,
           shortDefinition: t.definition,
           status: 'published',
           ...(english ? { english } : {}),
+          ...(t.caseSensitive === undefined ? {} : { caseSensitive: t.caseSensitive }),
         },
-        $setOnInsert: { caseSensitive: false, autoLink: true },
+        $setOnInsert: { autoLink: true, ...(t.caseSensitive === undefined ? { caseSensitive: false } : {}) },
         ...(english ? {} : { $unset: { english: 1 } }),
       },
       { upsert: true },

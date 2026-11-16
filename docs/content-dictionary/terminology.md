@@ -28,6 +28,8 @@ Theo thứ tự ưu tiên:
       "keepEnglish": false,              // true = `use` chính là tiếng Anh, không dịch
       "glossary": true,                  // đưa vào từ điển keyword
       "definition": "…",                 // định nghĩa ngắn ≤ 300 ký tự (cho hộp thoại)
+      "aliases": ["…"],                  // cách viết khác cũng được từ điển dò (tên tiếng Anh tự thành alias)
+      "caseSensitive": false,            // true = từ điển dò phân biệt hoa thường (SLA, H3, oracle…)
       "note": "…",                       // lý do, hiện trong kết quả lint
       "avoid": [                         // các cách viết cần tránh
         { "text": "kiểm sâu", "severity": "high", "autofix": true },

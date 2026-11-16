@@ -1,11 +1,11 @@
-import { cpSync, mkdtempSync, rmSync, writeFileSync } from 'node:fs';
+import { cpSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import request from 'supertest';
 import { beforeEach, describe, expect, it } from 'vitest';
 import { runSeed } from '../seed/lib.js';
-import { Term } from '../src/models/index.js';
+import { Article, Term } from '../src/models/index.js';
 import { assertCleanJson, createArticle, createCategory, createUser, makeApp, resetDb, sessionCookie, useTestDb } from './helpers.js';
 
 useTestDb();
@@ -143,6 +143,60 @@ describe('từ điển keyword — đếm số bài chứa keyword', () => {
   });
 });
 
+describe('từ điển keyword — tắt đánh dấu cho cả bài (glossary: false)', () => {
+  beforeEach(resetDb);
+
+  it('admin bật/tắt cờ; chỉ lưu khi tắt; trang công khai và CMS đều trả cờ', async () => {
+    const adminUser = await createUser('admin');
+    const cookie = sessionCookie(adminUser);
+    const cat = await createCategory();
+    const input = (extra: Record<string, unknown> = {}) => ({
+      title: 'Bài có smoke test',
+      summary: 'Tóm tắt',
+      content: 'Chạy smoke test.',
+      language: 'vi',
+      categoryId: cat._id.toString(),
+      level: 'beginner',
+      tags: [],
+      ...extra,
+    });
+
+    const created = await request(app).post('/api/v1/admin/articles').set('Cookie', cookie).send(input({ glossary: false })).expect(201);
+    expect(created.body.glossary).toBe(false);
+    const id = created.body.id as string;
+    await request(app).post(`/api/v1/admin/articles/${id}/publish`).set('Cookie', cookie).send({}).expect(200);
+    const pub = await request(app).get(`/api/v1/articles/${created.body.slug}`).expect(200);
+    expect(pub.body.glossary).toBe(false);
+
+    const on = await request(app).put(`/api/v1/admin/articles/${id}`).set('Cookie', cookie).send(input()).expect(200);
+    expect(on.body.glossary).toBeUndefined();
+    const doc = await Article.findById(id).lean();
+    expect(doc && 'glossary' in doc).toBe(false);
+    expect((await request(app).get(`/api/v1/articles/${created.body.slug}`).expect(200)).body.glossary).toBeUndefined();
+  });
+
+  it('seed đọc `glossary: false` trong frontmatter và gỡ cờ khi tệp bỏ dòng đó', async () => {
+    const dir = mkdtempSync(path.join(tmpdir(), 'tkh-seed-glossary-flag-'));
+    try {
+      cpSync(fixtures, dir, { recursive: true });
+      const file = path.join(dir, 'content', '01-chi-muc.md');
+      const original = readFileSync(file, 'utf8');
+      const flagged = original.replace(/language: vi(\r?\n)/, 'language: vi$1glossary: false$1');
+      expect(flagged).not.toBe(original);
+      writeFileSync(file, flagged);
+      await runSeed({ dataDir: dir, admin, log: quiet });
+      expect((await Article.findOne({ slug: 'chi-muc-co-ban' }).lean())?.glossary).toBe(false);
+
+      writeFileSync(file, original);
+      await runSeed({ dataDir: dir, admin, log: quiet });
+      const after = await Article.findOne({ slug: 'chi-muc-co-ban' }).lean();
+      expect(after && 'glossary' in after).toBe(false);
+    } finally {
+      rmSync(dir, { recursive: true, force: true });
+    }
+  });
+});
+
 describe('từ điển keyword — seed từ terminology.json', () => {
   beforeEach(resetDb);
 
@@ -159,24 +213,28 @@ describe('từ điển keyword — seed từ terminology.json', () => {
             { id: 'deduplication', use: 'khử trùng lặp', english: 'deduplication', glossary: true, definition: 'Loại bỏ bản ghi lặp.' },
             { id: 'no-definition', use: 'x', glossary: true },
             { id: 'not-glossary', use: 'y', definition: 'Không vào từ điển.' },
+            { id: 'sla', use: 'SLA', english: 'Service Level Agreement', aliases: ['sla', 'cam kết dịch vụ'], caseSensitive: true, glossary: true, definition: 'Cam kết chất lượng.' },
           ],
           patterns: [],
         }),
       );
       const first = await runSeed({ dataDir: dir, admin, log: quiet });
-      expect(first.terms).toEqual({ upserted: 2, keptCms: 0 });
+      expect(first.terms).toEqual({ upserted: 3, keptCms: 0 });
+      // alias trùng cách viết chuẩn (khác hoa thường) bị bỏ; tên tiếng Anh đứng trước alias khai báo
+      expect(await Term.findOne({ slug: 'sla' }).lean()).toMatchObject({ aliases: ['Service Level Agreement', 'cam kết dịch vụ'], caseSensitive: true });
+      expect((await Term.findOne({ slug: 'deduplication' }).lean())?.caseSensitive).toBe(false);
       const dedup = await Term.findOne({ slug: 'deduplication' }).lean();
       expect(dedup).toMatchObject({ term: 'khử trùng lặp', english: 'deduplication', aliases: ['deduplication'], autoLink: true, status: 'published' });
       expect((await Term.findOne({ slug: 'smoke-test' }).lean())?.english).toBeUndefined();
 
       await Term.updateOne({ slug: 'smoke-test' }, { $set: { shortDefinition: 'Sửa trong CMS', editedInCms: true } });
       const second = await runSeed({ dataDir: dir, admin, log: quiet });
-      expect(second.terms).toEqual({ upserted: 1, keptCms: 1 });
+      expect(second.terms).toEqual({ upserted: 2, keptCms: 1 });
       expect((await Term.findOne({ slug: 'smoke-test' }).lean())?.shortDefinition).toBe('Sửa trong CMS');
 
       await runSeed({ dataDir: dir, admin, log: quiet, forceContent: true });
       expect((await Term.findOne({ slug: 'smoke-test' }).lean())?.shortDefinition).toBe('Bộ kiểm thử nhỏ.');
-      expect(await Term.countDocuments()).toBe(2);
+      expect(await Term.countDocuments()).toBe(3);
     } finally {
       rmSync(dir, { recursive: true, force: true });
     }

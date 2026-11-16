@@ -37,6 +37,8 @@ export interface IArticle {
   seo?: IArticleSeo;
   /** true khi bài đã được sửa trong CMS — `npm run seed` không ghi đè nội dung nữa (hợp đồng §8.4). */
   editedInCms?: boolean;
+  /** `false` = không đánh dấu keyword của từ điển trong bài này. Vắng = bật (mặc định). */
+  glossary?: boolean;
   stats: { views: number; comments: number; reactions: ReactionCounts };
   createdAt: Date;
   updatedAt: Date;
@@ -66,6 +68,7 @@ const articleSchema = new Schema<IArticle>(
       default: undefined,
     },
     editedInCms: Boolean,
+    glossary: Boolean,
     stats: {
       views: { type: Number, default: 0 },
       comments: { type: Number, default: 0 },

@@ -88,6 +88,8 @@ const articleInputSchema = z.object({
     .array(z.string().trim().toLowerCase().min(1).max(40))
     .max(10)
     .transform((tags) => [...new Set(tags)]),
+  /** `false` = tắt đánh dấu keyword của từ điển cho bài này. */
+  glossary: z.boolean().optional(),
 });
 type ArticleInput = z.output<typeof articleInputSchema>;
 
@@ -238,6 +240,7 @@ export function adminRouter(): Router {
         slug,
         coverImageUrl: input.coverImageUrl,
         seo: seoFields(input),
+        ...(input.glossary === false ? { glossary: false } : {}),
         authorId: user._id,
         status: 'draft',
         // Bài sinh ra trong CMS thuộc quyền CMS — seed không được ghi đè nếu sau này có tệp .md trùng slug.
@@ -268,6 +271,9 @@ export function adminRouter(): Router {
     const seo = seoFields(input);
     if (seo) set.seo = seo;
     else unset.seo = 1;
+    // Chỉ lưu khi tắt (`false`); bật = gỡ trường, cùng quy ước với seed.
+    if (input.glossary === false) set.glossary = false;
+    else unset.glossary = 1;
     const update: Record<string, unknown> = { $set: set };
     if (Object.keys(unset).length) update.$unset = unset;
     try {

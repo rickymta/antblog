@@ -65,6 +65,8 @@ interface FormState {
   seoDescription: string;
   seoOgImageUrl: string;
   seoNoindex: boolean;
+  /** Đánh dấu keyword của từ điển trong bài (mặc định bật). */
+  glossary: boolean;
 }
 
 type FieldKey = keyof FormState;
@@ -84,6 +86,7 @@ const EMPTY: FormState = {
   seoDescription: '',
   seoOgImageUrl: '',
   seoNoindex: false,
+  glossary: true,
 };
 
 function fromArticle(a: AdminArticle): FormState {
@@ -101,6 +104,7 @@ function fromArticle(a: AdminArticle): FormState {
     seoDescription: a.seo?.description ?? '',
     seoOgImageUrl: a.seo?.ogImageUrl ?? '',
     seoNoindex: a.seo?.noindex === true,
+    glossary: a.glossary !== false,
   };
 }
 
@@ -115,6 +119,8 @@ function toInput(f: FormState): ArticleInput {
     categoryId: f.categoryId,
     level: f.level,
     tags: f.tags,
+    // Chỉ gửi khi tắt; bỏ trường = bật (API gỡ cờ).
+    glossary: f.glossary ? undefined : false,
     // Luôn gửi `seo`: trường rỗng ⇒ API gỡ ghi đè tương ứng.
     seo: {
       title: f.seoTitle.trim() || undefined,
@@ -820,7 +826,7 @@ function ArticleEditor({ article: initialArticle }: { article: AdminArticle | un
                 role="region"
                 tabIndex={0}
               >
-                {deferredContent.trim() ? <ArticleContent markdown={deferredContent} glossary={glossary} /> : <p className="text-sm text-muted italic">{t('editor.previewEmpty')}</p>}
+                {deferredContent.trim() ? <ArticleContent markdown={deferredContent} glossary={form.glossary ? glossary : undefined} /> : <p className="text-sm text-muted italic">{t('editor.previewEmpty')}</p>}
               </div>
             )}
           </div>
@@ -988,6 +994,13 @@ function ArticleEditor({ article: initialArticle }: { article: AdminArticle | un
                 )}
               </Field>
             </div>
+            <label className="flex items-start gap-2.5 text-sm">
+              <input type="checkbox" className="mt-0.5 size-4 accent-[var(--color-primary)]" checked={form.glossary} onChange={(e) => update('glossary', e.target.checked)} />
+              <span>
+                <span className="font-medium text-ink">{t('editor.glossary')}</span>
+                <span className="mt-0.5 block text-xs text-muted">{t('editor.glossaryHint')}</span>
+              </span>
+            </label>
             <Field
               label={t('editor.fieldTags')}
               error={visibleErrors.tags}

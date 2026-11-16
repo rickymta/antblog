@@ -10,7 +10,8 @@
 | — Xem trước trong CMS | Xong | `useGlossary` trong `apps/admin/src/lib/queries.ts`. Bản xem trước chỉ đánh dấu keyword, chưa có hộp thoại |
 | 4. Trang quản trị keyword | Xong | `apps/admin/src/pages/TermsPage.tsx` (route `/terms`, chỉ admin): danh sách có tìm kiếm và lọc, form có xem trước hộp thoại, nút đếm số bài chứa keyword (`POST /admin/terms/usage`, `api/src/services/glossaryUsage.ts`) |
 | 5. Trang `/glossary`, SEO | Xong | `apps/web/src/app/glossary/page.tsx` (A–Z, nhóm theo chữ cái), `glossary/[slug]/page.tsx` (định nghĩa, giải thích dài, cách gọi khác, bài liên quan); JSON-LD `DefinedTermSet`/`DefinedTerm`, sitemap, link ở footer, link "Xem thêm" trong hộp thoại. `GET /glossary/:slug` trả tối đa 6 bài đã xuất bản có nhắc tới thuật ngữ |
-| Frontmatter `glossary: false` | Chưa làm | Hiện tắt từng vùng bằng `data-no-glossary` |
+| Tắt từ điển cho cả bài | Xong | Frontmatter `glossary: false` (seed) hoặc ô "Đánh dấu keyword" trong trình soạn bài CMS. Trường `glossary` chỉ lưu khi bằng `false`; trang bài và bản xem trước bỏ qua việc dò keyword. Tắt từng vùng vẫn dùng `data-no-glossary` |
+| Dữ liệu từ điển | 67 thuật ngữ | Seed từ các mục `glossary: true` trong `api/seed/terminology.json`. Thuật ngữ chọn theo số bài nhắc tới (đếm trên văn xuôi, đã che code); bỏ các từ quá chung hoặc nhiều nghĩa như index, timeout, transaction, baseline, coverage. Mục có thể khai báo thêm `aliases` và `caseSensitive` (ví dụ `test oracle` có alias `oracle` và phân biệt hoa thường để không khớp tên hệ quản trị Oracle) |
 
 Test: `api/test/glossary.test.ts` (API, seed, đếm số bài), `glossary-matcher.test.ts` (bộ dò), `glossary-render.test.ts` (plugin chạy qua `ArticleContent`).
 
@@ -72,7 +73,7 @@ Viết plugin `rehypeGlossary` trong `packages/ui/src/glossary/`, chạy sau `re
 - **Bỏ qua** text nằm trong: `pre`, `code`, `a`, `h1`–`h6`, `dfn`, `abbr`, `kbd`, `script`, `style`, `svg`, và mọi phần tử có `data-no-glossary`.
 - **Chỉ lần đầu:** ghi nhớ các slug đã đánh dấu trong lúc duyệt cây.
 - **Đầu ra:** `<dfn class="tkh-term" data-term="smoke-test" tabindex="0">smoke test</dfn>`. Giữ nguyên chữ gốc trong bài; chỉ bọc thêm thẻ.
-- **Tác giả gắn thủ công:** cú pháp `<dfn data-term="cap-theorem">định lý CAP</dfn>` (HTML thô, đã được `rehypeRaw` hỗ trợ). Không cần plugin remark mới. Nếu cần tắt dò cho cả bài, thêm frontmatter `glossary: false`. Trường này phải được thêm vào schema `frontmatter` trong `api/seed/lib.ts`, model `Article` và form trong CMS; nếu không, `z.object` sẽ âm thầm bỏ trường này đi.
+- **Tác giả gắn thủ công:** cú pháp `<dfn data-term="cap-theorem">định lý CAP</dfn>` (HTML thô, đã được `rehypeRaw` hỗ trợ). Không cần plugin remark mới. Nếu cần tắt dò cho cả bài, thêm frontmatter `glossary: false` (đã có trong schema seed, model `Article` và form CMS).
 - **Test** (vitest trong `packages/ui`): chữ có dấu, cụm chồng nhau ("CAP" và "CAP theorem"), phân biệt hoa thường, bỏ qua code và link, chỉ đánh dấu lần đầu, alias.
 
 Trang đọc [`articles/[slug]/page.tsx`](../../apps/web/src/app/articles/[slug]/page.tsx) lấy danh sách term ở server (có cache) và truyền vào `ArticleContent`. Bản xem trước trong admin ([`ArticleEditorPage.tsx`](../../apps/admin/src/pages/ArticleEditorPage.tsx)) lấy danh sách qua React Query để tác giả thấy đúng kết quả đánh dấu.

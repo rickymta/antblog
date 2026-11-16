@@ -30,6 +30,10 @@ export interface TermEntry {
   /** true: đưa vào từ điển keyword (giai đoạn 1). */
   glossary?: boolean;
   definition?: string;
+  /** Cách viết khác cũng được dò trong bài (từ điển keyword). */
+  aliases?: string[];
+  /** true: từ điển dò phân biệt hoa thường (từ viết tắt dễ trùng từ thường). */
+  caseSensitive?: boolean;
   note?: string;
   avoid?: AvoidRule[];
 }

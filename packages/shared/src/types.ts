@@ -95,6 +95,8 @@ export interface ArticleDetail extends ArticleCard {
   seo?: ArticleSeo;
   learningPath?: ArticleLearningPathRef;
   myReactions: ReactionType[];
+  /** `false` = không đánh dấu keyword của từ điển trong bài này. Vắng = bật. */
+  glossary?: false;
 }
 
 /** Dữ liệu dựng sitemap.xml (hợp đồng §8.3). */
@@ -230,6 +232,8 @@ export interface ArticleInput {
   tags: string[];
   /** Ghi đè SEO; gửi `{}` hoặc bỏ trường để xoá ghi đè. */
   seo?: ArticleSeo;
+  /** `false` = tắt đánh dấu keyword của từ điển; bỏ trường = bật. */
+  glossary?: boolean;
 }
 
 /** Thân `POST /admin/articles/:id/publish` — bỏ trống = xuất bản ngay; có `publishAt` ở tương lai = lên lịch. */
