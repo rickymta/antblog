@@ -1,0 +1,2156 @@
+{
+  "version": 1,
+  "category": "postgresql",
+  "generatedAt": "2026-11-16",
+  "source": {
+    "articles": 60,
+    "checkedAgainst": "api/seed/terminology.json (working tree 16/11/2026, 72 mục)",
+    "occurrencesMethod": "occurrences = số bài (trên 60 bài của series) có ít nhất một chỗ khớp term/english/aliases trong văn xuôi; mentions = tổng số chỗ khớp. Bỏ frontmatter, khối code, inline code, <pre>/<code>/<script>/<style>, thẻ HTML (giữ alt/title/aria-label), đích liên kết, URL. Ranh giới từ Unicode, cụm dài thắng cụm ngắn, tôn trọng caseSensitive. Vẫn tính chữ trong heading và link, nên là ước lượng trên so với trang đọc. outsideSeriesArticles = số bài ngoài series có chỗ khớp, để đánh giá rủi ro nếu bỏ phạm vi chủ đề."
+  },
+  "conflicts": [
+    {
+      "candidate": "idempotency",
+      "existingId": "idempotency",
+      "action": "keep-existing",
+      "note": "Cùng slug và cùng alias (idempotent, idempotency key). Định nghĩa có sẵn đúng và chung cho mọi series.",
+      "proposedAliases": [
+        "tính idempotent"
+      ],
+      "occurrences": 12,
+      "candidateDefinition": "Tính chất một thao tác chạy lại nhiều lần cho cùng kết quả như chạy một lần. Thường đạt được bằng khoá idempotency do client gửi kèm và một ràng buộc unique trên khoá đó."
+    },
+    {
+      "candidate": "outbox",
+      "existingId": "outbox-pattern",
+      "action": "keep-existing",
+      "note": "Cùng các dạng chữ (outbox, outbox pattern, transactional outbox) nhưng khác slug; thêm mục mới sẽ làm hai mục tranh nhau một chữ. Giữ outbox-pattern.",
+      "occurrences": 8,
+      "candidateDefinition": "Mẫu ghi sự kiện cần gửi vào một bảng outbox trong cùng giao dịch với dữ liệu nghiệp vụ; một tiến trình khác đọc bảng và gửi đi sau. Tránh tình trạng dữ liệu đã lưu mà sự kiện bị mất, hoặc ngược lại."
+    },
+    {
+      "candidate": "connection-pool",
+      "existingId": "connection-pool",
+      "action": "keep-existing",
+      "note": "Cùng slug. Không thêm alias bare \"pool\" vào mục có sẵn: mục đó áp dụng toàn site, mà series khác có thread pool, worker pool. 58 chỗ \"pool\" trong series PostgreSQL vì vậy sẽ không được đánh dấu.",
+      "occurrences": 15,
+      "candidateDefinition": "Bộ giữ sẵn một số kết nối database để ứng dụng mượn rồi trả, thay vì mở kết nối mới mỗi request. Mỗi kết nối PostgreSQL là một tiến trình riêng nên số kết nối phải được giới hạn."
+    },
+    {
+      "candidate": "deadlock",
+      "existingId": "deadlock",
+      "action": "keep-existing",
+      "note": "Cùng slug và alias \"khoá chết\". Chi tiết riêng PostgreSQL (deadlock_timeout mặc định 1 giây, SQLSTATE 40P01, khoá theo thứ tự cố định) nên đưa vào body của trang /glossary/deadlock thay vì định nghĩa ngắn.",
+      "occurrences": 5,
+      "candidateDefinition": "Hai hay nhiều giao dịch chờ khoá của nhau thành vòng tròn. Sau deadlock_timeout (mặc định 1 giây), PostgreSQL phát hiện và huỷ một giao dịch với lỗi 40P01. Phòng bằng cách khoá theo thứ tự cố định."
+    },
+    {
+      "candidate": "mvcc",
+      "existingId": "mvcc",
+      "action": "keep-existing",
+      "note": "Cùng slug. Mục có sẵn đã nhắc PostgreSQL.",
+      "proposedAliases": [
+        "đa phiên bản"
+      ],
+      "occurrences": 14,
+      "candidateDefinition": "Cách PostgreSQL cho đọc và ghi chạy song song: mỗi lần sửa tạo phiên bản dòng mới, mỗi giao dịch đọc theo snapshot của mình nên người đọc không chặn người ghi và ngược lại. Phiên bản cũ được VACUUM dọn sau."
+    },
+    {
+      "candidate": "optimistic-concurrency",
+      "existingId": "optimistic-concurrency",
+      "action": "keep-existing",
+      "note": "Cùng slug và alias.",
+      "proposedAliases": [
+        "cập nhật có điều kiện"
+      ],
+      "occurrences": 5,
+      "candidateDefinition": "Không khoá khi đọc; lúc ghi kiểm tra dữ liệu chưa đổi, thường bằng UPDATE … WHERE version = giá trị đã đọc. Nếu 0 dòng bị sửa thì có người ghi trước, ứng dụng đọc lại hoặc báo xung đột."
+    },
+    {
+      "candidate": "cte",
+      "existingId": "cte",
+      "action": "keep-existing",
+      "note": "Cùng slug. Mục có sẵn thiếu chi tiết inline từ PostgreSQL 12 (CTE dùng một lần được gộp vào câu chính, MATERIALIZED để buộc tính riêng); đưa vào body nếu cần.",
+      "proposedAliases": [
+        "CTE đệ quy",
+        "recursive CTE"
+      ],
+      "occurrences": 10,
+      "candidateDefinition": "Truy vấn con đặt tên bằng WITH … AS (…) rồi dùng như một bảng tạm trong câu chính. Từ PostgreSQL 12, CTE không đệ quy dùng một lần thường được planner gộp vào câu chính; viết MATERIALIZED để buộc tính riêng."
+    },
+    {
+      "candidate": "failover",
+      "existingId": "failover",
+      "action": "keep-existing",
+      "note": "Cùng slug, định nghĩa có sẵn đủ dùng.",
+      "occurrences": 10,
+      "candidateDefinition": "Chuyển vai trò nhận ghi sang một bản sao khi máy chính hỏng, kèm việc đổi đường kết nối của ứng dụng. Với replication bất đồng bộ, failover có thể mất phần dữ liệu chưa kịp sao."
+    },
+    {
+      "candidate": "rpo",
+      "existingId": "rpo",
+      "action": "keep-existing",
+      "note": "Cùng slug, cùng caseSensitive.",
+      "occurrences": 5,
+      "candidateDefinition": "Lượng dữ liệu tối đa được phép mất khi sự cố, tính bằng thời gian, ví dụ RPO 5 phút. Quyết định tần suất backup, archive WAL và có cần replication đồng bộ không."
+    },
+    {
+      "candidate": "rto",
+      "existingId": "rto",
+      "action": "keep-existing",
+      "note": "Cùng slug, cùng caseSensitive.",
+      "occurrences": 4,
+      "candidateDefinition": "Thời gian tối đa được phép để hệ thống hoạt động lại sau sự cố. Quyết định chọn restore từ backup, promote standby hay failover tự động."
+    },
+    {
+      "candidate": "cardinality",
+      "existingId": "cardinality",
+      "action": "update-existing-definition",
+      "note": "XUNG ĐỘT NGHĨA. Mục có sẵn định nghĩa cardinality là \"số giá trị khác nhau của một cột hoặc nhãn\". Series PostgreSQL dùng hai nghĩa khác: quan hệ 1–1/1–n/n–n (PG-016) và số dòng planner ước lượng (PG-027, rows=…). Hộp thoại hiện tại sẽ giải thích sai ở 7 bài. Vì chưa có categoryIds để tách theo chủ đề, đề xuất viết lại định nghĩa có sẵn bao cả ba nghĩa.",
+      "proposedDefinition": "Số lượng phần tử, tuỳ ngữ cảnh: số giá trị khác nhau của một cột hay nhãn metric; số dòng bên này ứng với một dòng bên kia (1–1, 1–n, n–n); hoặc số dòng planner ước lượng một bước trả về. Ước lượng sai là nguyên nhân phổ biến của plan tệ.",
+      "proposedAliases": [
+        "ước lượng cardinality"
+      ],
+      "occurrences": 7,
+      "candidateDefinition": "Trong mô hình quan hệ: số dòng bên này ứng với một dòng bên kia (1–1, 1–n, n–n). Trong kế hoạch thực thi: số dòng planner ước lượng một bước sẽ trả về (rows=…); ước lượng sai là nguyên nhân phổ biến của plan tệ."
+    },
+    {
+      "existingId": "replica",
+      "candidate": "standby",
+      "action": "no-duplicate-aliases",
+      "note": "Mục replica có sẵn (alias read replica) trùng hai alias ban đầu của standby; đã bỏ hai alias đó khỏi standby. Mục replica-identity trong file này còn giúp \"replica identity\" không bị mục replica bắt nhầm."
+    },
+    {
+      "existingId": "query-plan",
+      "candidate": "execution-plan (deferred)",
+      "action": "add-alias-to-existing",
+      "note": "Ứng viên execution-plan đã hoãn vì trùng mục query-plan. Series viết \"kế hoạch thực thi\" 9 lần ở 8 bài, mục có sẵn chỉ có \"kế hoạch truy vấn\".",
+      "proposedAliases": [
+        "kế hoạch thực thi",
+        "query plan"
+      ]
+    },
+    {
+      "existingId": "least-privilege",
+      "candidate": "least-privilege (deferred)",
+      "action": "keep-existing",
+      "note": "Đã có sẵn; xuất hiện ở 7 bài của series."
+    },
+    {
+      "existingId": "at-least-once",
+      "candidate": "at-least-once (deferred)",
+      "action": "keep-existing",
+      "note": "Đã có sẵn."
+    },
+    {
+      "existingId": "deduplication",
+      "candidate": null,
+      "action": "related",
+      "note": "Gần nghĩa idempotency (khử trùng lặp là một cách đạt idempotency); liên kết chéo trong body, không gộp."
+    },
+    {
+      "existingId": "race-condition",
+      "candidate": "lost-update",
+      "action": "related",
+      "note": "lost update là một dạng race condition cụ thể ở tầng database. Không trùng chữ; giữ cả hai."
+    },
+    {
+      "existingId": "version",
+      "candidate": "tuple, dead-tuple",
+      "action": "wording-ok",
+      "note": "terminology.json chốt \"phiên bản\" cho văn xuôi; alias \"phiên bản dòng\", \"phiên bản chết\" theo đúng quy ước. Mục version không có glossary nên không đụng nhau khi dò."
+    },
+    {
+      "existingId": "equivalence-partitioning",
+      "candidate": "partitioning",
+      "action": "no-action",
+      "note": "\"phân vùng tương đương\" dài hơn \"phân vùng\" nên bộ dò ưu tiên đúng; không có trong series PostgreSQL."
+    },
+    {
+      "existingId": "fixture",
+      "candidate": null,
+      "action": "no-action",
+      "note": "Mục fixture có sẵn (nghĩa kiểm thử) sẽ được đánh dấu ở 30 bài PostgreSQL, nơi \"fixture\" là dữ liệu lab tái lập được. Nghĩa vẫn khớp, chỉ ghi nhận để biết mật độ đánh dấu."
+    }
+  ],
+  "terms": [
+    {
+      "slug": "database-cluster",
+      "term": "cluster",
+      "english": "database cluster",
+      "aliases": [],
+      "shortDefinition": "Trong PostgreSQL, cluster là tập các database do một server quản lý, dùng chung một data directory, một cổng và một bộ role. Không phải cụm nhiều máy như nghĩa thông thường.",
+      "caseSensitive": false,
+      "autoLink": false,
+      "categories": [
+        "postgresql"
+      ],
+      "relatedArticleSlugs": [
+        "postgresql-cai-dat-lab-psql-ket-noi",
+        "postgresql-la-gi-va-vai-tro-trong-toi-noi"
+      ],
+      "reviewNote": "\"cluster\" xuất hiện ~240 lần, có chỗ mang nghĩa cụm HA nhiều node; để autoLink false, tác giả gắn tay ở lần giải thích đầu. Không alias \"cụm\".",
+      "occurrences": 35,
+      "mentions": 222,
+      "outsideSeriesArticles": 50
+    },
+    {
+      "slug": "schema",
+      "term": "schema",
+      "aliases": [
+        "lược đồ"
+      ],
+      "shortDefinition": "Trong PostgreSQL, schema là không gian tên bên trong một database, chứa bảng, view, hàm…; tên đầy đủ có dạng schema.bảng. Theo nghĩa rộng, \"schema\" còn chỉ toàn bộ thiết kế bảng và ràng buộc của ứng dụng.",
+      "caseSensitive": false,
+      "autoLink": true,
+      "categories": [
+        "postgresql"
+      ],
+      "relatedArticleSlugs": [
+        "postgresql-la-gi-va-vai-tro-trong-toi-noi",
+        "postgresql-schema-migration-tuong-thich"
+      ],
+      "reviewNote": "Bài dùng cả hai nghĩa (namespace và thiết kế dữ liệu); định nghĩa nêu cả hai.",
+      "occurrences": 27,
+      "mentions": 160,
+      "outsideSeriesArticles": 160
+    },
+    {
+      "slug": "system-catalog",
+      "term": "catalog",
+      "english": "system catalog",
+      "aliases": [],
+      "shortDefinition": "Các bảng hệ thống (pg_class, pg_attribute, pg_roles…) nơi PostgreSQL lưu định nghĩa bảng, cột, index, role và quyền. Truy vấn catalog là cách kiểm chứng schema thật thay vì tin vào file migration.",
+      "caseSensitive": false,
+      "autoLink": true,
+      "categories": [
+        "postgresql"
+      ],
+      "relatedArticleSlugs": [
+        "postgresql-la-gi-va-vai-tro-trong-toi-noi",
+        "postgresql-role-grant-least-privilege"
+      ],
+      "occurrences": 14,
+      "mentions": 23,
+      "outsideSeriesArticles": 17
+    },
+    {
+      "slug": "pglite",
+      "term": "PGlite",
+      "aliases": [],
+      "shortDefinition": "PostgreSQL biên dịch sang WebAssembly, chạy ngay trong tiến trình Node.js hoặc trình duyệt mà không cần cài server. Lab của series dùng nó cho SQL đơn phiên; chỉ có một kết nối nên các bài cần nhiều phiên, replication hay backup dùng server PostgreSQL thật.",
+      "caseSensitive": false,
+      "autoLink": true,
+      "categories": [
+        "postgresql"
+      ],
+      "relatedArticleSlugs": [
+        "postgresql-cai-dat-lab-psql-ket-noi"
+      ],
+      "reviewNote": "Kiểm lại với README lab: PGlite chỉ phục vụ một kết nối tại một thời điểm.",
+      "occurrences": 26,
+      "mentions": 56,
+      "outsideSeriesArticles": 21
+    },
+    {
+      "slug": "sqlstate",
+      "term": "SQLSTATE",
+      "aliases": [],
+      "shortDefinition": "Mã lỗi 5 ký tự theo chuẩn SQL mà PostgreSQL trả kèm mỗi lỗi, ví dụ 23505 (vi phạm unique), 40001 (lỗi tuần tự hoá), 40P01 (deadlock). Ứng dụng nên rẽ nhánh theo mã này, không theo nội dung thông báo.",
+      "caseSensitive": true,
+      "autoLink": true,
+      "categories": [
+        "postgresql"
+      ],
+      "relatedArticleSlugs": [
+        "postgresql-create-table-constraints",
+        "postgresql-serializable-retry"
+      ],
+      "occurrences": 27,
+      "mentions": 50,
+      "outsideSeriesArticles": 25
+    },
+    {
+      "slug": "primary-key",
+      "term": "khoá chính",
+      "english": "primary key",
+      "aliases": [],
+      "shortDefinition": "Cột hoặc nhóm cột định danh duy nhất mỗi dòng trong bảng: không trùng và không NULL. PostgreSQL tự tạo một unique index B-tree cho khoá chính.",
+      "caseSensitive": false,
+      "autoLink": true,
+      "categories": [
+        "postgresql"
+      ],
+      "relatedArticleSlugs": [
+        "postgresql-bang-dong-cot-primary-foreign-key",
+        "heap-ctid-va-primary-key"
+      ],
+      "occurrences": 31,
+      "mentions": 111,
+      "outsideSeriesArticles": 21
+    },
+    {
+      "slug": "normalization",
+      "term": "chuẩn hoá",
+      "english": "normalization",
+      "aliases": [
+        "dạng chuẩn"
+      ],
+      "shortDefinition": "Cách tách dữ liệu thành các bảng sao cho mỗi sự thật chỉ lưu một chỗ, theo các dạng chuẩn (1NF, 2NF, 3NF…), để tránh bất thường khi thêm, sửa, xoá.",
+      "caseSensitive": false,
+      "autoLink": true,
+      "categories": [
+        "postgresql"
+      ],
+      "relatedArticleSlugs": [
+        "postgresql-mo-hinh-quan-he-chuan-hoa"
+      ],
+      "reviewNote": "\"chuẩn hoá\" còn nghĩa chuẩn hoá chuỗi/dữ liệu đầu vào; giữ trong phạm vi postgresql.",
+      "occurrences": 10,
+      "mentions": 28,
+      "outsideSeriesArticles": 59
+    },
+    {
+      "slug": "denormalization",
+      "term": "phi chuẩn hoá",
+      "english": "denormalization",
+      "aliases": [],
+      "shortDefinition": "Cố ý lưu trùng hoặc lưu sẵn dữ liệu suy ra được (ví dụ tên khách trong bảng chuyến, tổng tiền đã tính) để đọc nhanh hơn, đổi lại phải tự giữ các bản sao nhất quán.",
+      "caseSensitive": false,
+      "autoLink": true,
+      "categories": [
+        "postgresql"
+      ],
+      "relatedArticleSlugs": [
+        "postgresql-mo-hinh-quan-he-chuan-hoa",
+        "postgresql-materialized-view-reporting"
+      ],
+      "occurrences": 1,
+      "mentions": 6,
+      "outsideSeriesArticles": 0
+    },
+    {
+      "slug": "upsert",
+      "term": "upsert",
+      "aliases": [
+        "INSERT … ON CONFLICT",
+        "ON CONFLICT"
+      ],
+      "shortDefinition": "Thêm dòng, hoặc cập nhật/bỏ qua nếu dòng đã tồn tại theo một ràng buộc unique, trong một câu INSERT … ON CONFLICT nguyên tử. PostgreSQL dựa vào unique index hoặc ràng buộc unique để phát hiện dòng trùng.",
+      "caseSensitive": false,
+      "autoLink": true,
+      "categories": [
+        "postgresql"
+      ],
+      "relatedArticleSlugs": [
+        "postgresql-upsert-on-conflict"
+      ],
+      "occurrences": 6,
+      "mentions": 18,
+      "outsideSeriesArticles": 14
+    },
+    {
+      "slug": "keyset-pagination",
+      "term": "keyset",
+      "english": "keyset pagination",
+      "aliases": [
+        "phân trang keyset",
+        "seek pagination"
+      ],
+      "shortDefinition": "Phân trang bằng cách nhớ khoá của dòng cuối trang trước và lọc WHERE (khoá) > (giá trị đó), thay vì OFFSET. Không phải đọc rồi bỏ các trang trước và không lệch khi có dòng mới chèn vào.",
+      "caseSensitive": false,
+      "autoLink": true,
+      "categories": [
+        "postgresql"
+      ],
+      "relatedArticleSlugs": [
+        "postgresql-pagination-keyset"
+      ],
+      "occurrences": 5,
+      "mentions": 21,
+      "outsideSeriesArticles": 3
+    },
+    {
+      "slug": "page",
+      "term": "page",
+      "aliases": [],
+      "shortDefinition": "Đơn vị đọc ghi cố định của PostgreSQL, mặc định 8 KB. Bảng và index đều là chuỗi page; một dòng nằm trọn trong một page (giá trị lớn được TOAST tách ra), và I/O luôn tính theo page chứ không theo dòng.",
+      "caseSensitive": false,
+      "autoLink": true,
+      "categories": [
+        "postgresql"
+      ],
+      "relatedArticleSlugs": [
+        "page-don-vi-doc-ghi"
+      ],
+      "reviewNote": "Không alias \"block\" (trùng \"transaction block\") và \"trang\" (trùng trang web). Bài dùng \"block\" như tên khác của page ở PG-022.",
+      "occurrences": 17,
+      "mentions": 522,
+      "outsideSeriesArticles": 7
+    },
+    {
+      "slug": "heap",
+      "term": "heap",
+      "aliases": [],
+      "shortDefinition": "Cách PostgreSQL lưu dữ liệu bảng: các dòng nằm trong page theo chỗ trống còn lại, không theo thứ tự khoá. Index là cấu trúc riêng trỏ về vị trí (ctid) của dòng trong heap.",
+      "caseSensitive": false,
+      "autoLink": true,
+      "categories": [
+        "postgresql"
+      ],
+      "relatedArticleSlugs": [
+        "heap-ctid-va-primary-key",
+        "page-don-vi-doc-ghi"
+      ],
+      "occurrences": 15,
+      "mentions": 116,
+      "outsideSeriesArticles": 26
+    },
+    {
+      "slug": "tuple",
+      "term": "tuple",
+      "aliases": [
+        "phiên bản dòng",
+        "row version"
+      ],
+      "shortDefinition": "Một phiên bản vật lý của một dòng trong heap. UPDATE không sửa tại chỗ mà ghi tuple mới và đánh dấu tuple cũ hết hiệu lực, nên một dòng logic có thể có nhiều tuple cùng lúc.",
+      "caseSensitive": false,
+      "autoLink": true,
+      "categories": [
+        "postgresql"
+      ],
+      "relatedArticleSlugs": [
+        "postgresql-mvcc-snapshot",
+        "heap-ctid-va-primary-key"
+      ],
+      "occurrences": 16,
+      "mentions": 41,
+      "outsideSeriesArticles": 17
+    },
+    {
+      "slug": "ctid",
+      "term": "ctid",
+      "english": "tuple identifier",
+      "aliases": [],
+      "shortDefinition": "Cột hệ thống cho biết vị trí vật lý của tuple: (số page, số thứ tự trong page). ctid đổi khi UPDATE hoặc VACUUM FULL, nên không dùng làm định danh lâu dài của dòng.",
+      "caseSensitive": true,
+      "autoLink": true,
+      "categories": [
+        "postgresql"
+      ],
+      "relatedArticleSlugs": [
+        "heap-ctid-va-primary-key"
+      ],
+      "occurrences": 8,
+      "mentions": 36,
+      "outsideSeriesArticles": 0
+    },
+    {
+      "slug": "hot-update",
+      "term": "HOT update",
+      "english": "heap-only tuple",
+      "aliases": [
+        "HOT"
+      ],
+      "shortDefinition": "UPDATE không đổi cột nào có index và tuple mới vừa trong cùng page: PostgreSQL không phải thêm mục mới vào các index, chỉ nối tuple cũ sang tuple mới trong page. Rẻ hơn nhiều so với UPDATE thường.",
+      "caseSensitive": true,
+      "autoLink": true,
+      "categories": [
+        "postgresql"
+      ],
+      "relatedArticleSlugs": [
+        "postgresql-mvcc-snapshot",
+        "postgresql-vacuum-autovacuum-bloat"
+      ],
+      "reviewNote": "Chính xác hơn: index loại summarizing (BRIN) không chặn HOT từ PG 16. Định nghĩa ngắn đã lược chi tiết này.",
+      "occurrences": 9,
+      "mentions": 66,
+      "outsideSeriesArticles": 1
+    },
+    {
+      "slug": "b-tree",
+      "term": "B-tree",
+      "aliases": [
+        "btree"
+      ],
+      "shortDefinition": "Loại index mặc định của PostgreSQL: cây cân bằng giữ khoá theo thứ tự, phục vụ so sánh =, <, >, BETWEEN và ORDER BY. Unique index và khoá chính đều là B-tree.",
+      "caseSensitive": false,
+      "autoLink": true,
+      "categories": [
+        "postgresql"
+      ],
+      "relatedArticleSlugs": [
+        "postgresql-btree-index-co-ban",
+        "postgresql-index-nhieu-cot-partial-expression"
+      ],
+      "occurrences": 13,
+      "mentions": 62,
+      "outsideSeriesArticles": 3
+    },
+    {
+      "slug": "gin",
+      "term": "GIN",
+      "english": "Generalized Inverted Index",
+      "aliases": [],
+      "shortDefinition": "Index \"đảo ngược\": với mỗi phần tử (khoá JSONB, từ, trigram) lưu danh sách các dòng chứa nó. Hợp với truy vấn \"chứa\" như @> trên JSONB hay mảng; ghi chậm và tốn chỗ hơn B-tree.",
+      "caseSensitive": true,
+      "autoLink": true,
+      "categories": [
+        "postgresql"
+      ],
+      "relatedArticleSlugs": [
+        "postgresql-gin-gist-brin-lua-chon",
+        "postgresql-jsonb-quan-he"
+      ],
+      "occurrences": 8,
+      "mentions": 52,
+      "outsideSeriesArticles": 0
+    },
+    {
+      "slug": "gist",
+      "term": "GiST",
+      "english": "Generalized Search Tree",
+      "aliases": [],
+      "shortDefinition": "Khung index cây tổng quát cho dữ liệu không có thứ tự tuyến tính: hình học, khoảng (range), toạ độ PostGIS, tìm gần nhất. Hỗ trợ ràng buộc loại trừ (EXCLUDE) chống chồng lấn.",
+      "caseSensitive": true,
+      "autoLink": true,
+      "categories": [
+        "postgresql"
+      ],
+      "relatedArticleSlugs": [
+        "postgresql-gin-gist-brin-lua-chon",
+        "postgresql-extension-postgis-pgvector"
+      ],
+      "occurrences": 6,
+      "mentions": 28,
+      "outsideSeriesArticles": 1
+    },
+    {
+      "slug": "brin",
+      "term": "BRIN",
+      "english": "Block Range Index",
+      "aliases": [],
+      "shortDefinition": "Index rất nhỏ chỉ lưu min/max cho mỗi dải page liên tiếp. Hiệu quả khi giá trị cột tương quan với thứ tự ghi vật lý, như thời điểm tạo của bảng chỉ chèn thêm; vô ích nếu dữ liệu xáo trộn.",
+      "caseSensitive": true,
+      "autoLink": true,
+      "categories": [
+        "postgresql"
+      ],
+      "relatedArticleSlugs": [
+        "postgresql-gin-gist-brin-lua-chon"
+      ],
+      "occurrences": 7,
+      "mentions": 28,
+      "outsideSeriesArticles": 0
+    },
+    {
+      "slug": "multicolumn-index",
+      "term": "index nhiều cột",
+      "english": "multicolumn index",
+      "aliases": [],
+      "shortDefinition": "Index trên nhiều cột theo thứ tự khai báo. B-tree dùng tốt nhất khi điều kiện lọc bắt đầu từ cột đầu; thứ tự cột quyết định truy vấn nào hưởng lợi.",
+      "caseSensitive": false,
+      "autoLink": true,
+      "categories": [
+        "postgresql"
+      ],
+      "relatedArticleSlugs": [
+        "postgresql-index-nhieu-cot-partial-expression"
+      ],
+      "occurrences": 7,
+      "mentions": 12,
+      "outsideSeriesArticles": 0
+    },
+    {
+      "slug": "partial-index",
+      "term": "partial index",
+      "aliases": [
+        "index một phần"
+      ],
+      "shortDefinition": "Index có mệnh đề WHERE, chỉ chứa các dòng thoả điều kiện, ví dụ chỉ chuyến đang chờ. Nhỏ hơn và rẻ hơn khi ghi; planner chỉ dùng khi điều kiện truy vấn suy ra được điều kiện của index.",
+      "caseSensitive": false,
+      "autoLink": true,
+      "categories": [
+        "postgresql"
+      ],
+      "relatedArticleSlugs": [
+        "postgresql-index-nhieu-cot-partial-expression"
+      ],
+      "occurrences": 6,
+      "mentions": 14,
+      "outsideSeriesArticles": 2
+    },
+    {
+      "slug": "skip-scan",
+      "term": "skip scan",
+      "aliases": [],
+      "shortDefinition": "Cách quét B-tree nhiều cột có từ PostgreSQL 18: khi truy vấn không lọc cột đầu, executor nhảy qua từng giá trị khác nhau của cột đầu thay vì quét cả index. Chỉ có lợi khi cột đầu có ít giá trị khác nhau.",
+      "caseSensitive": false,
+      "autoLink": true,
+      "categories": [
+        "postgresql"
+      ],
+      "relatedArticleSlugs": [
+        "postgresql-index-nhieu-cot-partial-expression",
+        "postgresql-btree-index-co-ban"
+      ],
+      "occurrences": 3,
+      "mentions": 14,
+      "outsideSeriesArticles": 0
+    },
+    {
+      "slug": "planner",
+      "term": "planner",
+      "english": "query planner",
+      "aliases": [
+        "optimizer",
+        "bộ lập kế hoạch"
+      ],
+      "shortDefinition": "Thành phần của PostgreSQL chọn cách thực thi câu SQL: quét bảng hay index, thứ tự và kiểu join. Planner so chi phí ước lượng dựa trên thống kê, nên thống kê sai dẫn tới plan sai.",
+      "caseSensitive": false,
+      "autoLink": true,
+      "categories": [
+        "postgresql"
+      ],
+      "relatedArticleSlugs": [
+        "postgresql-explain-ke-hoach-thuc-thi",
+        "postgresql-statistics-analyze-cardinality"
+      ],
+      "occurrences": 19,
+      "mentions": 103,
+      "outsideSeriesArticles": 6
+    },
+    {
+      "slug": "explain",
+      "term": "EXPLAIN",
+      "aliases": [
+        "EXPLAIN ANALYZE"
+      ],
+      "shortDefinition": "Lệnh in kế hoạch thực thi của một câu SQL. EXPLAIN ANALYZE chạy thật câu lệnh rồi in thêm thời gian và số dòng thực tế từng bước; từ PostgreSQL 18 kèm sẵn thống kê buffer.",
+      "caseSensitive": true,
+      "autoLink": true,
+      "categories": [
+        "postgresql"
+      ],
+      "relatedArticleSlugs": [
+        "postgresql-explain-ke-hoach-thuc-thi",
+        "postgresql-thuc-hanh-toi-uu-truy-van"
+      ],
+      "reviewNote": "PG 18: EXPLAIN ANALYZE tự bật BUFFERS. EXPLAIN ANALYZE trên INSERT/UPDATE/DELETE thực sự ghi dữ liệu.",
+      "occurrences": 11,
+      "mentions": 21,
+      "outsideSeriesArticles": 2
+    },
+    {
+      "slug": "analyze",
+      "term": "ANALYZE",
+      "aliases": [],
+      "shortDefinition": "Lệnh lấy mẫu bảng để cập nhật thống kê cho planner (phân bố giá trị, tỉ lệ NULL, số giá trị khác nhau). Autovacuum tự chạy ANALYZE, nhưng sau khi nạp nhiều dữ liệu nên chạy tay.",
+      "caseSensitive": true,
+      "autoLink": true,
+      "categories": [
+        "postgresql"
+      ],
+      "relatedArticleSlugs": [
+        "postgresql-statistics-analyze-cardinality"
+      ],
+      "reviewNote": "Trùng chữ với tuỳ chọn ANALYZE của EXPLAIN; matcher ưu tiên cụm dài nên \"EXPLAIN ANALYZE\" khớp mục explain.",
+      "occurrences": 9,
+      "mentions": 52,
+      "outsideSeriesArticles": 0
+    },
+    {
+      "slug": "planner-statistics",
+      "term": "statistics",
+      "english": "planner statistics",
+      "aliases": [
+        "extended statistics"
+      ],
+      "shortDefinition": "Số liệu tóm tắt về dữ liệu (số dòng, giá trị phổ biến, histogram, độ tương quan) mà ANALYZE thu và planner dùng để ước lượng. Extended statistics (CREATE STATISTICS) bổ sung quan hệ giữa nhiều cột.",
+      "caseSensitive": false,
+      "autoLink": true,
+      "categories": [
+        "postgresql"
+      ],
+      "relatedArticleSlugs": [
+        "postgresql-statistics-analyze-cardinality"
+      ],
+      "reviewNote": "Không alias bare \"thống kê\" vì trùng nghĩa thống kê nghiệp vụ.",
+      "occurrences": 10,
+      "mentions": 43,
+      "outsideSeriesArticles": 1
+    },
+    {
+      "slug": "seq-scan",
+      "term": "Seq Scan",
+      "english": "sequential scan",
+      "aliases": [
+        "quét tuần tự"
+      ],
+      "shortDefinition": "Node quét toàn bộ page của bảng theo thứ tự. Không phải lúc nào cũng xấu: khi phải đọc phần lớn bảng, quét tuần tự rẻ hơn nhảy qua index.",
+      "caseSensitive": false,
+      "autoLink": true,
+      "categories": [
+        "postgresql"
+      ],
+      "relatedArticleSlugs": [
+        "postgresql-explain-ke-hoach-thuc-thi",
+        "postgresql-btree-index-co-ban"
+      ],
+      "occurrences": 9,
+      "mentions": 49,
+      "outsideSeriesArticles": 1
+    },
+    {
+      "slug": "bitmap-scan",
+      "term": "Bitmap Heap Scan",
+      "english": "bitmap scan",
+      "aliases": [
+        "Bitmap Index Scan"
+      ],
+      "shortDefinition": "Cặp node: Bitmap Index Scan gom vị trí các dòng khớp thành một bitmap, rồi Bitmap Heap Scan đọc heap theo thứ tự page. Nằm giữa Index Scan và Seq Scan; kết hợp được nhiều index bằng AND/OR.",
+      "caseSensitive": false,
+      "autoLink": true,
+      "categories": [
+        "postgresql"
+      ],
+      "relatedArticleSlugs": [
+        "postgresql-btree-index-co-ban",
+        "postgresql-gin-gist-brin-lua-chon"
+      ],
+      "occurrences": 8,
+      "mentions": 20,
+      "outsideSeriesArticles": 0
+    },
+    {
+      "slug": "index-only-scan",
+      "term": "index-only scan",
+      "aliases": [
+        "Index Only Scan"
+      ],
+      "shortDefinition": "Node trả kết quả chỉ từ index, không đọc heap, khi index chứa đủ cột cần. Chỉ bỏ được heap với page được visibility map đánh dấu all-visible; số \"Heap Fetches\" cho biết bao nhiêu lần vẫn phải đọc heap.",
+      "caseSensitive": false,
+      "autoLink": true,
+      "categories": [
+        "postgresql"
+      ],
+      "relatedArticleSlugs": [
+        "postgresql-index-only-scan-visibility-map"
+      ],
+      "occurrences": 7,
+      "mentions": 25,
+      "outsideSeriesArticles": 0
+    },
+    {
+      "slug": "visibility-map",
+      "term": "visibility map",
+      "aliases": [
+        "bản đồ hiển thị",
+        "all-visible"
+      ],
+      "shortDefinition": "Bitmap đi kèm mỗi bảng, hai bit cho mỗi page: all-visible (mọi tuple đều thấy được với mọi giao dịch) và all-frozen. VACUUM cập nhật nó; index-only scan và VACUUM dựa vào nó để bỏ qua page.",
+      "caseSensitive": false,
+      "autoLink": true,
+      "categories": [
+        "postgresql"
+      ],
+      "relatedArticleSlugs": [
+        "postgresql-index-only-scan-visibility-map",
+        "postgresql-vacuum-autovacuum-bloat"
+      ],
+      "occurrences": 6,
+      "mentions": 28,
+      "outsideSeriesArticles": 1
+    },
+    {
+      "slug": "disk-spill",
+      "term": "tràn đĩa",
+      "english": "spill to disk",
+      "aliases": [
+        "spill",
+        "tràn ra đĩa"
+      ],
+      "shortDefinition": "Khi Sort, Hash hoặc HashAggregate cần nhiều hơn work_mem (với hash là work_mem × hash_mem_multiplier), PostgreSQL ghi dữ liệu trung gian ra file tạm trên đĩa. EXPLAIN ANALYZE hiện \"external merge\" hoặc nhiều batch.",
+      "caseSensitive": false,
+      "autoLink": true,
+      "categories": [
+        "postgresql"
+      ],
+      "relatedArticleSlugs": [
+        "postgresql-sort-hash-memory-spill"
+      ],
+      "occurrences": 4,
+      "mentions": 15,
+      "outsideSeriesArticles": 0
+    },
+    {
+      "slug": "snapshot",
+      "term": "snapshot",
+      "aliases": [],
+      "shortDefinition": "Ảnh chụp trạng thái giao dịch tại một thời điểm: giao dịch nào đã commit, giao dịch nào còn chạy. PostgreSQL dùng snapshot để quyết định tuple nào \"thấy được\"; Read Committed lấy snapshot mỗi câu lệnh, Repeatable Read lấy một lần cho cả giao dịch.",
+      "caseSensitive": false,
+      "autoLink": true,
+      "categories": [
+        "postgresql"
+      ],
+      "relatedArticleSlugs": [
+        "postgresql-mvcc-snapshot",
+        "postgresql-isolation-read-committed-repeatable-read"
+      ],
+      "reviewNote": "Ở bài backup, \"snapshot\" có thể mang nghĩa snapshot ổ đĩa/volume; kiểm lại khi duyệt.",
+      "occurrences": 17,
+      "mentions": 95,
+      "outsideSeriesArticles": 75
+    },
+    {
+      "slug": "xid",
+      "term": "xid",
+      "english": "transaction ID",
+      "aliases": [
+        "XID"
+      ],
+      "shortDefinition": "Số định danh 32 bit PostgreSQL cấp cho giao dịch khi nó ghi lần đầu. Tuple ghi xid tạo và xid xoá (xmin, xmax) để so với snapshot; vì xid quay vòng nên cần VACUUM freeze định kỳ.",
+      "caseSensitive": true,
+      "autoLink": true,
+      "categories": [
+        "postgresql"
+      ],
+      "relatedArticleSlugs": [
+        "postgresql-mvcc-snapshot"
+      ],
+      "occurrences": 7,
+      "mentions": 48,
+      "outsideSeriesArticles": 3
+    },
+    {
+      "slug": "dead-tuple",
+      "term": "tuple chết",
+      "english": "dead tuple",
+      "aliases": [
+        "dòng chết",
+        "phiên bản chết"
+      ],
+      "shortDefinition": "Phiên bản dòng đã bị UPDATE hoặc DELETE thay thế và không còn giao dịch nào cần thấy. Vẫn chiếm chỗ trong page cho tới khi VACUUM dọn; tích nhiều gây bloat.",
+      "caseSensitive": false,
+      "autoLink": true,
+      "categories": [
+        "postgresql"
+      ],
+      "relatedArticleSlugs": [
+        "postgresql-vacuum-autovacuum-bloat",
+        "postgresql-mvcc-snapshot"
+      ],
+      "occurrences": 12,
+      "mentions": 58,
+      "outsideSeriesArticles": 2
+    },
+    {
+      "slug": "vacuum",
+      "term": "VACUUM",
+      "aliases": [],
+      "shortDefinition": "Lệnh dọn tuple chết để tái dùng chỗ trống, cập nhật visibility map và freeze xid cũ. VACUUM thường không chặn đọc ghi và hầu như không trả dung lượng cho hệ điều hành; VACUUM FULL viết lại bảng nhưng khoá toàn bảng.",
+      "caseSensitive": false,
+      "autoLink": true,
+      "categories": [
+        "postgresql"
+      ],
+      "relatedArticleSlugs": [
+        "postgresql-vacuum-autovacuum-bloat"
+      ],
+      "occurrences": 19,
+      "mentions": 99,
+      "outsideSeriesArticles": 2
+    },
+    {
+      "slug": "autovacuum",
+      "term": "autovacuum",
+      "aliases": [],
+      "shortDefinition": "Tiến trình nền tự chạy VACUUM và ANALYZE cho bảng khi số dòng thay đổi vượt ngưỡng cấu hình. Không nên tắt (dù tắt, PostgreSQL vẫn tự vacuum để chống quay vòng xid); bảng ghi nhiều thường cần chỉnh ngưỡng riêng.",
+      "caseSensitive": false,
+      "autoLink": true,
+      "categories": [
+        "postgresql"
+      ],
+      "relatedArticleSlugs": [
+        "postgresql-vacuum-autovacuum-bloat"
+      ],
+      "occurrences": 15,
+      "mentions": 58,
+      "outsideSeriesArticles": 2
+    },
+    {
+      "slug": "bloat",
+      "term": "bloat",
+      "aliases": [
+        "phình to"
+      ],
+      "shortDefinition": "Phần dung lượng bảng hoặc index bị chiếm bởi tuple chết và chỗ trống không dùng tới, khiến đọc tốn I/O hơn cần thiết. Hay gặp khi autovacuum không theo kịp hoặc có giao dịch mở lâu.",
+      "caseSensitive": false,
+      "autoLink": true,
+      "categories": [
+        "postgresql"
+      ],
+      "relatedArticleSlugs": [
+        "postgresql-vacuum-autovacuum-bloat"
+      ],
+      "occurrences": 10,
+      "mentions": 17,
+      "outsideSeriesArticles": 4
+    },
+    {
+      "slug": "long-running-transaction",
+      "term": "giao dịch mở lâu",
+      "english": "long-running transaction",
+      "aliases": [
+        "giao dịch dài"
+      ],
+      "shortDefinition": "Giao dịch giữ snapshot hoặc khoá trong thời gian dài. Nó chặn VACUUM dọn tuple chết mới hơn snapshot của mình, gây bloat, và có thể làm các lệnh khác phải chờ khoá.",
+      "caseSensitive": false,
+      "autoLink": true,
+      "categories": [
+        "postgresql"
+      ],
+      "relatedArticleSlugs": [
+        "postgresql-vacuum-autovacuum-bloat",
+        "postgresql-pg-stat-activity-quan-sat"
+      ],
+      "occurrences": 8,
+      "mentions": 16,
+      "outsideSeriesArticles": 1
+    },
+    {
+      "slug": "isolation-level",
+      "term": "mức cô lập",
+      "english": "isolation level",
+      "aliases": [],
+      "shortDefinition": "Mức độ một giao dịch bị ảnh hưởng bởi giao dịch chạy song song. PostgreSQL có Read Committed (mặc định), Repeatable Read và Serializable; Read Uncommitted được xử lý như Read Committed.",
+      "caseSensitive": false,
+      "autoLink": true,
+      "categories": [
+        "postgresql"
+      ],
+      "relatedArticleSlugs": [
+        "postgresql-isolation-read-committed-repeatable-read",
+        "postgresql-serializable-retry"
+      ],
+      "occurrences": 9,
+      "mentions": 13,
+      "outsideSeriesArticles": 8
+    },
+    {
+      "slug": "read-committed",
+      "term": "Read Committed",
+      "aliases": [],
+      "shortDefinition": "Mức cô lập mặc định của PostgreSQL: mỗi câu lệnh thấy dữ liệu đã commit tại lúc câu đó bắt đầu. Hai câu SELECT trong cùng giao dịch có thể thấy kết quả khác nhau.",
+      "caseSensitive": false,
+      "autoLink": true,
+      "categories": [
+        "postgresql"
+      ],
+      "relatedArticleSlugs": [
+        "postgresql-isolation-read-committed-repeatable-read"
+      ],
+      "occurrences": 11,
+      "mentions": 49,
+      "outsideSeriesArticles": 14
+    },
+    {
+      "slug": "repeatable-read",
+      "term": "Repeatable Read",
+      "aliases": [],
+      "shortDefinition": "Mức cô lập trong đó cả giao dịch đọc theo một snapshot lấy ở câu đầu tiên. Nếu định sửa dòng mà giao dịch khác đã sửa và commit sau snapshot đó, PostgreSQL báo lỗi tuần tự hoá thay vì ghi đè.",
+      "caseSensitive": false,
+      "autoLink": true,
+      "categories": [
+        "postgresql"
+      ],
+      "relatedArticleSlugs": [
+        "postgresql-isolation-read-committed-repeatable-read"
+      ],
+      "occurrences": 9,
+      "mentions": 45,
+      "outsideSeriesArticles": 2
+    },
+    {
+      "slug": "serializable",
+      "term": "Serializable",
+      "aliases": [
+        "SSI",
+        "Serializable Snapshot Isolation"
+      ],
+      "shortDefinition": "Mức cô lập cao nhất: kết quả như thể các giao dịch chạy lần lượt. PostgreSQL thực hiện bằng SSI, theo dõi phụ thuộc đọc–ghi và huỷ một giao dịch (SQLSTATE 40001) khi phát hiện nguy cơ; ứng dụng phải thử lại.",
+      "caseSensitive": false,
+      "autoLink": true,
+      "categories": [
+        "postgresql"
+      ],
+      "relatedArticleSlugs": [
+        "postgresql-serializable-retry"
+      ],
+      "occurrences": 6,
+      "mentions": 37,
+      "outsideSeriesArticles": 3
+    },
+    {
+      "slug": "serialization-failure",
+      "term": "lỗi tuần tự hoá",
+      "english": "serialization failure",
+      "aliases": [],
+      "shortDefinition": "Lỗi SQLSTATE 40001 PostgreSQL trả khi giao dịch Repeatable Read hoặc Serializable không thể commit mà vẫn giữ đúng bảo đảm. Không phải bug: cách xử lý đúng là chạy lại toàn bộ giao dịch.",
+      "caseSensitive": false,
+      "autoLink": true,
+      "categories": [
+        "postgresql"
+      ],
+      "relatedArticleSlugs": [
+        "postgresql-serializable-retry",
+        "postgresql-isolation-read-committed-repeatable-read"
+      ],
+      "occurrences": 5,
+      "mentions": 7,
+      "outsideSeriesArticles": 4
+    },
+    {
+      "slug": "lost-update",
+      "term": "lost update",
+      "aliases": [
+        "cập nhật bị mất"
+      ],
+      "shortDefinition": "Lỗi đồng thời khi hai giao dịch cùng đọc một giá trị, tính toán rồi ghi đè, khiến thay đổi của bên ghi trước biến mất. Chống bằng UPDATE nguyên tử, SELECT … FOR UPDATE, cột version hoặc mức cô lập cao hơn.",
+      "caseSensitive": false,
+      "autoLink": true,
+      "categories": [
+        "postgresql"
+      ],
+      "relatedArticleSlugs": [
+        "postgresql-optimistic-version-conditional-update",
+        "postgresql-isolation-read-committed-repeatable-read"
+      ],
+      "occurrences": 3,
+      "mentions": 4,
+      "outsideSeriesArticles": 5
+    },
+    {
+      "slug": "row-lock",
+      "term": "khoá dòng",
+      "english": "row-level lock",
+      "aliases": [
+        "row lock"
+      ],
+      "shortDefinition": "Khoá đặt trên từng dòng bởi UPDATE, DELETE hoặc SELECT … FOR UPDATE/FOR SHARE. Chỉ chặn người ghi hoặc khoá cùng dòng, không chặn SELECT thường; được ghi trong tuple (xmax) chứ không giữ trong bộ nhớ.",
+      "caseSensitive": false,
+      "autoLink": true,
+      "categories": [
+        "postgresql"
+      ],
+      "relatedArticleSlugs": [
+        "postgresql-lock-row-table",
+        "postgresql-for-update-skip-locked"
+      ],
+      "occurrences": 18,
+      "mentions": 63,
+      "outsideSeriesArticles": 16
+    },
+    {
+      "slug": "table-lock",
+      "term": "khoá bảng",
+      "english": "table-level lock",
+      "aliases": [
+        "table lock",
+        "ACCESS EXCLUSIVE"
+      ],
+      "shortDefinition": "Khoá cấp bảng, có nhiều chế độ từ ACCESS SHARE (SELECT) tới ACCESS EXCLUSIVE (nhiều lệnh DDL). Lệnh DDL chờ khoá có thể làm mọi truy vấn xếp hàng phía sau nó cùng chờ.",
+      "caseSensitive": false,
+      "autoLink": true,
+      "categories": [
+        "postgresql"
+      ],
+      "relatedArticleSlugs": [
+        "postgresql-lock-row-table",
+        "postgresql-schema-migration-tuong-thich"
+      ],
+      "occurrences": 11,
+      "mentions": 23,
+      "outsideSeriesArticles": 6
+    },
+    {
+      "slug": "skip-locked",
+      "term": "SKIP LOCKED",
+      "aliases": [],
+      "shortDefinition": "Tuỳ chọn của FOR UPDATE/FOR SHARE: bỏ qua dòng đang bị khoá thay vì chờ. Hợp với hàng đợi nhiều worker cùng lấy việc; không hợp khi cần thấy dữ liệu nhất quán.",
+      "caseSensitive": true,
+      "autoLink": true,
+      "categories": [
+        "postgresql"
+      ],
+      "relatedArticleSlugs": [
+        "postgresql-for-update-skip-locked"
+      ],
+      "occurrences": 4,
+      "mentions": 20,
+      "outsideSeriesArticles": 7
+    },
+    {
+      "slug": "invariant",
+      "term": "bất biến",
+      "english": "invariant",
+      "aliases": [],
+      "shortDefinition": "Điều kiện nghiệp vụ phải luôn đúng dù có bao nhiêu giao dịch chạy song song, ví dụ \"một chuyến chỉ có một tài xế nhận\". Nên đặt bằng ràng buộc trong database và kiểm bằng truy vấn tự động.",
+      "caseSensitive": false,
+      "autoLink": true,
+      "categories": [
+        "postgresql"
+      ],
+      "relatedArticleSlugs": [
+        "postgresql-thuc-hanh-tranh-chap-nhan-chuyen",
+        "postgresql-serializable-retry"
+      ],
+      "reviewNote": "\"bất biến\" cũng là cách dịch immutable (vd. hàm IMMUTABLE); trong series hiện chỉ dùng nghĩa invariant. Giữ phạm vi postgresql.",
+      "occurrences": 12,
+      "mentions": 43,
+      "outsideSeriesArticles": 143
+    },
+    {
+      "slug": "role",
+      "term": "role",
+      "aliases": [],
+      "shortDefinition": "Danh tính trong PostgreSQL, vừa là người dùng (có quyền LOGIN) vừa là nhóm quyền; role có thể là thành viên của role khác và thừa hưởng quyền. Role thuộc cấp cluster, không thuộc riêng database nào.",
+      "caseSensitive": false,
+      "autoLink": true,
+      "categories": [
+        "postgresql"
+      ],
+      "relatedArticleSlugs": [
+        "postgresql-role-grant-least-privilege"
+      ],
+      "reviewNote": "Không alias \"vai trò\" (từ thông dụng, 15 chỗ trong series với nghĩa thường). \"role\" ở series AWS là IAM role nên phải giữ phạm vi postgresql.",
+      "occurrences": 17,
+      "mentions": 173,
+      "outsideSeriesArticles": 103
+    },
+    {
+      "slug": "row-level-security",
+      "term": "row-level security",
+      "aliases": [
+        "RLS",
+        "Row-Level Security"
+      ],
+      "shortDefinition": "Tính năng lọc dòng theo policy gắn với bảng: mỗi câu lệnh tự được thêm điều kiện, ví dụ chỉ thấy dòng của tenant hiện tại. Superuser và role có BYPASSRLS luôn bỏ qua; owner bảng cũng bỏ qua trừ khi bật FORCE ROW LEVEL SECURITY.",
+      "caseSensitive": true,
+      "autoLink": true,
+      "categories": [
+        "postgresql"
+      ],
+      "relatedArticleSlugs": [
+        "postgresql-rls-tenant-security"
+      ],
+      "reviewNote": "caseSensitive để \"RLS\" không khớp chữ thường; các biến thể hoa/thường của tên đầy đủ được liệt kê thành alias.",
+      "occurrences": 5,
+      "mentions": 35,
+      "outsideSeriesArticles": 2
+    },
+    {
+      "slug": "rls-policy",
+      "term": "policy",
+      "english": "RLS policy",
+      "aliases": [
+        "policy RLS"
+      ],
+      "shortDefinition": "Quy tắc RLS tạo bằng CREATE POLICY: điều kiện USING lọc dòng được đọc, WITH CHECK chặn dòng được ghi. Policy permissive cộng dồn bằng OR, policy restrictive thêm điều kiện bằng AND.",
+      "caseSensitive": false,
+      "autoLink": true,
+      "categories": [
+        "postgresql"
+      ],
+      "relatedArticleSlugs": [
+        "postgresql-rls-tenant-security"
+      ],
+      "reviewNote": "\"policy\" còn chỉ retention policy, IAM policy… Trong series hiện 47 chỗ ở 3 bài, đều nghĩa RLS; nếu admin đếm thấy khác thì chuyển autoLink false.",
+      "occurrences": 3,
+      "mentions": 46,
+      "outsideSeriesArticles": 108
+    },
+    {
+      "slug": "scram-sha-256",
+      "term": "SCRAM-SHA-256",
+      "aliases": [
+        "SCRAM"
+      ],
+      "shortDefinition": "Cơ chế xác thực mật khẩu mặc định của PostgreSQL: server chỉ lưu dữ liệu băm có muối, mật khẩu không đi qua mạng. Thay cho MD5, kiểu đã bị đánh dấu lỗi thời từ PostgreSQL 18.",
+      "caseSensitive": true,
+      "autoLink": true,
+      "categories": [
+        "postgresql"
+      ],
+      "relatedArticleSlugs": [
+        "postgresql-ket-noi-auth-tls"
+      ],
+      "occurrences": 4,
+      "mentions": 19,
+      "outsideSeriesArticles": 2
+    },
+    {
+      "slug": "pg-dump",
+      "term": "pg_dump",
+      "aliases": [
+        "pg_dumpall",
+        "bản dump"
+      ],
+      "shortDefinition": "Công cụ sao lưu logic: xuất một database thành SQL hoặc file archive, nhất quán theo một snapshot. Không chứa role và cấu hình cấp cluster (cần pg_dumpall --globals-only) và không cho khôi phục theo thời điểm.",
+      "caseSensitive": true,
+      "autoLink": true,
+      "categories": [
+        "postgresql"
+      ],
+      "relatedArticleSlugs": [
+        "postgresql-pg-dump-restore"
+      ],
+      "occurrences": 6,
+      "mentions": 18,
+      "outsideSeriesArticles": 3
+    },
+    {
+      "slug": "wal",
+      "term": "WAL",
+      "english": "write-ahead log",
+      "aliases": [
+        "Write-Ahead Logging",
+        "nhật ký ghi trước"
+      ],
+      "shortDefinition": "Nhật ký mọi thay đổi, được ghi và đẩy xuống đĩa trước khi page dữ liệu thay đổi được ghi. Nhờ WAL, sau sự cố PostgreSQL phát lại để khôi phục giao dịch đã commit; WAL cũng là nguồn cho replication và PITR.",
+      "caseSensitive": true,
+      "autoLink": true,
+      "categories": [
+        "postgresql"
+      ],
+      "relatedArticleSlugs": [
+        "postgresql-wal-checkpoint-durability",
+        "postgresql-pitr-base-backup-wal"
+      ],
+      "occurrences": 20,
+      "mentions": 293,
+      "outsideSeriesArticles": 14
+    },
+    {
+      "slug": "checkpoint",
+      "term": "checkpoint",
+      "aliases": [],
+      "shortDefinition": "Thời điểm PostgreSQL ghi mọi page bẩn trong bộ nhớ xuống file dữ liệu và đánh dấu trong WAL. Khi khôi phục sau sự cố chỉ cần phát lại WAL từ checkpoint gần nhất; checkpoint dày làm tăng full-page image.",
+      "caseSensitive": false,
+      "autoLink": true,
+      "categories": [
+        "postgresql"
+      ],
+      "relatedArticleSlugs": [
+        "postgresql-wal-checkpoint-durability"
+      ],
+      "occurrences": 12,
+      "mentions": 93,
+      "outsideSeriesArticles": 8
+    },
+    {
+      "slug": "full-page-image",
+      "term": "full-page image",
+      "aliases": [
+        "FPI",
+        "full page image",
+        "full-page write"
+      ],
+      "shortDefinition": "Bản chụp nguyên một page ghi vào WAL ở lần sửa đầu tiên của page đó sau mỗi checkpoint, để sửa được page bị ghi dở (torn page) khi mất điện. Là lý do WAL tăng vọt ngay sau checkpoint.",
+      "caseSensitive": false,
+      "autoLink": true,
+      "categories": [
+        "postgresql"
+      ],
+      "relatedArticleSlugs": [
+        "postgresql-wal-checkpoint-durability"
+      ],
+      "occurrences": 6,
+      "mentions": 26,
+      "outsideSeriesArticles": 0
+    },
+    {
+      "slug": "lsn",
+      "term": "LSN",
+      "english": "Log Sequence Number",
+      "aliases": [],
+      "shortDefinition": "Vị trí byte trong WAL, viết dạng 0/4001DF0. Dùng để so độ trễ replication, đặt mục tiêu khôi phục và biết một thay đổi đã tới standby chưa.",
+      "caseSensitive": true,
+      "autoLink": true,
+      "categories": [
+        "postgresql"
+      ],
+      "relatedArticleSlugs": [
+        "postgresql-wal-checkpoint-durability",
+        "postgresql-replication-primary-standby"
+      ],
+      "occurrences": 9,
+      "mentions": 65,
+      "outsideSeriesArticles": 0
+    },
+    {
+      "slug": "wal-archiving",
+      "term": "WAL archive",
+      "english": "WAL archiving",
+      "aliases": [
+        "archive WAL",
+        "archive_command"
+      ],
+      "shortDefinition": "Việc sao từng segment WAL đã đầy ra nơi lưu riêng (archive_command hoặc archive_library). Cùng với base backup, chuỗi WAL archive liên tục cho phép khôi phục tới thời điểm bất kỳ.",
+      "caseSensitive": false,
+      "autoLink": true,
+      "categories": [
+        "postgresql"
+      ],
+      "relatedArticleSlugs": [
+        "postgresql-pitr-base-backup-wal"
+      ],
+      "reviewNote": "Không alias bare \"archive\" vì bài pg_dump dùng \"archive\" cho file dump định dạng custom.",
+      "occurrences": 5,
+      "mentions": 9,
+      "outsideSeriesArticles": 1
+    },
+    {
+      "slug": "base-backup",
+      "term": "base backup",
+      "aliases": [
+        "pg_basebackup"
+      ],
+      "shortDefinition": "Bản sao vật lý toàn bộ data directory chụp khi server đang chạy (thường bằng pg_basebackup), kèm đoạn WAL cần để nhất quán. Là điểm xuất phát cho PITR và để dựng standby.",
+      "caseSensitive": false,
+      "autoLink": true,
+      "categories": [
+        "postgresql"
+      ],
+      "relatedArticleSlugs": [
+        "postgresql-pitr-base-backup-wal",
+        "postgresql-replication-primary-standby"
+      ],
+      "occurrences": 10,
+      "mentions": 56,
+      "outsideSeriesArticles": 1
+    },
+    {
+      "slug": "pitr",
+      "term": "PITR",
+      "english": "point-in-time recovery",
+      "aliases": [
+        "khôi phục theo thời điểm"
+      ],
+      "shortDefinition": "Khôi phục database về một thời điểm cụ thể: restore base backup rồi phát lại WAL archive tới mục tiêu (thời gian, LSN, xid hoặc restore point). Dùng khi lỗi người dùng như xoá nhầm dữ liệu.",
+      "caseSensitive": true,
+      "autoLink": true,
+      "categories": [
+        "postgresql"
+      ],
+      "relatedArticleSlugs": [
+        "postgresql-pitr-base-backup-wal",
+        "postgresql-thuc-hanh-runbook-phuc-hoi"
+      ],
+      "occurrences": 7,
+      "mentions": 25,
+      "outsideSeriesArticles": 17
+    },
+    {
+      "slug": "restore-point",
+      "term": "restore point",
+      "aliases": [
+        "điểm khôi phục"
+      ],
+      "shortDefinition": "Mốc có tên ghi vào WAL bằng pg_create_restore_point(), ví dụ ngay trước migration. Khi PITR có thể dừng chính xác tại mốc này bằng recovery_target_name.",
+      "caseSensitive": false,
+      "autoLink": true,
+      "categories": [
+        "postgresql"
+      ],
+      "relatedArticleSlugs": [
+        "postgresql-pitr-base-backup-wal",
+        "postgresql-thuc-hanh-runbook-phuc-hoi"
+      ],
+      "occurrences": 5,
+      "mentions": 19,
+      "outsideSeriesArticles": 0
+    },
+    {
+      "slug": "timeline",
+      "term": "timeline",
+      "aliases": [],
+      "shortDefinition": "Nhánh lịch sử WAL. Mỗi lần kết thúc recovery để nhận ghi (promote standby, PITR), PostgreSQL mở timeline mới và ghi file .history, để WAL của nhánh cũ và nhánh mới không lẫn vào nhau.",
+      "caseSensitive": false,
+      "autoLink": true,
+      "categories": [
+        "postgresql"
+      ],
+      "relatedArticleSlugs": [
+        "postgresql-pitr-base-backup-wal",
+        "postgresql-ha-failover-read-consistency"
+      ],
+      "reviewNote": "Có thể trùng nghĩa \"dòng thời gian sự cố\" trong bài runbook; nếu có thì chuyển autoLink false.",
+      "occurrences": 5,
+      "mentions": 70,
+      "outsideSeriesArticles": 6
+    },
+    {
+      "slug": "pg-upgrade",
+      "term": "pg_upgrade",
+      "aliases": [],
+      "shortDefinition": "Công cụ nâng cấp phiên bản chính tại chỗ bằng cách dựng lại catalog và dùng lại file dữ liệu (copy, link, clone hoặc swap), nhanh hơn dump/restore. Từ PostgreSQL 18 giữ được thống kê planner.",
+      "caseSensitive": true,
+      "autoLink": true,
+      "categories": [
+        "postgresql"
+      ],
+      "relatedArticleSlugs": [
+        "postgresql-upgrade-migration-cutover"
+      ],
+      "reviewNote": "PG 18: pg_upgrade chuyển thống kê thường nhưng không chuyển extended statistics; có thêm chế độ --swap.",
+      "occurrences": 4,
+      "mentions": 15,
+      "outsideSeriesArticles": 0
+    },
+    {
+      "slug": "primary-server",
+      "term": "primary",
+      "english": "primary server",
+      "aliases": [],
+      "shortDefinition": "Server nhận ghi trong một cụm replication; các standby phát lại WAL từ nó. Sau failover, standby được promote trở thành primary mới.",
+      "caseSensitive": false,
+      "autoLink": true,
+      "categories": [
+        "postgresql"
+      ],
+      "relatedArticleSlugs": [
+        "postgresql-replication-primary-standby",
+        "postgresql-ha-failover-read-consistency"
+      ],
+      "reviewNote": "\"primary key\" được mục khoá chính bắt trước (cụm dài hơn). Viết hoa đầu câu \"Primary\" vẫn khớp vì caseSensitive=false.",
+      "occurrences": 9,
+      "mentions": 181,
+      "outsideSeriesArticles": 21
+    },
+    {
+      "slug": "standby",
+      "term": "standby",
+      "english": "standby server",
+      "aliases": [
+        "hot standby"
+      ],
+      "shortDefinition": "Server liên tục phát lại WAL từ primary để giữ bản sao. Ở chế độ hot standby nó nhận truy vấn chỉ đọc (khi đó thường gọi là replica), và có thể được promote khi primary hỏng.",
+      "caseSensitive": false,
+      "autoLink": true,
+      "categories": [
+        "postgresql"
+      ],
+      "relatedArticleSlugs": [
+        "postgresql-replication-primary-standby",
+        "postgresql-ha-failover-read-consistency"
+      ],
+      "reviewNote": "Không alias \"replica\"/\"read replica\": đã là mục replica có sẵn trong terminology.json.",
+      "occurrences": 14,
+      "mentions": 168,
+      "outsideSeriesArticles": 11
+    },
+    {
+      "slug": "replication-lag",
+      "term": "replication lag",
+      "aliases": [
+        "độ trễ replication"
+      ],
+      "shortDefinition": "Khoảng cách giữa primary và standby, đo bằng LSN hoặc thời gian. Đọc từ standby khi đang lag có thể không thấy dữ liệu vừa ghi.",
+      "caseSensitive": false,
+      "autoLink": true,
+      "categories": [
+        "postgresql"
+      ],
+      "relatedArticleSlugs": [
+        "postgresql-replication-primary-standby",
+        "postgresql-ha-failover-read-consistency"
+      ],
+      "occurrences": 5,
+      "mentions": 6,
+      "outsideSeriesArticles": 7
+    },
+    {
+      "slug": "split-brain",
+      "term": "split-brain",
+      "aliases": [],
+      "shortDefinition": "Tình huống hai node cùng tin mình là primary và cùng nhận ghi, khiến dữ liệu rẽ thành hai nhánh khó hợp nhất. Phòng bằng fencing và cơ chế chọn leader có đồng thuận.",
+      "caseSensitive": false,
+      "autoLink": true,
+      "categories": [],
+      "scopeNote": "Thuật ngữ HA chung, không có nghĩa khác trong blog.",
+      "relatedArticleSlugs": [
+        "postgresql-ha-failover-read-consistency"
+      ],
+      "occurrences": 4,
+      "mentions": 23,
+      "outsideSeriesArticles": 3
+    },
+    {
+      "slug": "fencing",
+      "term": "fencing",
+      "aliases": [
+        "STONITH"
+      ],
+      "shortDefinition": "Biện pháp cô lập hẳn node cũ (tắt máy, chặn mạng, thu hồi địa chỉ) trước khi promote node mới, để bảo đảm không bao giờ có hai primary cùng nhận ghi.",
+      "caseSensitive": false,
+      "autoLink": true,
+      "categories": [],
+      "scopeNote": "Thuật ngữ HA chung.",
+      "relatedArticleSlugs": [
+        "postgresql-ha-failover-read-consistency"
+      ],
+      "occurrences": 3,
+      "mentions": 24,
+      "outsideSeriesArticles": 2
+    },
+    {
+      "slug": "logical-replication",
+      "term": "logical replication",
+      "aliases": [
+        "logical decoding"
+      ],
+      "shortDefinition": "Replication theo từng thay đổi dòng (INSERT, UPDATE, DELETE, TRUNCATE) giải mã từ WAL, chọn được bảng và chạy được giữa các phiên bản chính khác nhau. Không sao chép DDL và giá trị sequence.",
+      "caseSensitive": false,
+      "autoLink": true,
+      "categories": [
+        "postgresql"
+      ],
+      "relatedArticleSlugs": [
+        "postgresql-logical-replication-cdc",
+        "postgresql-upgrade-migration-cutover"
+      ],
+      "occurrences": 8,
+      "mentions": 33,
+      "outsideSeriesArticles": 4
+    },
+    {
+      "slug": "publication",
+      "term": "publication",
+      "aliases": [
+        "publisher"
+      ],
+      "shortDefinition": "Tập bảng (và loại thay đổi) mà một server công bố cho logical replication, tạo bằng CREATE PUBLICATION. Server công bố gọi là publisher.",
+      "caseSensitive": false,
+      "autoLink": true,
+      "categories": [
+        "postgresql"
+      ],
+      "relatedArticleSlugs": [
+        "postgresql-logical-replication-cdc"
+      ],
+      "occurrences": 2,
+      "mentions": 56,
+      "outsideSeriesArticles": 10
+    },
+    {
+      "slug": "subscription",
+      "term": "subscription",
+      "aliases": [
+        "subscriber"
+      ],
+      "shortDefinition": "Đăng ký nhận thay đổi từ một publication, tạo bằng CREATE SUBSCRIPTION trên server nhận (subscriber). Mặc định chép dữ liệu ban đầu rồi áp các thay đổi tiếp theo; bảng đích phải được tạo trước.",
+      "caseSensitive": false,
+      "autoLink": true,
+      "categories": [
+        "postgresql"
+      ],
+      "relatedArticleSlugs": [
+        "postgresql-logical-replication-cdc"
+      ],
+      "occurrences": 4,
+      "mentions": 70,
+      "outsideSeriesArticles": 73
+    },
+    {
+      "slug": "replica-identity",
+      "term": "replica identity",
+      "aliases": [],
+      "shortDefinition": "Cột dùng để xác định dòng cũ khi logical replication gửi UPDATE và DELETE, mặc định là khoá chính. Bảng không có khoá chính hay replica identity sẽ báo lỗi khi UPDATE/DELETE nếu nằm trong publication.",
+      "caseSensitive": false,
+      "autoLink": true,
+      "categories": [
+        "postgresql"
+      ],
+      "relatedArticleSlugs": [
+        "postgresql-logical-replication-cdc"
+      ],
+      "occurrences": 2,
+      "mentions": 6,
+      "outsideSeriesArticles": 0
+    },
+    {
+      "slug": "replication-slot",
+      "term": "replication slot",
+      "aliases": [
+        "slot"
+      ],
+      "shortDefinition": "Bản ghi bền trên primary nhớ vị trí WAL mà một consumer (standby hoặc subscriber) đã nhận, để WAL chưa nhận không bị xoá. Slot bị bỏ rơi giữ WAL vô hạn và có thể làm đầy đĩa; max_slot_wal_keep_size đặt giới hạn.",
+      "caseSensitive": false,
+      "autoLink": true,
+      "categories": [
+        "postgresql"
+      ],
+      "relatedArticleSlugs": [
+        "postgresql-logical-replication-cdc",
+        "postgresql-replication-primary-standby"
+      ],
+      "reviewNote": "Bare \"slot\" 75 chỗ trong 6 bài; đều nghĩa replication slot theo mẫu kiểm tra, nhưng cần xem lại nếu có bài nói \"slot thời gian\".",
+      "occurrences": 6,
+      "mentions": 74,
+      "outsideSeriesArticles": 12
+    },
+    {
+      "slug": "cdc",
+      "term": "CDC",
+      "english": "change data capture",
+      "aliases": [],
+      "shortDefinition": "Change data capture: bắt từng thay đổi dữ liệu (thêm, sửa, xoá) từ database và phát cho hệ thống khác theo thứ tự. Với PostgreSQL, CDC thường đọc WAL qua logical decoding.",
+      "caseSensitive": true,
+      "autoLink": true,
+      "categories": [],
+      "scopeNote": "Thuật ngữ tích hợp dữ liệu chung; viết hoa, caseSensitive.",
+      "relatedArticleSlugs": [
+        "postgresql-logical-replication-cdc",
+        "postgresql-idempotency-outbox-transaction"
+      ],
+      "occurrences": 6,
+      "mentions": 15,
+      "outsideSeriesArticles": 7
+    },
+    {
+      "slug": "partitioning",
+      "term": "partition",
+      "english": "table partitioning",
+      "aliases": [
+        "phân vùng",
+        "partitioning",
+        "bảng phân vùng",
+        "partitioned table"
+      ],
+      "shortDefinition": "Chia một bảng lớn thành nhiều bảng con (partition) theo khoá, ví dụ theo tháng. Truy vấn vẫn gọi bảng cha; planner chỉ đọc partition liên quan và có thể bỏ cả partition cũ thay vì DELETE.",
+      "caseSensitive": false,
+      "autoLink": true,
+      "categories": [
+        "postgresql"
+      ],
+      "relatedArticleSlugs": [
+        "postgresql-partition-co-ban",
+        "postgresql-partition-pruning-retention"
+      ],
+      "reviewNote": "\"partition\" là thuật ngữ Kafka ở series integration; giữ phạm vi postgresql. \"PARTITION BY\" của window function thường nằm trong inline code.",
+      "occurrences": 11,
+      "mentions": 231,
+      "outsideSeriesArticles": 74
+    },
+    {
+      "slug": "partition-pruning",
+      "term": "partition pruning",
+      "aliases": [
+        "tỉa partition"
+      ],
+      "shortDefinition": "Việc planner (lúc lập kế hoạch) hoặc executor (lúc chạy, khi tham số mới biết) loại bỏ các partition chắc chắn không chứa dòng khớp điều kiện. Chỉ xảy ra khi điều kiện lọc trên khoá phân vùng.",
+      "caseSensitive": false,
+      "autoLink": true,
+      "categories": [
+        "postgresql"
+      ],
+      "relatedArticleSlugs": [
+        "postgresql-partition-pruning-retention"
+      ],
+      "reviewNote": "Không alias bare \"pruning\" vì bài MVCC/HOT dùng \"pruning\" cho dọn tuple trong page.",
+      "occurrences": 5,
+      "mentions": 10,
+      "outsideSeriesArticles": 1
+    },
+    {
+      "slug": "materialized-view",
+      "term": "materialized view",
+      "aliases": [],
+      "shortDefinition": "View lưu sẵn kết quả truy vấn trên đĩa, chỉ cập nhật khi chạy REFRESH MATERIALIZED VIEW. Đọc nhanh nhưng dữ liệu có thể cũ; REFRESH … CONCURRENTLY không chặn người đọc nhưng cần unique index.",
+      "caseSensitive": false,
+      "autoLink": true,
+      "categories": [
+        "postgresql"
+      ],
+      "relatedArticleSlugs": [
+        "postgresql-materialized-view-reporting"
+      ],
+      "occurrences": 6,
+      "mentions": 17,
+      "outsideSeriesArticles": 1
+    },
+    {
+      "slug": "jsonb",
+      "term": "JSONB",
+      "aliases": [],
+      "shortDefinition": "Kiểu lưu JSON dạng nhị phân đã phân tích: không giữ khoảng trắng hay thứ tự khoá, khoá trùng chỉ giữ cái cuối. Truy vấn và đánh index (GIN) được, khác kiểu json chỉ lưu nguyên văn.",
+      "caseSensitive": false,
+      "autoLink": true,
+      "categories": [
+        "postgresql"
+      ],
+      "relatedArticleSlugs": [
+        "postgresql-jsonb-quan-he"
+      ],
+      "occurrences": 7,
+      "mentions": 49,
+      "outsideSeriesArticles": 4
+    },
+    {
+      "slug": "extension",
+      "term": "extension",
+      "aliases": [
+        "CREATE EXTENSION"
+      ],
+      "shortDefinition": "Gói mở rộng cài vào một database bằng CREATE EXTENSION, thêm kiểu, hàm, toán tử hoặc loại index, ví dụ PostGIS, pgvector, pg_trgm. Phiên bản extension phải được tính khi backup và nâng cấp.",
+      "caseSensitive": false,
+      "autoLink": true,
+      "categories": [
+        "postgresql"
+      ],
+      "relatedArticleSlugs": [
+        "postgresql-extension-postgis-pgvector"
+      ],
+      "reviewNote": "\"extension\" có nghĩa khác ở series khác (browser/VS Code extension); giữ phạm vi postgresql.",
+      "occurrences": 19,
+      "mentions": 57,
+      "outsideSeriesArticles": 34
+    }
+  ],
+  "deferred": [
+    {
+      "slug": "dbms",
+      "term": "DBMS",
+      "english": "database management system",
+      "occurrences": 3,
+      "reason": "Chỉ 3 bài, đã giải thích ngay trong PG-001."
+    },
+    {
+      "slug": "data-directory",
+      "term": "data directory",
+      "occurrences": 10,
+      "reason": "Dễ hiểu từ tên."
+    },
+    {
+      "slug": "psql",
+      "term": "psql",
+      "occurrences": 27,
+      "reason": "Công cụ đã giới thiệu kỹ ở PG-002; người đọc dùng ngay từ đầu."
+    },
+    {
+      "slug": "libpq",
+      "term": "libpq",
+      "occurrences": 5,
+      "reason": "Tên thư viện, 5 bài; người đọc tra được."
+    },
+    {
+      "slug": "foreign-key",
+      "term": "khoá ngoại",
+      "english": "foreign key",
+      "occurrences": 13,
+      "reason": "Khái niệm cơ bản người đọc đã biết."
+    },
+    {
+      "slug": "functional-dependency",
+      "term": "phụ thuộc hàm",
+      "english": "functional dependency",
+      "occurrences": 3,
+      "reason": "Chỉ 3 bài trong P01."
+    },
+    {
+      "slug": "update-anomaly",
+      "term": "bất thường cập nhật",
+      "english": "update anomaly",
+      "occurrences": 2,
+      "reason": "Chỉ 2 bài; định nghĩa chuẩn hoá đã nhắc."
+    },
+    {
+      "slug": "data-dictionary",
+      "term": "data dictionary",
+      "occurrences": 6,
+      "reason": "Thuật ngữ tài liệu, không đặc thù PostgreSQL."
+    },
+    {
+      "slug": "identity-column",
+      "term": "cột identity",
+      "english": "identity column",
+      "occurrences": 4,
+      "reason": "Chỉ 4 chỗ."
+    },
+    {
+      "slug": "sequence",
+      "term": "sequence",
+      "occurrences": 14,
+      "reason": "Ít giá trị cho hộp thoại."
+    },
+    {
+      "slug": "uuid",
+      "term": "UUID",
+      "english": "universally unique identifier",
+      "occurrences": 6,
+      "reason": "Khái niệm phổ biến. Lưu ý PG 18 có uuidv7() nếu sau này thêm."
+    },
+    {
+      "slug": "timestamptz",
+      "term": "timestamptz",
+      "english": "timestamp with time zone",
+      "occurrences": 0,
+      "reason": "Chỉ xuất hiện trong inline code, 0 chỗ trong văn xuôi."
+    },
+    {
+      "slug": "generated-column",
+      "term": "generated column",
+      "occurrences": 4,
+      "reason": "Chỉ 4 bài. Lưu ý PG 18 đổi mặc định sang VIRTUAL nếu sau này thêm."
+    },
+    {
+      "slug": "aggregate-function",
+      "term": "hàm tổng hợp",
+      "english": "aggregate function",
+      "occurrences": 8,
+      "reason": "Khái niệm SQL cơ bản."
+    },
+    {
+      "slug": "subquery",
+      "term": "subquery",
+      "occurrences": 11,
+      "reason": "Khái niệm SQL cơ bản."
+    },
+    {
+      "slug": "recursive-cte",
+      "term": "CTE đệ quy",
+      "english": "recursive CTE",
+      "occurrences": 3,
+      "reason": "Chỉ 3 bài; định nghĩa CTE đã đủ."
+    },
+    {
+      "slug": "window-function",
+      "term": "window function",
+      "occurrences": 4,
+      "reason": "Chỉ 4 bài."
+    },
+    {
+      "slug": "window-frame",
+      "term": "frame",
+      "english": "window frame",
+      "occurrences": 1,
+      "reason": "Chỉ 1 bài; định nghĩa window function đã đủ cho hộp thoại."
+    },
+    {
+      "slug": "line-pointer",
+      "term": "line pointer",
+      "occurrences": 4,
+      "reason": "Chỉ 4 bài, mức chi tiết lưu trữ."
+    },
+    {
+      "slug": "toast",
+      "term": "TOAST",
+      "english": "The Oversized-Attribute Storage Technique",
+      "occurrences": 4,
+      "reason": "Chỉ 4 bài."
+    },
+    {
+      "slug": "fillfactor",
+      "term": "fillfactor",
+      "occurrences": 5,
+      "reason": "Chỉ 5 bài, tham số cấu hình."
+    },
+    {
+      "slug": "expression-index",
+      "term": "expression index",
+      "occurrences": 5,
+      "reason": "Gom vào nhóm index; chỉ 5 bài."
+    },
+    {
+      "slug": "operator-class",
+      "term": "operator class",
+      "occurrences": 4,
+      "reason": "Chỉ 4 bài."
+    },
+    {
+      "slug": "trigram",
+      "term": "trigram",
+      "occurrences": 2,
+      "reason": "Chỉ 2 bài."
+    },
+    {
+      "slug": "execution-plan",
+      "term": "kế hoạch thực thi",
+      "english": "execution plan",
+      "occurrences": 10,
+      "reason": "EXPLAIN và planner đã bao."
+    },
+    {
+      "slug": "mcv",
+      "term": "MCV",
+      "english": "most common values",
+      "occurrences": 1,
+      "reason": "Chỉ 1 bài (PG-028), dù nhắc nhiều lần."
+    },
+    {
+      "slug": "index-scan",
+      "term": "Index Scan",
+      "occurrences": 9,
+      "reason": "Tên node tự giải thích; Bitmap/Index-only scan quan trọng hơn."
+    },
+    {
+      "slug": "nested-loop",
+      "term": "Nested Loop",
+      "english": "nested loop join",
+      "occurrences": 4,
+      "reason": "Chỉ 4 bài."
+    },
+    {
+      "slug": "hash-join",
+      "term": "Hash Join",
+      "occurrences": 4,
+      "reason": "Chỉ 4 bài."
+    },
+    {
+      "slug": "merge-join",
+      "term": "Merge Join",
+      "occurrences": 2,
+      "reason": "Chỉ 2 bài."
+    },
+    {
+      "slug": "shared-buffers",
+      "term": "shared buffers",
+      "occurrences": 2,
+      "reason": "Chủ yếu nằm trong inline code (shared_buffers)."
+    },
+    {
+      "slug": "prepared-statement",
+      "term": "prepared statement",
+      "occurrences": 4,
+      "reason": "Người đọc backend đã quen; 4 bài."
+    },
+    {
+      "slug": "generic-plan",
+      "term": "generic plan",
+      "occurrences": 2,
+      "reason": "Chỉ 2 bài."
+    },
+    {
+      "slug": "acid",
+      "term": "ACID",
+      "occurrences": 1,
+      "reason": "Chỉ 1 chỗ trong series."
+    },
+    {
+      "slug": "xmin",
+      "term": "xmin",
+      "occurrences": 3,
+      "reason": "Chủ yếu là tên cột trong inline code; MVCC/xid đã bao."
+    },
+    {
+      "slug": "xmax",
+      "term": "xmax",
+      "occurrences": 2,
+      "reason": "Chủ yếu là tên cột trong inline code; MVCC/xid đã bao."
+    },
+    {
+      "slug": "xid-wraparound",
+      "term": "xid wraparound",
+      "english": "transaction ID wraparound",
+      "occurrences": 1,
+      "reason": "Chỉ 1 bài; ý chính đã nằm trong định nghĩa xid và autovacuum."
+    },
+    {
+      "slug": "idle-in-transaction",
+      "term": "idle in transaction",
+      "occurrences": 4,
+      "reason": "Giao dịch mở lâu đã bao."
+    },
+    {
+      "slug": "write-skew",
+      "term": "write skew",
+      "occurrences": 1,
+      "reason": "Chỉ 1 bài; Serializable đã nhắc."
+    },
+    {
+      "slug": "select-for-update",
+      "term": "FOR UPDATE",
+      "english": "SELECT … FOR UPDATE",
+      "occurrences": 4,
+      "reason": "Từ khoá SQL; SKIP LOCKED và khoá dòng đã bao."
+    },
+    {
+      "slug": "advisory-lock",
+      "term": "advisory lock",
+      "occurrences": 2,
+      "reason": "Chỉ 2 bài."
+    },
+    {
+      "slug": "at-least-once",
+      "term": "at-least-once",
+      "english": "at-least-once delivery",
+      "occurrences": 2,
+      "reason": "Chỉ 2 chỗ trong series."
+    },
+    {
+      "slug": "superuser",
+      "term": "superuser",
+      "occurrences": 10,
+      "reason": "Người đọc đã hiểu."
+    },
+    {
+      "slug": "least-privilege",
+      "term": "quyền tối thiểu",
+      "english": "least privilege",
+      "occurrences": 7,
+      "reason": "Nguyên tắc dễ hiểu từ tên."
+    },
+    {
+      "slug": "default-privileges",
+      "term": "default privileges",
+      "occurrences": 3,
+      "reason": "Chỉ 3 bài."
+    },
+    {
+      "slug": "acl",
+      "term": "ACL",
+      "english": "access control list",
+      "occurrences": 5,
+      "reason": "Từ viết tắt dễ trùng network ACL; chỉ 5 bài."
+    },
+    {
+      "slug": "tenant",
+      "term": "tenant",
+      "occurrences": 6,
+      "reason": "Khái niệm SaaS người đọc đã quen; row-level security đã nhắc. Trùng nghĩa Entra tenant ở series Azure nếu sau này thêm."
+    },
+    {
+      "slug": "pg-hba-conf",
+      "term": "pg_hba.conf",
+      "occurrences": 1,
+      "reason": "Chủ yếu nằm trong inline code."
+    },
+    {
+      "slug": "data-checksums",
+      "term": "data checksums",
+      "occurrences": 3,
+      "reason": "Chỉ 3 bài. Lưu ý PG 18 initdb bật mặc định nếu sau này thêm."
+    },
+    {
+      "slug": "pg-restore",
+      "term": "pg_restore",
+      "occurrences": 3,
+      "reason": "Đi kèm pg_dump; 3 chỗ."
+    },
+    {
+      "slug": "wal-segment",
+      "term": "segment WAL",
+      "english": "WAL segment",
+      "occurrences": 3,
+      "reason": "Chỉ 3 bài; mức chi tiết vận hành."
+    },
+    {
+      "slug": "runbook",
+      "term": "runbook",
+      "occurrences": 10,
+      "reason": "Thuật ngữ vận hành người đọc đã quen."
+    },
+    {
+      "slug": "pgbouncer",
+      "term": "PgBouncer",
+      "occurrences": 2,
+      "reason": "Chỉ 2 bài; tên sản phẩm, người đọc tra được."
+    },
+    {
+      "slug": "backend-process",
+      "term": "tiến trình backend",
+      "english": "backend process",
+      "occurrences": 2,
+      "reason": "Chỉ 2 chỗ; bare \"backend\" không dò được vì trùng \"đội backend\"."
+    },
+    {
+      "slug": "pg-stat-activity",
+      "term": "pg_stat_activity",
+      "occurrences": 1,
+      "reason": "Chủ yếu nằm trong inline code (1 bài có văn xuôi)."
+    },
+    {
+      "slug": "cutover",
+      "term": "cutover",
+      "occurrences": 5,
+      "reason": "Thuật ngữ migration chung; expand–contract và pg_upgrade đã bao."
+    },
+    {
+      "slug": "expand-contract",
+      "term": "expand–contract",
+      "english": "expand and contract",
+      "occurrences": 3,
+      "reason": "Chỉ 3 bài."
+    },
+    {
+      "slug": "backfill",
+      "term": "backfill",
+      "occurrences": 1,
+      "reason": "Chỉ 1 bài."
+    },
+    {
+      "slug": "streaming-replication",
+      "term": "streaming replication",
+      "english": "physical streaming replication",
+      "occurrences": 4,
+      "reason": "Standby đã bao."
+    },
+    {
+      "slug": "synchronous-replication",
+      "term": "synchronous replication",
+      "occurrences": 4,
+      "reason": "Chỉ 4 bài."
+    },
+    {
+      "slug": "promote",
+      "term": "promote",
+      "occurrences": 3,
+      "reason": "Standby/failover đã bao; \"promote\" trùng nghĩa ở DevOps."
+    },
+    {
+      "slug": "pg-rewind",
+      "term": "pg_rewind",
+      "occurrences": 3,
+      "reason": "Chỉ 3 bài, chi tiết vận hành HA."
+    },
+    {
+      "slug": "partition-key",
+      "term": "khoá phân vùng",
+      "english": "partition key",
+      "occurrences": 4,
+      "reason": "Định nghĩa partition đã nêu."
+    },
+    {
+      "slug": "default-partition",
+      "term": "default partition",
+      "occurrences": 2,
+      "reason": "Chỉ 2 bài; định nghĩa partition đã đủ."
+    },
+    {
+      "slug": "postgis",
+      "term": "PostGIS",
+      "occurrences": 4,
+      "reason": "Tên sản phẩm; extension đã bao."
+    },
+    {
+      "slug": "pgvector",
+      "term": "pgvector",
+      "occurrences": 4,
+      "reason": "Tên sản phẩm; extension đã bao."
+    },
+    {
+      "slug": "hnsw",
+      "term": "HNSW",
+      "english": "Hierarchical Navigable Small World",
+      "occurrences": 2,
+      "reason": "Chỉ 2 bài, nằm gọn trong PG-058."
+    },
+    {
+      "slug": "ann",
+      "term": "ANN",
+      "english": "approximate nearest neighbor",
+      "occurrences": 1,
+      "reason": "Chỉ 1 bài; để dành khi có bài vector riêng."
+    }
+  ]
+}
