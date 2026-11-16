@@ -261,7 +261,7 @@ Không có đường nâng cấp «an toàn nhất» chung. Dump/restore ít yê
 **Bài 1.** Trên bản chép riêng của lab, thêm một extended statistics (`CREATE STATISTICS … (dependencies) ON …`) cho `tickets` ở cluster 17, chạy `ANALYZE`, rồi nâng cấp bằng `pg_upgrade` copy mode.
 
 <details><summary><b>Lời giải phải chứng minh được</b></summary>
-<p>Output thật cho thấy trên cluster 18, <code>pg_stats</code> có dòng cho <code>tickets</code> nhưng <code>pg_stats_ext</code> (hoặc <code>pg_statistic_ext_data</code>) chưa có dữ liệu cho đối tượng statistics vừa tạo, trong khi định nghĩa trong <code>pg_statistic_ext</code> vẫn còn. Sau khi chạy lệnh <code>vacuumdb</code> mà <code>pg_upgrade</code> của bạn khuyến nghị (dán đúng dòng nó in), dữ liệu xuất hiện. Đối chiếu với ghi chú phát hành PostgreSQL 18 về statistics và pg_upgrade.</p>
+<p>Kết quả chạy thật cho thấy trên cluster 18, <code>pg_stats</code> có dòng cho <code>tickets</code> nhưng <code>pg_stats_ext</code> (hoặc <code>pg_statistic_ext_data</code>) chưa có dữ liệu cho đối tượng statistics vừa tạo, trong khi định nghĩa trong <code>pg_statistic_ext</code> vẫn còn. Sau khi chạy lệnh <code>vacuumdb</code> mà <code>pg_upgrade</code> của bạn khuyến nghị (dán đúng dòng nó in), dữ liệu xuất hiện. Đối chiếu với ghi chú phát hành PostgreSQL 18 về statistics và pg_upgrade.</p>
 </details>
 
 **Bài 2.** Đo thời gian ngừng ghi của hai đường trên một bản sao lớn hơn (ví dụ bảng `gps_plain` nhân lên vài triệu dòng).
@@ -273,7 +273,7 @@ Không có đường nâng cấp «an toàn nhất» chung. Dump/restore ít yê
 **Bài 3.** Viết kế hoạch cutover một trang cho Tới Nơi, cửa sổ 02:00–02:30.
 
 <details><summary><b>Lời giải phải chứng minh được</b></summary>
-<p>Đường được chọn kèm số đo thời gian từ diễn tập (không lấy số từ bài này — lab không đo). Mỗi bước có giờ dự kiến, người thực hiện và điều kiện dừng. Bảng cổng go/no-go có cột «bằng chứng» trỏ tới output thật. Điểm không quay lại được ghi rõ, đường lùi trước và sau điểm đó, thời hạn giữ cluster cũ. Nếu chọn link hoặc swap, có thời gian phục hồi từ backup đã đo.</p>
+<p>Đường được chọn kèm số đo thời gian từ diễn tập (không lấy số từ bài này — lab không đo). Mỗi bước có giờ dự kiến, người thực hiện và điều kiện dừng. Bảng cổng go/no-go có cột «bằng chứng» trỏ tới kết quả chạy thật. Điểm không quay lại được ghi rõ, đường lùi trước và sau điểm đó, thời hạn giữ cluster cũ. Nếu chọn link hoặc swap, có thời gian phục hồi từ backup đã đo.</p>
 </details>
 
 ## 13. Đọc tiếp

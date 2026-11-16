@@ -75,14 +75,7 @@ Còn `attrs` thì sao? Lab đặt đúng một ràng buộc: `CHECK (jsonb_typeo
 INSERT INTO gps VALUES (1, '2026-11-15 00:30 UTC', '[5]');
 ```
 
-```text
---- 053 CHECK jsonb_typeof = object
-ERROR:  23514: new row for relation "gps_nov" violates check constraint "gps_attrs_check"
-DETAIL:  Failing row contains (1, 2026-11-15 07:30:00+07, [5]).
-SCHEMA NAME:  public
-TABLE NAME:  gps_nov
-CONSTRAINT NAME:  gps_attrs_check
-```
+<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/postgresql-jsonb-quan-he/dbstudio-01.webp" alt="DBStudio chạy truy vấn của bước 053 trong p06/run.mjs và hiển thị thông báo lỗi" width="1066" height="500" loading="lazy"></div><figcaption>DBStudio · bước 053 của <code>p06/run.mjs</code> · lỗi</figcaption></figure>
 
 SQLSTATE **`23514`** là `check_violation`; ứng dụng nên bắt theo mã này, không theo câu chữ. Lỗi báo trên **`gps_nov`**, không phải `gps`: dòng được định tuyến vào partition tháng 11 trước, rồi ràng buộc kế thừa từ bảng cha được kiểm tại đó, vẫn mang tên `gps_attrs_check` mà PostgreSQL tự đặt ở bảng cha. (`00:30 UTC` được in thành `07:30:00+07` theo múi giờ session — cùng một thời điểm, xem [PG-016](/articles/postgresql-date-time-timezone).)
 
@@ -147,10 +140,7 @@ Không lỗi, không cảnh báo, chỉ là **0**. `attrs->>'accurracy_m'` trả
 SELECT count(*) FROM gps WHERE (attrs->>'source')::int = 1;
 ```
 
-```text
---- 053 cast of a text value at query time
-ERROR:  22P02: invalid input syntax for type integer: "phone"
-```
+<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/postgresql-jsonb-quan-he/dbstudio-02.webp" alt="DBStudio chạy truy vấn của bước 053 trong p06/run.mjs và hiển thị thông báo lỗi" width="996" height="544" loading="lazy"></div><figcaption>DBStudio · bước 053 của <code>p06/run.mjs</code> · lỗi</figcaption></figure>
 
 `22P02` là `invalid_text_representation`. Lab cố ý ép một khoá toàn chuỗi, nhưng tình huống thật thường là: tuần này mọi máy gửi `accuracy_m` là số, tuần sau một bản firmware gửi `"accuracy_m": "unknown"`. Không có gì chặn lúc ghi, và **mọi** truy vấn ép kiểu quét qua dòng đó bắt đầu thất bại — kể cả dashboard chẳng liên quan gì đến bản firmware kia. Người phát hiện lỗi không phải người gây ra lỗi.
 
@@ -233,16 +223,7 @@ Lưu ý thêm, như PG-028 đã chỉ ra: GIN JSONB chỉ phục vụ toán tử
 
 Cuối cùng là kích thước (đo sau khi thêm cột generated ở mục 8, nên các index đã được dựng lại cùng bảng):
 
-```text
---- 053 index sizes
-       index       | size
--------------------+-------
- gps_oct_pkey      | 40 kB
- gps_nov_pkey      | 40 kB
- gps_oct_attrs_idx | 16 kB
- gps_nov_attrs_idx | 16 kB
-(4 rows)
-```
+<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/postgresql-jsonb-quan-he/dbstudio-05.webp" alt="DBStudio chạy truy vấn của bước 053 trong p06/run.mjs và hiển thị kết quả 4 dòng" width="996" height="648" loading="lazy"></div><figcaption>DBStudio · bước 053 của <code>p06/run.mjs</code> · 4 dòng</figcaption></figure>
 
 Index GIN mỗi partition 16 kB, nhỏ hơn khoá chính 40 kB. Đừng suy rộng: `attrs` trong fixture chỉ có hai khoá và 11 giá trị phân biệt (`"phone"` và các số 5…14), tức rất ít mục index, mỗi mục trỏ tới nhiều dòng. Dữ liệu thật với nhiều khoá, nhiều giá trị khác nhau cho index lớn hơn hẳn. Thêm vào đó, mỗi index GIN là thêm việc cho mỗi lần ghi — ở 6.250 điểm/giây, đó là chi phí phải đo, không phải đoán.
 

@@ -58,16 +58,7 @@ FROM trip_flat
 ORDER BY trip_code;
 ```
 
-```text
- trip_code | customer_name  | customer_phone |  driver_name   |    city_name    |  merchant_name
------------+----------------+----------------+----------------+-----------------+-----------------
-    100000 | Nguyễn Văn An  | 0900000001     | Bùi Văn Khoa   | TP. Hồ Chí Minh |
-    100002 | Trần Thị Bình  | 0900000002     | Hồ Thị Lan     | TP. Hồ Chí Minh | Cơm Tấm Phố Lab
-    100003 | Lê Hoàng Cường | 0900000003     | Ngô Quang Minh | Hà Nội          | Bún Chả Ngõ Mẫu
-    100006 | Nguyễn Văn An  | 0900000001     |                | TP. Hồ Chí Minh |
-    100012 | Nguyễn Văn An  | 0900000001     | Bùi Văn Khoa   | TP. Hồ Chí Minh |
-(5 rows)
-```
+<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/postgresql-mo-hinh-quan-he-chuan-hoa/dbstudio-01.webp" alt="DBStudio chạy câu lệnh ở pg008-bang-phang-bat-thuong.sql dòng 32 và hiển thị kết quả 5 dòng" width="1138" height="480" loading="lazy"></div><figcaption>DBStudio · <code>pg008-bang-phang-bat-thuong.sql</code>, câu ở dòng 32 · 5 dòng</figcaption></figure>
 
 Chỉ 5 dòng mà «TP. Hồ Chí Minh» lặp 4 lần, khách An 3 lần; với 2 triệu chuyến/ngày của hồ sơ Tới Nơi, mỗi khách quen lặp hàng trăm lần.
 
@@ -94,15 +85,7 @@ WHERE customer_name = 'Nguyễn Văn An'
 ORDER BY trip_code;
 ```
 
-```text
-UPDATE 1
- trip_code | customer_name | customer_phone
------------+---------------+----------------
-    100000 | Nguyễn Văn An | 0900000001
-    100006 | Nguyễn Văn An | 0900000001
-    100012 | Nguyễn Văn An | 0900000011
-(3 rows)
-```
+<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/postgresql-mo-hinh-quan-he-chuan-hoa/dbstudio-02.webp" alt="DBStudio chạy câu lệnh ở pg008-bang-phang-bat-thuong.sql dòng 38 và hiển thị kết quả 3 dòng" width="996" height="442" loading="lazy"></div><figcaption>DBStudio · <code>pg008-bang-phang-bat-thuong.sql</code>, câu ở dòng 38 · 3 dòng</figcaption></figure>
 
 Khách An giờ có hai số; không ràng buộc nào chặn được vì bảng không có khái niệm «khách». Sửa cho đủ cũng khó: tìm theo tên thì trúng người trùng tên, theo số cũ thì sót dòng đã sửa dở. Trong schema lab, số điện thoại sống ở **một** dòng của `customers`; chuyến chỉ giữ `customer_id`:
 
@@ -128,10 +111,7 @@ INSERT INTO trip_flat (driver_code, driver_name, kind, status, fare, requested_a
 VALUES (8006, 'Trịnh Văn Phúc', 'ride', 'requested', 0, '2026-11-03 10:00+07', '?', '?', 'DN', 'Đà Nẵng');
 ```
 
-```text
-ERROR:  null value in column "trip_code" of relation "trip_flat" violates not-null constraint
-DETAIL:  Failing row contains (null, ride, requested, 0, 2026-11-03 10:00:00+07, ?, ?, 8006, Trịnh Văn Phúc, DN, Đà Nẵng, null, null).
-```
+<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/postgresql-mo-hinh-quan-he-chuan-hoa/dbstudio-03.webp" alt="DBStudio chạy câu lệnh ở pg008-bang-phang-bat-thuong.sql dòng 49 và hiển thị thông báo lỗi" width="1462" height="412" loading="lazy"></div><figcaption>DBStudio · <code>pg008-bang-phang-bat-thuong.sql</code>, câu ở dòng 49 · lỗi</figcaption></figure>
 
 Muốn lưu, ai đó sẽ bịa mã chuyến và khách `'?'`, rồi mọi báo cáo phải nhớ loại dòng giả. Trong lab, `drivers` là bảng riêng.
 
@@ -142,15 +122,7 @@ DELETE FROM trip_flat WHERE status = 'cancelled'
 RETURNING trip_code, customer_name, merchant_name;
 ```
 
-```text
- trip_code | customer_name  |  merchant_name
------------+----------------+-----------------
-    100003 | Lê Hoàng Cường | Bún Chả Ngõ Mẫu
-    100006 | Nguyễn Văn An  |
-(2 rows)
-
-DELETE 2
-```
+<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/postgresql-mo-hinh-quan-he-chuan-hoa/dbstudio-04.webp" alt="DBStudio chạy câu lệnh ở pg008-bang-phang-bat-thuong.sql dòng 55 và hiển thị kết quả 2 dòng" width="996" height="368" loading="lazy"></div><figcaption>DBStudio · <code>pg008-bang-phang-bat-thuong.sql</code>, câu ở dòng 55 · 2 dòng</figcaption></figure>
 
 Sau đó lọc theo tên quán Bún Chả Ngõ Mẫu hay tên khách Lê Hoàng Cường đều trả `(0 rows)`: quán và khách biến mất vì đơn duy nhất của họ là đơn huỷ. Ở schema lab thì ngược lại — FK còn chặn xoá khách đang có chuyến: `DELETE FROM customers WHERE id = 'c0000000-…-000000000003'` báo `violates foreign key constraint "fk_trips_customer"` (đã chạy thật).
 
@@ -169,18 +141,11 @@ WHERE status_history LIKE '%accepted%'
 ORDER BY trip_code;
 ```
 
-```text
- trip_code |                            status_history
------------+----------------------------------------------------------------------
-    100000 | requested,searching,accepted,arriving,picked_up,in_transit,completed
-    100002 | requested,searching,accepted,arriving,picked_up,in_transit,completed
-    100012 | requested,searching,accepted
-(3 rows)
-```
+<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/postgresql-mo-hinh-quan-he-chuan-hoa/dbstudio-05.webp" alt="DBStudio chạy câu lệnh ở pg008-bang-phang-bat-thuong.sql dòng 58 và hiển thị kết quả 3 dòng" width="996" height="442" loading="lazy"></div><figcaption>DBStudio · <code>pg008-bang-phang-bat-thuong.sql</code>, câu ở dòng 58 · 3 dòng</figcaption></figure>
 
 (Không có 100003 vì đơn huỷ đã bị xoá ở 3.3.) Đúng hôm nay, nhưng chuỗi không có giờ của từng bước, không CHECK được từng trạng thái thuộc 8 giá trị, và `LIKE` sẽ khớp nhầm khi có trạng thái mới chứa chữ `accepted`. Sửa: mỗi lần đổi trạng thái là **một dòng** — bảng `trip_events` của lab, có `ck_trip_events_status` và `occurred_at` riêng.
 
-PostgreSQL có mảng và JSONB nên một ô nhiều giá trị không bị cấm về kỹ thuật; câu hỏi 1NF thực dụng là *có ai cần lọc, ràng buộc hay tham chiếu từng phần tử không* — có thì tách dòng (JSONB: PG-053, Phần 6).
+PostgreSQL có mảng và JSONB nên một ô nhiều giá trị không bị cấm về kỹ thuật; câu hỏi 1NF thực dụng là *có ai cần lọc, ràng buộc hay tham chiếu từng phần tử không* — có thì tách dòng (JSONB: [PG-053](/articles/postgresql-jsonb-quan-he), Phần 6).
 
 ### 2NF — phụ thuộc vào toàn bộ khoá
 
@@ -221,12 +186,7 @@ VALUES ('food', 1, 'c0000000-0000-4000-8000-000000000001',
         '2026-11-03 10:00:00+07', '2026-11-03 10:00:00+07');
 ```
 
-```text
-ALTER TABLE
-ALTER TABLE
-ERROR:  insert or update on table "trips" violates foreign key constraint "fk_trips_merchant_city"
-DETAIL:  Key (merchant_id, city_id)=(e0000000-0000-4000-8000-000000000002, 1) is not present in table "merchants".
-```
+<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/postgresql-mo-hinh-quan-he-chuan-hoa/dbstudio-06.webp" alt="DBStudio chạy câu lệnh ở pg008-rang-buoc-lien-bang.sql dòng 6 và hiển thị thông báo lỗi" width="1282" height="434" loading="lazy"></div><figcaption>DBStudio · <code>pg008-rang-buoc-lien-bang.sql</code>, câu ở dòng 6 · lỗi</figcaption></figure>
 
 Mặc định, dòng có một cột FK là NULL không bị kiểm tra, nên FK này không đụng `ride`/`parcel` (`merchant_id` NULL); luật «chỉ đơn đồ ăn có quán» vẫn do `ck_trips_merchant_only_food` giữ. Cái giá là một UNIQUE (kèm index) trên `merchants` — đáng, vì quán gần như không đổi thành phố.
 
@@ -284,12 +244,7 @@ ORDER BY valid_from DESC
 LIMIT 1;
 ```
 
-```text
- id | base_fare | per_km |       valid_from
-----+-----------+--------+------------------------
-  1 |     12000 |   4500 | 2026-10-01 00:00:00+07
-(1 row)
-```
+<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/postgresql-mo-hinh-quan-he-chuan-hoa/dbstudio-07.webp" alt="DBStudio chạy câu lệnh ở pg008-rang-buoc-lien-bang.sql dòng 35 và hiển thị kết quả 1 dòng" width="996" height="426" loading="lazy"></div><figcaption>DBStudio · <code>pg008-rang-buoc-lien-bang.sql</code>, câu ở dòng 35 · 1 dòng</figcaption></figure>
 
 Câu cuối dùng đúng kỹ thuật PG-007. Bảng giá có phiên bản trả lời «áp giá nào»; `fare` trả lời «khách trả bao nhiêu». Cần cả hai thì giữ cả hai — chuyến có thể thêm `fare_rule_version_id` để kiểm toán. Lập luận này cũng áp dụng cho chứng từ — xem bài tập 2.
 
@@ -297,7 +252,7 @@ Câu cuối dùng đúng kỹ thuật PG-007. Bảng giá có phiên bản trả
 
 `drivers.status`, bộ đếm, cột tổng hợp là bản sao thật sự — suy ra được từ nguồn. Chấp nhận khi lợi ích đọc rõ ràng và đủ bốn điều; với `drivers.status`: nguồn dữ liệu gốc xác định (chuyến đang chạy trong `trips`), đường ghi duy nhất cùng giao dịch với nguồn (bước nhận/hoàn thành — giao dịch ở Phần 4), truy vấn kiểm tra lệch (07-B4), và dựng lại được từ nguồn khi lệch.
 
-Bảng phẳng của CSKH cũng hợp lệ *ở dạng này*: một view hay materialized view dựng từ bảng chuẩn hoá, chỉ để đọc (PG-056, Phần 6) — không phải nơi sửa số điện thoại.
+Bảng phẳng của CSKH cũng hợp lệ *ở dạng này*: một view hay materialized view dựng từ bảng chuẩn hoá, chỉ để đọc ([PG-056](/articles/postgresql-materialized-view-reporting), Phần 6) — không phải nơi sửa số điện thoại.
 
 ## 7. Ranh giới mô hình: chuyến và sự kiện chuyến
 

@@ -114,13 +114,7 @@ LSN (*log sequence number* — vị trí trong dòng WAL) `0/4001DF0` là mốc 
 
 **Bước 3 — Chờ WAL tới archive.** `pg_switch_wal()` đóng segment hiện tại; runner chờ cả tệp xuất hiện lẫn `pg_stat_archiver` bắt kịp:
 
-```text
---- 048 pg_stat_archiver
-   archived_count |    last_archived_wal     | failed_count
-  ----------------+--------------------------+--------------
-                5 | 000000010000000000000004 |            0
-  (1 row)
-```
+<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/postgresql-thuc-hanh-runbook-phuc-hoi/dbstudio-01.webp" alt="DBStudio chạy truy vấn của bước 048 trong p05/run.mjs và hiển thị kết quả 1 dòng" width="996" height="514" loading="lazy"></div><figcaption>DBStudio · bước 048 của <code>p05/run.mjs</code> · 1 dòng</figcaption></figure>
 
 Restore point `0/4001DF0` thuộc segment `…0004`; log recovery ở bước 5 cho thấy đích phải lấy segment này từ archive mới tới được target. Thiếu nó, chuyến 101 không về — vì thế RUNBOOK ghi «không đánh dấu có backup chỉ vì có base».
 

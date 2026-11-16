@@ -117,12 +117,7 @@ PASS 048 source damaged deliberately: 0
 
 `pg_switch_wal()` buộc server đóng segment hiện tại và chuyển sang segment mới. Việc này cần thiết vì `archive_command` chỉ chạy khi một segment **hoàn tất**: segment `…04` chứa restore point (ở `0/4001DF0`, tức mới vài KB đầu segment) và câu DELETE; nếu không switch thì nó nằm trong `pg_wal` tới khi đầy 16 MB. Runner đợi tới khi file xuất hiện trong kho **và** `pg_stat_archiver` ghi nhận:
 
-```text
- archived_count |    last_archived_wal     | failed_count
-----------------+--------------------------+--------------
-              5 | 000000010000000000000004 |            0
-(1 row)
-```
+<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/postgresql-pitr-base-backup-wal/dbstudio-01.webp" alt="DBStudio chạy truy vấn của bước 048 trong p05/run.mjs và hiển thị kết quả 1 dòng" width="996" height="514" loading="lazy"></div><figcaption>DBStudio · bước 048 của <code>p05/run.mjs</code> · 1 dòng</figcaption></figure>
 
 `failed_count = 0` và `last_archived_wal` đã tới `…04`. Restore point mới chỉ nằm trên nguồn thì chưa đủ: nếu máy nguồn mất trước khi segment chứa nó vào kho, mốc đó không tồn tại với bất kỳ bản phục hồi nào. Lab không liệt kê năm file đã archive là những file nào; con số chỉ dùng để thấy archiver đang chạy và chưa thất bại lần nào.
 

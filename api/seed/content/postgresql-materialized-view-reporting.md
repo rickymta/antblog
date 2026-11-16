@@ -113,16 +113,7 @@ PASS 056 plain REFRESH blocks readers: reader wait_event_type = Lock
 
 `wait_event_type = Lock` nghĩa là phiên reader đang chờ một khoá cấp đối tượng ([PG-043](/articles/postgresql-pg-stat-activity-quan-sat)). Còn `pg_locks` trên `fare_report`, lọc theo hai phiên:
 
-```text
---- 056 locks during plain REFRESH
-    s    |        mode         | granted
----------+---------------------+---------
- refresh | AccessExclusiveLock | t
- refresh | ExclusiveLock       | t
- refresh | ShareLock           | t
- reader  | AccessShareLock     | f
-(4 rows)
-```
+<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/postgresql-materialized-view-reporting/dbstudio-01.webp" alt="DBStudio chạy truy vấn của bước 056 trong p06/run.mjs và hiển thị kết quả 4 dòng" width="996" height="648" loading="lazy"></div><figcaption>DBStudio · bước 056 của <code>p06/run.mjs</code> · 4 dòng</figcaption></figure>
 
 Đọc bảng này:
 
@@ -138,11 +129,7 @@ REFRESH thường có ưu điểm của nó: tài liệu PostgreSQL 18 (*REFRESH
 
 `REFRESH MATERIALIZED VIEW CONCURRENTLY` tính lại mà **không chặn** người đọc. Runner thử ngay khi MV chưa có index nào:
 
-```text
---- 056 CONCURRENTLY without unique index
-ERROR:  55000: cannot refresh materialized view "public.fare_report" concurrently
-HINT:  Create a unique index with no WHERE clause on one or more columns of the materialized view.
-```
+<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/postgresql-materialized-view-reporting/dbstudio-02.webp" alt="DBStudio chạy truy vấn của bước 056 trong p06/run.mjs và hiển thị thông báo lỗi" width="1147" height="434" loading="lazy"></div><figcaption>DBStudio · bước 056 của <code>p06/run.mjs</code> · lỗi</figcaption></figure>
 
 `55000` là `object_not_in_prerequisite_state` — đối tượng chưa ở trạng thái đủ điều kiện. Tài liệu PostgreSQL 18 nêu ba điều kiện của `CONCURRENTLY`:
 
@@ -179,15 +166,7 @@ Runner đánh dấu «no wait» khi reader trả lời trong chưa tới 2 giây
 
 Khoá phiên refresh giữ trên `fare_report`:
 
-```text
---- 056 locks during REFRESH CONCURRENTLY
-    s    |       mode       | granted
----------+------------------+---------
- refresh | AccessShareLock  | t
- refresh | ExclusiveLock    | t
- refresh | RowExclusiveLock | t
-(3 rows)
-```
+<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/postgresql-materialized-view-reporting/dbstudio-03.webp" alt="DBStudio chạy truy vấn của bước 056 trong p06/run.mjs và hiển thị kết quả 3 dòng" width="996" height="618" loading="lazy"></div><figcaption>DBStudio · bước 056 của <code>p06/run.mjs</code> · 3 dòng</figcaption></figure>
 
 Mấu chốt là **`ExclusiveLock`** thay cho `AccessExclusiveLock`. Hai cái tên gần giống nhau nhưng khác hẳn. Theo bảng xung đột trong tài liệu *Explicit Locking*, `EXCLUSIVE` xung đột với mọi mức **trừ** `ACCESS SHARE` — tài liệu viết rằng nó chỉ cho phép các khoá `ACCESS SHARE` đồng thời, tức chỉ việc **đọc** chạy song song được, và nêu đích danh `REFRESH MATERIALIZED VIEW CONCURRENTLY` là lệnh lấy mức khoá này.
 
@@ -281,7 +260,7 @@ SELECT cron.schedule('fare-report', '*/15 * * * *',
 Dù chọn cách nào, job refresh nên:
 
 - Đặt `lock_timeout` để không treo vô hạn sau một refresh khác hay một thao tác DDL, và `statement_timeout` theo thời lượng kỳ vọng.
-- Chạy bằng role có quyền phù hợp. Từ PostgreSQL 17 có quyền `MAINTAIN` cho phép refresh mà không cần là chủ sở hữu MV; hãy kiểm tài liệu phiên bản bạn dùng trước khi cấp quyền.
+- Chạy bằng role có quyền phù hợp. Từ PostgreSQL 17 có quyền `MAINTAIN` cho phép refresh mà không cần là chủ sở hữu MV; hãy tra tài liệu phiên bản bạn dùng trước khi cấp quyền.
 - Báo động khi **thất bại** và khi **quá hạn** — hai thứ khác nhau: job có thể không chạy (scheduler chết) mà không có dòng log lỗi nào.
 
 Câu theo dõi độ tươi, **không chạy trong lab**, đủ đơn giản để đưa vào dashboard:

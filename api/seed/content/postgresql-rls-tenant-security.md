@@ -57,12 +57,7 @@ WITH CHECK (
 
 Catalog `pg_policies` ghi lại đúng như vậy:
 
-```text
-   policyname  |  roles   | cmd |                                          qual                                           |                                       with_check
-  -------------+----------+-----+-----------------------------------------------------------------------------------------+-----------------------------------------------------------------------------------------
-   tenant_scope | {tn_app} | ALL | (tenant_id = (NULLIF(current_setting('app.tenant_id'::text, true), ''::text))::integer) | (tenant_id = (NULLIF(current_setting('app.tenant_id'::text, true), ''::text))::integer)
-  (1 row)
-```
+<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/postgresql-rls-tenant-security/dbstudio-01.webp" alt="DBStudio chạy truy vấn của bước 049 trong p05/run.mjs và hiển thị kết quả 1 dòng" width="1696" height="558" loading="lazy"></div><figcaption>DBStudio · bước 049 của <code>p05/run.mjs</code> · 1 dòng</figcaption></figure>
 
 Đọc từng phần:
 
@@ -207,14 +202,7 @@ PASS 049 superuser still bypasses FORCE: 100
 
 Hệ quả cho kiểm thử: **phép kiểm policy chạy bằng `postgres` là vô nghĩa**. Runner luôn `SET ROLE` sang role thật trước khi đếm. Bảng role của PG-041 cho thấy chưa role ứng dụng nào có `BYPASSRLS`:
 
-```text
-    rolname   | login | super | bypassrls
-  ------------+-------+-------+-----------
-   tn_app     | t     | f     | f
-   tn_monitor | f     | f     | f
-   tn_owner   | f     | f     | f
-   tn_report  | f     | f     | f
-```
+<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/postgresql-rls-tenant-security/dbstudio-02.webp" alt="DBStudio chạy truy vấn của bước 041 trong p05/run.mjs và hiển thị kết quả 4 dòng" width="996" height="648" loading="lazy"></div><figcaption>DBStudio · bước 041 của <code>p05/run.mjs</code> · 4 dòng</figcaption></figure>
 
 Đưa cột `bypassrls` vào kiểm định kỳ: role được cấp `BYPASSRLS` «tạm để chạy migration» rồi quên thu hồi là cửa sau không ai nhìn thấy.
 

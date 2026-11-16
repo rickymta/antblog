@@ -65,14 +65,9 @@ Ta chọn **một** khoá ứng viên làm **primary key** (khoá chính). Tài 
 
 Lab đặt tên ràng buộc theo tiền tố `pk_`, `uq_`, `fk_`, `ck_` để thông báo lỗi chỉ thẳng vào quy tắc. Database thật sự **chặn** dữ liệu vi phạm khoá — hai câu trong `03-fixture-invalid.sql` thêm thành phố trùng `id` và khách trùng số điện thoại:
 
-```text
-INSERT INTO cities (id, code, name) VALUES (1, 'XX', 'Trùng id 1');
-ERROR:  duplicate key value violates unique constraint "pk_cities"
-DETAIL:  Key (id)=(1) already exists.
+<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/postgresql-bang-dong-cot-primary-foreign-key/dbstudio-01.webp" alt="DBStudio chạy câu lệnh ở 03-fixture-invalid.sql dòng 76 và hiển thị thông báo lỗi" width="996" height="368" loading="lazy"></div><figcaption>DBStudio · <code>03-fixture-invalid.sql</code>, câu ở dòng 76 · lỗi</figcaption></figure>
 
-ERROR:  duplicate key value violates unique constraint "uq_customers_phone"
-DETAIL:  Key (phone)=(0900000001) already exists.
-```
+<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/postgresql-bang-dong-cot-primary-foreign-key/dbstudio-02.webp" alt="DBStudio chạy câu lệnh ở 03-fixture-invalid.sql dòng 59 và hiển thị thông báo lỗi" width="996" height="456" loading="lazy"></div><figcaption>DBStudio · <code>03-fixture-invalid.sql</code>, câu ở dòng 59 · lỗi</figcaption></figure>
 
 Cả hai cùng mã `23505` (unique_violation): primary key và unique dùng chung cơ chế «không trùng»; primary key còn cấm `NULL` và là khoá mà bảng khác trỏ tới. Cách viết các câu lệnh này nằm ở [PG-005](/articles/postgresql-create-table-constraints) và PG-006.
 
@@ -93,22 +88,11 @@ SELECT phone, full_name FROM customers WHERE id = 'c0000000-0000-4000-8000-00000
 SELECT code, full_name, city_id FROM drivers WHERE id = 'd0000000-0000-4000-8000-000000008005';
 ```
 
-```text
-  code  |             customer_id              |              driver_id
---------+--------------------------------------+--------------------------------------
- 100004 | c0000000-0000-4000-8000-000000000005 | d0000000-0000-4000-8000-000000008005
-(1 row)
+<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/postgresql-bang-dong-cot-primary-foreign-key/dbstudio-03.webp" alt="DBStudio chạy câu lệnh ở pg003-di-theo-khoa.sql dòng 2 và hiển thị kết quả 1 dòng" width="1030" height="316" loading="lazy"></div><figcaption>DBStudio · <code>pg003-di-theo-khoa.sql</code>, câu ở dòng 2 · 1 dòng</figcaption></figure>
 
-   phone    |  full_name
-------------+-------------
- 0900000005 | Võ Minh Đức
-(1 row)
+<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/postgresql-bang-dong-cot-primary-foreign-key/dbstudio-04.webp" alt="DBStudio chạy câu lệnh ở pg003-di-theo-khoa.sql dòng 3 và hiển thị kết quả 1 dòng" width="1030" height="316" loading="lazy"></div><figcaption>DBStudio · <code>pg003-di-theo-khoa.sql</code>, câu ở dòng 3 · 1 dòng</figcaption></figure>
 
- code |  full_name  | city_id
-------+-------------+---------
- 8005 | Lý Thị Oanh |       3
-(1 row)
-```
+<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/postgresql-bang-dong-cot-primary-foreign-key/dbstudio-05.webp" alt="DBStudio chạy câu lệnh ở pg003-di-theo-khoa.sql dòng 4 và hiển thị kết quả 1 dòng" width="1030" height="316" loading="lazy"></div><figcaption>DBStudio · <code>pg003-di-theo-khoa.sql</code>, câu ở dòng 4 · 1 dòng</figcaption></figure>
 
 Chuyến 100004 là của khách Võ Minh Đức, tài xế Lý Thị Oanh (mã 8005) ở Đà Nẵng. Phần 2 gộp ba bước này thành một câu `JOIN`; bài này cố ý tách ra để thấy mỗi bước chỉ là «đi theo một khoá».
 
@@ -123,14 +107,9 @@ Chuyến 100004 là của khách Võ Minh Đức, tài xế Lý Thị Oanh (mã 
 
 Foreign key chặn cả hai chiều. Hai ví dụ dưới đây là thêm chuyến cho khách không tồn tại, và xoá thành phố Đà Nẵng khi còn tài xế trỏ tới (cả hai từ `03-fixture-invalid.sql`):
 
-```text
-ERROR:  insert or update on table "trips" violates foreign key constraint "fk_trips_customer"
-DETAIL:  Key (customer_id)=(c0000000-0000-4000-8000-000000000099) is not present in table "customers".
+<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/postgresql-bang-dong-cot-primary-foreign-key/dbstudio-06.webp" alt="DBStudio chạy câu lệnh ở 03-fixture-invalid.sql dòng 88 và hiển thị thông báo lỗi" width="1255" height="434" loading="lazy"></div><figcaption>DBStudio · <code>03-fixture-invalid.sql</code>, câu ở dòng 88 · lỗi</figcaption></figure>
 
-DELETE FROM cities WHERE id = 3;
-ERROR:  update or delete on table "cities" violates foreign key constraint "fk_drivers_city" on table "drivers"
-DETAIL:  Key (id)=(3) is still referenced from table "drivers".
-```
+<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/postgresql-bang-dong-cot-primary-foreign-key/dbstudio-07.webp" alt="DBStudio chạy câu lệnh ở 03-fixture-invalid.sql dòng 95 và hiển thị thông báo lỗi" width="1516" height="368" loading="lazy"></div><figcaption>DBStudio · <code>03-fixture-invalid.sql</code>, câu ở dòng 95 · lỗi</figcaption></figure>
 
 Cả hai mang mã `23503` (foreign_key_violation). Lỗi thứ hai do hành vi mặc định `NO ACTION`: từ chối xoá dòng cha còn dòng con. `CASCADE` xoá luôn dòng con — với dữ liệu chuyến và tiền, thường là điều ta **không** muốn.
 

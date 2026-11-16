@@ -124,12 +124,9 @@ SET ROLE tn_report; DELETE FROM ops.trips;
 SET ROLE tn_app;    ALTER TABLE ops.trips ADD COLUMN bad int;
 ```
 
-```text
---- 041 tn_report DELETE
-  ERROR:  42501: permission denied for table trips
---- 041 tn_app ALTER TABLE
-  ERROR:  42501: must be owner of table trips
-```
+<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/postgresql-role-grant-least-privilege/dbstudio-01.webp" alt="DBStudio chạy truy vấn của bước 041 trong p05/run.mjs và hiển thị thông báo lỗi" width="996" height="478" loading="lazy"></div><figcaption>DBStudio · bước 041 của <code>p05/run.mjs</code> · lỗi</figcaption></figure>
+
+<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/postgresql-role-grant-least-privilege/dbstudio-02.webp" alt="DBStudio chạy truy vấn của bước 041 trong p05/run.mjs và hiển thị thông báo lỗi" width="996" height="500" loading="lazy"></div><figcaption>DBStudio · bước 041 của <code>p05/run.mjs</code> · lỗi</figcaption></figure>
 
 Cùng SQLSTATE `42501` (`insufficient_privilege`) nhưng hai thông báo khác nhau, và sự khác biệt đó có lý do:
 
@@ -148,29 +145,13 @@ PASS 041 application is not owner: tn_owner
 
 Lỗi `42501` cho biết một việc bị cấm; muốn biết **tất cả** những gì đang được phép thì đọc ACL. Danh sách role của lab:
 
-```text
---- 041 roles
-    rolname   | login | super | bypassrls
-  ------------+-------+-------+-----------
-   tn_app     | t     | f     | f
-   tn_monitor | f     | f     | f
-   tn_owner   | f     | f     | f
-   tn_report  | f     | f     | f
-  (4 rows)
-```
+<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/postgresql-role-grant-least-privilege/dbstudio-03.webp" alt="DBStudio chạy truy vấn của bước 041 trong p05/run.mjs và hiển thị kết quả 4 dòng" width="996" height="648" loading="lazy"></div><figcaption>DBStudio · bước 041 của <code>p05/run.mjs</code> · 4 dòng</figcaption></figure>
 
 Chỉ `tn_app` đăng nhập được; không role nào là superuser hay có `BYPASSRLS` (bỏ qua row-level security — PG-049).
 
 ACL của hai bảng trong schema `ops`:
 
-```text
---- 041 table ACL
-     relname   |                                relacl
-  -------------+-----------------------------------------------------------------------
-   next_report | {tn_owner=arwdDxtm/tn_owner,tn_report=r/tn_owner}
-   trips       | {tn_owner=arwdDxtm/tn_owner,tn_app=arw/tn_owner,tn_report=r/tn_owner}
-  (2 rows)
-```
+<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/postgresql-role-grant-least-privilege/dbstudio-04.webp" alt="DBStudio chạy truy vấn của bước 041 trong p05/run.mjs và hiển thị kết quả 2 dòng" width="1021" height="588" loading="lazy"></div><figcaption>DBStudio · bước 041 của <code>p05/run.mjs</code> · 2 dòng</figcaption></figure>
 
 Mỗi phần tử có dạng `người_nhận=quyền/người_cấp`. Các chữ cái theo [bảng viết tắt ACL](https://www.postgresql.org/docs/18/ddl-priv.html#PRIVILEGE-ABBREVS-TABLE):
 
@@ -205,13 +186,7 @@ PASS 041 future table default privileges: t
 PASS 041 future table not granted to app: f
 ```
 
-```text
---- 041 default ACL
-   for_role | in_schema | type |       defaclacl
-  ----------+-----------+------+------------------------
-   tn_owner | ops       | r    | {tn_report=r/tn_owner}
-  (1 row)
-```
+<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/postgresql-role-grant-least-privilege/dbstudio-05.webp" alt="DBStudio chạy truy vấn của bước 041 trong p05/run.mjs và hiển thị kết quả 1 dòng" width="996" height="536" loading="lazy"></div><figcaption>DBStudio · bước 041 của <code>p05/run.mjs</code> · 1 dòng</figcaption></figure>
 
 Default ACL đọc là: khi **`tn_owner`** tạo đối tượng loại `r` (relation — bảng, view…) trong `ops`, cấp `r` (SELECT) cho `tn_report`. Đúng như vậy, `next_report` trong ACL ở mục 6 có `tn_report=r/tn_owner` dù không ai chạy GRANT trên nó.
 

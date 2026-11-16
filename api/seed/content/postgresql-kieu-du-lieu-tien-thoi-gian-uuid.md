@@ -62,51 +62,25 @@ SELECT sum(0.1::double precision) AS tong_float,
 FROM generate_series(1, 10);
 ```
 
-```text
-     float_cong      | float_bang_0_3 | numeric_bang_0_3
----------------------+----------------+------------------
- 0.30000000000000004 | f              | t
-(1 row)
+<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/postgresql-kieu-du-lieu-tien-thoi-gian-uuid/dbstudio-01.webp" alt="DBStudio chạy câu lệnh ở pg004-kieu-du-lieu.sql dòng 4 và hiển thị kết quả 1 dòng" width="996" height="382" loading="lazy"></div><figcaption>DBStudio · <code>pg004-kieu-du-lieu.sql</code>, câu ở dòng 4 · 1 dòng</figcaption></figure>
 
-     tong_float     | tong_numeric | tong_dong_integer
---------------------+--------------+-------------------
- 0.9999999999999999 |          1.0 |              1000
-(1 row)
-```
+<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/postgresql-kieu-du-lieu-tien-thoi-gian-uuid/dbstudio-02.webp" alt="DBStudio chạy câu lệnh ở pg004-kieu-du-lieu.sql dòng 9 và hiển thị kết quả 1 dòng" width="996" height="404" loading="lazy"></div><figcaption>DBStudio · <code>pg004-kieu-du-lieu.sql</code>, câu ở dòng 9 · 1 dòng</figcaption></figure>
 
 Mười khoản 100 đ cộng bằng `double precision` không ra đúng 1 nghìn đồng, và phép so sánh bằng trả `f`. Làm tròn khi hiển thị che được con số, nhưng không cứu được phép so sánh hay đối soát. `numeric` và số nguyên đồng đều chính xác; với VND, số nguyên đồng đơn giản và nhanh hơn — tài liệu ghi nhận phép tính `numeric` chậm hơn hẳn kiểu số nguyên.
 
 **Tổng thì sao?** Với 2 triệu chuyến/ngày (hồ sơ Tới Nơi) và cước trung bình **giả định** 100.000 đ, tổng một ngày là 200 tỷ đồng — vượt xa 2,1 tỷ. PostgreSQL lo việc này: `sum` của `integer` trả về `bigint`. Trên fixture 15 chuyến:
 
-```text
-SELECT pg_typeof(sum(fare)) AS kieu_tong, sum(fare) AS tong_cuoc FROM trips;
- kieu_tong | tong_cuoc
------------+-----------
- bigint    |    840000
-(1 row)
-```
+<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/postgresql-kieu-du-lieu-tien-thoi-gian-uuid/dbstudio-03.webp" alt="DBStudio chạy câu lệnh ở pg004-kieu-du-lieu.sql dòng 20 và hiển thị kết quả 1 dòng" width="996" height="360" loading="lazy"></div><figcaption>DBStudio · <code>pg004-kieu-du-lieu.sql</code>, câu ở dòng 20 · 1 dòng</figcaption></figure>
 
 **Chia tiền phải chọn cách làm tròn.** Chia đôi, chia ba một khoản (chia cước cho nhiều điểm giao, chia hoa hồng) là chỗ số nguyên đòi bạn ra quyết định:
 
-```text
-SELECT 100000 / 3 AS chia_integer, 100000 % 3 AS phan_du, 100000::numeric / 3 AS chia_numeric;
- chia_integer | phan_du |    chia_numeric
---------------+---------+--------------------
-        33333 |       1 | 33333.333333333333
-(1 row)
-```
+<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/postgresql-kieu-du-lieu-tien-thoi-gian-uuid/dbstudio-04.webp" alt="DBStudio chạy câu lệnh ở pg004-kieu-du-lieu.sql dòng 15 và hiển thị kết quả 1 dòng" width="1102" height="382" loading="lazy"></div><figcaption>DBStudio · <code>pg004-kieu-du-lieu.sql</code>, câu ở dòng 15 · 1 dòng</figcaption></figure>
 
 Chia `integer` cho `integer` cắt phần lẻ: ba phần 33.333 đ cộng lại thiếu 1 đ. `numeric` cũng không giải quyết — không ai trả 33.333,33 đ. Quy tắc nghiệp vụ phải nói phần dư thuộc về phần nào.
 
 **Vì sao không dùng `money`?** Tài liệu cho biết phần lẻ của kiểu này do thiết lập `lc_monetary` quyết định, và dữ liệu có thể không nạp được vào database có `lc_monetary` khác. Trên lab:
 
-```text
-SELECT current_setting('lc_monetary') AS lc_monetary, 45000::money AS cuoc_money;
- lc_monetary | cuoc_money
--------------+------------
- C           | $45,000.00
-(1 row)
-```
+<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/postgresql-kieu-du-lieu-tien-thoi-gian-uuid/dbstudio-05.webp" alt="DBStudio chạy câu lệnh ở pg004-kieu-du-lieu.sql dòng 24 và hiển thị kết quả 1 dòng" width="996" height="338" loading="lazy"></div><figcaption>DBStudio · <code>pg004-kieu-du-lieu.sql</code>, câu ở dòng 24 · 1 dòng</figcaption></figure>
 
 Cước 45.000 đồng được in thành 45 nghìn **đô la** với hai chữ số lẻ. Định dạng hiển thị là việc của ứng dụng; database nên giữ con số và đơn vị rõ ràng.
 
@@ -128,17 +102,9 @@ SELECT '2026-11-03 00:10:00+07'::timestamptz AS co_mui_gio,
        '2026-11-03 00:10:00+07'::timestamp   AS khong_mui_gio;
 ```
 
-```text
-       co_mui_gio       |    khong_mui_gio
-------------------------+---------------------
- 2026-11-03 00:10:00+07 | 2026-11-03 00:10:00
-(1 row)
+<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/postgresql-kieu-du-lieu-tien-thoi-gian-uuid/dbstudio-06.webp" alt="DBStudio chạy câu lệnh ở pg004-kieu-du-lieu.sql dòng 27 và hiển thị kết quả 1 dòng" width="996" height="360" loading="lazy"></div><figcaption>DBStudio · <code>pg004-kieu-du-lieu.sql</code>, câu ở dòng 27 · 1 dòng</figcaption></figure>
 
-       co_mui_gio       |    khong_mui_gio
-------------------------+---------------------
- 2026-11-02 17:10:00+00 | 2026-11-03 00:10:00
-(1 row)
-```
+<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/postgresql-kieu-du-lieu-tien-thoi-gian-uuid/dbstudio-07.webp" alt="DBStudio chạy câu lệnh ở pg004-kieu-du-lieu.sql dòng 32 và hiển thị kết quả 1 dòng" width="996" height="338" loading="lazy"></div><figcaption>DBStudio · <code>pg004-kieu-du-lieu.sql</code>, câu ở dòng 32 · 1 dòng</figcaption></figure>
 
 Cột `timestamptz` hiển thị khác nhau nhưng là **cùng một khoảnh khắc** (00:10 giờ VN = 17:10 UTC hôm trước). Cột `timestamp` đã bỏ `+07` mà không báo gì: không ai biết «00:10» là giờ ở đâu nữa. Hai nguồn ghi theo hai múi giờ vào cùng cột `timestamp` sẽ lệch 7 tiếng và không có cách nào tách lại.
 
@@ -159,24 +125,13 @@ WHERE code IN (100007, 100008)
 ORDER BY code;
 ```
 
-```text
-  code  |      requested_at      |       gio_vn        |  ngay_vn   | ngay_theo_phien
---------+------------------------+---------------------+------------+-----------------
- 100007 | 2026-11-02 16:50:00+00 | 2026-11-02 23:50:00 | 2026-11-02 | 2026-11-02
- 100008 | 2026-11-02 17:10:00+00 | 2026-11-03 00:10:00 | 2026-11-03 | 2026-11-02
-(2 rows)
-```
+<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/postgresql-kieu-du-lieu-tien-thoi-gian-uuid/dbstudio-08.webp" alt="DBStudio chạy câu lệnh ở pg004-kieu-du-lieu.sql dòng 38 và hiển thị kết quả 2 dòng" width="1030" height="522" loading="lazy"></div><figcaption>DBStudio · <code>pg004-kieu-du-lieu.sql</code>, câu ở dòng 38 · 2 dòng</figcaption></figure>
 
 Chuyến 100008 thuộc ngày 03/11 theo giờ VN nhưng ngày 02/11 theo phiên UTC. Tệp `05-select.sql` đếm cả fixture theo hai cách và ra **9** chuyến «ngày 02/11» ở phiên UTC so với **8** theo giờ Việt Nam. Đó chính là câu trả lời sai thứ hai của kế toán ở đầu bài. Cách viết bộ lọc khoảng thời gian đúng (khoảng nửa mở `[00:00 ngày 02/11, 00:00 ngày 03/11)` theo giờ VN) được trình bày ở bài [PG-007](/articles/postgresql-select-filter-order-limit).
 
 Một bẫy khác cũng không báo lỗi: định dạng ngày khi nhập chuỗi. Kết quả thật ở cuối `03-fixture-invalid.sql`:
 
-```text
- datestyle | chuoi_03_11_2026 | iso_2026_11_03
------------+------------------+----------------
- ISO, MDY  | 2026-03-11       | 2026-11-03
-(1 row)
-```
+<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/postgresql-kieu-du-lieu-tien-thoi-gian-uuid/dbstudio-09.webp" alt="DBStudio chạy câu lệnh ở 03-fixture-invalid.sql dòng 251 và hiển thị kết quả 1 dòng" width="996" height="448" loading="lazy"></div><figcaption>DBStudio · <code>03-fixture-invalid.sql</code>, câu ở dòng 251 · 1 dòng</figcaption></figure>
 
 Với `DateStyle` mặc định `ISO, MDY`, chuỗi `'03/11/2026'` được hiểu là **ngày 11 tháng 3**. Luôn viết ngày giờ theo ISO 8601: `'2026-11-03 09:00:00+07'`.
 
@@ -184,34 +139,17 @@ Với `DateStyle` mặc định `ISO, MDY`, chuỗi `'03/11/2026'` được hi�
 
 **`uuid` cho `id`.** Kiểu `uuid` lưu một giá trị 128 bit; dạng chữ chuẩn là 36 ký tự hex có gạch nối. Lưu bằng `uuid` thay vì `text` vừa gọn vừa được kiểm định dạng (`'khach-so-1'` bị chặn ở mục 1). Trên lab:
 
-```text
-SELECT pg_typeof(gen_random_uuid()) AS kieu, pg_column_size(gen_random_uuid()) AS byte_uuid,
-       length(gen_random_uuid()::text) AS ky_tu_dang_chu, pg_column_size(100004::bigint) AS byte_bigint;
- kieu | byte_uuid | ky_tu_dang_chu | byte_bigint
-------+-----------+----------------+-------------
- uuid |        16 |             36 |           8
-(1 row)
-```
+<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/postgresql-kieu-du-lieu-tien-thoi-gian-uuid/dbstudio-10.webp" alt="DBStudio chạy câu lệnh ở pg004-kieu-du-lieu.sql dòng 49 và hiển thị kết quả 1 dòng" width="1192" height="404" loading="lazy"></div><figcaption>DBStudio · <code>pg004-kieu-du-lieu.sql</code>, câu ở dòng 49 · 1 dòng</figcaption></figure>
 
 `gen_random_uuid()` có sẵn trong lõi PostgreSQL (từ bản 13, không cần extension) và theo tài liệu trả về UUID **phiên bản 4 — ngẫu nhiên**. Lợi ích: ứng dụng tự sinh id trước khi ghi, id không lộ số lượng chuyến, gộp dữ liệu nhiều nguồn không lo trùng. Cái giá phải trả: dung lượng gấp đôi `bigint`, khó đọc, giá trị ngẫu nhiên rải khắp index (đo ở Phần 3). PostgreSQL 18 bổ sung `uuidv7()` có thành phần thời gian; lab ghim bản 17 nên chưa dùng.
 
 **Identity cho `code`.** `code bigint GENERATED ALWAYS AS IDENTITY (START WITH 100000)` là cột **identity**: theo tài liệu, nó gắn với một sequence ngầm, tự nhận giá trị khi thêm dòng, mặc định `NOT NULL`. Với `ALWAYS`, giá trị ghi tay chỉ được nhận kèm `OVERRIDING SYSTEM VALUE` (với `BY DEFAULT` thì giá trị người dùng được ưu tiên). Lab chọn `ALWAYS` để không ai vô tình tự đặt mã chuyến:
 
-```text
-ERROR:  cannot insert a non-DEFAULT value into column "code"
-DETAIL:  Column "code" is an identity column defined as GENERATED ALWAYS.
-HINT:  Use OVERRIDING SYSTEM VALUE to override.
-```
+<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/postgresql-kieu-du-lieu-tien-thoi-gian-uuid/dbstudio-11.webp" alt="DBStudio chạy câu lệnh ở 03-fixture-invalid.sql dòng 211 và hiển thị thông báo lỗi" width="996" height="434" loading="lazy"></div><figcaption>DBStudio · <code>03-fixture-invalid.sql</code>, câu ở dòng 211 · lỗi</figcaption></figure>
 
 **Sequence không bảo đảm liên tục.** Sau khi chạy `00`→`03`, hỏi sequence của `code`:
 
-```text
-SELECT last_value FROM trips_code_seq;
- last_value
-------------
-     100028
-(1 row)
-```
+<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/postgresql-kieu-du-lieu-tien-thoi-gian-uuid/dbstudio-12.webp" alt="DBStudio chạy câu lệnh ở pg004-kieu-du-lieu.sql dòng 55 và hiển thị kết quả 1 dòng" width="996" height="338" loading="lazy"></div><figcaption>DBStudio · <code>pg004-kieu-du-lieu.sql</code>, câu ở dòng 55 · 1 dòng</figcaption></figure>
 
 Bảng vẫn chỉ có 15 chuyến (100000–100014), nhưng sequence đã cấp tới 100028: một câu hợp lệ bị `ROLLBACK` và 13 câu thêm chuyến bị NOT NULL / FK / CHECK từ chối đều đã lấy số. Các câu sai kiểu (`22P02`, `22003`, `22007`, `22008`) và `428C9` thì không tiêu số, vì bị từ chối trước khi cột identity được cấp số (lúc đọc giá trị hoặc lúc kiểm tra câu lệnh). Kết quả: chuyến tạo ở `04-lifecycle.sql` nhận mã **100029**. Tài liệu (mục kiểu `serial`) cũng cảnh báo cột lấy số từ sequence có thể có «lỗ hổng» dù không xoá dòng nào. Đừng dùng `code` để đếm, đừng viết logic kiểu «mã kế tiếp là max + 1».
 
@@ -257,19 +195,7 @@ WHERE a.attrelid = 'toinoi.trips'::regclass AND a.attnum > 0 AND NOT a.attisdrop
 ORDER BY a.attnum;
 ```
 
-```text
-     cot      |           kieu           | cho_null |                         chu_thich
---------------+--------------------------+----------+------------------------------------------------------------
- id           | uuid                     | f        | Định danh kỹ thuật UUID v4; ứng dụng hoặc database sinh
- code         | bigint                   | f        | Mã chuyến tăng dần cho người dùng và CSKH; có thể nhảy cóc
- kind         | text                     | f        |
- …
- fare         | integer                  | f        | Cước tính bằng đồng (VND), số nguyên không âm
- requested_at | timestamp with time zone | f        | Thời điểm khách đặt (timestamptz)
- accepted_at  | timestamp with time zone | t        | Thời điểm tài xế nhận; NULL khi chưa ai nhận
- …
-(13 rows)
-```
+<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/postgresql-kieu-du-lieu-tien-thoi-gian-uuid/dbstudio-13.webp" alt="DBStudio chạy câu lệnh ở pg004-kieu-du-lieu.sql dòng 58 và hiển thị kết quả 13 dòng" width="1273" height="830" loading="lazy"></div><figcaption>DBStudio · <code>pg004-kieu-du-lieu.sql</code>, câu ở dòng 58 · 13 dòng</figcaption></figure>
 
 Sáu cột `kind`, `city_id`, `customer_id`, `driver_id`, `merchant_id`, `status` chưa có chú thích — khoảng trống bạn sẽ lấp một phần ở bài tập 1.
 

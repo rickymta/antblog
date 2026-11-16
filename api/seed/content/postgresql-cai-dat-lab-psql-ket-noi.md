@@ -92,33 +92,15 @@ SELECT 1 + 1 AS ket_qua;
 
 Chạy `node run.mjs <đường-dẫn>/thu-nghiem.sql`. Kết quả thật (đã lược phần in lại câu lệnh):
 
-```text
--- [lab] Engine: PostgreSQL 17.5 qua PGlite 0.3.16 (WebAssembly, một kết nối)
-                                       version
--------------------------------------------------------------------------------------…
- PostgreSQL 17.5 on aarch64-unknown-linux-gnu, compiled by emcc (Emscripten gcc/clang-like replacement + linker emulating GNU ld) 3.1.74 (1092ec30a3fb1d46b1782ff1b4db5094d3d06ae5), 32-bit
-(1 row)
- server_version
-----------------
- 17.5
-(1 row)
- server_version_num
---------------------
- 170005
-(1 row)
-     TimeZone
-------------------
- Asia/Ho_Chi_Minh
-(1 row)
- current_database | current_user
-------------------+--------------
- template1        | postgres
-(1 row)
- ket_qua
----------
-       2
-(1 row)
-```
+<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/postgresql-cai-dat-lab-psql-ket-noi/dbstudio-01.webp" alt="DBStudio chạy câu lệnh ở pg002-phien-ban-mui-gio.sql dòng 3 và hiển thị kết quả 1 dòng" width="1696" height="316" loading="lazy"></div><figcaption>DBStudio · <code>pg002-phien-ban-mui-gio.sql</code>, câu ở dòng 3 · 1 dòng</figcaption></figure>
+
+<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/postgresql-cai-dat-lab-psql-ket-noi/dbstudio-02.webp" alt="DBStudio chạy câu lệnh ở pg002-phien-ban-mui-gio.sql dòng 5 và hiển thị kết quả 1 dòng" width="1696" height="316" loading="lazy"></div><figcaption>DBStudio · <code>pg002-phien-ban-mui-gio.sql</code>, câu ở dòng 5 · 1 dòng</figcaption></figure>
+
+<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/postgresql-cai-dat-lab-psql-ket-noi/dbstudio-03.webp" alt="DBStudio chạy câu lệnh ở pg002-phien-ban-mui-gio.sql dòng 7 và hiển thị kết quả 1 dòng" width="1696" height="316" loading="lazy"></div><figcaption>DBStudio · <code>pg002-phien-ban-mui-gio.sql</code>, câu ở dòng 7 · 1 dòng</figcaption></figure>
+
+<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/postgresql-cai-dat-lab-psql-ket-noi/dbstudio-04.webp" alt="DBStudio chạy câu lệnh ở pg002-phien-ban-mui-gio.sql dòng 9 và hiển thị kết quả 1 dòng" width="1696" height="316" loading="lazy"></div><figcaption>DBStudio · <code>pg002-phien-ban-mui-gio.sql</code>, câu ở dòng 9 · 1 dòng</figcaption></figure>
+
+<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/postgresql-cai-dat-lab-psql-ket-noi/dbstudio-05.webp" alt="DBStudio chạy câu lệnh ở pg002-phien-ban-mui-gio.sql dòng 11 và hiển thị kết quả 1 dòng" width="1696" height="316" loading="lazy"></div><figcaption>DBStudio · <code>pg002-phien-ban-mui-gio.sql</code>, câu ở dòng 11 · 1 dòng</figcaption></figure>
 
 Đọc từng dòng:
 
@@ -137,14 +119,7 @@ SHOW timezone;
 SET TIME ZONE 'Asia/Ho_Chi_Minh';
 ```
 
-```text
-RESET
- TimeZone
-----------
- GMT
-(1 row)
-SET
-```
+<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/postgresql-cai-dat-lab-psql-ket-noi/dbstudio-06.webp" alt="DBStudio chạy câu lệnh ở pg002-phien-ban-mui-gio.sql dòng 17 và hiển thị kết quả 1 dòng" width="996" height="316" loading="lazy"></div><figcaption>DBStudio · <code>pg002-phien-ban-mui-gio.sql</code>, câu ở dòng 17 · 1 dòng</figcaption></figure>
 
 Khi bỏ thiết lập của runner, PGlite quay về `GMT`. Với ảnh Docker, giá trị mặc định thường là `Etc/UTC` (chưa kiểm — hãy chạy `SHOW timezone` và ghi vào phiếu lab). Vì mặc định khác nhau giữa các môi trường, lab **luôn đặt múi giờ tường minh**. Đây là chuyện của cách *hiển thị* thời điểm; PG-004 giải thích vì sao giá trị đã lưu không đổi khi đổi múi giờ phiên.
 
@@ -166,12 +141,7 @@ Kết quả không kèm ngữ cảnh rất khó so sánh về sau, nên ghi lạ
 SELECT datcollate, datctype FROM pg_database WHERE datname = current_database();
 ```
 
-```text
- datcollate | datctype
-------------+----------
- C          | C.UTF-8
-(1 row)
-```
+<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/postgresql-cai-dat-lab-psql-ket-noi/dbstudio-07.webp" alt="DBStudio chạy câu lệnh ở pg002-collation.sql dòng 1 và hiển thị kết quả 1 dòng" width="996" height="316" loading="lazy"></div><figcaption>DBStudio · <code>pg002-collation.sql</code>, câu ở dòng 1 · 1 dòng</figcaption></figure>
 
 **Collation** (quy tắc so sánh và sắp xếp chuỗi) ảnh hưởng tới thứ tự `ORDER BY` tên khách; server Docker có thể khác PGlite, vì vậy các truy vấn sắp xếp chữ của lab ghi rõ collation (PG-007). `DateStyle` = `ISO, MDY` là lý do chuỗi `'03/11/2026'` bị hiểu thành ngày 11 tháng 3 — bẫy này để dành cho PG-004.
 

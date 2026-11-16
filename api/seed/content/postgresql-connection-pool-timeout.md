@@ -52,18 +52,7 @@ PostgreSQL dùng **một tiến trình backend cho mỗi kết nối** ([Archite
 
 Cluster lab dùng `max_connections = 40` (cấu hình chung của lab, không phải khuyến nghị):
 
-```text
---- 047 connection settings
-                  name                 | setting
-  -------------------------------------+---------
-   idle_in_transaction_session_timeout | 0
-   lock_timeout                        | 0
-   max_connections                     | 40
-   reserved_connections                | 0
-   statement_timeout                   | 0
-   superuser_reserved_connections      | 3
-  (6 rows)
-```
+<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/postgresql-connection-pool-timeout/dbstudio-01.webp" alt="DBStudio chạy truy vấn của bước 047 trong p05/run.mjs và hiển thị kết quả 6 dòng" width="996" height="708" loading="lazy"></div><figcaption>DBStudio · bước 047 của <code>p05/run.mjs</code> · 6 dòng</figcaption></figure>
 
 Role thường của lab dùng được tối đa 40 − 3 − 0 = **37** kết nối. Theo tài liệu, khi số chỗ còn lại chỉ bằng phần giữ riêng, kết nối mới của role thường bị từ chối; lỗi này có SQLSTATE `53300` (`too_many_connections`). Lab **không** thử lấp đầy 37 chỗ, nên bài không trích thông báo của trường hợp này. Bảng cũng xác nhận ba timeout đều **0 — tắt**: nếu bạn không đặt, không ai đặt hộ.
 

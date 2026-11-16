@@ -135,12 +135,7 @@ SELECT NULL::timestamptz >= TIMESTAMPTZ '2026-11-03 09:00:00+07' AS ket_qua_so_s
        (NULL::timestamptz >= TIMESTAMPTZ '2026-11-03 09:00:00+07') IS NULL AS la_null;
 ```
 
-```text
- ket_qua_so_sanh | la_null
------------------+---------
-                 | t
-(1 row)
-```
+<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/postgresql-create-table-constraints/dbstudio-01.webp" alt="DBStudio chạy câu lệnh ở pg005-ten-rang-buoc.sql dòng 35 và hiển thị kết quả 1 dòng" width="996" height="360" loading="lazy"></div><figcaption>DBStudio · <code>pg005-ten-rang-buoc.sql</code>, câu ở dòng 35 · 1 dòng</figcaption></figure>
 
 Nhờ vậy `ck_trips_accepted_after_requested CHECK (accepted_at >= requested_at)` tự bỏ qua chuyến chưa ai nhận. Mặt trái: CHECK kiểu so sánh **không bao giờ** buộc cột phải có giá trị. Quy tắc «phải có» phải viết tường minh bằng `IS NULL` / `IS NOT NULL`, hoặc dùng NOT NULL.
 
@@ -199,30 +194,19 @@ Tệp có 33 câu sai, mỗi câu kèm dòng chú thích `-- expect-error: <SQLS
 
 **NOT NULL** — ghi NULL tường minh bị chặn kể cả khi cột có DEFAULT; DEFAULT chỉ dùng khi câu lệnh không nhắc tới cột:
 
-```text
-ERROR:  null value in column "full_name" of relation "customers" violates not-null constraint
-DETAIL:  Failing row contains (f0000000-0000-4000-8000-000000000001, 0900000011, null, 2026-11-03 09:00:00+07).
+<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/postgresql-create-table-constraints/dbstudio-02.webp" alt="DBStudio chạy câu lệnh ở 03-fixture-invalid.sql dòng 38 và hiển thị thông báo lỗi" width="996" height="456" loading="lazy"></div><figcaption>DBStudio · <code>03-fixture-invalid.sql</code>, câu ở dòng 38 · lỗi</figcaption></figure>
 
-ERROR:  null value in column "status" of relation "trips" violates not-null constraint
-```
+<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/postgresql-create-table-constraints/dbstudio-03.webp" alt="DBStudio chạy câu lệnh ở 03-fixture-invalid.sql dòng 53 và hiển thị thông báo lỗi" width="1255" height="412" loading="lazy"></div><figcaption>DBStudio · <code>03-fixture-invalid.sql</code>, câu ở dòng 53 · lỗi</figcaption></figure>
 
 **UNIQUE / PRIMARY KEY** — `DETAIL` cho biết giá trị nào đã tồn tại (trùng `pk_cities` cũng ra đúng dạng này):
 
-```text
-ERROR:  duplicate key value violates unique constraint "uq_customers_phone"
-DETAIL:  Key (phone)=(0900000001) already exists.
-```
+<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/postgresql-create-table-constraints/dbstudio-04.webp" alt="DBStudio chạy câu lệnh ở 03-fixture-invalid.sql dòng 59 và hiển thị thông báo lỗi" width="996" height="456" loading="lazy"></div><figcaption>DBStudio · <code>03-fixture-invalid.sql</code>, câu ở dòng 59 · lỗi</figcaption></figure>
 
 **FOREIGN KEY** — hai chiều: thêm dòng con trỏ tới dòng cha không tồn tại, và xoá dòng cha còn dòng con:
 
-```text
-ERROR:  insert or update on table "trips" violates foreign key constraint "fk_trips_customer"
-DETAIL:  Key (customer_id)=(c0000000-0000-4000-8000-000000000099) is not present in table "customers".
+<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/postgresql-create-table-constraints/dbstudio-05.webp" alt="DBStudio chạy câu lệnh ở 03-fixture-invalid.sql dòng 88 và hiển thị thông báo lỗi" width="1255" height="434" loading="lazy"></div><figcaption>DBStudio · <code>03-fixture-invalid.sql</code>, câu ở dòng 88 · lỗi</figcaption></figure>
 
-DELETE FROM cities WHERE id = 3;
-ERROR:  update or delete on table "cities" violates foreign key constraint "fk_drivers_city" on table "drivers"
-DETAIL:  Key (id)=(3) is still referenced from table "drivers".
-```
+<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/postgresql-create-table-constraints/dbstudio-06.webp" alt="DBStudio chạy câu lệnh ở 03-fixture-invalid.sql dòng 95 và hiển thị thông báo lỗi" width="1516" height="368" loading="lazy"></div><figcaption>DBStudio · <code>03-fixture-invalid.sql</code>, câu ở dòng 95 · lỗi</figcaption></figure>
 
 **CHECK** — đúng sự cố mở bài. Số `+84…` bị từ chối để UNIQUE trên một dạng chuẩn còn ý nghĩa; chuyến 100012 bị đổi sang `completed` mà quên giờ hoàn thành:
 
@@ -237,24 +221,17 @@ DETAIL:  Failing row contains (70000000-0000-4000-8000-000000100012, 100012, rid
 
 **IDENTITY và sai kiểu** — mã chuyến do database cấp; còn lỗi sai kiểu thì phát sinh ngay khi đọc giá trị, trước mọi ràng buộc:
 
-```text
-ERROR:  cannot insert a non-DEFAULT value into column "code"
-DETAIL:  Column "code" is an identity column defined as GENERATED ALWAYS.
-HINT:  Use OVERRIDING SYSTEM VALUE to override.
+<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/postgresql-create-table-constraints/dbstudio-07.webp" alt="DBStudio chạy câu lệnh ở 03-fixture-invalid.sql dòng 211 và hiển thị thông báo lỗi" width="996" height="434" loading="lazy"></div><figcaption>DBStudio · <code>03-fixture-invalid.sql</code>, câu ở dòng 211 · lỗi</figcaption></figure>
 
-ERROR:  invalid input syntax for type integer: "45.000đ"
-ERROR:  integer out of range
-ERROR:  date/time field value out of range: "2026-02-30 09:00:00+07"
-```
+<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/postgresql-create-table-constraints/dbstudio-08.webp" alt="DBStudio chạy câu lệnh ở 03-fixture-invalid.sql dòng 218 và hiển thị thông báo lỗi" width="996" height="478" loading="lazy"></div><figcaption>DBStudio · <code>03-fixture-invalid.sql</code>, câu ở dòng 218 · lỗi</figcaption></figure>
+
+<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/postgresql-create-table-constraints/dbstudio-09.webp" alt="DBStudio chạy câu lệnh ở 03-fixture-invalid.sql dòng 227 và hiển thị thông báo lỗi" width="996" height="412" loading="lazy"></div><figcaption>DBStudio · <code>03-fixture-invalid.sql</code>, câu ở dòng 227 · lỗi</figcaption></figure>
+
+<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/postgresql-create-table-constraints/dbstudio-10.webp" alt="DBStudio chạy câu lệnh ở 03-fixture-invalid.sql dòng 239 và hiển thị thông báo lỗi" width="996" height="412" loading="lazy"></div><figcaption>DBStudio · <code>03-fixture-invalid.sql</code>, câu ở dòng 239 · lỗi</figcaption></figure>
 
 Cuối tệp, số dòng vẫn giữ nguyên như sau bước `02`: không câu sai nào để lại dấu vết.
 
-```text
- cities | customers | drivers | trips
---------+-----------+---------+-------
-      3 |         6 |       6 |    15
-(1 row)
-```
+<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/postgresql-create-table-constraints/dbstudio-11.webp" alt="DBStudio chạy câu lệnh ở 03-fixture-invalid.sql dòng 259 và hiển thị kết quả 1 dòng" width="996" height="404" loading="lazy"></div><figcaption>DBStudio · <code>03-fixture-invalid.sql</code>, câu ở dòng 259 · 1 dòng</figcaption></figure>
 
 Hai điều đáng để ý. Thứ nhất, trong `OUTPUT.txt` các dòng chuyến bị từ chối mang mã 100016, 100017, 100019… (phần `DETAIL` in cả dòng): số đã được IDENTITY cấp trước khi ràng buộc từ chối dòng, và không được trả lại — đó là lý do chuyến kế tiếp ở PG-006 nhận mã 100029 chứ không phải 100015. Thứ hai, có một lỗi **không** báo gì: `'03/11/2026'::date` cho ra `2026-03-11` (DateStyle `ISO, MDY`), không ràng buộc nào chặn được ngày đúng định dạng nhưng sai ý. Luôn ghi ngày giờ theo ISO 8601.
 

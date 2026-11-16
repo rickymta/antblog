@@ -76,17 +76,7 @@ FROM cay
 ORDER BY thu_tu_duyet;
 ```
 
-```text
- do_sau |   code   |      name
---------+----------+-----------------
-      0 | SG       | TP. Hồ Chí Minh
-      1 | SG-DO    | Phía Đông
-      2 | SG-DO-01 | Khu 01
-      2 | SG-DO-02 | Khu 02
-…
-      2 | SG-TT-03 | Khu 03
-(15 rows)
-```
+<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/postgresql-recursive-cte-cay-khu-vuc/dbstudio-01.webp" alt="DBStudio chạy câu lệnh ở 19-cay-khu-vuc.sql dòng 31 và hiển thị kết quả 15 dòng" width="996" height="1022" loading="lazy"></div><figcaption>DBStudio · <code>19-cay-khu-vuc.sql</code>, câu ở dòng 31 · 15 dòng</figcaption></figure>
 
 `a.parent_id = c.id` nghĩa là "tìm dòng có cha nằm trong bảng làm việc" — đi **xuống**. Mệnh đề `SEARCH` (có từ PostgreSQL 14) không đổi cách đánh giá; nó chỉ thêm một cột để `ORDER BY`. Trên 17.5, `DEPTH FIRST` sinh mảng đường đi như `{(SG),(SG-DO),(SG-DO-01)}` (hết nhánh này mới sang nhánh kia), còn `BREADTH FIRST` sinh bản ghi (độ sâu, khoá) như `(2,SG-DO-01)` (hết tầng này mới sang tầng sau). Cột trong `BY` quyết định thứ tự giữa anh em. Trước bản 14, phải tự mang theo mảng `ARRAY[code]`, nối `c.duong_di || a.code` mỗi vòng rồi sắp theo nó (lab có cách viết này). Lọc như `WHERE code LIKE 'SG-TT-%'` phải đặt ở truy vấn **ngoài**: lọc trong phần đệ quy là cắt luôn nhánh con.
 
@@ -129,20 +119,7 @@ GROUP BY n.id, n.code, n.level
 ORDER BY n.code COLLATE "C";
 ```
 
-```text
- code  |  level   | so_chuyen | doanh_thu
--------+----------+-----------+-----------
- DN    | city     |       456 |  26124000
-…
- HN    | city     |      1094 |  62246000
- HN-BA | district |       340 |  19456000
- HN-NA | district |         0 |         0
- HN-TA | district |       295 |  16496000
- HN-TT | district |       459 |  26294000
- SG    | city     |      1588 |  92143000
-…
-(13 rows)
-```
+<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/postgresql-recursive-cte-cay-khu-vuc/dbstudio-02.webp" alt="DBStudio chạy câu lệnh ở 19-cay-khu-vuc.sql dòng 91 và hiển thị kết quả 13 dòng" width="996" height="1116" loading="lazy"></div><figcaption>DBStudio · <code>19-cay-khu-vuc.sql</code>, câu ở dòng 91 · 13 dòng</figcaption></figure>
 
 Ba chi tiết giữ số đúng, đều là bài học cũ của Phần 2: cặp (nút, chính nó) để chuyến ở chính một nút được tính cho nút đó; `LEFT JOIN` + `count(t.id)` để vùng `HN-NA` hiện 0 chứ không bị đếm thành 1 ([PG-011](/articles/postgresql-null-case-coalesce), [PG-013](/articles/postgresql-join-quan-he-cardinality)); doanh thu chỉ tính `completed` bằng `FILTER`, bọc `coalesce` vì `sum` trên tập rỗng là NULL ([PG-012](/articles/postgresql-aggregate-group-by-having)).
 
@@ -212,16 +189,7 @@ WITH RECURSIVE to_tien (id, parent_id, code, bac) AS (
 SELECT bac, code, la_chu_trinh, duong_di FROM to_tien ORDER BY bac;
 ```
 
-```text
- bac |   code   | la_chu_trinh |           duong_di
------+----------+--------------+-------------------------------
-   0 | HN-TT-01 | f            | {(211)}
-   1 | HN-TT    | f            | {(211),(21)}
-   2 | HN-TA-01 | f            | {(211),(21),(221)}
-   3 | HN-TA    | f            | {(211),(21),(221),(22)}
-   4 | HN-TT-01 | t            | {(211),(21),(221),(22),(211)}
-(5 rows)
-```
+<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/postgresql-recursive-cte-cay-khu-vuc/dbstudio-03.webp" alt="DBStudio chạy câu lệnh ở 19-chu-trinh.sql dòng 62 và hiển thị kết quả 5 dòng" width="996" height="656" loading="lazy"></div><figcaption>DBStudio · <code>19-chu-trinh.sql</code>, câu ở dòng 62 · 5 dòng</figcaption></figure>
 
 Theo [tài liệu `SELECT`](https://www.postgresql.org/docs/17/sql-select.html), dạng đầy đủ là `CYCLE cột SET cột_đánh_dấu TO giá_trị DEFAULT giá_trị_mặc_định USING cột_đường_đi`; bỏ `TO … DEFAULT …` thì cột đánh dấu là `boolean` `true`/`false`. Lọc `WHERE NOT la_chu_trinh` ở truy vấn ngoài nếu cần kết quả sạch. `CYCLE` cũng làm bảng closure dừng được (thí nghiệm ngoài lab), nhưng ra **98** cặp tổ tiên–hậu duệ thay vì 86 của cây lành (3×1 + 10×2 + 21×3) — vì 21 giờ vừa là tổ tiên vừa là hậu duệ của 22. Dừng được không có nghĩa là đúng: dữ liệu có vòng thì phép cộng dồn vô nghĩa; việc đúng là phát hiện rồi từ chối bản cập nhật.
 

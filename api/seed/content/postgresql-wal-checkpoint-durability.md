@@ -89,19 +89,7 @@ Checkpoint theo lịch không xả hết page bẩn một lúc: `checkpoint_comp
 
 Cấu hình WAL của cluster lab:
 
-```text
-        name        | setting | unit
---------------------+---------+------
- archive_mode       | on      | NULL
- checkpoint_timeout | 1800    | s
- fsync              | on      | NULL
- full_page_writes   | on      | NULL
- max_wal_size       | 4096    | MB
- synchronous_commit | on      | NULL
- wal_compression    | off     | NULL
- wal_level          | replica | NULL
-(8 rows)
-```
+<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/postgresql-wal-checkpoint-durability/dbstudio-01.webp" alt="DBStudio chạy truy vấn của bước 045 trong p05/run.mjs và hiển thị kết quả 8 dòng" width="996" height="768" loading="lazy"></div><figcaption>DBStudio · bước 045 của <code>p05/run.mjs</code> · 8 dòng</figcaption></figure>
 
 Lưu ý: `checkpoint_timeout = 1800` giây (30 phút) và `max_wal_size = 4096` MB là **cấu hình chung của lab** (`pg/lib/cluster.mjs`), không phải mặc định PostgreSQL — chúng được nới để checkpoint theo lịch không chen vào phép đo. `archive_mode = on` và `wal_level = replica` phục vụ PITR ở PG-048. `wal_compression = off` là mặc định.
 

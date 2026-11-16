@@ -49,14 +49,7 @@ GROUP BY c.code
 ORDER BY c.code COLLATE "C";
 ```
 
-```text
- tp | hoan_thanh | tren_tb_thanh_pho
-----+------------+-------------------
- DN |        389 |               190
- HN |        941 |               436
- SG |       1377 |               636
-(3 rows)
-```
+<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/postgresql-subquery-exists-cte/dbstudio-01.webp" alt="DBStudio chạy câu lệnh ở pg014-kiem-ke-bat-loi.sql dòng 29 và hiển thị kết quả 3 dòng" width="996" height="574" loading="lazy"></div><figcaption>DBStudio · <code>pg014-kiem-ke-bat-loi.sql</code>, câu ở dòng 29 · 3 dòng</figcaption></figure>
 
 `t2.city_id = t.city_id` là chỗ «tương quan»: `t` thuộc câu ngoài. Viết lại bằng cách gom trung bình theo thành phố trong `FROM` rồi nối (mẫu của PG-013) sẽ ra đúng ba con số này (câu 3 của `pg014-kiem-ke-bat-loi.sql`) — hai cách viết cùng nghĩa, còn kế hoạch thực thi của chúng để dành cho Phần 3.
 
@@ -68,9 +61,7 @@ FROM trips AS t
 WHERE t.code = 100042;
 ```
 
-```text
-ERROR:  more than one row returned by a subquery used as an expression
-```
+<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/postgresql-subquery-exists-cte/dbstudio-02.webp" alt="DBStudio chạy câu lệnh ở 14-subquery-exists-cte.sql dòng 28 và hiển thị thông báo lỗi" width="996" height="412" loading="lazy"></div><figcaption>DBStudio · <code>14-subquery-exists-cte.sql</code>, câu ở dòng 28 · lỗi</figcaption></figure>
 
 SQLSTATE `21000`. Câu này chạy êm với mọi chuyến chỉ có một giao dịch — và vỡ vào ngày có chuyến đầu tiên trả bằng hai phương thức. Subquery vô hướng trả **0 dòng** thì không lỗi: giá trị là NULL. Muốn một giá trị từ phía «nhiều», nói rõ phép gộp (`sum`, `max`) hoặc dùng `LIMIT 1` kèm `ORDER BY` có nghĩa nghiệp vụ.
 
@@ -85,12 +76,7 @@ SELECT (SELECT count(*) FROM customers AS c
          WHERE EXISTS (SELECT 1 FROM trips AS t WHERE t.customer_id = c.id AND t.status = 'cancelled')) AS dung_exists;
 ```
 
-```text
- dung_in | dung_exists
----------+-------------
-     266 |         266
-(1 row)
-```
+<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/postgresql-subquery-exists-cte/dbstudio-03.webp" alt="DBStudio chạy câu lệnh ở 14-subquery-exists-cte.sql dòng 34 và hiển thị kết quả 1 dòng" width="996" height="470" loading="lazy"></div><figcaption>DBStudio · <code>14-subquery-exists-cte.sql</code>, câu ở dòng 34 · 1 dòng</figcaption></figure>
 
 Nối `customers` với `trips` rồi đếm sẽ ra **461** — số *chuyến* huỷ, không phải số khách (`pg014-kiem-ke-bat-loi.sql`, câu 2). `IN` và `EXISTS` là **semi-join**: mỗi dòng bên ngoài được giữ hoặc bỏ, không bao giờ bị nhân bản, dù khớp bao nhiêu dòng bên trong.
 
@@ -109,11 +95,7 @@ WHERE d.id NOT IN (SELECT t.driver_id FROM trips AS t)
 ORDER BY d.code;
 ```
 
-```text
- code
-------
-(0 rows)
-```
+<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/postgresql-subquery-exists-cte/dbstudio-04.webp" alt="DBStudio chạy câu lệnh ở 14-subquery-exists-cte.sql dòng 44 và hiển thị kết quả 0 dòng" width="996" height="418" loading="lazy"></div><figcaption>DBStudio · <code>14-subquery-exists-cte.sql</code>, câu ở dòng 44 · 0 dòng</figcaption></figure>
 
 Không lỗi, không cảnh báo, không dòng nào. Nguyên nhân là logic ba giá trị của PG-011: `x NOT IN (a, b, NULL)` nghĩa là `x <> a AND x <> b AND x <> NULL`, mà `x <> NULL` ra NULL. Tài liệu PostgreSQL nói đúng điều đó: nếu không có giá trị nào bằng và có ít nhất một dòng bên phải là NULL, kết quả của `NOT IN` là **NULL, không phải true** — và `WHERE` loại dòng NULL. Câu 1 của tệp thí nghiệm kiểm tra điều này trên hằng số: `1 IN (1, NULL)` ra `true`, `1 IN (2, NULL)` ra NULL, `1 NOT IN (1, NULL)` ra `false`, `1 NOT IN (2, NULL)` ra **NULL**, chỉ `1 NOT IN (2, 3)` ra `true`. Chỉ cần **một** trong 297 chuyến có `driver_id` NULL là mọi tài xế đều bị loại. `NOT EXISTS` không có vấn đề này, vì nó chỉ hỏi «có dòng nào khớp không»:
 
@@ -123,13 +105,7 @@ WHERE NOT EXISTS (SELECT 1 FROM trips AS t WHERE t.driver_id = d.id)
 ORDER BY d.code;
 ```
 
-```text
- code |       created_at
-------+------------------------
- 8219 | 2026-10-29 09:00:00+07
- 8220 | 2026-10-29 09:00:00+07
-(2 rows)
-```
+<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/postgresql-subquery-exists-cte/dbstudio-05.webp" alt="DBStudio chạy câu lệnh ở 14-subquery-exists-cte.sql dòng 53 và hiển thị kết quả 2 dòng" width="996" height="412" loading="lazy"></div><figcaption>DBStudio · <code>14-subquery-exists-cte.sql</code>, câu ở dòng 53 · 2 dòng</figcaption></figure>
 
 Hai tài xế Hà Nội đăng ký ngày 29/10 chưa nhận chuyến nào. `NOT IN` chỉ đúng khi subquery chắc chắn không trả NULL — thêm `WHERE t.driver_id IS NOT NULL` thì nó cũng ra 8219, 8220. Nhưng sự an toàn đó phụ thuộc vào việc người sửa câu sau này nhớ giữ dòng lọc. Quy tắc của Tới Nơi: **phủ định «không có» luôn viết bằng `NOT EXISTS`**.
 
@@ -150,17 +126,7 @@ CROSS JOIN LATERAL (
 ORDER BY c.id, top.fare DESC, top.code;
 ```
 
-```text
- tp |  code  | kind |  fare
-----+--------+------+--------
- SG | 101601 | food | 150000
- SG | 101725 | food | 150000
- HN | 101699 | food | 149000
- HN | 101913 | food | 149000
- DN | 101355 | food | 150000
- DN | 101431 | food | 150000
-(6 rows)
-```
+<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/postgresql-subquery-exists-cte/dbstudio-06.webp" alt="DBStudio chạy câu lệnh ở 14-subquery-exists-cte.sql dòng 66 và hiển thị kết quả 6 dòng" width="996" height="752" loading="lazy"></div><figcaption>DBStudio · <code>14-subquery-exists-cte.sql</code>, câu ở dòng 66 · 6 dòng</figcaption></figure>
 
 Ở cả ba thành phố, hai chuyến đầu cùng cước; `t.code` là tie-breaker (PG-007) nên «hai chuyến đầu» là xác định. Thành phố không có chuyến nào sẽ biến mất khỏi `CROSS JOIN LATERAL`; muốn giữ thì dùng `LEFT JOIN LATERAL (…) ON true`.
 
@@ -197,12 +163,7 @@ SELECT (SELECT count(*) FROM b1)                 AS b1_pham_vi,
        (SELECT count(*) FROM b4)                 AS b4_lech;
 ```
 
-```text
- b1_pham_vi | b2_chuyen_co_gd | b3_sau_ghep | b3_chuyen_khac_nhau | b4_lech
-------------+-----------------+-------------+---------------------+---------
-       3168 |            2688 |        3168 |                3168 |       7
-(1 row)
-```
+<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/postgresql-subquery-exists-cte/dbstudio-07.webp" alt="DBStudio chạy câu lệnh ở 14-subquery-exists-cte.sql dòng 87 và hiển thị kết quả 1 dòng" width="996" height="1064" loading="lazy"></div><figcaption>DBStudio · <code>14-subquery-exists-cte.sql</code>, câu ở dòng 87 · 1 dòng</figcaption></figure>
 
 Câu chính ở đây là một **câu kiểm kê**: nó không trả lời câu hỏi nghiệp vụ, nó in số dòng của từng bước. Mỗi số đối chiếu được với một điều đã biết:
 
@@ -212,20 +173,7 @@ Câu chính ở đây là một **câu kiểm kê**: nó không trả lời câu
 
 Giữ nguyên b1…b4 và thay câu chính bằng danh sách lệch cộng hai dòng tổng (câu tiếp theo của lab dùng `UNION ALL`):
 
-```text
-   ma    |  status   | phai_thu  | thuc_thu  | chenh
----------+-----------+-----------+-----------+--------
- 100724  | completed |     76000 |         0 | -76000
- 101084  | completed |     98000 |         0 | -98000
- 101310  | completed |     85000 |    170000 |  85000
- 101987  | cancelled |         0 |    -72000 | -72000
- 102443  | completed |     54000 |     45000 |  -9000
- 102642  | completed |     38000 |    380000 | 342000
- 102739  | cancelled |         0 |     96000 |  96000
- TỔNG b4 |           |    351000 |    619000 | 268000
- TỔNG b3 |           | 182287000 | 182555000 | 268000
-(9 rows)
-```
+<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/postgresql-subquery-exists-cte/dbstudio-08.webp" alt="DBStudio chạy câu lệnh ở 14-subquery-exists-cte.sql dòng 124 và hiển thị kết quả 9 dòng" width="996" height="1194" loading="lazy"></div><figcaption>DBStudio · <code>14-subquery-exists-cte.sql</code>, câu ở dòng 124 · 9 dòng</figcaption></figure>
 
 Dòng kiểm cuối cùng trả lời câu hỏi thứ ba của kế toán: chênh của 7 dòng lệch (**+268.000 đ**) bằng đúng chênh của cả 3.168 chuyến — không còn khoản chênh nào nằm ngoài danh sách. Đọc từng dòng (thiếu thanh toán, thu trùng, hoàn không có thu, lệch số tiền, thu chuyến huỷ) là việc của PG-020.
 
@@ -266,12 +214,7 @@ C là lỗi *định nghĩa*: cộng cả giao dịch `failed`/`pending` vào th
 
 Theo release notes 12, trước bản này CTE luôn được tính riêng trước phần còn lại của câu; từ bản 12, CTE không đệ quy, không có tác dụng phụ và **chỉ được tham chiếu một lần** được tự động gộp vào câu ngoài. `MATERIALIZED` buộc tính riêng, `NOT MATERIALIZED` buộc gộp (có thể phải tính lặp nếu CTE được dùng nhiều lần). Câu 6 của lab chạy cùng truy vấn với hai lựa chọn:
 
-```text
- materialized | not_materialized
---------------+------------------
-            7 |                7
-(1 row)
-```
+<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/postgresql-subquery-exists-cte/dbstudio-09.webp" alt="DBStudio chạy câu lệnh ở 14-subquery-exists-cte.sql dòng 164 và hiển thị kết quả 1 dòng" width="996" height="690" loading="lazy"></div><figcaption>DBStudio · <code>14-subquery-exists-cte.sql</code>, câu ở dòng 164 · 1 dòng</figcaption></figure>
 
 Kết quả giống nhau — đây là lựa chọn về **kế hoạch thực thi**, không về nghĩa. Lưu ý chuỗi b1…b4 ở mục 6: b1, b2, b3 được tham chiếu hơn một lần trong câu kiểm kê, nên theo quy tắc trên chúng mặc định không được gộp. Đo khác biệt bằng `EXPLAIN` là việc của Phần 3; ở Phần 2, đừng thêm `MATERIALIZED` khi chưa đo.
 

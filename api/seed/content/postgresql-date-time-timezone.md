@@ -48,12 +48,7 @@ SELECT code,
 FROM trips WHERE code = 101503;
 ```
 
-```text
-  code  |      requested_at      |       gio_utc       |       gio_vn
---------+------------------------+---------------------+---------------------
- 101503 | 2026-10-15 07:00:00+07 | 2026-10-15 00:00:00 | 2026-10-15 07:00:00
-(1 row)
-```
+<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/postgresql-date-time-timezone/dbstudio-01.webp" alt="DBStudio chạy câu lệnh ở 16-date-time-timezone.sql dòng 17 và hiển thị kết quả 1 dòng" width="996" height="448" loading="lazy"></div><figcaption>DBStudio · <code>16-date-time-timezone.sql</code>, câu ở dòng 17 · 1 dòng</figcaption></figure>
 
 Cột 2 có `+07` (một `timestamptz`), cột 3–4 không có (hai `timestamp`). Áp `AT TIME ZONE 'Asia/Ho_Chi_Minh'` hai lần liên tiếp lại ra đúng `requested_at` ban đầu — đi rồi về.
 
@@ -99,16 +94,7 @@ WHERE code IN (101489, 101502, 101503, 101594, 101595)
 ORDER BY code;
 ```
 
-```text
-  code  |       requested_at       | a_nua_mo | e_between | f_nho_hon_bang
---------+--------------------------+----------+-----------+----------------
- 101489 | 2026-10-15 00:00:00+07   | t        | t         | t
- 101502 | 2026-10-15 06:59:59+07   | t        | t         | t
- 101503 | 2026-10-15 07:00:00+07   | t        | t         | t
- 101594 | 2026-10-15 23:59:59.5+07 | t        | f         | t
- 101595 | 2026-10-16 00:00:00+07   | f        | f         | t
-(5 rows)
-```
+<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/postgresql-date-time-timezone/dbstudio-02.webp" alt="DBStudio chạy câu lệnh ở 16-date-time-timezone.sql dòng 63 và hiển thị kết quả 5 dòng" width="996" height="656" loading="lazy"></div><figcaption>DBStudio · <code>16-date-time-timezone.sql</code>, câu ở dòng 63 · 5 dòng</figcaption></figure>
 
 Hai chuyến 101502/101503 nằm ở biên **ngày UTC** (07:00 giờ VN = 00:00 UTC) — biên mà một bộ lọc dựa vào phiên UTC sẽ cắt nhầm. Bộ dữ liệu kiểm thử của mọi báo cáo theo ngày nên có đủ bốn loại điểm: đầu ngày, ngay trước cuối ngày (có phần lẻ giây), đúng đầu ngày sau, và hai phía của nửa đêm UTC.
 
@@ -128,14 +114,7 @@ Cả hai cách đều cho ra `2026-10-15 00:00:00+07`, biên trên `2026-10-16 0
 
 Gom theo **ngày VN** và theo **ngày UTC** lệch nhau ở mọi chuyến đặt 00:00–06:59 giờ VN:
 
-```text
-    ngay    | theo_ngay_vn | theo_ngay_utc
-------------+--------------+---------------
- 2026-10-14 |          100 |           102
- 2026-10-15 |          106 |           105
- 2026-10-16 |          103 |           104
-(3 rows)
-```
+<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/postgresql-date-time-timezone/dbstudio-03.webp" alt="DBStudio chạy câu lệnh ở 16-date-time-timezone.sql dòng 91 và hiển thị kết quả 3 dòng" width="996" height="1116" loading="lazy"></div><figcaption>DBStudio · <code>16-date-time-timezone.sql</code>, câu ở dòng 91 · 3 dòng</figcaption></figure>
 
 Tổng ba ngày gần bằng nhau nhưng từng ngày đều sai — loại lỗi khó thấy nhất trên biểu đồ.
 
@@ -143,16 +122,7 @@ Tổng ba ngày gần bằng nhau nhưng từng ngày đều sai — loại lỗ
 
 **Tuần.** `date_trunc('week', …)` đưa mốc về **00:00 thứ hai**. Thí nghiệm C gom theo tuần giờ VN:
 
-```text
-        dau_tuan        | so_chuyen
-------------------------+-----------
- 2026-09-28 00:00:00+07 |       440
- 2026-10-05 00:00:00+07 |       751
- 2026-10-12 00:00:00+07 |       748
- 2026-10-19 00:00:00+07 |       728
- 2026-10-26 00:00:00+07 |       507
-(5 rows)
-```
+<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/postgresql-date-time-timezone/dbstudio-04.webp" alt="DBStudio chạy câu lệnh ở pg016-mui-gio.sql dòng 63 và hiển thị kết quả 5 dòng" width="996" height="590" loading="lazy"></div><figcaption>DBStudio · <code>pg016-mui-gio.sql</code>, câu ở dòng 63 · 5 dòng</figcaption></figure>
 
 01/10/2026 là thứ năm (`extract(isodow …)` = 4), nên «tuần bắt đầu 28/09» chỉ có bốn ngày tháng 10 — so tuần đầu với tuần đủ là so khập khiễng. Tuần cuối gồm cả 6 chuyến đang chạy sáng 31/10. Hai cách đánh số thứ trong tuần: `isodow` thứ hai = 1 … chủ nhật = 7; `dow` chủ nhật = 0. Mã tuần ISO: `to_char(DATE '2026-10-12', 'IYYY-"W"IW')` = `2026-W42`.
 
@@ -170,12 +140,7 @@ FROM generate_series(DATE '2026-10-01', DATE '2026-10-02', interval '1 day') AS 
 LIMIT 1;
 ```
 
-```text
-   kieu_generate_series   | sau_khi_ep | date_cong_so_nguyen
---------------------------+------------+---------------------
- timestamp with time zone | date       | date
-(1 row)
-```
+<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/postgresql-date-time-timezone/dbstudio-05.webp" alt="DBStudio chạy câu lệnh ở 16-date-time-timezone.sql dòng 134 và hiển thị kết quả 1 dòng" width="996" height="514" loading="lazy"></div><figcaption>DBStudio · <code>16-date-time-timezone.sql</code>, câu ở dòng 134 · 1 dòng</figcaption></figure>
 
 `generate_series(date, date, interval)` trả **`timestamptz`** — nửa đêm theo phiên — không phải `date`. Đem kết quả so với cột `date` thì PostgreSQL ép kiểu ngầm: đúng ở phiên VN, lệch ở phiên khác. Dùng `DATE '2026-10-01' + n` với `generate_series(0, 29)`, hoặc ép `::date` ngay khi sinh. Lịch + `LEFT JOIN` với biên dựng như mục 4 cho ra, với Đà Nẵng, 19/10: 13 chuyến · 20/10 (bão): **0** · 21/10: 17 — ngày bão vẫn có dòng.
 
@@ -192,12 +157,7 @@ SELECT code,
 FROM trips WHERE code = 101503;
 ```
 
-```text
-  code  |  chuoi_utc_cong_7   |    chuoi_cong_07    |  interval_cong_07   |     ten_mui_gio
---------+---------------------+---------------------+---------------------+---------------------
- 101503 | 2026-10-14 17:00:00 | 2026-10-14 17:00:00 | 2026-10-15 07:00:00 | 2026-10-15 07:00:00
-(1 row)
-```
+<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/postgresql-date-time-timezone/dbstudio-06.webp" alt="DBStudio chạy câu lệnh ở pg016-mui-gio.sql dòng 10 và hiển thị kết quả 1 dòng" width="1120" height="536" loading="lazy"></div><figcaption>DBStudio · <code>pg016-mui-gio.sql</code>, câu ở dòng 10 · 1 dòng</figcaption></figure>
 
 Chuỗi `'UTC+7'` và `'+07'` được hiểu theo **quy ước POSIX**; tài liệu PostgreSQL 17 (mục B.5) ghi: dấu dương dùng cho múi giờ **phía tây** Greenwich, «ngược với quy ước ISO-8601 dùng ở những chỗ khác trong PostgreSQL». Vậy `'+07'` là UTC−7, và 07:00 sáng 15/10 giờ VN bị đổi thành 17:00 chiều 14/10. `SET TIME ZONE 'UTC+7'` cũng vậy: chuyến 101503 hiện `2026-10-14 17:00:00-07`. Nhưng `SET TIME ZONE '+07'` — một **số** — lại là phía đông (tài liệu `SET`: «Positive values are east from UTC») và hiện đúng `+07`. Cùng ký tự, hai nghĩa ngược nhau giữa `SET` và `AT TIME ZONE`.
 
@@ -210,12 +170,7 @@ SELECT TIMESTAMPTZ '2026-11-01 00:00:00 America/New_York'                       
        TIMESTAMPTZ '2026-11-01 00:00:00 America/New_York' + interval '24 hours' AS cong_24_gio;
 ```
 
-```text
-        bat_dau         |      cong_1_ngay       |      cong_24_gio
-------------------------+------------------------+------------------------
- 2026-11-01 00:00:00-04 | 2026-11-02 00:00:00-05 | 2026-11-01 23:00:00-05
-(1 row)
-```
+<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/postgresql-date-time-timezone/dbstudio-07.webp" alt="DBStudio chạy câu lệnh ở 16-date-time-timezone.sql dòng 179 và hiển thị kết quả 1 dòng" width="996" height="360" loading="lazy"></div><figcaption>DBStudio · <code>16-date-time-timezone.sql</code>, câu ở dòng 179 · 1 dòng</figcaption></figure>
 
 Ngày đó dài 25 giờ: «+1 ngày» tới nửa đêm hôm sau, «+24 giờ» dừng ở 23:00. Tên múi giờ mang theo lịch sử đổi giờ; một độ lệch cố định thì không. Ở giờ VN hai phép cộng ra cùng `2026-10-16 00:00:00+07` — nhưng mã viết hôm nay có thể chạy cho thị trường khác ngày mai.
 

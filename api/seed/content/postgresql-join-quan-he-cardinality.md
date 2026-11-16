@@ -52,16 +52,7 @@ WHERE t.code IN (100041, 100042, 100048, 100724)
 ORDER BY t.code, p.id;
 ```
 
-```text
-  code  |  fare  | method |  status   | amount
---------+--------+--------+-----------+--------
- 100041 | 127000 | card   | succeeded | 127000
- 100042 |  82000 | card   | failed    |  82000
- 100042 |  82000 | card   | succeeded |  82000
- 100048 | 119000 | wallet | succeeded | 104000
- 100048 | 119000 | card   | succeeded |  15000
-(5 rows)
-```
+<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/postgresql-join-quan-he-cardinality/dbstudio-01.webp" alt="DBStudio chạy câu lệnh ở pg013-bon-chuyen-no-dong.sql dòng 19 và hiển thị kết quả 5 dòng" width="996" height="546" loading="lazy"></div><figcaption>DBStudio · <code>pg013-bon-chuyen-no-dong.sql</code>, câu ở dòng 19 · 5 dòng</figcaption></figure>
 
 Bốn chuyến nở thành năm dòng. Đổi sang `LEFT JOIN` thì 100724 quay lại với ba cột NULL — 6 dòng. Cộng `t.fare`: đúng là **404.000**, nhưng sau INNER JOIN thành **529.000** và sau LEFT JOIN thành **605.000**.
 
@@ -99,12 +90,7 @@ JOIN không «sai» — nó trả đúng một dòng cho mỗi cặp khớp. Sai
 
 Thói quen đầu tiên: đếm phía bạn quan tâm, rồi đếm lại sau khi nối. Câu 1 của `13-join-cardinality.sql` đặt bốn phép đếm cạnh nhau:
 
-```text
- chuyen_hoan_thanh | gd_cua_chung | dong_inner_join | dong_left_join
--------------------+--------------+-----------------+----------------
-              2707 |         2800 |            2800 |           2832
-(1 row)
-```
+<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/postgresql-join-quan-he-cardinality/dbstudio-02.webp" alt="DBStudio chạy câu lệnh ở 13-join-cardinality.sql dòng 15 và hiển thị kết quả 1 dòng" width="996" height="514" loading="lazy"></div><figcaption>DBStudio · <code>13-join-cardinality.sql</code>, câu ở dòng 15 · 1 dòng</figcaption></figure>
 
 2.707 chuyến hoàn thành có 2.800 dòng giao dịch. INNER JOIN cho **2.800** dòng — bằng số giao dịch, không phải số chuyến. LEFT JOIN cho **2.832**: thêm 32 chuyến không có giao dịch, mỗi chuyến một dòng NULL. Báo cáo «theo chuyến» mà số dòng sau nối khác số chuyến thì mọi `sum` trên cột của chuyến đều đáng ngờ.
 
@@ -122,12 +108,7 @@ JOIN payments AS p ON p.trip_id = t.id
 WHERE t.status = 'completed';
 ```
 
-```text
- so_dong | so_chuyen | tong_cuoc_sai | tong_gd_moi_trang_thai
----------+-----------+---------------+------------------------
-    2800 |      2675 |     191644000 |              189686000
-(1 row)
-```
+<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/postgresql-join-quan-he-cardinality/dbstudio-03.webp" alt="DBStudio chạy câu lệnh ở 13-join-cardinality.sql dòng 27 và hiển thị kết quả 1 dòng" width="996" height="558" loading="lazy"></div><figcaption>DBStudio · <code>13-join-cardinality.sql</code>, câu ở dòng 27 · 1 dòng</figcaption></figure>
 
 Khoản chênh 9.357.000 đ gồm hai phần ngược chiều (câu 5 của tệp thí nghiệm): **+9.433.000 đ** là cước của 125 chuyến có 2 dòng giao dịch, bị cộng thêm một lần; **−76.000 đ** là 32 chuyến không có dòng nào rơi khỏi INNER JOIN (31 chuyến cước 0 đ và 100724). 182.287.000 + 9.433.000 − 76.000 = 191.644.000. Hai lỗi bù trừ một phần, nên «tổng gần đúng» không chứng minh câu lệnh đúng. Cột `tong_gd_moi_trang_thai` cũng không phải tiền đã thu: nó cộng cả `failed`, `pending` và cộng tiền hoàn như tiền thu.
 
@@ -167,12 +148,7 @@ LEFT JOIN (
 WHERE t.status = 'completed';
 ```
 
-```text
- so_dong | so_chuyen | tong_cuoc | tong_thuc_thu
----------+-----------+-----------+---------------
-    2707 |      2707 | 182287000 |     182531000
-(1 row)
-```
+<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/postgresql-join-quan-he-cardinality/dbstudio-04.webp" alt="DBStudio chạy câu lệnh ở 13-join-cardinality.sql dòng 73 và hiển thị kết quả 1 dòng" width="996" height="690" loading="lazy"></div><figcaption>DBStudio · <code>13-join-cardinality.sql</code>, câu ở dòng 73 · 1 dòng</figcaption></figure>
 
 Subquery trong `FROM` (bảng dẫn xuất `g`) có `GROUP BY trip_id` nên mỗi chuyến xuất hiện tối đa một lần; `LEFT JOIN` giữ 32 chuyến không có giao dịch, `coalesce(…, 0)` coi chúng là 0 đ (PG-011). Bằng chứng nằm ngay trong kết quả: `so_dong` = `so_chuyen` = 2.707 và `tong_cuoc` khớp PG-012.
 

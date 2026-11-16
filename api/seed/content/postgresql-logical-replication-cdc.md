@@ -69,12 +69,7 @@ Theo tài liệu PostgreSQL 18, cột được ghép **theo tên**, không theo 
 
 Ngay sau initial copy, runner đọc `pg_replication_slots` trên publisher:
 
-```text
- slot_name |  plugin  | slot_type | active | wal_status
------------+----------+-----------+--------+------------
- fare_sub  | pgoutput | logical   | t      | reserved
-(1 row)
-```
+<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/postgresql-logical-replication-cdc/dbstudio-01.webp" alt="DBStudio chạy truy vấn của bước 055 trong p06/run.mjs và hiển thị kết quả 1 dòng" width="996" height="558" loading="lazy"></div><figcaption>DBStudio · bước 055 của <code>p06/run.mjs</code> · 1 dòng</figcaption></figure>
 
 - **slot_type = logical, plugin = pgoutput**: slot này giải mã WAL thành thay đổi logic qua plugin chuẩn.
 - **active = t**: đang có một walsender dùng slot.
@@ -84,12 +79,7 @@ Ba cột không có trong khối trên nhưng nên có trong truy vấn giám s�
 
 Phía publisher, bên nhận hiện ra như một kết nối replication:
 
-```text
- application_name |   state
-------------------+-----------
- fare_sub         | streaming
-(1 row)
-```
+<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/postgresql-logical-replication-cdc/dbstudio-02.webp" alt="DBStudio chạy truy vấn của bước 055 trong p06/run.mjs và hiển thị kết quả 1 dòng" width="996" height="536" loading="lazy"></div><figcaption>DBStudio · bước 055 của <code>p06/run.mjs</code> · 1 dòng</figcaption></figure>
 
 `pg_stat_replication` cũng là view mà PG-052 dùng cho standby vật lý. Subscription xuất hiện ở đây với `application_name` bằng tên subscription. Trạng thái `streaming` nghĩa là initial copy đã xong và walsender đang đẩy thay đổi liên tục.
 
@@ -119,12 +109,7 @@ Còn trên publisher, slot đứng yên ở `restart_lsn` cũ trong khi WAL ti�
 MEASURE 055 WAL bytes held back by inactive slot fare_sub: 6638440
 ```
 
-```text
- slot_name | active | wal_status | retained
------------+--------+------------+----------
- fare_sub  | f      | reserved   | 6483 kB
-(1 row)
-```
+<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/postgresql-logical-replication-cdc/dbstudio-03.webp" alt="DBStudio chạy truy vấn của bước 055 trong p06/run.mjs và hiển thị kết quả 1 dòng" width="996" height="558" loading="lazy"></div><figcaption>DBStudio · bước 055 của <code>p06/run.mjs</code> · 1 dòng</figcaption></figure>
 
 Cột `retained` do runner tự đặt tên: nó là `pg_size_pretty(pg_wal_lsn_diff(pg_current_wal_lsn(), restart_lsn))`, tức khoảng cách từ chỗ slot còn cần tới vị trí WAL hiện tại. 6.638.440 byte hiển thị thành 6483 kB.
 
@@ -339,7 +324,7 @@ Logical replication rẻ lúc dựng, đắt lúc vận hành: primary gánh th�
 **Bài 1.** Trên bản chép riêng của lab, đặt `max_slot_wal_keep_size` nhỏ (ví dụ vài chục MB) cho primary, bỏ `wal_keep_size = 512MB`, tắt subscription rồi sinh đủ WAL để vượt giới hạn.
 
 <details><summary><b>Lời giải phải chứng minh được</b></summary>
-<p>Output thật của <code>pg_replication_slots</code> cho thấy <code>wal_status</code> đi qua các trạng thái và cuối cùng là <code>lost</code>, kèm cột <code>invalidation_reason</code>. Khi bật lại subscription, log subscriber báo lỗi (dán đúng dòng log của bạn, không chép từ bài). Bạn mô tả cách khôi phục bản sao — dựng lại subscription với initial copy hoặc làm trống bảng đích — và chứng minh bằng đối soát sổ hai bên. Kết luận phải nói rõ đây là đánh đổi: primary được bảo vệ, bản sao phải chép lại.</p>
+<p>Kết quả chạy thật của <code>pg_replication_slots</code> cho thấy <code>wal_status</code> đi qua các trạng thái và cuối cùng là <code>lost</code>, kèm cột <code>invalidation_reason</code>. Khi bật lại subscription, log subscriber báo lỗi (dán đúng dòng log của bạn, không chép từ bài). Bạn mô tả cách khôi phục bản sao — dựng lại subscription với initial copy hoặc làm trống bảng đích — và chứng minh bằng đối soát sổ hai bên. Kết luận phải nói rõ đây là đánh đổi: primary được bảo vệ, bản sao phải chép lại.</p>
 </details>
 
 **Bài 2.** Viết quy trình thêm cột `surge_multiplier numeric(3,2)` vào `fares` khi bảng đang được publish sang đối soát.

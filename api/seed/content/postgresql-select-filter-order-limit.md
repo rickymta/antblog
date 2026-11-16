@@ -49,9 +49,7 @@ Hiểu thứ tự logic giải thích ngay một lỗi người mới hay gặp:
 SELECT code, fare / 1000 AS nghin_dong FROM trips WHERE nghin_dong > 60 ORDER BY code;
 ```
 
-```text
-ERROR:  column "nghin_dong" does not exist
-```
+<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/postgresql-select-filter-order-limit/dbstudio-01.webp" alt="DBStudio chạy câu lệnh ở pg007-loi-thuong-gap.sql dòng 41 và hiển thị thông báo lỗi" width="996" height="368" loading="lazy"></div><figcaption>DBStudio · <code>pg007-loi-thuong-gap.sql</code>, câu ở dòng 41 · lỗi</figcaption></figure>
 
 Lọc theo cột gốc thì chạy, và `ORDER BY` dùng được tên mới: `… WHERE fare > 60000 ORDER BY nghin_dong DESC, code` trả 6 dòng, đầu tiên là `100005 | 126`. (`fare` là `integer` đồng nên `fare / 1000` là phép chia nguyên — chỉ dùng để hiển thị, đừng dùng để tính tiền.)
 
@@ -63,16 +61,7 @@ Nên liệt kê cột thay vì `SELECT *`: không kéo cột thừa, không đ�
 
 Câu 1 của `05-select.sql` chính là câu mẫu ở mục 2, bỏ `LIMIT`:
 
-```text
-  code  |  kind  | city_id |  fare  |      completed_at
---------+--------+---------+--------+------------------------
- 100000 | ride   |       1 |  45000 | 2026-11-02 08:24:10+07
- 100001 | parcel |       2 |  38000 | 2026-11-02 10:02:00+07
- …
- 100008 | ride   |       1 |      0 | 2026-11-03 00:30:00+07
- 100029 | ride   |       2 |  54000 | 2026-11-03 09:31:00+07
-(8 rows)
-```
+<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/postgresql-select-filter-order-limit/dbstudio-02.webp" alt="DBStudio chạy câu lệnh ở 05-select.sql dòng 9 và hiển thị kết quả 8 dòng" width="996" height="614" loading="lazy"></div><figcaption>DBStudio · <code>05-select.sql</code>, câu ở dòng 9 · 8 dòng</figcaption></figure>
 
 Lọc theo danh sách bằng `IN` — «chuyến đang có tài xế trên đường» là bốn trạng thái từ `accepted` tới `in_transit` của vòng đời:
 
@@ -83,15 +72,7 @@ WHERE status IN ('accepted', 'arriving', 'picked_up', 'in_transit')
 ORDER BY requested_at, code;
 ```
 
-```text
-  code  |  kind  |   status   |      requested_at
---------+--------+------------+------------------------
- 100009 | food   | picked_up  | 2026-11-03 08:00:00+07
- 100010 | ride   | in_transit | 2026-11-03 08:05:00+07
- 100011 | parcel | arriving   | 2026-11-03 08:10:00+07
- 100012 | ride   | accepted   | 2026-11-03 08:20:00+07
-(4 rows)
-```
+<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/postgresql-select-filter-order-limit/dbstudio-03.webp" alt="DBStudio chạy câu lệnh ở 05-select.sql dòng 16 và hiển thị kết quả 4 dòng" width="996" height="494" loading="lazy"></div><figcaption>DBStudio · <code>05-select.sql</code>, câu ở dòng 16 · 4 dòng</figcaption></figure>
 
 Chuỗi phải khớp đúng giá trị lưu; gõ sai chính tả không báo lỗi, chỉ ra ít dòng hơn. CHECK `ck_trips_status` (PG-005) giữ cột trong 8 giá trị đã biết, nên danh sách `IN` luôn đối chiếu được với tài liệu nghiệp vụ.
 
@@ -103,11 +84,7 @@ Chuỗi phải khớp đúng giá trị lưu; gõ sai chính tả không báo l�
 SELECT code, status FROM trips WHERE driver_id = NULL;
 ```
 
-```text
- code | status
-------+--------
-(0 rows)
-```
+<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/postgresql-select-filter-order-limit/dbstudio-04.webp" alt="DBStudio chạy câu lệnh ở pg007-loi-thuong-gap.sql dòng 4 và hiển thị kết quả 0 dòng" width="996" height="308" loading="lazy"></div><figcaption>DBStudio · <code>pg007-loi-thuong-gap.sql</code>, câu ở dòng 4 · 0 dòng</figcaption></figure>
 
 Viết `WHERE driver_id IS NULL ORDER BY code` thì ra đúng 3 chuyến chưa có tài xế: 100006 (`cancelled` trước khi có người nhận), 100013 (`searching`), 100014 (`requested`).
 
@@ -137,17 +114,7 @@ WHERE requested_at >= '2026-11-02 00:00:00+07'
 ORDER BY requested_at, code;
 ```
 
-```text
-  code  |  kind  |  status   |      requested_at
---------+--------+-----------+------------------------
- 100000 | ride   | completed | 2026-11-02 07:58:00+07
- …
- 100003 | food   | cancelled | 2026-11-02 12:00:00+07
- 100004 | food   | completed | 2026-11-02 12:00:00+07
- …
- 100007 | parcel | completed | 2026-11-02 23:50:00+07
-(8 rows)
-```
+<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/postgresql-select-filter-order-limit/dbstudio-05.webp" alt="DBStudio chạy câu lệnh ở 05-select.sql dòng 23 và hiển thị kết quả 8 dòng" width="996" height="702" loading="lazy"></div><figcaption>DBStudio · <code>05-select.sql</code>, câu ở dòng 23 · 8 dòng</figcaption></figure>
 
 Vì sao nửa hở tốt hơn hai cách quen tay?
 
@@ -166,12 +133,7 @@ SELECT timestamptz '2026-11-03 00:00:00+07'
          BETWEEN '2026-11-03 00:00:00+07' AND '2026-11-04 00:00:00+07' AS thuoc_ngay_03;
 ```
 
-```text
- thuoc_ngay_02 | thuoc_ngay_03
----------------+---------------
- t             | t
-(1 row)
-```
+<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/postgresql-select-filter-order-limit/dbstudio-06.webp" alt="DBStudio chạy câu lệnh ở pg007-loi-thuong-gap.sql dòng 27 và hiển thị kết quả 1 dòng" width="996" height="404" loading="lazy"></div><figcaption>DBStudio · <code>pg007-loi-thuong-gap.sql</code>, câu ở dòng 27 · 1 dòng</figcaption></figure>
 
 Một khoảnh khắc thuộc hai ngày: báo cáo theo ngày cộng lại lớn hơn tổng thật.
 
@@ -190,13 +152,7 @@ WHERE code IN (100007, 100008)
 ORDER BY code;
 ```
 
-```text
-  code  |      requested_at
---------+------------------------
- 100007 | 2026-11-02 16:50:00+00
- 100008 | 2026-11-02 17:10:00+00
-(2 rows)
-```
+<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/postgresql-select-filter-order-limit/dbstudio-07.webp" alt="DBStudio chạy câu lệnh ở 05-select.sql dòng 38 và hiển thị kết quả 2 dòng" width="996" height="456" loading="lazy"></div><figcaption>DBStudio · <code>05-select.sql</code>, câu ở dòng 38 · 2 dòng</figcaption></figure>
 
 Theo UTC, chuyến 100008 rơi vào ngày 02/11. Mọi cách viết dựa vào múi giờ phiên đều đếm nhầm nó:
 
@@ -207,12 +163,7 @@ SELECT count(*) FILTER (WHERE requested_at::date = DATE '2026-11-02') AS theo_mu
 FROM trips;
 ```
 
-```text
- theo_mui_gio_phien | theo_gio_viet_nam
---------------------+-------------------
-                  9 |                 8
-(1 row)
-```
+<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/postgresql-select-filter-order-limit/dbstudio-08.webp" alt="DBStudio chạy câu lệnh ở 05-select.sql dòng 46 và hiển thị kết quả 1 dòng" width="996" height="448" loading="lazy"></div><figcaption>DBStudio · <code>05-select.sql</code>, câu ở dòng 46 · 1 dòng</figcaption></figure>
 
 (`count(*) FILTER (…)` đếm có điều kiện — Phần 2 sẽ giải thích; ở đây chỉ cần đọc hai con số.) Ép `::date` dùng múi giờ **phiên**, nên kết quả phụ thuộc người chạy. Mốc **không** ghi múi giờ cũng vậy: vẫn ở phiên UTC, `WHERE requested_at >= '2026-11-02 00:00:00' AND requested_at < '2026-11-03 00:00:00'` đếm ra **9** (đã chạy thật); cùng câu với mốc ghi `+07` trả **8** ở bất kỳ phiên nào. Tài liệu PostgreSQL mô tả đúng hành vi này: chuỗi nhập cho `timestamptz` không nêu múi giờ thì được coi là ở múi giờ của tham số `TimeZone`.
 
@@ -238,14 +189,7 @@ ORDER BY requested_at DESC, code DESC
 LIMIT 3;
 ```
 
-```text
-  code  | kind |  status   |      requested_at
---------+------+-----------+------------------------
- 100029 | ride | completed | 2026-11-03 09:00:00+07
- 100014 | ride | requested | 2026-11-03 08:29:30+07
- 100013 | food | searching | 2026-11-03 08:25:00+07
-(3 rows)
-```
+<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/postgresql-select-filter-order-limit/dbstudio-09.webp" alt="DBStudio chạy câu lệnh ở 05-select.sql dòng 56 và hiển thị kết quả 3 dòng" width="996" height="486" loading="lazy"></div><figcaption>DBStudio · <code>05-select.sql</code>, câu ở dòng 56 · 3 dòng</figcaption></figure>
 
 Một tập khoá sắp xếp gọi là **xác định** (deterministic) khi không hai dòng nào bằng nhau trên toàn bộ tập khoá. `(requested_at, code)` xác định vì riêng `code` đã duy nhất. `(kind, status)` thì không.
 
@@ -298,21 +242,9 @@ SELECT code, kind, status FROM trips ORDER BY kind LIMIT 3;            -- trang 
 SELECT code, kind, status FROM trips ORDER BY kind LIMIT 3 OFFSET 3;   -- trang 2
 ```
 
-```text
-  code  | kind |  status
---------+------+-----------
- 100003 | food | cancelled
- 100002 | food | completed
- 100004 | food | completed
-(3 rows)
+<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/postgresql-select-filter-order-limit/dbstudio-10.webp" alt="DBStudio chạy câu lệnh ở 05-select.sql dòng 73 và hiển thị kết quả 3 dòng" width="996" height="552" loading="lazy"></div><figcaption>DBStudio · <code>05-select.sql</code>, câu ở dòng 73 · 3 dòng</figcaption></figure>
 
-  code  |  kind  |  status
---------+--------+-----------
- 100004 | food   | completed
- 100002 | food   | completed
- 100007 | parcel | completed
-(3 rows)
-```
+<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/postgresql-select-filter-order-limit/dbstudio-11.webp" alt="DBStudio chạy câu lệnh ở 05-select.sql dòng 84 và hiển thị kết quả 3 dòng" width="996" height="486" loading="lazy"></div><figcaption>DBStudio · <code>05-select.sql</code>, câu ở dòng 84 · 3 dòng</figcaption></figure>
 
 Có 5 chuyến `food` nhưng hai trang đầu chỉ cho thấy 3, trong đó 100002 và 100004 lặp lại; 100009 và 100013 biến mất. Mỗi câu vẫn sắp đúng theo `kind`, nhưng hai câu không cam kết cùng thứ tự cho dòng hoà. Thứ tự trên là quan sát trên PGlite 17.5, lặp lại được trong lab; server hay dữ liệu khác có thể ra thứ tự khác.
 
@@ -323,21 +255,9 @@ SELECT code, kind, status FROM trips ORDER BY kind, code LIMIT 3;
 SELECT code, kind, status FROM trips ORDER BY kind, code LIMIT 3 OFFSET 3;
 ```
 
-```text
-  code  | kind |  status
---------+------+-----------
- 100002 | food | completed
- 100003 | food | cancelled
- 100004 | food | completed
-(3 rows)
+<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/postgresql-select-filter-order-limit/dbstudio-12.webp" alt="DBStudio chạy câu lệnh ở 05-select.sql dòng 92 và hiển thị kết quả 3 dòng" width="996" height="508" loading="lazy"></div><figcaption>DBStudio · <code>05-select.sql</code>, câu ở dòng 92 · 3 dòng</figcaption></figure>
 
-  code  |  kind  |  status
---------+--------+-----------
- 100009 | food   | picked_up
- 100013 | food   | searching
- 100001 | parcel | completed
-(3 rows)
-```
+<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/postgresql-select-filter-order-limit/dbstudio-13.webp" alt="DBStudio chạy câu lệnh ở 05-select.sql dòng 101 và hiển thị kết quả 3 dòng" width="996" height="442" loading="lazy"></div><figcaption>DBStudio · <code>05-select.sql</code>, câu ở dòng 101 · 3 dòng</figcaption></figure>
 
 Mỗi dòng có một vị trí duy nhất, các trang ghép lại vừa khít.
 

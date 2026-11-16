@@ -253,4 +253,4 @@ Lời giải chạy được ở `p04/thu-nghiem/pg040-nhan-chuyen-bai-tap.sql` 
 - [PostgreSQL 18 · INSERT](https://www.postgresql.org/docs/18/sql-insert.html) và [Index Uniqueness Checks](https://www.postgresql.org/docs/18/index-unique-checks.html): chờ ở index duy nhất.
 - Lab: `p04/40-thuc-hanh-nhan-chuyen.sql`, `p04/OUTPUT.txt`, `p04/DO-DAC.md` (K040-a … K040-e), `p04/dong-thoi.mjs`, `p04/README.md` (ghi chú cho người đọc số đo), `p04/thu-nghiem/pg040-nhan-chuyen-bai-tap.sql`.
 
-Bài tiếp theo: Phần 5 · Bảo mật, bảo trì và phục hồi sắp ra mắt. Đọc lại từ đầu Phần 4: [PG-031: Transaction, COMMIT và ROLLBACK](/articles/postgresql-transaction-commit-rollback)
+Bài tiếp theo — mở đầu Phần 5 · Bảo mật, bảo trì và phục hồi: [PG-041: Role, GRANT và quyền tối thiểu](/articles/postgresql-role-grant-least-privilege). Đọc lại từ đầu Phần 4: [PG-031: Transaction, COMMIT và ROLLBACK](/articles/postgresql-transaction-commit-rollback)

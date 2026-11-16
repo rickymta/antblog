@@ -31,29 +31,7 @@ WINDOW w AS (ORDER BY requested_at DESC, code DESC)
 ORDER BY requested_at DESC, code DESC;
 ```
 
-```text
- vi_tri | trang |  code  |      requested_at
---------+-------+--------+------------------------
-      1 |     1 | 102897 | 2026-10-28 10:30:00+07
-      2 |     1 | 102611 | 2026-10-25 14:10:00+07
-      3 |     1 | 102149 | 2026-10-21 08:50:00+07
-      4 |     1 | 101885 | 2026-10-18 14:30:00+07
-      5 |     1 | 101884 | 2026-10-18 14:30:00+07
-      6 |     2 | 101883 | 2026-10-18 14:30:00+07
-      7 |     2 | 101882 | 2026-10-18 14:30:00+07
-      8 |     2 | 101555 | 2026-10-15 16:45:00+07
-      9 |     2 | 101224 | 2026-10-12 11:05:00+07
-     10 |     2 | 100976 | 2026-10-10 09:00:00+07
-     11 |     3 | 100975 | 2026-10-10 09:00:00+07
-     12 |     3 | 100974 | 2026-10-10 09:00:00+07
-     13 |     3 | 100973 | 2026-10-10 09:00:00+07
-     14 |     3 | 100972 | 2026-10-10 09:00:00+07
-     15 |     3 | 100971 | 2026-10-10 09:00:00+07
-     16 |     4 | 100669 | 2026-10-07 09:20:00+07
-     17 |     4 | 100500 | 2026-10-05 15:40:00+07
-     18 |     4 | 100130 | 2026-10-02 10:15:00+07
-(18 rows)
-```
+<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/postgresql-pagination-keyset/dbstudio-01.webp" alt="DBStudio chạy câu lệnh ở 18-pagination-keyset.sql dòng 18 và hiển thị kết quả 18 dòng" width="996" height="1002" loading="lazy"></div><figcaption>DBStudio · <code>18-pagination-keyset.sql</code>, câu ở dòng 18 · 18 dòng</figcaption></figure>
 
 Hai lô API đặt cùng giây: 10/10 09:00:00 có 6 chuyến (100971–100976), 18/10 14:30:00 có 4 chuyến (101882–101885). Cả hai **vắt qua ranh giới trang**. Đó không phải trường hợp hiếm: trong fixture, giờ đặt làm tròn tới phút và có 148 nhóm chuyến trùng giờ (305 chuyến). Ở hệ thống thật, `timestamptz` lưu tới micro giây nhưng lô gửi qua API, dữ liệu nhập từ file hay đồng hồ phía máy khách vẫn tạo ra giờ trùng — đừng dựa vào «hiếm khi trùng».
 
@@ -92,16 +70,7 @@ ORDER BY requested_at DESC, code DESC
 LIMIT 5;
 ```
 
-```text
-  code  |      requested_at
---------+------------------------
- 101555 | 2026-10-15 16:45:00+07
- 101224 | 2026-10-12 11:05:00+07
- 100976 | 2026-10-10 09:00:00+07
- 100975 | 2026-10-10 09:00:00+07
- 100974 | 2026-10-10 09:00:00+07
-(5 rows)
-```
+<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/postgresql-pagination-keyset/dbstudio-02.webp" alt="DBStudio chạy câu lệnh ở 18-pagination-keyset.sql dòng 60 và hiển thị kết quả 5 dòng" width="996" height="612" loading="lazy"></div><figcaption>DBStudio · <code>18-pagination-keyset.sql</code>, câu ở dòng 60 · 5 dòng</figcaption></figure>
 
 101883 và 101882 cùng giờ với con trỏ nên `<` loại chúng — và không trang nào sau đó còn cơ hội lấy lại. Đây chính là hai chuyến kế toán không tìm thấy. Không lỗi, không cảnh báo.
 
@@ -135,16 +104,7 @@ ORDER BY requested_at DESC, code DESC
 LIMIT 5;
 ```
 
-```text
-  code  |      requested_at
---------+------------------------
- 101883 | 2026-10-18 14:30:00+07
- 101882 | 2026-10-18 14:30:00+07
- 101555 | 2026-10-15 16:45:00+07
- 101224 | 2026-10-12 11:05:00+07
- 100976 | 2026-10-10 09:00:00+07
-(5 rows)
-```
+<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/postgresql-pagination-keyset/dbstudio-03.webp" alt="DBStudio chạy câu lệnh ở 18-pagination-keyset.sql dòng 89 và hiển thị kết quả 5 dòng" width="996" height="634" loading="lazy"></div><figcaption>DBStudio · <code>18-pagination-keyset.sql</code>, câu ở dòng 89 · 5 dòng</figcaption></figure>
 
 Đúng vị trí 6–10. Trong nhóm 14:30:00, `code` quyết định: 101883 và 101882 nhỏ hơn 101884 nên được lấy; 101885 lớn hơn nên đã nằm ở trang 1. Trang 3 với con trỏ (2026-10-10 09:00:00+07, 100976) bắt đầu **giữa** lô 10/10: 100975, 100974, 100973, 100972, 100971 — vị trí 11–15.
 
@@ -191,24 +151,11 @@ WITH RECURSIVE trang (so_trang, ma, con_tro_at, con_tro_code) AS (
 SELECT so_trang, ma FROM trang ORDER BY so_trang;
 ```
 
-```text
- so_trang |                  ma
-----------+--------------------------------------
-        1 | {102897,102611,102149,101885,101884}
-        2 | {101883,101882,101555,101224,100976}
-        3 | {100975,100974,100973,100972,100971}
-        4 | {100669,100500,100130}
-(4 rows)
-```
+<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/postgresql-pagination-keyset/dbstudio-04.webp" alt="DBStudio chạy câu lệnh ở 18-pagination-keyset.sql dòng 157 và hiển thị kết quả 4 dòng" width="996" height="956" loading="lazy"></div><figcaption>DBStudio · <code>18-pagination-keyset.sql</code>, câu ở dòng 157 · 4 dòng</figcaption></figure>
 
 Câu kiểm tra thứ hai của lab đếm trên cùng truy vấn đệ quy:
 
-```text
- so_trang | tong_ma_qua_cac_trang | ma_khac_nhau | so_chuyen
-----------+-----------------------+--------------+-----------
-        4 |                    18 |           18 |        18
-(1 row)
-```
+<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/postgresql-pagination-keyset/dbstudio-05.webp" alt="DBStudio chạy câu lệnh ở 18-pagination-keyset.sql dòng 188 và hiển thị kết quả 1 dòng" width="996" height="866" loading="lazy"></div><figcaption>DBStudio · <code>18-pagination-keyset.sql</code>, câu ở dòng 188 · 1 dòng</figcaption></figure>
 
 18 mã qua các trang = 18 mã khác nhau (không lặp) = 18 chuyến của khách (không mất), và bốn trang khớp từng dòng với cột `trang` của bảng đối chiếu ở mục 1. Truy vấn kiểm tra này nên nằm trong bộ test của API phân trang, chạy trên fixture có khoá trùng cố ý — fixture không có khoá trùng thì cách sai ở mục 3 cũng qua test.
 
@@ -226,16 +173,7 @@ ORDER BY requested_at DESC, code ASC
 LIMIT 5;
 ```
 
-```text
-  code  |      requested_at
---------+------------------------
- 101884 | 2026-10-18 14:30:00+07
- 101885 | 2026-10-18 14:30:00+07
- 101555 | 2026-10-15 16:45:00+07
- 101224 | 2026-10-12 11:05:00+07
- 100971 | 2026-10-10 09:00:00+07
-(5 rows)
-```
+<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/postgresql-pagination-keyset/dbstudio-06.webp" alt="DBStudio chạy câu lệnh ở 18-pagination-keyset.sql dòng 140 và hiển thị kết quả 5 dòng" width="996" height="656" loading="lazy"></div><figcaption>DBStudio · <code>18-pagination-keyset.sql</code>, câu ở dòng 140 · 5 dòng</figcaption></figure>
 
 Con trỏ (18/10 14:30, 101883) là dòng cuối trang 1 theo thứ tự này (trang 1 kết thúc bằng 101882, 101883). Trong nhóm 14:30 điều kiện là `code > 101883`, còn nhóm 10/10 bắt đầu từ 100971 — mã nhỏ nhất. Với cột số còn một cách: đổi dấu để hai cột cùng chiều, `(requested_at, -code) < ('2026-10-18 14:30:00+07', -101883)` kèm `ORDER BY requested_at DESC, -code DESC` — thí nghiệm `pg018-nguoc-chieu-doi-dau.sql` ra đúng 5 dòng trên. Cách này không dùng được cho cột chữ, và chỉ mục phục vụ cách này phải được tạo trên biểu thức `-code` (Phần 3).
 
@@ -268,16 +206,7 @@ INSERT … RETURNING code   →  103174
 
 Trang 2 tải bằng `LIMIT 5 OFFSET 5`:
 
-```text
-  code  |      requested_at
---------+------------------------
- 101884 | 2026-10-18 14:30:00+07
- 101883 | 2026-10-18 14:30:00+07
- 101882 | 2026-10-18 14:30:00+07
- 101555 | 2026-10-15 16:45:00+07
- 101224 | 2026-10-12 11:05:00+07
-(5 rows)
-```
+<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/postgresql-pagination-keyset/dbstudio-07.webp" alt="DBStudio chạy câu lệnh ở 18-pagination-keyset.sql dòng 228 và hiển thị kết quả 5 dòng" width="996" height="524" loading="lazy"></div><figcaption>DBStudio · <code>18-pagination-keyset.sql</code>, câu ở dòng 228 · 5 dòng</figcaption></figure>
 
 Chuyến mới chen vào đầu danh sách, mọi dòng dịch xuống một bậc, nên 101884 — vừa thấy ở trang 1 — hiện lại, còn 100976 bị đẩy sang trang sau. Trang 2 bằng keyset với con trỏ (18/10 14:30, 101884) vẫn ra 101883, 101882, 101555, 101224, 100976 như trước: điều kiện gắn vào **giá trị** của dòng đã thấy, không vào số thứ tự. Xoá dòng cũng vậy: `OFFSET` làm mất một dòng ở ranh giới, keyset thì không. Sau `ROLLBACK`, khách vẫn 18 chuyến; sequence của `code` đã tiêu mất số 103174 ([PG-006](/articles/postgresql-insert-update-delete-returning)).
 

@@ -304,7 +304,7 @@ Theo tài liệu warm-standby, `on` chờ standby ghi bản ghi commit xuống l
 **Bài 3.** Thêm timeline vào LSN token của PG-052 và chứng minh token cũ bị từ chối sau failover.
 
 <details><summary><b>Lời giải phải chứng minh được</b></summary>
-<p>Token chứa timeline (ví dụ lấy từ tám ký tự đầu của <code>pg_walfile_name</code> như lab, hoặc một số thế hệ do ứng dụng quản lý). Một ca thử: token cấp từ primary cũ, sau failover và sau khi primary mới đã vượt LSN đó về con số — chứng minh phép so chỉ theo LSN sẽ trả sai, còn phép so có timeline buộc đọc primary và cho thấy chuyến không tồn tại. Output thật cho cả hai phép so.</p>
+<p>Token chứa timeline (ví dụ lấy từ tám ký tự đầu của <code>pg_walfile_name</code> như lab, hoặc một số thế hệ do ứng dụng quản lý). Một ca thử: token cấp từ primary cũ, sau failover và sau khi primary mới đã vượt LSN đó về con số — chứng minh phép so chỉ theo LSN sẽ trả sai, còn phép so có timeline buộc đọc primary và cho thấy chuyến không tồn tại. Kết quả chạy thật cho cả hai phép so.</p>
 </details>
 
 ## 15. Đọc tiếp

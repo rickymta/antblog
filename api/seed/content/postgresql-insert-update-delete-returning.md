@@ -82,14 +82,7 @@ VALUES ('b0000000-0000-4000-8000-000000000001', 'ride', 2, 'c0000000-0000-4000-8
 RETURNING code, kind, status, driver_id, fare, requested_at;
 ```
 
-```text
-  code  | kind |  status   | driver_id | fare  |      requested_at
---------+------+-----------+-----------+-------+------------------------
- 100029 | ride | requested |           | 54000 | 2026-11-03 09:00:00+07
-(1 row)
-
-INSERT 0 1
-```
+<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/postgresql-insert-update-delete-returning/dbstudio-01.webp" alt="DBStudio chạy câu lệnh ở 04-lifecycle.sql dòng 20 và hiển thị kết quả 1 dòng" width="996" height="580" loading="lazy"></div><figcaption>DBStudio · <code>04-lifecycle.sql</code>, câu ở dòng 20 · 1 dòng</figcaption></figure>
 
 App nhận ngay mã 100029 và trạng thái `requested` do database điền. `id` do «ứng dụng» sinh sẵn — cách làm phổ biến khi app cần biết định danh trước khi gửi xuống database; các câu sau tìm chuyến theo `id` này.
 
@@ -110,14 +103,7 @@ WHERE id = 'b0000000-0000-4000-8000-000000000001' AND status = 'requested'
 RETURNING code, status, updated_at;
 ```
 
-```text
-  code  |  status   |       updated_at
---------+-----------+------------------------
- 100029 | searching | 2026-11-03 09:00:05+07
-(1 row)
-
-UPDATE 1
-```
+<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/postgresql-insert-update-delete-returning/dbstudio-02.webp" alt="DBStudio chạy câu lệnh ở 04-lifecycle.sql dòng 40 và hiển thị kết quả 1 dòng" width="996" height="426" loading="lazy"></div><figcaption>DBStudio · <code>04-lifecycle.sql</code>, câu ở dòng 40 · 1 dòng</figcaption></figure>
 
 Tài xế 8003 nhận chuyến — chỉ thành công khi chuyến vẫn `searching`. Một câu đổi bốn cột, `RETURNING` xác nhận tài xế và mốc nhận:
 
@@ -131,14 +117,7 @@ WHERE id = 'b0000000-0000-4000-8000-000000000001' AND status = 'searching'
 RETURNING code, status, driver_id, accepted_at;
 ```
 
-```text
-  code  |  status  |              driver_id               |      accepted_at
---------+----------+--------------------------------------+------------------------
- 100029 | accepted | d0000000-0000-4000-8000-000000008003 | 2026-11-03 09:01:00+07
-(1 row)
-
-UPDATE 1
-```
+<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/postgresql-insert-update-delete-returning/dbstudio-03.webp" alt="DBStudio chạy câu lệnh ở 04-lifecycle.sql dòng 51 và hiển thị kết quả 1 dòng" width="1003" height="470" loading="lazy"></div><figcaption>DBStudio · <code>04-lifecycle.sql</code>, câu ở dòng 51 · 1 dòng</figcaption></figure>
 
 Sau mỗi UPDATE, lab thêm một dòng `trip_events` ghi lại trạng thái mới (hồ sơ Tới Nơi: mỗi mũi tên vòng đời = một UPDATE `trips` + một dòng lịch sử). Tài xế cũng chuyển `busy`, bằng chính mẫu có điều kiện: `UPDATE drivers SET status = 'busy' WHERE code = 8003 AND status = 'online'` → `UPDATE 1`.
 
@@ -158,13 +137,7 @@ WHERE id = 'b0000000-0000-4000-8000-000000000001' AND status = 'searching'
 RETURNING code, status, driver_id;
 ```
 
-```text
- code | status | driver_id
-------+--------+-----------
-(0 rows)
-
-UPDATE 0
-```
+<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/postgresql-insert-update-delete-returning/dbstudio-04.webp" alt="DBStudio chạy câu lệnh ở 04-lifecycle.sql dòng 70 và hiển thị kết quả 0 dòng" width="996" height="550" loading="lazy"></div><figcaption>DBStudio · <code>04-lifecycle.sql</code>, câu ở dòng 70 · 0 dòng</figcaption></figure>
 
 Không có lỗi nào. Tài liệu `UPDATE` ghi rõ số dòng bằng 0 nghĩa là không dòng nào được sửa và **không bị coi là lỗi**. Chuyến đã `accepted` nên điều kiện `status = 'searching'` không còn đúng, không dòng nào khớp `WHERE`. Ứng dụng phải tự đọc số dòng (hoặc thấy `RETURNING` rỗng) để báo «chuyến đã có người nhận». Code chỉ bắt exception sẽ tưởng đây là thành công.
 
@@ -176,12 +149,7 @@ FROM trips
 WHERE id = 'b0000000-0000-4000-8000-000000000001';
 ```
 
-```text
-  code  |  status   |              driver_id
---------+-----------+--------------------------------------
- 100029 | completed | d0000000-0000-4000-8000-000000008003
-(1 row)
-```
+<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/postgresql-insert-update-delete-returning/dbstudio-05.webp" alt="DBStudio chạy câu lệnh ở pg006-update-0-lost-update.sql dòng 11 và hiển thị kết quả 1 dòng" width="996" height="360" loading="lazy"></div><figcaption>DBStudio · <code>pg006-update-0-lost-update.sql</code>, câu ở dòng 11 · 1 dòng</figcaption></figure>
 
 Có dòng ⇒ trạng thái đã đi tiếp; 0 dòng ⇒ `id` sai. Đọc lại chỉ để **giải thích** cho người dùng, không dùng để quyết định ghi — quyết định đã nằm trong điều kiện `WHERE`.
 
@@ -201,14 +169,7 @@ RETURNING code, status, driver_id, accepted_at;
 ROLLBACK;
 ```
 
-```text
-  code  |  status  |              driver_id               |      accepted_at
---------+----------+--------------------------------------+------------------------
- 100012 | accepted | d0000000-0000-4000-8000-000000008003 | 2026-11-03 09:45:00+07
-(1 row)
-
-UPDATE 1
-```
+<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/postgresql-insert-update-delete-returning/dbstudio-06.webp" alt="DBStudio chạy câu lệnh ở pg006-update-0-lost-update.sql dòng 25 và hiển thị kết quả 1 dòng" width="1003" height="448" loading="lazy"></div><figcaption>DBStudio · <code>pg006-update-0-lost-update.sql</code>, câu ở dòng 25 · 1 dòng</figcaption></figure>
 
 `UPDATE 1`, không ràng buộc nào phản đối: dòng mới vẫn hợp lệ theo mọi CHECK. Tài xế 8001 đang chạy chuyến thì bị thay bằng 8003. Đây là **lost update** (cập nhật bị mất): một lần ghi đè lên kết quả của lần ghi trước mà không ai hay. Ràng buộc chỉ kiểm từng dòng có hợp lệ không, không kiểm dòng có đi đúng **bước** không — đó là việc của điều kiện trong `WHERE`.
 
@@ -247,14 +208,7 @@ SELECT id, status, completed_at FROM done
 RETURNING id, status, occurred_at;
 ```
 
-```text
- id |  status   |      occurred_at
-----+-----------+------------------------
-  8 | completed | 2026-11-03 09:31:00+07
-(1 row)
-
-INSERT 0 1
-```
+<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/postgresql-insert-update-delete-returning/dbstudio-07.webp" alt="DBStudio chạy câu lệnh ở 04-lifecycle.sql dòng 115 và hiển thị kết quả 1 dòng" width="996" height="624" loading="lazy"></div><figcaption>DBStudio · <code>04-lifecycle.sql</code>, câu ở dòng 115 · 1 dòng</figcaption></figure>
 
 Ý tưởng: kết quả `RETURNING` của UPDATE được dùng như một bảng tạm tên `done`, và câu INSERT đọc từ đó. Cú pháp `WITH` (CTE) sẽ giải thích ở Phần 2; điều cần nắm ở đây là **một câu lệnh thành công hoặc thất bại trọn vẹn**, nên không thể có chuyến `completed` mà thiếu dòng lịch sử. Nếu UPDATE không khớp dòng nào, `done` rỗng và INSERT thêm 0 dòng — chạy lại câu này lần nữa ra `INSERT 0 0`. Thẻ lệnh in ra là của câu INSERT ngoài cùng.
 
@@ -262,23 +216,9 @@ Các bước trước dùng hai câu riêng (UPDATE rồi INSERT), mỗi câu t�
 
 Đọc lại kết quả cuối:
 
-```text
-  code  |  status   | fare  |      requested_at      |      accepted_at       |      completed_at      | tong_thoi_gian
---------+-----------+-------+------------------------+------------------------+------------------------+----------------
- 100029 | completed | 54000 | 2026-11-03 09:00:00+07 | 2026-11-03 09:01:00+07 | 2026-11-03 09:31:00+07 | 00:31:00
-(1 row)
+<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/postgresql-insert-update-delete-returning/dbstudio-08.webp" alt="DBStudio chạy câu lệnh ở 04-lifecycle.sql dòng 137 và hiển thị kết quả 1 dòng" width="1336" height="404" loading="lazy"></div><figcaption>DBStudio · <code>04-lifecycle.sql</code>, câu ở dòng 137 · 1 dòng</figcaption></figure>
 
- id |   status   |      occurred_at
-----+------------+------------------------
-  2 | requested  | 2026-11-03 09:00:00+07
-  3 | searching  | 2026-11-03 09:00:05+07
-  4 | accepted   | 2026-11-03 09:01:00+07
-  5 | arriving   | 2026-11-03 09:01:30+07
-  6 | picked_up  | 2026-11-03 09:07:00+07
-  7 | in_transit | 2026-11-03 09:07:20+07
-  8 | completed  | 2026-11-03 09:31:00+07
-(7 rows)
-```
+<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/postgresql-insert-update-delete-returning/dbstudio-09.webp" alt="DBStudio chạy câu lệnh ở 04-lifecycle.sql dòng 144 và hiển thị kết quả 7 dòng" width="1336" height="562" loading="lazy"></div><figcaption>DBStudio · <code>04-lifecycle.sql</code>, câu ở dòng 144 · 7 dòng</figcaption></figure>
 
 Bảy trạng thái, bảy dòng lịch sử, chuyến dài 31 phút. Câu UPDATE lỗi ở bước hoàn thành không để lại gì: không đổi `trips`, không tiêu số `trip_events`.
 
@@ -291,10 +231,7 @@ DELETE FROM trips
 WHERE id = 'b0000000-0000-4000-8000-000000000002' AND status = 'cancelled';
 ```
 
-```text
-ERROR:  update or delete on table "trips" violates foreign key constraint "fk_trip_events_trip" on table "trip_events"
-DETAIL:  Key (id)=(b0000000-0000-4000-8000-000000000002) is still referenced from table "trip_events".
-```
+<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/postgresql-insert-update-delete-returning/dbstudio-10.webp" alt="DBStudio chạy câu lệnh ở 04-lifecycle.sql dòng 175 và hiển thị thông báo lỗi" width="1318" height="390" loading="lazy"></div><figcaption>DBStudio · <code>04-lifecycle.sql</code>, câu ở dòng 175 · lỗi</figcaption></figure>
 
 Khoá ngoại bảo vệ lịch sử: còn dòng `trip_events` trỏ tới thì không xoá được chuyến. Muốn xoá thật thì xoá con trước, và `RETURNING` cho biết đã xoá những gì:
 
@@ -304,15 +241,7 @@ WHERE trip_id = 'b0000000-0000-4000-8000-000000000002'
 RETURNING status, occurred_at;
 ```
 
-```text
-  status   |      occurred_at
------------+------------------------
- requested | 2026-11-03 09:10:00+07
- cancelled | 2026-11-03 09:10:40+07
-(2 rows)
-
-DELETE 2
-```
+<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/postgresql-insert-update-delete-returning/dbstudio-11.webp" alt="DBStudio chạy câu lệnh ở 04-lifecycle.sql dòng 180 và hiển thị kết quả 2 dòng" width="996" height="412" loading="lazy"></div><figcaption>DBStudio · <code>04-lifecycle.sql</code>, câu ở dòng 180 · 2 dòng</figcaption></figure>
 
 ```sql
 DELETE FROM trips
@@ -320,25 +249,13 @@ WHERE id = 'b0000000-0000-4000-8000-000000000002' AND status = 'cancelled'
 RETURNING code, kind, status, fare;
 ```
 
-```text
-  code  |  kind  |  status   | fare
---------+--------+-----------+-------
- 100030 | parcel | cancelled | 25000
-(1 row)
-
-DELETE 1
-```
+<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/postgresql-insert-update-delete-returning/dbstudio-12.webp" alt="DBStudio chạy câu lệnh ở 04-lifecycle.sql dòng 186 và hiển thị kết quả 1 dòng" width="996" height="360" loading="lazy"></div><figcaption>DBStudio · <code>04-lifecycle.sql</code>, câu ở dòng 186 · 1 dòng</figcaption></figure>
 
 `RETURNING` của DELETE là bản ghi cuối cùng của dòng — có thể lưu vào nhật ký trước khi nó biến mất. Điều kiện `AND status = 'cancelled'` là lưới an toàn: gõ nhầm `id` của một chuyến đang chạy thì câu xoá trả `DELETE 0`.
 
 Cuối tệp:
 
-```text
- ma_lon_nhat | so_chuyen | so_cap_gan_nhat
--------------+-----------+-----------------
-      100029 |        16 |          100030
-(1 row)
-```
+<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/postgresql-insert-update-delete-returning/dbstudio-13.webp" alt="DBStudio chạy câu lệnh ở 04-lifecycle.sql dòng 191 và hiển thị kết quả 1 dòng" width="996" height="470" loading="lazy"></div><figcaption>DBStudio · <code>04-lifecycle.sql</code>, câu ở dòng 191 · 1 dòng</figcaption></figure>
 
 16 chuyến (15 fixture + 100029), mã lớn nhất 100029, nhưng sequence `trips_code_seq` (do IDENTITY tự tạo) đã cấp tới 100030. Chuyến kế tiếp nhận 100031 (đã thử một INSERT trong giao dịch rồi huỷ); số 100030 không bao giờ được dùng lại.
 

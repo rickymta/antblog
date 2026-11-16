@@ -57,19 +57,7 @@ Các giá trị cột `type` hay gặp:
 
 Runner ghi đè `pg_hba.conf` của cluster tạm, bật `ssl=on`, khởi động lại cluster rồi đọc view `pg_hba_file_rules`:
 
-```text
---- 042 pg_hba_file_rules
-   rule |  type   |   database    | user_name  |  address  |  auth_method  | error
-  ------+---------+---------------+------------+-----------+---------------+-------
-      1 | local   | {all}         | {postgres} | NULL      | trust         | NULL
-      2 | host    | {all}         | {postgres} | 127.0.0.1 | trust         | NULL
-      3 | host    | {all}         | {postgres} | ::1       | trust         | NULL
-      4 | hostssl | {all}         | {tn_app}   | 127.0.0.1 | scram-sha-256 | NULL
-      5 | host    | {all}         | {all}      | 127.0.0.1 | reject        | NULL
-      6 | host    | {all}         | {all}      | ::1       | reject        | NULL
-      7 | host    | {replication} | {postgres} | 127.0.0.1 | trust         | NULL
-  (7 rows)
-```
+<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/postgresql-ket-noi-auth-tls/dbstudio-01.webp" alt="DBStudio chạy truy vấn của bước 042 trong p05/run.mjs và hiển thị kết quả 7 dòng" width="996" height="738" loading="lazy"></div><figcaption>DBStudio · bước 042 của <code>p05/run.mjs</code> · 7 dòng</figcaption></figure>
 
 (Bảng chỉ có địa chỉ, không có cột netmask; trong tệp, dòng 4 viết là `127.0.0.1/32`.) Đọc theo thứ tự:
 

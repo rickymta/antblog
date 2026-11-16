@@ -75,10 +75,7 @@ Vì sao không «SELECT xem có chưa, rồi INSERT hoặc UPDATE»? Giữa lúc
 
 Chạy đúng câu trên cho lô 2:
 
-```text
-ERROR:  ON CONFLICT DO UPDATE command cannot affect row a second time
-HINT:  Ensure that no rows proposed for insertion within the same command have duplicate constrained values.
-```
+<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/postgresql-upsert-on-conflict/dbstudio-01.webp" alt="DBStudio chạy câu lệnh ở 17-upsert-on-conflict.sql dòng 83 và hiển thị thông báo lỗi" width="1228" height="588" loading="lazy"></div><figcaption>DBStudio · <code>17-upsert-on-conflict.sql</code>, câu ở dòng 83 · lỗi</figcaption></figure>
 
 SQLSTATE `21000` (*cardinality violation* — vi phạm số lượng). Dòng 5 và 6 cùng khoá `(…101, BB-04)`: dòng 5 vừa được chèn thì dòng 6 xung đột với **chính dòng vừa chèn**. Tài liệu gọi câu lệnh này là «tất định»: không được tác động lên cùng một dòng hai lần, vì kết quả sẽ phụ thuộc thứ tự xử lý. PostgreSQL không đoán hộ dòng nào thắng — nó từ chối cả câu, kể cả 6 dòng không liên quan.
 
@@ -98,10 +95,7 @@ Mỗi món còn một dòng — dòng có `source_updated_at` mới nhất; cùn
 
 Thay nguồn của câu UPSERT bằng truy vấn `DISTINCT ON` ở trên, chạy lại:
 
-```text
-ERROR:  duplicate key value violates unique constraint "uq_menu_items_name"
-DETAIL:  Key (merchant_id, name)=(e1000000-0000-4000-8000-000000000101, Nước cam) already exists.
-```
+<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/postgresql-upsert-on-conflict/dbstudio-02.webp" alt="DBStudio chạy câu lệnh ở pg017-do-nothing-khong-target.sql dòng 8 và hiển thị thông báo lỗi" width="1129" height="500" loading="lazy"></div><figcaption>DBStudio · <code>pg017-do-nothing-khong-target.sql</code>, câu ở dòng 8 · lỗi</figcaption></figure>
 
 Dòng 7 (`BB-05`, «Nước cam») không đụng khoá `(merchant_id, sku)` — `BB-05` là mã mới — nhưng đụng ràng buộc **khác**: tên món trong quán. `ON CONFLICT (merchant_id, sku)` chỉ chuyển hướng xung đột của trọng tài được chỉ định; mọi ràng buộc còn lại (UNIQUE khác, FK, CHECK) vẫn sinh lỗi thường và huỷ cả câu.
 
@@ -141,19 +135,7 @@ WHERE i.batch_id = 2
 ORDER BY i.line_no;
 ```
 
-```text
- line_no |  sku  |                   ket_qua
----------+-------+---------------------------------------------
-       1 | BB-01 | CẬP NHẬT
-       2 | BB-02 | BỎ QUA — không có gì thay đổi (R3)
-       3 | BB-03 | BỎ QUA — cũ hơn dữ liệu đang có (R2)
-       4 | TR-01 | CẬP NHẬT
-       5 | BB-04 | BỎ QUA — có dòng mới hơn trong cùng lô (R4)
-       6 | BB-04 | THÊM
-       7 | BB-05 | TỪ CHỐI — trùng tên món khác (R5)
-       8 | XX-01 | TỪ CHỐI — quán không tồn tại (R5)
-(8 rows)
-```
+<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/postgresql-upsert-on-conflict/dbstudio-03.webp" alt="DBStudio chạy câu lệnh ở 17-upsert-on-conflict.sql dòng 116 và hiển thị kết quả 8 dòng" width="996" height="1054" loading="lazy"></div><figcaption>DBStudio · <code>17-upsert-on-conflict.sql</code>, câu ở dòng 116 · 8 dòng</figcaption></figure>
 
 Thứ tự nhánh `CASE` là thứ tự ưu tiên: từ chối trước, rồi loại dòng trùng trong lô, rồi mới so với dữ liệu đang có. `first_value(...) OVER (...)` ([PG-015](/articles/postgresql-window-function-frame)) chọn dòng mới nhất mỗi nhóm (quán, sku) — cùng tiêu chí với `DISTINCT ON`. So ba cột bằng **`IS NOT DISTINCT FROM`** để NULL được coi là bằng nhau ([PG-011](/articles/postgresql-null-case-coalesce)).
 
@@ -182,16 +164,7 @@ WHERE EXCLUDED.source_updated_at > m.source_updated_at                          
 RETURNING m.sku, m.price, m.is_available, m.updated_by_batch;
 ```
 
-```text
-  sku  | price | is_available | updated_by_batch
--------+-------+--------------+------------------
- BB-01 | 59000 | t            |                2
- BB-04 | 52000 | t            |                2
- TR-01 |  5000 | f            |                2
-(3 rows)
-
-INSERT 0 3
-```
+<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/postgresql-upsert-on-conflict/dbstudio-04.webp" alt="DBStudio chạy câu lệnh ở 17-upsert-on-conflict.sql dòng 187 và hiển thị kết quả 3 dòng" width="996" height="816" loading="lazy"></div><figcaption>DBStudio · <code>17-upsert-on-conflict.sql</code>, câu ở dòng 187 · 3 dòng</figcaption></figure>
 
 Khớp biên bản: `INSERT 0 3` = 1 thêm (BB-04, giá 52.000 của dòng 6) + 2 cập nhật. BB-02 và BB-03 **xung đột nhưng không được cập nhật** vì `WHERE` trả false — theo tài liệu `INSERT`, chúng không được đếm trong thẻ lệnh và không có trong `RETURNING`. Chỉ đọc thẻ lệnh thì không biết dòng nào bị bỏ qua vì sao; biên bản mục 5 mới nói được.
 
@@ -223,14 +196,7 @@ ON CONFLICT (merchant_id, sku) DO NOTHING
 RETURNING sku, price, updated_by_batch;
 ```
 
-```text
-  sku  | price | updated_by_batch
--------+-------+------------------
- CF-01 | 22000 |                3
-(1 row)
-
-INSERT 0 1
-```
+<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/postgresql-upsert-on-conflict/dbstudio-05.webp" alt="DBStudio chạy câu lệnh ở 17-upsert-on-conflict.sql dòng 251 và hiển thị kết quả 1 dòng" width="996" height="448" loading="lazy"></div><figcaption>DBStudio · <code>17-upsert-on-conflict.sql</code>, câu ở dòng 251 · 1 dòng</figcaption></figure>
 
 BB-01 bị bỏ qua mà không báo lỗi (giá vẫn `59000`); `RETURNING` chỉ trả dòng thật sự được chèn. `DO NOTHING` hợp với dữ liệu «ghi một lần» như sự kiện có mã duy nhất; với dữ liệu đổi theo thời gian như giá, cách này làm mất cập nhật thật.
 
@@ -244,9 +210,7 @@ VALUES ('e1000000-0000-4000-8000-000000000101', 'CF-02', 'Cà phê đen', 18000,
 ON CONFLICT (sku) DO NOTHING;
 ```
 
-```text
-ERROR:  there is no unique or exclusion constraint matching the ON CONFLICT specification
-```
+<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/postgresql-upsert-on-conflict/dbstudio-06.webp" alt="DBStudio chạy câu lệnh ở 17-upsert-on-conflict.sql dòng 264 và hiển thị thông báo lỗi" width="1057" height="434" loading="lazy"></div><figcaption>DBStudio · <code>17-upsert-on-conflict.sql</code>, câu ở dòng 264 · lỗi</figcaption></figure>
 
 SQLSTATE `42P10`: `sku` chỉ duy nhất **trong một quán**. Lỗi này là tin tốt — nó buộc ta nói đúng khoá nghiệp vụ. Có thể gọi tên ràng buộc (`ON CONFLICT ON CONSTRAINT pk_menu_items DO NOTHING`, lab ra `INSERT 0 0`), nhưng tài liệu khuyên liệt kê cột: đổi tên ràng buộc thì câu vẫn chạy. Khoá là chỉ mục duy nhất có điều kiện (partial unique index, Phần 3) thì target thêm `WHERE <điều kiện>`.
 
@@ -266,14 +230,7 @@ RETURNING merge_action() AS hanh_dong, m.sku, m.price, m.is_available
 SELECT * FROM ket_qua ORDER BY sku;
 ```
 
-```text
- hanh_dong |  sku  | price | is_available
------------+-------+-------+--------------
- UPDATE    | BB-01 | 59000 | t
- INSERT    | BB-04 | 52000 | t
- UPDATE    | TR-01 |  5000 | f
-(3 rows)
-```
+<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/postgresql-upsert-on-conflict/dbstudio-07.webp" alt="DBStudio chạy câu lệnh ở 17-upsert-on-conflict.sql dòng 159 và hiển thị kết quả 3 dòng" width="996" height="838" loading="lazy"></div><figcaption>DBStudio · <code>17-upsert-on-conflict.sql</code>, câu ở dòng 159 · 3 dòng</figcaption></figure>
 
 Cùng 1 thêm, 2 cập nhật như UPSERT. `MERGE` diễn đạt được nhiều nhánh hơn (xoá món không còn trong file bằng `WHEN NOT MATCHED BY SOURCE`), nhưng hai câu **không thay thế cho nhau**: tài liệu `MERGE` nói MERGE tuân theo các luật cô lập giao dịch thông thường khi chạy đồng thời, và gợi ý `INSERT … ON CONFLICT` nếu cần chuyển sang UPDATE khi phiên khác vừa chèn cùng khoá (Phần 4). Mỗi dòng đích cũng chỉ được khớp một dòng nguồn, nên R4 vẫn cần.
 

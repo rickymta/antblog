@@ -118,10 +118,7 @@ FROM pg_stat_replication;
 
 Ứng dụng cấu hình sai, gửi lệnh ghi sang standby, sẽ nhận:
 
-```text
---- 052 write on standby
-  ERROR:  25006: cannot execute INSERT in a read-only transaction
-```
+<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/postgresql-replication-primary-standby/dbstudio-01.webp" alt="DBStudio chạy truy vấn của bước 052 trong p06/run.mjs và hiển thị thông báo lỗi" width="996" height="500" loading="lazy"></div><figcaption>DBStudio · bước 052 của <code>p06/run.mjs</code> · lỗi</figcaption></figure>
 
 SQLSTATE **`25006`** là `read_only_sql_transaction`. Theo tài liệu Hot Standby, giao dịch trên standby không được cấp mã giao dịch và không thể ghi WAL; `transaction_read_only` luôn là true. Không chỉ DML bị từ chối: DDL (kể cả bảng tạm), `SELECT … FOR UPDATE`, `nextval()`, `LISTEN`/`NOTIFY` cũng vậy. Khi chuyển một màn hình sang replica, hãy kiểm các hàm «chỉ đọc» có gọi `nextval()` hay ghi bảng log. Ngược lại, nếu pool ghi bỗng nhận `25006`, nó đang nối vào một server trong recovery — có thể vì định tuyến chưa đổi sau failover (PG-058).
 
@@ -271,7 +268,7 @@ libpq cũng có `target_session_attrs` (`read-only`, `standby`, `prefer-standby`
 **Bài 2.** Viết hàm đọc lịch sử chuyến nhận một LSN token: thử replica, chờ tối đa 300 ms, quá hạn thì đọc primary.
 
 <details><summary><b>Lời giải phải chứng minh được</b></summary>
-<p>Ba ca kiểm thử có output thật: replica đã replay tới token (đọc replica), replica đang pause (rơi về primary sau đúng hạn chờ, vẫn thấy chuyến vừa đặt), replica trả <code>NULL</code> cho <code>pg_last_wal_replay_lsn()</code> (đọc primary, không so sánh). Nêu LSN được lấy ở đâu, trên kết nối nào, sau <code>COMMIT</code> hay trước, và vì sao vị trí đó không đứng trước bản ghi commit.</p>
+<p>Ba test case có kết quả chạy thật: replica đã replay tới token (đọc replica), replica đang pause (rơi về primary sau đúng hạn chờ, vẫn thấy chuyến vừa đặt), replica trả <code>NULL</code> cho <code>pg_last_wal_replay_lsn()</code> (đọc primary, không so sánh). Nêu LSN được lấy ở đâu, trên kết nối nào, sau <code>COMMIT</code> hay trước, và vì sao vị trí đó không đứng trước bản ghi commit.</p>
 </details>
 
 **Bài 3.** Lập bảng định tuyến đọc cho năm màn hình của app Tới Nơi: lịch sử chuyến, chi tiết chuyến đang chạy, số dư ví, báo cáo thu nhập tuần của tài xế, tra cứu của tổng đài.

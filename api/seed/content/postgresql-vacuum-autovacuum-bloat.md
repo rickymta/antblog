@@ -74,21 +74,11 @@ VACUUM (ANALYZE) ops.churn;
 
 Sau `DELETE`, trước VACUUM:
 
-```text
- table_len | live | dead | dead_pct | free_space | free_pct
------------+------+------+----------+------------+----------
-   1867776 | 2500 | 2500 |       47 |      82304 |        4
-(1 row)
-```
+<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/postgresql-vacuum-autovacuum-bloat/dbstudio-01.webp" alt="DBStudio chạy truy vấn của bước 044 trong p05/run.mjs và hiển thị kết quả 1 dòng" width="996" height="558" loading="lazy"></div><figcaption>DBStudio · bước 044 của <code>p05/run.mjs</code> · 1 dòng</figcaption></figure>
 
 Sau `VACUUM (ANALYZE)`:
 
-```text
- table_len | live | dead | dead_pct | free_space | free_pct
------------+------+------+----------+------------+----------
-   1867776 | 2500 |    0 |        0 |     963216 |       52
-(1 row)
-```
+<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/postgresql-vacuum-autovacuum-bloat/dbstudio-02.webp" alt="DBStudio chạy truy vấn của bước 044 trong p05/run.mjs và hiển thị kết quả 1 dòng" width="996" height="558" loading="lazy"></div><figcaption>DBStudio · bước 044 của <code>p05/run.mjs</code> · 1 dòng</figcaption></figure>
 
 - **`table_len` không đổi: 1.867.776 byte** = đúng 228 page × 8.192 byte (cổng `PASS 044 VACUUM keeps file size: 1867776`).
 - **`dead` 2.500 → 0**: mọi tuple chết đều dọn được, vì không có giao dịch nào khác đang mở.
@@ -125,12 +115,7 @@ removable cutoff: 774, which was 1 XIDs old when operation ended
 
 Câu ở T4 hỏi `pg_stat_activity` về H:
 
-```text
-   s    |        state        | has_xmin |              query
---------+---------------------+----------+---------------------------------
- holder | idle in transaction | t        | SELECT count(*) FROM ops.churn;
-(1 row)
-```
+<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/postgresql-vacuum-autovacuum-bloat/dbstudio-03.webp" alt="DBStudio chạy truy vấn của bước 044 trong p05/run.mjs và hiển thị kết quả 1 dòng" width="996" height="558" loading="lazy"></div><figcaption>DBStudio · bước 044 của <code>p05/run.mjs</code> · 1 dòng</figcaption></figure>
 
 `idle in transaction` và `backend_xmin` khác NULL (`has_xmin = t`) — hai dấu hiệu PG-043 đã dạy đọc. Cột `query` là câu **cuối cùng** phiên đã chạy, không phải câu đang chạy. Sau khi H `COMMIT`, VACUUM lần hai:
 
@@ -167,16 +152,7 @@ Phòng ngừa: `idle_in_transaction_session_timeout` (lab 043 đã chứng minh 
 
 **Autovacuum** gồm một tiến trình launcher thức dậy định kỳ và các worker (mặc định tối đa 3, `autovacuum_max_workers`) đi VACUUM/ANALYZE bảng vượt ngưỡng. Lab đọc cấu hình cluster:
 
-```text
-              name               |  setting
----------------------------------+-----------
- autovacuum                      | on
- autovacuum_naptime              | 60
- autovacuum_vacuum_max_threshold | 100000000
- autovacuum_vacuum_scale_factor  | 0.2
- autovacuum_vacuum_threshold     | 50
-(5 rows)
-```
+<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/postgresql-vacuum-autovacuum-bloat/dbstudio-04.webp" alt="DBStudio chạy truy vấn của bước 044 trong p05/run.mjs và hiển thị kết quả 5 dòng" width="996" height="678" loading="lazy"></div><figcaption>DBStudio · bước 044 của <code>p05/run.mjs</code> · 5 dòng</figcaption></figure>
 
 Lab đặt `autovacuum = on`; bốn giá trị còn lại là mặc định PostgreSQL 18. `autovacuum_naptime = 60` giây là chu kỳ launcher ghé mỗi database.
 

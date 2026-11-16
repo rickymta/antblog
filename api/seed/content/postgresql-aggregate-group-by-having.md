@@ -53,11 +53,7 @@ SELECT count(*)                    AS so_chuyen,
 FROM trips;
 ```
 
-```text
- so_chuyen | co_tai_xe | co_quan | so_tai_xe_khac_nhau | so_khach_khac_nhau
------------+-----------+---------+---------------------+--------------------
-      3174 |      2877 |    1432 |                  52 |                576
-```
+<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/postgresql-aggregate-group-by-having/dbstudio-01.webp" alt="DBStudio chạy câu lệnh ở 12-aggregate-group-by.sql dòng 15 và hiển thị kết quả 1 dòng" width="996" height="514" loading="lazy"></div><figcaption>DBStudio · <code>12-aggregate-group-by.sql</code>, câu ở dòng 15 · 1 dòng</figcaption></figure>
 
 `count(*)` đếm **dòng**; `count(cột)` đếm giá trị **khác NULL**; `count(DISTINCT cột)` đếm giá trị **khác nhau**, bỏ NULL. Lab có 54 tài xế nhưng chỉ 52 từng chạy — 8219 và 8220 chưa có chuyến nào.
 
@@ -74,21 +70,13 @@ GROUP BY ci.id
 ORDER BY ci.id;
 ```
 
-```text
- id | code |      name       | so_chuyen
-----+------+-----------------+-----------
-  1 | SG   | TP. Hồ Chí Minh |      1606
-  2 | HN   | Hà Nội          |      1108
-  3 | DN   | Đà Nẵng         |       460
-```
+<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/postgresql-aggregate-group-by-having/dbstudio-02.webp" alt="DBStudio chạy câu lệnh ở 12-aggregate-group-by.sql dòng 87 và hiển thị kết quả 3 dòng" width="996" height="1064" loading="lazy"></div><figcaption>DBStudio · <code>12-aggregate-group-by.sql</code>, câu ở dòng 87 · 3 dòng</figcaption></figure>
 
 1.606 + 1.108 + 460 = 3.174: mỗi chuyến rơi vào đúng một nhóm. (`JOIN … ON` ghép chuyến với thành phố — PG-013.)
 
 **Quy tắc:** mỗi cột trong `SELECT` phải có một giá trị duy nhất trong mỗi nhóm. Nhóm «SG» chứa ba loại dịch vụ, nên hỏi «`kind` của nhóm SG?» không có đáp án — PostgreSQL từ chối `SELECT c.code, t.kind, count(*) … GROUP BY c.code` thay vì chọn đại:
 
-```text
-ERROR:  column "t.kind" must appear in the GROUP BY clause or be used in an aggregate function
-```
+<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/postgresql-aggregate-group-by-having/dbstudio-03.webp" alt="DBStudio chạy câu lệnh ở 12-aggregate-group-by.sql dòng 79 và hiển thị thông báo lỗi" width="1102" height="456" loading="lazy"></div><figcaption>DBStudio · <code>12-aggregate-group-by.sql</code>, câu ở dòng 79 · lỗi</figcaption></figure>
 
 Mã `42803`. Sửa bằng cách thêm `t.kind` vào `GROUP BY`, hoặc bọc trong hàm tổng hợp. Câu truy vấn `cities` phía trên là ngoại lệ hợp lệ: nhóm theo **khoá chính** `ci.id` thì chọn được `ci.code`, `ci.name` — mỗi `id` chỉ có một `name`, tài liệu gọi là **phụ thuộc hàm** (functional dependency). `GROUP BY` cũng nhận biểu thức hoặc số thứ tự cột như `GROUP BY 1`; nhóm theo cột của select list là phần PostgreSQL mở rộng so với SQL chuẩn.
 
@@ -134,19 +122,7 @@ GROUP BY c.code, t.kind
 ORDER BY c.code COLLATE "C", t.kind COLLATE "C";
 ```
 
-```text
- tp |  kind  | da_ket_thuc | hoan_thanh | huy | ty_le_huy_pct | doanh_thu | cuoc_tb
-----+--------+-------------+------------+-----+---------------+-----------+---------
- DN | food   |         210 |        173 |  37 |          17.6 |  14902000 |   86139
- DN | parcel |          72 |         68 |   4 |           5.6 |   3380000 |   49706
- DN | ride   |         177 |        148 |  29 |          16.4 |   8134000 |   54959
- HN | food   |         503 |        413 |  90 |          17.9 |  35025000 |   84806
- HN | parcel |         165 |        145 |  20 |          12.1 |   7041000 |   48559
- HN | ride   |         438 |        383 |  55 |          12.6 |  20925000 |   54634
- SG | food   |         717 |        615 | 102 |          14.2 |  52898000 |   86013
- SG | parcel |         251 |        196 |  55 |          21.9 |   9290000 |   47398
- SG | ride   |         635 |        566 |  69 |          10.9 |  30692000 |   54226
-```
+<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/postgresql-aggregate-group-by-having/dbstudio-04.webp" alt="DBStudio chạy câu lệnh ở 12-aggregate-group-by.sql dòng 31 và hiển thị kết quả 9 dòng" width="996" height="1022" loading="lazy"></div><figcaption>DBStudio · <code>12-aggregate-group-by.sql</code>, câu ở dòng 31 · 9 dòng</figcaption></figure>
 
 Cột `da_ket_thuc` cộng lại đúng 3.168. Chú thích `-- huỷ / đã kết thúc` cạnh biểu thức cho người đọc thấy mẫu số mà không phải đoán.
 
@@ -171,13 +147,7 @@ GROUP BY c.code
 ORDER BY c.code COLLATE "C";
 ```
 
-```text
- tp | a_chia_nguyen | a_pct_nguyen | a_pct_dung | b_cuoc_tb_sai | b_cuoc_tb_dung | c_pct_sai_mau
-----+---------------+--------------+------------+---------------+----------------+---------------
- DN |             0 |           15 |      15.25 |         68011 |          67907 |         17.99
- HN |             0 |           14 |      14.92 |         68348 |          66940 |         17.53
- SG |             0 |           14 |      14.10 |         68269 |          67451 |         16.41
-```
+<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/postgresql-aggregate-group-by-having/dbstudio-05.webp" alt="DBStudio chạy câu lệnh ở 12-aggregate-group-by.sql dòng 57 và hiển thị kết quả 3 dòng" width="1129" height="750" loading="lazy"></div><figcaption>DBStudio · <code>12-aggregate-group-by.sql</code>, câu ở dòng 57 · 3 dòng</figcaption></figure>
 
 - **a) Chia số nguyên.** `bigint / bigint` bỏ phần thập phân: huỷ ÷ tổng < 1 nên ra 0; nhân 100 trước thì ra 14 — «14 %» của báo cáo. Viết `100.0 * …`: hằng `100.0` kiểu `numeric` kéo cả phép tính sang số thập phân, `round(…, 2)` làm tròn khi hiển thị.
 - **b) Trung bình trên sai tập dòng.** `avg(t.fare)` tính cả chuyến huỷ, vốn mang giá báo lúc đặt nhưng không ai trả: 68.269 đ thay vì 67.451 đ.
@@ -203,14 +173,7 @@ HAVING count(*) FILTER (WHERE t.status = 'cancelled') * 100.0 / count(*) > 15
 ORDER BY ty_le_huy_pct DESC, c.code COLLATE "C", t.kind COLLATE "C";
 ```
 
-```text
- tp |  kind  | da_ket_thuc | ty_le_huy_pct
-----+--------+-------------+---------------
- SG | parcel |         251 |          21.9
- HN | food   |         503 |          17.9
- DN | food   |         210 |          17.6
- DN | ride   |         177 |          16.4
-```
+<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/postgresql-aggregate-group-by-having/dbstudio-06.webp" alt="DBStudio chạy câu lệnh ở 12-aggregate-group-by.sql dòng 97 và hiển thị kết quả 4 dòng" width="996" height="522" loading="lazy"></div><figcaption>DBStudio · <code>12-aggregate-group-by.sql</code>, câu ở dòng 97 · 4 dòng</figcaption></figure>
 
 `HAVING` phải viết lại biểu thức vì tên `ty_le_huy_pct` chưa có ở bước đó (mục 4); `ORDER BY` thì dùng được tên. Để ý `HAVING` so trên tỉ lệ **chưa làm tròn**: so trên số đã `round` thì nhóm 15,04 % bị làm tròn thành 15,0 và trượt điều kiện.
 
@@ -232,16 +195,7 @@ GROUP BY ROLLUP (c.code, t.kind)
 ORDER BY grouping(c.code), c.code COLLATE "C", grouping(t.kind), t.kind COLLATE "C";
 ```
 
-```text
-  tp  |     kind      | hoan_thanh | doanh_thu
-------+---------------+------------+-----------
- DN   | food          |        173 |  14902000
- …
- DN   | (mọi dịch vụ) |        389 |  26416000
- …
- SG   | (mọi dịch vụ) |       1377 |  92880000
- TỔNG | (mọi dịch vụ) |       2707 | 182287000
-```
+<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/postgresql-aggregate-group-by-having/dbstudio-07.webp" alt="DBStudio chạy câu lệnh ở 12-aggregate-group-by.sql dòng 132 và hiển thị kết quả 13 dòng" width="996" height="940" loading="lazy"></div><figcaption>DBStudio · <code>12-aggregate-group-by.sql</code>, câu ở dòng 132 · 13 dòng</figcaption></figure>
 
 Một con số tổng chỉ đáng tin khi một cách tính **độc lập** cho ra cùng kết quả. Lab đối chiếu bằng câu tổng thẳng trên `trips` — không `JOIN`, không `ROLLUP`: `count(*), sum(fare) … WHERE status = 'completed'` trong kỳ ra đúng `2707 | 182287000`. Con số **182.287.000 đ** sẽ theo bạn tới PG-013 (khi `JOIN` với `payments` làm nó phình) và PG-020 (khi đối chiếu tiền thật).
 
@@ -251,13 +205,7 @@ Một con số tổng chỉ đáng tin khi một cách tính **độc lập** ch
 
 Câu 7 của lab nối chuyến hoàn thành trong kỳ với `trip_ratings` bằng `LEFT JOIN`, nhóm theo thành phố, và đặt cạnh nhau `count(r.trip_id)`, `100.0 * count(r.trip_id) / count(*)`, `count(r.stars)`, `avg(r.stars)`:
 
-```text
- tp | hoan_thanh | co_danh_gia | do_phu_pct | co_sao | diem_tb
-----+------------+-------------+------------+--------+---------
- DN |        389 |         266 |       68.4 |    251 |    4.30
- HN |        941 |         670 |       71.2 |    619 |    4.17
- SG |       1377 |         955 |       69.4 |    868 |    4.23
-```
+<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/postgresql-aggregate-group-by-having/dbstudio-08.webp" alt="DBStudio chạy câu lệnh ở 12-aggregate-group-by.sql dòng 154 và hiển thị kết quả 3 dòng" width="996" height="728" loading="lazy"></div><figcaption>DBStudio · <code>12-aggregate-group-by.sql</code>, câu ở dòng 154 · 3 dòng</figcaption></figure>
 
 **Độ phủ** chia cho chuyến hoàn thành; `r.trip_id` chỉ NULL ở chuyến không có dòng đánh giá (PG-011), nên `count(r.trip_id)` đếm chuyến *có* đánh giá. **Điểm trung bình** chia cho lượt có sao — `avg` tự bỏ NULL. Đặt `co_danh_gia` và `co_sao` ngay trong bảng là cách rẻ nhất để người đọc kiểm tra mẫu số: 4,30 của Đà Nẵng dựa trên 251 lượt, ít hơn hẳn 868 lượt của TP. HCM.
 
@@ -265,14 +213,7 @@ Câu 7 của lab nối chuyến hoàn thành trong kỳ với `trip_ratings` b�
 
 Con số 1.103 của Marketing đến từ câu 8 của lab — khách khác nhau theo dịch vụ, có `ROLLUP`:
 
-```text
-  kind  | so_khach | hoan_thanh | chuyen_moi_khach
---------+----------+------------+------------------
- food   |      441 |       1201 |             2.72
- parcel |      241 |        409 |             1.70
- ride   |      421 |       1097 |             2.61
- TỔNG   |      569 |       2707 |             4.76
-```
+<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/postgresql-aggregate-group-by-having/dbstudio-09.webp" alt="DBStudio chạy câu lệnh ở 12-aggregate-group-by.sql dòng 175 và hiển thị kết quả 4 dòng" width="996" height="670" loading="lazy"></div><figcaption>DBStudio · <code>12-aggregate-group-by.sql</code>, câu ở dòng 175 · 4 dòng</figcaption></figure>
 
 `hoan_thanh` cộng được: 1.201 + 409 + 1.097 = 2.707. `so_khach` thì không: 441 + 241 + 421 = 1.103, trong khi dòng TỔNG — `ROLLUP` tính lại `count(DISTINCT customer_id)` từ dòng gốc — chỉ có **569**. Khách vừa đặt xe vừa gọi đồ ăn được đếm ở cả hai dòng. Số «khác nhau» của cấp trên phải **tính lại**, không cộng từ cấp dưới.
 

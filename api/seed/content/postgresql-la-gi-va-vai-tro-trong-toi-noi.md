@@ -48,7 +48,7 @@ Từ bảng trên, ta rút ra bốn yêu cầu với nơi giữ bản gốc:
 3. **Tự giữ luật dữ liệu**: số điện thoại không trùng, cước không âm, chuyến phải thuộc một khách có thật.
 4. **Hỏi được nhiều kiểu**: theo khách, theo tài xế, theo thành phố và khoảng thời gian, mà không phải viết chương trình đọc file riêng cho mỗi câu hỏi.
 
-Ghi log ra file hay đặt cache trước database vẫn là chuyện bình thường; điểm quan trọng là phân vai: log để điều tra, cache để đọc nhanh, **PostgreSQL giữ bản gốc**. Series lần lượt học cách PostgreSQL đáp ứng bốn yêu cầu: luật dữ liệu ở Phần 1, truy vấn ở Phần 2, lưu trữ và index ở Phần 3, xử lý đồng thời ở Phần 4, độ bền và phục hồi ở Phần 5.
+Ghi log ra file hay đặt cache trước database vẫn là chuyện bình thường; điểm quan trọng là phân vai: log để điều tra, cache để đọc nhanh, **PostgreSQL giữ bản gốc**. Series lần lượt học cách PostgreSQL đáp ứng bốn yêu cầu: luật dữ liệu ở Phần 1, truy vấn ở Phần 2, lưu trữ và index ở Phần 3, xử lý đồng thời ở Phần 4, độ bền và phục hồi ở Phần 5; Phần 6 mở rộng sang partition, replication, failover, nâng phiên bản và khép lại bằng capstone vận hành.
 
 ## 3. DBMS, database, schema, bảng
 
@@ -109,25 +109,9 @@ SELECT schema_name FROM information_schema.schemata ORDER BY schema_name;
 SELECT table_name FROM information_schema.tables WHERE table_schema = 'toinoi' ORDER BY table_name;
 ```
 
-```text
-    schema_name
---------------------
- information_schema
- pg_catalog
- pg_toast
- public
- toinoi
-(5 rows)
- table_name
--------------
- cities
- customers
- drivers
- merchants
- trip_events
- trips
-(6 rows)
-```
+<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/postgresql-la-gi-va-vai-tro-trong-toi-noi/dbstudio-01.webp" alt="DBStudio chạy câu lệnh ở pg001-moi-truong.sql dòng 5 và hiển thị kết quả 5 dòng" width="996" height="436" loading="lazy"></div><figcaption>DBStudio · <code>pg001-moi-truong.sql</code>, câu ở dòng 5 · 5 dòng</figcaption></figure>
+
+<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/postgresql-la-gi-va-vai-tro-trong-toi-noi/dbstudio-02.webp" alt="DBStudio chạy câu lệnh ở pg001-moi-truong.sql dòng 7 và hiển thị kết quả 6 dòng" width="996" height="466" loading="lazy"></div><figcaption>DBStudio · <code>pg001-moi-truong.sql</code>, câu ở dòng 7 · 6 dòng</figcaption></figure>
 
 `pg_catalog` và `information_schema` là nơi PostgreSQL tự mô tả các đối tượng của nó — ta vừa đọc chúng để liệt kê schema và bảng. `pg_toast` là schema nội bộ (gặp lại ở Phần 3), `public` có sẵn trong mọi database mới, `toinoi` do `00-reset.sql` tạo.
 
@@ -160,19 +144,9 @@ SET search_path TO toinoi;
 
 Kết quả lần chạy đầu (trích `OUTPUT.txt`):
 
-```text
-DROP SCHEMA IF EXISTS toinoi CASCADE;
-NOTICE:  schema "toinoi" does not exist, skipping
-DROP SCHEMA
+<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/postgresql-la-gi-va-vai-tro-trong-toi-noi/dbstudio-03.webp" alt="DBStudio chạy câu lệnh ở 00-reset.sql dòng 1 và hiển thị kết quả 1 dòng" width="996" height="514" loading="lazy"></div><figcaption>DBStudio · <code>00-reset.sql</code>, câu ở dòng 1 · 1 dòng</figcaption></figure>
 
-CREATE SCHEMA toinoi;
-CREATE SCHEMA
-…
- schema_hien_tai |  mui_gio_phien   | phien_ban
------------------+------------------+-----------
- toinoi          | Asia/Ho_Chi_Minh | 17.5
-(1 row)
-```
+<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/postgresql-la-gi-va-vai-tro-trong-toi-noi/dbstudio-04.webp" alt="DBStudio chạy câu lệnh ở 00-reset.sql dòng 24 và hiển thị kết quả 1 dòng" width="996" height="360" loading="lazy"></div><figcaption>DBStudio · <code>00-reset.sql</code>, câu ở dòng 24 · 1 dòng</figcaption></figure>
 
 Vì sao dùng schema riêng thay vì đặt thẳng vào `public`?
 
@@ -190,22 +164,13 @@ SELECT count(*) FROM trips;
 SELECT count(*) AS so_chuyen FROM toinoi.trips;
 ```
 
-```text
- search_path
--------------
- toinoi
-(1 row)
- so_chuyen
------------
-        15
-(1 row)
-SET
-ERROR:  relation "trips" does not exist
- so_chuyen
------------
-        15
-(1 row)
-```
+<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/postgresql-la-gi-va-vai-tro-trong-toi-noi/dbstudio-05.webp" alt="DBStudio chạy câu lệnh ở pg001-moi-truong.sql dòng 9 và hiển thị kết quả 1 dòng" width="996" height="316" loading="lazy"></div><figcaption>DBStudio · <code>pg001-moi-truong.sql</code>, câu ở dòng 9 · 1 dòng</figcaption></figure>
+
+<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/postgresql-la-gi-va-vai-tro-trong-toi-noi/dbstudio-06.webp" alt="DBStudio chạy câu lệnh ở pg001-moi-truong.sql dòng 11 và hiển thị kết quả 1 dòng" width="996" height="316" loading="lazy"></div><figcaption>DBStudio · <code>pg001-moi-truong.sql</code>, câu ở dòng 11 · 1 dòng</figcaption></figure>
+
+<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/postgresql-la-gi-va-vai-tro-trong-toi-noi/dbstudio-07.webp" alt="DBStudio chạy câu lệnh ở pg001-moi-truong.sql dòng 17 và hiển thị thông báo lỗi" width="996" height="346" loading="lazy"></div><figcaption>DBStudio · <code>pg001-moi-truong.sql</code>, câu ở dòng 17 · lỗi</figcaption></figure>
+
+<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/postgresql-la-gi-va-vai-tro-trong-toi-noi/dbstudio-08.webp" alt="DBStudio chạy câu lệnh ở pg001-moi-truong.sql dòng 20 và hiển thị kết quả 1 dòng" width="996" height="316" loading="lazy"></div><figcaption>DBStudio · <code>pg001-moi-truong.sql</code>, câu ở dòng 20 · 1 dòng</figcaption></figure>
 
 Bảng `trips` không biến mất; PostgreSQL chỉ không tìm thấy nó trong `public`. Tên đầy đủ `toinoi.trips` vẫn chạy. `search_path` chỉ sống trong phiên hiện tại, nên mỗi file của lab đều tự đặt lại `SET search_path TO toinoi;` ở đầu.
 
@@ -222,10 +187,7 @@ Bảng `trips` không biến mất; PostgreSQL chỉ không tìm thấy nó tron
 
 Lab có sẵn bằng chứng cho dòng thứ hai. File `03-fixture-invalid.sql` cố thêm một khách mới dùng số điện thoại đã thuộc về khách Nguyễn Văn An. PostgreSQL từ chối, kể cả khi ứng dụng quên kiểm tra (trích `OUTPUT.txt`):
 
-```text
-ERROR:  duplicate key value violates unique constraint "uq_customers_phone"
-DETAIL:  Key (phone)=(0900000001) already exists.
-```
+<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/postgresql-la-gi-va-vai-tro-trong-toi-noi/dbstudio-09.webp" alt="DBStudio chạy câu lệnh ở 03-fixture-invalid.sql dòng 59 và hiển thị thông báo lỗi" width="996" height="456" loading="lazy"></div><figcaption>DBStudio · <code>03-fixture-invalid.sql</code>, câu ở dòng 59 · lỗi</figcaption></figure>
 
 Cách khai báo `uq_customers_phone` được trình bày ở [PG-005](/articles/postgresql-create-table-constraints). Điều cần giữ lúc này: luật nằm trong database thì **mọi** client đều phải tuân theo, kể cả script sửa dữ liệu viết vội lúc nửa đêm.
 

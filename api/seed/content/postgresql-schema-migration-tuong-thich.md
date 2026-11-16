@@ -139,11 +139,7 @@ UPDATE 7
 SELECT code, full_name FROM drivers WHERE vehicle_plate IS NULL;
 ```
 
-```text
- code | full_name
-------+-----------
-(0 rows)
-```
+<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/postgresql-schema-migration-tuong-thich/dbstudio-01.webp" alt="DBStudio chạy câu lệnh ở 06-migration.sql dòng 81 và hiển thị kết quả 0 dòng" width="996" height="308" loading="lazy"></div><figcaption>DBStudio · <code>06-migration.sql</code>, câu ở dòng 81 · 0 dòng</figcaption></figure>
 
 File nguồn cố ý có **một dòng sai định dạng** — tài xế 8006 với `43a 67890` (chữ thường, thiếu gạch). Backfill không biết điều đó; bước sau sẽ bắt.
 
@@ -169,10 +165,7 @@ Toán tử `~` so khớp **biểu thức chính quy** (regular expression). Đ�
 UPDATE drivers SET vehicle_plate = '59x1 12345' WHERE code = 8001;
 ```
 
-```text
-ERROR:  new row for relation "drivers" violates check constraint "ck_drivers_vehicle_plate_format"
-DETAIL:  Failing row contains (d0000000-0000-4000-8000-000000008001, 8001, Bùi Văn Khoa, 1, bike, busy, 2026-08-01 09:00:00+07, 59x1 12345).
-```
+<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/postgresql-schema-migration-tuong-thich/dbstudio-02.webp" alt="DBStudio chạy câu lệnh ở 06-migration.sql dòng 95 và hiển thị thông báo lỗi" width="1516" height="368" loading="lazy"></div><figcaption>DBStudio · <code>06-migration.sql</code>, câu ở dòng 95 · lỗi</figcaption></figure>
 
 …trong khi dòng **cũ** sai vẫn nằm yên:
 
@@ -182,12 +175,7 @@ FROM drivers
 WHERE vehicle_plate !~ '^[0-9]{2}[A-Z][A-Z0-9]?-[0-9]{3}\.[0-9]{2}$';
 ```
 
-```text
- code | vehicle_plate
-------+---------------
- 8006 | 43a 67890
-(1 row)
-```
+<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/postgresql-schema-migration-tuong-thich/dbstudio-03.webp" alt="DBStudio chạy câu lệnh ở 06-migration.sql dòng 99 và hiển thị kết quả 1 dòng" width="996" height="382" loading="lazy"></div><figcaption>DBStudio · <code>06-migration.sql</code>, câu ở dòng 99 · 1 dòng</figcaption></figure>
 
 Hai điểm cần đọc kỹ. Thứ nhất, CHECK đạt khi biểu thức ra true **hoặc NULL** (đã gặp ở [PG-005](/articles/postgresql-create-table-constraints)), nên app cũ ghi biển số NULL vẫn qua — đúng ý ở giai đoạn này. Thứ hai, PostgreSQL ghi nhận rằng ràng buộc chưa được tin cậy trên toàn bảng: cột `convalidated` trong catalog `pg_constraint` là `f`.
 
@@ -197,9 +185,7 @@ Bước B5 rà dữ liệu cũ bằng `VALIDATE CONSTRAINT`:
 ALTER TABLE drivers VALIDATE CONSTRAINT ck_drivers_vehicle_plate_format;
 ```
 
-```text
-ERROR:  check constraint "ck_drivers_vehicle_plate_format" of relation "drivers" is violated by some row
-```
+<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/postgresql-schema-migration-tuong-thich/dbstudio-04.webp" alt="DBStudio chạy câu lệnh ở 06-migration.sql dòng 105 và hiển thị thông báo lỗi" width="1192" height="412" loading="lazy"></div><figcaption>DBStudio · <code>06-migration.sql</code>, câu ở dòng 105 · lỗi</figcaption></figure>
 
 Thông báo **không nói dòng nào** sai — phải tự truy vấn như câu `!~` ở trên. Vì thế nên tìm dòng vi phạm **trước** khi validate bảng lớn: `VALIDATE` thất bại là một lần quét toàn bảng uổng phí. Hỏi lại bộ phận tuyển dụng, sửa dòng gốc rồi validate lại:
 
@@ -211,15 +197,7 @@ RETURNING code, vehicle_plate;
 ALTER TABLE drivers VALIDATE CONSTRAINT ck_drivers_vehicle_plate_format;
 ```
 
-```text
- code | vehicle_plate
-------+---------------
- 8006 | 43A-678.90
-(1 row)
-
-UPDATE 1
-ALTER TABLE
-```
+<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/postgresql-schema-migration-tuong-thich/dbstudio-05.webp" alt="DBStudio chạy câu lệnh ở 06-migration.sql dòng 111 và hiển thị kết quả 1 dòng" width="996" height="382" loading="lazy"></div><figcaption>DBStudio · <code>06-migration.sql</code>, câu ở dòng 111 · 1 dòng</figcaption></figure>
 
 Vì sao tách hai bước? Không phải để bớt lần quét — `VALIDATE` vẫn quét cả bảng. Khác biệt là **mức khoá**: `VALIDATE CONSTRAINT` chỉ lấy `SHARE UPDATE EXCLUSIVE`, đọc ghi vẫn chạy song song; còn `ADD CONSTRAINT` thường quét bảng dưới khoá nặng nhất (mục 7).
 
@@ -259,10 +237,7 @@ Dòng `DEBUG` là bằng chứng: server dùng CHECK đã validate làm chứng 
 
 Từ giờ app cũ bị từ chối, đúng như kế hoạch:
 
-```text
-ERROR:  null value in column "vehicle_plate" of relation "drivers" violates not-null constraint
-DETAIL:  Failing row contains (f0000000-0000-4000-8000-000000000030, 8030, Ứng Dụng Cũ, 1, bike, offline, 2026-11-03 11:00:00+07, null).
-```
+<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/postgresql-schema-migration-tuong-thich/dbstudio-06.webp" alt="DBStudio chạy câu lệnh ở 06-migration.sql dòng 140 và hiển thị thông báo lỗi" width="1480" height="412" loading="lazy"></div><figcaption>DBStudio · <code>06-migration.sql</code>, câu ở dòng 140 · lỗi</figcaption></figure>
 
 Kiểm chứng cuối migration — dữ liệu, trạng thái cột và ràng buộc:
 
@@ -273,12 +248,7 @@ WHERE conrelid = 'drivers'::regclass AND conname LIKE 'ck_drivers_vehicle_plate%
 ORDER BY conname;
 ```
 
-```text
-             conname             | convalidated |                                  dinh_nghia
----------------------------------+--------------+-------------------------------------------------------------------------------
- ck_drivers_vehicle_plate_format | t            | CHECK ((vehicle_plate ~ '^[0-9]{2}[A-Z][A-Z0-9]?-[0-9]{3}\.[0-9]{2}$'::text))
-(1 row)
-```
+<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/postgresql-schema-migration-tuong-thich/dbstudio-07.webp" alt="DBStudio chạy câu lệnh ở 06-migration.sql dòng 158 và hiển thị kết quả 1 dòng" width="1408" height="382" loading="lazy"></div><figcaption>DBStudio · <code>06-migration.sql</code>, câu ở dòng 158 · 1 dòng</figcaption></figure>
 
 `information_schema.columns` báo `vehicle_plate | text | NO` và cả 7 tài xế có biển số đúng định dạng. `07-checks.sql` (C1) còn tìm mọi ràng buộc `NOT convalidated` trong schema — để không ai "quên" một `NOT VALID`.
 

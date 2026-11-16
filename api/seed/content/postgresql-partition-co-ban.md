@@ -201,12 +201,7 @@ Partition range chỉ nhận dòng nằm trong biên đã khai báo. Lab thử g
 INSERT INTO gps VALUES (1, '2026-12-01 UTC', '{"accuracy_m":5}');
 ```
 
-```text
-ERROR:  23514: no partition of relation "gps" found for row
-DETAIL:  Partition key of the failing row contains (seen_at) = (2026-12-01 07:00:00+07).
-SCHEMA NAME:  public
-TABLE NAME:  gps
-```
+<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/postgresql-partition-co-ban/dbstudio-04.webp" alt="DBStudio chạy truy vấn của bước 051 trong p06/run.mjs và hiển thị thông báo lỗi" width="1057" height="500" loading="lazy"></div><figcaption>DBStudio · bước 051 của <code>p06/run.mjs</code> · lỗi</figcaption></figure>
 
 SQLSTATE `23514` là `check_violation` — cùng mã với vi phạm `CHECK` ở PG-005, vì về bản chất mỗi partition mang một ràng buộc ngầm định theo biên của nó. Dòng `DETAIL` in giá trị khoá phân vùng theo múi giờ phiên (+07), một lần nữa nhắc rằng `07:00+07` chính là `00:00 UTC`. Không có dòng nào được ghi; với ứng dụng, đây là một lỗi ghi như mọi lỗi ràng buộc khác.
 
@@ -231,10 +226,7 @@ CREATE TABLE gps_bad (driver_id int, seen_at timestamptz, UNIQUE (driver_id))
   PARTITION BY RANGE (seen_at);
 ```
 
-```text
-ERROR:  0A000: unique constraint on partitioned table must include all partitioning columns
-DETAIL:  UNIQUE constraint on table "gps_bad" lacks column "seen_at" which is part of the partition key.
-```
+<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/postgresql-partition-co-ban/dbstudio-05.webp" alt="DBStudio chạy truy vấn của bước 051 trong p06/run.mjs và hiển thị thông báo lỗi" width="1201" height="566" loading="lazy"></div><figcaption>DBStudio · bước 051 của <code>p06/run.mjs</code> · lỗi</figcaption></figure>
 
 `0A000` là `feature_not_supported`. Tài liệu PostgreSQL 18 giải thích lý do: ràng buộc duy nhất trên bảng phân vùng được thực thi bằng một index riêng trên mỗi partition, và mỗi index chỉ thấy dòng trong partition của nó. PostgreSQL không có «index toàn cục» xuyên partition. Muốn bảo đảm không trùng giữa các partition, chính cấu trúc phân vùng phải bảo đảm điều đó — nghĩa là khoá phân vùng phải nằm trong ràng buộc: hai dòng trùng `(driver_id, seen_at)` chắc chắn có cùng `seen_at`, nên chắc chắn rơi vào cùng partition, nơi index cục bộ bắt được chúng. Tài liệu cũng nói khoá phân vùng không được là biểu thức hay lời gọi hàm nếu muốn có ràng buộc duy nhất.
 
@@ -244,14 +236,7 @@ Bảng GPS hợp với ràng buộc này vì «một tài xế, một thời đi
 
 Runner đo tổng kích thước từng quan hệ bằng `pg_total_relation_size` (gồm heap, index và bảng TOAST đi kèm):
 
-```text
-  relname  | total
------------+--------
- gps_nov   | 152 kB
- gps_oct   | 168 kB
- gps_plain | 272 kB
-(3 rows)
-```
+<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/postgresql-partition-co-ban/dbstudio-06.webp" alt="DBStudio chạy truy vấn của bước 051 trong p06/run.mjs và hiển thị kết quả 3 dòng" width="996" height="618" loading="lazy"></div><figcaption>DBStudio · bước 051 của <code>p06/run.mjs</code> · 3 dòng</figcaption></figure>
 
 Hai partition cộng lại **320 kB**, lớn hơn **272 kB** của bảng thường chứa cùng dữ liệu. Trên dữ liệu cỡ này, mỗi quan hệ mang chi phí cố định: page đầu index, bảng TOAST riêng, page chưa đầy ở cuối mỗi file. Hai bộ chi phí cố định nặng hơn một bộ. Lab không tách con số này thành từng thành phần, nên bài không khẳng định phần chênh nằm ở đâu chính xác; điều kết luận được là **partition không phải công cụ tiết kiệm dung lượng**. Ở bảng hàng chục GB, chi phí cố định này không đáng kể, nhưng nó cũng không bao giờ âm.
 

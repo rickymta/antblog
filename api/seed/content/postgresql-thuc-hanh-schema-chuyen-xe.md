@@ -204,7 +204,7 @@ Mỗi tiêu chí 10 điểm. Từ 80 điểm là đạt để sang Phần 2; ti�
 | 7 | Fixture sai chính xác | Mỗi câu vi phạm đúng một quy tắc, kỳ vọng ghi cả SQLSTATE và tên ràng buộc (hoặc tên cột với 23502) |
 | 8 | Không câu sai nào lọt | Số dòng sau fixture sai không đổi; không có ca "lẽ ra lỗi mà chạy được" |
 | 9 | Truy vấn bất biến | Phủ R14 và hai kiểm tra về schema, đều trả 0 dòng trên fixture |
-| 10 | Bằng chứng trung thực | Có output thật, phiên bản, và danh sách điều chưa kiểm |
+| 10 | Bằng chứng trung thực | Có kết quả chạy thật, phiên bản, và danh sách điều chưa kiểm |
 
 ## 5. Bẫy hay gặp khi tự làm
 

@@ -70,19 +70,7 @@ sum(coalesce(d.doanh_thu, 0)) OVER (ORDER BY l.ngay
 
 `ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW` = mọi dòng từ đầu partition tới chính dòng này. In 17–24/10 (hai cột cuối dùng ở mục 4):
 
-```text
-    ngay    | so_chuyen | doanh_thu |  luy_ke  | tb7_lich_day | tb7_rows_thua
-------------+-----------+-----------+----------+--------------+---------------
- 2026-10-17 |        13 |    718000 | 15952000 |       927429 |        927429
- 2026-10-18 |        16 |    945000 | 16897000 |       859857 |        859857
- 2026-10-19 |        11 |    637000 | 17534000 |       828571 |        828571
- 2026-10-20 |         0 |         0 | 17534000 |       672571 |
- 2026-10-21 |        14 |    872000 | 18406000 |       677286 |        797143
- 2026-10-22 |        11 |    785000 | 19191000 |       679000 |        789429
- 2026-10-23 |        13 |    941000 | 20132000 |       699714 |        813429
- 2026-10-24 |        14 |    787000 | 20919000 |       709571 |        812143
-(8 rows)
-```
+<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/postgresql-window-function-frame/dbstudio-01.webp" alt="DBStudio chạy câu lệnh ở 15-window-function.sql dòng 17 và hiển thị kết quả 8 dòng" width="996" height="448" loading="lazy"></div><figcaption>DBStudio · <code>15-window-function.sql</code>, câu ở dòng 17 · 8 dòng</figcaption></figure>
 
 **Bẫy lọc ở cùng cấp truy vấn.** Câu trên tính cửa sổ trên cả tháng ở truy vấn trong, truy vấn ngoài mới lọc 17–24/10. Đặt `WHERE ngay BETWEEN '2026-10-17' AND '2026-10-24'` ngay trong câu có cửa sổ (`pg015-khung-cua-so.sql`, mục A) thì `WHERE` chạy trước: «luỹ kế» bắt đầu lại từ **718.000** (17/10), 1.663.000, 2.300.000… và ngày 20/10 biến mất. Quy tắc: lọc **phạm vi tính** ở truy vấn trong, lọc **phạm vi hiển thị** ở ngoài.
 
@@ -183,9 +171,7 @@ WHERE t.status = 'completed' AND rank() OVER (ORDER BY count(*) DESC) <= 3
 GROUP BY d.code;
 ```
 
-```text
-ERROR:  window functions are not allowed in WHERE
-```
+<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/postgresql-window-function-frame/dbstudio-02.webp" alt="DBStudio chạy câu lệnh ở 15-window-function.sql dòng 97 và hiển thị thông báo lỗi" width="996" height="522" loading="lazy"></div><figcaption>DBStudio · <code>15-window-function.sql</code>, câu ở dòng 97 · lỗi</figcaption></figure>
 
 SQLSTATE `42P20`: `WHERE` chạy trước khi có hạng. Tính hạng ở truy vấn con (hoặc CTE, PG-014) rồi lọc ngoài:
 
@@ -207,22 +193,7 @@ WHERE hang_lien_tuc <= 3
 ORDER BY tp COLLATE "C", so_thu_tu;
 ```
 
-```text
- tp | tai_xe | hoan_thanh | so_thu_tu | hang | hang_lien_tuc
-----+--------+------------+-----------+------+---------------
- DN |   8305 |         44 |         1 |    1 |             1
- DN |   8304 |         41 |         2 |    2 |             2
- DN |   8302 |         40 |         3 |    3 |             3
- DN |   8310 |         40 |         4 |    3 |             3
- HN |   8210 |         63 |         1 |    1 |             1
- …
- SG |   8101 |         68 |         1 |    1 |             1
- SG |   8109 |         68 |         2 |    1 |             1
- SG |   8120 |         66 |         3 |    3 |             2
- SG |   8108 |         64 |         4 |    4 |             3
- SG |   8124 |         64 |         5 |    4 |             3
-(12 rows)
-```
+<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/postgresql-window-function-frame/dbstudio-03.webp" alt="DBStudio chạy câu lệnh ở 15-window-function.sql dòng 108 và hiển thị kết quả 12 dòng" width="996" height="1020" loading="lazy"></div><figcaption>DBStudio · <code>15-window-function.sql</code>, câu ở dòng 108 · 12 dòng</figcaption></figure>
 
 8101 và 8109 cùng 68 chuyến: `row_number` cho 1 và 2 (khoá phụ `d.code` phân xử), `rank` và `dense_rank` cùng cho hạng 1. Dòng kế tiếp (8120) có `rank` **3** — nhảy cóc — còn `dense_rank` **2** — liên tục. Vì vậy «top 3» Đà Nẵng có bốn người (8302, 8310 cùng 40 chuyến), Sài Gòn có năm. Đây là câu hỏi **nghiệp vụ**: «ba người» (`row_number`, cần quy tắc phân xử khi hoà, ghi thành văn bản), «ba hạng có người» (`dense_rank`) hay «không quá hai người hơn mình» (`rank`) — ghi quy tắc bên cạnh báo cáo. `row_number` **cần** khoá phụ; `rank`/`dense_rank` thì **không được** có, thêm `d.code` là hết hoà.
 
@@ -244,17 +215,7 @@ ORDER BY t.requested_at, t.code
 LIMIT 6;
 ```
 
-```text
-  code  |      requested_at      | kind | dich_vu_truoc | cach_chuyen_truoc | chuyen_thu
---------+------------------------+------+---------------+-------------------+------------
- 100008 | 2026-10-01 06:12:00+07 | ride |               |                   |          1
- 100149 | 2026-10-02 12:45:00+07 | ride | ride          | 1 day 06:33:00    |          2
- 100215 | 2026-10-03 07:04:00+07 | ride | ride          | 18:19:00          |          3
- 100259 | 2026-10-03 13:02:00+07 | ride | ride          | 05:58:00          |          4
- 100277 | 2026-10-03 17:01:00+07 | ride | ride          | 03:59:00          |          5
- 100369 | 2026-10-04 12:07:00+07 | ride | ride          | 19:06:00          |          6
-(6 rows)
-```
+<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/postgresql-window-function-frame/dbstudio-04.webp" alt="DBStudio chạy câu lệnh ở 15-window-function.sql dòng 139 và hiển thị kết quả 6 dòng" width="1057" height="752" loading="lazy"></div><figcaption>DBStudio · <code>15-window-function.sql</code>, câu ở dòng 139 · 6 dòng</figcaption></figure>
 
 Chuyến đầu không có dòng trước nên `lag` là NULL — «không áp dụng» theo nghĩa của PG-011, không phải khoảng cách 0. Hiệu hai `timestamptz` là một `interval` (PG-016). Báo cáo cho mọi khách thì thêm `PARTITION BY t.customer_id`. `LIMIT 6` an toàn vì `LIMIT` cắt **sau** khi cửa sổ đã tính trên cả 36 chuyến — còn `WHERE` thì không (mục 3).
 

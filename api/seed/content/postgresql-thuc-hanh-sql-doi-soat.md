@@ -202,7 +202,7 @@ Mỗi tiêu chí 10 điểm. Từ 80 điểm là đạt để sang Phần 3; ti�
 | 7 | Không báo nhầm | Mọi ca khó nhưng đúng ở D5 không có nhãn lệch |
 | 8 | Thời điểm | Phân biệt được chênh do ngày đặt/ngày giao dịch với lỗi thật |
 | 9 | Giải thích dùng được | Mỗi dòng lệch có giả thuyết và hành động đề xuất; có danh sách việc cần theo dõi |
-| 10 | Bằng chứng trung thực | Kỳ vọng máy kiểm được, output thật, phiên bản, điều chưa kiểm |
+| 10 | Bằng chứng trung thực | Kỳ vọng máy kiểm được, kết quả chạy thật, phiên bản, điều chưa kiểm |
 
 ## 5. Bẫy hay gặp khi tự làm
 

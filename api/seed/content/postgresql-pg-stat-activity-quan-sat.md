@@ -81,14 +81,7 @@ PASS 043 identifies lock wait: Lock
 
 Ảnh chụp ở bước 4 (cột `s` là nhãn phiên runner gán từ PID):
 
-```text
---- 043 pg_stat_activity
-   s |        state        | wtype  |  wait_event   | blocked_by |                   query
-  ---+---------------------+--------+---------------+------------+--------------------------------------------
-   A | idle in transaction | Client | ClientRead    | {}         | UPDATE ops.trips SET fare=fare WHERE id=1;
-   B | active              | Lock   | transactionid | {<PID A>}    | UPDATE ops.trips SET fare=fare WHERE id=1;
-  (2 rows)
-```
+<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/postgresql-pg-stat-activity-quan-sat/dbstudio-01.webp" alt="DBStudio chạy truy vấn của bước 043 trong p05/run.mjs và hiển thị kết quả 2 dòng" width="1228" height="588" loading="lazy"></div><figcaption>DBStudio · bước 043 của <code>p05/run.mjs</code> · 2 dòng</figcaption></figure>
 
 - **A** `idle in transaction`, chờ `Client: ClientRead` — không chạy gì, đợi ứng dụng. `query` là câu **cuối** đã xong. Không ai chặn A: A là **gốc**.
 - **B** `active`, chờ `Lock: transactionid`, bị chặn bởi `<PID A>`. Cùng chuỗi `query`, nhưng ở B đó là câu **đang** chạy.
@@ -97,13 +90,7 @@ Chỉ nhìn cột `query`, hai dòng giống hệt. Thứ phân biệt người 
 
 Vì sao chờ `transactionid` mà không phải tên bảng? Khoá dòng được ghi trên chính dòng, không nằm trong bảng khoá dùng chung; phiên muốn sửa dòng chờ **giao dịch** đang giữ nó kết thúc:
 
-```text
---- 043 pg_locks not granted
-   s |   locktype    |   mode    | granted
-  ---+---------------+-----------+---------
-   B | transactionid | ShareLock | f
-  (1 row)
-```
+<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/postgresql-pg-stat-activity-quan-sat/dbstudio-02.webp" alt="DBStudio chạy truy vấn của bước 043 trong p05/run.mjs và hiển thị kết quả 1 dòng" width="996" height="558" loading="lazy"></div><figcaption>DBStudio · bước 043 của <code>p05/run.mjs</code> · 1 dòng</figcaption></figure>
 
 B xin `ShareLock` trên mã giao dịch của A, chưa được cấp. A `ROLLBACK` thì B hoàn thành.
 

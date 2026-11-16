@@ -53,11 +53,7 @@ SELECT NULL = NULL AS bang_nhau, NULL <> 1 AS khac_1, NULL IS NULL AS la_null,
        NULL IS DISTINCT FROM NULL AS khac_biet_null, 1 IS DISTINCT FROM NULL AS khac_biet_1;
 ```
 
-```text
- bang_nhau | khac_1 | la_null | khac_biet_null | khac_biet_1
------------+--------+---------+----------------+-------------
-           |        | t       | f              | t
-```
+<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/postgresql-null-case-coalesce/dbstudio-01.webp" alt="DBStudio chạy câu lệnh ở 11-null-case-coalesce.sql dòng 15 và hiển thị kết quả 1 dòng" width="996" height="514" loading="lazy"></div><figcaption>DBStudio · <code>11-null-case-coalesce.sql</code>, câu ở dòng 15 · 1 dòng</figcaption></figure>
 
 Khi ghép điều kiện, kết quả chắc chắn khi vế đã biết đã đủ để quyết định: `false AND NULL` là `false`, `true OR NULL` là `true`; còn `true AND NULL`, `false OR NULL`, `NOT NULL` vẫn là NULL (bảng chân trị ở thí nghiệm 1 của `pg011-logic-ba-gia-tri.sql`).
 
@@ -87,13 +83,7 @@ GROUP BY 1
 ORDER BY 2 DESC;
 ```
 
-```text
-            y_nghia_cot_driver_id            | so_chuyen
----------------------------------------------+-----------
- có tài xế                                   |      2877
- không áp dụng — huỷ trước khi có người nhận |       295
- chưa có — đang tìm tài xế                   |         2
-```
+<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/postgresql-null-case-coalesce/dbstudio-02.webp" alt="DBStudio chạy câu lệnh ở 11-null-case-coalesce.sql dòng 31 và hiển thị kết quả 3 dòng" width="996" height="1022" loading="lazy"></div><figcaption>DBStudio · <code>11-null-case-coalesce.sql</code>, câu ở dòng 31 · 3 dòng</figcaption></figure>
 
 (`GROUP BY 1` gom dòng cùng giá trị cột thứ nhất để `count(*)` đếm từng nhóm — PG-012.) Nhánh `ELSE` là câu kiểm tra miễn phí: hễ nhóm này xuất hiện là có chuyến đã nhận mà mất tài xế. Hôm nay nhóm này vắng mặt nhờ ràng buộc `ck_trips_assigned_has_driver`.
 
@@ -116,14 +106,7 @@ GROUP BY 1
 ORDER BY 2 DESC;
 ```
 
-```text
-          tinh_trang_danh_gia          | so_chuyen
----------------------------------------+-----------
- có sao                                |      1738
- thiếu — chưa đánh giá                 |       816
- không áp dụng — chuyến huỷ            |       461
- thiếu — mở màn đánh giá, bỏ trống sao |       153
-```
+<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/postgresql-null-case-coalesce/dbstudio-03.webp" alt="DBStudio chạy câu lệnh ở 11-null-case-coalesce.sql dòng 48 và hiển thị kết quả 4 dòng" width="996" height="736" loading="lazy"></div><figcaption>DBStudio · <code>11-null-case-coalesce.sql</code>, câu ở dòng 48 · 4 dòng</figcaption></figure>
 
 Bốn nhóm cộng lại 3.168 — đúng số chuyến đã kết thúc. Chỉ nhìn `r.stars IS NULL` thì 1.430 chuyến cần ba cách xử lý khác nhau bị gộp làm một.
 
@@ -143,11 +126,7 @@ SELECT count(*) AS so_danh_gia, count(stars) AS co_sao,
 FROM trip_ratings;
 ```
 
-```text
- so_danh_gia | co_sao | diem_tb_dung | diem_tb_sai
--------------+--------+--------------+-------------
-        1891 |   1738 |         4.22 |        3.88
-```
+<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/postgresql-null-case-coalesce/dbstudio-04.webp" alt="DBStudio chạy câu lệnh ở 11-null-case-coalesce.sql dòng 69 và hiển thị kết quả 1 dòng" width="996" height="470" loading="lazy"></div><figcaption>DBStudio · <code>11-null-case-coalesce.sql</code>, câu ở dòng 69 · 1 dòng</figcaption></figure>
 
 `avg(stars)` chia cho 1.738 lượt có sao. Bản 3,88 dùng `coalesce(stars, 0)` (mục 8) «cho khỏi NULL» — biến 153 lượt «không biết» thành 0 sao, một mức điểm không tồn tại, rồi chia cho 1.891.
 
@@ -167,11 +146,7 @@ SELECT count(*) AS so_danh_gia, count(tip) AS co_tra_loi_tip,
 FROM trip_ratings;
 ```
 
-```text
- so_danh_gia | co_tra_loi_tip | chon_0d | tong_tip | tb_tren_nguoi_tra_loi | tb_tren_moi_luot
--------------+----------------+---------+----------+-----------------------+------------------
-        1891 |           1350 |     660 |  5565000 |                  4122 |             2943
-```
+<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/postgresql-null-case-coalesce/dbstudio-05.webp" alt="DBStudio chạy câu lệnh ở 11-null-case-coalesce.sql dòng 88 và hiển thị kết quả 1 dòng" width="1102" height="602" loading="lazy"></div><figcaption>DBStudio · <code>11-null-case-coalesce.sql</code>, câu ở dòng 88 · 1 dòng</figcaption></figure>
 
 (`count(*) FILTER (WHERE …)` là đếm có điều kiện — PG-012.) «Khách có trả lời tip trung bình bao nhiêu» là 4.122 đ; «mỗi lượt đánh giá mang về bao nhiêu tip» là 2.943 đ, với giả định ghi rõ «bỏ qua = không tip». Cả hai đúng, cho hai câu hỏi khác nhau.
 
@@ -200,9 +175,7 @@ Thiếu gần 36 triệu đồng mà không có lỗi hay cảnh báo nào. Ở 
 
 **Chống chia cho 0.** Câu tỉ lệ huỷ ngày 20/10 đi từ `cities`, `LEFT JOIN trips` để thành phố không có chuyến vẫn có dòng, rồi chia cho `count(t.id)` — với Đà Nẵng là 0:
 
-```text
-ERROR:  division by zero
-```
+<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/postgresql-null-case-coalesce/dbstudio-06.webp" alt="DBStudio chạy câu lệnh ở 11-null-case-coalesce.sql dòng 174 và hiển thị thông báo lỗi" width="996" height="588" loading="lazy"></div><figcaption>DBStudio · <code>11-null-case-coalesce.sql</code>, câu ở dòng 174 · lỗi</figcaption></figure>
 
 Lỗi `22012` làm hỏng **cả câu**, mất luôn số của Hà Nội và TP. HCM. Sửa bằng `NULLIF(mẫu_số, 0)`:
 
@@ -267,11 +240,7 @@ SELECT count(*) AS tong,
 FROM trips;
 ```
 
-```text
- tong | o_111 | khac_111 | khac_biet_111
-------+-------+----------+---------------
- 3174 |   162 |     2976 |          3012
-```
+<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/postgresql-null-case-coalesce/dbstudio-07.webp" alt="DBStudio chạy câu lệnh ở 11-null-case-coalesce.sql dòng 163 và hiển thị kết quả 1 dòng" width="996" height="492" loading="lazy"></div><figcaption>DBStudio · <code>11-null-case-coalesce.sql</code>, câu ở dòng 163 · 1 dòng</figcaption></figure>
 
 162 + 2.976 thiếu đúng 36 chuyến mất GPS. **`IS DISTINCT FROM`** so sánh như `<>` nhưng coi NULL là một giá trị (dạng phủ định: `IS NOT DISTINCT FROM`). «Chắc chắn đón ngoài SG-TT-01» là 2.976, «không chắc đón ở SG-TT-01» là 3.012 — chọn câu nào tuỳ nghiệp vụ, miễn là chọn có chủ đích. Bẫy cùng loại là `NOT IN (danh sách có NULL)` trả 0 dòng — PG-014.
 
