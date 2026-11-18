@@ -120,39 +120,11 @@ WHERE driver_id = 1 AND seen_at >= '2026-11-01 UTC' AND seen_at < '2026-12-01 UT
 
 Trên bảng phân vùng `gps`:
 
-```text
-                         QUERY PLAN
---------------------------------------------------------------
- Bitmap Heap Scan on gps_nov gps (actual rows=36.00 loops=1)
-   Recheck Cond: ((driver_id = 1) AND (seen_at >= '2026-11-01 07:00:00+07'::timestamp with time zone) AND (seen_at < '2026-12-01 07:00:00+07'::timestamp with time zone))
-   Heap Blocks: exact=9
-   Buffers: shared hit=11
-   ->  Bitmap Index Scan on gps_nov_pkey (actual rows=36.00 loops=1)
-         Index Cond: ((driver_id = 1) AND (seen_at >= '2026-11-01 07:00:00+07'::timestamp with time zone) AND (seen_at < '2026-12-01 07:00:00+07'::timestamp with time zone))
-         Index Searches: 1
-         Buffers: shared hit=2
- Planning:
-   Buffers: shared hit=186
-(10 rows)
-```
+<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/postgresql-partition-co-ban/dbstudio-07.webp" alt="DBStudio chạy truy vấn của bước 051 trong p06/run.mjs và hiển thị kế hoạch thực thi gồm 2 toán tử, có số liệu thực tế" width="1400" height="392" loading="lazy"></div><figcaption>DBStudio · bước 051 của <code>p06/run.mjs</code> · Kế hoạch truy vấn, 2 toán tử · ANALYZE</figcaption></figure>
 
 Trên bảng thường `gps_plain`:
 
-```text
-                         QUERY PLAN
---------------------------------------------------------------
- Bitmap Heap Scan on gps_plain (actual rows=36.00 loops=1)
-   Recheck Cond: ((driver_id = 1) AND (seen_at >= '2026-11-01 07:00:00+07'::timestamp with time zone) AND (seen_at < '2026-12-01 07:00:00+07'::timestamp with time zone))
-   Heap Blocks: exact=10
-   Buffers: shared hit=12
-   ->  Bitmap Index Scan on gps_plain_pkey (actual rows=36.00 loops=1)
-         Index Cond: ((driver_id = 1) AND (seen_at >= '2026-11-01 07:00:00+07'::timestamp with time zone) AND (seen_at < '2026-12-01 07:00:00+07'::timestamp with time zone))
-         Index Searches: 1
-         Buffers: shared hit=2
- Planning:
-   Buffers: shared hit=86
-(10 rows)
-```
+<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/postgresql-partition-co-ban/dbstudio-08.webp" alt="DBStudio chạy truy vấn của bước 051 trong p06/run.mjs và hiển thị kế hoạch thực thi gồm 2 toán tử, có số liệu thực tế" width="1400" height="392" loading="lazy"></div><figcaption>DBStudio · bước 051 của <code>p06/run.mjs</code> · Kế hoạch truy vấn, 2 toán tử · ANALYZE</figcaption></figure>
 
 Cách đọc (nhắc lại PG-021): **Bitmap Index Scan** dùng index để thu danh sách vị trí dòng thoả điều kiện, rồi **Bitmap Heap Scan** đọc các page chứa những dòng đó. `Buffers: shared hit` là số page 8 KB đọc từ bộ nhớ đệm chung.
 
@@ -170,20 +142,7 @@ Câu thứ hai của điều phối viên quên điều kiện thời gian: «ch
 EXPLAIN (COSTS OFF) SELECT * FROM gps WHERE driver_id = 1;
 ```
 
-```text
-                  QUERY PLAN
------------------------------------------------
- Append
-   ->  Bitmap Heap Scan on gps_oct gps_1
-         Recheck Cond: (driver_id = 1)
-         ->  Bitmap Index Scan on gps_oct_pkey
-               Index Cond: (driver_id = 1)
-   ->  Bitmap Heap Scan on gps_nov gps_2
-         Recheck Cond: (driver_id = 1)
-         ->  Bitmap Index Scan on gps_nov_pkey
-               Index Cond: (driver_id = 1)
-(9 rows)
-```
+<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/postgresql-partition-co-ban/dbstudio-09.webp" alt="DBStudio chạy truy vấn của bước 051 trong p06/run.mjs và hiển thị kế hoạch thực thi gồm 5 toán tử" width="1400" height="530" loading="lazy"></div><figcaption>DBStudio · bước 051 của <code>p06/run.mjs</code> · Kế hoạch truy vấn, 5 toán tử</figcaption></figure>
 
 Lần này lab dùng `EXPLAIN` không `ANALYZE` — chỉ xem kế hoạch, không chạy. Nút **Append** nối kết quả của nhiều nhánh con, mỗi nhánh một partition. Điều kiện chỉ có `driver_id`, mà biên partition nói về `seen_at`, nên planner không có căn cứ nào để bỏ partition nào: nó phải vào **cả hai**, mỗi nơi một lần dò index.
 

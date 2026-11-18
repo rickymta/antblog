@@ -59,24 +59,11 @@ Lịch dưới đây là thứ tự **xảy ra thật**: bước T3 gửi trư�
 
 Ảnh chụp ở T4, ngay trước khi B khép vòng:
 
-```text
- phien |     trang_thai      |         cho         | bi_chan_boi |                           cau_lenh
--------+---------------------+---------------------+-------------+--------------------------------------------------------------
- A     | active              | Lock: transactionid | B           | UPDATE wallets SET balance = balance + 30000, updated_at = n
- B     | idle in transaction | Client: ClientRead  |             | UPDATE wallets SET balance = balance - 10000, updated_at = n
-(2 rows)
-```
+<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/postgresql-deadlock-lock-order-timeout/dbstudio-01.webp" alt="DBStudio chạy câu lệnh ở 37-deadlock-thu-tu-khoa.sql dòng 57 và hiển thị kết quả 2 dòng" width="1408" height="346" loading="lazy"></div><figcaption>DBStudio · <code>37-deadlock-thu-tu-khoa.sql</code>, câu ở dòng 57 · 2 dòng</figcaption></figure>
 
 Đây mới là chờ bình thường: B đang rảnh, chỉ cần B commit là A chạy tiếp. Ở T5, B lại xin đúng dòng A đang giữ — vòng khép lại. Lỗi B nhận được:
 
-```text
-ERROR:  deadlock detected
-DETAIL:  Process [B] waits for ShareLock on transaction <XID>; blocked by process [A].
-Process [A] waits for ShareLock on transaction <XID>; blocked by process [B].
-HINT:  See server log for query details.
-CONTEXT:  while updating tuple (0,1) in relation "wallets"
--- [lab] SQLSTATE 40P01
-```
+<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/postgresql-deadlock-lock-order-timeout/dbstudio-02.webp" alt="DBStudio chạy câu lệnh ở 37-deadlock-thu-tu-khoa.sql dòng 62 và hiển thị thông báo lỗi" width="1030" height="412" loading="lazy"></div><figcaption>DBStudio · <code>37-deadlock-thu-tu-khoa.sql</code>, câu ở dòng 62 · lỗi</figcaption></figure>
 
 B bị huỷ thì B nhả khoá ngay, và câu đang chờ của A chạy xong với **230000** = 200.000 + 30.000: khoản trừ 10.000 của B đã biến mất cùng giao dịch của B. A commit bình thường. `COMMIT` của B không báo lỗi mà trả thẻ `ROLLBACK` (PG-031) — ứng dụng phải kiểm tra kết quả này. Kết quả cuối: chỉ thanh toán có hiệu lực, tổng vẫn 14.800.000 đ. Deadlock **không làm sai dữ liệu**, nhưng khiến một nghiệp vụ thất bại.
 
@@ -88,14 +75,7 @@ Bài ép lịch chạy tất định bằng cách đặt `deadlock_timeout` củ
 
 Thí nghiệm cũng đọc `pg_settings` của cluster lab:
 
-```text
-       name       | setting | unit |  context
-------------------+---------+------+-----------
- deadlock_timeout | 1000    | ms   | superuser
- lock_timeout     | 0       | ms   | user
- log_lock_waits   | off     | NULL | superuser
-(3 rows)
-```
+<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/postgresql-deadlock-lock-order-timeout/dbstudio-03.webp" alt="DBStudio chạy câu lệnh ở pg037-vong-ba-phien-lock-timeout.sql dòng 152 và hiển thị kết quả 3 dòng" width="996" height="464" loading="lazy"></div><figcaption>DBStudio · <code>pg037-vong-ba-phien-lock-timeout.sql</code>, câu ở dòng 152 · 3 dòng</figcaption></figure>
 
 `context = superuser`: chỉ superuser hoặc người được cấp quyền `SET` mới đổi được `deadlock_timeout` — lab làm được vì chạy bằng superuser. Tăng ngưỡng này thì bớt được các lần dò thừa nhưng deadlock thật bị báo chậm hơn; tài liệu khuyên giá trị này nên lớn hơn thời gian giao dịch điển hình.
 
@@ -127,13 +107,7 @@ UPDATE wallets SET balance = balance + 10000, updated_at = now() WHERE id = 1001
 COMMIT;
 ```
 
-```text
-  id  | balance
-------+---------
- 1001 |  480000
- 2001 |  220000
-(2 rows)
-```
+<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/postgresql-deadlock-lock-order-timeout/dbstudio-04.webp" alt="DBStudio chạy câu lệnh ở 37-deadlock-thu-tu-khoa.sql dòng 105 và hiển thị kết quả 2 dòng" width="996" height="346" loading="lazy"></div><figcaption>DBStudio · <code>37-deadlock-thu-tu-khoa.sql</code>, câu ở dòng 105 · 2 dòng</figcaption></figure>
 
 Tài liệu PostgreSQL (mục xử lý lỗi tuần tự hoá) cho biết có thể thử lại khi gặp lỗi deadlock, và phải thử lại **cả giao dịch kèm logic quyết định câu lệnh nào chạy**. Phép thử đồng thời của lab dùng hàm `giaoDich()` (`pg/lib/dong-thoi.mjs`): gặp `40001`/`40P01` thì ROLLBACK, chờ ngẫu nhiên trong [0, min(trần, 2 ms · 2^lần)] rồi chạy lại toàn bộ hàm giao dịch, có **giới hạn số lần** (K037 cho tối đa 20). PG-038 đi chi tiết vào vòng thử lại này.
 
@@ -164,13 +138,7 @@ Ba chi tiết đáng giữ:
 
 - **Vì sao câu này khoá đúng thứ tự.** Kế hoạch của câu này (thí nghiệm §4) có nút `LockRows` nằm **trên** nút `Sort`: dòng được sắp theo `id` trước, rồi mới khoá lần lượt.
 
-```text
- LockRows
-   ->  Sort
-         Sort Key: id
-         ->  Seq Scan on wallets
-               Filter: (id = ANY ('{1001,2001}'::integer[]))
-```
+<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/postgresql-deadlock-lock-order-timeout/dbstudio-05.webp" alt="DBStudio chạy câu lệnh ở pg037-vong-ba-phien-lock-timeout.sql dòng 162 và hiển thị kế hoạch thực thi gồm 3 toán tử" width="1400" height="438" loading="lazy"></div><figcaption>DBStudio · <code>pg037-vong-ba-phien-lock-timeout.sql</code>, câu ở dòng 162 · Kế hoạch truy vấn, 3 toán tử</figcaption></figure>
 
 - **`UPDATE … WHERE id IN (…)` một câu không đủ.** Câu lệnh này khoá dòng theo thứ tự quét mà planner chọn — không có gì bảo đảm thứ tự đó giống nhau giữa các câu và các kế hoạch.
 - **`FOR NO KEY UPDATE` thay vì `FOR UPDATE`.** Đủ mạnh để sửa số dư (cũng là khoá mà `UPDATE` thường tự lấy), nhưng không chặn các câu chỉ cần `FOR KEY SHARE` như bước kiểm tra khoá ngoại khi chèn dòng con (PG-033, PG-036). Tài liệu còn khuyên khoá **đầu tiên** lấy trên một đối tượng nên là khoá mạnh nhất sẽ cần — đọc bằng `FOR SHARE` rồi sau đó mới nâng lên để sửa là một cách tự tạo deadlock.
@@ -214,12 +182,7 @@ Cuối cùng 1001 = 499000, 1002 = 500000, 1003 = 501000, tổng ba ví vẫn 1.
 
 `deadlock_timeout` **không** phải thời hạn bỏ cuộc: tham số này chỉ là thời điểm bắt đầu dò vòng chờ. Một giao dịch chờ một giao dịch khác đang «ngồi yên» (ví dụ giữ khoá trong lúc gọi API ngoài) sẽ chờ mãi mà không có deadlock nào. `lock_timeout` mới là giới hạn chờ: câu lệnh nào chờ **một** lần lấy khoá quá thời gian đó thì bị huỷ với `55P03`. Lab §3: A giữ ví 1002, B đặt `SET LOCAL lock_timeout = '300ms'` rồi sửa cùng ví.
 
-```text
--- [lab] [B] ⏳ đã chờ khoá (Lock: transactionid) — bị chặn bởi [A] trước khi xong
-ERROR:  canceling statement due to lock timeout
-CONTEXT:  while updating tuple (0,2) in relation "wallets"
--- [lab] SQLSTATE 55P03
-```
+<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/postgresql-deadlock-lock-order-timeout/dbstudio-06.webp" alt="DBStudio chạy câu lệnh ở 37-deadlock-thu-tu-khoa.sql dòng 178 và hiển thị thông báo lỗi" width="996" height="346" loading="lazy"></div><figcaption>DBStudio · <code>37-deadlock-thu-tu-khoa.sql</code>, câu ở dòng 178 · lỗi</figcaption></figure>
 
 Điều dễ quên: `55P03` huỷ **câu lệnh**, nhưng giao dịch chứa câu lệnh đó đã hỏng. Thí nghiệm §2 cho B trừ ví 1004 trước rồi mới vấp `lock_timeout`; câu `SELECT` kế tiếp nhận `25P02 current transaction is aborted`, `COMMIT` trả `ROLLBACK`, và ví 1004 vẫn **500000** — khoản trừ đã mất theo. Ứng dụng phải ROLLBACK rồi quyết định: báo lỗi «hệ thống bận» hay thử lại cả giao dịch sau một khoảng chờ.
 

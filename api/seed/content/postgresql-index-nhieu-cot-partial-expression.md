@@ -105,12 +105,7 @@ WHERE status IN ('requested', 'searching', 'accepted', 'arriving', 'picked_up', 
 CREATE INDEX ix_trips_status ON trips (status);   -- để so kích thước
 ```
 
-```text
-      relname       |  bytes
---------------------+---------
- ix_trips_dang_chay |   16384
- ix_trips_status    | 7069696
-```
+<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/postgresql-index-nhieu-cot-partial-expression/dbstudio-01.webp" alt="DBStudio chạy câu lệnh ở 25-index-nhieu-cot-partial-expression.sql dòng 63 và hiển thị kết quả 2 dòng" width="996" height="412" loading="lazy"></div><figcaption>DBStudio · <code>25-index-nhieu-cot-partial-expression.sql</code>, câu ở dòng 63 · 2 dòng</figcaption></figure>
 
 300 mục — 2 page (16 KB, gồm metapage) — so với 6,7 MB cho index đầy đủ. Nó cũng không lớn dần theo 730 triệu chuyến/năm: chuyến kết thúc thì rời index.
 

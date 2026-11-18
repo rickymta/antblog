@@ -95,14 +95,7 @@ sum(doanh_thu) OVER (ORDER BY ngay RANGE BETWEEN interval '6 days' PRECEDING AND
 
 Nhưng để nguyên `avg()` trên cùng frame (thí nghiệm B, trích 4/8 dòng):
 
-```text
-    ngay    | ngay_dau_khung | so_dong_trong_khung | avg_range_sai | tb7_dung
-------------+----------------+---------------------+---------------+----------
- 2026-10-19 | 2026-10-13     |                   7 |        828571 |   828571
- 2026-10-21 | 2026-10-15     |                   6 |        790167 |   677286
- 2026-10-26 | 2026-10-21     |                   6 |        925333 |   793143
- 2026-10-27 | 2026-10-21     |                   7 |        918143 |   918143
-```
+<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/postgresql-window-function-frame/dbstudio-05.webp" alt="DBStudio chạy câu lệnh ở pg015-khung-cua-so.sql dòng 28 và hiển thị kết quả 8 dòng" width="996" height="900" loading="lazy"></div><figcaption>DBStudio · <code>pg015-khung-cua-so.sql</code>, câu ở dòng 28 · 8 dòng</figcaption></figure>
 
 Ranh giới đúng, nhưng suốt 21–26/10 khung chỉ có **6 dòng** và `avg` chia 6: ra 790.167 đ — đáp án thứ ba, cũng sai. `RANGE` sửa **ranh giới**, không biến ngày không có dòng thành 0.
 

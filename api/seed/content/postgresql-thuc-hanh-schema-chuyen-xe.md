@@ -117,17 +117,7 @@ CONSTRAINT ck_trips_completed_after_accepted CHECK (completed_at &gt;= accepted_
 <details><summary><b>Lời giải</b></summary>
 <p><code>00-reset.sql</code> xoá và dựng lại schema riêng <code>toinoi</code> nên mọi tệp chạy lại được từ đầu. <code>02</code> nạp 3 thành phố, 6 khách, 6 tài xế, 3 quán và 15 chuyến — ảnh chụp lúc 08:30 ngày 03/11/2026 giờ VN. UUID và thời gian ghi sẵn (có <code>+07</code>) để kết quả giống nhau mọi lần chạy; mã chuyến không ghi tay mà để IDENTITY cấp theo thứ tự dòng.</p>
 <p>Ca biên có chủ đích: 100003 huỷ <b>sau</b> khi nhận (giữ tài xế), 100006 huỷ <b>trước</b> khi có người nhận; 100003 và 100004 cùng giờ đặt (thử sắp xếp ở PG-007); 100007 đặt 23:50 ngày 02/11, 100008 đặt 00:10 ngày 03/11 giờ VN (vẫn là 02/11 theo UTC); 100008 cước 0 đ; bốn tài xế <code>busy</code> mỗi người đúng một chuyến đang chạy. Kiểm nhanh ngay trong tệp (truy vấn dùng <code>FILTER</code>/<code>GROUP BY</code> của Phần 2):</p>
-<pre><code class="language-text">   status   | ride | food | parcel | tong
-------------+------+------+--------+------
- requested  |    1 |    0 |      0 |    1
- searching  |    0 |    1 |      0 |    1
- accepted   |    1 |    0 |      0 |    1
- arriving   |    0 |    0 |      1 |    1
- picked_up  |    0 |    1 |      0 |    1
- in_transit |    1 |    0 |      0 |    1
- completed  |    3 |    2 |      2 |    7
- cancelled  |    1 |    1 |      0 |    2
-(8 rows)</code></pre>
+<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/postgresql-thuc-hanh-schema-chuyen-xe/dbstudio-01.webp" alt="DBStudio chạy câu lệnh ở 02-fixture-valid.sql dòng 105 và hiển thị kết quả 8 dòng" width="996" height="746" loading="lazy"></div><figcaption>DBStudio · <code>02-fixture-valid.sql</code>, câu ở dòng 105 · 8 dòng</figcaption></figure>
 </details>
 
 ### 3.3 D3 — Fixture sai (`03-fixture-invalid.sql`)
@@ -146,8 +136,7 @@ CONSTRAINT ck_trips_completed_after_accepted CHECK (completed_at &gt;= accepted_
 </tbody>
 </table>
 <p>Một ca tiêu biểu — tên ràng buộc trong thông báo chính là quy tắc bị vi phạm:</p>
-<pre><code class="language-text">ERROR:  new row for relation "trips" violates check constraint "ck_trips_status"
-DETAIL:  Failing row contains (f0000000-0000-4000-8000-000000000012, 100020, ride, 1, c0000000-0000-4000-8000-000000000001, null, null, done, 40000, 2026-11-03 09:00:00+07, null, null, 2026-11-03 09:00:00+07).</code></pre>
+<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/postgresql-thuc-hanh-schema-chuyen-xe/dbstudio-02.webp" alt="DBStudio chạy câu lệnh ở 03-fixture-invalid.sql dòng 132 và hiển thị thông báo lỗi" width="1696" height="434" loading="lazy"></div><figcaption>DBStudio · <code>03-fixture-invalid.sql</code>, câu ở dòng 132 · lỗi</figcaption></figure>
 <p>Hai hiện tượng nên ghi vào hồ sơ bàn giao. (1) Mã trong <code>DETAIL</code> là 100020 dù chỉ có 15 chuyến: câu INSERT lỗi ở bước ràng buộc vẫn tiêu thụ một số của IDENTITY, nên chuyến hợp lệ tiếp theo ở <code>04</code> nhận mã <b>100029</b> — mã chuyến không bảo đảm liên tục. (2) Bẫy không báo lỗi: <code>'03/11/2026'::date</code> ra <code>2026-03-11</code> với <code>DateStyle</code> <code>ISO, MDY</code>. Cuối tệp, số dòng vẫn là 3/6/6/15: không câu sai nào lọt.</p>
 </details>
 
@@ -164,15 +153,7 @@ DETAIL:  Failing row contains (f0000000-0000-4000-8000-000000000012, 100020, rid
 </tbody>
 </table>
 <p>Kiểm kê C3 sau toàn bộ lab (đã có migration <code>06</code>, nên <code>drivers</code> có 5 CHECK):</p>
-<pre><code class="language-text">    bang     | p | f | u | c
--------------+---+---+---+----
- cities      | 1 | 0 | 1 |  2
- customers   | 1 | 0 | 1 |  2
- drivers     | 1 | 1 | 1 |  5
- merchants   | 1 | 1 | 0 |  1
- trip_events | 1 | 1 | 0 |  1
- trips       | 1 | 4 | 1 | 10
-(6 rows)</code></pre>
+<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/postgresql-thuc-hanh-schema-chuyen-xe/dbstudio-03.webp" alt="DBStudio chạy câu lệnh ở 07-checks.sql dòng 163 và hiển thị kết quả 6 dòng" width="996" height="686" loading="lazy"></div><figcaption>DBStudio · <code>07-checks.sql</code>, câu ở dòng 163 · 6 dòng</figcaption></figure>
 <p>Vì sao nhóm B quan trọng: người dựng lab đã chạy script sinh dữ liệu của hồ sơ dự án (thu nhỏ còn 2.000 chuyến) qua schema này — qua mọi CHECK, nhưng trượt B1 ở 1.638 chuyến, B2 ở 780 và B5 ở 1.980 (số ghi trong <code>p01/README.md</code>). Dữ liệu "qua được ràng buộc" chưa chắc đúng nghiệp vụ.</p>
 </details>
 
@@ -248,8 +229,7 @@ INSERT INTO trips (id, kind, city_id, customer_id, merchant_id, status, fare, re
 VALUES ('f0000000-0000-4000-8000-000000000040', 'food', 2, 'c0000000-0000-4000-8000-000000000001',
         'e0000000-0000-4000-8000-000000000001', 'requested', 40000,
         '2026-11-03 09:00:00+07', '2026-11-03 09:00:00+07');</code></pre>
-<pre><code class="language-text">ERROR:  insert or update on table "trips" violates foreign key constraint "fk_trips_merchant_city"
-DETAIL:  Key (merchant_id, city_id)=(e0000000-0000-4000-8000-000000000001, 2) is not present in table "merchants".</code></pre>
+<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/postgresql-thuc-hanh-schema-chuyen-xe/dbstudio-04.webp" alt="DBStudio chạy câu lệnh ở pg010-mo-rong-fk-hai-cot.sql dòng 7 và hiển thị thông báo lỗi" width="1282" height="412" loading="lazy"></div><figcaption>DBStudio · <code>pg010-mo-rong-fk-hai-cot.sql</code>, câu ở dòng 7 · lỗi</figcaption></figure>
 <p>Ba câu <code>ALTER</code> đều thành công vì fixture sạch. Chuyến đặt xe và bưu kiện có <code>merchant_id</code> NULL nên FK không kiểm (FK mặc định bỏ qua khi một cột khoá là NULL) — đúng ý, vì R7 đã lo phần đó. Đánh đổi: thêm một UNIQUE (kèm index) trên <code>merchants</code>, và quán đổi thành phố thì phải xử lý cả chuyến cũ. B1 làm tương tự với <code>drivers</code>, nhưng cần hỏi nghiệp vụ: tài xế chuyển thành phố thì chuyến cũ có còn "đúng" không?</p>
 </details>
 

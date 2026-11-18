@@ -232,11 +232,7 @@ ngưỡng = autovacuum_analyze_threshold + autovacuum_analyze_scale_factor × re
        = 50 + 0,1 × 1.000.000 ≈ 100.050
 ```
 
-```text
- base | scale | nguong_lam_tron | n_mod_since_analyze | se_tu_analyze
-------+-------+-----------------+---------------------+---------------
- 50   | 0.1   |          100000 |               30000 | f
-```
+<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/postgresql-statistics-analyze-cardinality/dbstudio-01.webp" alt="DBStudio chạy câu lệnh ở pg021-bai-tap.sql dòng 81 và hiển thị kết quả 3 dòng" width="996" height="486" loading="lazy"></div><figcaption>DBStudio · <code>pg021-bai-tap.sql</code>, câu ở dòng 81 · 3 dòng</figcaption></figure>
 
 30.000 dòng mới chưa tới ngưỡng: dù autovacuum bật, bảng vẫn chưa được ANALYZE lại (lab chỉ áp công thức vào số đếm thật, không chạy autovacuum). Với `trips` thật của Tới Nơi (730 triệu dòng sau một năm, theo hồ sơ dự án), 10 % là khoảng 73 triệu dòng thay đổi. Cách xử lý: hạ ngưỡng riêng cho bảng (`ALTER TABLE trips SET (autovacuum_analyze_scale_factor = 0.01)`), hoặc `ANALYZE trips` ngay sau mỗi lô nạp lớn.
 

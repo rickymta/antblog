@@ -86,10 +86,7 @@ Lời giải là `40-thuc-hanh-nhan-chuyen.sql`; số đo là `DO-DAC.md`. Mở 
 <tr><td>T6</td><td></td><td><code>COMMIT</code></td></tr>
 </tbody>
 </table>
-<pre><code class="language-text"> duoc_bao_nhan | driver_trong_db
----------------+-----------------
-          9101 |            9102
-          9102 |            9102</code></pre>
+<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/postgresql-thuc-hanh-tranh-chap-nhan-chuyen/dbstudio-01.webp" alt="DBStudio chạy câu lệnh ở 40-thuc-hanh-nhan-chuyen.sql dòng 69 và hiển thị kết quả 2 dòng" width="996" height="412" loading="lazy"></div><figcaption>DBStudio · <code>40-thuc-hanh-nhan-chuyen.sql</code>, câu ở dòng 69 · 2 dòng</figcaption></figure>
 <p>B quyết định dựa trên một lần đọc đã cũ, và câu ghi của B không mang điều kiện nào để database biết điều đó. Không có gì «hỏng» theo nghĩa kỹ thuật: mọi câu đều thành công. Đó là lý do lỗi này lọt qua mọi kiểm tra không có hai phiên.</p>
 </details>
 
@@ -134,12 +131,7 @@ DETAIL:  Key (trip_id)=(a4000000-0000-4000-8000-000000400104) already exists.
             THEN 'đạt' ELSE 'VI PHẠM' END AS bat_bien
 FROM trip_claims AS c JOIN trips AS t ON t.id = c.trip_id
 GROUP BY t.code, c.method ORDER BY t.code;</code></pre>
-<pre><code class="language-text">  code  |     method     | so_nguoi_thang | khop_driver_id | bat_bien
---------+----------------+----------------+----------------+----------
- 400101 | a_khong_khoa   |              2 |              1 | VI PHẠM
- 400102 | b_co_dieu_kien |              1 |              1 | đạt
- 400103 | c_for_update   |              1 |              1 | đạt
- 400104 | d_unique       |              1 |              1 | đạt</code></pre>
+<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/postgresql-thuc-hanh-tranh-chap-nhan-chuyen/dbstudio-02.webp" alt="DBStudio chạy câu lệnh ở 40-thuc-hanh-nhan-chuyen.sql dòng 207 và hiển thị kết quả 4 dòng" width="996" height="604" loading="lazy"></div><figcaption>DBStudio · <code>40-thuc-hanh-nhan-chuyen.sql</code>, câu ở dòng 207 · 4 dòng</figcaption></figure>
 <p>Thêm cho (d): <code>trip_assignments</code> khớp <code>trips</code> — <code>400104 | 9101 | 9101</code>. Mỗi dòng có chỉ thị <code>expect-line</code> trong tệp lab, nên nếu đổi lịch mà kết quả đổi thì runner báo <code>FAIL</code>.</p>
 </details>
 

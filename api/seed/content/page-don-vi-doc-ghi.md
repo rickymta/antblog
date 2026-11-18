@@ -67,14 +67,7 @@ WHERE relnamespace = 'bai_cu'::regnamespace
 ORDER BY relname;
 ```
 
-```text
-         relname         | relpages |  bytes  | rows_per_page
--------------------------+----------+---------+---------------
- ix_trips_city_requested |       83 |  679936 |         241.0
- trips                   |      374 | 3063808 |          53.5
- trips_pkey              |      102 |  835584 |         196.1
- uq_trips_code           |       57 |  466944 |         350.9
-```
+<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/page-don-vi-doc-ghi/dbstudio-01.webp" alt="DBStudio chạy câu lệnh ở 22-page-buffer.sql dòng 26 và hiển thị kết quả 4 dòng" width="996" height="582" loading="lazy"></div><figcaption>DBStudio · <code>22-page-buffer.sql</code>, câu ở dòng 26 · 4 dòng</figcaption></figure>
 
 20.000 chuyến nằm trong **374 page** (374 × 8.192 = 3.063.808 byte — kích thước tệp luôn là bội số của page), trung bình 53,5 chuyến một page. Một page index chứa được nhiều mục hơn vì mỗi mục chỉ có khoá và vị trí dòng (`ctid`).
 
@@ -88,11 +81,7 @@ SELECT lower, upper, upper - lower AS free_bytes, (lower - 24) / 4 AS so_line_po
 FROM page_header(get_raw_page('bai_cu.trips', 0));
 ```
 
-```text
- lower | upper | free_bytes | so_line_pointer
--------+-------+------------+-----------------
-   236 |   328 |         92 |              53
-```
+<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/page-don-vi-doc-ghi/dbstudio-02.webp" alt="DBStudio chạy câu lệnh ở 22-page-buffer.sql dòng 46 và hiển thị kết quả 1 dòng" width="996" height="360" loading="lazy"></div><figcaption>DBStudio · <code>22-page-buffer.sql</code>, câu ở dòng 46 · 1 dòng</figcaption></figure>
 
 Page mở đầu bằng **page header** 24 byte, tiếp theo là mảng **line pointer** (con trỏ dòng, 4 byte mỗi ô, ghi vị trí và độ dài của một dòng). `lower` là chỗ mảng line pointer kết thúc, `upper` là chỗ dữ liệu dòng bắt đầu; dữ liệu được ghi **từ cuối page ngược lên**. `heap_page_items` cho thấy ô 1 nằm ở byte 8.048 dài 144 byte, ô 53 ở byte 328.
 
@@ -177,12 +166,7 @@ Hai dòng cuối trả lời khẳng định thứ hai ở đầu bài. Bảng v
 
 `shared_buffers` là vùng nhớ chung chia thành các ô vừa đúng một page; lab dùng 128 MB (giá trị mặc định) = **16.384 buffer**. Extension `pg_buffercache` cho xem từng ô đang chứa page nào, và PostgreSQL 18 thêm hàm `pg_buffercache_evict_relation()` để đẩy mọi page của một bảng ra khỏi `shared_buffers`. Lab đẩy `bai_cu.trips` ra (đếm lại: 0 buffer), rồi đọc cả bảng bằng `count(fare)`:
 
-```text
- Aggregate (actual rows=1.00 loops=1)
-   Buffers: shared read=374
-   ->  Seq Scan on trips (actual rows=20000.00 loops=1)
-         Buffers: shared read=374
-```
+<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/page-don-vi-doc-ghi/dbstudio-03.webp" alt="DBStudio chạy câu lệnh ở 22-page-buffer.sql dòng 137 và hiển thị kế hoạch thực thi gồm 2 toán tử, có số liệu thực tế" width="1400" height="392" loading="lazy"></div><figcaption>DBStudio · <code>22-page-buffer.sql</code>, câu ở dòng 137 · Kế hoạch truy vấn, 2 toán tử · ANALYZE</figcaption></figure>
 
 ```sql
 SELECT count(*) AS so_buffer, min(usagecount) AS usagecount
@@ -192,11 +176,7 @@ WHERE relfilenode = pg_relation_filenode('bai_cu.trips')
   AND relforknumber = 0;
 ```
 
-```text
- so_buffer | usagecount
------------+------------
-       374 |          1
-```
+<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/page-don-vi-doc-ghi/dbstudio-04.webp" alt="DBStudio chạy câu lệnh ở 22-page-buffer.sql dòng 143 và hiển thị kết quả 1 dòng" width="996" height="404" loading="lazy"></div><figcaption>DBStudio · <code>22-page-buffer.sql</code>, câu ở dòng 143 · 1 dòng</figcaption></figure>
 
 374 page đọc vào chiếm đúng 374 buffer — không có «nửa page» trong bộ nhớ. Lần chạy sau, cùng câu ra `shared hit=374`.
 
@@ -223,14 +203,7 @@ WHERE resource_manager <> 'Standby'
 ORDER BY start_lsn;
 ```
 
-```text
- cau | resource_manager | record_type | record_length | fpi_length
------+------------------+-------------+---------------+------------
-   1 | Heap             | HOT_UPDATE  |          6573 |       6508
-   1 | Transaction      | COMMIT      |            34 |          0
-   2 | Heap             | HOT_UPDATE  |            80 |          0
-   2 | Transaction      | COMMIT      |            34 |          0
-```
+<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/page-don-vi-doc-ghi/dbstudio-05.webp" alt="DBStudio chạy câu lệnh ở 22-page-buffer.sql dòng 165 và hiển thị kết quả 4 dòng" width="996" height="538" loading="lazy"></div><figcaption>DBStudio · <code>22-page-buffer.sql</code>, câu ở dòng 165 · 4 dòng</figcaption></figure>
 
 Cùng kiểu thay đổi, cùng một page, nhưng câu đầu ghi **6.607 byte** WAL còn câu sau chỉ **114 byte**. Câu đầu chứa một **full page image** (ảnh nguyên page, cột `fpi_length`) 6.508 byte. Điều kiện `Standby` loại các bản ghi do tiến trình nền tự ghi định kỳ; nếu trừ thẳng hai vị trí LSN thì ra khoảng 6.640 và 120 byte, vì hiệu số đó gồm cả phần đệm căn lề.
 

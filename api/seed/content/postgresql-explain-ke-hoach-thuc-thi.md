@@ -39,15 +39,7 @@ FROM trips WHERE customer_id = :'kh_le'
 ORDER BY requested_at DESC LIMIT 20;
 ```
 
-```text
- Limit  (cost=48.05..48.08 rows=11 width=30)
-   ->  Sort  (cost=48.05..48.08 rows=11 width=30)
-         Sort Key: requested_at DESC
-         ->  Bitmap Heap Scan on trips  (cost=4.51..47.86 rows=11 width=30)
-               Recheck Cond: (customer_id = '3b3bf766-…'::uuid)
-               ->  Bitmap Index Scan on ix_trips_customer_requested  (cost=0.00..4.51 rows=11 width=0)
-                     Index Cond: (customer_id = '3b3bf766-…'::uuid)
-```
+<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/postgresql-explain-ke-hoach-thuc-thi/dbstudio-01.webp" alt="DBStudio chạy câu lệnh ở 21-explain-tim-chuyen.sql dòng 47 và hiển thị kế hoạch thực thi gồm 4 toán tử" width="1400" height="484" loading="lazy"></div><figcaption>DBStudio · <code>21-explain-tim-chuyen.sql</code>, câu ở dòng 47 · Kế hoạch truy vấn, 4 toán tử</figcaption></figure>
 
 Mỗi dòng có `->` là một **nút** (node). Nút thụt vào sâu hơn là nút con: nút này chạy trước và đưa dòng lên nút cha. Đọc **từ trong ra ngoài, từ dưới lên**: quét index lấy vị trí dòng → đọc bảng → sắp → cắt 20 dòng.
 
@@ -132,14 +124,7 @@ EXPLAIN (ANALYZE, COSTS OFF, TIMING OFF, SUMMARY OFF)
 SELECT count(*) FROM trips WHERE fare >= 150000;
 ```
 
-```text
- Aggregate (actual rows=1.00 loops=1)
-   Buffers: shared hit=47 read=19394
-   ->  Seq Scan on trips (actual rows=3541.00 loops=1)
-         Filter: (fare >= 150000)
-         Rows Removed by Filter: 996459
-         Buffers: shared hit=47 read=19394
-```
+<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/postgresql-explain-ke-hoach-thuc-thi/dbstudio-02.webp" alt="DBStudio chạy câu lệnh ở 21-explain-tim-chuyen.sql dòng 95 và hiển thị kế hoạch thực thi gồm 2 toán tử, có số liệu thực tế" width="1400" height="392" loading="lazy"></div><figcaption>DBStudio · <code>21-explain-tim-chuyen.sql</code>, câu ở dòng 95 · Kế hoạch truy vấn, 2 toán tử · ANALYZE</figcaption></figure>
 
 `Filter` là điều kiện áp **sau khi** đọc dòng lên; `Rows Removed by Filter: 996459` = số dòng đọc rồi bỏ. 19.441 page cho 3.541 dòng. Chạy lần hai vẫn `hit=190 read=19251`: với bảng lớn hơn một phần tư `shared_buffers`, Seq Scan chỉ dùng một vòng đệm nhỏ (256 kB) để khỏi đẩy dữ liệu khác ra khỏi cache — nên bảng này không «ấm lên» như bảng nhỏ.
 
@@ -202,12 +187,7 @@ WHERE city_id = 3 AND requested_at >= TIMESTAMPTZ '2026-10-01 00:00+07'
 
 **Merge Join** — hai đầu vào đã sắp theo khoá join, trộn như kéo khoá kéo:
 
-```text
- Merge Join
-   Merge Cond: (t.id = p.trip_id)
-   ->  Index Only Scan using pk_trips on trips t
-   ->  Index Scan using ix_payments_trip on payments p
-```
+<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/postgresql-explain-ke-hoach-thuc-thi/dbstudio-03.webp" alt="DBStudio chạy câu lệnh ở 21-explain-tim-chuyen.sql dòng 150 và hiển thị kế hoạch thực thi gồm 3 toán tử" width="1400" height="438" loading="lazy"></div><figcaption>DBStudio · <code>21-explain-tim-chuyen.sql</code>, câu ở dòng 150 · Kế hoạch truy vấn, 3 toán tử</figcaption></figure>
 
 Câu `SELECT t.id, p.amount FROM trips t JOIN payments p ON p.trip_id = t.id ORDER BY t.id` cần kết quả theo `t.id`; cả hai index đã trả dòng đúng thứ tự đó nên không phải sắp. Cấm Merge Join trong một giao dịch (`SET LOCAL enable_mergejoin = off`) thì planner chuyển sang `Hash Join` hai `Seq Scan` rồi `Sort` 900 nghìn dòng. Các biến `enable_*` chỉ để học và chẩn đoán — đừng tắt trên production.
 
@@ -222,15 +202,7 @@ EXPLAIN (ANALYZE, TIMING OFF, SUMMARY OFF)
 SELECT count(*) FROM trips WHERE city_id = 3 AND pickup_area_id = 311;
 ```
 
-```text
- Aggregate  (cost=24363.61..24363.62 rows=1 width=8) (actual rows=1.00 loops=1)
-   ->  Bitmap Heap Scan on trips  (cost=2972.62..24356.62 rows=2798 width=0) (actual rows=22222.00 loops=1)
-         Recheck Cond: (city_id = 3)
-         Filter: (pickup_area_id = 311)
-         Rows Removed by Filter: 107573
-         Heap Blocks: exact=19424
-         ->  Bitmap Index Scan on ix_trips_city_requested  (cost=0.00..2971.92 rows=129533 width=0) (actual rows=129795.00 loops=1)
-```
+<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/postgresql-explain-ke-hoach-thuc-thi/dbstudio-04.webp" alt="DBStudio chạy câu lệnh ở 21-explain-tim-chuyen.sql dòng 183 và hiển thị kế hoạch thực thi gồm 3 toán tử, có số liệu thực tế" width="1400" height="438" loading="lazy"></div><figcaption>DBStudio · <code>21-explain-tim-chuyen.sql</code>, câu ở dòng 183 · Kế hoạch truy vấn, 3 toán tử · ANALYZE</figcaption></figure>
 
 Ước khoảng 2.800, thật 22.222 — lệch khoảng 8 lần (hàm `uoc_luong()` của lab ra hệ số 7,9 ở lần chạy này). Khu 311 thuộc hẳn Đà Nẵng, nhưng planner coi hai điều kiện **độc lập** và nhân hai xác suất: tỉ lệ chuyến ở khu 311 × tỉ lệ chuyến ở Đà Nẵng (~13 %). Nút `Bitmap Index Scan` thì ước sát (129.533 vs 129.795) — lỗi nằm ở chỗ kết hợp điều kiện. Lệch ở nút dưới sẽ lan lên: nút cha dựa trên con số sai để chọn kiểu join và kiểu sắp. Để ý thêm `Heap Blocks: exact=19424` — Đà Nẵng rải khắp bảng nên bitmap chạm gần hết 19.441 page. [PG-027](/articles/postgresql-statistics-analyze-cardinality) sửa ước lượng này bằng `CREATE STATISTICS`.
 
@@ -252,12 +224,7 @@ UPDATE trips SET fare = fare + 1000 WHERE code = 600000;
 ROLLBACK;
 ```
 
-```text
- Update on trips (actual rows=0.00 loops=1)
-   Buffers: shared hit=29 read=24 dirtied=8
-   ->  Index Scan using uq_trips_code on trips (actual rows=1.00 loops=1)
-         Index Cond: (code = 600000)
-```
+<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/postgresql-explain-ke-hoach-thuc-thi/dbstudio-05.webp" alt="DBStudio chạy câu lệnh ở 21-explain-tim-chuyen.sql dòng 224 và hiển thị kế hoạch thực thi gồm 2 toán tử, có số liệu thực tế" width="1400" height="392" loading="lazy"></div><figcaption>DBStudio · <code>21-explain-tim-chuyen.sql</code>, câu ở dòng 224 · Kế hoạch truy vấn, 2 toán tử · ANALYZE</figcaption></figure>
 
 `dirtied=8`: câu UPDATE đã làm «bẩn» thật 8 page trong bộ nhớ. Sau `ROLLBACK`, chuyến 600000 vẫn 31.000 đ. `ROLLBACK` không thu hồi số đã lấy từ sequence và không huỷ được việc ngoài database (trigger gửi tin, gọi dịch vụ khác) — câu có tác dụng phụ như vậy thì đừng `ANALYZE` trên môi trường thật.
 
@@ -267,12 +234,7 @@ ROLLBACK;
 EXPLAIN (COSTS OFF, SETTINGS) SELECT count(*) FROM trips WHERE fare >= 150000;
 ```
 
-```text
- Aggregate
-   ->  Seq Scan on trips
-         Filter: (fare >= 150000)
- Settings: jit = 'off', max_parallel_workers_per_gather = '0', search_path = 'toinoi'
-```
+<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/postgresql-explain-ke-hoach-thuc-thi/dbstudio-06.webp" alt="DBStudio chạy câu lệnh ở 21-explain-tim-chuyen.sql dòng 90 và hiển thị kế hoạch thực thi gồm 2 toán tử" width="1400" height="392" loading="lazy"></div><figcaption>DBStudio · <code>21-explain-tim-chuyen.sql</code>, câu ở dòng 90 · Kế hoạch truy vấn, 2 toán tử</figcaption></figure>
 
 - **`SETTINGS`** in các tham số ảnh hưởng tới planner mà đang khác giá trị mặc định — người đọc kế hoạch của bạn biết ngay vì sao không có nút song song.
 - **`VERBOSE`** thêm dòng `Output:` (các cột mà mỗi nút trả ra), tên bảng kèm schema (`toinoi.trips t`) và `Query Identifier` khi `compute_query_id` bật (lab nạp `pg_stat_statements` nên có).

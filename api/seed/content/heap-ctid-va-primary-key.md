@@ -41,15 +41,7 @@ Hai tệp thí nghiệm không có trong lab chính, nằm ở `p03/thu-nghiem/`
 SELECT ctid, code, status FROM trips LIMIT 5;
 ```
 
-```text
- ctid  |  code  |  status
--------+--------+-----------
- (0,1) | 100000 | completed
- (0,2) | 100001 | completed
- (0,3) | 100002 | completed
- (0,4) | 100003 | completed
- (0,5) | 100004 | cancelled
-```
+<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/heap-ctid-va-primary-key/dbstudio-01.webp" alt="DBStudio chạy câu lệnh ở 24-heap-ctid-hot.sql dòng 15 và hiển thị kết quả 5 dòng" width="996" height="502" loading="lazy"></div><figcaption>DBStudio · <code>24-heap-ctid-hot.sql</code>, câu ở dòng 15 · 5 dòng</figcaption></figure>
 
 Còn đây là 5 dòng đầu **theo primary key**:
 
@@ -57,15 +49,7 @@ Còn đây là 5 dòng đầu **theo primary key**:
 SELECT ctid, left(id::text, 8) AS id, code FROM trips ORDER BY id LIMIT 5;
 ```
 
-```text
-   ctid   |    id    |  code
-----------+----------+--------
- (177,53) | 00011769 | 109521
- (255,10) | 0002832a | 113651
- (180,17) | 000b0dac | 109644
- (218,40) | 000c662d | 111701
- (138,41) | 000d8f74 | 107422
-```
+<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/heap-ctid-va-primary-key/dbstudio-02.webp" alt="DBStudio chạy câu lệnh ở 24-heap-ctid-hot.sql dòng 25 và hiển thị kết quả 5 dòng" width="996" height="458" loading="lazy"></div><figcaption>DBStudio · <code>24-heap-ctid-hot.sql</code>, câu ở dòng 25 · 5 dòng</figcaption></figure>
 
 Theo thứ tự vật lý, mã chuyến tăng dần từ page 0 — chuyến được chèn theo thời gian. Theo `id`, năm dòng đầu nằm ở **năm page khác nhau**: đọc theo primary key là đọc rải khắp tệp heap. (Không có `ORDER BY` thì PostgreSQL không hứa thứ tự nào; ở đây là thứ tự quét heap, và nó đổi khi bảng bị sửa.)
 
@@ -179,17 +163,7 @@ WHERE schemaname = 'bai_cu' AND tablename = 'trips'
 ORDER BY abs(correlation) DESC, attname;
 ```
 
-```text
-   attname    | correlation
---------------+-------------
- code         |       1.000
- requested_at |       1.000
- city_id      |       0.167
- fare         |       0.014
- id           |       0.009
- customer_id  |      -0.007
- driver_id    |      -0.001
-```
+<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/heap-ctid-va-primary-key/dbstudio-03.webp" alt="DBStudio chạy câu lệnh ở 24-heap-ctid-hot.sql dòng 54 và hiển thị kết quả 7 dòng" width="996" height="672" loading="lazy"></div><figcaption>DBStudio · <code>24-heap-ctid-hot.sql</code>, câu ở dòng 54 · 7 dòng</figcaption></figure>
 
 (Bản trước của bài thiếu điều kiện `schemaname`: database có hai schema cùng tên bảng `trips` thì câu đó trộn thống kê của cả hai.) Heap thẳng hàng tuyệt đối với **thời gian đặt** và **mã chuyến** — đó là thứ tự chèn — và không liên quan tới `id`. Ở Tới Nơi, "clustered index thật" tự nhiên đi theo `requested_at`, còn primary key thì ngẫu nhiên. Đó là tin tốt cho báo cáo theo khoảng thời gian: PG-023 đo được Index Scan trên `requested_at` vẫn được chọn khi lấy tới ~72 % bảng 1 triệu chuyến, và BRIN (PG-028) dựa vào đúng tính chất này.
 
@@ -211,13 +185,7 @@ PostgreSQL không ghi đè dòng: mỗi `UPDATE` tạo một **phiên bản mớ
 
 Ở lớp nhìn thấy, mỗi chuyến vẫn là cùng một chuyến (`id` không đổi). Ở lớp vật lý, cả ba đều sinh phiên bản mới ở địa chỉ mới; phiên bản cũ nằm lại, đã "chết", chờ dọn. Soi page 373 bằng `pageinspect` (`heap_page_items`) thấy chuỗi phiên bản — `t_ctid` của phiên bản cũ trỏ sang phiên bản mới:
 
-```text
- lp |  t_ctid  | hot_updated
-----+----------+-------------
- 32 | (373,47) | f
- 47 | (373,48) | t
- 48 | (373,48) | f
-```
+<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/heap-ctid-va-primary-key/dbstudio-04.webp" alt="DBStudio chạy câu lệnh ở 24-heap-ctid-hot.sql dòng 117 và hiển thị kết quả 3 dòng" width="996" height="464" loading="lazy"></div><figcaption>DBStudio · <code>24-heap-ctid-hot.sql</code>, câu ở dòng 117 · 3 dòng</figcaption></figure>
 
 Ô 32 là bản gốc (trỏ sang 47, không HOT vì ① đổi `driver_id`), ô 47 là bản sau ① (đã cập nhật kiểu HOT sang 48), ô 48 là bản hiện hành (trỏ chính nó).
 
@@ -247,12 +215,7 @@ WHERE relid = 'bai_cu.trips'::regclass;
 
 ## 8. Primary key chỉ là một B-tree UNIQUE
 
-```text
-     index     | amname | indisunique | indisprimary | contype
----------------+--------+-------------+--------------+---------
- trips_pkey    | btree  | t           | t            | p
- uq_trips_code | btree  | t           | f            | u
-```
+<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/heap-ctid-va-primary-key/dbstudio-05.webp" alt="DBStudio chạy câu lệnh ở 24-heap-ctid-hot.sql dòng 158 và hiển thị kết quả 2 dòng" width="996" height="544" loading="lazy"></div><figcaption>DBStudio · <code>24-heap-ctid-hot.sql</code>, câu ở dòng 158 · 2 dòng</figcaption></figure>
 
 Primary key gồm một index B-tree **UNIQUE**, ràng buộc **NOT NULL** và cờ "primary" (mỗi bảng tối đa một). Về cấu trúc, `trips_pkey` ngang hàng `uq_trips_code`. Khoá ngoại cũng tham chiếu được cột UNIQUE: bảng `ghi_chu_chuyen (trip_code bigint REFERENCES trips (code))` từ chối mã không tồn tại với `23503 … violates foreign key constraint`.
 
@@ -262,17 +225,7 @@ Mỗi index là thêm một cây trỏ xuống heap. Trên bộ 20.000 chuyến,
 
 `CLUSTER trips USING trips_pkey` chép lại heap theo thứ tự `id`. Kết quả trong lab:
 
-```text
--- pg_locks của phiên vừa chạy CLUSTER, trước COMMIT:
- AccessExclusiveLock
- ShareLock
--- sau CLUSTER + ANALYZE:
-   attname    | correlation
---------------+-------------
- id           |       1.000
- code         |       0.009
- requested_at |       0.009
-```
+<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/heap-ctid-va-primary-key/dbstudio-06.webp" alt="DBStudio chạy câu lệnh ở 24-heap-ctid-hot.sql dòng 194 và hiển thị kết quả 3 dòng" width="996" height="442" loading="lazy"></div><figcaption>DBStudio · <code>24-heap-ctid-hot.sql</code>, câu ở dòng 194 · 3 dòng</figcaption></figure>
 
 Heap thẳng hàng với `id` và **mất** sự thẳng hàng tự nhiên với thời gian đặt, thứ mà các báo cáo đang tận dụng — với `trips`, xếp theo uuid ngẫu nhiên là phản tác dụng. Mọi ctid đều đổi. PostgreSQL chỉ **ghi nhớ** index đã dùng (cờ `pg_index.indisclustered = t`) để lần sau gõ `CLUSTER trips` không cần `USING`; `\d trips` in `"trips_pkey" PRIMARY KEY, btree (id) CLUSTER` (thí nghiệm `pg024-ctid-hot-bai-tap.sql`). Đó là "clustered index nhìn thấy" theo nghĩa thứ hai: có chữ CLUSTER, nhưng không có gì được duy trì. Lab chèn tiếp 500 chuyến mới (id ngẫu nhiên): tất cả nằm ở **page 373–380**, cuối heap, không chen vào đúng vị trí theo id; `correlation` của `id` tụt về khoảng 0,95 sau một lần `ANALYZE` (số lấy mẫu, dao động giữa các lần chạy). Tài liệu nói thẳng: "Clustering is a one-time operation".
 

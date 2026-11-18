@@ -110,17 +110,7 @@ EXPLAIN (COSTS OFF) SELECT count(*) FROM gps
 WHERE date_trunc('month', seen_at AT TIME ZONE 'UTC') = '2026-11-01';
 ```
 
-```text
-                         QUERY PLAN
---------------------------------------------------------------------------------
- Aggregate
-   ->  Append
-         ->  Seq Scan on gps_oct gps_1
-               Filter: (date_trunc('month'::text, (seen_at AT TIME ZONE 'UTC'::text)) = '2026-11-01 00:00:00'::timestamp without time zone)
-         ->  Seq Scan on gps_nov gps_2
-               Filter: (date_trunc('month'::text, (seen_at AT TIME ZONE 'UTC'::text)) = '2026-11-01 00:00:00'::timestamp without time zone)
-(6 rows)
-```
+<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/postgresql-partition-pruning-retention/dbstudio-01.webp" alt="DBStudio chạy truy vấn của bước 054 trong p06/run.mjs và hiển thị kế hoạch thực thi gồm 4 toán tử" width="1400" height="484" loading="lazy"></div><figcaption>DBStudio · bước 054 của <code>p06/run.mjs</code> · Kế hoạch truy vấn, 4 toán tử</figcaption></figure>
 
 Cả `gps_oct` và `gps_nov` đều bị quét, không có `Subplans Removed`. Con người thấy ngay `gps_oct` không thể có kết quả; planner thì không: biên partition nói về **giá trị của `seen_at`**, còn điều kiện nói về **kết quả của một biểu thức** trên `seen_at`, và PostgreSQL không suy ngược từ «tháng của biểu thức bằng X» ra khoảng của `seen_at`. `AT TIME ZONE 'UTC'` còn đổi `timestamptz` thành `timestamp without time zone` (xem hằng số trong `Filter`), thêm một lớp chuyển đổi.
 

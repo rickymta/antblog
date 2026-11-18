@@ -57,16 +57,7 @@ EXPLAIN (ANALYZE, COSTS OFF, TIMING OFF, SUMMARY OFF)
 SELECT name, address FROM merchants WHERE name ILIKE '%tấm bà năm%';
 ```
 
-```text
- Bitmap Heap Scan on merchants (actual rows=75.00 loops=1)
-   Recheck Cond: (name ~~* '%tấm bà năm%'::text)
-   Heap Blocks: exact=71
-   Buffers: shared hit=93
-   ->  Bitmap Index Scan on ix_merchants_name_trgm (actual rows=75.00 loops=1)
-         Index Cond: (name ~~* '%tấm bà năm%'::text)
-         Index Searches: 1
-         Buffers: shared hit=22
-```
+<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/postgresql-gin-gist-brin-lua-chon/dbstudio-01.webp" alt="DBStudio chạy câu lệnh ở 28-gin-gist-brin.sql dòng 35 và hiển thị kế hoạch thực thi gồm 2 toán tử, có số liệu thực tế" width="1400" height="392" loading="lazy"></div><figcaption>DBStudio · <code>28-gin-gist-brin.sql</code>, câu ở dòng 35 · Kế hoạch truy vấn, 2 toán tử · ANALYZE</figcaption></figure>
 
 Trước khi có index: Seq Scan 412 page, `Rows Removed by Filter: 14925`. DO-DAC đo trung vị **5,69 ms** (Seq Scan) và **0,32 ms** (GIN). Tìm địa chỉ `'%đường hoa sứ%quận 3,%'` ra 84 quán qua index GIN trên `address`, với `Rows Removed by Index Recheck: 2`: index trả 86 ứng viên có đủ trigram, hai dòng không khớp thứ tự.
 

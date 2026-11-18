@@ -86,14 +86,9 @@ SELECT 1;
 COMMIT;
 ```
 
-```text
-ERROR:  new row for relation "trip_events" violates check constraint "ck_trip_events_status"
-DETAIL:  Failing row contains (102, a4000000-0000-4000-8000-000000400202, dang_tim, 2026-10-31 01:00:00+07).
-SELECT 1;
-ERROR:  current transaction is aborted, commands ignored until end of transaction block
-COMMIT;
-ROLLBACK
-```
+<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/postgresql-transaction-commit-rollback/dbstudio-01.webp" alt="DBStudio chạy câu lệnh ở 31-transaction-commit-rollback.sql dòng 71 và hiển thị thông báo lỗi" width="1228" height="390" loading="lazy"></div><figcaption>DBStudio · <code>31-transaction-commit-rollback.sql</code>, câu ở dòng 71 · lỗi</figcaption></figure>
+
+<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/postgresql-transaction-commit-rollback/dbstudio-02.webp" alt="DBStudio chạy câu lệnh ở 31-transaction-commit-rollback.sql dòng 77 và hiển thị thông báo lỗi" width="1228" height="368" loading="lazy"></div><figcaption>DBStudio · <code>31-transaction-commit-rollback.sql</code>, câu ở dòng 77 · lỗi</figcaption></figure>
 
 Ba điều cần nhớ:
 

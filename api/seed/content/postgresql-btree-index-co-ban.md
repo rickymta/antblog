@@ -40,12 +40,7 @@ SELECT code, requested_at, fare FROM trips WHERE customer_id = :'kh';
 
 `:'kh'` là biến psql, gán bằng `\gset` từ `SELECT id AS kh FROM customers WHERE phone = '0910000500'`.
 
-```text
- Seq Scan on trips (actual rows=40.00 loops=1)
-   Filter: (customer_id = '3b3bf766-29e0-4cca-8a69-7b8beba432de'::uuid)
-   Rows Removed by Filter: 999960
-   Buffers: shared read=19441
-```
+<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/postgresql-btree-index-co-ban/dbstudio-01.webp" alt="DBStudio chạy câu lệnh ở 23-btree.sql dòng 22 và hiển thị kế hoạch thực thi gồm 1 toán tử, có số liệu thực tế" width="1400" height="346" loading="lazy"></div><figcaption>DBStudio · <code>23-btree.sql</code>, câu ở dòng 22 · Kế hoạch truy vấn, 1 toán tử · ANALYZE</figcaption></figure>
 
 **Seq Scan** (quét tuần tự) đọc heap từ page đầu tới page cuối và thử điều kiện trên từng dòng. `Buffers: shared read=19441` đúng bằng số page của bảng: để trả 40 dòng, PostgreSQL đã chạm **mọi** page. `read` nghĩa là page chưa có trong `shared_buffers` — PostgreSQL phải xin hệ điều hành, và ở máy lab page đó thường đã nằm trong cache của hệ điều hành chứ chưa chắc là đọc đĩa thật.
 
@@ -57,16 +52,7 @@ Thời gian đo trong `DO-DAC.md` (G1-c): trung vị **65,4 ms** cho một lần
 CREATE INDEX ix_trips_customer ON trips (customer_id);
 ```
 
-```text
- Bitmap Heap Scan on trips (actual rows=40.00 loops=1)
-   Recheck Cond: (customer_id = '3b3bf766-29e0-4cca-8a69-7b8beba432de'::uuid)
-   Heap Blocks: exact=40
-   Buffers: shared read=43
-   ->  Bitmap Index Scan on ix_trips_customer (actual rows=40.00 loops=1)
-         Index Cond: (customer_id = '3b3bf766-29e0-4cca-8a69-7b8beba432de'::uuid)
-         Index Searches: 1
-         Buffers: shared read=3
-```
+<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/postgresql-btree-index-co-ban/dbstudio-02.webp" alt="DBStudio chạy câu lệnh ở 23-btree.sql dòng 37 và hiển thị kế hoạch thực thi gồm 2 toán tử, có số liệu thực tế" width="1400" height="392" loading="lazy"></div><figcaption>DBStudio · <code>23-btree.sql</code>, câu ở dòng 37 · Kế hoạch truy vấn, 2 toán tử · ANALYZE</figcaption></figure>
 
 Từ **19.441** xuống **43** page: 3 page của index (nút con dưới cùng) cộng 40 page heap (`Heap Blocks: exact=40` — 40 chuyến nằm ở 40 page khác nhau, vì khách đặt rải rác trong 6 tháng). Dòng `Buffers` của nút cha là tổng, gồm cả nút con.
 
@@ -90,31 +76,15 @@ SELECT tree_level, leaf_pages, internal_pages, avg_leaf_density
 FROM pgstatindex('ix_trips_customer');
 ```
 
-```text
- tree_level | leaf_pages | internal_pages | avg_leaf_density
-------------+------------+----------------+------------------
-          2 |       1611 |             10 |             90.3
-```
+<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/postgresql-btree-index-co-ban/dbstudio-03.webp" alt="DBStudio chạy câu lệnh ở 23-btree.sql dòng 56 và hiển thị kết quả 1 dòng" width="996" height="338" loading="lazy"></div><figcaption>DBStudio · <code>23-btree.sql</code>, câu ở dòng 56 · 1 dòng</figcaption></figure>
 
 Gốc ở tầng 2 ⇒ cây có **3 tầng**: 1 gốc → 9 nhánh → 1.611 lá (10 page "internal" là gốc + 9 nhánh). Page lá đầy trung bình 90,3 %. Tra một khách là đi đúng một page mỗi tầng — đó là 3 page index ở mục 3. Page gốc trông thế này (thí nghiệm, mục 1):
 
-```text
- itemoffset |  ctid   |          khoa
-------------+---------+-------------------------
-          1 | (3,0)   |
-          2 | (208,1) | 21 59 c5 70 88 5a 4d a9
-          3 | (400,1) | 39 83 b2 21 12 5c 41 39
-```
+<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/postgresql-btree-index-co-ban/dbstudio-04.webp" alt="DBStudio chạy câu lệnh ở pg023-btree-bai-tap.sql dòng 16 và hiển thị kết quả 3 dòng" width="996" height="486" loading="lazy"></div><figcaption>DBStudio · <code>pg023-btree-bai-tap.sql</code>, câu ở dòng 16 · 3 dòng</figcaption></figure>
 
 Mục 1 không có khoá ("âm vô cùng"): mọi uuid nhỏ hơn `2159c570…` đi xuống page 3 của index. Ở page nhánh, phần đầu của `ctid` là **số page con trong index**, không phải địa chỉ heap. Xuống tới lá mới gặp ctid thật:
 
-```text
- itemoffset |        khoa_dau         |   htid    | so_ctid_gop
-------------+-------------------------+-----------+-------------
-          2 | 00 00 30 bd 09 f1 4c 73 | (658,41)  |          11
-          3 | 00 00 9b 1f 52 28 48 75 | (1326,11) |        NULL
-          4 | 00 00 d1 30 2b f1 43 52 | (4812,8)  |           4
-```
+<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/postgresql-btree-index-co-ban/dbstudio-05.webp" alt="DBStudio chạy câu lệnh ở 23-btree.sql dòng 64 và hiển thị kết quả 3 dòng" width="996" height="508" loading="lazy"></div><figcaption>DBStudio · <code>23-btree.sql</code>, câu ở dòng 64 · 3 dòng</figcaption></figure>
 
 Khoá tăng dần (uuid bắt đầu `0000…`). Mục 2 là một khách có 11 chuyến: khoá chỉ lưu **một lần** kèm danh sách 11 ctid — **deduplication** (gộp khoá trùng), có từ PostgreSQL 13 và bật mặc định. Mục 3 là khách có một chuyến nên chỉ có một ctid. Nhờ gộp, index một cột này chỉ 12,7 MB, trong khi index hai cột `(customer_id, requested_at DESC)` của nền là 40,6 MB vì cặp khoá hầu như không trùng. (Mục 1 của page lá là **high key** — cận trên của page, nên truy vấn chỉ lấy mục 2–4.)
 
@@ -208,12 +178,7 @@ Nên nhớ hai điều: **không có ngưỡng phần trăm cố định** kiể
 
 Cả `pk_trips` (khoá uuid ngẫu nhiên) và `uq_trips_code` (mã tăng dần) đều có 1.000.000 mục, nhưng:
 
-```text
-     index     | leaf_pages | avg_leaf_density
----------------+------------+------------------
- pk_trips      |       4848 |            71.19
- uq_trips_code |       2733 |            90.01
-```
+<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/postgresql-btree-index-co-ban/dbstudio-06.webp" alt="DBStudio chạy câu lệnh ở 23-btree.sql dòng 156 và hiển thị kết quả 2 dòng" width="996" height="478" loading="lazy"></div><figcaption>DBStudio · <code>23-btree.sql</code>, câu ở dòng 156 · 2 dòng</figcaption></figure>
 
 Mã tăng dần luôn chèn ở mép phải cây: page lá được lấp tới 90 % (fillfactor mặc định của B-tree) rồi mở page mới. Uuid ngẫu nhiên chèn vào giữa cây: page lá đầy thì **tách đôi**, mỗi nửa còn trống, nên cây xốp hơn (71 %). `REINDEX INDEX pk_trips` dựng lại cây từ dữ liệu đã sắp ⇒ **3.832** lá, đầy 89,98 %. Cây xốp nghĩa là nhiều page hơn cho cùng số khoá — tốn chỗ và tốn buffer hơn; dùng lâu ngày cây lại xốp dần theo cách chèn.
 

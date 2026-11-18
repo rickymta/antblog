@@ -36,22 +36,9 @@ Thứ tự dòng trong bảng **không mang ý nghĩa** (muốn có thứ tự p
 
 ## 2. Cột: tên, kiểu và có được để trống
 
-Mỗi cột có tên, **data type** (kiểu dữ liệu) và quy định có được để trống. Cuối `01-schema.sql`, lab hỏi catalog chuẩn SQL `information_schema.columns` để in cấu trúc `trips` (psql có lệnh `\d trips`, nhưng đó là lệnh của công cụ chứ không phải SQL). Kết quả chạy thật, chỉ giữ 8 trong 13 dòng:
+Mỗi cột có tên, **data type** (kiểu dữ liệu) và quy định có được để trống. Cuối `01-schema.sql`, lab hỏi catalog chuẩn SQL `information_schema.columns` để in cấu trúc `trips`. DBStudio cũng cho xem cột ngay trên cây đối tượng của kết nối, nhưng câu SQL này chạy được trong mọi công cụ và ở cả chương trình. Kết quả chạy trong DBStudio, đủ 13 cột:
 
-```text
- column_name  |        data_type         | is_nullable |  column_default   | is_identity
---------------+--------------------------+-------------+-------------------+-------------
- id           | uuid                     | NO          | gen_random_uuid() | NO
- code         | bigint                   | NO          |                   | YES
- kind         | text                     | NO          |                   | NO
- customer_id  | uuid                     | NO          |                   | NO
- driver_id    | uuid                     | YES         |                   | NO
- status       | text                     | NO          | 'requested'::text | NO
- fare         | integer                  | NO          |                   | NO
- accepted_at  | timestamp with time zone | YES         |                   | NO
- …
-(13 rows)
-```
+<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/postgresql-bang-dong-cot-primary-foreign-key/dbstudio-08.webp" alt="DBStudio chạy câu lệnh ở 01-schema.sql dòng 177 và hiển thị kết quả 13 dòng" width="1057" height="808" loading="lazy"></div><figcaption>DBStudio · <code>01-schema.sql</code>, câu ở dòng 177 · 13 dòng</figcaption></figure>
 
 - **`is_nullable`**: cột có được chứa `NULL` — giá trị «không có / chưa biết». `driver_id` là `YES` vì chuyến vừa đặt chưa có tài xế; `customer_id` là `NO` vì không chuyến nào thiếu khách.
 - **`column_default`**: giá trị tự điền khi câu lệnh thêm dòng không nhắc tới cột, ví dụ trạng thái mặc định `requested`.

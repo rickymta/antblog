@@ -182,16 +182,7 @@ Planner có dùng index không?
 EXPLAIN (COSTS OFF) SELECT count(*) FROM gps WHERE attrs @> '{"accuracy_m":5}';
 ```
 
-```text
---- 053 EXPLAIN @> with GIN, default planner choice
- Aggregate
-   ->  Append
-         ->  Seq Scan on gps_oct gps_1
-               Filter: (attrs @> '{"accuracy_m": 5}'::jsonb)
-         ->  Seq Scan on gps_nov gps_2
-               Filter: (attrs @> '{"accuracy_m": 5}'::jsonb)
-(6 rows)
-```
+<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/postgresql-jsonb-quan-he/dbstudio-06.webp" alt="DBStudio chạy truy vấn của bước 053 trong p06/run.mjs và hiển thị kế hoạch thực thi gồm 4 toán tử" width="1400" height="484" loading="lazy"></div><figcaption>DBStudio · bước 053 của <code>p06/run.mjs</code> · Kế hoạch truy vấn, 4 toán tử</figcaption></figure>
 
 Không. Planner chọn **Seq Scan** (quét tuần tự) trên cả hai partition. Cách giải thích hợp lý — là suy luận, không phải thứ lab đo: mỗi partition chỉ vài trăm dòng nằm trong một số ít page, và điều kiện khớp khoảng 10 % số dòng; đọc thẳng vài page rẻ hơn đi qua index rồi quay lại heap.
 
@@ -202,20 +193,7 @@ SET enable_seqscan = off;
 EXPLAIN (COSTS OFF) SELECT count(*) FROM gps WHERE attrs @> '{"accuracy_m":5}';
 ```
 
-```text
---- 053 EXPLAIN @> with GIN, enable_seqscan=off (demonstration only)
- Aggregate
-   ->  Append
-         ->  Bitmap Heap Scan on gps_oct gps_1
-               Recheck Cond: (attrs @> '{"accuracy_m": 5}'::jsonb)
-               ->  Bitmap Index Scan on gps_oct_attrs_idx
-                     Index Cond: (attrs @> '{"accuracy_m": 5}'::jsonb)
-         ->  Bitmap Heap Scan on gps_nov gps_2
-               Recheck Cond: (attrs @> '{"accuracy_m": 5}'::jsonb)
-               ->  Bitmap Index Scan on gps_nov_attrs_idx
-                     Index Cond: (attrs @> '{"accuracy_m": 5}'::jsonb)
-(10 rows)
-```
+<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/postgresql-jsonb-quan-he/dbstudio-07.webp" alt="DBStudio chạy truy vấn của bước 053 trong p06/run.mjs và hiển thị kế hoạch thực thi gồm 6 toán tử" width="1400" height="576" loading="lazy"></div><figcaption>DBStudio · bước 053 của <code>p06/run.mjs</code> · Kế hoạch truy vấn, 6 toán tử</figcaption></figure>
 
 `Bitmap Index Scan on gps_*_attrs_idx` cho thấy `@>` khớp operator class và index có thể phục vụ truy vấn. `Recheck Cond` xuất hiện vì GIN trả về tập ứng viên; với `jsonb_path_ops`, giá trị băm có thể trùng, nên dòng phải được kiểm lại trên heap. Đây là plan `COSTS OFF`, không có `ANALYZE`: nó **không chứng minh index nhanh hơn**. Muốn biết, bạn cần dữ liệu cỡ thật, `EXPLAIN (ANALYZE, BUFFERS)` và nhiều lần đo.
 

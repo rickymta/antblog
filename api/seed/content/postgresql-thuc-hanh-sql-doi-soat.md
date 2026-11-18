@@ -105,27 +105,16 @@ FROM payments AS p
 GROUP BY p.trip_id</code></pre>
 <p>View còn tính <code>thuc_thu</code>, <code>chenh = thuc_thu − phai_thu</code> và <code>loai_lech</code> bằng một <code>CASE</code> theo đúng thứ tự D1 (<code>NULL</code> khi khớp). <code>so_thu_lap_tien</code> = số charge thành công trừ số mức tiền khác nhau: &gt; 0 nghĩa là có hai charge cùng số tiền. Cột <code>chi_tiet</code> không dùng để tính; đó là bằng chứng đọc được cho người nhận báo cáo.</p>
 <p>Hai bất biến chứng minh sổ đúng grain:</p>
-<pre><code class="language-text"> dong_so | chuyen_khac_nhau | dem_doc_lap
----------+------------------+-------------
-    3168 |             3168 |        3168</code></pre>
+<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/postgresql-thuc-hanh-sql-doi-soat/dbstudio-01.webp" alt="DBStudio chạy câu lệnh ở 20-doi-soat-thanh-toan.sql dòng 84 và hiển thị kết quả 1 dòng" width="996" height="426" loading="lazy"></div><figcaption>DBStudio · <code>20-doi-soat-thanh-toan.sql</code>, câu ở dòng 84 · 1 dòng</figcaption></figure>
 <p>Số dòng sổ = số chuyến khác nhau = đếm độc lập trên <code>trips</code>; và <b>0</b> giao dịch không thuộc chuyến nào trong sổ (<code>NOT EXISTS</code>) — không có tiền "trôi nổi" của chuyến đang chạy hay tháng khác, nên tổng của sổ là tổng của toàn bộ <code>payments</code>.</p>
 </details>
 
 ### 3.3 D3 — Đối soát tổng và số dòng
 
 <details><summary><b>Lời giải</b></summary>
-<pre><code class="language-text"> so_chuyen | tong_phai_thu | tong_thuc_thu | chenh
------------+---------------+---------------+--------
-      3168 |     182287000 |     182555000 | 268000</code></pre>
+<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/postgresql-thuc-hanh-sql-doi-soat/dbstudio-02.webp" alt="DBStudio chạy câu lệnh ở 20-doi-soat-thanh-toan.sql dòng 75 và hiển thị kết quả 1 dòng" width="996" height="448" loading="lazy"></div><figcaption>DBStudio · <code>20-doi-soat-thanh-toan.sql</code>, câu ở dòng 75 · 1 dòng</figcaption></figure>
 <p>Phải thu 182.287.000 đ trùng doanh thu tháng của PG-012 và con số "đúng" của PG-013 — ba cách tính độc lập cho cùng một số. Đối soát số dòng: mỗi chuyến rơi vào đúng một nhóm (cột cuối là tổng charge thành công của nhóm):</p>
-<pre><code class="language-text">                   nhom                    | so_chuyen | tong_tien_charge
--------------------------------------------+-----------+------------------
- KHỚP — hoàn thành, có thu                 |      2671 |        181941000
- KHỚP — chuyến huỷ, không giao dịch        |       447 |                0
- KHỚP — hoàn thành cước 0 đ, không cần thu |        31 |                0
- KHỚP — chuyến huỷ, đã hoàn đủ             |        12 |          1008000
- LỆCH                                      |         7 |           691000
- TỔNG                                      |      3168 |        183640000</code></pre>
+<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/postgresql-thuc-hanh-sql-doi-soat/dbstudio-03.webp" alt="DBStudio chạy câu lệnh ở 20-doi-soat-thanh-toan.sql dòng 127 và hiển thị kết quả 6 dòng" width="996" height="818" loading="lazy"></div><figcaption>DBStudio · <code>20-doi-soat-thanh-toan.sql</code>, câu ở dòng 127 · 6 dòng</figcaption></figure>
 <p>Cầu nối từ tiền thu tới thực thu (thí nghiệm ngoài lab, cộng thẳng trên <code>payments</code> chỉ <code>succeeded</code>): 2.714 charge = 183.640.000 − 13 refund 1.080.000 + 2 adjustment −5.000 = <b>182.555.000</b>. Ngoài ra có 96 giao dịch <code>failed</code> và 1 <code>pending</code> không đổi tiền. Ba con số cùng đi qua một chuỗi cộng trừ kiểm được — đó là thứ kế toán ký.</p>
 </details>
 
@@ -164,10 +153,7 @@ GROUP BY p.trip_id</code></pre>
 <p><b>Ca khó nhưng đúng</b> — không được báo, và là lý do quy tắc phải tính đủ refund, adjustment, chỉ lấy <code>succeeded</code>: 100042 thẻ lỗi rồi thu lại thành công 82.000; 100048 trả một phần ví 104.000 + thẻ 15.000 = 119.000; 102235 ví trừ 82.000, CSKH sửa cước còn 72.000 và ghi adjustment −10.000; 103162 có thêm một charge <code>pending</code> 57.000 bên cạnh lần thu thành công; 103165 tiền mặt 23.000 + adjustment +5.000 = 28.000; 12 chuyến huỷ đã trừ thẻ rồi hoàn đủ (như 100366, 103.000 thu và hoàn); 31 chuyến cước 0 đ không có giao dịch.</p>
 <p><b>Quy tắc quá đơn giản</b> — cộng mọi charge bất kể trạng thái, bỏ qua refund và adjustment — báo lệch <b>115</b> chuyến, so với 7 của quy tắc đúng. Đối soát báo nhầm trăm dòng còn tệ hơn không đối soát: người đọc sẽ bỏ qua cả 7 dòng thật.</p>
 <p><b>Chênh lệch thời điểm, không phải lỗi.</b> Bảng kê cổng thanh toán gom theo ngày giao dịch; sổ gom theo ngày đặt chuyến. Chuyến đặt cuối ngày được thu sang ngày sau:</p>
-<pre><code class="language-text">    ngay    | theo_ngay_dat_chuyen | theo_ngay_giao_dich
-------------+----------------------+---------------------
- 2026-10-15 |              5862000 |             5823000
- 2026-10-16 |              5244000 |             5228000</code></pre>
+<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/postgresql-thuc-hanh-sql-doi-soat/dbstudio-04.webp" alt="DBStudio chạy câu lệnh ở 20-doi-soat-thanh-toan.sql dòng 184 và hiển thị kết quả 2 dòng" width="996" height="588" loading="lazy"></div><figcaption>DBStudio · <code>20-doi-soat-thanh-toan.sql</code>, câu ở dòng 184 · 2 dòng</figcaption></figure>
 <p>Cả tháng: theo ngày giao dịch trong tháng 10 ra 182.550.000, ít hơn sổ đúng 5.000 — adjustment +5.000 của 103165 (đặt 30/10) được CSKH ghi lúc 00:05 ngày 31/10. Hai cách đều đúng; biên bản phải ghi rõ dùng cách nào.</p>
 <p><b>Việc cần theo dõi.</b> Charge <code>TH-103162-P</code> 57.000 còn <code>pending</code> lúc chụp dữ liệu dù chuyến đã hoàn thành hơn 1 giờ. Không đổi tiền hôm nay, nhưng nếu cổng chuyển giao dịch này sang <code>succeeded</code>, 103162 sẽ trở thành THU TRÙNG.</p>
 </details>
@@ -244,12 +230,7 @@ FROM so_doi_soat AS s
 JOIN cities AS c ON c.id = s.city_id
 GROUP BY ROLLUP (c.code)
 ORDER BY grouping(c.code), c.code COLLATE "C";</code></pre>
-<pre><code class="language-text">  tp  | so_chuyen | phai_thu  | thuc_thu  | chenh  | so_lech
-------+-----------+-----------+-----------+--------+---------
- DN   |       459 |  26416000 |  26318000 | -98000 |       1
- HN   |      1106 |  62991000 |  62906000 | -85000 |       2
- SG   |      1603 |  92880000 |  93331000 | 451000 |       4
- TỔNG |      3168 | 182287000 | 182555000 | 268000 |       7</code></pre>
+<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/postgresql-thuc-hanh-sql-doi-soat/dbstudio-05.webp" alt="DBStudio chạy câu lệnh ở pg020-bai-tap.sql dòng 49 và hiển thị kết quả 4 dòng" width="996" height="582" loading="lazy"></div><figcaption>DBStudio · <code>pg020-bai-tap.sql</code>, câu ở dòng 49 · 4 dòng</figcaption></figure>
 <p>Dòng TỔNG trùng mục 3.3 từng số. SG gánh +451.000 nhưng đó là tổng của bốn dòng ngược dấu (−72.000, +85.000, +96.000, +342.000): con số ròng nhỏ có thể che các dòng lớn, nên báo cáo theo thành phố phải đi kèm danh sách.</p>
 </details>
 

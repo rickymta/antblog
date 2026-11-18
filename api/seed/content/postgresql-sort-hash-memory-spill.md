@@ -43,13 +43,7 @@ EXPLAIN (ANALYZE, COSTS OFF, TIMING OFF, SUMMARY OFF)
 SELECT code, fare FROM trips ORDER BY fare DESC, code;
 ```
 
-```text
- Sort (actual rows=1000000.00 loops=1)
-   Sort Key: fare DESC, code
-   Sort Method: external merge  Disk: 21616kB
-   Buffers: shared hit=6 read=19441, temp read=2702 written=2716
-   ->  Seq Scan on trips (actual rows=1000000.00 loops=1)
-```
+<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/postgresql-sort-hash-memory-spill/dbstudio-01.webp" alt="DBStudio chạy câu lệnh ở 29-sort-hash-spill.sql dòng 15 và hiển thị kế hoạch thực thi gồm 2 toán tử, có số liệu thực tế" width="1400" height="392" loading="lazy"></div><figcaption>DBStudio · <code>29-sort-hash-spill.sql</code>, câu ở dòng 15 · Kế hoạch truy vấn, 2 toán tử · ANALYZE</figcaption></figure>
 
 `external merge` nghĩa là sắp từng phần vừa `work_mem`, ghi mỗi phần (run) ra file tạm, rồi trộn các phần. `temp written=2716` là số khối 8 kB đã ghi tạm. Đổi `work_mem` và thêm `LIMIT`:
 
@@ -81,13 +75,7 @@ Theo tài liệu, `log_temp_files = 0` ghi nhật ký mọi file, giá trị dư
 
 Thí nghiệm C reset `pg_stat_statements` rồi chạy ba câu báo cáo; chỉ câu đếm theo khách có khối tạm:
 
-```text
-                                  cau                                   | calls | co_tran
-------------------------------------------------------------------------+-------+---------
- SELECT count(*) FROM (SELECT customer_id, count(*) FROM trips GROUP BY |     1 | t
- SELECT code, fare FROM trips ORDER BY fare DESC, code LIMIT $1         |     1 | f
- SELECT count(*) FROM trips WHERE fare >= $1                            |     1 | f
-```
+<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/postgresql-sort-hash-memory-spill/dbstudio-02.webp" alt="DBStudio chạy câu lệnh ở pg029-spill-bai-tap.sql dòng 61 và hiển thị kết quả 3 dòng" width="1066" height="508" loading="lazy"></div><figcaption>DBStudio · <code>pg029-spill-bai-tap.sql</code>, câu ở dòng 61 · 3 dòng</figcaption></figure>
 
 `pg_stat_statements` phải nằm trong `shared_preload_libraries` (cần khởi động lại server) — cluster lab đã nạp sẵn, bài chỉ `CREATE EXTENSION`.
 
@@ -156,17 +144,7 @@ Giới hạn: một máy, một loại câu, một phiên, dữ liệu tổng h�
 
 Câu báo cáo thường không chỉ có một nút. Câu dưới có ba:
 
-```text
- Sort
-   Sort Key: (count(*)) DESC
-   ->  HashAggregate
-         Group Key: c.kind, t.city_id
-         ->  Hash Join
-               Hash Cond: (t.customer_id = c.id)
-               ->  Seq Scan on trips t
-               ->  Hash
-                     ->  Seq Scan on customers c
-```
+<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/postgresql-sort-hash-memory-spill/dbstudio-03.webp" alt="DBStudio chạy câu lệnh ở 29-sort-hash-spill.sql dòng 102 và hiển thị kế hoạch thực thi gồm 6 toán tử" width="1400" height="576" loading="lazy"></div><figcaption>DBStudio · <code>29-sort-hash-spill.sql</code>, câu ở dòng 102 · Kế hoạch truy vấn, 6 toán tử</figcaption></figure>
 
 Trần lý thuyết cho một phiên: Hash 8 MB + HashAggregate 8 MB + Sort 4 MB = 20 MB. Lab có `max_connections = 40`; nếu cả 40 phiên cùng chạy câu này, trần là **800 MB** — gấp hơn 6 lần `shared_buffers` 128MB. Đây là phép nhân minh hoạ (chỉ thị `expect-line: 40 | 4 | 2 | 800` của lab), không phải số đo; thực tế hiếm khi mọi nút cùng đầy.
 
@@ -208,12 +186,7 @@ Dòng cuối là cái bẫy: index không chứa đủ cột nên mỗi dòng ph
 
 **Đặt trần đĩa.** `temp_file_limit` (mặc định `-1`, không giới hạn) giới hạn tổng file tạm *một tiến trình* dùng cùng lúc; vượt thì giao dịch bị huỷ. Thí nghiệm B:
 
-```text
-SET LOCAL temp_file_limit = '10MB';
-SELECT count(*) FROM (SELECT code, fare FROM trips ORDER BY fare DESC, code OFFSET 0) AS x;
-ERROR:  temporary file size exceeds "temp_file_limit" (10240kB)
--- [lab] SQLSTATE 53400
-```
+<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/postgresql-sort-hash-memory-spill/dbstudio-04.webp" alt="DBStudio chạy câu lệnh ở pg029-spill-bai-tap.sql dòng 27 và hiển thị thông báo lỗi" width="1075" height="346" loading="lazy"></div><figcaption>DBStudio · <code>pg029-spill-bai-tap.sql</code>, câu ở dòng 27 · lỗi</figcaption></figure>
 
 Cùng trần đó, câu `LIMIT 20` chạy bình thường; và `CREATE TEMP TABLE … AS` 1 triệu dòng với trần `1MB` vẫn chạy — tài liệu ghi bảng tạm tường minh không tính vào giới hạn này.
 

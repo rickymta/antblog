@@ -77,25 +77,13 @@ RETURNING response;
 COMMIT;
 ```
 
-```text
-                   response
-----------------------------------------------
- {"status": "requested", "trip_code": 400200}
-(1 row)
-```
+<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/postgresql-idempotency-outbox-transaction/dbstudio-01.webp" alt="DBStudio chạy câu lệnh ở 39-idempotency-outbox.sql dòng 62 và hiển thị kết quả 1 dòng" width="996" height="426" loading="lazy"></div><figcaption>DBStudio · <code>39-idempotency-outbox.sql</code>, câu ở dòng 62 · 1 dòng</figcaption></figure>
 
 Phản hồi «mất trên đường về». App gửi lại, cùng khoá:
 
-```text
- key
------
-(0 rows)
+<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/postgresql-idempotency-outbox-transaction/dbstudio-02.webp" alt="DBStudio chạy câu lệnh ở 39-idempotency-outbox.sql dòng 78 và hiển thị kết quả 0 dòng" width="996" height="396" loading="lazy"></div><figcaption>DBStudio · <code>39-idempotency-outbox.sql</code>, câu ở dòng 78 · 0 dòng</figcaption></figure>
 
-INSERT 0 0
-                   response                   | cung_noi_dung
-----------------------------------------------+---------------
- {"status": "requested", "trip_code": 400200} | t
-```
+<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/postgresql-idempotency-outbox-transaction/dbstudio-03.webp" alt="DBStudio chạy câu lệnh ở 39-idempotency-outbox.sql dòng 87 và hiển thị kết quả 1 dòng" width="996" height="382" loading="lazy"></div><figcaption>DBStudio · <code>39-idempotency-outbox.sql</code>, câu ở dòng 87 · 1 dòng</figcaption></figure>
 
 `ON CONFLICT DO NOTHING` không chèn được (0 dòng) ⇒ server đọc và trả lại **đúng** phản hồi đã lưu, không tạo chuyến thứ hai. Cột `cung_noi_dung` so hash của request: khoá giống mà nội dung khác là lỗi phía client, phải báo lỗi chứ không được trả kết quả cũ mà không cảnh báo.
 
@@ -147,18 +135,7 @@ $$;
 
 Ba lần gọi với khoá `dat-0002-bbbb`: lần đầu, gửi lại cùng nội dung, rồi cùng khoá nhưng `fare` 99000:
 
-```text
-                           dat_chuyen
-----------------------------------------------------------------
- {"status": "requested", "lap_lai": false, "trip_code": 400201}
-…
- {"status": "requested", "lap_lai": true, "trip_code": 400201}
-…
-ERROR:  idempotency key dat-0002-bbbb đã dùng cho một request khác
-HINT:  Client phải sinh khoá MỚI cho request mới (HTTP 422)
-CONTEXT:  PL/pgSQL function dat_chuyen(text,uuid,jsonb) line 14 at RAISE
--- [lab] SQLSTATE P0001
-```
+<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/postgresql-idempotency-outbox-transaction/dbstudio-04.webp" alt="DBStudio chạy câu lệnh ở 39-idempotency-outbox.sql dòng 135 và hiển thị kết quả 1 dòng" width="996" height="338" loading="lazy"></div><figcaption>DBStudio · <code>39-idempotency-outbox.sql</code>, câu ở dòng 135 · 1 dòng</figcaption></figure>
 
 `P0001` là mã mặc định của `RAISE EXCEPTION` khi không ghi mã riêng (tài liệu PL/pgSQL, mục Errors and Messages). Hash tính trên `jsonb` chứ không trên chuỗi gốc: `jsonb` không giữ khoảng trắng và thứ tự khoá, nên thư viện JSON phía client xếp khoá khác đi vẫn là «cùng request» (bài tập 1). Thứ tự khoá trong kết quả in ra (`status` trước `trip_code`) cũng do `jsonb` tự sắp, không phải do hàm.
 
@@ -193,14 +170,7 @@ Ca khó nhất (§4): request đầu tạo xong mọi thứ nhưng server sập 
 
 A bị huỷ ⇒ khoá của A biến mất cùng chuyến, sự kiện và tin outbox ⇒ B chèn được khoá và **tự xử lý request**. Không có khoá mồ côi để dọn, không có chuyến nửa vời:
 
-```text
-      key      |  code  | su_kien | outbox
----------------+--------+---------+--------
- dat-0001-aaaa | 400200 |       1 |      1
- dat-0002-bbbb | 400201 |       1 |      1
- dat-0003-cccc | 400202 |       1 |      1
- dat-0004-dddd | 400204 |       1 |      1
-```
+<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/postgresql-idempotency-outbox-transaction/dbstudio-05.webp" alt="DBStudio chạy câu lệnh ở 39-idempotency-outbox.sql dòng 205 và hiển thị kết quả 4 dòng" width="996" height="516" loading="lazy"></div><figcaption>DBStudio · <code>39-idempotency-outbox.sql</code>, câu ở dòng 205 · 4 dòng</figcaption></figure>
 
 `SELECT count(*) FROM trips WHERE code = 400203` → `0`. Mã 400203 bị «đốt» vì sequence không quay lui khi ROLLBACK (PG-031).
 
@@ -226,14 +196,7 @@ Bước 2 vẫn là hai nơi. Lab §5 cho publisher chết đúng giữa «gửi
 
 Dòng outbox id 4 không có: nó thuộc giao dịch đã huỷ ở mục 5 (identity cũng không quay lui). Broker cuối cùng:
 
-```text
- outbox_id | count |       string_agg
------------+-------+-------------------------
-         1 |     2 | publisher-A,publisher-B
-         2 |     2 | publisher-A,publisher-B
-         3 |     1 | publisher-B
-         5 |     1 | publisher-B
-```
+<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/postgresql-idempotency-outbox-transaction/dbstudio-06.webp" alt="DBStudio chạy câu lệnh ở 39-idempotency-outbox.sql dòng 273 và hiển thị kết quả 4 dòng" width="996" height="450" loading="lazy"></div><figcaption>DBStudio · <code>39-idempotency-outbox.sql</code>, câu ở dòng 273 · 4 dòng</figcaption></figure>
 
 Không mất tin nào, nhưng tin 1 và 2 tới **hai lần**. Đây là bản chất của outbox: giao tin **ít nhất một lần** (at-least-once). `FOR UPDATE SKIP LOCKED` cho nhiều publisher chạy song song mà không lấy trùng dòng **đang bị khoá** ([PG-036](/articles/postgresql-for-update-skip-locked)); nó không chống được trùng sau khi publisher chết, vì khoá dòng chết theo giao dịch.
 
@@ -260,16 +223,7 @@ END
 $$;
 ```
 
-```text
- seq | outbox_id |     xu_ly_tin
------+-----------+-------------------
-   1 |         1 | đã gửi thông báo
-   2 |         2 | đã gửi thông báo
-   3 |         1 | bỏ qua (đã xử lý)
-   4 |         2 | bỏ qua (đã xử lý)
-   5 |         3 | đã gửi thông báo
-   6 |         5 | đã gửi thông báo
-```
+<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/postgresql-idempotency-outbox-transaction/dbstudio-07.webp" alt="DBStudio chạy câu lệnh ở 39-idempotency-outbox.sql dòng 305 và hiển thị kết quả 6 dòng" width="996" height="466" loading="lazy"></div><figcaption>DBStudio · <code>39-idempotency-outbox.sql</code>, câu ở dòng 305 · 6 dòng</figcaption></figure>
 
 Sáu tin cho bốn sự kiện ⇒ mỗi `outbox_id` đúng **1** dòng `notifications`. Cùng mẫu với idempotency key ở mục 2, chỉ đổi khoá: request dùng khoá do client sinh, consumer dùng id của sự kiện. Hai consumer nhận cùng một tin **đồng thời** cũng chờ nhau ở khoá chính như mục 4 — thí nghiệm ở bài tập 3.
 

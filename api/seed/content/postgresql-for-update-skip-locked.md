@@ -77,9 +77,7 @@ A giữ việc 3 trong một giao dịch mở. B hỏi với `NOWAIT`:
 SELECT id FROM jobs WHERE status = 'queued' ORDER BY priority, id LIMIT 1 FOR UPDATE NOWAIT;
 ```
 
-```text
-ERROR:  could not obtain lock on row in relation "jobs"
-```
+<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/postgresql-for-update-skip-locked/dbstudio-01.webp" alt="DBStudio chạy câu lệnh ở 36-for-update-skip-locked.sql dòng 77 và hiển thị thông báo lỗi" width="996" height="346" loading="lazy"></div><figcaption>DBStudio · <code>36-for-update-skip-locked.sql</code>, câu ở dòng 77 · lỗi</figcaption></figure>
 
 SQLSTATE **`55P03`** (lock_not_available — cùng mã với `lock_timeout` ở PG-033). B không chờ, nhưng cũng không lấy được việc nào: lỗi làm hỏng giao dịch, B phải `ROLLBACK` và hỏi lại. `NOWAIT` hợp với thao tác *một* dòng cụ thể («mở chuyến 400108 để sửa — nếu ai đang sửa thì báo ngay»), không hợp với hàng đợi.
 
@@ -173,12 +171,7 @@ SELECT j.id, j.status, p.modes, lab_nhan(p.pids[1]) AS phien
 FROM jobs AS j JOIN pgrowlocks('jobs') AS p ON p.locked_row = j.ctid;
 ```
 
-```text
- id | status |         modes         | phien
-----+--------+-----------------------+-------
- 11 | queued | {"For No Key Update"} | A
-(1 row)
-```
+<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/postgresql-for-update-skip-locked/dbstudio-02.webp" alt="DBStudio chạy câu lệnh ở pg036-lease-fencing-lo-viec-idle-timeout.sql dòng 128 và hiển thị kết quả 1 dòng" width="996" height="360" loading="lazy"></div><figcaption>DBStudio · <code>pg036-lease-fencing-lo-viec-idle-timeout.sql</code>, câu ở dòng 128 · 1 dòng</figcaption></figure>
 
 (`lab_nhan` là hàm tiện ích của lab, đổi PID thành nhãn phiên.) `pgrowlocks` đọc cả bảng và không cho ảnh chụp nhất quán — dùng để điều tra, không đặt trong vòng lặp giám sát mỗi giây trên bảng lớn. Cách giám sát thường xuyên rẻ hơn là tìm việc `queued` có `created_at` quá cũ, hoặc `pg_stat_activity` có phiên `idle in transaction` lâu.
 
@@ -199,12 +192,7 @@ SELECT (SELECT count(*) FROM jobs WHERE status = 'queued') AS dem_thuong,
        (SELECT count(*) FROM (SELECT id FROM jobs WHERE status = 'queued' FOR UPDATE SKIP LOCKED) AS s) AS dem_skip_locked;
 ```
 
-```text
- dem_thuong | dem_skip_locked
-------------+-----------------
-          1 |               0
-(1 row)
-```
+<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/postgresql-for-update-skip-locked/dbstudio-03.webp" alt="DBStudio chạy câu lệnh ở 36-for-update-skip-locked.sql dòng 235 và hiển thị kết quả 1 dòng" width="996" height="382" loading="lazy"></div><figcaption>DBStudio · <code>36-for-update-skip-locked.sql</code>, câu ở dòng 235 · 1 dòng</figcaption></figure>
 
 SKIP LOCKED trả về «những dòng tôi khoá được ngay lúc này», không phải «những dòng đang có» — và câu đếm kiểu đó còn khoá mọi việc nó đếm được trong lúc chạy. Hãy dùng SKIP LOCKED để *lấy* việc; đếm và giám sát bằng `SELECT` thường.
 

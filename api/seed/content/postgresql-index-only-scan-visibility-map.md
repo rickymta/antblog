@@ -68,11 +68,7 @@ WHERE customer_id = :'kh_b1' AND requested_at >= TIMESTAMPTZ '2026-10-01 00:00+0
 
 Index Only Scan với mỗi mục index tìm được sẽ tra bit all-visible của page heap tương ứng. Bit bật ⇒ trả dữ liệu từ index luôn. Bit tắt ⇒ phải đọc tuple trong heap để kiểm tra phiên bản — mỗi lần như vậy cộng vào **`Heap Fetches`**. VM rất nhỏ (thí nghiệm, mục A):
 
-```text
- heap_bytes | vm_bytes
-------------+----------
-  159260672 |     8192
-```
+<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/postgresql-index-only-scan-visibility-map/dbstudio-01.webp" alt="DBStudio chạy câu lệnh ở pg026-heap-fetch-hot-partial-include.sql dòng 12 và hiển thị kết quả 1 dòng" width="996" height="360" loading="lazy"></div><figcaption>DBStudio · <code>pg026-heap-fetch-hot-partial-include.sql</code>, câu ở dòng 12 · 1 dòng</figcaption></figure>
 
 159 MB heap, một page VM 8 kB. Extension `pg_visibility` đọc được bản đồ:
 
@@ -81,11 +77,7 @@ SELECT all_visible, (SELECT relpages FROM pg_class WHERE oid = 'trips'::regclass
 FROM pg_visibility_map_summary('trips');
 ```
 
-```text
- all_visible | so_page
--------------+---------
-       19441 |   19441
-```
+<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/postgresql-index-only-scan-visibility-map/dbstudio-02.webp" alt="DBStudio chạy câu lệnh ở 26-index-only-scan.sql dòng 19 và hiển thị kết quả 1 dòng" width="996" height="382" loading="lazy"></div><figcaption>DBStudio · <code>26-index-only-scan.sql</code>, câu ở dòng 19 · 1 dòng</figcaption></figure>
 
 Bảng vừa VACUUM: mọi page đều all-visible. Tài liệu nêu một quy tắc quan trọng: bit VM chỉ do **VACUUM bật**, còn **bất kỳ thao tác sửa dữ liệu nào** trên page cũng **xoá** bit này. Bản đồ «bảo thủ»: bit bật thì chắc chắn đúng; bit tắt thì có thể page vẫn sạch, chỉ là chưa ai kiểm lại.
 
@@ -110,11 +102,7 @@ Số page all-visible còn **16.103**; bảng lớn thêm 174 page (19.441 → 1
 
 Vẫn 9.365 dòng, vẫn Index Only Scan, nhưng **18.536 heap fetch**. Vì sao gần gấp đôi số dòng? Index giờ có **hai** mục cho phần lớn chuyến: mục cũ trỏ phiên bản cũ (đã chết) và mục mới trỏ phiên bản mới. Cả hai loại page đều mất bit all-visible, nên với mỗi mục PostgreSQL phải ghé heap — với mục cũ, chỉ để phát hiện phiên bản đã chết và bỏ qua. Thí nghiệm đếm chính xác:
 
-```text
- n_tup_upd | n_tup_hot_upd
------------+---------------
-      9365 |           194
-```
+<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/postgresql-index-only-scan-visibility-map/dbstudio-03.webp" alt="DBStudio chạy câu lệnh ở pg026-heap-fetch-hot-partial-include.sql dòng 23 và hiển thị kết quả 1 dòng" width="996" height="338" loading="lazy"></div><figcaption>DBStudio · <code>pg026-heap-fetch-hot-partial-include.sql</code>, câu ở dòng 23 · 1 dòng</figcaption></figure>
 
 194 lần là **HOT update** (phiên bản mới nằm cùng page, không tạo mục index mới — PG-024). Vậy số mục index cần kiểm = 9.365 mục cũ + 9.171 mục mới = **18.536** — khớp từng đơn vị với `Heap Fetches`.
 
@@ -145,11 +133,7 @@ Lần đọc đầu đã gặp các phiên bản cũ chết với mọi giao d�
 VACUUM trips;
 ```
 
-```text
- all_visible | so_page
--------------+---------
-       19615 |   19615
-```
+<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/postgresql-index-only-scan-visibility-map/dbstudio-04.webp" alt="DBStudio chạy câu lệnh ở 26-index-only-scan.sql dòng 72 và hiển thị kết quả 1 dòng" width="996" height="338" loading="lazy"></div><figcaption>DBStudio · <code>26-index-only-scan.sql</code>, câu ở dòng 72 · 1 dòng</figcaption></figure>
 
 Page của B1: `t | t`. Câu của màn B1 trở về `Heap Fetches: 0`, **96 page** (index đã to thêm vì các mục mới), DO-DAC **0,64 ms**. `VACUUM (VERBOSE)` cho thấy nó làm gì (thí nghiệm, trích):
 
