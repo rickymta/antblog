@@ -39,13 +39,7 @@ SELECT requested_at FROM trips
 WHERE customer_id = :'kh_b1' AND requested_at >= TIMESTAMPTZ '2026-10-01 00:00+07';
 ```
 
-```text
- Index Only Scan using ix_trips_customer_requested on trips (actual rows=9365.00 loops=1)
-   Index Cond: ((customer_id = '239ec4d4-…'::uuid) AND (requested_at >= '2026-10-01 00:00:00+07'::timestamp with time zone))
-   Heap Fetches: 0
-   Index Searches: 1
-   Buffers: shared hit=1 read=49
-```
+<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/postgresql-index-only-scan-visibility-map/dbstudio-05.webp" alt="DBStudio chạy câu lệnh ở 26-index-only-scan.sql dòng 25 và hiển thị kế hoạch thực thi gồm 1 toán tử, có số liệu thực tế" width="1400" height="346" loading="lazy"></div><figcaption>DBStudio · <code>26-index-only-scan.sql</code>, câu ở dòng 25 · Kế hoạch truy vấn, 1 toán tử · ANALYZE</figcaption></figure>
 
 **Index Only Scan** (quét chỉ index) trả kết quả từ mục index mà không đọc heap. Điều kiện thứ nhất hiển nhiên: câu chỉ dùng cột có trong index. Thêm `fare` — cột không có trong index:
 
@@ -178,11 +172,7 @@ CREATE INDEX ix_trips_khach_bao_gom ON trips (customer_id, requested_at DESC) IN
 
 Cột trong `INCLUDE` là cột **không phải khoá** (non-key): chỉ «đi kèm» ở mục lá, không dùng để tìm hay sắp, không tính vào tính duy nhất.
 
-```text
- Index Only Scan using ix_trips_khach_bao_gom on trips (actual rows=9365.00 loops=1)
-   Heap Fetches: 0
-   Buffers: shared hit=1 read=69
-```
+<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/postgresql-index-only-scan-visibility-map/dbstudio-06.webp" alt="DBStudio chạy câu lệnh ở 26-index-only-scan.sql dòng 93 và hiển thị kế hoạch thực thi gồm 1 toán tử, có số liệu thực tế" width="1400" height="346" loading="lazy"></div><figcaption>DBStudio · <code>26-index-only-scan.sql</code>, câu ở dòng 93 · Kế hoạch truy vấn, 1 toán tử · ANALYZE</figcaption></figure>
 
 70 page, DO-DAC **0,75 ms** so với 4,46 ms. Cái giá:
 

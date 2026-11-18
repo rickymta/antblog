@@ -204,18 +204,7 @@ WHERE requested_at >= '2026-11-03 08:00:00+07'
 ORDER BY accepted_at DESC, code;
 ```
 
-```text
-  code  |   status   |      accepted_at
---------+------------+------------------------
- 100013 | searching  |
- 100014 | requested  |
- 100029 | completed  | 2026-11-03 09:01:00+07
- 100012 | accepted   | 2026-11-03 08:21:00+07
- 100011 | arriving   | 2026-11-03 08:12:00+07
- 100010 | in_transit | 2026-11-03 08:06:00+07
- 100009 | picked_up  | 2026-11-03 08:02:00+07
-(7 rows)
-```
+<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/postgresql-select-filter-order-limit/dbstudio-14.webp" alt="DBStudio chạy câu lệnh ở pg007-loi-thuong-gap.sql dòng 16 và hiển thị kết quả 6 dòng" width="996" height="554" loading="lazy"></div><figcaption>DBStudio · <code>pg007-loi-thuong-gap.sql</code>, câu ở dòng 16 · 6 dòng</figcaption></figure>
 
 Hai chuyến chưa ai nhận chiếm đầu danh sách — có thể đúng ý (cần chú ý chuyến chưa có tài xế), có thể không. Câu 7 của lab nói rõ ý định bằng `ORDER BY accepted_at DESC NULLS LAST, code`: năm dòng có giờ nhận giữ nguyên thứ tự, 100013 rồi 100014 xuống cuối. Hai dòng NULL hoà nhau trên `accepted_at`; `code` phân định chúng.
 

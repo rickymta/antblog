@@ -103,15 +103,9 @@ WHERE conrelid = 'nhap_khong_ten'::regclass
 ORDER BY conname;
 ```
 
-```text
-          conname          | contype
----------------------------+---------
- nhap_khong_ten_code_key   | u
- nhap_khong_ten_fare_check | c
- nhap_khong_ten_kind_check | c
- nhap_khong_ten_pkey       | p
-(4 rows)
-```
+<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/postgresql-create-table-constraints/dbstudio-12.webp" alt="DBStudio chạy câu lệnh ở pg005-ten-rang-buoc.sql dòng 12 và hiển thị kết quả 7 dòng" width="996" height="562" loading="lazy"></div><figcaption>DBStudio · <code>pg005-ten-rang-buoc.sql</code>, câu ở dòng 12 · 7 dòng</figcaption></figure>
+
+Từ PostgreSQL 18, `NOT NULL` cũng được lưu thành ràng buộc trong `pg_constraint` (`contype = 'n'`, tên dạng `nhap_khong_ten_fare_not_null`), nên danh sách có bảy dòng; bản 17 trở về trước chỉ có bốn dòng `u`, `c`, `c`, `p`.
 
 Tên tự sinh đọc được, nhưng tài liệu không cam kết cách sinh, và không cho biết quy tắc nào bị vi phạm. Lab đặt tên mọi ràng buộc theo quy ước `pk_<bảng>`, `fk_<bảng>_<cột>`, `uq_<bảng>_<cột>`, `ck_<bảng>_<quy tắc>`. Lợi ích cụ thể:
 

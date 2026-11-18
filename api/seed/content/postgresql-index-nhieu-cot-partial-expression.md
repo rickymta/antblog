@@ -40,15 +40,7 @@ WHERE city_id = 3 AND requested_at >= TIMESTAMPTZ '2026-10-15 00:00+07'
                   AND requested_at <  TIMESTAMPTZ '2026-10-16 00:00+07';
 ```
 
-```text
- Aggregate (actual rows=1.00 loops=1)
-   Buffers: shared hit=3 read=7
-   ->  Index Only Scan using ix_trips_city_requested on trips (actual rows=768.00 loops=1)
-         Index Cond: ((city_id = 3) AND (requested_at >= '2026-10-15 00:00:00+07'::timestamp with time zone) AND …)
-         Heap Fetches: 0
-         Index Searches: 1
-         Buffers: shared hit=3 read=7
-```
+<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/postgresql-index-nhieu-cot-partial-expression/dbstudio-02.webp" alt="DBStudio chạy câu lệnh ở 25-index-nhieu-cot-partial-expression.sql dòng 12 và hiển thị kế hoạch thực thi gồm 2 toán tử, có số liệu thực tế" width="1400" height="392" loading="lazy"></div><figcaption>DBStudio · <code>25-index-nhieu-cot-partial-expression.sql</code>, câu ở dòng 12 · Kế hoạch truy vấn, 2 toán tử · ANALYZE</figcaption></figure>
 
 Một lần dò cây tới mục đầu tiên `(3, 15/10 00:00)`, rồi đọc tiếp các lá liền nhau tới khi gặp `(3, 16/10)`: **10 page** cho 768 chuyến. (`Index Only Scan` và `Heap Fetches` là chủ đề của [PG-026](/articles/postgresql-index-only-scan-visibility-map); ở đây chỉ cần biết câu không phải đọc heap.)
 

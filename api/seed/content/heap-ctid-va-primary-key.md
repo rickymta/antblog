@@ -141,15 +141,7 @@ EXPLAIN (COSTS OFF) SELECT * FROM trips WHERE id = 'ab31fe65-42a9-425f-8abd-48b3
 
 Cost `0.29..8.30 rows=1 width=125` khớp từng chữ số với bản trước của bài. Nhiều dòng khớp (chuyến của một thành phố trong một ngày) thì planner chọn **Bitmap Heap Scan**: gom ctid từ index, sắp theo page, đọc mỗi page heap một lần. Lab thay `now()` của bản trước bằng một mốc thời gian cố định:
 
-```text
-EXPLAIN SELECT * FROM trips
-WHERE city_id = 1 AND requested_at >= TIMESTAMPTZ '2026-10-31 01:00+07' - interval '1 day';
-
- Bitmap Heap Scan on trips  (cost=5.43..247.17 rows=111 width=125)
-   Recheck Cond: ((city_id = 1) AND (requested_at >= …))
-   ->  Bitmap Index Scan on ix_trips_city_requested  (cost=0.00..5.40 rows=111 width=0)
-         Index Cond: ((city_id = 1) AND (requested_at >= …))
-```
+<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/heap-ctid-va-primary-key/dbstudio-07.webp" alt="DBStudio chạy câu lệnh ở 24-heap-ctid-hot.sql dòng 42 và hiển thị kế hoạch thực thi gồm 2 toán tử" width="1400" height="392" loading="lazy"></div><figcaption>DBStudio · <code>24-heap-ctid-hot.sql</code>, câu ở dòng 42 · Kế hoạch truy vấn, 2 toán tử</figcaption></figure>
 
 ## 5. Heap đang thẳng hàng với cột nào?
 
@@ -204,12 +196,7 @@ WHERE relid = 'bai_cu.trips'::regclass;
 
 `fillfactor` của bảng là phần trăm mỗi page được lấp khi chèn; phần còn lại để dành cho phiên bản mới của UPDATE. Lab chép 20.000 chuyến ra hai bảng, `fillfactor` 100 và 90, cùng có index `driver_id`, rồi sửa giá 2.000 chuyến cũ rải đều (mỗi chuyến thứ 10):
 
-```text
- relname | so_page | n_tup_upd | n_tup_hot_upd | hot_pct
----------+---------+-----------+---------------+---------
- ff100   |     384 |      2000 |            21 |     1.1
- ff90    |     448 |      2000 |          2000 |   100.0
-```
+<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/heap-ctid-va-primary-key/dbstudio-08.webp" alt="DBStudio chạy câu lệnh ở 24-heap-ctid-hot.sql dòng 128 và hiển thị kết quả 1 dòng" width="996" height="382" loading="lazy"></div><figcaption>DBStudio · <code>24-heap-ctid-hot.sql</code>, câu ở dòng 128 · 1 dòng</figcaption></figure>
 
 (Ghép từ hai câu của lab; `CREATE TABLE AS` ghi bằng đường chèn hàng loạt nên ra 384 page chứ không đúng 374 như bảng gốc.) Ta tốn thêm 17 % dung lượng heap để đổi lấy 100 % HOT với kiểu UPDATE này. Đánh đổi đó đáng với bảng bị sửa nhiều như `trips`; bảng chỉ chèn như `trip_events` thì giữ 100.
 

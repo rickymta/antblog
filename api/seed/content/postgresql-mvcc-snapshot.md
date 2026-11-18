@@ -50,12 +50,7 @@ WHERE code = 400101
 RETURNING fare, version, xid_td(xmin) AS xmin, xid_td(xmax) AS xmax;
 ```
 
-```text
- fare  | version | xmin | xmax
--------+---------+------+------
- 35000 |       2 | X+1  | 0
-(1 row)
-```
+<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/postgresql-mvcc-snapshot/dbstudio-01.webp" alt="DBStudio chạy câu lệnh ở pg033-transaction-timeout.sql dòng 32 và hiển thị kết quả 1 dòng" width="996" height="338" loading="lazy"></div><figcaption>DBStudio · <code>pg033-transaction-timeout.sql</code>, câu ở dòng 32 · 1 dòng</figcaption></figure>
 
 Sau câu `SELECT`, A vẫn chưa có xid (NULL): PostgreSQL chỉ cấp xid ở **câu ghi đầu tiên** của giao dịch, giao dịch chỉ đọc không tiêu tốn xid. Câu `UPDATE` làm A nhận xid **X+1**, và `RETURNING` đọc chính phiên bản mới: `xmin = X+1` (A tạo ra nó), `xmax = 0`.
 
@@ -152,12 +147,7 @@ SELECT fare, xid_td(xmin) AS xmin, xid_td(xmax) AS xmax, pg_xact_status(xid_x(3)
 FROM trips WHERE code = 400103;
 ```
 
-```text
- fare  | xmin | xmax | trang_thai_x3
--------+------+------+---------------
- 33000 | <X   | X+3  | aborted
-(1 row)
-```
+<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/postgresql-mvcc-snapshot/dbstudio-02.webp" alt="DBStudio chạy câu lệnh ở 32-mvcc-snapshot.sql dòng 148 và hiển thị kết quả 1 dòng" width="996" height="382" loading="lazy"></div><figcaption>DBStudio · <code>32-mvcc-snapshot.sql</code>, câu ở dòng 148 · 1 dòng</figcaption></figure>
 
 `ROLLBACK` không «xoá» phiên bản 99.000 đã ghi vào page, cũng không xoá `xmax = X+3` trên bản cũ. Lệnh này chỉ ghi nhận X+3 là `aborted`. Từ đó, phiên đọc tra trạng thái và biết: bản 99.000 không bao giờ có hiệu lực, bản 33.000 **vẫn sống** dù `xmax ≠ 0`. Vì vậy đừng bao giờ suy «`xmax` khác 0 ⇒ dòng đã bị xoá»: giá trị đó còn có thể do giao dịch đang chạy, giao dịch đã huỷ, hoặc chỉ là khoá dòng (`FOR UPDATE` — [PG-033](/articles/postgresql-lock-row-table)).
 

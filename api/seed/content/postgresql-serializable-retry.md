@@ -161,14 +161,7 @@ Cùng lịch, nhưng hai phiên `SET enable_seqscan = off` để truy vấn đi 
 
 Hết khoá mức bảng ⇒ **cả hai COMMIT**, khu 112 và 113 mỗi khu còn 1 người. `lab_khoa()` lọc bỏ index nên chỉ thấy dòng; thí nghiệm §1 đọc thẳng `pg_locks` (database mới, chưa ai sửa nên 9103/9104 nằm ở `(0,3)`/`(0,4)`):
 
-```text
- phien | locktype |       relname       | page | tuple
--------+----------+---------------------+------+-------
- A     | page     | ix_driver_duty_area |    1 |  NULL
- A     | tuple    | driver_duty         |    0 |     3
- A     | tuple    | driver_duty         |    0 |     4
-(3 rows)
-```
+<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/postgresql-serializable-retry/dbstudio-01.webp" alt="DBStudio chạy câu lệnh ở pg038-siread-retry-sai-muc-tron.sql dòng 36 và hiển thị kết quả 3 dòng" width="996" height="464" loading="lazy"></div><figcaption>DBStudio · <code>pg038-siread-retry-sai-muc-tron.sql</code>, câu ở dòng 36 · 3 dòng</figcaption></figure>
 
 Đó là «vùng đã đọc» khi đi index: page index chứa khoá `112` và hai dòng đã đọc. Sau khi A tự `UPDATE` dòng 9103, `pg_locks` không còn khoá đọc trên `(0,3)` mà thêm `page pk_driver_duty 1` (câu `UPDATE` tìm dòng qua khoá chính) — mỗi bên chỉ còn một dòng trong `lab_khoa()` vì lý do đó.
 

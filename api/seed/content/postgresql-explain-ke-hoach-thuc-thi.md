@@ -62,24 +62,7 @@ FROM trips WHERE customer_id = :'kh_le'
 ORDER BY requested_at DESC LIMIT 20;
 ```
 
-```text
- Limit (actual rows=20.00 loops=1)
-   Buffers: shared hit=3 read=44
-   ->  Sort (actual rows=20.00 loops=1)
-         Sort Key: requested_at DESC
-         Sort Method: quicksort  Memory: 27kB
-         Buffers: shared hit=3 read=44
-         ->  Bitmap Heap Scan on trips (actual rows=40.00 loops=1)
-               Recheck Cond: (customer_id = '3b3bf766-…'::uuid)
-               Heap Blocks: exact=40
-               Buffers: shared read=44
-               ->  Bitmap Index Scan on ix_trips_customer_requested (actual rows=40.00 loops=1)
-                     Index Cond: (customer_id = '3b3bf766-…'::uuid)
-                     Index Searches: 1
-                     Buffers: shared read=4
- Planning:
-   Buffers: shared hit=149 read=23
-```
+<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/postgresql-explain-ke-hoach-thuc-thi/dbstudio-07.webp" alt="DBStudio chạy câu lệnh ở 21-explain-tim-chuyen.sql dòng 23 và hiển thị kế hoạch thực thi gồm 4 toán tử, có số liệu thực tế" width="1400" height="484" loading="lazy"></div><figcaption>DBStudio · <code>21-explain-tim-chuyen.sql</code>, câu ở dòng 23 · Kế hoạch truy vấn, 4 toán tử · ANALYZE</figcaption></figure>
 
 Chạy lại y nguyên câu đó, mọi dòng `Buffers` đổi thành `shared hit=44`, không còn `read`.
 
@@ -139,16 +122,7 @@ WHERE city_id = 3 AND requested_at >= TIMESTAMPTZ '2026-10-01 00:00+07'
                   AND requested_at <  TIMESTAMPTZ '2026-10-08 00:00+07';
 ```
 
-```text
- Aggregate (actual rows=1.00 loops=1)
-   ->  Bitmap Heap Scan on trips (actual rows=5477.00 loops=1)
-         Recheck Cond: ((city_id = 3) AND (requested_at >= …) AND (requested_at < …))
-         Heap Blocks: exact=827
-         Buffers: shared hit=4 read=850
-         ->  Bitmap Index Scan on ix_trips_city_requested (actual rows=5477.00 loops=1)
-               Index Cond: ((city_id = 3) AND (requested_at >= …) AND (requested_at < …))
-               Buffers: shared hit=3 read=24
-```
+<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/postgresql-explain-ke-hoach-thuc-thi/dbstudio-08.webp" alt="DBStudio chạy câu lệnh ở 21-explain-tim-chuyen.sql dòng 117 và hiển thị kế hoạch thực thi gồm 3 toán tử, có số liệu thực tế" width="1400" height="438" loading="lazy"></div><figcaption>DBStudio · <code>21-explain-tim-chuyen.sql</code>, câu ở dòng 117 · Kế hoạch truy vấn, 3 toán tử · ANALYZE</figcaption></figure>
 
 5.477 dòng trên 827 page bảng (`Heap Blocks: exact=827`), 27 page index. `Recheck Cond` là điều kiện được kiểm tra lại trên dòng đã đọc khi cần (bitmap quá lớn thì phải chuyển sang chế độ chỉ nhớ page, «lossy»); ở đây mọi page đều `exact`.
 

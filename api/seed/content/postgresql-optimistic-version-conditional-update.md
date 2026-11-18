@@ -40,12 +40,7 @@ Lịch §1 của lab, không kiểm tra gì cả:
 | T3 | `UPDATE trips SET fare = 45000, status = :'trang_thai' … WHERE code = 400108` → `UPDATE 1` | |
 | T4 | | Đọc lại |
 
-```text
- fare  |  status
--------+-----------
- 45000 | requested
-(1 row)
-```
+<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/postgresql-optimistic-version-conditional-update/dbstudio-01.webp" alt="DBStudio chạy câu lệnh ở 35-optimistic-version.sql dòng 40 và hiển thị kết quả 1 dòng" width="996" height="338" loading="lazy"></div><figcaption>DBStudio · <code>35-optimistic-version.sql</code>, câu ở dòng 40 · 1 dòng</figcaption></figure>
 
 Cả hai câu UPDATE đều thành công, đều chạy dưới Read Committed mặc định, không ai chờ ai — chúng cách nhau cả phút. Database làm đúng điều được yêu cầu: ghi `status = 'requested'`. Lỗi nằm ở chỗ câu ghi của A **dựa trên một lần đọc đã cũ** mà không nói ra điều đó. Mức cô lập không cứu được: hai giao dịch không chồng nhau về thời gian, nên không mức nào coi đây là xung đột.
 
@@ -64,12 +59,7 @@ WHERE code = 400108 AND version = 1
 RETURNING status, version;
 ```
 
-```text
-  status   | version
------------+---------
- cancelled |       2
-(1 row)
-```
+<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/postgresql-optimistic-version-conditional-update/dbstudio-02.webp" alt="DBStudio chạy câu lệnh ở 35-optimistic-version.sql dòng 55 và hiển thị kết quả 1 dòng" width="996" height="382" loading="lazy"></div><figcaption>DBStudio · <code>35-optimistic-version.sql</code>, câu ở dòng 55 · 1 dòng</figcaption></figure>
 
 ```sql
 -- [A] lưu form với version 1 đã đọc
@@ -219,12 +209,7 @@ Thí nghiệm §3–§4 thử hai ứng viên khác ngoài cột `version`:
 
 **`updated_at = now()`.** `now()` là giờ *bắt đầu giao dịch*, không phải giờ câu lệnh chạy. A mở giao dịch, B sửa chuyến 400107 và commit (now() của B muộn hơn), rồi A mới ghi `updated_at = now()` và commit:
 
-```text
- fare  | di_lui
--------+--------
- 38500 | t
-(1 row)
-```
+<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/postgresql-optimistic-version-conditional-update/dbstudio-03.webp" alt="DBStudio chạy câu lệnh ở pg035-version-rr-ham-luu-updated-at-xmin.sql dòng 116 và hiển thị kết quả 1 dòng" width="996" height="338" loading="lazy"></div><figcaption>DBStudio · <code>pg035-version-rr-ham-luu-updated-at-xmin.sql</code>, câu ở dòng 116 · 1 dòng</figcaption></figure>
 
 `di_lui = t`: lần sửa sau ghi mốc *nhỏ hơn* lần sửa trước. Dùng mốc thời gian làm version thì có thể so «bằng» được, nhưng giá trị không tăng đơn điệu, phụ thuộc đồng hồ, và hai lần sửa trong cùng giao dịch mang cùng mốc. Giữ `updated_at` để hiển thị, đừng dùng làm điều kiện.
 

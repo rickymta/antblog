@@ -47,29 +47,13 @@ Người đọc (T2) không chờ: khoá dòng **không chặn SELECT thường*
 
 Giữa T3 và T4, phiên C đọc **`pg_stat_activity`** (mỗi kết nối một dòng: trạng thái, đang chờ gì, câu lệnh cuối) cùng hàm **`pg_blocking_pids(pid)`** (danh sách PID đang chặn một phiên):
 
-```text
- phien |     trang_thai      |         cho         | bi_chan_boi |                           cau_lenh
--------+---------------------+---------------------+-------------+--------------------------------------------------------------
- A     | idle in transaction | Client: ClientRead  |             | UPDATE trips SET fare = fare + 1000, version = version + 1,
- B     | active              | Lock: transactionid | A           | UPDATE trips SET fare = fare + 500, version = version + 1, u
-(2 rows)
-```
+<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/postgresql-lock-row-table/dbstudio-01.webp" alt="DBStudio chạy câu lệnh ở 33-khoa-dong-khoa-bang.sql dòng 43 và hiển thị kết quả 2 dòng" width="1408" height="434" loading="lazy"></div><figcaption>DBStudio · <code>33-khoa-dong-khoa-bang.sql</code>, câu ở dòng 43 · 2 dòng</figcaption></figure>
 
 A **`idle in transaction`** — mở giao dịch mà không chạy gì, `Client: ClientRead` là backend đợi ứng dụng gửi câu tiếp: hình dạng của «màn sửa cước chưa bấm Lưu». B `active` nhưng chờ `Lock: transactionid` — chờ giao dịch của A. Cột câu lệnh là câu **cuối cùng** phiên gửi, không nhất thiết là câu đang giữ khoá.
 
 Rồi **`pg_locks`** — danh sách khoá đang giữ (`granted = t`) và đang xin (`f`):
 
-```text
- phien |     loai      |  doi_tuong   |      che_do      | da_cap
--------+---------------+--------------+------------------+--------
- A     | relation      | trips        | RowExclusiveLock | t
- A     | transactionid | xid của A    | ExclusiveLock    | t
- B     | relation      | trips        | RowExclusiveLock | t
- B     | transactionid | xid của A    | ShareLock        | f
- B     | transactionid | xid của B    | ExclusiveLock    | t
- B     | tuple         | trips (0,34) | ExclusiveLock    | t
-(6 rows)
-```
+<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/postgresql-lock-row-table/dbstudio-02.webp" alt="DBStudio chạy câu lệnh ở 33-khoa-dong-khoa-bang.sql dòng 52 và hiển thị kết quả 6 dòng" width="996" height="532" loading="lazy"></div><figcaption>DBStudio · <code>33-khoa-dong-khoa-bang.sql</code>, câu ở dòng 52 · 6 dòng</figcaption></figure>
 
 Không dòng nào nói «A khoá chuyến 400104». Theo tài liệu, thông tin khoá dòng nằm **trên đĩa** chứ không trong bộ nhớ, nên thường không hiện ở `pg_locks`: A khoá dòng bằng cách ghi xid của mình vào `xmax` của phiên bản dòng (PG-032 — `xmax ≠ 0` không có nghĩa là dòng đã bị xoá). Mỗi giao dịch giữ `ExclusiveLock` trên chính xid của nó tới khi kết thúc; B chờ A bằng cách **xin `ShareLock` trên xid của A** (`da_cap = f`), chỉ được cấp khi A COMMIT hoặc ROLLBACK. Dòng `tuple trips (0,34)` là chỗ đứng đầu hàng của B trên đúng phiên bản dòng (ctid, PG-024). Hai khoá `relation trips RowExclusiveLock` là **khoá bảng** mà mọi UPDATE/INSERT/DELETE lấy; chúng không xung đột nhau, nên sửa các chuyến *khác nhau* vẫn song song được.
 
@@ -106,11 +90,7 @@ SET lock_timeout = '300ms';
 ALTER TABLE trips ADD COLUMN ghi_chu text;
 ```
 
-```text
--- [lab] [B] ⏳ đã chờ khoá (Lock: relation) — bị chặn bởi [A] trước khi xong
-ERROR:  canceling statement due to lock timeout
--- [lab] SQLSTATE 55P03
-```
+<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/postgresql-lock-row-table/dbstudio-03.webp" alt="DBStudio chạy câu lệnh ở 33-khoa-dong-khoa-bang.sql dòng 173 và hiển thị thông báo lỗi" width="996" height="346" loading="lazy"></div><figcaption>DBStudio · <code>33-khoa-dong-khoa-bang.sql</code>, câu ở dòng 173 · lỗi</figcaption></figure>
 
 Ngay sau đó C đếm ra 40 không chờ dù A vẫn mở giao dịch: B đã rời hàng. Migration thật bọc vòng thử lại quanh câu DDL đó.
 
@@ -127,12 +107,7 @@ Cả bốn mặc định `0` (tắt). Tài liệu khuyên không đặt `lock_ti
 
 Lab §4: A giữ khoá chuyến 400106; B đặt `statement_timeout = '300ms'` rồi UPDATE cùng chuyến:
 
-```text
--- [lab] [B] ⏳ đã chờ khoá (Lock: transactionid) — bị chặn bởi [A] trước khi xong
-ERROR:  canceling statement due to statement timeout
-CONTEXT:  while updating tuple (0,36) in relation "trips"
--- [lab] SQLSTATE 57014
-```
+<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/postgresql-lock-row-table/dbstudio-04.webp" alt="DBStudio chạy câu lệnh ở 33-khoa-dong-khoa-bang.sql dòng 208 và hiển thị thông báo lỗi" width="996" height="346" loading="lazy"></div><figcaption>DBStudio · <code>33-khoa-dong-khoa-bang.sql</code>, câu ở dòng 208 · lỗi</figcaption></figure>
 
 Câu kế của B (`SELECT 1`) gặp `25P02 current transaction is aborted`: giao dịch đã hỏng, phải ROLLBACK (PG-031). `SELECT pg_sleep(1)` không cần khoá cũng nhận `57014`. Chuyến 400106 cuối cùng là **37000** — chỉ có +1000 của A.
 
@@ -159,14 +134,7 @@ WHERE a.application_name IN ('lab-A', 'lab-B', 'lab-C')
 ORDER BY a.application_name;
 ```
 
-```text
- application_name |        state        | wait_event_type |  wait_event   | chan_boi
-------------------+---------------------+-----------------+---------------+----------
- lab-A            | idle in transaction | Client          | ClientRead    |
- lab-B            | active              | Lock            | transactionid | lab-A
- lab-C            | active              | Lock            | tuple         | lab-B
-(3 rows)
-```
+<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/postgresql-lock-row-table/dbstudio-05.webp" alt="DBStudio chạy câu lệnh ở pg033-go-roi-phien-giu-khoa.sql dòng 46 và hiển thị kết quả 3 dòng" width="1021" height="596" loading="lazy"></div><figcaption>DBStudio · <code>pg033-go-roi-phien-giu-khoa.sql</code>, câu ở dòng 46 · 3 dòng</figcaption></figure>
 
 C không chờ thẳng A mà chờ **B**: B đang giữ khoá `tuple` (chỗ đứng đầu hàng của dòng đó), C xếp sau. Hàng chờ là một chuỗi, nên tìm **gốc** = phiên đang chặn người khác mà bản thân không bị ai chặn:
 

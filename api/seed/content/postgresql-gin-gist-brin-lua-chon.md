@@ -117,11 +117,7 @@ ALTER TABLE driver_shifts
   ADD CONSTRAINT ex_driver_shifts_khong_chong EXCLUDE USING gist (driver_id WITH =, shift WITH &&);
 ```
 
-```text
-ERROR:  could not create exclusion constraint "ex_driver_shifts_khong_chong"
-DETAIL:  Key (driver_id, shift)=(bfd06b3f-…, ["2026-10-15 13:53:00+07","2026-10-15 23:53:00+07")) conflicts with key (driver_id, shift)=(bfd06b3f-…, ["2026-10-15 15:53:00+07","2026-10-16 01:53:00+07")).
--- [lab] SQLSTATE 23P01 · constraint ex_driver_shifts_khong_chong · table driver_shifts
-```
+<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/postgresql-gin-gist-brin-lua-chon/dbstudio-02.webp" alt="DBStudio chạy câu lệnh ở 28-gin-gist-brin.sql dòng 123 và hiển thị thông báo lỗi" width="1696" height="500" loading="lazy"></div><figcaption>DBStudio · <code>28-gin-gist-brin.sql</code>, câu ở dòng 123 · lỗi</figcaption></figure>
 
 Dữ liệu cũ đã vi phạm. Tìm bằng self-join theo đúng toán tử của ràng buộc (ra 3 cặp của tài xế 20007, 23605, 25401, ca sau nhập lúc 2026-10-20 10:00), xoá 3 ca nhập sau, rồi thêm lại thành công. Ràng buộc tự tạo một index `gist` cùng tên. Sau đó ca chồng giờ bị chặn ngay khi INSERT (`23P01` kèm DETAIL chỉ ra ca đang có). Ca **liền sau**, bắt đầu đúng lúc ca trước kết thúc, hợp lệ, vì `tstzrange` mặc định nửa mở `[bắt đầu, kết thúc)`.
 

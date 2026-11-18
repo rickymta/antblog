@@ -187,10 +187,7 @@ UPDATE trips SET status = 'completed', updated_at = '2026-11-03 09:31:00+07'
 WHERE id = 'b0000000-0000-4000-8000-000000000001' AND status = 'in_transit';
 ```
 
-```text
-ERROR:  new row for relation "trips" violates check constraint "ck_trips_completed_at_by_status"
-DETAIL:  Failing row contains (b0000000-0000-4000-8000-000000000001, 100029, ride, 2, …, completed, 54000, 2026-11-03 09:00:00+07, 2026-11-03 09:01:00+07, null, 2026-11-03 09:31:00+07).
-```
+<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/postgresql-insert-update-delete-returning/dbstudio-14.webp" alt="DBStudio chạy câu lệnh ở 04-lifecycle.sql dòng 110 và hiển thị thông báo lỗi" width="1696" height="390" loading="lazy"></div><figcaption>DBStudio · <code>04-lifecycle.sql</code>, câu ở dòng 110 · lỗi</figcaption></figure>
 
 Đây chính là sự cố mở bài PG-005, bị chặn ngay ở câu lệnh. Câu đúng ghi `completed_at` **và** dòng lịch sử trong một câu lệnh duy nhất:
 

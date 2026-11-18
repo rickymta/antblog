@@ -53,11 +53,7 @@ Với bảng lớn, ANALYZE không đọc hết bảng mà lấy mẫu **300 × 
 
 Cột `customer_id` của `trips` sau ANALYZE của nền (lab, khối biến động):
 
-```text
- null_frac | n_distinct | so_mcv | tan_suat_mcv_1 | tong_tan_suat_mcv | so_moc_histogram
------------+------------+--------+----------------+-------------------+------------------
-         0 |      82202 |     51 |         0.0500 |             0.081 |              101
-```
+<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/postgresql-statistics-analyze-cardinality/dbstudio-02.webp" alt="DBStudio chạy câu lệnh ở 27-statistics.sql dòng 23 và hiển thị kết quả 1 dòng" width="1057" height="448" loading="lazy"></div><figcaption>DBStudio · <code>27-statistics.sql</code>, câu ở dòng 23 · 1 dòng</figcaption></figure>
 
 Hai lần dựng nền khác (khi chạy thí nghiệm của bài) cho `n_distinct` **82.254** với **60** MCV (tổng tần suất 0,0872) và **81.567** với **50** MCV (0,0850). Mẫu khác nhau, bộ số khác nhau. Điều không đổi: `n_distinct` chỉ bằng khoảng **0,43 lần** số khách thật (191.852), và B1 luôn đứng đầu MCV với tần suất ≈ 0,05.
 
@@ -69,12 +65,7 @@ Vì sao thấp? Mẫu 30.000 dòng chỉ chạm một phần nhỏ trong gần 1
 
 Với `customer_id = B1`, planner lấy thẳng tần suất của B1 trong MCV nhân số dòng:
 
-```text
- Bitmap Heap Scan on trips  (cost=1384.18..21450.59 rows=50033 width=129) (actual rows=51151.00 loops=1)
-   Recheck Cond: (customer_id = '239ec4d4-ca1d-4ae9-8459-a2f5227a39c1'::uuid)
-   Heap Blocks: exact=18139
-   ->  Bitmap Index Scan on ix_trips_customer_requested  (cost=0.00..1371.67 rows=50033 width=0) (actual rows=51151.00 loops=1)
-```
+<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/postgresql-statistics-analyze-cardinality/dbstudio-03.webp" alt="DBStudio chạy câu lệnh ở 27-statistics.sql dòng 45 và hiển thị kế hoạch thực thi gồm 2 toán tử, có số liệu thực tế" width="1400" height="392" loading="lazy"></div><figcaption>DBStudio · <code>27-statistics.sql</code>, câu ở dòng 45 · Kế hoạch truy vấn, 2 toán tử · ANALYZE</figcaption></figure>
 
 Ước khoảng 50.000, thực tế 51.151: lệch 1,0 lần. (PostgreSQL 18 in `actual rows` có hai chữ số thập phân.)
 
@@ -89,11 +80,7 @@ rows        = selectivity × số dòng của bảng
 
 Thí nghiệm `pg027-cong-thuc-uoc-luong.sql` tự tính công thức này từ `pg_stats` rồi đặt cạnh số của planner:
 
-```text
- uoc_tu_tinh | planner_khach_0_chuyen | planner_khach_76_chuyen
--------------+------------------------+-------------------------
-        11.1 |                     11 |                      11
-```
+<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/postgresql-statistics-analyze-cardinality/dbstudio-04.webp" alt="DBStudio chạy câu lệnh ở pg027-cong-thuc-uoc-luong.sql dòng 39 và hiển thị kết quả 1 dòng" width="996" height="360" loading="lazy"></div><figcaption>DBStudio · <code>pg027-cong-thuc-uoc-luong.sql</code>, câu ở dòng 39 · 1 dòng</figcaption></figure>
 
 (1 − 0 − 0,0872) / (82.254 − 60) × 1.000.000 ≈ 11,1. Khách `0910000066` đi **76** chuyến và khách chưa đi chuyến nào đều được ước **11** dòng. Lab ghi hệ số lệch của khách 76 chuyến khoảng **6,9 lần** ở một lần chạy (kiểm trong khoảng 3–15 lần). Với khách 0 chuyến, planner vẫn ước như khách «trung bình», vì không có thống kê nào nói giá trị đó vắng mặt.
 
@@ -110,11 +97,7 @@ ANALYZE trips (customer_id);
 
 Target 1000 nghĩa là mẫu 300.000 dòng và MCV tối đa 1.000 giá trị. Kết quả một lần chạy:
 
-```text
- n_distinct | so_mcv
-------------+--------
-  -0.157148 |   1000
-```
+<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/postgresql-statistics-analyze-cardinality/dbstudio-05.webp" alt="DBStudio chạy câu lệnh ở 27-statistics.sql dòng 74 và hiển thị kết quả 1 dòng" width="996" height="338" loading="lazy"></div><figcaption>DBStudio · <code>27-statistics.sql</code>, câu ở dòng 74 · 1 dòng</figcaption></figure>
 
 `n_distinct` chuyển sang dạng âm: ≈ 0,157 × 1.000.000 = 157 nghìn khách, sát hơn nhiều so với 82 nghìn. Khách 76 chuyến lọt vào MCV, nên hệ số lệch về khoảng **1,0**. Cái giá: ANALYZE đọc nhiều dòng hơn, `pg_statistic` to hơn, planner tốn thêm chút thời gian với danh sách dài hơn.
 
@@ -156,11 +139,7 @@ ANALYZE trips;
 SELECT statistics_name, n_distinct, dependencies FROM pg_stats_ext WHERE statistics_name = 'st_trips_tp_khu';
 ```
 
-```text
- statistics_name |  n_distinct   |     dependencies
------------------+---------------+-----------------------
- st_trips_tp_khu | {"4, 14": 75} | {"14 => 4": 0.989670}
-```
+<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/postgresql-statistics-analyze-cardinality/dbstudio-06.webp" alt="DBStudio chạy câu lệnh ở 27-statistics.sql dòng 106 và hiển thị kết quả 1 dòng" width="996" height="404" loading="lazy"></div><figcaption>DBStudio · <code>27-statistics.sql</code>, câu ở dòng 106 · 1 dòng</figcaption></figure>
 
 Cột được gọi bằng số thứ tự (attnum): 4 = `city_id`, 14 = `pickup_area_id`. `ndistinct` ghi 75 tổ hợp; `dependencies` ghi «khu ⇒ thành phố» với độ phụ thuộc ≈ 0,99. Con số không đạt 1,0 vì khoảng 1 % chuyến mất GPS có khu NULL ở cả ba thành phố. Chiều «thành phố ⇒ khu» yếu tới mức không được ghi. Sau đó ước lượng của câu lọc là **21.887** (lệch 1,0), GROUP BY ước sát 75 nhóm.
 
