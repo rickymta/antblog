@@ -1368,5 +1368,25 @@
       "git-thuc-hanh-repository-bao-gia"
     ],
     "status": "published"
+  },
+  {
+    "slug": "git-qua-gitstudio-phan-02",
+    "title": "Git qua GitStudio · Phần 2 · Nhánh, merge và xung đột",
+    "description": "Đủ 10 bài GIT-011–GIT-020 qua tính năng phụ phí giờ cao điểm của Tới Nơi: nhánh là con trỏ, chuyển nhánh khi còn thay đổi, merge fast-forward và --no-ff, xung đột thật ở dòng tính cước với công cụ ba khung của GitStudio, stash, annotated tag theo semver, nhánh phát hành với cherry-pick -x và revert, rebase có xung đột, worktree; kết thúc bằng bài thực hành có script chấm 11 tiêu chí. Gồm 3 bài cơ bản, 4 trung bình và 3 nâng cao.",
+    "level": "intermediate",
+    "category": "git",
+    "articles": [
+      "git-nhanh-la-gi",
+      "git-chuyen-nhanh-thay-doi-chua-commit",
+      "git-merge-fast-forward-merge-commit",
+      "git-xung-dot-merge",
+      "git-stash-cat-thay-doi",
+      "git-tag-phien-ban",
+      "git-cherry-pick-revert",
+      "git-rebase-co-ban",
+      "git-worktree",
+      "git-thuc-hanh-nhanh-merge-tag"
+    ],
+    "status": "published"
   }
 ]

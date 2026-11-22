@@ -1,0 +1,668 @@
+
+# ==================== p02/11-nhanh-la-gi.mjs · GIT-011 ====================
+# Repository đang có một nhánh
+$ git branch
+* main
+$ git branch --show-current
+main
+
+# Tạo nhánh tính năng và chuyển sang đó
+$ git switch -c tinh-nang/phu-phi-gio-cao-diem
+Switched to a new branch 'tinh-nang/phu-phi-gio-cao-diem'
+$ git branch
+  main
+* tinh-nang/phu-phi-gio-cao-diem
+# .git/HEAD chứa: ref: refs/heads/tinh-nang/phu-phi-gio-cao-diem
+$ git rev-parse main tinh-nang/phu-phi-gio-cao-diem
+89855d5ae9eeadc33e9969090faabe175773a520
+89855d5ae9eeadc33e9969090faabe175773a520
+PASS nhánh mới trỏ cùng commit với main
+
+# Commit trên nhánh tính năng: chỉ nhánh này tiến lên
+$ git add src/BaoGia/appsettings.json
+$ git commit -m "Thêm hệ số phụ phí giờ cao điểm vào bảng giá"
+[tinh-nang/phu-phi-gio-cao-diem c46c1dd] Thêm hệ số phụ phí giờ cao điểm vào bảng giá
+ 1 file changed, 4 insertions(+)
+$ git log --oneline --graph --all -3
+* c46c1dd Thêm hệ số phụ phí giờ cao điểm vào bảng giá
+* 89855d5 Chuẩn hoá xuống dòng LF bằng .gitattributes
+* 1c6e78c Đổi tên tài liệu thành bang-gia-cuoc.md
+
+# Về main: working tree trở về đúng commit của main
+$ git switch main
+Switched to branch 'main'
+$ git grep -c Multiplier -- src/BaoGia/appsettings.json
+$ git switch tinh-nang/phu-phi-gio-cao-diem
+Switched to branch 'tinh-nang/phu-phi-gio-cao-diem'
+$ git grep -c Multiplier -- src/BaoGia/appsettings.json
+src/BaoGia/appsettings.json:1
+
+# Tạo, đổi tên, xoá một nhánh thử
+$ git branch thu-nghiem main
+$ git branch -m thu-nghiem thu-nghiem-gio-cao-diem
+$ git branch -v
+  main                           89855d5 Chuẩn hoá xuống dòng LF bằng .gitattributes
+  thu-nghiem-gio-cao-diem        89855d5 Chuẩn hoá xuống dòng LF bằng .gitattributes
+* tinh-nang/phu-phi-gio-cao-diem c46c1dd Thêm hệ số phụ phí giờ cao điểm vào bảng giá
+$ git branch -d thu-nghiem-gio-cao-diem
+Deleted branch thu-nghiem-gio-cao-diem (was 89855d5).
+
+# Xoá nhánh có commit chưa merge: Git từ chối
+$ git switch main
+Switched to branch 'main'
+$ git branch -d tinh-nang/phu-phi-gio-cao-diem
+error: the branch 'tinh-nang/phu-phi-gio-cao-diem' is not fully merged
+hint: If you are sure you want to delete it, run 'git branch -D tinh-nang/phu-phi-gio-cao-diem'
+hint: Disable this message with "git config set advice.forceDeleteBranch false"
+$ git switch tinh-nang/phu-phi-gio-cao-diem
+Switched to branch 'tinh-nang/phu-phi-gio-cao-diem'
+PASS nhánh và tag trùng lịch sử chuẩn
+
+# ==================== p02/12-chuyen-nhanh-thay-doi.mjs · GIT-012 ====================
+# Minh đang sửa dở FareCalculator.cs trên nhánh tính năng
+$ git status --short --branch
+## tinh-nang/phu-phi-gio-cao-diem
+ M src/BaoGia/FareCalculator.cs
+
+# Chuyển sang main: Git cho phép và MANG THEO thay đổi (file này giống nhau ở hai nhánh)
+$ git switch main
+M	src/BaoGia/FareCalculator.cs
+Switched to branch 'main'
+$ git status --short --branch
+## main
+ M src/BaoGia/FareCalculator.cs
+$ git switch tinh-nang/phu-phi-gio-cao-diem
+M	src/BaoGia/FareCalculator.cs
+Switched to branch 'tinh-nang/phu-phi-gio-cao-diem'
+
+# Sửa thêm appsettings.json (file khác nhau giữa hai nhánh): Git từ chối chuyển
+$ git switch main
+error: Your local changes to the following files would be overwritten by checkout:
+	src/BaoGia/appsettings.json
+Please commit your changes or stash them before you switch branches.
+Aborting
+$ git restore src/BaoGia/appsettings.json
+
+# Thay đổi FareCalculator.cs đã xong: commit trên nhánh tính năng rồi mới chuyển
+$ git add src/BaoGia/FareCalculator.cs
+$ git commit -m "Nhân hệ số giờ cao điểm khi tính cước"
+[tinh-nang/phu-phi-gio-cao-diem e4cd655] Nhân hệ số giờ cao điểm khi tính cước
+ 1 file changed, 4 insertions(+), 3 deletions(-)
+$ git switch main
+Switched to branch 'main'
+$ git status --short --branch
+## main
+
+# Sửa gấp trên main: làm tròn quãng đường tới 0,1 km
+$ git add src tests
+$ git commit -m "Làm tròn quãng đường tới 0,1 km trước khi tính cước" -m "GPS trả quãng đường tới mét; khách thấy giá nhảy khi xe đứng yên."
+[main 7993c73] Làm tròn quãng đường tới 0,1 km trước khi tính cước
+ 2 files changed, 5 insertions(+), 1 deletion(-)
+$ git log --oneline --graph --all -4
+* 7993c73 Làm tròn quãng đường tới 0,1 km trước khi tính cước
+| * e4cd655 Nhân hệ số giờ cao điểm khi tính cước
+| * c46c1dd Thêm hệ số phụ phí giờ cao điểm vào bảng giá
+|/  
+* 89855d5 Chuẩn hoá xuống dòng LF bằng .gitattributes
+PASS nhánh và tag trùng lịch sử chuẩn
+
+# ==================== p02/13-merge-ff-merge-commit.mjs · GIT-013 ====================
+# Lan sửa tài liệu trên một nhánh ngắn
+$ git switch -c sua/tai-lieu-lam-tron
+Switched to a new branch 'sua/tai-lieu-lam-tron'
+$ git commit -am "Ghi cách làm tròn quãng đường vào tài liệu"
+[sua/tai-lieu-lam-tron efe9c33] Ghi cách làm tròn quãng đường vào tài liệu
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+$ git switch main
+Switched to branch 'main'
+
+# main chưa đi tiếp từ chỗ nhánh tách ra: merge chỉ cần dời main lên (fast-forward)
+$ git merge sua/tai-lieu-lam-tron
+Updating 7993c73..efe9c33
+Fast-forward
+ docs/bang-gia-cuoc.md | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+$ git branch -d sua/tai-lieu-lam-tron
+Deleted branch sua/tai-lieu-lam-tron (was efe9c33).
+$ git log --oneline --graph -3
+* efe9c33 Ghi cách làm tròn quãng đường vào tài liệu
+* 7993c73 Làm tròn quãng đường tới 0,1 km trước khi tính cước
+* 89855d5 Chuẩn hoá xuống dòng LF bằng .gitattributes
+
+# Nhánh tài liệu thứ hai, merge bằng --no-ff để giữ dấu vết nhánh trong lịch sử
+$ git switch -c tai-lieu/gio-cao-diem
+Switched to a new branch 'tai-lieu/gio-cao-diem'
+$ git commit -am "Mô tả phụ phí giờ cao điểm trong tài liệu"
+[tai-lieu/gio-cao-diem 3e7f15a] Mô tả phụ phí giờ cao điểm trong tài liệu
+ 1 file changed, 4 insertions(+)
+$ git switch main
+Switched to branch 'main'
+$ git merge --no-ff --no-edit tai-lieu/gio-cao-diem
+Merge made by the 'ort' strategy.
+ docs/bang-gia-cuoc.md | 4 ++++
+ 1 file changed, 4 insertions(+)
+$ git log --oneline --graph -4
+*   8c05257 Merge branch 'tai-lieu/gio-cao-diem'
+|\  
+| * 3e7f15a Mô tả phụ phí giờ cao điểm trong tài liệu
+|/  
+* efe9c33 Ghi cách làm tròn quãng đường vào tài liệu
+* 7993c73 Làm tròn quãng đường tới 0,1 km trước khi tính cước
+$ git cat-file -p HEAD
+tree dc34c543d086ef04e66d59a1fcf1209085c94091
+parent efe9c33cf463dead481a14f4c239963fbef6c7f9
+parent 3e7f15acc7c9d68fa78d67c8fb4ceced44b27ed7
+author Trần Minh <minh@toinoi.test> 1794817800 +0700
+committer Trần Minh <minh@toinoi.test> 1794817800 +0700
+
+Merge branch 'tai-lieu/gio-cao-diem'
+PASS merge commit có hai commit cha
+$ git branch -d tai-lieu/gio-cao-diem
+Deleted branch tai-lieu/gio-cao-diem (was 3e7f15a).
+
+# Nhánh nào đã/chưa merge vào main
+$ git branch --merged main
+* main
+$ git branch --no-merged main
+  tinh-nang/phu-phi-gio-cao-diem
+PASS nhánh tính năng chưa merge
+PASS nhánh và tag trùng lịch sử chuẩn
+
+# ==================== p02/14-xung-dot-merge.mjs · GIT-014 ====================
+# Hai nhánh tách nhau từ commit nào, mỗi bên đã đổi gì
+$ git merge-base main tinh-nang/phu-phi-gio-cao-diem
+89855d5ae9eeadc33e9969090faabe175773a520
+$ git log --oneline main..tinh-nang/phu-phi-gio-cao-diem
+e4cd655 Nhân hệ số giờ cao điểm khi tính cước
+c46c1dd Thêm hệ số phụ phí giờ cao điểm vào bảng giá
+$ git log --oneline tinh-nang/phu-phi-gio-cao-diem..main
+8c05257 Merge branch 'tai-lieu/gio-cao-diem'
+3e7f15a Mô tả phụ phí giờ cao điểm trong tài liệu
+efe9c33 Ghi cách làm tròn quãng đường vào tài liệu
+7993c73 Làm tròn quãng đường tới 0,1 km trước khi tính cước
+
+# Merge nhánh tính năng vào main
+$ git merge tinh-nang/phu-phi-gio-cao-diem
+Auto-merging src/BaoGia/FareCalculator.cs
+CONFLICT (content): Merge conflict in src/BaoGia/FareCalculator.cs
+Automatic merge failed; fix conflicts and then commit the result.
+$ git status
+On branch main
+You have unmerged paths.
+  (fix conflicts and run "git commit")
+  (use "git merge --abort" to abort the merge)
+
+Changes to be committed:
+	modified:   src/BaoGia/appsettings.json
+
+Unmerged paths:
+  (use "git add <file>..." to mark resolution)
+	both modified:   src/BaoGia/FareCalculator.cs
+# Phần xung đột trong file (diff gộp của hai bên)
+$ git diff
+diff --cc src/BaoGia/FareCalculator.cs
+index 3f8121c,1337a96..0000000
+--- a/src/BaoGia/FareCalculator.cs
++++ b/src/BaoGia/FareCalculator.cs
+@@@ -15,8 -15,9 +15,14 @@@ public static class FareCalculato
+          // Giá = giá mở cửa + đơn giá mỗi km × số km.
+          // Ví dụ ô tô 4 chỗ đi 4 km: 12.000 + 4.500 × 4 = 30.000 đ.
+          // Chuyến quá ngắn vẫn trả ít nhất giá tối thiểu.
+++<<<<<<< HEAD
+ +        // Chưa gồm phụ phí giờ cao điểm, phí cầu đường, khuyến mãi.
+ +        var fare = rule.BaseFare + rule.PerKm * Math.Round(distanceKm, 1, MidpointRounding.AwayFromZero);
+++=======
++         // Giờ cao điểm: nhân hệ số Peak.Multiplier (mặc định 1, ngoài giờ cao điểm).
++         // Chưa gồm phí cầu đường, khuyến mãi.
++         var fare = (rule.BaseFare + rule.PerKm * distanceKm) * peakMultiplier;
+++>>>>>>> tinh-nang/phu-phi-gio-cao-diem
+          var atLeastMinimum = Math.Max(fare, rule.MinimumFare);
+  
+          // Làm tròn lên bội số 1.000 đ để khách không phải trả tiền lẻ.
+
+# Chưa muốn giải quyết ngay: huỷ merge, repository trở lại như trước
+$ git merge --abort
+$ git status --short --branch
+## main
+
+# Merge lại, lần này giải quyết: giữ cả làm tròn 0,1 km lẫn hệ số giờ cao điểm
+$ git merge tinh-nang/phu-phi-gio-cao-diem
+PASS không còn dấu xung đột trong file
+$ git add src/BaoGia/FareCalculator.cs
+$ git status --short
+M  src/BaoGia/FareCalculator.cs
+M  src/BaoGia/appsettings.json
+$ git merge --continue
+[main e46c89f] Merge branch 'tinh-nang/phu-phi-gio-cao-diem'
+$ git log --oneline --graph -6
+*   e46c89f Merge branch 'tinh-nang/phu-phi-gio-cao-diem'
+|\  
+| * e4cd655 Nhân hệ số giờ cao điểm khi tính cước
+| * c46c1dd Thêm hệ số phụ phí giờ cao điểm vào bảng giá
+* |   8c05257 Merge branch 'tai-lieu/gio-cao-diem'
+|\ \  
+| * | 3e7f15a Mô tả phụ phí giờ cao điểm trong tài liệu
+|/ /  
+* | efe9c33 Ghi cách làm tròn quãng đường vào tài liệu
+
+# Xem lại cách đã giải quyết xung đột
+$ git show --remerge-diff --format=%h%x20%s HEAD
+e46c89f Merge branch 'tinh-nang/phu-phi-gio-cao-diem'
+
+diff --git a/src/BaoGia/FareCalculator.cs b/src/BaoGia/FareCalculator.cs
+remerge CONFLICT (content): Merge conflict in src/BaoGia/FareCalculator.cs
+index d2d538c..46c0047 100644
+--- a/src/BaoGia/FareCalculator.cs
++++ b/src/BaoGia/FareCalculator.cs
+@@ -15,14 +15,9 @@ public static class FareCalculator
+         // Giá = giá mở cửa + đơn giá mỗi km × số km.
+         // Ví dụ ô tô 4 chỗ đi 4 km: 12.000 + 4.500 × 4 = 30.000 đ.
+         // Chuyến quá ngắn vẫn trả ít nhất giá tối thiểu.
+-<<<<<<< 8c05257 (Merge branch 'tai-lieu/gio-cao-diem')
+-        // Chưa gồm phụ phí giờ cao điểm, phí cầu đường, khuyến mãi.
+-        var fare = rule.BaseFare + rule.PerKm * Math.Round(distanceKm, 1, MidpointRounding.AwayFromZero);
+-=======
+         // Giờ cao điểm: nhân hệ số Peak.Multiplier (mặc định 1, ngoài giờ cao điểm).
+         // Chưa gồm phí cầu đường, khuyến mãi.
+-        var fare = (rule.BaseFare + rule.PerKm * distanceKm) * peakMultiplier;
+->>>>>>> e4cd655 (Nhân hệ số giờ cao điểm khi tính cước)
++        var fare = (rule.BaseFare + rule.PerKm * Math.Round(distanceKm, 1, MidpointRounding.AwayFromZero)) * peakMultiplier;
+         var atLeastMinimum = Math.Max(fare, rule.MinimumFare);
+ 
+         // Làm tròn lên bội số 1.000 đ để khách không phải trả tiền lẻ.
+$ git branch -d tinh-nang/phu-phi-gio-cao-diem
+Deleted branch tinh-nang/phu-phi-gio-cao-diem (was e4cd655).
+PASS nhánh và tag trùng lịch sử chuẩn
+
+# ==================== p02/15-stash.mjs · GIT-015 ====================
+# Minh đang viết test giờ cao điểm, kèm một file ghi chú chưa theo dõi
+$ git status --short
+ M tests/BaoGia.Tests/FareCalculatorTests.cs
+?? ghi-chu-test.md
+
+# Lan báo một test cũ đang đỏ. Cần chạy test trên code sạch: cất thay đổi đi
+$ git stash push -m "Test phụ phí giờ cao điểm dở dang"
+Saved working directory and index state On main: Test phụ phí giờ cao điểm dở dang
+$ git status --short
+?? ghi-chu-test.md
+$ git stash list
+stash@{0}: On main: Test phụ phí giờ cao điểm dở dang
+$ git stash show --stat stash@{0}
+ tests/BaoGia.Tests/FareCalculatorTests.cs | 4 ++++
+ 1 file changed, 4 insertions(+)
+
+# Kiểm tra xong, lấy thay đổi về và xoá stash
+$ git stash pop
+$ git status --short
+ M tests/BaoGia.Tests/FareCalculatorTests.cs
+?? ghi-chu-test.md
+$ git stash list
+PASS stash đã được xoá sau pop
+
+# Stash cả file chưa theo dõi (-u), rồi apply: stash vẫn còn
+$ git stash push -u -m "Kèm ghi chú"
+Saved working directory and index state On main: Kèm ghi chú
+$ git status --short
+$ git stash apply
+$ git stash list
+stash@{0}: On main: Kèm ghi chú
+$ git stash drop
+
+# Chỉ cất phần đã stage (--staged)
+$ git add tests/BaoGia.Tests/FareCalculatorTests.cs
+$ git stash push --staged -m "Chỉ phần đã stage"
+Saved working directory and index state On main: Chỉ phần đã stage
+$ git status --short
+?? ghi-chu-test.md
+$ git stash pop --index
+$ git status --short
+M  tests/BaoGia.Tests/FareCalculatorTests.cs
+?? ghi-chu-test.md
+
+# Commit test, bỏ file ghi chú
+$ git commit -m "Thêm test cho phụ phí giờ cao điểm"
+[main 70b18f6] Thêm test cho phụ phí giờ cao điểm
+ 1 file changed, 4 insertions(+)
+PASS không còn stash
+PASS nhánh và tag trùng lịch sử chuẩn
+
+# ==================== p02/16-tag.mjs · GIT-016 ====================
+$ git tag
+
+# Lightweight tag: chỉ là một cái tên trỏ thẳng vào commit
+$ git tag thu-nghiem
+$ git cat-file -t thu-nghiem
+commit
+$ git tag -d thu-nghiem
+Deleted tag 'thu-nghiem' (was 70b18f6)
+
+# Annotated tag: một object riêng có người tạo, thời điểm, lời nhắn
+$ git tag -a v1.0.0 -m "Phiên bản 1.0.0: tính cước theo km, làm tròn 1.000 đ" 89855d5
+$ git tag -a v1.1.0 -m "Phiên bản 1.1.0: phụ phí giờ cao điểm, làm tròn quãng đường 0,1 km"
+$ git tag -n
+v1.0.0          Phiên bản 1.0.0: tính cước theo km, làm tròn 1.000 đ
+v1.1.0          Phiên bản 1.1.0: phụ phí giờ cao điểm, làm tròn quãng đường 0,1 km
+$ git cat-file -t v1.1.0
+tag
+$ git cat-file -p v1.1.0
+object 70b18f6ef606e77c6d57b2ace5cdbd3652a5f7f2
+type commit
+tag v1.1.0
+tagger Trần Minh <minh@toinoi.test> 1794888300 +0700
+
+Phiên bản 1.1.0: phụ phí giờ cao điểm, làm tròn quãng đường 0,1 km
+PASS v1.0.0 trỏ vào commit cuối Phần 1
+
+# Mô tả một commit bằng tag gần nhất
+$ git describe
+v1.1.0
+$ git describe HEAD~1
+v1.0.0-7-ge46c89f
+$ git log --oneline --decorate -2
+70b18f6 (HEAD -> main, tag: v1.1.0) Thêm test cho phụ phí giờ cao điểm
+e46c89f Merge branch 'tinh-nang/phu-phi-gio-cao-diem'
+PASS nhánh và tag trùng lịch sử chuẩn
+
+# ==================== p02/17-cherry-pick-revert.mjs · GIT-017 ====================
+# Bản vá làm tròn quãng đường: 7993c73; commit cấu hình giờ cao điểm: c46c1dd
+
+# Nhánh phát hành 1.0 tạo từ tag v1.0.0, mang bản vá sang bằng cherry-pick
+$ git switch -c phat-hanh/1.0 v1.0.0
+Switched to a new branch 'phat-hanh/1.0'
+$ git cherry-pick -x 7993c73
+[phat-hanh/1.0 b047783] Làm tròn quãng đường tới 0,1 km trước khi tính cước
+ Date: Mon Nov 16 11:15:00 2026 +0700
+ 2 files changed, 5 insertions(+), 1 deletion(-)
+$ git log -1 --format="%h %s%n%n%b"
+b047783 Làm tròn quãng đường tới 0,1 km trước khi tính cước
+
+GPS trả quãng đường tới mét; khách thấy giá nhảy khi xe đứng yên.
+
+(cherry picked from commit 7993c73f77906dbc35746cc946496c2e42025c69)
+$ git log -1 --format="tác giả: %an %ad%nngười commit: %cn %cd" --date=iso
+tác giả: Trần Minh 2026-11-16 11:15:00 +0700
+người commit: Trần Minh 2026-11-18 09:00:00 +0700
+$ git tag -a v1.0.1 -m "Phiên bản 1.0.1: bản vá làm tròn quãng đường"
+$ git log --oneline --graph --decorate -3
+* b047783 (HEAD -> phat-hanh/1.0, tag: v1.0.1) Làm tròn quãng đường tới 0,1 km trước khi tính cước
+* 89855d5 (tag: v1.0.0) Chuẩn hoá xuống dòng LF bằng .gitattributes
+* 1c6e78c Đổi tên tài liệu thành bang-gia-cuoc.md
+
+# Bộ phận vận hành hoãn phụ phí giờ cao điểm: revert commit cấu hình trên main
+$ git switch main
+Switched to branch 'main'
+$ git revert --no-edit c46c1dd
+[main b6829e3] Revert "Thêm hệ số phụ phí giờ cao điểm vào bảng giá"
+ Date: Wed Nov 18 14:00:00 2026 +0700
+ 1 file changed, 4 deletions(-)
+$ git log -1 --format="%h %s%n%n%b"
+b6829e3 Revert "Thêm hệ số phụ phí giờ cao điểm vào bảng giá"
+
+This reverts commit c46c1dda9d78f686ef8c9b9f55b99e4150089523.
+$ git show --stat --format= HEAD
+ src/BaoGia/appsettings.json | 4 ----
+ 1 file changed, 4 deletions(-)
+$ git grep -c Multiplier -- src/BaoGia/appsettings.json
+PASS code vẫn nhận hệ số (mặc định 1)
+PASS nhánh và tag trùng lịch sử chuẩn
+
+# ==================== p02/18-rebase-co-ban.mjs · GIT-018 ====================
+# Lan làm phí chờ trên nhánh tạo từ v1.1.0
+$ git switch -c tinh-nang/phi-cho-doi v1.1.0
+Switched to a new branch 'tinh-nang/phi-cho-doi'
+$ git commit -am "Nhắc thời gian chờ trong mô tả dịch vụ"
+[tinh-nang/phi-cho-doi f3496a8] Nhắc thời gian chờ trong mô tả dịch vụ
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+$ git add docs/phi-cho.md
+$ git commit -m "Thêm tài liệu phí chờ"
+[tinh-nang/phi-cho-doi aa8ac44] Thêm tài liệu phí chờ
+ 1 file changed, 3 insertions(+)
+ create mode 100644 docs/phi-cho.md
+
+# Trong lúc đó, Minh sửa cùng dòng README trên main
+$ git switch main
+Switched to branch 'main'
+$ git commit -am "Nhắc giờ đặt chuyến trong mô tả dịch vụ"
+[main d42d397] Nhắc giờ đặt chuyến trong mô tả dịch vụ
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+$ git log --oneline --graph main tinh-nang/phi-cho-doi -6
+* d42d397 Nhắc giờ đặt chuyến trong mô tả dịch vụ
+* b6829e3 Revert "Thêm hệ số phụ phí giờ cao điểm vào bảng giá"
+| * aa8ac44 Thêm tài liệu phí chờ
+| * f3496a8 Nhắc thời gian chờ trong mô tả dịch vụ
+|/  
+* 70b18f6 Thêm test cho phụ phí giờ cao điểm
+*   e46c89f Merge branch 'tinh-nang/phu-phi-gio-cao-diem'
+|\  
+
+# Rebase nhánh của Lan lên đầu main: dừng ở commit đụng README
+$ git switch tinh-nang/phi-cho-doi
+Switched to branch 'tinh-nang/phi-cho-doi'
+$ git rebase main
+Auto-merging README.md
+CONFLICT (content): Merge conflict in README.md
+Rebasing (1/2)error: could not apply f3496a8... Nhắc thời gian chờ trong mô tả dịch vụ
+hint: Resolve all conflicts manually, mark them as resolved with
+hint: "git add/rm <conflicted_files>", then run "git rebase --continue".
+hint: You can instead skip this commit: run "git rebase --skip".
+hint: To abort and get back to the state before "git rebase", run "git rebase --abort".
+hint: Disable this message with "git config set advice.mergeConflict false"
+Could not apply f3496a8... # Nhắc thời gian chờ trong mô tả dịch vụ
+$ git status
+interactive rebase in progress; onto d42d397
+Last command done (1 command done):
+   pick f3496a8 # Nhắc thời gian chờ trong mô tả dịch vụ
+Next command to do (1 remaining command):
+   pick aa8ac44 # Thêm tài liệu phí chờ
+  (use "git rebase --edit-todo" to view and edit)
+You are currently rebasing branch 'tinh-nang/phi-cho-doi' on 'd42d397'.
+  (fix conflicts and then run "git rebase --continue")
+  (use "git rebase --skip" to skip this patch)
+  (use "git rebase --abort" to check out the original branch)
+
+Unmerged paths:
+  (use "git restore --staged <file>..." to unstage)
+  (use "git add <file>..." to mark resolution)
+	both modified:   README.md
+
+no changes added to commit (use "git add" and/or "git commit -a")
+$ git diff
+diff --cc README.md
+index b47a64e,a1d74dc..0000000
+--- a/README.md
++++ b/README.md
+@@@ -1,4 -1,4 +1,8 @@@
+  # bao-gia
+  
+++<<<<<<< HEAD
+ +Dịch vụ báo giá cước của Tới Nơi: nhận quãng đường, giờ đặt và loại dịch vụ,
+++=======
++ Dịch vụ báo giá cước của Tới Nơi: nhận quãng đường, thời gian chờ và loại dịch vụ,
+++>>>>>>> f3496a8 (Nhắc thời gian chờ trong mô tả dịch vụ)
+  trả về giá dự kiến cho khách trước khi đặt chuyến.
+
+# Giải quyết: giữ cả "giờ đặt" lẫn "thời gian chờ", rồi đi tiếp
+$ git add README.md
+$ git rebase --continue
+[detached HEAD 95720a8] Nhắc thời gian chờ trong mô tả dịch vụ
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+Rebasing (2/2)Successfully rebased and updated refs/heads/tinh-nang/phi-cho-doi.
+$ git log --oneline --graph -4
+* 61f5ed6 Thêm tài liệu phí chờ
+* 95720a8 Nhắc thời gian chờ trong mô tả dịch vụ
+* d42d397 Nhắc giờ đặt chuyến trong mô tả dịch vụ
+* b6829e3 Revert "Thêm hệ số phụ phí giờ cao điểm vào bảng giá"
+$ git log -2 --format="%h %an | viết %ad | commit %cd | %s" --date=format:%d/%m_%H:%M
+61f5ed6 Lê Lan | viết 18/11_11:00 | commit 18/11_16:00 | Thêm tài liệu phí chờ
+95720a8 Lê Lan | viết 18/11_10:00 | commit 18/11_16:00 | Nhắc thời gian chờ trong mô tả dịch vụ
+
+# Sau rebase, main chỉ cần fast-forward
+$ git switch main
+Switched to branch 'main'
+$ git merge --ff-only tinh-nang/phi-cho-doi
+Updating d42d397..61f5ed6
+Fast-forward
+ README.md       | 2 +-
+ docs/phi-cho.md | 3 +++
+ 2 files changed, 4 insertions(+), 1 deletion(-)
+ create mode 100644 docs/phi-cho.md
+$ git branch -d tinh-nang/phi-cho-doi
+Deleted branch tinh-nang/phi-cho-doi (was 61f5ed6).
+$ git log --oneline --graph -5
+* 61f5ed6 Thêm tài liệu phí chờ
+* 95720a8 Nhắc thời gian chờ trong mô tả dịch vụ
+* d42d397 Nhắc giờ đặt chuyến trong mô tả dịch vụ
+* b6829e3 Revert "Thêm hệ số phụ phí giờ cao điểm vào bảng giá"
+* 70b18f6 Thêm test cho phụ phí giờ cao điểm
+PASS nhánh và tag trùng lịch sử chuẩn
+
+# ==================== p02/19-worktree.mjs · GIT-019 ====================
+$ git worktree list
+<lab>/work/bao-gia  61f5ed6 [main]
+
+# Cần sửa nhánh phát hành mà không đụng tới working tree của main
+$ git worktree add ../bao-gia-1.0 phat-hanh/1.0
+HEAD is now at b047783 Làm tròn quãng đường tới 0,1 km trước khi tính cước
+Preparing worktree (checking out 'phat-hanh/1.0')
+$ git worktree list
+<lab>/work/bao-gia      61f5ed6 [main]
+<lab>/work/bao-gia-1.0  b047783 [phat-hanh/1.0]
+$ git branch -v
+* main          61f5ed6 Thêm tài liệu phí chờ
++ phat-hanh/1.0 b047783 Làm tròn quãng đường tới 0,1 km trước khi tính cước
+
+# Một nhánh chỉ được checkout ở một worktree
+$ git switch phat-hanh/1.0
+fatal: 'phat-hanh/1.0' is already used by worktree at '<lab>/work/bao-gia-1.0'
+
+# Làm việc trong worktree thứ hai như một thư mục bình thường
+$ cd ../bao-gia-1.0
+$ git status --short --branch
+## phat-hanh/1.0
+$ git add CHANGELOG.md
+$ git commit -m "Thêm ghi chú phát hành 1.0.1"
+[phat-hanh/1.0 c6e65d7] Thêm ghi chú phát hành 1.0.1
+ 1 file changed, 9 insertions(+)
+ create mode 100644 CHANGELOG.md
+
+# Commit vừa tạo có ngay trong repository chính (cùng .git)
+$ cd ../bao-gia
+$ git log --oneline -2 phat-hanh/1.0
+c6e65d7 Thêm ghi chú phát hành 1.0.1
+b047783 Làm tròn quãng đường tới 0,1 km trước khi tính cước
+$ git status --short --branch
+## main
+PASS working tree của main không có CHANGELOG.md
+
+# Xong việc: gỡ worktree
+$ git worktree remove ../bao-gia-1.0
+$ git worktree list
+<lab>/work/bao-gia  61f5ed6 [main]
+PASS nhánh và tag trùng lịch sử chuẩn
+
+# ==================== p02/20-thuc-hanh.mjs · GIT-020 ====================
+# Repository mẫu: lịch sử chuẩn của Phần 2
+$ cd bao-gia
+$ git log --oneline --graph --decorate --all
+* c6e65d7 (phat-hanh/1.0) Thêm ghi chú phát hành 1.0.1
+* b047783 (tag: v1.0.1) Làm tròn quãng đường tới 0,1 km trước khi tính cước
+| * 61f5ed6 (HEAD -> main) Thêm tài liệu phí chờ
+| * 95720a8 Nhắc thời gian chờ trong mô tả dịch vụ
+| * d42d397 Nhắc giờ đặt chuyến trong mô tả dịch vụ
+| * b6829e3 Revert "Thêm hệ số phụ phí giờ cao điểm vào bảng giá"
+| * 70b18f6 (tag: v1.1.0) Thêm test cho phụ phí giờ cao điểm
+| *   e46c89f Merge branch 'tinh-nang/phu-phi-gio-cao-diem'
+| |\  
+| | * e4cd655 Nhân hệ số giờ cao điểm khi tính cước
+| | * c46c1dd Thêm hệ số phụ phí giờ cao điểm vào bảng giá
+| |/  
+|/|   
+| *   8c05257 Merge branch 'tai-lieu/gio-cao-diem'
+| |\  
+| | * 3e7f15a Mô tả phụ phí giờ cao điểm trong tài liệu
+| |/  
+| * efe9c33 Ghi cách làm tròn quãng đường vào tài liệu
+| * 7993c73 Làm tròn quãng đường tới 0,1 km trước khi tính cước
+|/  
+* 89855d5 (tag: v1.0.0) Chuẩn hoá xuống dòng LF bằng .gitattributes
+* 1c6e78c Đổi tên tài liệu thành bang-gia-cuoc.md
+* 45c0d6b Thêm tài liệu bảng giá
+* 0d57e4b Làm tròn cước lên bội số 1.000 đ
+* b56c460 Báo lỗi rõ hơn khi quãng đường âm
+* d508151 Tăng cước mỗi km ô tô 4 chỗ lên 5.000 đ
+* b48e0a1 Thêm test cho hàm tính cước
+* 19ac10f Bỏ qua kết quả build và cấu hình máy cá nhân
+* 7ab5adc Thêm hàm tính cước theo km
+* cd8da2e Khởi tạo dịch vụ báo giá
+PASS nhánh và tag trùng lịch sử chuẩn
+$ node ../../p02/kiem-tra.mjs .
+ĐẠT      không có merge/rebase/cherry-pick/revert dở dang
+ĐẠT      working tree sạch
+ĐẠT      không còn dấu xung đột trong file đã commit
+ĐẠT      main có ít nhất một merge commit
+ĐẠT      có tag annotated v1.0.0, v1.1.0, v1.0.1
+ĐẠT      v1.1.0 nằm trên lịch sử của main
+ĐẠT      nhánh phat-hanh/1.0 có commit cherry-pick ghi nguồn (-x)
+ĐẠT      v1.0.1 nằm trên nhánh phát hành, không nằm trên main
+ĐẠT      nhánh đã merge vào main đã được xoá
+ĐẠT      không còn stash bị bỏ quên
+ĐẠT      không còn worktree phụ
+11/11 tiêu chí đạt
+PASS repository mẫu đạt mọi tiêu chí
+
+# Làm hỏng có chủ đích: nhánh đã merge còn sót, stash bị quên, merge dở dang, tag lightweight
+$ git branch tinh-nang/phu-phi-gio-cao-diem HEAD~3
+$ git stash push -m "Ghi chú tạm"
+Saved working directory and index state On main: Ghi chú tạm
+$ git tag -d v1.0.1
+Deleted tag 'v1.0.1' (was f957ba3)
+$ git tag v1.0.1 phat-hanh/1.0~1
+$ git switch -q -c thu-xung-dot v1.0.0
+$ git commit -qam "Thử đổi giá trị mặc định"
+$ git switch -q main
+$ git merge thu-xung-dot   # xung đột, bỏ dở
+$ node ../../p02/kiem-tra.mjs .
+CHƯA ĐẠT không có merge/rebase/cherry-pick/revert dở dang — MERGE_HEAD
+CHƯA ĐẠT working tree sạch — UU src/BaoGia/FareCalculator.cs
+CHƯA ĐẠT không còn dấu xung đột trong file đã commit — src/BaoGia/FareCalculator.cs:9:<<<<<<< HEAD, src/BaoGia/FareCalculator.cs:11:=======
+ĐẠT      main có ít nhất một merge commit
+CHƯA ĐẠT có tag annotated v1.0.0, v1.1.0, v1.0.1 — v1.0.1: commit
+ĐẠT      v1.1.0 nằm trên lịch sử của main
+ĐẠT      nhánh phat-hanh/1.0 có commit cherry-pick ghi nguồn (-x)
+ĐẠT      v1.0.1 nằm trên nhánh phát hành, không nằm trên main
+CHƯA ĐẠT nhánh đã merge vào main đã được xoá — tinh-nang/phu-phi-gio-cao-diem
+CHƯA ĐẠT không còn stash bị bỏ quên — stash@{0}: On main: Ghi chú tạm
+ĐẠT      không còn worktree phụ
+5/11 tiêu chí đạt
+PASS kiểm tra bắt được 6 lỗi
+
+# Sửa từng lỗi
+$ git merge --abort
+$ git branch -D thu-xung-dot
+Deleted branch thu-xung-dot (was d6ba037).
+$ git branch -d tinh-nang/phu-phi-gio-cao-diem
+Deleted branch tinh-nang/phu-phi-gio-cao-diem (was b6829e3).
+$ git stash drop
+$ git tag -d v1.0.1
+Deleted tag 'v1.0.1' (was b047783)
+$ git tag -a v1.0.1 -m "Phiên bản 1.0.1: bản vá làm tròn quãng đường" phat-hanh/1.0~1
+$ node ../../p02/kiem-tra.mjs .
+ĐẠT      không có merge/rebase/cherry-pick/revert dở dang
+ĐẠT      working tree sạch
+ĐẠT      không còn dấu xung đột trong file đã commit
+ĐẠT      main có ít nhất một merge commit
+ĐẠT      có tag annotated v1.0.0, v1.1.0, v1.0.1
+ĐẠT      v1.1.0 nằm trên lịch sử của main
+ĐẠT      nhánh phat-hanh/1.0 có commit cherry-pick ghi nguồn (-x)
+ĐẠT      v1.0.1 nằm trên nhánh phát hành, không nằm trên main
+ĐẠT      nhánh đã merge vào main đã được xoá
+ĐẠT      không còn stash bị bỏ quên
+ĐẠT      không còn worktree phụ
+11/11 tiêu chí đạt
+PASS sửa xong đạt mọi tiêu chí
+PASS tag v1.0.1 tạo lại trùng mã hash chuẩn (cùng người tạo, thời điểm, lời nhắn)
+
+# [lab] Bài đã chạy: 10
+# [lab] PASS: 23
+# [lab] FAIL: 0
+# [lab] KẾT QUẢ: ĐẠT

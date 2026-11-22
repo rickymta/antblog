@@ -1,4 +1,4 @@
-# Git qua GitStudio và dự án Tới Nơi
+undefinedThực hành Phần 2: phụ phí giờ cao điểm từ nhánh tới bản phát hành, chấm bằng script 11 tiêu chí<br>`git-thuc-hanh-nhanh-merge-tag`undefined| Đã viết |undefinedWorktree: làm hai nhánh cùng lúc trong hai thư mục, không cần stash qua lại<br>`git-worktree`undefined| Đã viết |undefinedRebase cơ bản: chép nhánh tính năng lên đầu main, xử lý xung đột giữa chừng, khi nào không rebase<br>`git-rebase-co-ban`undefined| Đã viết |undefinedCherry-pick và revert: mang bản vá sang nhánh phát hành, hoàn tác một commit đã chia sẻ<br>`git-cherry-pick-revert`undefined| Đã viết |undefinedTag và phiên bản phát hành: lightweight hay annotated, đặt tên theo semver, git describe<br>`git-tag-phien-ban`undefined| Đã viết |undefinedStash: cất thay đổi dở dang để làm việc khác, rồi lấy lại đúng chỗ<br>`git-stash-cat-thay-doi`undefined| Đã viết |undefinedXung đột merge: đọc marker, dùng công cụ ba khung của GitStudio và giải quyết dòng tính cước<br>`git-xung-dot-merge`undefined| Đã viết |undefinedMerge trong Git: fast-forward và merge commit, khi nào dùng --no-ff<br>`git-merge-fast-forward-merge-commit`undefined| Đã viết |undefinedChuyển nhánh khi còn thay đổi chưa commit: khi nào Git cho, khi nào từ chối<br>`git-chuyen-nhanh-thay-doi-chua-commit`undefined| Đã viết |undefinedNhánh trong Git: con trỏ di động trên đồ thị, tạo, đổi tên và xoá bằng GitStudio<br>`git-nhanh-la-gi`undefined| Đã viết |# Git qua GitStudio và dự án Tới Nơi
 
 Khung biên tập v1 · 22/11/2026 · **6 phần × 10 bài = 60 bài**. Mỗi phần có **3 cơ bản / 4 trung bình / 3 nâng cao**, gồm cả bài thực hành cuối phần. Đây là khung viết bài; hoàn thành khung không có nghĩa đã hoàn thành nội dung.
 
@@ -72,20 +72,22 @@ Lộ trình: `git-qua-gitstudio` — **đã viết đủ 10 bài ngày 22/11/202
 
 ## P02 · Nhánh, merge và xung đột
 
-Đầu vào: P01. Đầu ra: tính năng phụ phí giờ cao điểm làm trên nhánh, merge vào `main` có xung đột đã giải quyết, tag phát hành. Lộ trình dự kiến `git-qua-gitstudio-phan-02`.
+Đầu vào: P01. Đầu ra: tính năng phụ phí giờ cao điểm làm trên nhánh, merge vào `main` có xung đột đã giải quyết, tag phát hành, nhánh phát hành 1.0 với bản vá cherry-pick.
+
+Lộ trình: `git-qua-gitstudio-phan-02` — **đã viết đủ 10 bài ngày 22/11/2026**, đã thêm vào `api/seed/learning-paths.json`. Lab: `examples/toi-noi-git/p02` (lịch sử chuẩn 12 bước trong `lib/history2.mjs` dựng trên cuối P01; 10 file bài, 23 kiểm tra PASS, mọi bài so nhánh và tag với lịch sử chuẩn; script chấm `p02/kiem-tra.mjs` 11 tiêu chí; `npm test` 4/4 cho cả P01 và P02). 27 ảnh GitStudio 1.0.1 (2000 × 1125) ở `apps/web/public/images/articles/git-*/`. Thuật ngữ đề xuất bổ sung vào `glossary-candidates/git.json` (31 mục cho P01–P02). Ghi chú GitStudio 1.0.1 khi viết P02: checkout thất bại chỉ hiện lỗi trong Nhật ký hoạt động; Cherry-pick commit không thêm `-x`; Revert commit luôn `--no-edit`; Xem trước merge có ba khung A/B/Kết quả và chọn cả hai bên ghép theo dòng. Chưa seed/deploy lên website.
 
 | ID | Bài / slug | Mức | Làm được sau bài / sản phẩm thực hành | Trạng thái |
 |---|---|---|---|---|
-| GIT-011 | Nhánh là gì: con trỏ di động trên đồ thị<br>`git-nhanh-la-gi` | CB | Tạo, đổi tên, xoá nhánh; HEAD trỏ vào nhánh; `switch` vs `checkout` | Dự kiến |
-| GIT-012 | Chuyển nhánh khi còn thay đổi chưa commit<br>`git-chuyen-nhanh-thay-doi-chua-commit` | CB | Hiểu khi nào Git cho/không cho chuyển, mang thay đổi theo hay cất đi | Dự kiến |
-| GIT-013 | Merge: fast-forward và merge commit<br>`git-merge-fast-forward-merge-commit` | CB | Merge bằng kéo thả/menu, `--no-ff`, xem trước merge trong GitStudio | Dự kiến |
-| GIT-014 | Xung đột merge và công cụ giải quyết xung đột<br>`git-xung-dot-merge` | TB | Đọc marker, lấy ours/theirs theo file, sửa trong conflict editor, continue/abort | Dự kiến |
-| GIT-015 | Stash: cất thay đổi dở dang<br>`git-stash-cat-thay-doi` | TB | Stash có tiêu đề, stash chỉ phần đã stage, apply/pop/drop, stash trên đồ thị | Dự kiến |
-| GIT-016 | Tag và phiên bản phát hành<br>`git-tag-phien-ban` | TB | Lightweight vs annotated tag, tag theo semver, push tag | Dự kiến |
-| GIT-017 | Cherry-pick và revert một commit sang nhánh khác<br>`git-cherry-pick-revert` | TB | Mang bản vá sang nhánh phát hành, xử lý xung đột khi cherry-pick | Dự kiến |
-| GIT-018 | Rebase cơ bản: viết lại nhánh lên đầu `main`<br>`git-rebase-co-ban` | NC | Rebase vs merge, xung đột giữa chừng rebase, khi nào không rebase | Dự kiến |
-| GIT-019 | Worktree: làm hai nhánh cùng lúc<br>`git-worktree` | NC | Tạo worktree từ menu commit, sửa lỗi gấp không phải stash | Dự kiến |
-| GIT-020 | Thực hành: phụ phí giờ cao điểm từ nhánh tới bản phát hành<br>`git-thuc-hanh-nhanh-merge-tag` | NC | Bàn giao lịch sử có nhánh tính năng, xung đột đã giải quyết, tag `v1.1.0` | Dự kiến |
+| GIT-011 | Nhánh trong Git: con trỏ di động trên đồ thị, tạo, đổi tên và xoá bằng GitStudio<br>`git-nhanh-la-gi` | CB | Tạo, đổi tên, xoá nhánh; HEAD trỏ vào nhánh; `switch` vs `checkout` | Đã viết |
+| GIT-012 | Chuyển nhánh khi còn thay đổi chưa commit: khi nào Git cho, khi nào từ chối<br>`git-chuyen-nhanh-thay-doi-chua-commit` | CB | Hiểu khi nào Git cho/không cho chuyển, mang thay đổi theo hay cất đi | Đã viết |
+| GIT-013 | Merge trong Git: fast-forward và merge commit, khi nào dùng --no-ff<br>`git-merge-fast-forward-merge-commit` | CB | Merge bằng menu nhánh, `--no-ff`, xem trước merge trong GitStudio | Đã viết |
+| GIT-014 | Xung đột merge: đọc marker, dùng công cụ ba khung của GitStudio và giải quyết dòng tính cước<br>`git-xung-dot-merge` | TB | Đọc marker, lấy ours/theirs theo file, sửa trong conflict editor, continue/abort | Đã viết |
+| GIT-015 | Stash: cất thay đổi dở dang để làm việc khác, rồi lấy lại đúng chỗ<br>`git-stash-cat-thay-doi` | TB | Stash có tiêu đề, stash chỉ phần đã stage, apply/pop/drop, stash trên đồ thị | Đã viết |
+| GIT-016 | Tag và phiên bản phát hành: lightweight hay annotated, đặt tên theo semver, git describe<br>`git-tag-phien-ban` | TB | Lightweight vs annotated tag, tag theo semver, push tag | Đã viết |
+| GIT-017 | Cherry-pick và revert: mang bản vá sang nhánh phát hành, hoàn tác một commit đã chia sẻ<br>`git-cherry-pick-revert` | TB | Mang bản vá sang nhánh phát hành, xử lý xung đột khi cherry-pick | Đã viết |
+| GIT-018 | Rebase cơ bản: chép nhánh tính năng lên đầu main, xử lý xung đột giữa chừng, khi nào không rebase<br>`git-rebase-co-ban` | NC | Rebase vs merge, xung đột giữa chừng rebase, khi nào không rebase | Đã viết |
+| GIT-019 | Worktree: làm hai nhánh cùng lúc trong hai thư mục, không cần stash qua lại<br>`git-worktree` | NC | Tạo worktree từ menu commit, sửa lỗi gấp không phải stash | Đã viết |
+| GIT-020 | Thực hành Phần 2: phụ phí giờ cao điểm từ nhánh tới bản phát hành, chấm bằng script 11 tiêu chí<br>`git-thuc-hanh-nhanh-merge-tag` | NC | Bàn giao lịch sử có nhánh tính năng, xung đột đã giải quyết, tag `v1.1.0` | Đã viết |
 
 ## P03 · Remote và làm việc nhóm
 

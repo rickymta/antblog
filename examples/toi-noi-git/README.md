@@ -12,9 +12,12 @@ npm test               # chạy lại Phần 1 và so từng ký tự với p01/
 npm run setup -- 05    # dựng work/bao-gia ở trạng thái ĐẦU bài GIT-005 để mở bằng GitStudio
 npm run setup -- 05 --end   # … hoặc trạng thái CUỐI bài
 npm run kiem-tra -- <đường dẫn repository>   # chấm repository theo 11 tiêu chí của GIT-010
+npm run p02            # chạy cả Phần 2 (nhánh, merge, xung đột, stash, tag, cherry-pick, rebase, worktree)
+npm run setup -- 14    # bài Phần 2 đánh số 11–20; setup tự dựng Phần 1 rồi các bước Phần 2 cần thiết
+npm run kiem-tra-p02 -- <đường dẫn repository>   # chấm repository theo 11 tiêu chí của GIT-020
 ```
 
-Kết quả trên máy viết bài: `# [lab] PASS: 31`, `# [lab] FAIL: 0`, `npm test` 2/2.
+Kết quả trên máy viết bài: Phần 1 `# [lab] PASS: 31`, Phần 2 `# [lab] PASS: 23`, `# [lab] FAIL: 0`, `npm test` 4/4.
 
 ## Vì sao mã hash trong bài trùng với máy bạn
 
@@ -36,10 +39,12 @@ Khác phiên bản git có thể khác câu chữ của vài thông báo (ví d�
 | `run.mjs` | Runner: chạy bài, dựng trạng thái (`setup`) |
 | `lib/lab.mjs` | Môi trường git cô lập, lớp `Session` in lệnh/kết quả và đếm PASS/FAIL |
 | `lib/history.mjs` | Nội dung file và **lịch sử chuẩn** 10 commit của repository `bao-gia` (Phần 1) |
+| `lib/history2.mjs` | Lịch sử chuẩn Phần 2: 12 bước (nhánh, merge, xung đột, tag, cherry-pick, revert, rebase, worktree) dựng trên cuối Phần 1 |
+| `p02/NN-*.mjs`, `p02/kiem-tra.mjs`, `p02/OUTPUT.txt` | Bài GIT-011…GIT-020; mỗi bài so mọi nhánh và tag với lịch sử chuẩn (`p02/chung.mjs`) |
 | `p01/NN-*.mjs` | Một file cho mỗi bài GIT-001…GIT-010; `start`/`end` = số commit chuẩn ở đầu/cuối bài |
 | `p01/kiem-tra.mjs` | Script chấm repository của GIT-010 (chỉ đọc, mã thoát 0 khi đạt hết) |
 | `p01/OUTPUT.txt` | Kết quả mẫu |
-| `test/p01.test.mjs` | So kết quả với `OUTPUT.txt`, kiểm `setup` |
+| `test/lab.test.mjs` | So kết quả hai phần với `OUTPUT.txt`, kiểm `setup` |
 | `work/` | Nơi lab dựng repository (bị `.gitignore`); xoá thoải mái |
 
 Các bài tạo commit bằng thao tác thật (`git add -p`, `--amend`…) rồi kiểm tra commit tạo ra trùng mã hash với lịch sử chuẩn (`PASS commit trùng c6`…). Nhờ vậy lịch sử chuẩn và nội dung bài không lệch nhau.

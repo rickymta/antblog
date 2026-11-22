@@ -6557,5 +6557,103 @@
       "GITATTRIBUTES",
       "COMMIT SẠCH"
     ]
+  },
+  "git-nhanh-la-gi": {
+    "title": "NHÁNH · HEAD",
+    "subtitle": "Con trỏ di động trên đồ thị commit",
+    "diagram": "flow",
+    "labels": [
+      "MAIN",
+      "HEAD",
+      "TÍNH NĂNG"
+    ]
+  },
+  "git-chuyen-nhanh-thay-doi-chua-commit": {
+    "title": "SWITCH · WIP",
+    "subtitle": "Chuyển nhánh khi còn thay đổi chưa commit",
+    "diagram": "split",
+    "labels": [
+      "NHÁNH A",
+      "↔",
+      "NHÁNH B"
+    ]
+  },
+  "git-merge-fast-forward-merge-commit": {
+    "title": "MERGE · FF",
+    "subtitle": "Fast-forward và merge commit",
+    "diagram": "blocks",
+    "labels": [
+      "MAIN",
+      "NHÁNH",
+      "MERGE"
+    ]
+  },
+  "git-xung-dot-merge": {
+    "title": "XUNG ĐỘT MERGE",
+    "subtitle": "Dòng tính cước bị sửa ở cả hai nhánh",
+    "diagram": "target",
+    "labels": [
+      "OURS",
+      "THEIRS",
+      "KẾT QUẢ"
+    ]
+  },
+  "git-stash-cat-thay-doi": {
+    "title": "STASH",
+    "subtitle": "Cất thay đổi dở dang rồi lấy lại",
+    "diagram": "layers",
+    "labels": [
+      "STASH"
+    ]
+  },
+  "git-tag-phien-ban": {
+    "title": "TAG · SEMVER",
+    "subtitle": "v1.0.0, v1.1.0 và git describe",
+    "diagram": "checklist",
+    "labels": [
+      "V1.0.0",
+      "V1.1.0",
+      "V1.0.1"
+    ]
+  },
+  "git-cherry-pick-revert": {
+    "title": "CHERRY-PICK",
+    "subtitle": "Bản vá cho nhánh phát hành, revert trên main",
+    "diagram": "network",
+    "labels": [
+      "MAIN",
+      "PICK",
+      "PHÁT HÀNH"
+    ]
+  },
+  "git-rebase-co-ban": {
+    "title": "REBASE",
+    "subtitle": "Chép nhánh lên đầu main, lịch sử thẳng",
+    "diagram": "cycle",
+    "labels": [
+      "TÁCH",
+      "CHÉP LẠI",
+      "FAST-FORWARD"
+    ]
+  },
+  "git-worktree": {
+    "title": "WORKTREE",
+    "subtitle": "Hai nhánh, hai thư mục, một repository",
+    "diagram": "map",
+    "labels": [
+      "MAIN",
+      ".GIT",
+      "PHÁT HÀNH"
+    ]
+  },
+  "git-thuc-hanh-nhanh-merge-tag": {
+    "title": "PHẦN 2 · LAB",
+    "subtitle": "Từ nhánh tới bản phát hành · 11 tiêu chí",
+    "diagram": "matrix",
+    "labels": [
+      "MERGE",
+      "TAG",
+      "CHECKS"
+    ]
   }
 }

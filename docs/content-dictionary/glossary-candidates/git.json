@@ -3,9 +3,9 @@
   "category": "git",
   "generatedAt": "2026-11-22",
   "source": {
-    "articles": 10,
+    "articles": 20,
     "checkedAgainst": "api/seed/terminology.json (working tree 22/11/2026, 422 mục) và các file glossary-candidates hiện có",
-    "occurrencesMethod": "Như postgresql.json: occurrences = số bài Git P01 (10 bài, git-*) có ít nhất một chỗ khớp term/english/aliases trong văn xuôi; mentions = tổng số chỗ khớp. Bỏ frontmatter, khối code, inline code, thẻ HTML (giữ alt), đích liên kết, URL. Ranh giới từ Unicode, cụm dài thắng cụm ngắn, tôn trọng caseSensitive. outsideSeriesArticles = số bài ngoài series có chỗ khớp. Phần lớn tên lệnh và tên file nằm trong inline code nên không được đếm. Đếm lại khi viết thêm phần."
+    "occurrencesMethod": "Như postgresql.json: occurrences = số bài Git P01–P02 (20 bài, git-*) có ít nhất một chỗ khớp term/english/aliases trong văn xuôi; mentions = tổng số chỗ khớp. Bỏ frontmatter, khối code, inline code, thẻ HTML (giữ alt), đích liên kết, URL. Ranh giới từ Unicode, cụm dài thắng cụm ngắn, tôn trọng caseSensitive. outsideSeriesArticles = số bài ngoài series có chỗ khớp. Phần lớn tên lệnh và tên file nằm trong inline code nên không được đếm. Đếm lại khi viết thêm phần."
   },
   "conflicts": [
     {
@@ -59,8 +59,8 @@
         "git-init-clone-mo-repository",
         "git-ben-trong-object-ref-head"
       ],
-      "occurrences": 9,
-      "mentions": 101,
+      "occurrences": 14,
+      "mentions": 127,
       "outsideSeriesArticles": 245
     },
     {
@@ -76,8 +76,8 @@
       "relatedArticleSlugs": [
         "git-ba-vung-working-tree-staging-gitignore"
       ],
-      "occurrences": 6,
-      "mentions": 30,
+      "occurrences": 11,
+      "mentions": 50,
       "outsideSeriesArticles": 1
     },
     {
@@ -94,8 +94,8 @@
         "git-ba-vung-working-tree-staging-gitignore",
         "git-commit-stage-hunk-amend"
       ],
-      "occurrences": 4,
-      "mentions": 23,
+      "occurrences": 9,
+      "mentions": 29,
       "outsideSeriesArticles": 0
     },
     {
@@ -111,8 +111,8 @@
       "relatedArticleSlugs": [
         "git-ba-vung-working-tree-staging-gitignore"
       ],
-      "occurrences": 3,
-      "mentions": 5,
+      "occurrences": 6,
+      "mentions": 18,
       "outsideSeriesArticles": 0
     },
     {
@@ -177,8 +177,8 @@
       "relatedArticleSlugs": [
         "git-commit-stage-hunk-amend"
       ],
-      "occurrences": 5,
-      "mentions": 32,
+      "occurrences": 7,
+      "mentions": 35,
       "outsideSeriesArticles": 0
     },
     {
@@ -195,8 +195,8 @@
         "git-ben-trong-object-ref-head"
       ],
       "reviewNote": "caseSensitive bắt buộc: không khớp chữ head thường. Chỉ dò trong chuyên mục git, vì HEAD còn là phương thức HTTP.",
-      "occurrences": 5,
-      "mentions": 10,
+      "occurrences": 10,
+      "mentions": 26,
       "outsideSeriesArticles": 3
     },
     {
@@ -213,8 +213,8 @@
         "git-ben-trong-object-ref-head"
       ],
       "reviewNote": "Chỉ dò trong git: blob còn nghĩa là Blob Storage của Azure.",
-      "occurrences": 2,
-      "mentions": 21,
+      "occurrences": 3,
+      "mentions": 22,
       "outsideSeriesArticles": 21
     },
     {
@@ -285,8 +285,292 @@
         "git-la-gi-va-gitstudio"
       ],
       "reviewNote": "Alias \"mã hash\" chỉ an toàn khi dò trong chuyên mục git.",
+      "occurrences": 13,
+      "mentions": 63,
+      "outsideSeriesArticles": 0
+    },
+    {
+      "slug": "git-branch",
+      "term": "nhánh",
+      "english": "branch",
+      "aliases": [],
+      "shortDefinition": "Trong Git: một ref (file nhỏ trong .git/refs/heads) trỏ vào commit mới nhất của một dòng lịch sử. Commit mới được tạo trên nhánh mà HEAD đang trỏ tới và chỉ nhánh đó tiến lên.",
+      "caseSensitive": false,
+      "autoLink": false,
+      "categories": [
+        "git"
+      ],
+      "relatedArticleSlugs": [
+        "git-nhanh-la-gi"
+      ],
+      "reviewNote": "autoLink false: \"nhánh\" là từ thường (độ phủ nhánh trong kiểm thử, nhánh if). Gắn tay bằng dfn.",
+      "occurrences": 16,
+      "mentions": 385,
+      "outsideSeriesArticles": 220
+    },
+    {
+      "slug": "git-merge",
+      "term": "merge",
+      "aliases": [],
+      "shortDefinition": "Đưa thay đổi của một nhánh vào nhánh đang đứng. Git fast-forward nếu nhánh nhận chưa đi tiếp, không thì tạo merge commit có hai commit cha; đoạn bị sửa khác nhau ở hai bên thành xung đột.",
+      "caseSensitive": false,
+      "autoLink": false,
+      "categories": [
+        "git"
+      ],
+      "relatedArticleSlugs": [
+        "git-merge-fast-forward-merge-commit",
+        "git-xung-dot-merge"
+      ],
+      "reviewNote": "autoLink false vì quá dày đặc trong series. Không trùng mục MERGE (SQL) vì mục đó caseSensitive.",
+      "occurrences": 11,
+      "mentions": 123,
+      "outsideSeriesArticles": 32
+    },
+    {
+      "slug": "fast-forward",
+      "term": "fast-forward",
+      "aliases": [],
+      "shortDefinition": "Kiểu merge khi nhánh nhận chưa có commit nào sau điểm tách: Git chỉ dời con trỏ nhánh tới commit của nhánh nguồn, không tạo commit mới, lịch sử vẫn thẳng.",
+      "caseSensitive": false,
+      "autoLink": true,
+      "categories": [
+        "git"
+      ],
+      "relatedArticleSlugs": [
+        "git-merge-fast-forward-merge-commit"
+      ],
+      "occurrences": 4,
+      "mentions": 22,
+      "outsideSeriesArticles": 0
+    },
+    {
+      "slug": "merge-commit",
+      "term": "merge commit",
+      "aliases": [],
+      "shortDefinition": "Commit có từ hai commit cha trở lên, tạo ra khi merge hai nhánh đã tách nhau (hoặc khi ép --no-ff). Cha thứ nhất là nhánh nhận, cha thứ hai là nhánh được merge vào.",
+      "caseSensitive": false,
+      "autoLink": true,
+      "categories": [
+        "git"
+      ],
+      "relatedArticleSlugs": [
+        "git-merge-fast-forward-merge-commit"
+      ],
+      "occurrences": 7,
+      "mentions": 33,
+      "outsideSeriesArticles": 0
+    },
+    {
+      "slug": "merge-base",
+      "term": "merge base",
+      "aliases": [],
+      "shortDefinition": "Commit chung gần nhất của hai nhánh, điểm xuất phát của three-way merge. Xem bằng git merge-base A B.",
+      "caseSensitive": false,
+      "autoLink": true,
+      "categories": [
+        "git"
+      ],
+      "relatedArticleSlugs": [
+        "git-xung-dot-merge"
+      ],
+      "occurrences": 1,
+      "mentions": 4,
+      "outsideSeriesArticles": 0
+    },
+    {
+      "slug": "merge-conflict",
+      "term": "xung đột merge",
+      "english": "merge conflict",
+      "aliases": [
+        "xung đột"
+      ],
+      "shortDefinition": "Tình huống hai nhánh sửa khác nhau cùng một đoạn (hoặc sát nhau) kể từ merge base, nên Git không tự quyết được. File chứa marker <<<<<<<, =======, >>>>>>>; người dùng sửa, git add rồi tiếp tục.",
+      "caseSensitive": false,
+      "autoLink": true,
+      "categories": [
+        "git"
+      ],
+      "relatedArticleSlugs": [
+        "git-xung-dot-merge",
+        "git-rebase-co-ban"
+      ],
+      "occurrences": 11,
+      "mentions": 65,
+      "outsideSeriesArticles": 68,
+      "reviewNote": "Alias \"xung đột\" chỉ an toàn khi dò trong chuyên mục git (ở chuyên mục khác là từ thường)."
+    },
+    {
+      "slug": "git-stash",
+      "term": "stash",
+      "aliases": [],
+      "shortDefinition": "Chỗ cất tạm thay đổi chưa commit (working tree, staging area, tuỳ chọn cả file untracked) để working tree trở về commit hiện tại; lấy lại bằng git stash pop hoặc apply.",
+      "caseSensitive": false,
+      "autoLink": true,
+      "categories": [
+        "git"
+      ],
+      "relatedArticleSlugs": [
+        "git-stash-cat-thay-doi"
+      ],
+      "occurrences": 9,
+      "mentions": 98,
+      "outsideSeriesArticles": 0
+    },
+    {
+      "slug": "annotated-tag",
+      "term": "annotated tag",
+      "aliases": [],
+      "shortDefinition": "Tag là một object riêng có người gắn, thời điểm, lời nhắn (và có thể chữ ký), trỏ tới một commit. Dùng cho phiên bản phát hành; git describe mặc định chỉ dùng loại tag này.",
+      "caseSensitive": false,
+      "autoLink": true,
+      "categories": [
+        "git"
+      ],
+      "relatedArticleSlugs": [
+        "git-tag-phien-ban"
+      ],
+      "occurrences": 3,
+      "mentions": 15,
+      "outsideSeriesArticles": 0
+    },
+    {
+      "slug": "lightweight-tag",
+      "term": "lightweight tag",
+      "aliases": [],
+      "shortDefinition": "Tag chỉ là một ref trỏ thẳng vào commit, không có người gắn, thời điểm hay lời nhắn. Hợp để đánh dấu tạm trên máy mình, không hợp cho phiên bản phát hành.",
+      "caseSensitive": false,
+      "autoLink": true,
+      "categories": [
+        "git"
+      ],
+      "relatedArticleSlugs": [
+        "git-tag-phien-ban"
+      ],
+      "occurrences": 2,
+      "mentions": 8,
+      "outsideSeriesArticles": 0
+    },
+    {
+      "slug": "semver",
+      "term": "semver",
+      "english": "Semantic Versioning",
+      "aliases": [],
+      "shortDefinition": "Quy ước đánh số phiên bản MAJOR.MINOR.PATCH: tăng PATCH khi sửa lỗi, MINOR khi thêm tính năng tương thích ngược, MAJOR khi phá vỡ tương thích.",
+      "caseSensitive": false,
+      "autoLink": true,
+      "categories": [],
+      "relatedArticleSlugs": [
+        "git-tag-phien-ban"
+      ],
+      "scopeNote": "Nghĩa giống nhau ở mọi chuyên mục (npm, NuGet, API).",
+      "occurrences": 1,
+      "mentions": 5,
+      "outsideSeriesArticles": 2
+    },
+    {
+      "slug": "cherry-pick",
+      "term": "cherry-pick",
+      "aliases": [],
+      "shortDefinition": "Chép thay đổi của một commit sang nhánh hiện tại thành commit mới (mã hash mới, giữ tác giả). Dùng -x để thêm dòng ghi nguồn (cherry picked from commit …).",
+      "caseSensitive": false,
+      "autoLink": true,
+      "categories": [
+        "git"
+      ],
+      "relatedArticleSlugs": [
+        "git-cherry-pick-revert"
+      ],
+      "occurrences": 5,
+      "mentions": 37,
+      "outsideSeriesArticles": 0
+    },
+    {
+      "slug": "git-revert",
+      "term": "revert",
+      "aliases": [],
+      "shortDefinition": "Trong Git: tạo commit mới áp thay đổi ngược lại của một commit cũ, không xoá lịch sử. Cách an toàn để hoàn tác commit đã chia sẻ.",
+      "caseSensitive": false,
+      "autoLink": true,
+      "categories": [
+        "git"
+      ],
+      "relatedArticleSlugs": [
+        "git-cherry-pick-revert"
+      ],
       "occurrences": 8,
       "mentions": 40,
+      "outsideSeriesArticles": 4
+    },
+    {
+      "slug": "git-rebase",
+      "term": "rebase",
+      "aliases": [],
+      "shortDefinition": "Chép lại các commit của nhánh hiện tại lên trên một commit khác (thường là đầu main), như một chuỗi cherry-pick. Lịch sử thẳng nhưng mọi commit được chép đổi mã hash; không rebase commit đã chia sẻ.",
+      "caseSensitive": false,
+      "autoLink": true,
+      "categories": [
+        "git"
+      ],
+      "relatedArticleSlugs": [
+        "git-rebase-co-ban"
+      ],
+      "occurrences": 9,
+      "mentions": 53,
+      "outsideSeriesArticles": 0
+    },
+    {
+      "slug": "git-worktree",
+      "term": "worktree",
+      "aliases": [],
+      "shortDefinition": "Một working tree phụ của cùng repository, ở thư mục khác, checkout một nhánh khác, dùng chung .git (object, ref, stash). Một nhánh chỉ được checkout ở một worktree.",
+      "caseSensitive": false,
+      "autoLink": true,
+      "categories": [
+        "git"
+      ],
+      "relatedArticleSlugs": [
+        "git-worktree"
+      ],
+      "occurrences": 5,
+      "mentions": 71,
+      "outsideSeriesArticles": 3
+    },
+    {
+      "slug": "detached-head",
+      "term": "detached HEAD",
+      "aliases": [],
+      "shortDefinition": "Trạng thái HEAD trỏ thẳng vào một commit thay vì một nhánh (khi checkout tag/commit, hoặc giữa lúc rebase). Commit tạo lúc này không thuộc nhánh nào trừ khi tạo nhánh.",
+      "caseSensitive": false,
+      "autoLink": true,
+      "categories": [
+        "git"
+      ],
+      "relatedArticleSlugs": [
+        "git-rebase-co-ban",
+        "git-tag-phien-ban"
+      ],
+      "occurrences": 4,
+      "mentions": 5,
+      "outsideSeriesArticles": 0
+    },
+    {
+      "slug": "release-branch",
+      "term": "nhánh phát hành",
+      "english": "release branch",
+      "aliases": [],
+      "shortDefinition": "Nhánh tạo từ tag của một phiên bản đã phát hành để vá lỗi riêng cho phiên bản đó (ví dụ phat-hanh/1.0 → v1.0.1), thường nhận bản vá bằng cherry-pick từ main.",
+      "caseSensitive": false,
+      "autoLink": true,
+      "categories": [
+        "git"
+      ],
+      "relatedArticleSlugs": [
+        "git-cherry-pick-revert",
+        "git-worktree"
+      ],
+      "occurrences": 4,
+      "mentions": 15,
       "outsideSeriesArticles": 0
     }
   ],
@@ -296,12 +580,6 @@
       "term": "commit",
       "occurrences": 10,
       "reason": "Quá chung và xuất hiện dày đặc ở mọi bài Git; gạch chân mọi chỗ gây nhiễu. Nếu thêm thì autoLink false, gắn tay."
-    },
-    {
-      "slug": "git-branch",
-      "term": "nhánh (branch)",
-      "occurrences": 6,
-      "reason": "Phần 2 (GIT-011) mới dạy; đề xuất cùng merge, fast-forward, detached HEAD khi viết P02."
     },
     {
       "slug": "git-remote",
