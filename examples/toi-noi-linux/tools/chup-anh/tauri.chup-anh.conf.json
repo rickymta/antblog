@@ -1,0 +1,16 @@
+{
+  "identifier": "dev.sshstudio.blog",
+  "app": {
+    "windows": [
+      {
+        "title": "SSH Studio",
+        "width": 2400,
+        "height": 1350,
+        "minWidth": 1000,
+        "minHeight": 680,
+        "decorations": false,
+        "center": true
+      }
+    ]
+  }
+}

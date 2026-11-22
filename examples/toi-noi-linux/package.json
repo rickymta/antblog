@@ -1,0 +1,20 @@
+{
+  "name": "toi-noi-linux-lab",
+  "private": true,
+  "type": "module",
+  "description": "Lab Linux qua SSH Studio và Tới Nơi — server Ubuntu 24.04 chạy trong Docker, runner Node không có dependency",
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "up": "node run.mjs up",
+    "down": "node run.mjs down",
+    "reset": "node run.mjs reset",
+    "info": "node run.mjs info",
+    "setup": "node run.mjs setup",
+    "p01": "node run.mjs p01",
+    "p01:output": "node run.mjs p01 > p01/OUTPUT.txt",
+    "kiem-tra": "node p01/kiem-tra.mjs",
+    "test": "node --test \"test/*.test.mjs\""
+  }
+}

@@ -1,0 +1,868 @@
+==== p01/01-linux-la-gi.sh ====
+
+# Đây là hệ điều hành gì?
+an@toinoi-app-01:~$ cat /etc/os-release
+PRETTY_NAME="Ubuntu 24.04.5 LTS"
+NAME="Ubuntu"
+VERSION_ID="24.04"
+VERSION="24.04.5 LTS (Noble Numbat)"
+VERSION_CODENAME=noble
+ID=ubuntu
+ID_LIKE=debian
+HOME_URL="https://www.ubuntu.com/"
+SUPPORT_URL="https://help.ubuntu.com/"
+BUG_REPORT_URL="https://bugs.launchpad.net/ubuntu/"
+PRIVACY_POLICY_URL="https://www.ubuntu.com/legal/terms-and-policies/privacy-policy"
+UBUNTU_CODENAME=noble
+LOGO=ubuntu-logo
+
+# Kernel và kiến trúc CPU
+an@toinoi-app-01:~$ uname -s
+Linux
+an@toinoi-app-01:~$ uname -srm
+Linux 6.18.58.1-microsoft-standard-WSL2 x86_64
+
+# Tôi là ai, đang ở máy nào?
+an@toinoi-app-01:~$ whoami
+an
+an@toinoi-app-01:~$ hostname
+toinoi-app-01
+
+# Tiến trình số 1 của hệ thống
+an@toinoi-app-01:~$ ps -p 1 -o pid,comm
+    PID COMMAND
+      1 systemd
+
+==== p01/02-ket-noi.sh ====
+
+# Những lệnh đầu tiên sau khi đăng nhập
+an@toinoi-app-01:~$ whoami
+an
+an@toinoi-app-01:~$ hostname
+toinoi-app-01
+an@toinoi-app-01:~$ pwd
+/home/an
+an@toinoi-app-01:~$ ls
+huong-dan.txt
+an@toinoi-app-01:~$ cat huong-dan.txt
+Chào An,
+
+Đây là server toinoi-app-01 của nhóm backend Tới Nơi (bản lab).
+Dịch vụ báo giá nằm ở /opt/toinoi/bao-gia, log ở /var/log/toinoi.
+
+Việc đầu tiên: làm quen với server, rồi chuẩn bị thư mục triển khai
+/srv/toinoi theo hướng dẫn của series.
+
+— Bình (nhóm hạ tầng)
+
+# Fingerprint host key của server (so với hộp thoại của SSH Studio)
+an@toinoi-app-01:~$ ssh-keygen -lf /etc/ssh/ssh_host_ed25519_key.pub
+256 SHA256:/fjhnPhFNYvAMC3S/UdkbCQ039oKGZN4rJ96pPyUvkI root@buildkitsandbox (ED25519)
+
+# Dịch vụ SSH đang chạy
+an@toinoi-app-01:~$ systemctl is-active ssh
+active
+
+==== p01/03-shell.sh ====
+
+# Shell đang dùng
+an@toinoi-app-01:~$ echo $SHELL
+/bin/bash
+an@toinoi-app-01:~$ bash --version
+GNU bash, version 5.2.21(1)-release (x86_64-pc-linux-gnu)
+Copyright (C) 2022 Free Software Foundation, Inc.
+License GPLv3+: GNU GPL version 3 or later <http://gnu.org/licenses/gpl.html>
+
+This is free software; you are free to change and redistribute it.
+There is NO WARRANTY, to the extent permitted by law.
+
+# Lệnh, tuỳ chọn, đối số
+an@toinoi-app-01:~$ date
+Sun Nov 22 22:27:00 +07 2026
+an@toinoi-app-01:~$ date +%F
+2026-11-22
+an@toinoi-app-01:~$ date --utc +%H:%M
+15:27
+an@toinoi-app-01:~$ ls
+huong-dan.txt
+an@toinoi-app-01:~$ ls -l
+total 4
+-rw-r--r-- 1 an an 330 Nov 20 08:30 huong-dan.txt
+an@toinoi-app-01:~$ ls -a
+.  ..  .bash_logout  .bashrc  .cache  .profile  huong-dan.txt
+an@toinoi-app-01:~$ ls -l -a
+total 28
+drwxr-x--- 1 an   an   4096 Nov 22 22:26 .
+drwxr-xr-x 1 root root 4096 Nov 22 22:26 ..
+-rw-r--r-- 1 an   an    220 Mar 31  2024 .bash_logout
+-rw-r--r-- 1 an   an   3771 Mar 31  2024 .bashrc
+drwx------ 2 an   an   4096 Nov 22 22:26 .cache
+-rw-r--r-- 1 an   an    807 Mar 31  2024 .profile
+-rw-r--r-- 1 an   an    330 Nov 20 08:30 huong-dan.txt
+an@toinoi-app-01:~$ ls -la
+total 28
+drwxr-x--- 1 an   an   4096 Nov 22 22:26 .
+drwxr-xr-x 1 root root 4096 Nov 22 22:26 ..
+-rw-r--r-- 1 an   an    220 Mar 31  2024 .bash_logout
+-rw-r--r-- 1 an   an   3771 Mar 31  2024 .bashrc
+drwx------ 2 an   an   4096 Nov 22 22:26 .cache
+-rw-r--r-- 1 an   an    807 Mar 31  2024 .profile
+-rw-r--r-- 1 an   an    330 Nov 20 08:30 huong-dan.txt
+an@toinoi-app-01:~$ ls -la /opt/toinoi
+total 12
+drwxr-xr-x 1 baogia toinoi 4096 Nov 20 09:20 .
+drwxr-xr-x 1 root   root   4096 Nov 22 22:26 ..
+drwxr-xr-x 1 baogia toinoi 4096 Nov 20 09:20 bao-gia
+
+# Lệnh nằm ở đâu?
+an@toinoi-app-01:~$ type ls
+ls is aliased to `ls --color=auto'
+an@toinoi-app-01:~$ type cd
+cd is a shell builtin
+an@toinoi-app-01:~$ type date
+date is hashed (/usr/bin/date)
+
+# Tra trợ giúp
+an@toinoi-app-01:~$ whoami --help
+Usage: whoami [OPTION]...
+Print the user name associated with the current effective user ID.
+Same as id -un.
+
+      --help        display this help and exit
+      --version     output version information and exit
+
+GNU coreutils online help: <https://www.gnu.org/software/coreutils/>
+Report any translation bugs to <https://translationproject.org/team/>
+Full documentation <https://www.gnu.org/software/coreutils/whoami>
+or available locally via: info '(coreutils) whoami invocation'
+an@toinoi-app-01:~$ man -f ls
+ls (1)               - list directory contents
+an@toinoi-app-01:~$ man -f date passwd
+date (1)             - print or set the system date and time
+passwd (1)           - change user password
+passwd (1ssl)        - OpenSSL application commands
+passwd (5)           - the password file
+
+# Khi gõ sai
+an@toinoi-app-01:~$ lss
+-bash: lss: command not found
+an@toinoi-app-01:~$ ls /khong-co
+ls: cannot access '/khong-co': No such file or directory
+an@toinoi-app-01:~$ echo $?
+2
+an@toinoi-app-01:~$ ls /opt
+toinoi
+an@toinoi-app-01:~$ echo $?
+0
+
+==== p01/04-cay-thu-muc.sh ====
+
+# Tôi đang ở đâu?
+an@toinoi-app-01:~$ pwd
+/home/an
+an@toinoi-app-01:~$ ls /
+bin                dev   lib                media  proc  sbin                sys  var
+bin.usr-is-merged  etc   lib.usr-is-merged  mnt    root  sbin.usr-is-merged  tmp
+boot               home  lib64              opt    run   srv                 usr
+
+# Đường dẫn tuyệt đối và tương đối
+an@toinoi-app-01:~$ cd /var/log
+an@toinoi-app-01:/var/log$ pwd
+/var/log
+an@toinoi-app-01:/var/log$ ls
+README            apt            btmp      faillog  lastlog  toinoi
+alternatives.log  bootstrap.log  dpkg.log  journal  private  wtmp
+an@toinoi-app-01:/var/log$ cd toinoi
+an@toinoi-app-01:/var/log/toinoi$ pwd
+/var/log/toinoi
+an@toinoi-app-01:/var/log/toinoi$ cd ..
+an@toinoi-app-01:/var/log$ pwd
+/var/log
+an@toinoi-app-01:/var/log$ cd ../../opt/toinoi/bao-gia
+an@toinoi-app-01:/opt/toinoi/bao-gia$ pwd
+/opt/toinoi/bao-gia
+
+# Về thư mục home, quay lại thư mục trước
+an@toinoi-app-01:/opt/toinoi/bao-gia$ cd
+an@toinoi-app-01:~$ pwd
+/home/an
+an@toinoi-app-01:~$ cd -
+/opt/toinoi/bao-gia
+an@toinoi-app-01:/opt/toinoi/bao-gia$ cd ~
+
+# Nhìn một thư mục
+an@toinoi-app-01:~$ ls /opt/toinoi/bao-gia
+appsettings.json  bang-gia.csv  bi-mat.env  kiem-tra-cau-hinh.sh
+an@toinoi-app-01:~$ ls -l /opt/toinoi/bao-gia
+total 16
+-rw-r--r-- 1 baogia toinoi 275 Nov 20 09:15 appsettings.json
+-rw-r--r-- 1 baogia toinoi 188 Nov 20 09:15 bang-gia.csv
+-rw------- 1 baogia toinoi 126 Nov 20 09:20 bi-mat.env
+-rw-r--r-- 1 baogia toinoi 403 Nov 20 09:20 kiem-tra-cau-hinh.sh
+an@toinoi-app-01:~$ ls -lh /var/log/toinoi
+total 28K
+-rw-r--r-- 1 baogia toinoi 27K Nov 21 12:17 bao-gia.log
+an@toinoi-app-01:~$ ls -ld /opt/toinoi/bao-gia
+drwxr-xr-x 1 baogia toinoi 4096 Nov 20 09:20 /opt/toinoi/bao-gia
+an@toinoi-app-01:~$ tree /opt/toinoi
+/opt/toinoi
+└── bao-gia
+    ├── appsettings.json
+    ├── bang-gia.csv
+    ├── bi-mat.env
+    └── kiem-tra-cau-hinh.sh
+
+2 directories, 4 files
+
+# File ẩn và symlink
+an@toinoi-app-01:~$ ls -a
+.  ..  .bash_logout  .bashrc  .cache  .lesshst  .profile  huong-dan.txt
+an@toinoi-app-01:~$ ls -ld /bin /sbin /lib
+lrwxrwxrwx 1 root root 7 Apr 22  2024 /bin -> usr/bin
+lrwxrwxrwx 1 root root 7 Apr 22  2024 /lib -> usr/lib
+lrwxrwxrwx 1 root root 8 Apr 22  2024 /sbin -> usr/sbin
+
+# Đây là file gì?
+an@toinoi-app-01:~$ file /opt/toinoi/bao-gia/bang-gia.csv
+/opt/toinoi/bao-gia/bang-gia.csv: CSV Unicode text, UTF-8 text
+an@toinoi-app-01:~$ file /opt/toinoi/bao-gia/kiem-tra-cau-hinh.sh
+/opt/toinoi/bao-gia/kiem-tra-cau-hinh.sh: Bourne-Again shell script, Unicode text, UTF-8 text executable
+an@toinoi-app-01:~$ file /usr/bin/ls
+/usr/bin/ls: ELF 64-bit LSB pie executable, x86-64, version 1 (SYSV), dynamically linked, interpreter /lib64/ld-linux-x86-64.so.2, BuildID[sha1]=44900829b39271d878615772bb2a6ffa422f0891, for GNU/Linux 3.2.0, stripped
+an@toinoi-app-01:~$ stat /opt/toinoi/bao-gia/bang-gia.csv
+  File: /opt/toinoi/bao-gia/bang-gia.csv
+  Size: 188             Blocks: 8          IO Block: 4096   regular file
+Device: 0,120   Inode: 538075      Links: 1
+Access: (0644/-rw-r--r--)  Uid: (  990/  baogia)   Gid: ( 2000/  toinoi)
+Access: 2026-11-20 09:15:00.000000000 +0700
+Modify: 2026-11-20 09:15:00.000000000 +0700
+Change: 2026-11-22 22:26:53.451433375 +0700
+ Birth: 2026-11-22 22:26:53.451338775 +0700
+
+==== p01/05-tao-sao-chep-xoa.sh ====
+
+# Tạo thư mục và file
+an@toinoi-app-01:~$ mkdir tai-lieu
+an@toinoi-app-01:~$ mkdir du-an/bao-gia/cau-hinh
+mkdir: cannot create directory ‘du-an/bao-gia/cau-hinh’: No such file or directory
+an@toinoi-app-01:~$ mkdir -p du-an/bao-gia/cau-hinh
+an@toinoi-app-01:~$ tree du-an
+du-an
+└── bao-gia
+    └── cau-hinh
+
+3 directories, 0 files
+an@toinoi-app-01:~$ touch tai-lieu/ghi-chu.txt
+an@toinoi-app-01:~$ ls -l tai-lieu
+total 0
+-rw-rw-r-- 1 an an 0 Nov 22 22:27 ghi-chu.txt
+
+# Sao chép
+an@toinoi-app-01:~$ cp /opt/toinoi/bao-gia/bang-gia.csv tai-lieu/
+an@toinoi-app-01:~$ cp tai-lieu/bang-gia.csv tai-lieu/bang-gia.csv.bak
+an@toinoi-app-01:~$ ls -l tai-lieu
+total 8
+-rw-r--r-- 1 an an 188 Nov 22 22:27 bang-gia.csv
+-rw-r--r-- 1 an an 188 Nov 22 22:27 bang-gia.csv.bak
+-rw-rw-r-- 1 an an   0 Nov 22 22:27 ghi-chu.txt
+an@toinoi-app-01:~$ cp /opt/toinoi/bao-gia du-an/ban-sao
+cp: -r not specified; omitting directory '/opt/toinoi/bao-gia'
+an@toinoi-app-01:~$ cp -r /opt/toinoi/bao-gia du-an/ban-sao
+cp: cannot open '/opt/toinoi/bao-gia/bi-mat.env' for reading: Permission denied
+an@toinoi-app-01:~$ ls -l du-an/ban-sao
+total 12
+-rw-r--r-- 1 an an 275 Nov 22 22:27 appsettings.json
+-rw-r--r-- 1 an an 188 Nov 22 22:27 bang-gia.csv
+-rw-r--r-- 1 an an 403 Nov 22 22:27 kiem-tra-cau-hinh.sh
+
+# Đổi tên và di chuyển
+an@toinoi-app-01:~$ mv tai-lieu/ghi-chu.txt tai-lieu/nhat-ky.txt
+an@toinoi-app-01:~$ mv tai-lieu/bang-gia.csv.bak du-an/bao-gia/cau-hinh/
+an@toinoi-app-01:~$ tree tai-lieu du-an
+tai-lieu
+├── bang-gia.csv
+└── nhat-ky.txt
+du-an
+├── ban-sao
+│   ├── appsettings.json
+│   ├── bang-gia.csv
+│   └── kiem-tra-cau-hinh.sh
+└── bao-gia
+    └── cau-hinh
+        └── bang-gia.csv.bak
+
+5 directories, 6 files
+
+# Xoá
+an@toinoi-app-01:~$ rm tai-lieu/nhat-ky.txt
+an@toinoi-app-01:~$ rmdir du-an/ban-sao
+rmdir: failed to remove 'du-an/ban-sao': Directory not empty
+an@toinoi-app-01:~$ rm du-an/ban-sao
+rm: cannot remove 'du-an/ban-sao': Is a directory
+an@toinoi-app-01:~$ rm -r du-an/ban-sao
+an@toinoi-app-01:~$ tree du-an
+du-an
+└── bao-gia
+    └── cau-hinh
+        └── bang-gia.csv.bak
+
+3 directories, 1 file
+
+# Nhiều file một lúc: wildcard và ngoặc nhọn
+an@toinoi-app-01:~$ touch bao-cao-01.txt bao-cao-02.txt bao-cao-03.txt nhap.tmp
+an@toinoi-app-01:~$ ls
+bao-cao-01.txt  bao-cao-02.txt  bao-cao-03.txt  du-an  huong-dan.txt  nhap.tmp  tai-lieu
+an@toinoi-app-01:~$ ls bao-cao-*
+bao-cao-01.txt  bao-cao-02.txt  bao-cao-03.txt
+an@toinoi-app-01:~$ echo rm bao-cao-0[12].txt
+rm bao-cao-01.txt bao-cao-02.txt
+an@toinoi-app-01:~$ rm bao-cao-0[12].txt nhap.tmp
+an@toinoi-app-01:~$ ls
+bao-cao-03.txt  du-an  huong-dan.txt  tai-lieu
+an@toinoi-app-01:~$ mkdir -p du-an/bao-gia/{releases,shared}
+an@toinoi-app-01:~$ ls du-an/bao-gia
+cau-hinh  releases  shared
+
+# File do SSH Studio tải lên (khung Files, mục 6 của bài)
+an@toinoi-app-01:~$ ls -l tai-lieu
+total 8
+-rw-r--r-- 1 an an 188 Nov 22 22:27 bang-gia.csv
+-rw-rw-r-- 1 an an  60 Nov 22 22:27 lich-truc.txt
+an@toinoi-app-01:~$ cat tai-lieu/lich-truc.txt
+Lịch trực tuần 47 (lab)
+Thứ Hai: An
+Thứ Ba: Bình
+
+==== p01/06-xem-sua-file.sh ====
+
+# Xem cả file
+an@toinoi-app-01:~$ cat huong-dan.txt
+Chào An,
+
+Đây là server toinoi-app-01 của nhóm backend Tới Nơi (bản lab).
+Dịch vụ báo giá nằm ở /opt/toinoi/bao-gia, log ở /var/log/toinoi.
+
+Việc đầu tiên: làm quen với server, rồi chuẩn bị thư mục triển khai
+/srv/toinoi theo hướng dẫn của series.
+
+— Bình (nhóm hạ tầng)
+an@toinoi-app-01:~$ cat -n /opt/toinoi/bao-gia/bang-gia.csv
+     1  dich_vu,ten,gia_mo_cua,gia_moi_km,gia_toi_thieu
+     2  bike,Xe máy,8000,2500,12000
+     3  car4,Ô tô 4 chỗ,12000,4500,25000
+     4  car7,Ô tô 7 chỗ,15000,5500,30000
+     5  delivery,Giao hàng,10000,3000,15000
+
+# File dài: đếm, xem đầu, xem cuối
+an@toinoi-app-01:~$ wc -l /var/log/toinoi/bao-gia.log
+362 /var/log/toinoi/bao-gia.log
+an@toinoi-app-01:~$ wc /var/log/toinoi/bao-gia.log
+  362  3431 27260 /var/log/toinoi/bao-gia.log
+an@toinoi-app-01:~$ head /var/log/toinoi/bao-gia.log
+2026-11-21 06:00:00 INFO  bao-gia 1.4.2 khoi dong, cong 8080, moi truong production
+2026-11-21 06:00:00 INFO  nap bang gia: 4 loai dich vu tu /opt/toinoi/bao-gia/bang-gia.csv
+2026-11-21 06:01:45 INFO  q-100001 dich_vu=delivery km=23.8 gia=82000 178 ms
+2026-11-21 06:02:30 WARN  q-100002 dich_vu=bike km=16.9 bao gia cham: 1406 ms
+2026-11-21 06:03:03 INFO  q-100003 dich_vu=delivery km=12.1 gia=47000 103 ms
+2026-11-21 06:03:59 INFO  q-100004 dich_vu=bike km=1.5 gia=12000 57 ms
+2026-11-21 06:05:40 INFO  q-100005 dich_vu=car7 km=4.8 gia=42000 92 ms
+2026-11-21 06:06:00 INFO  q-100006 dich_vu=car7 km=20.2 gia=127000 74 ms
+2026-11-21 06:06:32 INFO  q-100007 dich_vu=delivery km=17.0 gia=61000 173 ms
+2026-11-21 06:07:33 INFO  q-100008 dich_vu=car7 km=10.3 gia=72000 32 ms
+an@toinoi-app-01:~$ head -n 3 /var/log/toinoi/bao-gia.log
+2026-11-21 06:00:00 INFO  bao-gia 1.4.2 khoi dong, cong 8080, moi truong production
+2026-11-21 06:00:00 INFO  nap bang gia: 4 loai dich vu tu /opt/toinoi/bao-gia/bang-gia.csv
+2026-11-21 06:01:45 INFO  q-100001 dich_vu=delivery km=23.8 gia=82000 178 ms
+an@toinoi-app-01:~$ tail -n 3 /var/log/toinoi/bao-gia.log
+2026-11-21 12:14:13 INFO  q-100358 dich_vu=bike km=8.8 gia=30000 26 ms
+2026-11-21 12:15:08 INFO  q-100359 dich_vu=delivery km=20.3 gia=71000 109 ms
+2026-11-21 12:17:05 INFO  q-100360 dich_vu=car4 km=14.3 gia=77000 59 ms
+an@toinoi-app-01:~$ tail -n +361 /var/log/toinoi/bao-gia.log
+2026-11-21 12:15:08 INFO  q-100359 dich_vu=delivery km=20.3 gia=71000 109 ms
+2026-11-21 12:17:05 INFO  q-100360 dich_vu=car4 km=14.3 gia=77000 59 ms
+
+# Sửa file bằng trình sửa của SSH Studio (mục 5): giá mở cửa xe máy 8000 -> 9000
+an@toinoi-app-01:~$ cat tai-lieu/bang-gia.csv
+dich_vu,ten,gia_mo_cua,gia_moi_km,gia_toi_thieu
+bike,Xe máy,9000,2500,12000
+car4,Ô tô 4 chỗ,12000,4500,25000
+car7,Ô tô 7 chỗ,15000,5500,30000
+delivery,Giao hàng,10000,3000,15000
+an@toinoi-app-01:~$ diff /opt/toinoi/bao-gia/bang-gia.csv tai-lieu/bang-gia.csv
+2c2
+< bike,Xe máy,8000,2500,12000
+---
+> bike,Xe máy,9000,2500,12000
+
+# Sửa file bằng vim (mục 4): ghi chú của An
+an@toinoi-app-01:~$ cat tai-lieu/ghi-chu.txt
+Ghi chú của An
+- 22/11: tăng giá mở cửa xe máy lên 9.000 đ ở bản nháp
+
+# Đây có phải file văn bản không?
+an@toinoi-app-01:~$ file tai-lieu/ghi-chu.txt tai-lieu/bang-gia.csv /usr/bin/ls
+tai-lieu/ghi-chu.txt:  Unicode text, UTF-8 text
+tai-lieu/bang-gia.csv: CSV Unicode text, UTF-8 text
+/usr/bin/ls:           ELF 64-bit LSB pie executable, x86-64, version 1 (SYSV), dynamically linked, interpreter /lib64/ld-linux-x86-64.so.2, BuildID[sha1]=44900829b39271d878615772bb2a6ffa422f0891, for GNU/Linux 3.2.0, stripped
+
+==== p01/07-quyen.sh ====
+
+# Tôi là ai, thuộc nhóm nào?
+an@toinoi-app-01:~$ whoami
+an
+an@toinoi-app-01:~$ id
+uid=1000(an) gid=1000(an) groups=1000(an),27(sudo)
+an@toinoi-app-01:~$ id binh
+uid=1001(binh) gid=1001(binh) groups=1001(binh),27(sudo),2000(toinoi)
+an@toinoi-app-01:~$ getent passwd an binh baogia
+an:x:1000:1000:Nguyen Van An:/home/an:/bin/bash
+binh:x:1001:1001:Tran Thi Binh:/home/binh:/bin/bash
+baogia:x:990:2000::/opt/toinoi/bao-gia:/usr/sbin/nologin
+an@toinoi-app-01:~$ getent group toinoi sudo
+toinoi:x:2000:binh
+sudo:x:27:an,binh
+
+# Đọc quyền của file
+an@toinoi-app-01:~$ ls -l /opt/toinoi/bao-gia
+total 16
+-rw-r--r-- 1 baogia toinoi 275 Nov 20 09:15 appsettings.json
+-rw-r--r-- 1 baogia toinoi 188 Nov 20 09:15 bang-gia.csv
+-rw------- 1 baogia toinoi 126 Nov 20 09:20 bi-mat.env
+-rw-r--r-- 1 baogia toinoi 403 Nov 20 09:20 kiem-tra-cau-hinh.sh
+an@toinoi-app-01:~$ cat /opt/toinoi/bao-gia/bi-mat.env
+cat: /opt/toinoi/bao-gia/bi-mat.env: Permission denied
+an@toinoi-app-01:~$ ls -l /etc/passwd /etc/shadow
+-rw-r--r-- 1 root root   1168 Nov 22 22:26 /etc/passwd
+-rw-r----- 1 root shadow  764 Nov 22 22:26 /etc/shadow
+an@toinoi-app-01:~$ cat /etc/shadow
+cat: /etc/shadow: Permission denied
+
+# Quyền thực thi
+an@toinoi-app-01:~$ cp /opt/toinoi/bao-gia/kiem-tra-cau-hinh.sh /opt/toinoi/bao-gia/bang-gia.csv du-an/bao-gia/
+an@toinoi-app-01:~$ cd du-an/bao-gia
+an@toinoi-app-01:~/du-an/bao-gia$ ls -l
+total 20
+-rw-r--r-- 1 an an  188 Nov 22 22:27 bang-gia.csv
+drwxrwxr-x 2 an an 4096 Nov 22 22:27 cau-hinh
+-rw-r--r-- 1 an an  403 Nov 22 22:27 kiem-tra-cau-hinh.sh
+drwxrwxr-x 2 an an 4096 Nov 22 22:27 releases
+drwxrwxr-x 2 an an 4096 Nov 22 22:27 shared
+an@toinoi-app-01:~/du-an/bao-gia$ ./kiem-tra-cau-hinh.sh
+-bash: ./kiem-tra-cau-hinh.sh: Permission denied
+an@toinoi-app-01:~/du-an/bao-gia$ chmod u+x kiem-tra-cau-hinh.sh
+an@toinoi-app-01:~/du-an/bao-gia$ ls -l kiem-tra-cau-hinh.sh
+-rwxr--r-- 1 an an 403 Nov 22 22:27 kiem-tra-cau-hinh.sh
+an@toinoi-app-01:~/du-an/bao-gia$ ./kiem-tra-cau-hinh.sh
+bao-gia: bang gia co 4 loai dich vu
+bao-gia: cau hinh hop le
+
+# chmod dạng chữ và dạng số
+an@toinoi-app-01:~/du-an/bao-gia$ chmod go-r bang-gia.csv
+an@toinoi-app-01:~/du-an/bao-gia$ ls -l bang-gia.csv
+-rw------- 1 an an 188 Nov 22 22:27 bang-gia.csv
+an@toinoi-app-01:~/du-an/bao-gia$ chmod 640 bang-gia.csv
+an@toinoi-app-01:~/du-an/bao-gia$ chmod 750 kiem-tra-cau-hinh.sh
+an@toinoi-app-01:~/du-an/bao-gia$ stat -c '%a %A %U:%G %n' bang-gia.csv kiem-tra-cau-hinh.sh
+640 -rw-r----- an:an bang-gia.csv
+750 -rwxr-x--- an:an kiem-tra-cau-hinh.sh
+
+# Quyền trên thư mục
+an@toinoi-app-01:~/du-an/bao-gia$ ls -ld cau-hinh
+drwxrwxr-x 2 an an 4096 Nov 22 22:27 cau-hinh
+an@toinoi-app-01:~/du-an/bao-gia$ chmod a-x cau-hinh
+an@toinoi-app-01:~/du-an/bao-gia$ ls cau-hinh
+ls: cannot access 'cau-hinh/bang-gia.csv.bak': Permission denied
+bang-gia.csv.bak
+an@toinoi-app-01:~/du-an/bao-gia$ cat cau-hinh/bang-gia.csv.bak
+cat: cau-hinh/bang-gia.csv.bak: Permission denied
+an@toinoi-app-01:~/du-an/bao-gia$ cd cau-hinh
+-bash: cd: cau-hinh: Permission denied
+an@toinoi-app-01:~/du-an/bao-gia$ chmod 755 cau-hinh
+an@toinoi-app-01:~/du-an/bao-gia$ chmod a-w cau-hinh
+an@toinoi-app-01:~/du-an/bao-gia$ touch cau-hinh/thu.txt
+touch: cannot touch 'cau-hinh/thu.txt': Permission denied
+an@toinoi-app-01:~/du-an/bao-gia$ rm -f cau-hinh/bang-gia.csv.bak
+rm: cannot remove 'cau-hinh/bang-gia.csv.bak': Permission denied
+an@toinoi-app-01:~/du-an/bao-gia$ chmod 755 cau-hinh
+
+# Quyền mặc định của file mới
+an@toinoi-app-01:~/du-an/bao-gia$ umask
+0002
+an@toinoi-app-01:~/du-an/bao-gia$ touch moi.txt
+an@toinoi-app-01:~/du-an/bao-gia$ mkdir moi
+an@toinoi-app-01:~/du-an/bao-gia$ ls -ld moi.txt moi
+drwxrwxr-x 2 an an 4096 Nov 22 22:27 moi
+-rw-rw-r-- 1 an an    0 Nov 22 22:27 moi.txt
+an@toinoi-app-01:~/du-an/bao-gia$ rm -r moi.txt moi
+
+# Đổi chủ sở hữu và nhóm: cần root
+an@toinoi-app-01:~/du-an/bao-gia$ chown binh bang-gia.csv
+chown: changing ownership of 'bang-gia.csv': Operation not permitted
+an@toinoi-app-01:~/du-an/bao-gia$ chgrp toinoi bang-gia.csv
+chgrp: changing group of 'bang-gia.csv': Operation not permitted
+an@toinoi-app-01:~/du-an/bao-gia$ sudo chown an:toinoi bang-gia.csv
+an@toinoi-app-01:~/du-an/bao-gia$ ls -l bang-gia.csv
+-rw-r----- 1 an toinoi 188 Nov 22 22:27 bang-gia.csv
+an@toinoi-app-01:~/du-an/bao-gia$ sudo cat /opt/toinoi/bao-gia/bi-mat.env
+# Khoá gọi dịch vụ bản đồ của bao-gia (giá trị giả của lab).
+BANDO_API_KEY=lab-khong-phai-khoa-that-0000
+an@toinoi-app-01:~/du-an/bao-gia$ sudo -l
+Matching Defaults entries for an on toinoi-app-01:
+    env_reset, mail_badpass,
+    secure_path=/usr/local/sbin\:/usr/local/bin\:/usr/sbin\:/usr/bin\:/sbin\:/bin\:/snap/bin,
+    use_pty
+
+User an may run the following commands on toinoi-app-01:
+    (ALL : ALL) ALL
+
+# Thêm An vào nhóm toinoi: phải đăng nhập lại mới có hiệu lực
+an@toinoi-app-01:~/du-an/bao-gia$ sudo usermod -aG toinoi an
+an@toinoi-app-01:~/du-an/bao-gia$ id
+uid=1000(an) gid=1000(an) groups=1000(an),27(sudo)
+an@toinoi-app-01:~/du-an/bao-gia$ id an
+uid=1000(an) gid=1000(an) groups=1000(an),27(sudo),2000(toinoi)
+
+==== p01/08-chuyen-huong-pipe.sh ====
+
+# An đăng nhập lại sau bài 7: đã ở trong nhóm toinoi
+an@toinoi-app-01:~$ id
+uid=1000(an) gid=1000(an) groups=1000(an),27(sudo),2000(toinoi)
+an@toinoi-app-01:~$ cd tai-lieu
+
+# Ghi kết quả ra file: > và >>
+an@toinoi-app-01:~/tai-lieu$ ls /opt/toinoi/bao-gia > danh-sach.txt
+an@toinoi-app-01:~/tai-lieu$ cat danh-sach.txt
+appsettings.json
+bang-gia.csv
+bi-mat.env
+kiem-tra-cau-hinh.sh
+an@toinoi-app-01:~/tai-lieu$ date +%F >> danh-sach.txt
+an@toinoi-app-01:~/tai-lieu$ cat danh-sach.txt
+appsettings.json
+bang-gia.csv
+bi-mat.env
+kiem-tra-cau-hinh.sh
+2026-11-22
+an@toinoi-app-01:~/tai-lieu$ date +%F > danh-sach.txt
+an@toinoi-app-01:~/tai-lieu$ cat danh-sach.txt
+2026-11-22
+
+# Hai luồng ra: stdout và stderr
+an@toinoi-app-01:~/tai-lieu$ ls /opt/toinoi /khong-co
+ls: cannot access '/khong-co': No such file or directory
+/opt/toinoi:
+bao-gia
+an@toinoi-app-01:~/tai-lieu$ ls /opt/toinoi /khong-co > ket-qua.txt
+ls: cannot access '/khong-co': No such file or directory
+an@toinoi-app-01:~/tai-lieu$ cat ket-qua.txt
+/opt/toinoi:
+bao-gia
+an@toinoi-app-01:~/tai-lieu$ ls /opt/toinoi /khong-co 2> loi.txt
+/opt/toinoi:
+bao-gia
+an@toinoi-app-01:~/tai-lieu$ cat loi.txt
+ls: cannot access '/khong-co': No such file or directory
+an@toinoi-app-01:~/tai-lieu$ ls /opt/toinoi /khong-co > tat-ca.txt 2>&1
+an@toinoi-app-01:~/tai-lieu$ cat tat-ca.txt
+ls: cannot access '/khong-co': No such file or directory
+/opt/toinoi:
+bao-gia
+an@toinoi-app-01:~/tai-lieu$ ls /opt/toinoi /khong-co 2> /dev/null
+/opt/toinoi:
+bao-gia
+
+# Luồng vào: <
+an@toinoi-app-01:~/tai-lieu$ wc -l /var/log/toinoi/bao-gia.log
+362 /var/log/toinoi/bao-gia.log
+an@toinoi-app-01:~/tai-lieu$ wc -l < /var/log/toinoi/bao-gia.log
+362
+
+# Pipe: nối lệnh với nhau
+an@toinoi-app-01:~/tai-lieu$ grep ERROR /var/log/toinoi/bao-gia.log | wc -l
+17
+an@toinoi-app-01:~/tai-lieu$ grep ERROR /var/log/toinoi/bao-gia.log | head -n 3
+2026-11-21 06:37:58 ERROR q-100034 dich_vu=car7 khong lay duoc quang duong: timeout sau 3000 ms goi ban-do
+2026-11-21 06:41:18 ERROR q-100038 dich_vu=car4 khong lay duoc quang duong: timeout sau 3000 ms goi ban-do
+2026-11-21 07:20:18 ERROR q-100076 dich_vu=bike khong lay duoc quang duong: timeout sau 3000 ms goi ban-do
+an@toinoi-app-01:~/tai-lieu$ grep ERROR /var/log/toinoi/bao-gia.log | tail -n 2 | cut -d' ' -f1,2,4
+2026-11-21 11:51:32 q-100336
+2026-11-21 11:56:57 q-100341
+
+# Đếm theo nhóm: cut | sort | uniq -c
+an@toinoi-app-01:~/tai-lieu$ cut -c21-25 /var/log/toinoi/bao-gia.log | sort | uniq -c
+     17 ERROR
+    321 INFO
+     24 WARN
+an@toinoi-app-01:~/tai-lieu$ grep -o 'dich_vu=[a-z0-9]*' /var/log/toinoi/bao-gia.log | sort | uniq -c | sort -rn
+     99 dich_vu=car4
+     94 dich_vu=car7
+     84 dich_vu=delivery
+     83 dich_vu=bike
+an@toinoi-app-01:~/tai-lieu$ grep WARN /var/log/toinoi/bao-gia.log | sort -t: -k4 -n | tail -n 3
+2026-11-21 09:56:45 WARN  q-100226 dich_vu=delivery km=9.6 bao gia cham: 2615 ms
+2026-11-21 09:12:56 WARN  q-100180 dich_vu=delivery km=2.9 bao gia cham: 2637 ms
+2026-11-21 11:21:33 WARN  q-100311 dich_vu=bike km=20.1 bao gia cham: 2671 ms
+
+# Vừa xem vừa ghi: tee
+an@toinoi-app-01:~/tai-lieu$ grep ERROR /var/log/toinoi/bao-gia.log | cut -d' ' -f5 | sort | uniq -c | tee loi-theo-dich-vu.txt
+      5 dich_vu=bike
+      6 dich_vu=car4
+      4 dich_vu=car7
+      2 dich_vu=delivery
+an@toinoi-app-01:~/tai-lieu$ ls -l
+total 32
+-rw-r--r-- 1 an an 188 Nov 22 22:27 bang-gia.csv
+-rw-rw-r-- 1 an an  11 Nov 22 22:27 danh-sach.txt
+-rw-rw-r-- 1 an an  87 Nov 22 22:27 ghi-chu.txt
+-rw-rw-r-- 1 an an  21 Nov 22 22:27 ket-qua.txt
+-rw-rw-r-- 1 an an  60 Nov 22 22:27 lich-truc.txt
+-rw-rw-r-- 1 an an  88 Nov 22 22:27 loi-theo-dich-vu.txt
+-rw-rw-r-- 1 an an  57 Nov 22 22:27 loi.txt
+-rw-rw-r-- 1 an an  78 Nov 22 22:27 tat-ca.txt
+
+# Pipe chỉ mang stdout
+an@toinoi-app-01:~/tai-lieu$ ls /khong-co | wc -l
+ls: cannot access '/khong-co': No such file or directory
+0
+an@toinoi-app-01:~/tai-lieu$ ls /khong-co 2>&1 | wc -l
+1
+
+# Mã thoát và nối lệnh có điều kiện
+an@toinoi-app-01:~/tai-lieu$ grep -q ERROR /var/log/toinoi/bao-gia.log && echo "co loi trong log"
+co loi trong log
+an@toinoi-app-01:~/tai-lieu$ grep -q FATAL /var/log/toinoi/bao-gia.log || echo "khong co dong FATAL"
+khong co dong FATAL
+an@toinoi-app-01:~/tai-lieu$ rm ket-qua.txt loi.txt tat-ca.txt danh-sach.txt
+
+==== p01/09-tim-kiem.sh ====
+
+# find theo tên
+an@toinoi-app-01:~$ find /opt/toinoi -name '*.csv'
+/opt/toinoi/bao-gia/bang-gia.csv
+an@toinoi-app-01:~$ find ~ -name 'bang-gia*'
+/home/an/tai-lieu/bang-gia.csv
+/home/an/du-an/bao-gia/cau-hinh/bang-gia.csv.bak
+/home/an/du-an/bao-gia/bang-gia.csv
+an@toinoi-app-01:~$ find ~ -iname '*.TXT'
+/home/an/tai-lieu/lich-truc.txt
+/home/an/tai-lieu/ghi-chu.txt
+/home/an/tai-lieu/loi-theo-dich-vu.txt
+/home/an/bao-cao-03.txt
+/home/an/huong-dan.txt
+
+# find theo loại, kích thước, thời gian
+an@toinoi-app-01:~$ find ~/du-an -type d
+/home/an/du-an
+/home/an/du-an/bao-gia
+/home/an/du-an/bao-gia/releases
+/home/an/du-an/bao-gia/shared
+/home/an/du-an/bao-gia/cau-hinh
+an@toinoi-app-01:~$ find /var/log -type f -size +20k
+/var/log/dpkg.log
+/var/log/bootstrap.log
+/var/log/apt/history.log
+/var/log/apt/term.log
+/var/log/journal/eb838f0e03e34a54af4996cd142d5f22/system.journal
+/var/log/journal/eb838f0e03e34a54af4996cd142d5f22/user-1000.journal
+/var/log/toinoi/bao-gia.log
+find: ‘/var/log/private’: Permission denied
+an@toinoi-app-01:~$ find /var/log -type f -size +20k 2>/dev/null
+/var/log/dpkg.log
+/var/log/bootstrap.log
+/var/log/apt/history.log
+/var/log/apt/term.log
+/var/log/journal/eb838f0e03e34a54af4996cd142d5f22/system.journal
+/var/log/journal/eb838f0e03e34a54af4996cd142d5f22/user-1000.journal
+/var/log/toinoi/bao-gia.log
+an@toinoi-app-01:~$ find /opt/toinoi -type f -newer /opt/toinoi/bao-gia/bang-gia.csv
+/opt/toinoi/bao-gia/bi-mat.env
+/opt/toinoi/bao-gia/kiem-tra-cau-hinh.sh
+an@toinoi-app-01:~$ find ~ -type f -mmin -30 -not -name '.*'
+/home/an/tai-lieu/lich-truc.txt
+/home/an/tai-lieu/ghi-chu.txt
+/home/an/tai-lieu/loi-theo-dich-vu.txt
+/home/an/tai-lieu/bang-gia.csv
+/home/an/du-an/bao-gia/kiem-tra-cau-hinh.sh
+/home/an/du-an/bao-gia/cau-hinh/bang-gia.csv.bak
+/home/an/du-an/bao-gia/bang-gia.csv
+/home/an/bao-cao-03.txt
+
+# find theo quyền và chủ sở hữu
+an@toinoi-app-01:~$ find /opt/toinoi -type f -perm 600
+/opt/toinoi/bao-gia/bi-mat.env
+an@toinoi-app-01:~$ find ~ -type f -perm -u+x
+/home/an/du-an/bao-gia/kiem-tra-cau-hinh.sh
+an@toinoi-app-01:~$ find /opt /var/log -user baogia 2>/dev/null
+/opt/toinoi
+/opt/toinoi/bao-gia
+/opt/toinoi/bao-gia/appsettings.json
+/opt/toinoi/bao-gia/bi-mat.env
+/opt/toinoi/bao-gia/kiem-tra-cau-hinh.sh
+/opt/toinoi/bao-gia/bang-gia.csv
+/var/log/toinoi
+/var/log/toinoi/bao-gia.log
+
+# Làm gì đó với kết quả
+an@toinoi-app-01:~$ find ~ -name '*.csv' -exec ls -l {} \;
+-rw-r--r-- 1 an an 188 Nov 22 22:27 /home/an/tai-lieu/bang-gia.csv
+-rw-r----- 1 an toinoi 188 Nov 22 22:27 /home/an/du-an/bao-gia/bang-gia.csv
+an@toinoi-app-01:~$ find ~ -name '*.csv' -exec wc -l {} +
+  5 /home/an/tai-lieu/bang-gia.csv
+  5 /home/an/du-an/bao-gia/bang-gia.csv
+ 10 total
+
+# grep: tìm trong nội dung
+an@toinoi-app-01:~$ grep -c ERROR /var/log/toinoi/bao-gia.log
+17
+an@toinoi-app-01:~$ grep -n 'q-100057' /var/log/toinoi/bao-gia.log
+59:2026-11-21 06:59:30 INFO  q-100057 dich_vu=car7 km=15.8 gia=102000 95 ms
+an@toinoi-app-01:~$ grep -n -B1 -A1 'q-100057' /var/log/toinoi/bao-gia.log
+58-2026-11-21 06:57:37 INFO  q-100056 dich_vu=bike km=8.3 gia=29000 114 ms
+59:2026-11-21 06:59:30 INFO  q-100057 dich_vu=car7 km=15.8 gia=102000 95 ms
+60-2026-11-21 07:01:08 INFO  q-100058 dich_vu=delivery km=13.4 gia=51000 53 ms
+an@toinoi-app-01:~$ grep -i 'KHOI DONG' /var/log/toinoi/bao-gia.log
+2026-11-21 06:00:00 INFO  bao-gia 1.4.2 khoi dong, cong 8080, moi truong production
+an@toinoi-app-01:~$ grep -v INFO /var/log/toinoi/bao-gia.log | head -n 4
+2026-11-21 06:02:30 WARN  q-100002 dich_vu=bike km=16.9 bao gia cham: 1406 ms
+2026-11-21 06:18:02 WARN  q-100017 dich_vu=delivery km=18.6 bao gia cham: 2295 ms
+2026-11-21 06:37:58 ERROR q-100034 dich_vu=car7 khong lay duoc quang duong: timeout sau 3000 ms goi ban-do
+2026-11-21 06:40:06 WARN  q-100037 dich_vu=bike km=2.2 bao gia cham: 1548 ms
+an@toinoi-app-01:~$ grep -E 'ERROR|WARN' /var/log/toinoi/bao-gia.log | wc -l
+41
+an@toinoi-app-01:~$ grep -E 'cham: 2[0-9]{3} ms' /var/log/toinoi/bao-gia.log
+2026-11-21 06:18:02 WARN  q-100017 dich_vu=delivery km=18.6 bao gia cham: 2295 ms
+2026-11-21 08:41:21 WARN  q-100151 dich_vu=car7 km=16.5 bao gia cham: 2187 ms
+2026-11-21 09:12:56 WARN  q-100180 dich_vu=delivery km=2.9 bao gia cham: 2637 ms
+2026-11-21 09:56:45 WARN  q-100226 dich_vu=delivery km=9.6 bao gia cham: 2615 ms
+2026-11-21 11:09:42 WARN  q-100296 dich_vu=bike km=10.6 bao gia cham: 2386 ms
+2026-11-21 11:21:33 WARN  q-100311 dich_vu=bike km=20.1 bao gia cham: 2671 ms
+2026-11-21 11:27:22 WARN  q-100315 dich_vu=car7 km=15.7 bao gia cham: 2570 ms
+an@toinoi-app-01:~$ grep -w 8080 /opt/toinoi/bao-gia/appsettings.json
+    "Port": 8080,
+
+# grep trong cả thư mục
+an@toinoi-app-01:~$ grep -r 'bang-gia.csv' /opt/toinoi
+/opt/toinoi/bao-gia/appsettings.json:    "RuleFile": "/opt/toinoi/bao-gia/bang-gia.csv",
+grep: /opt/toinoi/bao-gia/bi-mat.env: Permission denied
+/opt/toinoi/bao-gia/kiem-tra-cau-hinh.sh:bang_gia="$thu_muc/bang-gia.csv"
+an@toinoi-app-01:~$ grep -r 'bang-gia.csv' /opt/toinoi 2>/dev/null
+/opt/toinoi/bao-gia/appsettings.json:    "RuleFile": "/opt/toinoi/bao-gia/bang-gia.csv",
+/opt/toinoi/bao-gia/kiem-tra-cau-hinh.sh:bang_gia="$thu_muc/bang-gia.csv"
+an@toinoi-app-01:~$ grep -rl 'bao-gia' /opt/toinoi ~/du-an 2>/dev/null
+/opt/toinoi/bao-gia/appsettings.json
+/opt/toinoi/bao-gia/kiem-tra-cau-hinh.sh
+/home/an/du-an/bao-gia/kiem-tra-cau-hinh.sh
+an@toinoi-app-01:~$ grep -rn --include='*.sh' 'exit' /opt/toinoi
+/opt/toinoi/bao-gia/kiem-tra-cau-hinh.sh:9:  exit 1
+
+# Kết hợp find và grep
+an@toinoi-app-01:~$ find ~ -name '*.csv' -exec grep -H 'bike' {} +
+/home/an/tai-lieu/bang-gia.csv:bike,Xe máy,9000,2500,12000
+/home/an/du-an/bao-gia/bang-gia.csv:bike,Xe máy,8000,2500,12000
+
+# Lệnh nằm ở đâu?
+an@toinoi-app-01:~$ which ls vim tree
+/usr/bin/ls
+/usr/bin/vim
+/usr/bin/tree
+an@toinoi-app-01:~$ whereis ls
+ls: /usr/bin/ls /usr/share/man/man1/ls.1.gz
+
+==== p01/10-thuc-hanh.sh ====
+
+# 1. Tạo cây thư mục triển khai
+an@toinoi-app-01:~$ ls -ld /srv
+drwxr-xr-x 2 root root 4096 Nov 10 21:48 /srv
+an@toinoi-app-01:~$ mkdir -p /srv/toinoi/bao-gia
+mkdir: cannot create directory ‘/srv/toinoi’: Permission denied
+an@toinoi-app-01:~$ sudo mkdir -p /srv/toinoi/bao-gia/{releases/1.4.2,shared/config,shared/logs}
+an@toinoi-app-01:~$ sudo chown -R an:toinoi /srv/toinoi
+an@toinoi-app-01:~$ tree /srv/toinoi
+/srv/toinoi
+└── bao-gia
+    ├── releases
+    │   └── 1.4.2
+    └── shared
+        ├── config
+        └── logs
+
+7 directories, 0 files
+
+# 2. Đưa bản phát hành 1.4.2 và cấu hình vào
+an@toinoi-app-01:~$ cd /srv/toinoi/bao-gia
+an@toinoi-app-01:/srv/toinoi/bao-gia$ cp /opt/toinoi/bao-gia/kiem-tra-cau-hinh.sh /opt/toinoi/bao-gia/bang-gia.csv releases/1.4.2/
+an@toinoi-app-01:/srv/toinoi/bao-gia$ cp /opt/toinoi/bao-gia/appsettings.json shared/config/
+an@toinoi-app-01:/srv/toinoi/bao-gia$ sudo cp /opt/toinoi/bao-gia/bi-mat.env shared/config/
+an@toinoi-app-01:/srv/toinoi/bao-gia$ sudo chown an:toinoi shared/config/bi-mat.env
+
+# 3. Đặt nhóm và quyền
+an@toinoi-app-01:/srv/toinoi/bao-gia$ ls -l releases/1.4.2
+total 8
+-rw-r--r-- 1 an an 188 Nov 22 22:27 bang-gia.csv
+-rw-r--r-- 1 an an 403 Nov 22 22:27 kiem-tra-cau-hinh.sh
+an@toinoi-app-01:/srv/toinoi/bao-gia$ chgrp -R toinoi releases shared
+an@toinoi-app-01:/srv/toinoi/bao-gia$ chmod 750 releases/1.4.2/kiem-tra-cau-hinh.sh
+an@toinoi-app-01:/srv/toinoi/bao-gia$ chmod 640 releases/1.4.2/bang-gia.csv shared/config/appsettings.json
+an@toinoi-app-01:/srv/toinoi/bao-gia$ chmod 600 shared/config/bi-mat.env
+an@toinoi-app-01:/srv/toinoi/bao-gia$ chmod 750 shared/config
+an@toinoi-app-01:/srv/toinoi/bao-gia$ chmod 770 shared/logs
+an@toinoi-app-01:/srv/toinoi/bao-gia$ find . -mindepth 1 -exec stat -c '%a %U:%G %n' {} + | sort -k3
+755 an:toinoi ./releases
+755 an:toinoi ./releases/1.4.2
+640 an:toinoi ./releases/1.4.2/bang-gia.csv
+750 an:toinoi ./releases/1.4.2/kiem-tra-cau-hinh.sh
+755 an:toinoi ./shared
+750 an:toinoi ./shared/config
+640 an:toinoi ./shared/config/appsettings.json
+600 an:toinoi ./shared/config/bi-mat.env
+770 an:toinoi ./shared/logs
+
+# 4. Liên kết current trỏ tới bản đang chạy
+an@toinoi-app-01:/srv/toinoi/bao-gia$ ln -s releases/1.4.2 current
+an@toinoi-app-01:/srv/toinoi/bao-gia$ ls -l
+total 8
+lrwxrwxrwx 1 an an       14 Nov 22 22:27 current -> releases/1.4.2
+drwxr-xr-x 3 an toinoi 4096 Nov 22 22:27 releases
+drwxr-xr-x 4 an toinoi 4096 Nov 22 22:27 shared
+an@toinoi-app-01:/srv/toinoi/bao-gia$ current/kiem-tra-cau-hinh.sh
+bao-gia: bang gia co 4 loai dich vu
+bao-gia: cau hinh hop le
+
+# 5. Trích lỗi của ngày 21/11 từ log
+an@toinoi-app-01:/srv/toinoi/bao-gia$ grep ERROR /var/log/toinoi/bao-gia.log > shared/logs/loi-2026-11-21.txt
+an@toinoi-app-01:/srv/toinoi/bao-gia$ wc -l shared/logs/loi-2026-11-21.txt
+17 shared/logs/loi-2026-11-21.txt
+an@toinoi-app-01:/srv/toinoi/bao-gia$ grep -o 'dich_vu=[a-z0-9]*' shared/logs/loi-2026-11-21.txt | sort | uniq -c | sort -rn | tee shared/logs/loi-theo-dich-vu.txt
+      6 dich_vu=car4
+      5 dich_vu=bike
+      4 dich_vu=car7
+      2 dich_vu=delivery
+
+# 6. Người khác nhìn thấy gì?
+an@toinoi-app-01:/srv/toinoi/bao-gia$ sudo -u binh head -n 3 /srv/toinoi/bao-gia/shared/config/appsettings.json
+{
+  "Service": {
+    "Name": "bao-gia",
+an@toinoi-app-01:/srv/toinoi/bao-gia$ sudo -u binh cat /srv/toinoi/bao-gia/shared/config/bi-mat.env
+cat: /srv/toinoi/bao-gia/shared/config/bi-mat.env: Permission denied
+an@toinoi-app-01:/srv/toinoi/bao-gia$ sudo -u nobody ls /srv/toinoi/bao-gia/shared/config
+ls: cannot open directory '/srv/toinoi/bao-gia/shared/config': Permission denied
+
+# 7. Kết quả bàn giao
+an@toinoi-app-01:/srv/toinoi/bao-gia$ tree -p /srv/toinoi
+[drwxr-xr-x]  /srv/toinoi
+└── [drwxr-xr-x]  bao-gia
+    ├── [lrwxrwxrwx]  current -> releases/1.4.2
+    ├── [drwxr-xr-x]  releases
+    │   └── [drwxr-xr-x]  1.4.2
+    │       ├── [-rw-r-----]  bang-gia.csv
+    │       └── [-rwxr-x---]  kiem-tra-cau-hinh.sh
+    └── [drwxr-xr-x]  shared
+        ├── [drwxr-x---]  config
+        │   ├── [-rw-r-----]  appsettings.json
+        │   └── [-rw-------]  bi-mat.env
+        └── [drwxrwx---]  logs
+            ├── [-rw-rw-r--]  loi-2026-11-21.txt
+            └── [-rw-rw-r--]  loi-theo-dich-vu.txt
+
+8 directories, 6 files

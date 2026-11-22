@@ -605,6 +605,26 @@
     "status": "published"
   },
   {
+    "slug": "linux-qua-ssh-studio",
+    "title": "Linux qua SSH Studio · Phần 1 · Nền tảng: kết nối, shell, file và quyền",
+    "description": "Bắt đầu làm việc trên server Linux từ con số không cùng nhóm backend Tới Nơi: Linux gồm những gì, dựng server Ubuntu 24.04 bằng Docker và kết nối bằng SSH Studio có đối chiếu fingerprint, đọc dòng lệnh và tự tra trợ giúp, đi lại trong cây thư mục, tạo và tải file, xem log và sửa file bằng vim, đọc và đặt quyền với chmod và sudo, nối lệnh bằng pipe, tìm bằng find và grep — kết thúc bằng bài thực hành chuẩn bị thư mục triển khai có bộ chấm tự động.",
+    "level": "beginner",
+    "category": "devops-linux",
+    "articles": [
+      "linux-la-gi-va-ssh-studio",
+      "linux-dung-lab-docker-ket-noi-ssh-studio",
+      "linux-shell-dong-lenh-tro-giup",
+      "linux-cay-thu-muc-duong-dan",
+      "linux-tao-sao-chep-di-chuyen-xoa-file",
+      "linux-xem-sua-file-van-ban",
+      "linux-nguoi-dung-nhom-quyen-file",
+      "linux-chuyen-huong-pipe",
+      "linux-tim-kiem-find-grep",
+      "linux-thuc-hanh-thu-muc-trien-khai"
+    ],
+    "status": "published"
+  },
+  {
     "slug": "ba-p01-tu-duy-phan-tich-nghiep-vu",
     "title": "BA · Phần 1 · Tư duy phân tích nghiệp vụ",
     "description": "Tám bài mở đầu chương trình Business Analysis qua Tới Nơi: tư duy BA, vai trò phối hợp, phân loại yêu cầu, BACCM, mục tiêu đo lường, phạm vi và quyết định khi thiếu bằng chứng. Gồm 3 bài cơ bản, 3 bài trung bình và 2 bài nâng cao; kết thúc bằng hồ sơ đề xuất cải thiện điểm đón.",

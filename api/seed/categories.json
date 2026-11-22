@@ -266,6 +266,21 @@
     "parent": "devops"
   },
   {
+    "slug": "devops-linux",
+    "name": {
+      "vi": "Linux",
+      "en": "Linux"
+    },
+    "description": {
+      "vi": "Làm việc trên server Linux qua SSH: dòng lệnh, file và quyền, shell script, dịch vụ, mạng và vận hành.",
+      "en": "Working on Linux servers over SSH: command line, files and permissions, shell scripts, services, networking and operations."
+    },
+    "icon": "devops",
+    "color": "#059669",
+    "order": 3,
+    "parent": "devops"
+  },
+  {
     "slug": "security",
     "name": {
       "vi": "Bảo mật",

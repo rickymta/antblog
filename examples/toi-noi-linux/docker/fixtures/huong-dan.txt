@@ -1,0 +1,9 @@
+Chào An,
+
+Đây là server toinoi-app-01 của nhóm backend Tới Nơi (bản lab).
+Dịch vụ báo giá nằm ở /opt/toinoi/bao-gia, log ở /var/log/toinoi.
+
+Việc đầu tiên: làm quen với server, rồi chuẩn bị thư mục triển khai
+/srv/toinoi theo hướng dẫn của series.
+
+— Bình (nhóm hạ tầng)

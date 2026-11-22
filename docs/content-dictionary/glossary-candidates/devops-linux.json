@@ -1,0 +1,644 @@
+{
+  "version": 1,
+  "category": "devops-linux",
+  "generatedAt": "2026-11-22",
+  "source": {
+    "articles": 10,
+    "checkedAgainst": "api/seed/terminology.json (working tree 22/11/2026, 422 mục) và các file khác trong glossary-candidates/",
+    "occurrencesMethod": "Như postgresql.json: occurrences = số bài trong series (Phần 1, 10 bài linux-*) có ít nhất một chỗ khớp term/english/aliases trong văn xuôi; mentions = tổng số chỗ khớp; outsideSeriesArticles = số bài ngoài series có chỗ khớp. Bỏ frontmatter, khối code, inline code, <pre>/<code>/<script>/<style>, thẻ HTML (giữ alt/title/aria-label), đích liên kết, URL. Ranh giới từ Unicode, tôn trọng caseSensitive. Phần lớn tên lệnh trong series nằm trong inline code nên không được tính. Cập nhật lại khi viết các phần sau."
+  },
+  "conflicts": [],
+  "terms": [
+    {
+      "slug": "kernel",
+      "term": "kernel",
+      "shortDefinition": "Chương trình lõi của hệ điều hành, nằm giữa phần cứng và mọi chương trình khác: chia CPU cho tiến trình, cấp bộ nhớ, đọc ghi đĩa, xử lý mạng và kiểm tra quyền. \"Linux\" theo nghĩa hẹp là tên của kernel.",
+      "categories": [],
+      "relatedArticleSlugs": [
+        "linux-la-gi-va-ssh-studio"
+      ],
+      "scopeNote": "Thuật ngữ riêng của Linux/Unix, cùng nghĩa ở mọi chuyên mục.",
+      "occurrences": 3,
+      "mentions": 23,
+      "outsideSeriesArticles": 5,
+      "reviewNote": "Alias \"nhân\" rất dễ bắt nhầm (nhân vật, phép nhân, nguyên nhân là từ khác nhưng \"nhân\" đứng riêng vẫn gặp); chỉ nên giữ \"kernel\"."
+    },
+    {
+      "slug": "ban-phan-phoi-linux",
+      "term": "bản phân phối",
+      "english": "Linux distribution",
+      "aliases": [
+        "distro",
+        "distribution"
+      ],
+      "shortDefinition": "Kernel Linux đóng gói cùng các lệnh cơ bản, trình quản lý gói, hệ thống khởi động dịch vụ và cấu hình mặc định thành một hệ điều hành dùng được. Ví dụ: Ubuntu, Debian, Red Hat Enterprise Linux, Alpine.",
+      "categories": [
+        "devops-linux"
+      ],
+      "relatedArticleSlugs": [
+        "linux-la-gi-va-ssh-studio"
+      ],
+      "scopeNote": "\"distribution\" ngoài chuyên mục này còn là phân phối xác suất, CloudFront distribution.",
+      "occurrences": 2,
+      "mentions": 16,
+      "outsideSeriesArticles": 14
+    },
+    {
+      "slug": "shell",
+      "term": "shell",
+      "shortDefinition": "Chương trình đọc dòng lệnh bạn gõ rồi chạy các chương trình khác theo dòng lệnh đó. Shell mặc định của Ubuntu là bash. Shell cũng mở rộng wildcard, biến và thực hiện chuyển hướng trước khi lệnh chạy.",
+      "categories": [
+        "devops-linux"
+      ],
+      "relatedArticleSlugs": [
+        "linux-la-gi-va-ssh-studio",
+        "linux-shell-dong-lenh-tro-giup"
+      ],
+      "scopeNote": "Ngoài chuyên mục: Azure Cloud Shell, ShellRoute của go_router.",
+      "occurrences": 10,
+      "mentions": 46,
+      "outsideSeriesArticles": 19
+    },
+    {
+      "slug": "bash",
+      "term": "bash",
+      "english": "Bourne-Again SHell",
+      "shortDefinition": "Shell mặc định trên phần lớn bản phân phối Linux. Đọc dòng lệnh, mở rộng wildcard và biến, nối lệnh bằng pipe, và cũng là ngôn ngữ viết shell script.",
+      "categories": [],
+      "relatedArticleSlugs": [
+        "linux-shell-dong-lenh-tro-giup"
+      ],
+      "scopeNote": "Thuật ngữ riêng của Linux/Unix, cùng nghĩa ở mọi chuyên mục.",
+      "occurrences": 6,
+      "mentions": 25,
+      "outsideSeriesArticles": 14
+    },
+    {
+      "slug": "ssh",
+      "term": "SSH",
+      "english": "Secure Shell",
+      "shortDefinition": "Giao thức mở một phiên làm việc trên máy ở xa qua kênh mã hoá. Server chạy sshd (mặc định cổng 22); client xác thực bằng mật khẩu hoặc SSH key. Trên cùng kết nối còn chạy được SFTP và port forwarding.",
+      "caseSensitive": true,
+      "categories": [],
+      "relatedArticleSlugs": [
+        "linux-la-gi-va-ssh-studio",
+        "linux-dung-lab-docker-ket-noi-ssh-studio"
+      ],
+      "scopeNote": "Thuật ngữ riêng của Linux/Unix, cùng nghĩa ở mọi chuyên mục.",
+      "occurrences": 10,
+      "mentions": 165,
+      "outsideSeriesArticles": 14
+    },
+    {
+      "slug": "sftp",
+      "term": "SFTP",
+      "english": "SSH File Transfer Protocol",
+      "shortDefinition": "Giao thức truyền và quản lý file chạy trên kết nối SSH: liệt kê thư mục, tải lên, tải về, đổi tên, đổi quyền. Có sshd là có SFTP, không cần cài thêm dịch vụ. Không liên quan tới FTP.",
+      "caseSensitive": true,
+      "categories": [],
+      "relatedArticleSlugs": [
+        "linux-la-gi-va-ssh-studio",
+        "linux-tao-sao-chep-di-chuyen-xoa-file"
+      ],
+      "scopeNote": "Thuật ngữ riêng của Linux/Unix, cùng nghĩa ở mọi chuyên mục.",
+      "occurrences": 4,
+      "mentions": 13,
+      "outsideSeriesArticles": 0
+    },
+    {
+      "slug": "sshd",
+      "term": "sshd",
+      "english": "SSH daemon",
+      "shortDefinition": "Chương trình chạy nền trên server, nghe ở cổng SSH, xác thực người kết nối rồi khởi động shell hoặc phiên SFTP cho họ. Cấu hình nằm ở /etc/ssh/sshd_config.",
+      "caseSensitive": true,
+      "categories": [],
+      "relatedArticleSlugs": [
+        "linux-la-gi-va-ssh-studio",
+        "linux-dung-lab-docker-ket-noi-ssh-studio"
+      ],
+      "scopeNote": "Thuật ngữ riêng của Linux/Unix, cùng nghĩa ở mọi chuyên mục.",
+      "occurrences": 1,
+      "mentions": 3,
+      "outsideSeriesArticles": 0
+    },
+    {
+      "slug": "host-key",
+      "term": "host key",
+      "shortDefinition": "Cặp khoá riêng của một server SSH. Server dùng khoá bí mật để chứng minh danh tính mỗi lần có kết nối; client lưu khoá công khai và chặn kết nối nếu lần sau server đưa ra khoá khác.",
+      "categories": [],
+      "relatedArticleSlugs": [
+        "linux-dung-lab-docker-ket-noi-ssh-studio"
+      ],
+      "scopeNote": "Thuật ngữ riêng của Linux/Unix, cùng nghĩa ở mọi chuyên mục.",
+      "occurrences": 1,
+      "mentions": 14,
+      "outsideSeriesArticles": 0
+    },
+    {
+      "slug": "ssh-fingerprint",
+      "term": "fingerprint",
+      "english": "key fingerprint",
+      "shortDefinition": "Bản rút gọn (thường là SHA-256) của một khoá công khai, đủ ngắn để mắt người so được. Lần đầu kết nối SSH, đối chiếu fingerprint của host key với giá trị lấy từ phía server qua kênh tin cậy.",
+      "categories": [
+        "devops-linux"
+      ],
+      "relatedArticleSlugs": [
+        "linux-dung-lab-docker-ket-noi-ssh-studio"
+      ],
+      "scopeNote": "Ngoài chuyên mục, \"fingerprint\" còn là vân tay sinh trắc học, device fingerprint.",
+      "occurrences": 3,
+      "mentions": 23,
+      "outsideSeriesArticles": 7
+    },
+    {
+      "slug": "known-hosts",
+      "term": "Known Hosts",
+      "english": "known_hosts",
+      "aliases": [
+        "known hosts"
+      ],
+      "shortDefinition": "Danh sách host key mà SSH client đã tin cậy, gắn với địa chỉ và cổng của server. OpenSSH lưu ở ~/.ssh/known_hosts; SSH Studio có trang Known Hosts. Host key khác bản đã lưu thì kết nối bị chặn.",
+      "categories": [
+        "devops-linux"
+      ],
+      "relatedArticleSlugs": [
+        "linux-dung-lab-docker-ket-noi-ssh-studio"
+      ],
+      "occurrences": 1,
+      "mentions": 7,
+      "outsideSeriesArticles": 0
+    },
+    {
+      "slug": "dau-nhac-shell",
+      "term": "dấu nhắc",
+      "english": "shell prompt",
+      "aliases": [
+        "prompt"
+      ],
+      "shortDefinition": "Chuỗi mà shell in ra khi chờ lệnh, dạng user@host:thư-mục$. Cho biết bạn là ai, đang ở máy nào, thư mục nào; kết thúc bằng $ với người dùng thường và # với root.",
+      "autoLink": false,
+      "categories": [
+        "devops-linux"
+      ],
+      "relatedArticleSlugs": [
+        "linux-shell-dong-lenh-tro-giup"
+      ],
+      "scopeNote": "\"prompt\" ngoài chuyên mục thường là prompt của mô hình AI.",
+      "occurrences": 6,
+      "mentions": 20,
+      "outsideSeriesArticles": 3
+    },
+    {
+      "slug": "tuy-chon-lenh",
+      "term": "tuỳ chọn",
+      "english": "command option",
+      "shortDefinition": "Phần của dòng lệnh làm thay đổi cách lệnh hoạt động, bắt đầu bằng - (dạng ngắn, gộp được: -la) hoặc -- (dạng dài: --all).",
+      "autoLink": false,
+      "categories": [
+        "devops-linux"
+      ],
+      "relatedArticleSlugs": [
+        "linux-shell-dong-lenh-tro-giup"
+      ],
+      "scopeNote": "Từ rất chung; chỉ gắn tay ở chỗ định nghĩa.",
+      "occurrences": 6,
+      "mentions": 18,
+      "outsideSeriesArticles": 118
+    },
+    {
+      "slug": "doi-so-lenh",
+      "term": "đối số",
+      "english": "argument",
+      "shortDefinition": "Giá trị mà lệnh tác động lên, đứng sau tên lệnh và các tuỳ chọn; thường là tên file hoặc thư mục. Shell tách dòng lệnh thành các đối số theo dấu cách.",
+      "categories": [
+        "devops-linux"
+      ],
+      "relatedArticleSlugs": [
+        "linux-shell-dong-lenh-tro-giup"
+      ],
+      "scopeNote": "Ngoài chuyên mục: đối số của hàm trong các series lập trình (cùng nghĩa rộng, khác ngữ cảnh).",
+      "occurrences": 7,
+      "mentions": 14,
+      "outsideSeriesArticles": 34
+    },
+    {
+      "slug": "alias-shell",
+      "term": "alias",
+      "english": "shell alias",
+      "shortDefinition": "Tên tắt do shell thay bằng một dòng lệnh khác trước khi chạy. Ubuntu đặt sẵn ls thành ls --color=auto trong ~/.bashrc. Script không tương tác không dùng alias, nên cùng một lệnh có thể cho kết quả khác khi gõ tay.",
+      "categories": [
+        "devops-linux"
+      ],
+      "relatedArticleSlugs": [
+        "linux-shell-dong-lenh-tro-giup"
+      ],
+      "scopeNote": "Ngoài chuyên mục: alias trong SQL, alias của keyword trong từ điển này.",
+      "occurrences": 4,
+      "mentions": 5,
+      "outsideSeriesArticles": 24
+    },
+    {
+      "slug": "ma-thoat",
+      "term": "mã thoát",
+      "english": "exit code",
+      "aliases": [
+        "exit code",
+        "exit status"
+      ],
+      "shortDefinition": "Số nguyên mà mọi lệnh trả về khi kết thúc: 0 là thành công, khác 0 là thất bại. Đọc bằng $? ngay sau lệnh. Script, && và || dựa vào mã thoát để quyết định bước tiếp theo.",
+      "categories": [],
+      "relatedArticleSlugs": [
+        "linux-shell-dong-lenh-tro-giup",
+        "linux-chuyen-huong-pipe"
+      ],
+      "scopeNote": "Thuật ngữ riêng của Linux/Unix, cùng nghĩa ở mọi chuyên mục.",
+      "occurrences": 5,
+      "mentions": 19,
+      "outsideSeriesArticles": 53,
+      "reviewNote": "Dò toàn site sẽ đánh dấu ở 53 bài ngoài series; soát vài bài trước khi gộp."
+    },
+    {
+      "slug": "thu-muc-goc",
+      "term": "thư mục gốc",
+      "english": "root directory",
+      "shortDefinition": "Đỉnh của cây thư mục Linux, ký hiệu /. Mọi file, kể cả trên đĩa khác được gắn vào, đều nằm bên dưới nó. Khác với /root là thư mục riêng của người dùng root.",
+      "categories": [
+        "devops-linux"
+      ],
+      "relatedArticleSlugs": [
+        "linux-cay-thu-muc-duong-dan"
+      ],
+      "scopeNote": "Ngoài chuyên mục: thư mục gốc của repository, của dự án.",
+      "occurrences": 1,
+      "mentions": 5,
+      "outsideSeriesArticles": 136
+    },
+    {
+      "slug": "duong-dan-tuyet-doi",
+      "term": "đường dẫn tuyệt đối",
+      "english": "absolute path",
+      "shortDefinition": "Đường dẫn bắt đầu bằng /, mô tả vị trí tính từ thư mục gốc; chỉ tới cùng một chỗ dù bạn đang đứng ở đâu. Nên dùng trong script và tài liệu.",
+      "categories": [],
+      "relatedArticleSlugs": [
+        "linux-cay-thu-muc-duong-dan"
+      ],
+      "scopeNote": "Thuật ngữ riêng của Linux/Unix, cùng nghĩa ở mọi chuyên mục.",
+      "occurrences": 1,
+      "mentions": 6,
+      "outsideSeriesArticles": 5
+    },
+    {
+      "slug": "duong-dan-tuong-doi",
+      "term": "đường dẫn tương đối",
+      "english": "relative path",
+      "shortDefinition": "Đường dẫn không bắt đầu bằng /, được tính từ thư mục hiện tại. Dùng . cho thư mục hiện tại và .. cho thư mục cha.",
+      "categories": [],
+      "relatedArticleSlugs": [
+        "linux-cay-thu-muc-duong-dan"
+      ],
+      "scopeNote": "Thuật ngữ riêng của Linux/Unix, cùng nghĩa ở mọi chuyên mục.",
+      "occurrences": 2,
+      "mentions": 6,
+      "outsideSeriesArticles": 7
+    },
+    {
+      "slug": "symlink",
+      "term": "symlink",
+      "english": "symbolic link",
+      "aliases": [
+        "liên kết tượng trưng",
+        "symbolic link"
+      ],
+      "shortDefinition": "File đặc biệt chứa đường dẫn tới một file hoặc thư mục khác; mở symlink là mở đích của nó. Tạo bằng ln -s. Đích tương đối được tính từ thư mục chứa symlink. Đích mất thì symlink gãy.",
+      "categories": [],
+      "relatedArticleSlugs": [
+        "linux-cay-thu-muc-duong-dan",
+        "linux-thuc-hanh-thu-muc-trien-khai"
+      ],
+      "scopeNote": "Thuật ngữ riêng của Linux/Unix, cùng nghĩa ở mọi chuyên mục.",
+      "occurrences": 3,
+      "mentions": 35,
+      "outsideSeriesArticles": 0
+    },
+    {
+      "slug": "file-an",
+      "term": "file ẩn",
+      "english": "hidden file",
+      "shortDefinition": "File hoặc thư mục có tên bắt đầu bằng dấu chấm. ls chỉ hiện chúng khi có -a, và wildcard * không khớp chúng. Đây là quy ước hiển thị, không phải cơ chế bảo mật.",
+      "categories": [],
+      "relatedArticleSlugs": [
+        "linux-cay-thu-muc-duong-dan"
+      ],
+      "scopeNote": "Thuật ngữ riêng của Linux/Unix, cùng nghĩa ở mọi chuyên mục.",
+      "occurrences": 3,
+      "mentions": 9,
+      "outsideSeriesArticles": 0
+    },
+    {
+      "slug": "wildcard",
+      "term": "wildcard",
+      "english": "glob pattern",
+      "aliases": [
+        "ký tự đại diện"
+      ],
+      "shortDefinition": "Mẫu khớp tên file: * là chuỗi bất kỳ, ? là một ký tự, [abc] là một ký tự trong tập. Shell mở rộng mẫu thành danh sách tên file trước khi chạy lệnh; lệnh không nhìn thấy dấu *.",
+      "categories": [
+        "devops-linux"
+      ],
+      "relatedArticleSlugs": [
+        "linux-tao-sao-chep-di-chuyen-xoa-file",
+        "linux-tim-kiem-find-grep"
+      ],
+      "scopeNote": "Ngoài chuyên mục: wildcard của SQL LIKE, wildcard certificate, wildcard trong CORS.",
+      "occurrences": 2,
+      "mentions": 11,
+      "outsideSeriesArticles": 8
+    },
+    {
+      "slug": "brace-expansion",
+      "term": "brace expansion",
+      "aliases": [
+        "mở rộng ngoặc nhọn"
+      ],
+      "shortDefinition": "Cách shell sinh nhiều chuỗi từ một mẫu có ngoặc nhọn: a/{b,c} thành a/b a/c, {1..3} thành 1 2 3. Khác wildcard ở chỗ không cần file nào tồn tại.",
+      "categories": [],
+      "relatedArticleSlugs": [
+        "linux-tao-sao-chep-di-chuyen-xoa-file",
+        "linux-thuc-hanh-thu-muc-trien-khai"
+      ],
+      "scopeNote": "Thuật ngữ riêng của Linux/Unix, cùng nghĩa ở mọi chuyên mục.",
+      "occurrences": 2,
+      "mentions": 4,
+      "outsideSeriesArticles": 0
+    },
+    {
+      "slug": "vim",
+      "term": "vim",
+      "english": "Vi IMproved",
+      "shortDefinition": "Trình soạn thảo trong terminal, có trên gần như mọi server Linux. Làm việc theo chế độ: Normal (phím là lệnh), Insert (gõ chữ, vào bằng i), Command-line (gõ : rồi lệnh như :wq để lưu và thoát, :q! để bỏ thay đổi).",
+      "categories": [],
+      "relatedArticleSlugs": [
+        "linux-xem-sua-file-van-ban"
+      ],
+      "scopeNote": "Thuật ngữ riêng của Linux/Unix, cùng nghĩa ở mọi chuyên mục.",
+      "occurrences": 1,
+      "mentions": 7,
+      "outsideSeriesArticles": 1
+    },
+    {
+      "slug": "uid-gid",
+      "term": "UID",
+      "english": "user ID",
+      "aliases": [
+        "GID"
+      ],
+      "shortDefinition": "Số định danh của người dùng (UID) và của nhóm (GID). Kernel kiểm tra quyền theo số chứ không theo tên; root có UID 0. Xem bằng lệnh id.",
+      "caseSensitive": true,
+      "categories": [],
+      "relatedArticleSlugs": [
+        "linux-nguoi-dung-nhom-quyen-file"
+      ],
+      "scopeNote": "Thuật ngữ riêng của Linux/Unix, cùng nghĩa ở mọi chuyên mục.",
+      "occurrences": 1,
+      "mentions": 5,
+      "outsideSeriesArticles": 1
+    },
+    {
+      "slug": "tai-khoan-dich-vu",
+      "term": "tài khoản dịch vụ",
+      "english": "service account",
+      "shortDefinition": "Tài khoản tạo ra để một dịch vụ chạy dưới danh nghĩa riêng, chỉ có quyền trên file của dịch vụ đó. Trên Linux thường có UID nhỏ hơn 1000 và shell nologin nên không đăng nhập được.",
+      "categories": [
+        "devops-linux"
+      ],
+      "relatedArticleSlugs": [
+        "linux-nguoi-dung-nhom-quyen-file"
+      ],
+      "scopeNote": "Ngoài chuyên mục: service account của Kubernetes, của nhà cung cấp đám mây (khái niệm gần nhưng cơ chế khác).",
+      "occurrences": 1,
+      "mentions": 1,
+      "outsideSeriesArticles": 6
+    },
+    {
+      "slug": "umask",
+      "term": "umask",
+      "shortDefinition": "Mặt nạ các quyền bị bỏ đi khi tạo file hoặc thư mục mới. File bắt đầu từ 666, thư mục từ 777; umask 002 cho ra 664 và 775, umask 022 cho ra 644 và 755.",
+      "categories": [],
+      "relatedArticleSlugs": [
+        "linux-nguoi-dung-nhom-quyen-file"
+      ],
+      "scopeNote": "Thuật ngữ riêng của Linux/Unix, cùng nghĩa ở mọi chuyên mục.",
+      "occurrences": 1,
+      "mentions": 1,
+      "outsideSeriesArticles": 0
+    },
+    {
+      "slug": "sudo",
+      "term": "sudo",
+      "shortDefinition": "Lệnh chạy một lệnh khác với quyền của root (hoặc của người dùng khác với -u), sau khi hỏi mật khẩu của chính người gõ. Ai được dùng và dùng cho lệnh nào do cấu hình sudoers quyết định; mọi lần dùng đều được ghi log.",
+      "categories": [],
+      "relatedArticleSlugs": [
+        "linux-nguoi-dung-nhom-quyen-file"
+      ],
+      "scopeNote": "Thuật ngữ riêng của Linux/Unix, cùng nghĩa ở mọi chuyên mục.",
+      "occurrences": 3,
+      "mentions": 9,
+      "outsideSeriesArticles": 1
+    },
+    {
+      "slug": "root-user",
+      "term": "root",
+      "english": "superuser",
+      "shortDefinition": "Tài khoản quản trị của Linux, UID 0. Kernel bỏ qua mọi kiểm tra quyền với root. Không nên đăng nhập trực tiếp bằng root; mượn quyền cho từng lệnh bằng sudo.",
+      "caseSensitive": true,
+      "autoLink": false,
+      "categories": [
+        "devops-linux"
+      ],
+      "relatedArticleSlugs": [
+        "linux-nguoi-dung-nhom-quyen-file"
+      ],
+      "scopeNote": "Ngoài chuyên mục: root cause, root của cây, aggregate root, root account của AWS.",
+      "occurrences": 2,
+      "mentions": 3,
+      "outsideSeriesArticles": 57
+    },
+    {
+      "slug": "stdin-stdout-stderr",
+      "term": "stdout",
+      "english": "standard output",
+      "aliases": [
+        "stdin",
+        "stderr"
+      ],
+      "shortDefinition": "Ba luồng nối sẵn với mọi chương trình: stdin (0) là đầu vào, stdout (1) là kết quả, stderr (2) là thông báo lỗi. Kết quả và lỗi đi hai đường riêng nên chuyển hướng hoặc đưa vào pipe được độc lập.",
+      "categories": [],
+      "relatedArticleSlugs": [
+        "linux-chuyen-huong-pipe"
+      ],
+      "scopeNote": "Thuật ngữ riêng của Linux/Unix, cùng nghĩa ở mọi chuyên mục.",
+      "occurrences": 2,
+      "mentions": 31,
+      "outsideSeriesArticles": 13
+    },
+    {
+      "slug": "chuyen-huong-shell",
+      "term": "chuyển hướng",
+      "english": "redirection",
+      "aliases": [
+        "redirection"
+      ],
+      "shortDefinition": "Việc shell nối stdin, stdout hoặc stderr của một lệnh tới file trước khi lệnh chạy: > ghi đè, >> ghi nối, 2> cho lỗi, 2>&1 gộp lỗi vào kết quả, < lấy đầu vào từ file.",
+      "categories": [
+        "devops-linux"
+      ],
+      "relatedArticleSlugs": [
+        "linux-chuyen-huong-pipe"
+      ],
+      "scopeNote": "Ngoài chuyên mục: HTTP redirect, redirect URI của OAuth.",
+      "occurrences": 2,
+      "mentions": 6,
+      "outsideSeriesArticles": 8
+    },
+    {
+      "slug": "pipe",
+      "term": "pipe",
+      "shortDefinition": "Dấu | nối stdout của lệnh bên trái vào stdin của lệnh bên phải; các lệnh chạy cùng lúc, không qua file trung gian. Pipe chỉ mang stdout, không mang stderr.",
+      "categories": [
+        "devops-linux"
+      ],
+      "relatedArticleSlugs": [
+        "linux-chuyen-huong-pipe"
+      ],
+      "scopeNote": "Ngoài chuyên mục: \"pipe\" hiếm, nhưng \"pipeline\" rất phổ biến với nghĩa khác.",
+      "occurrences": 4,
+      "mentions": 10,
+      "outsideSeriesArticles": 4,
+      "reviewNote": "\"pipeline\" ngoài chuyên mục là CI/CD pipeline, aggregation pipeline; không dùng làm alias."
+    },
+    {
+      "slug": "dev-null",
+      "term": "/dev/null",
+      "shortDefinition": "File đặc biệt nuốt mọi thứ ghi vào nó. Chuyển hướng 2>/dev/null để bỏ thông báo lỗi của một lệnh; đọc từ nó thì nhận ngay kết thúc file.",
+      "autoLink": false,
+      "categories": [],
+      "relatedArticleSlugs": [
+        "linux-chuyen-huong-pipe"
+      ],
+      "scopeNote": "Trong bài luôn nằm trong inline code nên bộ dò không bắt; gắn tay nếu cần.",
+      "occurrences": 1,
+      "mentions": 1,
+      "outsideSeriesArticles": 0
+    },
+    {
+      "slug": "bieu-thuc-chinh-quy",
+      "term": "biểu thức chính quy",
+      "english": "regular expression",
+      "aliases": [
+        "regex"
+      ],
+      "shortDefinition": "Ngôn ngữ mô tả mẫu chuỗi: . là một ký tự bất kỳ, [0-9] là một ký tự trong khoảng, * + {n} là số lần lặp, ^ $ là đầu và cuối dòng, | là \"hoặc\". grep -E dùng dạng mở rộng. Khác wildcard của shell.",
+      "categories": [],
+      "relatedArticleSlugs": [
+        "linux-tim-kiem-find-grep"
+      ],
+      "scopeNote": "Thuật ngữ riêng của Linux/Unix, cùng nghĩa ở mọi chuyên mục.",
+      "occurrences": 2,
+      "mentions": 10,
+      "outsideSeriesArticles": 25,
+      "reviewNote": "Dò toàn site sẽ đánh dấu ở 25 bài ngoài series; soát vài bài trước khi gộp."
+    },
+    {
+      "slug": "tien-trinh",
+      "term": "tiến trình",
+      "english": "process",
+      "shortDefinition": "Một chương trình đang chạy, có số định danh PID, chạy dưới danh nghĩa một người dùng và một tập nhóm. Tiến trình có PID 1 (systemd trên Ubuntu) khởi động mọi tiến trình khác.",
+      "categories": [
+        "devops-linux"
+      ],
+      "relatedArticleSlugs": [
+        "linux-la-gi-va-ssh-studio"
+      ],
+      "scopeNote": "Ngoài chuyên mục: \"tiến trình\" còn là quy trình nghiệp vụ, process của hệ điều hành trong series lập trình.",
+      "occurrences": 6,
+      "mentions": 19,
+      "outsideSeriesArticles": 221
+    },
+    {
+      "slug": "systemd",
+      "term": "systemd",
+      "shortDefinition": "Hệ thống khởi động và quản lý dịch vụ của phần lớn bản phân phối Linux, chạy với PID 1. Bật dịch vụ lúc khởi động, khởi động lại khi dịch vụ chết, gom log vào journal. Điều khiển bằng systemctl.",
+      "categories": [],
+      "relatedArticleSlugs": [
+        "linux-la-gi-va-ssh-studio",
+        "linux-dung-lab-docker-ket-noi-ssh-studio"
+      ],
+      "scopeNote": "Thuật ngữ riêng của Linux/Unix, cùng nghĩa ở mọi chuyên mục.",
+      "occurrences": 2,
+      "mentions": 7,
+      "outsideSeriesArticles": 2
+    },
+    {
+      "slug": "motd",
+      "term": "MOTD",
+      "english": "message of the day",
+      "shortDefinition": "Nội dung file /etc/motd, hiện ra sau khi đăng nhập. Người quản trị dùng để nhắc tên máy, môi trường (lab, staging, production) và quy định sử dụng.",
+      "caseSensitive": true,
+      "categories": [],
+      "relatedArticleSlugs": [
+        "linux-dung-lab-docker-ket-noi-ssh-studio"
+      ],
+      "scopeNote": "Thuật ngữ riêng của Linux/Unix, cùng nghĩa ở mọi chuyên mục.",
+      "occurrences": 1,
+      "mentions": 1,
+      "outsideSeriesArticles": 0
+    },
+    {
+      "slug": "lts",
+      "term": "LTS",
+      "english": "long-term support",
+      "shortDefinition": "Bản phát hành được vá lỗi bảo mật trong nhiều năm. Server gần như luôn chạy bản LTS (ví dụ Ubuntu 24.04 LTS) để hạn chế số lần nâng cấp hệ điều hành.",
+      "caseSensitive": true,
+      "categories": [],
+      "relatedArticleSlugs": [
+        "linux-la-gi-va-ssh-studio"
+      ],
+      "scopeNote": "Thuật ngữ riêng của Linux/Unix, cùng nghĩa ở mọi chuyên mục.",
+      "occurrences": 2,
+      "mentions": 6,
+      "outsideSeriesArticles": 1
+    }
+  ],
+  "deferred": [
+    {
+      "slug": "fhs",
+      "term": "FHS",
+      "reason": "Filesystem Hierarchy Standard: chỉ nhắc một lần ở LNX-004, đã giải nghĩa tại chỗ."
+    },
+    {
+      "slug": "mtime-ctime-atime",
+      "term": "mtime",
+      "reason": "Ba mốc thời gian của file; chỉ xuất hiện trong bảng của LNX-004. Đề xuất lại khi Phần 2 và Phần 5 dùng find -mtime nhiều hơn."
+    },
+    {
+      "slug": "elf",
+      "term": "ELF",
+      "reason": "Định dạng file thực thi; nhắc một lần ở LNX-004."
+    },
+    {
+      "slug": "setgid",
+      "term": "setgid",
+      "reason": "Mới nhắc trước ở LNX-010; định nghĩa đầy đủ thuộc Phần 3 (LNX-026)."
+    },
+    {
+      "slug": "scrollback",
+      "term": "scrollback",
+      "reason": "Vùng cuộn của terminal; nhắc một lần ở LNX-009."
+    },
+    {
+      "slug": "nhom-chinh",
+      "term": "nhóm chính",
+      "reason": "Primary group; đã giải thích trong LNX-007 và LNX-010, ít dùng ngoài hai bài đó."
+    }
+  ]
+}
