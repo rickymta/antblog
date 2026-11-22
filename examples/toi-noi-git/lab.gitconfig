@@ -1,0 +1,11 @@
+# Cấu hình git CÔ LẬP của lab (runner đặt GIT_CONFIG_GLOBAL trỏ vào file này).
+# Không có user.name/user.email ở đây: mỗi commit của lab ghi rõ người viết và thời điểm.
+[init]
+	defaultBranch = main
+[core]
+	autocrlf = false
+	quotepath = false
+[color]
+	ui = false
+[advice]
+	detachedHead = true

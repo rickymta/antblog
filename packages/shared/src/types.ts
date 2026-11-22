@@ -24,7 +24,7 @@ export interface AuthorRef {
   role: Role;
 }
 
-export const CATEGORY_ICONS = ['database', 'code', 'pattern', 'architecture', 'devops', 'system', 'security', 'testing', 'analysis', 'location'] as const;
+export const CATEGORY_ICONS = ['database', 'code', 'pattern', 'architecture', 'devops', 'system', 'security', 'testing', 'analysis', 'location', 'git'] as const;
 export type CategoryIcon = (typeof CATEGORY_ICONS)[number];
 
 export interface Category {

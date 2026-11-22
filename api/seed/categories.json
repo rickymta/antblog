@@ -515,5 +515,19 @@
     "icon": "analysis",
     "color": "#0891B2",
     "order": 8
+  },
+  {
+    "slug": "git",
+    "name": {
+      "vi": "Git & Quản lý mã nguồn",
+      "en": "Git & Source Control"
+    },
+    "description": {
+      "vi": "Git qua GitStudio và Tới Nơi: repository, commit và lịch sử, nhánh, merge và xung đột, remote và làm việc nhóm, viết lại lịch sử và hoàn tác, điều tra và bảo trì. Mỗi thao tác làm trên giao diện GitStudio, Spotlight và lệnh git trong terminal tích hợp.",
+      "en": "Git through GitStudio and Toi Noi: repositories, commits and history, branches, merges and conflicts, remotes and teamwork, rewriting history and undoing, investigation and maintenance. Every task is done in the GitStudio UI, with Spotlight and with git commands in the built-in terminal."
+    },
+    "icon": "git",
+    "color": "#E8590C",
+    "order": 9
   }
 ]

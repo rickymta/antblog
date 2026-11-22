@@ -1,0 +1,16 @@
+{
+  "name": "toi-noi-git-lab",
+  "private": true,
+  "type": "module",
+  "description": "Lab Git qua GitStudio và Tới Nơi — runner Node không có dependency, git chạy với cấu hình cô lập để mã hash commit tái lập được",
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "p01": "node run.mjs p01",
+    "p01:output": "node run.mjs p01 > p01/OUTPUT.txt",
+    "setup": "node run.mjs setup",
+    "kiem-tra": "node p01/kiem-tra.mjs",
+    "test": "node --test \"test/*.test.mjs\""
+  }
+}

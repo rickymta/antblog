@@ -42,7 +42,7 @@ Chỉ trả bài `status = 'published'` và `publishedAt <= now`.
 `Localized = { vi: string, en: string }`
 
 `Category = { id, parentId?: string, slug, name: Localized, description: Localized, icon: CategoryIcon, color: string (#RRGGBB), order: number, articleCount: number }`
-`CategoryIcon = 'database' | 'code' | 'pattern' | 'architecture' | 'devops' | 'system' | 'security' | 'testing' | 'analysis'`
+`CategoryIcon = 'database' | 'code' | 'pattern' | 'architecture' | 'devops' | 'system' | 'security' | 'testing' | 'analysis' | 'location' | 'git'`
 
 Danh mục tạo thành cây tối đa **3 cấp** (gốc là cấp 1). `parentId` vắng nghĩa là danh mục gốc. Danh sách API vẫn phẳng để tương thích; frontend dựng cây từ `parentId`. `articleCount` trả về là tổng bài công khai của chính danh mục **và toàn bộ danh mục con**, không tính nháp/lên lịch. Query `category` ở danh sách bài (công khai và quản trị) bao gồm nhánh con.
 

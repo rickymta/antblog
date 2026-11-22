@@ -1,0 +1,349 @@
+{
+  "version": 1,
+  "category": "git",
+  "generatedAt": "2026-11-22",
+  "source": {
+    "articles": 10,
+    "checkedAgainst": "api/seed/terminology.json (working tree 22/11/2026, 422 mục) và các file glossary-candidates hiện có",
+    "occurrencesMethod": "Như postgresql.json: occurrences = số bài Git P01 (10 bài, git-*) có ít nhất một chỗ khớp term/english/aliases trong văn xuôi; mentions = tổng số chỗ khớp. Bỏ frontmatter, khối code, inline code, thẻ HTML (giữ alt), đích liên kết, URL. Ranh giới từ Unicode, cụm dài thắng cụm ngắn, tôn trọng caseSensitive. outsideSeriesArticles = số bài ngoài series có chỗ khớp. Phần lớn tên lệnh và tên file nằm trong inline code nên không được đếm. Đếm lại khi viết thêm phần."
+  },
+  "conflicts": [
+    {
+      "candidate": "git-head",
+      "existingId": "merge-statement",
+      "action": "no-action",
+      "note": "Không trùng chữ. Ghi để nhớ: series Git dùng merge (chữ thường, nghĩa gộp nhánh) từ Phần 2; mục có sẵn MERGE là câu lệnh SQL, caseSensitive nên không bắt nhầm. Khi thêm ứng viên merge cho Git ở P02 phải để caseSensitive hoặc categories [\"git\"]."
+    },
+    {
+      "candidate": "commit",
+      "existingId": "consumer-offset",
+      "action": "no-action",
+      "note": "Mục có sẵn có use = \"commit offset\" (Kafka). Không đề xuất mục commit đơn lẻ (xem deferred), nên không xung đột; nếu sau này thêm, cụm dài \"commit offset\" vẫn thắng."
+    },
+    {
+      "candidate": "git-blob",
+      "existingId": null,
+      "action": "related",
+      "note": "Chưa có mục Azure Blob Storage trong terminology.json nhưng 21 bài ngoài series có chữ blob (Azure, AWS). Bắt buộc categories [\"git\"]."
+    }
+  ],
+  "terms": [
+    {
+      "slug": "version-control",
+      "term": "version control",
+      "aliases": [
+        "quản lý phiên bản"
+      ],
+      "shortDefinition": "Ghi lại các trạng thái của một bộ file theo thời gian, để biết mỗi thay đổi do ai làm, lúc nào, vì sao và quay lại được trạng thái cũ. Git là một hệ thống version control phân tán.",
+      "caseSensitive": false,
+      "autoLink": true,
+      "categories": [],
+      "relatedArticleSlugs": [
+        "git-la-gi-va-gitstudio"
+      ],
+      "occurrences": 1,
+      "mentions": 8,
+      "outsideSeriesArticles": 3
+    },
+    {
+      "slug": "git-repository",
+      "term": "repository",
+      "aliases": [],
+      "shortDefinition": "Trong Git: thư mục dự án cùng thư mục .git bên trong, nơi lưu toàn bộ lịch sử commit, nhánh, tag và cấu hình riêng. Có thể tạo mới (git init) hoặc sao chép từ nơi khác (git clone).",
+      "caseSensitive": false,
+      "autoLink": false,
+      "categories": [
+        "git"
+      ],
+      "relatedArticleSlugs": [
+        "git-init-clone-mo-repository",
+        "git-ben-trong-object-ref-head"
+      ],
+      "occurrences": 9,
+      "mentions": 101,
+      "outsideSeriesArticles": 245
+    },
+    {
+      "slug": "working-tree",
+      "term": "working tree",
+      "aliases": [],
+      "shortDefinition": "Các file bạn thấy và sửa trong thư mục dự án, ứng với một commit đang checkout cộng các thay đổi chưa commit. Một trong ba vùng của Git, cùng staging area và repository.",
+      "caseSensitive": false,
+      "autoLink": true,
+      "categories": [
+        "git"
+      ],
+      "relatedArticleSlugs": [
+        "git-ba-vung-working-tree-staging-gitignore"
+      ],
+      "occurrences": 6,
+      "mentions": 30,
+      "outsideSeriesArticles": 1
+    },
+    {
+      "slug": "staging-area",
+      "term": "staging area",
+      "aliases": [],
+      "shortDefinition": "Bản nháp của commit tiếp theo, lưu trong file .git/index (còn gọi là index). git add đưa thay đổi vào đây; git commit chỉ lấy những gì đang nằm trong staging area.",
+      "caseSensitive": false,
+      "autoLink": true,
+      "categories": [
+        "git"
+      ],
+      "relatedArticleSlugs": [
+        "git-ba-vung-working-tree-staging-gitignore",
+        "git-commit-stage-hunk-amend"
+      ],
+      "occurrences": 4,
+      "mentions": 23,
+      "outsideSeriesArticles": 0
+    },
+    {
+      "slug": "untracked-file",
+      "term": "untracked",
+      "aliases": [],
+      "shortDefinition": "Trạng thái của file có trong working tree nhưng Git chưa theo dõi (chưa từng được git add). git status --short đánh dấu bằng ??.",
+      "caseSensitive": false,
+      "autoLink": true,
+      "categories": [
+        "git"
+      ],
+      "relatedArticleSlugs": [
+        "git-ba-vung-working-tree-staging-gitignore"
+      ],
+      "occurrences": 3,
+      "mentions": 5,
+      "outsideSeriesArticles": 0
+    },
+    {
+      "slug": "gitignore",
+      "term": ".gitignore",
+      "aliases": [],
+      "shortDefinition": "File văn bản trong repository liệt kê các mẫu đường dẫn Git bỏ qua khi tìm file untracked, như bin/, obj/, .env. Không có tác dụng với file đã được theo dõi.",
+      "caseSensitive": false,
+      "autoLink": true,
+      "categories": [],
+      "relatedArticleSlugs": [
+        "git-ba-vung-working-tree-staging-gitignore"
+      ],
+      "reviewNote": "Ranh giới từ phải cho phép dấu chấm đầu. Dò toàn site an toàn vì chuỗi chỉ có một nghĩa.",
+      "occurrences": 2,
+      "mentions": 4,
+      "outsideSeriesArticles": 1
+    },
+    {
+      "slug": "gitattributes",
+      "term": ".gitattributes",
+      "aliases": [],
+      "shortDefinition": "File trong repository gán thuộc tính cho đường dẫn theo mẫu: chuẩn hoá xuống dòng (text, eol), đánh dấu file nhị phân (binary), chọn cách diff/merge. Áp dụng cho mọi người clone repository.",
+      "caseSensitive": false,
+      "autoLink": true,
+      "categories": [],
+      "relatedArticleSlugs": [
+        "git-diff-so-sanh-thay-doi",
+        "git-thuc-hanh-repository-bao-gia"
+      ],
+      "occurrences": 1,
+      "mentions": 1,
+      "outsideSeriesArticles": 0
+    },
+    {
+      "slug": "hunk",
+      "term": "hunk",
+      "aliases": [],
+      "shortDefinition": "Một cụm dòng thay đổi liền nhau trong diff, kèm vài dòng ngữ cảnh, mở đầu bằng tiêu đề @@ -a,b +c,d @@. Stage hoặc huỷ bỏ được từng hunk (git add -p, Stage hunk trong GitStudio).",
+      "caseSensitive": false,
+      "autoLink": true,
+      "categories": [
+        "git"
+      ],
+      "relatedArticleSlugs": [
+        "git-commit-stage-hunk-amend"
+      ],
+      "occurrences": 4,
+      "mentions": 57,
+      "outsideSeriesArticles": 0
+    },
+    {
+      "slug": "amend",
+      "term": "amend",
+      "aliases": [],
+      "shortDefinition": "git commit --amend: thay commit cuối bằng một commit mới gồm thêm thay đổi đang stage và/hoặc nội dung commit mới. Commit cũ không bị sửa mà bị thay thế, nên mã hash đổi; chỉ amend commit chưa push.",
+      "caseSensitive": false,
+      "autoLink": true,
+      "categories": [
+        "git"
+      ],
+      "relatedArticleSlugs": [
+        "git-commit-stage-hunk-amend"
+      ],
+      "occurrences": 5,
+      "mentions": 32,
+      "outsideSeriesArticles": 0
+    },
+    {
+      "slug": "git-head",
+      "term": "HEAD",
+      "aliases": [],
+      "shortDefinition": "Con trỏ cho biết bạn đang đứng ở đâu: thường trỏ tới một nhánh (ref: refs/heads/main), nhánh đó trỏ tới commit mới nhất. Lưu trong .git/HEAD. HEAD~3 là commit lùi ba bậc từ HEAD.",
+      "caseSensitive": true,
+      "autoLink": true,
+      "categories": [
+        "git"
+      ],
+      "relatedArticleSlugs": [
+        "git-ben-trong-object-ref-head"
+      ],
+      "reviewNote": "caseSensitive bắt buộc: không khớp chữ head thường. Chỉ dò trong chuyên mục git, vì HEAD còn là phương thức HTTP.",
+      "occurrences": 5,
+      "mentions": 10,
+      "outsideSeriesArticles": 3
+    },
+    {
+      "slug": "git-blob",
+      "term": "blob",
+      "aliases": [],
+      "shortDefinition": "Object của Git lưu nội dung một file, không có tên file. Đặt tên bằng mã băm của nội dung, nên hai file giống hệt nhau dùng chung một blob.",
+      "caseSensitive": false,
+      "autoLink": true,
+      "categories": [
+        "git"
+      ],
+      "relatedArticleSlugs": [
+        "git-ben-trong-object-ref-head"
+      ],
+      "reviewNote": "Chỉ dò trong git: blob còn nghĩa là Blob Storage của Azure.",
+      "occurrences": 2,
+      "mentions": 21,
+      "outsideSeriesArticles": 21
+    },
+    {
+      "slug": "git-blame",
+      "term": "blame",
+      "aliases": [
+        "git blame"
+      ],
+      "shortDefinition": "Lệnh gắn mỗi dòng của file với commit gần nhất đã thay đổi dòng đó (tác giả, thời điểm, mã hash). Dùng để tìm ngữ cảnh của một dòng, không phải để quy lỗi. GitStudio có chế độ Blame trong khung xem file.",
+      "caseSensitive": false,
+      "autoLink": true,
+      "categories": [
+        "git"
+      ],
+      "relatedArticleSlugs": [
+        "git-blame-lich-su-file-truy-vet"
+      ],
+      "occurrences": 4,
+      "mentions": 20,
+      "outsideSeriesArticles": 0
+    },
+    {
+      "slug": "pickaxe",
+      "term": "pickaxe",
+      "aliases": [],
+      "shortDefinition": "Tìm commit theo nội dung thay đổi: git log -S<chuỗi> tìm commit làm thay đổi số lần xuất hiện của chuỗi, git log -G<regex> tìm commit có dòng thêm/bỏ khớp biểu thức.",
+      "caseSensitive": false,
+      "autoLink": true,
+      "categories": [
+        "git"
+      ],
+      "relatedArticleSlugs": [
+        "git-blame-lich-su-file-truy-vet"
+      ],
+      "occurrences": 2,
+      "mentions": 7,
+      "outsideSeriesArticles": 0
+    },
+    {
+      "slug": "crlf",
+      "term": "CRLF",
+      "aliases": [],
+      "shortDefinition": "Kiểu kết thúc dòng bằng hai ký tự CR LF (\\r\\n) của Windows, khác LF (\\n) của Linux và macOS. Lẫn lộn hai kiểu làm Git báo cả file thay đổi; chuẩn hoá bằng .gitattributes.",
+      "caseSensitive": true,
+      "autoLink": true,
+      "categories": [],
+      "relatedArticleSlugs": [
+        "git-diff-so-sanh-thay-doi"
+      ],
+      "occurrences": 2,
+      "mentions": 11,
+      "outsideSeriesArticles": 0
+    },
+    {
+      "slug": "commit-hash",
+      "term": "mã hash commit",
+      "aliases": [
+        "mã hash"
+      ],
+      "shortDefinition": "Định danh 40 ký tự hex (SHA-1) của một commit, tính từ chính nội dung commit gồm tree, commit cha, tác giả, thời điểm và nội dung commit. Thường viết tắt 7 ký tự đầu.",
+      "caseSensitive": false,
+      "autoLink": true,
+      "categories": [
+        "git"
+      ],
+      "relatedArticleSlugs": [
+        "git-ben-trong-object-ref-head",
+        "git-la-gi-va-gitstudio"
+      ],
+      "reviewNote": "Alias \"mã hash\" chỉ an toàn khi dò trong chuyên mục git.",
+      "occurrences": 8,
+      "mentions": 40,
+      "outsideSeriesArticles": 0
+    }
+  ],
+  "deferred": [
+    {
+      "slug": "commit",
+      "term": "commit",
+      "occurrences": 10,
+      "reason": "Quá chung và xuất hiện dày đặc ở mọi bài Git; gạch chân mọi chỗ gây nhiễu. Nếu thêm thì autoLink false, gắn tay."
+    },
+    {
+      "slug": "git-branch",
+      "term": "nhánh (branch)",
+      "occurrences": 6,
+      "reason": "Phần 2 (GIT-011) mới dạy; đề xuất cùng merge, fast-forward, detached HEAD khi viết P02."
+    },
+    {
+      "slug": "git-remote",
+      "term": "remote",
+      "occurrences": 4,
+      "reason": "Phần 3 (GIT-021); P01 chỉ nhắc khi clone."
+    },
+    {
+      "slug": "origin",
+      "term": "origin",
+      "occurrences": 1,
+      "reason": "Phần 3; chữ origin còn xuất hiện ở bài về CORS, CDN."
+    },
+    {
+      "slug": "reflog",
+      "term": "reflog",
+      "occurrences": 3,
+      "reason": "Phần 4 (GIT-034) giải thích đầy đủ."
+    },
+    {
+      "slug": "git-tree-object",
+      "term": "tree",
+      "occurrences": 7,
+      "reason": "Chữ tree quá chung (R-tree, B-tree, cây thư mục). Định nghĩa nằm trong mục blob/HEAD đủ dùng cho P01."
+    },
+    {
+      "slug": "git-index",
+      "term": "index",
+      "occurrences": 2,
+      "reason": "Trùng nghĩa với index của database ở hàng trăm bài; đã đưa vào định nghĩa staging-area."
+    },
+    {
+      "slug": "gitstudio",
+      "term": "GitStudio",
+      "occurrences": 10,
+      "reason": "Tên sản phẩm, không phải thuật ngữ; bài đã giới thiệu và liên kết ở GIT-001."
+    },
+    {
+      "slug": "spotlight",
+      "term": "Spotlight",
+      "occurrences": 4,
+      "reason": "Tên tính năng của GitStudio (và của macOS); không phải thuật ngữ Git."
+    }
+  ]
+}

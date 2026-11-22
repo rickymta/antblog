@@ -1328,5 +1328,25 @@
       "da-thuc-hanh-ke-hoach-phan-tich-huy-chuyen"
     ],
     "status": "published"
+  },
+  {
+    "slug": "git-qua-gitstudio",
+    "title": "Git qua GitStudio · Phần 1 · Repository, commit và lịch sử",
+    "description": "Đủ 10 bài GIT-001–GIT-010 qua Tới Nơi: version control và GitStudio, cài đặt và danh tính commit, init và clone, ba vùng và .gitignore, stage theo hunk và amend, đọc lịch sử, diff và xuống dòng CRLF/LF, bên trong .git, blame và pickaxe; kết thúc bằng bài thực hành dựng repository dịch vụ báo giá có script chấm. Mỗi thao tác làm trên giao diện GitStudio, Spotlight và terminal tích hợp. Gồm 3 bài cơ bản, 4 trung bình và 3 nâng cao.",
+    "level": "beginner",
+    "category": "git",
+    "articles": [
+      "git-la-gi-va-gitstudio",
+      "git-cai-dat-cau-hinh-gitstudio",
+      "git-init-clone-mo-repository",
+      "git-ba-vung-working-tree-staging-gitignore",
+      "git-commit-stage-hunk-amend",
+      "git-lich-su-log-do-thi-commit",
+      "git-diff-so-sanh-thay-doi",
+      "git-ben-trong-object-ref-head",
+      "git-blame-lich-su-file-truy-vet",
+      "git-thuc-hanh-repository-bao-gia"
+    ],
+    "status": "published"
   }
 ]

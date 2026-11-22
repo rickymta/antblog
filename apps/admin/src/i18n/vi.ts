@@ -363,6 +363,7 @@ export const vi = {
       testing: 'Kiểm thử',
       analysis: 'Phân tích nghiệp vụ',
       location: 'Định vị & chỉ đường',
+      git: 'Git & quản lý mã nguồn',
     },
   },
   paths: {

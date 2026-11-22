@@ -5,6 +5,7 @@ import {
   Code,
   Database,
   FlaskConical,
+  GitBranch,
   Infinity as InfinityIcon,
   MapPin,
   Network,
@@ -71,6 +72,7 @@ export const CATEGORY_ICON_COMPONENT: Record<CategoryIconName, LucideIcon> = {
   testing: FlaskConical,
   analysis: ClipboardList,
   location: MapPin,
+  git: GitBranch,
 };
 
 /** Ô biểu tượng chủ đề: nền màu chủ đề, biểu tượng trắng. */

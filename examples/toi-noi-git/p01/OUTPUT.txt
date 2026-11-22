@@ -1,0 +1,734 @@
+
+# ==================== p01/01-git-la-gi.mjs · GIT-001 ====================
+# Mười commit của dịch vụ báo giá, mới nhất ở trên cùng
+$ git log --oneline
+89855d5 Chuẩn hoá xuống dòng LF bằng .gitattributes
+1c6e78c Đổi tên tài liệu thành bang-gia-cuoc.md
+45c0d6b Thêm tài liệu bảng giá
+0d57e4b Làm tròn cước lên bội số 1.000 đ
+b56c460 Báo lỗi rõ hơn khi quãng đường âm
+d508151 Tăng cước mỗi km ô tô 4 chỗ lên 5.000 đ
+b48e0a1 Thêm test cho hàm tính cước
+19ac10f Bỏ qua kết quả build và cấu hình máy cá nhân
+7ab5adc Thêm hàm tính cước theo km
+cd8da2e Khởi tạo dịch vụ báo giá
+
+# Một commit: ai, khi nào, vì sao, đổi file nào
+$ git show --stat HEAD~5
+commit d508151e625bcf6af2e0467fc3d7d757b1d1a376
+Author: Lê Lan <lan@toinoi.test>
+Date:   Wed Nov 4 10:40:00 2026 +0700
+
+    Tăng cước mỗi km ô tô 4 chỗ lên 5.000 đ
+    
+    Theo bảng giá mới của bộ phận vận hành, áp dụng từ 01/12/2026.
+
+ src/BaoGia/appsettings.json | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+PASS HEAD trùng commit c10 của lịch sử chuẩn
+PASS repository có đúng 10 commit
+
+# ==================== p01/02-cai-dat-cau-hinh.mjs · GIT-002 ====================
+# Danh tính dùng cho mọi repository trên máy
+$ git config --global user.name "Trần Minh"
+$ git config --global user.email minh@toinoi.test
+$ git config --global init.defaultBranch main
+$ git config --global --get user.name
+Trần Minh
+$ git config --global --list
+user.name=Trần Minh
+user.email=minh@toinoi.test
+init.defaultbranch=main
+
+# Repository cá nhân dùng email khác: cấu hình riêng (local) thắng cấu hình toàn cục
+$ git init -q du-an-ca-nhan
+$ cd du-an-ca-nhan
+$ git config user.email minh.ca-nhan@example.com
+$ git config --show-scope --get user.email
+local	minh.ca-nhan@example.com
+$ git config --show-scope --get user.name
+global	Trần Minh
+$ git config --show-origin --get user.email
+file:.git/config	minh.ca-nhan@example.com
+
+# Commit thử để thấy danh tính được ghi vào commit
+$ git add ghi-chu.md
+$ git commit -q -m "Ghi chú đầu tiên"
+$ git log -1 --format="%an <%ae>"
+Trần Minh <minh.ca-nhan@example.com>
+PASS local email thắng global
+PASS tên lấy từ global
+PASS nhánh khởi tạo là main
+
+# ==================== p01/03-init-clone.mjs · GIT-003 ====================
+$ git init -b main bao-gia
+Initialized empty Git repository in <lab>/work/bao-gia/.git/
+$ cd bao-gia
+$ Get-ChildItem -Force -Name .git
+config
+description
+HEAD
+hooks
+info
+objects
+refs
+$ git status
+On branch main
+
+No commits yet
+
+nothing to commit (create/copy files and use "git add" to track)
+
+# Danh tính riêng của repository lab
+$ git config user.name "Trần Minh"
+$ git config user.email minh@toinoi.test
+
+# Tạo README.md rồi commit đầu tiên
+$ git status --short
+?? README.md
+$ git add README.md
+$ git commit -m "Khởi tạo dịch vụ báo giá"
+[main (root-commit) cd8da2e] Khởi tạo dịch vụ báo giá
+ 1 file changed, 4 insertions(+)
+ create mode 100644 README.md
+$ git log --oneline
+cd8da2e Khởi tạo dịch vụ báo giá
+PASS commit đầu tiên trùng c1 của lịch sử chuẩn
+
+# Clone repository vừa tạo sang thư mục khác
+$ cd ..
+$ git clone bao-gia bao-gia-ban-sao
+Cloning into 'bao-gia-ban-sao'...
+done.
+$ cd bao-gia-ban-sao
+$ git log --oneline
+cd8da2e Khởi tạo dịch vụ báo giá
+$ git remote -v
+origin	<lab>/work/bao-gia (fetch)
+origin	<lab>/work/bao-gia (push)
+$ git status
+On branch main
+Your branch is up to date with 'origin/main'.
+
+nothing to commit, working tree clean
+PASS bản clone có cùng commit
+PASS bản clone có remote origin
+
+# ==================== p01/04-ba-vung-gitignore.mjs · GIT-004 ====================
+# Hai file mới: Git chưa theo dõi (untracked)
+$ git status
+On branch main
+Untracked files:
+  (use "git add <file>..." to include in what will be committed)
+	src/
+
+nothing added to commit but untracked files present (use "git add" to track)
+$ git status --short --untracked-files=all
+?? src/BaoGia/FareCalculator.cs
+?? src/BaoGia/appsettings.json
+
+# Stage một file: chụp nội dung lúc này vào staging area
+$ git add src/BaoGia/FareCalculator.cs
+$ git status --short --untracked-files=all
+A  src/BaoGia/FareCalculator.cs
+?? src/BaoGia/appsettings.json
+
+# Sửa tiếp file đã stage: bản trong staging area và bản trong working tree khác nhau
+$ git status --short --untracked-files=all
+AM src/BaoGia/FareCalculator.cs
+?? src/BaoGia/appsettings.json
+# Bỏ dòng TODO vừa thêm: working tree lại giống staging area
+$ git status --short --untracked-files=all
+A  src/BaoGia/FareCalculator.cs
+?? src/BaoGia/appsettings.json
+
+$ git add src/BaoGia/appsettings.json
+$ git commit -m "Thêm hàm tính cước theo km"
+[main 7ab5adc] Thêm hàm tính cước theo km
+ 2 files changed, 37 insertions(+)
+ create mode 100644 src/BaoGia/FareCalculator.cs
+ create mode 100644 src/BaoGia/appsettings.json
+$ git status
+On branch main
+nothing to commit, working tree clean
+PASS commit trùng c2
+
+# Build project: thư mục bin/, obj/ và file riêng của máy xuất hiện
+$ git status --short --untracked-files=all
+?? .env
+?? src/BaoGia/BaoGia.csproj.user
+?? src/BaoGia/appsettings.Development.json
+?? src/BaoGia/bin/Debug/net10.0/BaoGia.dll
+?? src/BaoGia/obj/project.assets.json
+
+# Viết .gitignore
+$ git status --short --untracked-files=all
+?? .gitignore
+$ git status --short --ignored
+?? .gitignore
+!! .env
+!! src/BaoGia/BaoGia.csproj.user
+!! src/BaoGia/appsettings.Development.json
+!! src/BaoGia/bin/
+!! src/BaoGia/obj/
+$ git check-ignore -v src/BaoGia/bin/Debug/net10.0/BaoGia.dll .env src/BaoGia/BaoGia.csproj.user
+.gitignore:2:bin/	src/BaoGia/bin/Debug/net10.0/BaoGia.dll
+.gitignore:11:.env	.env
+.gitignore:7:*.user	src/BaoGia/BaoGia.csproj.user
+$ git add .gitignore
+$ git commit -m "Bỏ qua kết quả build và cấu hình máy cá nhân"
+[main 19ac10f] Bỏ qua kết quả build và cấu hình máy cá nhân
+ 1 file changed, 11 insertions(+)
+ create mode 100644 .gitignore
+$ git ls-files
+.gitignore
+README.md
+src/BaoGia/FareCalculator.cs
+src/BaoGia/appsettings.json
+PASS commit trùng c3
+PASS không file build nào bị theo dõi
+
+# Bẫy: file ĐÃ được theo dõi thì .gitignore không còn tác dụng với nó
+$ cd ..
+$ git init -q -b main thu-nghiem-ignore
+$ cd thu-nghiem-ignore
+$ git add .env
+$ git commit -q -m "Lỡ commit .env"
+$ git status --short
+ M .env
+?? .gitignore
+$ git rm --cached .env
+rm '.env'
+$ git add .gitignore
+$ git status --short
+D  .env
+A  .gitignore
+$ git commit -q -m "Ngừng theo dõi .env, thêm .gitignore"
+$ git status --short --ignored
+!! .env
+PASS .env không còn trong commit mới nhất
+PASS .env vẫn nằm trong commit cũ
+
+# ==================== p01/05-commit-hunk-amend.mjs · GIT-005 ====================
+# Minh sửa FareCalculator.cs hai chỗ: thông báo lỗi và làm tròn cước
+$ git diff
+diff --git a/src/BaoGia/FareCalculator.cs b/src/BaoGia/FareCalculator.cs
+index 175bdd3..378b9cb 100644
+--- a/src/BaoGia/FareCalculator.cs
++++ b/src/BaoGia/FareCalculator.cs
+@@ -9,7 +9,8 @@ public static class FareCalculator
+     public static decimal Quote(FareRule rule, decimal distanceKm)
+     {
+         if (distanceKm < 0)
+-            throw new ArgumentOutOfRangeException(nameof(distanceKm));
++            throw new ArgumentOutOfRangeException(
++                nameof(distanceKm), distanceKm, "Quãng đường không được âm.");
+ 
+         // Giá = giá mở cửa + đơn giá mỗi km × số km.
+         // Ví dụ ô tô 4 chỗ đi 4 km: 12.000 + 4.500 × 4 = 30.000 đ.
+@@ -18,6 +19,7 @@ public static class FareCalculator
+         var fare = rule.BaseFare + rule.PerKm * distanceKm;
+         var atLeastMinimum = Math.Max(fare, rule.MinimumFare);
+ 
+-        return atLeastMinimum;
++        // Làm tròn lên bội số 1.000 đ để khách không phải trả tiền lẻ.
++        return Math.Ceiling(atLeastMinimum / 1000m) * 1000m;
+     }
+ }
+
+# Stage riêng hunk thứ nhất: trả lời y cho hunk 1, n cho hunk 2
+$ git add -p src/BaoGia/FareCalculator.cs
+diff --git a/src/BaoGia/FareCalculator.cs b/src/BaoGia/FareCalculator.cs
+index 175bdd3..378b9cb 100644
+--- a/src/BaoGia/FareCalculator.cs
++++ b/src/BaoGia/FareCalculator.cs
+@@ -9,7 +9,8 @@ public static class FareCalculator
+     public static decimal Quote(FareRule rule, decimal distanceKm)
+     {
+         if (distanceKm < 0)
+-            throw new ArgumentOutOfRangeException(nameof(distanceKm));
++            throw new ArgumentOutOfRangeException(
++                nameof(distanceKm), distanceKm, "Quãng đường không được âm.");
+ 
+         // Giá = giá mở cửa + đơn giá mỗi km × số km.
+         // Ví dụ ô tô 4 chỗ đi 4 km: 12.000 + 4.500 × 4 = 30.000 đ.
+(1/2) Stage this hunk [y,n,q,a,d,j,J,g,/,e,p,?]? @@ -18,6 +19,7 @@ public static class FareCalculator
+         var fare = rule.BaseFare + rule.PerKm * distanceKm;
+         var atLeastMinimum = Math.Max(fare, rule.MinimumFare);
+ 
+-        return atLeastMinimum;
++        // Làm tròn lên bội số 1.000 đ để khách không phải trả tiền lẻ.
++        return Math.Ceiling(atLeastMinimum / 1000m) * 1000m;
+     }
+ }
+(2/2) Stage this hunk [y,n,q,a,d,K,g,/,e,p,?]? 
+$ git status --short
+MM src/BaoGia/FareCalculator.cs
+$ git diff --staged --stat
+ src/BaoGia/FareCalculator.cs | 3 ++-
+ 1 file changed, 2 insertions(+), 1 deletion(-)
+$ git commit -m "Báo lỗi rõ hơn khi quãng đường âm"
+[main b56c460] Báo lỗi rõ hơn khi quãng đường âm
+ 1 file changed, 2 insertions(+), 1 deletion(-)
+PASS commit thứ nhất trùng c6
+
+# Hunk còn lại thành commit thứ hai, có summary và description
+$ git add src/BaoGia/FareCalculator.cs
+$ git commit -m "Làm tròn cước lên bội số 1.000 đ" -m "Khách trả tiền mặt không phải trả tiền lẻ, tài xế không phải thối."
+[main bed94fc] Làm tròn cước lên bội số 1.000 đ
+ 1 file changed, 2 insertions(+), 1 deletion(-)
+
+# Quên test: thêm test rồi amend vào commit vừa tạo
+$ git add tests/BaoGia.Tests/FareCalculatorTests.cs
+$ git commit --amend --no-edit
+[main 0d57e4b] Làm tròn cước lên bội số 1.000 đ
+ Date: Thu Nov 5 09:05:00 2026 +0700
+ 2 files changed, 6 insertions(+), 1 deletion(-)
+$ git log --oneline -3
+0d57e4b Làm tròn cước lên bội số 1.000 đ
+b56c460 Báo lỗi rõ hơn khi quãng đường âm
+d508151 Tăng cước mỗi km ô tô 4 chỗ lên 5.000 đ
+$ git show --stat --format=fuller HEAD
+commit 0d57e4b9d030ae41e97e6fc614a3c9cc19f0969c
+Author:     Trần Minh <minh@toinoi.test>
+AuthorDate: Thu Nov 5 09:05:00 2026 +0700
+Commit:     Trần Minh <minh@toinoi.test>
+CommitDate: Thu Nov 5 09:12:00 2026 +0700
+
+    Làm tròn cước lên bội số 1.000 đ
+    
+    Khách trả tiền mặt không phải trả tiền lẻ, tài xế không phải thối.
+
+ src/BaoGia/FareCalculator.cs              | 3 ++-
+ tests/BaoGia.Tests/FareCalculatorTests.cs | 4 ++++
+ 2 files changed, 6 insertions(+), 1 deletion(-)
+# Mã hash trước amend: bed94fc
+PASS amend tạo commit mới (hash khác)
+PASS commit sau amend trùng c7
+PASS commit trước amend vẫn còn trong reflog
+
+# ==================== p01/06-lich-su-log.mjs · GIT-006 ====================
+# Mặc định: đầy đủ từng commit (giới hạn 2 commit cho gọn)
+$ git log -2
+commit 1c6e78ce7a6a8161bbee40dadc212ae1d2acc8b3
+Author: Lê Lan <lan@toinoi.test>
+Date:   Mon Nov 9 11:00:00 2026 +0700
+
+    Đổi tên tài liệu thành bang-gia-cuoc.md
+
+commit 45c0d6b2a5488d77d74cbff429b18a21c218b9cc
+Author: Trần Minh <minh@toinoi.test>
+Date:   Fri Nov 6 16:20:00 2026 +0700
+
+    Thêm tài liệu bảng giá
+
+$ git log --oneline
+1c6e78c Đổi tên tài liệu thành bang-gia-cuoc.md
+45c0d6b Thêm tài liệu bảng giá
+0d57e4b Làm tròn cước lên bội số 1.000 đ
+b56c460 Báo lỗi rõ hơn khi quãng đường âm
+d508151 Tăng cước mỗi km ô tô 4 chỗ lên 5.000 đ
+b48e0a1 Thêm test cho hàm tính cước
+19ac10f Bỏ qua kết quả build và cấu hình máy cá nhân
+7ab5adc Thêm hàm tính cước theo km
+cd8da2e Khởi tạo dịch vụ báo giá
+$ git log --oneline --graph --decorate -3
+* 1c6e78c (HEAD -> main) Đổi tên tài liệu thành bang-gia-cuoc.md
+* 45c0d6b Thêm tài liệu bảng giá
+* 0d57e4b Làm tròn cước lên bội số 1.000 đ
+
+# Tự chọn cột: hash ngắn, tác giả, ngày, summary
+$ git log --format="%h %<(9)%an %ad %s" --date=short
+1c6e78c Lê Lan    2026-11-09 Đổi tên tài liệu thành bang-gia-cuoc.md
+45c0d6b Trần Minh 2026-11-06 Thêm tài liệu bảng giá
+0d57e4b Trần Minh 2026-11-05 Làm tròn cước lên bội số 1.000 đ
+b56c460 Trần Minh 2026-11-05 Báo lỗi rõ hơn khi quãng đường âm
+d508151 Lê Lan    2026-11-04 Tăng cước mỗi km ô tô 4 chỗ lên 5.000 đ
+b48e0a1 Lê Lan    2026-11-03 Thêm test cho hàm tính cước
+19ac10f Trần Minh 2026-11-02 Bỏ qua kết quả build và cấu hình máy cá nhân
+7ab5adc Trần Minh 2026-11-02 Thêm hàm tính cước theo km
+cd8da2e Trần Minh 2026-11-02 Khởi tạo dịch vụ báo giá
+
+# Lọc theo tác giả, khoảng thời gian, đường dẫn, nội dung message
+$ git log --oneline --author=Lan
+1c6e78c Đổi tên tài liệu thành bang-gia-cuoc.md
+d508151 Tăng cước mỗi km ô tô 4 chỗ lên 5.000 đ
+b48e0a1 Thêm test cho hàm tính cước
+$ git log --oneline --since="2026-11-05T00:00+07:00" --until="2026-11-06T23:59+07:00"
+45c0d6b Thêm tài liệu bảng giá
+0d57e4b Làm tròn cước lên bội số 1.000 đ
+b56c460 Báo lỗi rõ hơn khi quãng đường âm
+$ git log --oneline -- src/BaoGia/appsettings.json
+d508151 Tăng cước mỗi km ô tô 4 chỗ lên 5.000 đ
+7ab5adc Thêm hàm tính cước theo km
+$ git log --oneline -i --grep="tài liệu"
+1c6e78c Đổi tên tài liệu thành bang-gia-cuoc.md
+45c0d6b Thêm tài liệu bảng giá
+
+# Khoảng commit: các commit có trong HEAD nhưng không có trong HEAD~3
+$ git log --oneline HEAD~3..HEAD
+1c6e78c Đổi tên tài liệu thành bang-gia-cuoc.md
+45c0d6b Thêm tài liệu bảng giá
+0d57e4b Làm tròn cước lên bội số 1.000 đ
+
+# Xem một commit cụ thể
+$ git show --stat b48e0a1
+commit b48e0a1da91c35b60804fad7c087212f64bcde5e
+Author: Lê Lan <lan@toinoi.test>
+Date:   Tue Nov 3 14:05:00 2026 +0700
+
+    Thêm test cho hàm tính cước
+
+ tests/BaoGia.Tests/FareCalculatorTests.cs | 21 +++++++++++++++++++++
+ 1 file changed, 21 insertions(+)
+PASS Lan có 3 commit
+PASS appsettings.json đổi ở 2 commit
+
+# ==================== p01/07-diff.mjs · GIT-007 ====================
+# Hai thay đổi: README.md (sẽ stage) và appsettings.json (chưa stage)
+$ git add README.md
+$ git status --short
+M  README.md
+ M src/BaoGia/appsettings.json
+
+# git diff: working tree so với staging area (phần CHƯA stage)
+$ git diff
+diff --git a/src/BaoGia/appsettings.json b/src/BaoGia/appsettings.json
+index ce82839..0c37630 100644
+--- a/src/BaoGia/appsettings.json
++++ b/src/BaoGia/appsettings.json
+@@ -7,7 +7,7 @@
+     },
+     "Bike": {
+       "BaseFare": 8000,
+-      "PerKm": 2500,
++      "PerKm": 3000,
+       "MinimumFare": 12000
+     }
+   }
+# git diff --staged: staging area so với HEAD (phần SẼ vào commit)
+$ git diff --staged
+diff --git a/README.md b/README.md
+index 6fe73a4..12ec0f3 100644
+--- a/README.md
++++ b/README.md
+@@ -2,3 +2,5 @@
+ 
+ Dịch vụ báo giá cước của Tới Nơi: nhận quãng đường và loại dịch vụ,
+ trả về giá dự kiến cho khách trước khi đặt chuyến.
++
++Chạy test: `dotnet test`.
+# git diff HEAD: working tree so với HEAD (cả hai)
+$ git diff HEAD --stat
+ README.md                   | 2 ++
+ src/BaoGia/appsettings.json | 2 +-
+ 2 files changed, 3 insertions(+), 1 deletion(-)
+
+# Diff theo từ: thấy ngay con số nào đổi
+$ git diff --word-diff src/BaoGia/appsettings.json
+diff --git a/src/BaoGia/appsettings.json b/src/BaoGia/appsettings.json
+index ce82839..0c37630 100644
+--- a/src/BaoGia/appsettings.json
++++ b/src/BaoGia/appsettings.json
+@@ -7,7 +7,7 @@
+    },
+    "Bike": {
+      "BaseFare": 8000,
+      "PerKm": [-2500,-]{+3000,+}
+      "MinimumFare": 12000
+    }
+  }
+
+# Trả lại như cũ
+$ git restore --staged README.md
+$ git restore README.md src/BaoGia/appsettings.json
+$ git status --short
+
+# Diff giữa hai commit, giới hạn một file
+$ git diff HEAD~4 HEAD --stat
+ docs/bang-gia-cuoc.md                     | 10 ++++++++++
+ src/BaoGia/FareCalculator.cs              |  6 ++++--
+ tests/BaoGia.Tests/FareCalculatorTests.cs |  4 ++++
+ 3 files changed, 18 insertions(+), 2 deletions(-)
+$ git diff HEAD~4 HEAD -- src/BaoGia/FareCalculator.cs
+diff --git a/src/BaoGia/FareCalculator.cs b/src/BaoGia/FareCalculator.cs
+index 175bdd3..378b9cb 100644
+--- a/src/BaoGia/FareCalculator.cs
++++ b/src/BaoGia/FareCalculator.cs
+@@ -9,7 +9,8 @@ public static class FareCalculator
+     public static decimal Quote(FareRule rule, decimal distanceKm)
+     {
+         if (distanceKm < 0)
+-            throw new ArgumentOutOfRangeException(nameof(distanceKm));
++            throw new ArgumentOutOfRangeException(
++                nameof(distanceKm), distanceKm, "Quãng đường không được âm.");
+ 
+         // Giá = giá mở cửa + đơn giá mỗi km × số km.
+         // Ví dụ ô tô 4 chỗ đi 4 km: 12.000 + 4.500 × 4 = 30.000 đ.
+@@ -18,6 +19,7 @@ public static class FareCalculator
+         var fare = rule.BaseFare + rule.PerKm * distanceKm;
+         var atLeastMinimum = Math.Max(fare, rule.MinimumFare);
+ 
+-        return atLeastMinimum;
++        // Làm tròn lên bội số 1.000 đ để khách không phải trả tiền lẻ.
++        return Math.Ceiling(atLeastMinimum / 1000m) * 1000m;
+     }
+ }
+
+# Đổi tên file: Git nhận ra rename nhờ so độ giống nội dung
+$ git diff --stat HEAD~1 HEAD
+ docs/{bang-gia.md => bang-gia-cuoc.md} | 2 ++
+ 1 file changed, 2 insertions(+)
+$ git diff --stat --no-renames HEAD~1 HEAD
+ docs/bang-gia-cuoc.md | 10 ++++++++++
+ docs/bang-gia.md      |  8 --------
+ 2 files changed, 10 insertions(+), 8 deletions(-)
+
+# Một trình soạn thảo trên Windows lưu appsettings.json với xuống dòng CRLF
+$ git diff --stat
+ src/BaoGia/appsettings.json | 28 ++++++++++++++--------------
+ 1 file changed, 14 insertions(+), 14 deletions(-)
+$ git diff --ignore-cr-at-eol --stat
+$ git restore src/BaoGia/appsettings.json
+
+# Thêm .gitattributes: chuẩn hoá xuống dòng ngay khi add
+$ git add .gitattributes
+$ git commit -m "Chuẩn hoá xuống dòng LF bằng .gitattributes"
+[main 89855d5] Chuẩn hoá xuống dòng LF bằng .gitattributes
+ 1 file changed, 10 insertions(+)
+ create mode 100644 .gitattributes
+PASS commit trùng c10
+$ git ls-files --eol
+i/lf    w/lf    attr/text=auto eol=lf 	.gitattributes
+i/lf    w/lf    attr/text=auto eol=lf 	.gitignore
+i/lf    w/lf    attr/text=auto eol=lf 	README.md
+i/lf    w/lf    attr/text=auto eol=lf 	docs/bang-gia-cuoc.md
+i/lf    w/lf    attr/text=auto eol=lf 	src/BaoGia/FareCalculator.cs
+i/lf    w/lf    attr/text=auto eol=lf 	src/BaoGia/appsettings.json
+i/lf    w/lf    attr/text=auto eol=lf 	tests/BaoGia.Tests/FareCalculatorTests.cs
+
+# Lưu lại file với CRLF: Git không còn coi đó là thay đổi nội dung
+$ git add src/BaoGia/appsettings.json
+warning: in the working copy of 'src/BaoGia/appsettings.json', CRLF will be replaced by LF the next time Git touches it
+$ git status --short
+$ git ls-files --eol src/BaoGia/appsettings.json
+i/lf    w/crlf  attr/text=auto eol=lf 	src/BaoGia/appsettings.json
+PASS staging area không có thay đổi
+$ git restore src/BaoGia/appsettings.json
+
+# ==================== p01/08-ben-trong-git.mjs · GIT-008 ====================
+# HEAD là một tham chiếu tới nhánh, nhánh là tham chiếu tới commit
+# .git/HEAD chứa: ref: refs/heads/main
+$ git symbolic-ref HEAD
+refs/heads/main
+$ git rev-parse HEAD
+89855d5ae9eeadc33e9969090faabe175773a520
+# .git/refs/heads/main chứa: 89855d5ae9eeadc33e9969090faabe175773a520
+
+# Commit object: trỏ tới một tree, commit cha, người viết, message
+$ git cat-file -t HEAD
+commit
+$ git cat-file -p HEAD
+tree add4a78b760abd4ecd24015d2b9ba59d1dc49f41
+parent 1c6e78ce7a6a8161bbee40dadc212ae1d2acc8b3
+author Trần Minh <minh@toinoi.test> 1794275100 +0700
+committer Trần Minh <minh@toinoi.test> 1794275100 +0700
+
+Chuẩn hoá xuống dòng LF bằng .gitattributes
+
+# Tree object: danh sách tên → blob/tree
+$ git cat-file -p HEAD^{tree}
+100644 blob 611b1f191b24ba5e93a9e53563fc38ade9fa31da	.gitattributes
+100644 blob f35c56a924964bf6134d70c985c0a44fadd11315	.gitignore
+100644 blob 6fe73a4afc5b65f774c7356fbdf7dcab50e2f462	README.md
+040000 tree 5afa5c3da1045004b2e94a187106b8ff809bfbf7	docs
+040000 tree e9711e4d7cb253d76e8a35362f8e98919360908c	src
+040000 tree 9ef24a663c0ea1f6a6f42ce70d9773a26edb65eb	tests
+$ git ls-tree HEAD src/BaoGia/
+100644 blob 378b9cb0e04cb5f598dcbe93daf959bf8a900576	src/BaoGia/FareCalculator.cs
+100644 blob ce82839a7e102aafd20f64e8ae6f35261a323a9e	src/BaoGia/appsettings.json
+
+# Blob object: chỉ có nội dung, không có tên file
+$ git cat-file -t ce82839
+blob
+$ git cat-file -s ce82839
+206
+$ git hash-object src/BaoGia/appsettings.json
+ce82839a7e102aafd20f64e8ae6f35261a323a9e
+PASS hash-object của file = blob trong tree
+
+# Đổi một chữ số trong nội dung → blob khác hẳn
+$ git hash-object --stdin   # nội dung với PerKm 5500
+da12a1d360fda29ae6927b93751df2fbca98890a
+
+# Commit sau amend: AuthorDate và CommitDate khác nhau (GIT-005)
+$ git cat-file -p 0d57e4b
+tree d3b5210931478ff041770f0cc88b814b991b086b
+parent b56c46018f0d61b23efcd1df0f4a7f087305141a
+author Trần Minh <minh@toinoi.test> 1793844300 +0700
+committer Trần Minh <minh@toinoi.test> 1793844720 +0700
+
+Làm tròn cước lên bội số 1.000 đ
+
+Khách trả tiền mặt không phải trả tiền lẻ, tài xế không phải thối.
+
+# Tất cả object trong repository, đếm theo loại
+# git cat-file --batch-all-objects --batch-check → commit: 10, tree: 24, blob: 12
+PASS có đúng 10 commit object
+
+# Object lưu dưới .git/objects/<2 ký tự đầu>/<38 ký tự còn lại>, nén zlib
+PASS file object của blob tồn tại
+
+# ==================== p01/09-blame-truy-vet.mjs · GIT-009 ====================
+# Câu hỏi của bộ phận vận hành: ai đổi đơn giá mỗi km của ô tô 4 chỗ, khi nào, vì sao?
+$ git blame -L 3,7 src/BaoGia/appsettings.json
+7ab5adc3 (Trần Minh 2026-11-02 09:10:00 +0700 3)     "Car4": {
+7ab5adc3 (Trần Minh 2026-11-02 09:10:00 +0700 4)       "BaseFare": 12000,
+d508151e (Lê Lan    2026-11-04 10:40:00 +0700 5)       "PerKm": 5000,
+7ab5adc3 (Trần Minh 2026-11-02 09:10:00 +0700 6)       "MinimumFare": 25000
+7ab5adc3 (Trần Minh 2026-11-02 09:10:00 +0700 7)     },
+
+# Đọc commit được blame chỉ ra: description trả lời "vì sao"
+$ git show d508151
+commit d508151e625bcf6af2e0467fc3d7d757b1d1a376
+Author: Lê Lan <lan@toinoi.test>
+Date:   Wed Nov 4 10:40:00 2026 +0700
+
+    Tăng cước mỗi km ô tô 4 chỗ lên 5.000 đ
+    
+    Theo bảng giá mới của bộ phận vận hành, áp dụng từ 01/12/2026.
+
+diff --git a/src/BaoGia/appsettings.json b/src/BaoGia/appsettings.json
+index 65a696e..ce82839 100644
+--- a/src/BaoGia/appsettings.json
++++ b/src/BaoGia/appsettings.json
+@@ -2,7 +2,7 @@
+   "Fare": {
+     "Car4": {
+       "BaseFare": 12000,
+-      "PerKm": 4500,
++      "PerKm": 5000,
+       "MinimumFare": 25000
+     },
+     "Bike": {
+
+# Pickaxe: commit nào làm THAY ĐỔI số lần xuất hiện của chuỗi
+$ git log -S'4500,' --oneline
+d508151 Tăng cước mỗi km ô tô 4 chỗ lên 5.000 đ
+7ab5adc Thêm hàm tính cước theo km
+$ git log -G'Math.Ceiling' --oneline
+0d57e4b Làm tròn cước lên bội số 1.000 đ
+
+# Lịch sử của một khoảng dòng: thân hàm Quote
+$ git log -L 10,25:src/BaoGia/FareCalculator.cs --format="%h %an %s" --no-patch
+0d57e4b Trần Minh Làm tròn cước lên bội số 1.000 đ
+b56c460 Trần Minh Báo lỗi rõ hơn khi quãng đường âm
+7ab5adc Trần Minh Thêm hàm tính cước theo km
+
+# File đã đổi tên: không có --follow, lịch sử dừng ở lần đổi tên
+$ git log --oneline -- docs/bang-gia-cuoc.md
+1c6e78c Đổi tên tài liệu thành bang-gia-cuoc.md
+$ git log --oneline --follow -- docs/bang-gia-cuoc.md
+1c6e78c Đổi tên tài liệu thành bang-gia-cuoc.md
+45c0d6b Thêm tài liệu bảng giá
+$ git log --oneline --follow --name-status -- docs/bang-gia-cuoc.md
+1c6e78c Đổi tên tài liệu thành bang-gia-cuoc.md
+R084	docs/bang-gia.md	docs/bang-gia-cuoc.md
+45c0d6b Thêm tài liệu bảng giá
+A	docs/bang-gia.md
+
+# Blame trên file code: dòng điều kiện từ c2, câu lệnh throw từ c6
+$ git blame -w -L 11,13 src/BaoGia/FareCalculator.cs
+7ab5adc3 (Trần Minh 2026-11-02 09:10:00 +0700 11)         if (distanceKm < 0)
+b56c4601 (Trần Minh 2026-11-05 09:00:00 +0700 12)             throw new ArgumentOutOfRangeException(
+b56c4601 (Trần Minh 2026-11-05 09:00:00 +0700 13)                 nameof(distanceKm), distanceKm, "Quãng đường không được âm.");
+PASS pickaxe tìm được commit thêm và commit đổi 4500
+PASS --follow thấy 2 commit của tài liệu
+PASS blame dòng PerKm trỏ về commit của Lan (c5)
+
+# ==================== p01/10-thuc-hanh.mjs · GIT-010 ====================
+# Repository mẫu: lịch sử chuẩn của Phần 1
+$ cd bao-gia
+$ git log --format="%h %<(9)%an %s"
+89855d5 Trần Minh Chuẩn hoá xuống dòng LF bằng .gitattributes
+1c6e78c Lê Lan    Đổi tên tài liệu thành bang-gia-cuoc.md
+45c0d6b Trần Minh Thêm tài liệu bảng giá
+0d57e4b Trần Minh Làm tròn cước lên bội số 1.000 đ
+b56c460 Trần Minh Báo lỗi rõ hơn khi quãng đường âm
+d508151 Lê Lan    Tăng cước mỗi km ô tô 4 chỗ lên 5.000 đ
+b48e0a1 Lê Lan    Thêm test cho hàm tính cước
+19ac10f Trần Minh Bỏ qua kết quả build và cấu hình máy cá nhân
+7ab5adc Trần Minh Thêm hàm tính cước theo km
+cd8da2e Trần Minh Khởi tạo dịch vụ báo giá
+PASS HEAD trùng c10
+
+$ node ../../p01/kiem-tra.mjs .
+ĐẠT      có ít nhất 3 commit
+ĐẠT      nhánh hiện tại là main
+ĐẠT      working tree sạch (đã commit hết)
+ĐẠT      có README.md
+ĐẠT      .gitignore bỏ qua bin/, obj/, .env, appsettings.Development.json, *.user
+ĐẠT      không theo dõi kết quả build hay file bí mật
+ĐẠT      .gitattributes đặt eol=lf cho file văn bản
+ĐẠT      không file nào lưu CRLF trong repository
+ĐẠT      summary mọi commit ≤ 72 ký tự
+ĐẠT      không có summary chung chung ("update", "fix", "wip"…)
+ĐẠT      mọi commit có email tác giả hợp lệ
+11/11 tiêu chí đạt
+PASS repository mẫu đạt mọi tiêu chí
+
+# Repository mắc lỗi thường gặp: commit cả bin/ và .env, summary chung chung, CRLF, quên commit
+$ cd ..
+$ git init -q -b main bao-gia-loi
+$ cd bao-gia-loi
+$ git add -A
+$ git commit -q -m "update"
+$ git add -A
+$ git commit -q -m "Thêm hàm tính cước theo km cho ô tô bốn chỗ và xe máy, có giá tối thiểu và làm tròn"
+$ node ../../p01/kiem-tra.mjs .
+CHƯA ĐẠT có ít nhất 3 commit — 2 commit
+ĐẠT      nhánh hiện tại là main
+CHƯA ĐẠT working tree sạch (đã commit hết) — ?? ghi-chu.txt
+ĐẠT      có README.md
+CHƯA ĐẠT .gitignore bỏ qua bin/, obj/, .env, appsettings.Development.json, *.user — src/X/bin/Debug/a.dll, src/X/obj/project.assets.json, .env, src/X/appsettings.Development.json, src/X/X.csproj.user
+CHƯA ĐẠT không theo dõi kết quả build hay file bí mật — .env, src/BaoGia/bin/Debug/net10.0/BaoGia.dll
+CHƯA ĐẠT .gitattributes đặt eol=lf cho file văn bản — README.md: text: unspecified; README.md: eol: unspecified
+CHƯA ĐẠT không file nào lưu CRLF trong repository — README.md
+CHƯA ĐẠT summary mọi commit ≤ 72 ký tự — 914e78d
+CHƯA ĐẠT không có summary chung chung ("update", "fix", "wip"…) — 566746b
+ĐẠT      mọi commit có email tác giả hợp lệ
+3/11 tiêu chí đạt
+PASS kiểm tra bắt được 8 lỗi của repository lỗi
+
+# Sửa: ngừng theo dõi file build và bí mật, thêm .gitignore, .gitattributes, chuẩn hoá xuống dòng
+$ git rm -r -q --cached src/BaoGia/bin .env
+$ git add .gitignore .gitattributes
+$ git add --renormalize .
+$ git status --short
+D  .env
+A  .gitattributes
+A  .gitignore
+M  README.md
+D  src/BaoGia/bin/Debug/net10.0/BaoGia.dll
+$ git commit -q -m "Ngừng theo dõi kết quả build và .env, chuẩn hoá LF"
+$ node ../../p01/kiem-tra.mjs .
+ĐẠT      có ít nhất 3 commit
+ĐẠT      nhánh hiện tại là main
+ĐẠT      working tree sạch (đã commit hết)
+ĐẠT      có README.md
+ĐẠT      .gitignore bỏ qua bin/, obj/, .env, appsettings.Development.json, *.user
+ĐẠT      không theo dõi kết quả build hay file bí mật
+ĐẠT      .gitattributes đặt eol=lf cho file văn bản
+ĐẠT      không file nào lưu CRLF trong repository
+CHƯA ĐẠT summary mọi commit ≤ 72 ký tự — 914e78d
+CHƯA ĐẠT không có summary chung chung ("update", "fix", "wip"…) — 566746b
+ĐẠT      mọi commit có email tác giả hợp lệ
+9/11 tiêu chí đạt
+# Hai lỗi còn lại nằm trong message của commit cũ; Phần 4 học cách viết lại lịch sử.
+PASS chỉ còn 2 lỗi về summary trong lịch sử cũ
+
+# [lab] Bài đã chạy: 10
+# [lab] PASS: 31
+# [lab] FAIL: 0
+# [lab] KẾT QUẢ: ĐẠT

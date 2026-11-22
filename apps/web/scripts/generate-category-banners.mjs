@@ -37,6 +37,7 @@ const COLORS = {
   security: '#EF4444',
   testing: '#14B8A6',
   'business-analysis': '#EAB308',
+  git: '#E8590C',
 };
 
 // ───────────────────────── màu & hình nguyên thuỷ ─────────────────────────
@@ -468,6 +469,32 @@ const art = {
     // giấy nhớ
     const note = (x, y, rot, col) => `<g transform="rotate(${rot} ${x + 50} ${y + 50})">` + R(x + 4, y + 6, 100, 100, { f: '#000', fo: 0.3, r: 4 }) + R(x, y, 100, 100, { f: col, fo: 0.92, r: 4 }) + R(x + 14, y + 22, 68, 7, { f: NAVY, fo: 0.45, r: 3.5 }) + R(x + 14, y + 42, 50, 7, { f: NAVY, fo: 0.35, r: 3.5 }) + R(x + 14, y + 62, 60, 7, { f: NAVY, fo: 0.35, r: 3.5 }) + `</g>`;
     s += note(822, 222, -6, k.warn) + note(930, 236, 5, mix(k.c, '#ffffff', 0.45)) + note(1034, 222, -4, k.ok);
+    return s;
+  },
+
+  git(k) {
+    // đồ thị commit: main thẳng, một nhánh tính năng tách ra rồi merge lại, nhãn nhánh và tag
+    let s = '';
+    const yMain = 230;
+    const yFeat = 120;
+    s += L(820, yMain, 1500, yMain, k.a, { sw: 5, so: 0.9 });
+    s += P(`M1000 ${yMain}C1040 ${yMain} 1040 ${yFeat} 1080 ${yFeat}H1260C1300 ${yFeat} 1300 ${yMain} 1340 ${yMain}`, { s: k.warn, sw: 5 });
+    [860, 940, 1000, 1180, 1340, 1420].forEach((x, i) => {
+      s += C(x, yMain, i === 5 ? 17 : 14, { f: i === 5 ? k.c : NAVY, s: k.a, sw: 4 });
+    });
+    [1100, 1180, 1250].forEach((x) => { s += C(x, yFeat, 14, { f: NAVY, s: k.warn, sw: 4 }); });
+    s += C(1420, yMain, 6, { f: '#ffffff' });
+    // nhãn nhánh
+    s += R(1360, yMain + 34, 110, 34, { f: k.c, fo: 0.35, s: k.a, r: 17 }) + T(1415, yMain + 57, 'main', 16, '#ffffff', { anchor: 'middle' });
+    s += R(1090, yFeat - 70, 150, 34, { f: k.warn, fo: 0.18, s: k.warn, r: 17 }) + T(1165, yFeat - 47, 'feature', 16, k.warn, { anchor: 'middle' });
+    s += P(`M1325 ${yMain - 56}h50l14 14-14 14h-50z`, { f: k.ok, fo: 0.18, s: k.ok, sw: 2.5 }) + T(1350, yMain - 37, 'v1', 13, k.ok, { anchor: 'middle' });
+    // hàng WIP
+    s += C(1500, yMain - 60, 12, { s: k.a, sw: 3, d: '4 4' });
+    s += L(1500, yMain - 48, 1440, yMain - 8, k.a, { sw: 2, d: '4 4', so: 0.7 });
+    // dòng diff
+    s += R(840, 290, 330, 70, { f: '#fff', fo: 0.05, s: k.a, so: 0.4, r: 10 });
+    s += R(856, 304, 12, 12, { f: k.bad, fo: 0.8, r: 3 }) + R(878, 306, 200, 8, { f: k.bad, fo: 0.45, r: 4 });
+    s += R(856, 330, 12, 12, { f: k.ok, fo: 0.8, r: 3 }) + R(878, 332, 240, 8, { f: k.ok, fo: 0.45, r: 4 });
     return s;
   },
 

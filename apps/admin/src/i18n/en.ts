@@ -365,6 +365,7 @@ export const en: Messages = {
       testing: 'Testing',
       analysis: 'Business analysis',
       location: 'Location & routing',
+      git: 'Git & source control',
     },
   },
   paths: {

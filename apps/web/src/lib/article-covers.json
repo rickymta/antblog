@@ -6458,5 +6458,104 @@
       "FIXTURE",
       "CHECKS"
     ]
+  },
+  "git-la-gi-va-gitstudio": {
+    "title": "GIT · GITSTUDIO",
+    "subtitle": "Version control · Giao diện, Spotlight, terminal",
+    "diagram": "network",
+    "labels": [
+      "GIAO DIỆN",
+      "GIT",
+      "TERMINAL"
+    ]
+  },
+  "git-cai-dat-cau-hinh-gitstudio": {
+    "title": "CÀI ĐẶT · DANH TÍNH",
+    "subtitle": "Git và GitStudio · user.name, user.email",
+    "diagram": "layers",
+    "labels": [
+      "SYSTEM",
+      "GLOBAL",
+      "LOCAL"
+    ]
+  },
+  "git-init-clone-mo-repository": {
+    "title": "INIT · CLONE",
+    "subtitle": "Tạo repository và commit đầu tiên",
+    "diagram": "flow",
+    "labels": [
+      "INIT",
+      "COMMIT",
+      "CLONE"
+    ]
+  },
+  "git-ba-vung-working-tree-staging-gitignore": {
+    "title": "BA VÙNG · IGNORE",
+    "subtitle": "Working tree, staging area, repository",
+    "diagram": "blocks",
+    "labels": [
+      "WORKING",
+      "STAGING",
+      "REPO"
+    ]
+  },
+  "git-commit-stage-hunk-amend": {
+    "title": "HUNK · AMEND",
+    "subtitle": "Commit nhỏ có nghĩa · Báo giá Tới Nơi",
+    "diagram": "split",
+    "labels": [
+      "HUNK 1",
+      "↔",
+      "HUNK 2"
+    ]
+  },
+  "git-lich-su-log-do-thi-commit": {
+    "title": "LOG · ĐỒ THỊ",
+    "subtitle": "Đọc và lọc lịch sử commit",
+    "diagram": "map",
+    "labels": [
+      "AUTHOR",
+      "GREP",
+      "PATH"
+    ]
+  },
+  "git-diff-so-sanh-thay-doi": {
+    "title": "DIFF · CRLF",
+    "subtitle": "Staged, unstaged, đổi tên, .gitattributes",
+    "diagram": "code",
+    "labels": [
+      "DIFF",
+      "LF"
+    ]
+  },
+  "git-ben-trong-object-ref-head": {
+    "title": "BÊN TRONG .GIT",
+    "subtitle": "Blob, tree, commit, ref và HEAD",
+    "diagram": "storage",
+    "labels": [
+      "HEAD",
+      "TREE",
+      "OBJECTS"
+    ]
+  },
+  "git-blame-lich-su-file-truy-vet": {
+    "title": "BLAME · PICKAXE",
+    "subtitle": "Ai đổi giá, khi nào, vì sao",
+    "diagram": "target",
+    "labels": [
+      "BLAME",
+      "LOG -S",
+      "FOLLOW"
+    ]
+  },
+  "git-thuc-hanh-repository-bao-gia": {
+    "title": "PHẦN 1 · LAB",
+    "subtitle": "Repository báo giá · 11 tiêu chí",
+    "diagram": "checklist",
+    "labels": [
+      "GITIGNORE",
+      "GITATTRIBUTES",
+      "COMMIT SẠCH"
+    ]
   }
 }
