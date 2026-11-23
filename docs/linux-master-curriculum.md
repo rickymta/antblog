@@ -92,20 +92,22 @@ Lộ trình: `linux-qua-ssh-studio-phan-02`. Lab: `examples/toi-noi-linux/p02` (
 
 ## P03 · Người dùng, sudo và SSH an toàn
 
-Đầu vào: P01–P02. Đầu ra: server chỉ đăng nhập bằng SSH key, tài khoản triển khai riêng. Lộ trình dự kiến `-phan-03`.
+Đầu vào: P01–P02. Đầu ra: `toinoi-app-01` chỉ nhận SSH key, không mật khẩu, không root, chỉ nhóm `ssh-users`; người cần thêm mã TOTP, tài khoản `deploy` của CI chỉ dùng key qua `Match User`; sudo theo việc cho `cuong` và `deploy`; thư mục chung `3770`.
+
+Lộ trình: `linux-qua-ssh-studio-phan-03`. Lab: `examples/toi-noi-linux/p03` (bài 21…30). Ảnh lab cài thêm `libpam-google-authenticator`, `oathtool` và bộ key, host key thay thế, bí mật TOTP cố định trong `/usr/share/toinoi-lab/p03`; key «trên laptop của An» ở `may-cua-ban/khoa-lab`. Runner có thêm chỉ dẫn `#sudofile` (sửa file bằng `visudo`/`sudoedit`) và `#login` (đăng nhập SSH thật, có OTP). Bộ chấm: `npm run kiem-tra:p03` (22 yêu cầu, gồm đăng nhập thật).
 
 | ID | Bài / slug | Mức | Làm được sau bài / sản phẩm thực hành | Trạng thái |
 |---|---|---|---|---|
-| LNX-021 | Quản lý người dùng và nhóm<br>`linux-quan-ly-nguoi-dung-nhom` | CB | `useradd`, `usermod`, `passwd`, khoá tài khoản, tài khoản dịch vụ | Dự kiến |
-| LNX-022 | SSH key: tạo trong SSH Studio và cài lên server<br>`linux-ssh-key-ssh-studio` | CB | Tạo key Ed25519, `authorized_keys`, quyền của `~/.ssh`, đăng nhập bằng key | Dự kiến |
-| LNX-023 | Host key, Known Hosts và cảnh báo host key thay đổi<br>`linux-host-key-known-hosts` | CB | Hiểu tấn công đứng giữa, xử lý đúng khi server được dựng lại | Dự kiến |
-| LNX-024 | `sudo` và `sudoers`: cấp quyền theo việc<br>`linux-sudo-sudoers` | TB | `visudo`, file trong `sudoers.d`, giới hạn lệnh, đọc nhật ký sudo | Dự kiến |
-| LNX-025 | Cấu hình `sshd`: tắt mật khẩu, tắt root, giới hạn người dùng<br>`linux-sshd-config-an-toan` | TB | Đổi cấu hình không tự khoá mình ngoài cửa, kiểm tra bằng phiên thứ hai | Dự kiến |
-| LNX-026 | Quyền đặc biệt: setuid, setgid, sticky bit và thư mục dùng chung<br>`linux-setuid-setgid-sticky` | TB | Thư mục nhóm `toinoi` tự thừa kế nhóm, `/tmp` an toàn | Dự kiến |
-| LNX-027 | ACL: quyền chi tiết hơn chủ sở hữu–nhóm–người khác<br>`linux-acl-setfacl` | TB | `setfacl`, `getfacl`, ACL mặc định cho thư mục log | Dự kiến |
-| LNX-028 | SSH agent, passphrase và nhiều key<br>`linux-ssh-agent-passphrase` | NC | Key có passphrase, agent trên Windows/macOS/Linux, chọn key theo server | Dự kiến |
-| LNX-029 | Xác thực hai bước cho SSH (TOTP)<br>`linux-ssh-mfa-totp` | NC | Keyboard-interactive với OTP, đăng nhập nhiều bước trong SSH Studio | Dự kiến |
-| LNX-030 | Thực hành: khoá chặt đăng nhập của toinoi-app-01<br>`linux-thuc-hanh-khoa-dang-nhap-ssh` | NC | Bàn giao server chỉ nhận key, có tài khoản `deploy`, sudo giới hạn | Dự kiến |
+| LNX-021 | Quản lý người dùng và nhóm<br>`linux-quan-ly-nguoi-dung-nhom` | CB | `useradd`, `usermod -aG`, `passwd -l`, `chage`, tài khoản dịch vụ `nologin`, `userdel`; đổi mật khẩu bắt buộc lần đầu trong SSH Studio | Đã viết |
+| LNX-022 | SSH key: tạo trong SSH Studio và cài lên server<br>`linux-ssh-key-ssh-studio` | CB | Nhập key vào thư viện SSH Studio, `authorized_keys` với quyền đúng, chuyển server sang SSH Key, kiểm chứng trong log, lỗi `StrictModes` | Đã viết |
+| LNX-023 | Host key, Known Hosts và cảnh báo host key thay đổi<br>`linux-host-key-known-hosts` | CB | Fingerprint host key, `known_hosts` băm, cảnh báo host key đổi ở OpenSSH và SSH Studio, xác minh rồi quên host, giữ host key khi dựng lại | Đã viết |
+| LNX-024 | `sudo` và `sudoers`: cấp quyền theo việc<br>`linux-sudo-sudoers` | TB | `visudo -f /etc/sudoers.d/…`, `Cmnd_Alias`, `NOPASSWD`, `sudo -l -U`, lệnh thoát ra shell, `visudo -c`, nhật ký sudo | Đã viết |
+| LNX-025 | Cấu hình `sshd`: tắt mật khẩu, tắt root, giới hạn người dùng<br>`linux-sshd-config-an-toan` | TB | `sshd -T`, `sudoedit`, «giá trị đầu tiên thắng» trong `sshd_config.d`, `AllowGroups`, `reload` và phiên dự phòng | Đã viết |
+| LNX-026 | Quyền đặc biệt: setuid, setgid, sticky bit và thư mục dùng chung<br>`linux-setuid-setgid-sticky` | TB | Đọc `s`/`S`/`t`/`T`, setuid của `passwd`, setgid cho thư mục log, sticky `/tmp`, thư mục chung `3770` | Đã viết |
+| LNX-027 | ACL: quyền chi tiết hơn chủ sở hữu–nhóm–người khác<br>`linux-acl-setfacl` | TB | `setfacl -m`/`-d`/`-x`/`-k`/`-b`, `getfacl`, dấu `+`, mask và `chmod` | Đã viết |
+| LNX-028 | SSH agent, passphrase và nhiều key<br>`linux-ssh-agent-passphrase` | NC | Key có passphrase, `ssh-agent`, `ssh-add`, `~/.ssh/config` với `IdentitiesOnly`, `ssh -G`, agent forwarding; phương thức Agent của SSH Studio | Đã viết |
+| LNX-029 | Xác thực hai bước cho SSH (TOTP)<br>`linux-ssh-mfa-totp` | NC | `~/.google_authenticator`, PAM `pam_google_authenticator`, `AuthenticationMethods publickey,keyboard-interactive`, đăng nhập hai bước trong SSH Studio | Đã viết |
+| LNX-030 | Thực hành: khoá chặt đăng nhập của toinoi-app-01<br>`linux-thuc-hanh-khoa-dang-nhap-ssh` | NC | Bàn giao tài khoản `deploy` chỉ dùng key, sudo hai lệnh, `Match User deploy`, `sshd -T -C`; `kiem-tra` 22 PASS | Đã viết |
 
 ## P04 · Tiến trình, dịch vụ và gói phần mềm
 

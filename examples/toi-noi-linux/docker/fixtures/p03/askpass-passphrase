@@ -1,0 +1,3 @@
+#!/bin/sh
+# Passphrase của key ~/.ssh/id_ed25519 mà An tạo trên server ở LNX-028 (lab).
+echo "mot-cum-tu-chi-dung-cho-lab"

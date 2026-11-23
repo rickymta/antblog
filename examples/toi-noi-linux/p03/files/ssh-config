@@ -1,0 +1,6 @@
+# Cấu hình client SSH của An trên toinoi-app-01 (LNX-028).
+Host app01
+    HostName localhost
+    User an
+    IdentityFile ~/.ssh/id_ed25519
+    IdentitiesOnly yes

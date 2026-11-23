@@ -3,7 +3,7 @@
 
 import { writeFileSync } from 'node:fs';
 
-const PORT = process.env.CDP_PORT || 9333;
+const PORT = process.env.CDP_PORT || 9344;
 export const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 
 export async function attach() {

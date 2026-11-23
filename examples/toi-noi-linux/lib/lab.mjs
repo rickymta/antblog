@@ -18,6 +18,12 @@
 //   #check ĐƯỜNG NGUỒN ghi files/NGUỒN vào ĐƯỜNG mà không in: kết quả của thao tác sửa bằng vim
 //                     hoặc giao diện ngay trước đó (công cụ chụp ảnh đối chiếu nội dung)
 //   #wait N           chờ N giây (ví dụ chờ cron chạy)
+//   #sudofile sudoedit|visudo ĐƯỜNG NGUỒN [NN]
+//                     như #file cho file của root: in "sudoedit ĐƯỜNG" hoặc "sudo visudo -f ĐƯỜNG",
+//                     ghi bằng quyền root (visudo: quyền 0440)
+//   #login NGƯỜI KEY [otp]
+//                     mô phỏng một lần đăng nhập SSH từ phía client (root chạy ssh tới 127.0.0.1
+//                     bằng key /usr/share/toinoi-lab/p03/KEY, kèm mã OTP nếu có), không in
 
 import { spawnSync } from 'node:child_process';
 import { readFileSync, readdirSync } from 'node:fs';
@@ -95,7 +101,7 @@ export function compile(source, { echo = true, dir = '.' } = {}) {
   ];
   // Trong phiên SSH thật, sudo hỏi mật khẩu ở lần gọi đầu tiên. Runner xác thực sẵn (chỉ ở
   // kịch bản có dùng sudo) nên bản ghi không có dòng "[sudo] password for an:".
-  if (/^\s*sudo\b|^#root /m.test(source)) out.push(`echo ${quote(PASSWORD)} | sudo -S -v 2>/dev/null`);
+  if (/^\s*(sudo|sudoedit)\b|^#(root|sudofile|login) /m.test(source)) out.push(`echo ${quote(PASSWORD)} | sudo -S -v 2>/dev/null`);
   out.push(
     // Dấu nhắc giống PS1 mặc định của Ubuntu: user@host:thư-mục$. Hàm trả lại mã thoát của
     // lệnh đứng trước, để `echo $?` trong kịch bản vẫn đúng.
@@ -111,6 +117,23 @@ export function compile(source, { echo = true, dir = '.' } = {}) {
     }
     if (line.startsWith('#wait ')) {
       out.push(`sleep ${Number(line.slice(6))}`);
+      continue;
+    }
+    const sf = line.match(/^#sudofile (sudoedit|visudo) (\S+) (\S+)(?: \d\d)?$/);
+    if (sf) {
+      const body = readFileSync(join(dir, 'files', sf[3])).toString('base64').replace(/.{76}/g, '$&\n');
+      if (echo) out.push(`__p ${quote(sf[1] === 'visudo' ? `sudo visudo -f ${sf[2]}` : `sudoedit ${sf[2]}`)}`);
+      // Như visudo/sudoedit thật: file mới do `visudo -f` tạo có quyền 0640 (sudo đòi 0440, bài tự chmod),
+      // file mới do sudoedit tạo là 0644; file đã có thì giữ nguyên quyền.
+      const mode = sf[1] === 'visudo' ? '0640' : '0644';
+      out.push(`__new=0; sudo -n test -e ${sf[2]} || __new=1`);
+      out.push(`base64 -d <<'__B64__' | sudo -n tee ${sf[2]} >/dev/null\n${body.trimEnd()}\n__B64__`);
+      out.push(`[ "$__new" = 1 ] && sudo -n chmod ${mode} ${sf[2]}`);
+      continue;
+    }
+    const lg = line.match(/^#login (\S+) (\S+)( otp)?$/);
+    if (lg) {
+      out.push(`sudo -n bash -c ${quote(loginCommand(lg[1], lg[2], !!lg[3]))} >/dev/null 2>&1`);
       continue;
     }
     if (line.startsWith('#root ')) {
@@ -173,4 +196,24 @@ function expandTabs(line) {
   let out = '';
   for (const ch of line) out += ch === '\t' ? ' '.repeat(8 - (out.length % 8)) : ch;
   return out;
+}
+
+/**
+ * Lệnh (chạy bằng root trong container) mô phỏng một client đăng nhập SSH vào chính server:
+ * dùng key riêng tư của lab và, nếu cần, mã OTP do oathtool tính từ bí mật của lab.
+ */
+export function loginCommand(user, key, otp = false) {
+  const opts = [
+    `-i /usr/share/toinoi-lab/p03/${key}`,
+    '-o IdentitiesOnly=yes',
+    '-o StrictHostKeyChecking=no',
+    '-o UserKnownHostsFile=/dev/null',
+    '-o LogLevel=ERROR',
+    '-o ConnectTimeout=5',
+  ];
+  const env = otp
+    ? 'SSH_ASKPASS=/usr/share/toinoi-lab/p03/askpass-otp SSH_ASKPASS_REQUIRE=force DISPLAY=lab '
+    : '';
+  if (!otp) opts.push('-o BatchMode=yes');
+  return `${env}setsid -w ssh ${opts.join(' ')} ${user}@127.0.0.1 true < /dev/null`;
 }

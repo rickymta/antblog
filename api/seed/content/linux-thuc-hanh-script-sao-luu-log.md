@@ -276,7 +276,7 @@ Bộ chấm không chỉ đọc file: nó chạy các script dưới tài khoả
 | Nháy kép, `set -u`, `trap`, `mktemp`, `flock`, `shellcheck` | LNX-019 |
 | Thư mục script dùng chung, môi trường của cron, `crontab` | LNX-020 |
 
-Phần 3 chuyển sang an toàn của chính server: quản lý người dùng, đăng nhập bằng SSH key tạo trong SSH Studio, tắt mật khẩu, cấp `sudo` theo đúng việc, và một tài khoản triển khai riêng thay cho tài khoản của An.
+Phần 3 chuyển sang an toàn của chính server: quản lý người dùng, đăng nhập bằng SSH key tạo trong SSH Studio, tắt mật khẩu, cấp `sudo` theo đúng việc, và một tài khoản triển khai riêng thay cho tài khoản của An. Bắt đầu với [LNX-021 · Quản lý người dùng và nhóm](/articles/linux-quan-ly-nguoi-dung-nhom).
 
 ## Bài tập mở rộng
 

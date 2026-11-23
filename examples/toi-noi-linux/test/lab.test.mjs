@@ -96,3 +96,49 @@ test('OUTPUT.txt của Phần 2 có bản ghi của cả 10 bài', () => {
   for (const s of scripts('p02')) assert.ok(out.includes(`==== p02/${s.name} ====`), s.name);
   assert.ok(!out.includes('/run/lab.sh'), 'không lộ tên file kịch bản tạm');
 });
+
+test('Phần 3 có đủ 10 kịch bản, đánh số tiếp từ 21', () => {
+  assert.deepEqual(
+    scripts('p03').map((s) => s.id),
+    ['21', '22', '23', '24', '25', '26', '27', '28', '29', '30'],
+  );
+});
+
+test('#sudofile in lệnh visudo/sudoedit rồi ghi file hệ thống bằng sudo', () => {
+  const dir = join(ROOT, 'p03');
+  const v = compile('#sudofile visudo /etc/sudoers.d/cuong sudoers-cuong 02\n', { dir });
+  assert.match(v, /sudo -S -v/);
+  assert.match(v, /__p 'sudo visudo -f \/etc\/sudoers\.d\/cuong'/);
+  assert.match(v, /sudo -n tee \/etc\/sudoers\.d\/cuong/);
+  // File mới do visudo -f tạo có quyền 0640 như thật; bài tự chmod 440.
+  assert.match(v, /chmod 0640 \/etc\/sudoers\.d\/cuong/);
+  const e = compile('#sudofile sudoedit /etc/pam.d/sshd pam-sshd\n', { dir });
+  assert.match(e, /__p 'sudoedit \/etc\/pam\.d\/sshd'/);
+  assert.match(e, /chmod 0644 \/etc\/pam\.d\/sshd/);
+});
+
+test('#login đăng nhập SSH thật bằng key của lab, không in; otp dùng askpass', () => {
+  const sh = compile('#login an an-laptop otp\n#login root an-laptop\n');
+  assert.match(sh, /sudo -S -v/);
+  assert.doesNotMatch(sh, /__p '.*ssh -i/);
+  assert.match(sh, /\/usr\/share\/toinoi-lab\/p03\/an-laptop/);
+  assert.match(sh, /SSH_ASKPASS=\/usr\/share\/toinoi-lab\/p03\/askpass-otp/);
+  assert.match(sh, /BatchMode=yes/);
+  assert.match(sh, /root@127\.0\.0\.1/);
+});
+
+test('mọi file được #file/#check/#sudofile nhắc tới đều có trong p03/files', () => {
+  for (const s of scripts('p03')) {
+    const src = readFileSync(s.path, 'utf8');
+    for (const m of src.matchAll(/^#(?:file|check) \S+ (\S+)(?: \d\d)?$|^#sudofile \S+ \S+ (\S+)(?: \d\d)?$/gm)) {
+      const f = m[1] || m[2];
+      assert.ok(existsSync(join(ROOT, 'p03', 'files', f)), `${s.name}: thiếu files/${f}`);
+    }
+  }
+});
+
+test('OUTPUT.txt của Phần 3 có bản ghi của cả 10 bài', () => {
+  const out = readFileSync(join(ROOT, 'p03', 'OUTPUT.txt'), 'utf8');
+  for (const s of scripts('p03')) assert.ok(out.includes(`==== p03/${s.name} ====`), s.name);
+  assert.doesNotMatch(out, /(^|[\s'"=])toinoi-lab($|[\s'"])/m, 'không in mật khẩu của lab');
+});

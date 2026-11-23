@@ -1,0 +1,5 @@
+# Mọi file của lab được chép vào container Linux: giữ LF khi checkout trên Windows
+# (script và private key có CRLF sẽ không chạy, không đọc được).
+* text=auto eol=lf
+*.webp binary
+*.gz binary

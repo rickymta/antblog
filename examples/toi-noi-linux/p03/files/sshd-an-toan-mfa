@@ -1,0 +1,8 @@
+# Gia cố sshd cho toinoi-app-01 (LNX-025, LNX-029).
+PasswordAuthentication no
+KbdInteractiveAuthentication yes
+AuthenticationMethods publickey,keyboard-interactive
+PermitRootLogin no
+AllowGroups ssh-users
+MaxAuthTries 3
+X11Forwarding no

@@ -92,6 +92,18 @@ RUN cd /usr/share/toinoi-lab/p02 \
  && chmod 755 chuan-bi.sh \
  && chmod 644 bao-gia-2026-11-20.log bao-gia-2026-11-19.log.gz
 
+# ---- Phần 3 ----
+# PAM cho mã OTP (LNX-029) và oathtool để tính mã. Dữ liệu của lab nằm trong
+# /usr/share/toinoi-lab/p03, chỉ root đọc được: key riêng tư ở đây là "key trên laptop"
+# của An và của hệ thống CI, server thật không bao giờ giữ chúng.
+RUN apt-get update \
+ && apt-get install -y --no-install-recommends libpam-google-authenticator oathtool \
+ && rm -rf /var/lib/apt/lists/*
+COPY fixtures/p03/ /usr/share/toinoi-lab/p03/
+RUN chmod 700 /usr/share/toinoi-lab/p03 \
+ && chmod 600 /usr/share/toinoi-lab/p03/* \
+ && chmod 700 /usr/share/toinoi-lab/p03/askpass-*
+
 EXPOSE 22
 STOPSIGNAL SIGRTMIN+3
 CMD ["/sbin/init"]

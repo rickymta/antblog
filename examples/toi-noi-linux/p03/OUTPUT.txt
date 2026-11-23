@@ -1,0 +1,652 @@
+==== p03/21-nguoi-dung.sh ====
+
+# Ai có tài khoản trên server?
+an@toinoi-app-01:~$ getent passwd | awk -F: '$3 >= 1000 && $3 < 60000 { print $1, $3, $6, $7 }'
+an 1000 /home/an /bin/bash
+binh 1001 /home/binh /bin/bash
+an@toinoi-app-01:~$ getent passwd | wc -l
+24
+an@toinoi-app-01:~$ awk -F: '$7 !~ /(nologin|false)$/ { print $1, $7 }' /etc/passwd
+root /bin/bash
+sync /bin/sync
+an /bin/bash
+binh /bin/bash
+
+# Tạo tài khoản cho Cường
+an@toinoi-app-01:~$ sudo useradd --create-home --shell /bin/bash --comment "Le Van Cuong" cuong
+an@toinoi-app-01:~$ id cuong
+uid=1002(cuong) gid=1002(cuong) groups=1002(cuong)
+an@toinoi-app-01:~$ sudo ls -la /home/cuong
+total 24
+drwxr-x--- 2 cuong cuong 4096 Nov 23 23:36 .
+drwxr-xr-x 1 root  root  4096 Nov 23 23:36 ..
+-rw-r--r-- 1 cuong cuong  220 Mar 31  2024 .bash_logout
+-rw-r--r-- 1 cuong cuong 3771 Mar 31  2024 .bashrc
+-rw-r--r-- 1 cuong cuong  807 Mar 31  2024 .profile
+an@toinoi-app-01:~$ ls -A /etc/skel
+.bash_logout  .bashrc  .profile
+
+# Mật khẩu ban đầu, bắt đổi ở lần đăng nhập đầu
+an@toinoi-app-01:~$ sudo passwd -S cuong
+cuong L 2026-11-23 0 99999 7 -1
+an@toinoi-app-01:~$ echo 'cuong:Tam-thoi-2611' | sudo chpasswd
+an@toinoi-app-01:~$ sudo passwd -S cuong
+cuong P 2026-11-23 0 99999 7 -1
+an@toinoi-app-01:~$ sudo chage -d 0 cuong
+an@toinoi-app-01:~$ sudo chage -l cuong
+Last password change                                    : password must be changed
+Password expires                                        : password must be changed
+Password inactive                                       : password must be changed
+Account expires                                         : never
+Minimum number of days between password change          : 0
+Maximum number of days between password change          : 99999
+Number of days of warning before password expires       : 7
+an@toinoi-app-01:~$ sudo passwd -S cuong
+cuong P 2026-11-23 0 99999 7 -1
+
+# Nhóm
+an@toinoi-app-01:~$ sudo groupadd trien-khai
+an@toinoi-app-01:~$ sudo usermod -aG toinoi,trien-khai cuong
+an@toinoi-app-01:~$ id cuong
+uid=1002(cuong) gid=1002(cuong) groups=1002(cuong),2000(toinoi),2001(trien-khai)
+an@toinoi-app-01:~$ getent group trien-khai toinoi
+trien-khai:x:2001:cuong
+toinoi:x:2000:binh,an,cuong
+an@toinoi-app-01:~$ sudo gpasswd -d cuong trien-khai
+Removing user cuong from group trien-khai
+an@toinoi-app-01:~$ groups cuong
+cuong : cuong toinoi
+
+# Khoá, hết hạn và mở khoá
+an@toinoi-app-01:~$ sudo passwd -l cuong
+passwd: password changed.
+an@toinoi-app-01:~$ sudo passwd -S cuong
+cuong L 2026-11-23 0 99999 7 -1
+an@toinoi-app-01:~$ sudo chage -E 2026-12-31 cuong
+an@toinoi-app-01:~$ sudo chage -l cuong
+Last password change                                    : Nov 23, 2026
+Password expires                                        : never
+Password inactive                                       : never
+Account expires                                         : Dec 31, 2026
+Minimum number of days between password change          : 0
+Maximum number of days between password change          : 99999
+Number of days of warning before password expires       : 7
+an@toinoi-app-01:~$ sudo chage -E -1 cuong
+an@toinoi-app-01:~$ sudo passwd -u cuong
+passwd: password changed.
+an@toinoi-app-01:~$ sudo passwd -S cuong
+cuong P 2026-11-23 0 99999 7 -1
+
+# Tài khoản dịch vụ
+an@toinoi-app-01:~$ getent passwd baogia
+baogia:x:990:2000::/opt/toinoi/bao-gia:/usr/sbin/nologin
+an@toinoi-app-01:~$ sudo su - baogia
+This account is currently not available.
+an@toinoi-app-01:~$ echo $?
+1
+an@toinoi-app-01:~$ sudo -u baogia id
+uid=990(baogia) gid=2000(toinoi) groups=2000(toinoi)
+an@toinoi-app-01:~$ sudo useradd --system --no-create-home --shell /usr/sbin/nologin --gid toinoi bao-cao
+an@toinoi-app-01:~$ getent passwd bao-cao
+bao-cao:x:999:2000::/home/bao-cao:/usr/sbin/nologin
+an@toinoi-app-01:~$ sudo userdel bao-cao
+an@toinoi-app-01:~$ getent passwd bao-cao || echo "đã xoá"
+đã xoá
+
+==== p03/22-ssh-key.sh ====
+
+# Server đang chấp nhận những cách đăng nhập nào?
+an@toinoi-app-01:~$ ssh -o BatchMode=yes -o StrictHostKeyChecking=accept-new an@localhost true
+Warning: Permanently added 'localhost' (ED25519) to the list of known hosts.
+an@localhost: Permission denied (publickey,password).
+an@toinoi-app-01:~$ ls -la ~/.ssh
+total 16
+drwx------ 2 an an 4096 Nov 23 23:36 .
+drwxr-x--- 1 an an 4096 Nov 23 23:36 ..
+-rw-r--r-- 1 an an  142 Nov 23 23:36 known_hosts
+
+# Cài public key cho tài khoản an
+an@toinoi-app-01:~$ mkdir -p ~/.ssh
+an@toinoi-app-01:~$ chmod 700 ~/.ssh
+an@toinoi-app-01:~$ echo 'ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIFvQW8mHkVjU1nOtQ4pdIuRs5X14dOyuz6HzyQOw026x an-laptop' >> ~/.ssh/authorized_keys
+an@toinoi-app-01:~$ chmod 600 ~/.ssh/authorized_keys
+an@toinoi-app-01:~$ ls -la ~/.ssh
+total 20
+drwx------ 2 an an 4096 Nov 23 23:36 .
+drwxr-x--- 1 an an 4096 Nov 23 23:36 ..
+-rw------- 1 an an   91 Nov 23 23:36 authorized_keys
+-rw-r--r-- 1 an an  142 Nov 23 23:36 known_hosts
+an@toinoi-app-01:~$ ssh-keygen -lf ~/.ssh/authorized_keys
+256 SHA256:yJ42WJZlgwZsUsCCjvAX237jMd5+ssxlWKtoaNrMTgY an-laptop (ED25519)
+
+# Bằng chứng trong log của sshd
+an@toinoi-app-01:~$ sudo journalctl -u ssh --no-pager | grep -E 'Accepted (password|publickey) for an' | tail -n 2
+Nov 23 23:36:08 toinoi-app-01 sshd[1751]: Accepted publickey for an from 127.0.0.1 port 48568 ssh2: ED25519 SHA256:yJ42WJZlgwZsUsCCjvAX237jMd5+ssxlWKtoaNrMTgY
+
+# Quyền sai: sshd từ chối key
+an@toinoi-app-01:~$ chmod o+w ~/.ssh/authorized_keys
+an@toinoi-app-01:~$ ls -l ~/.ssh/authorized_keys
+-rw-----w- 1 an an 91 Nov 23 23:36 /home/an/.ssh/authorized_keys
+an@toinoi-app-01:~$ sudo journalctl -u ssh --no-pager | grep -o 'Authentication refused: .*' | tail -n 1
+Authentication refused: bad ownership or modes for file /home/an/.ssh/authorized_keys
+an@toinoi-app-01:~$ chmod 600 ~/.ssh/authorized_keys
+an@toinoi-app-01:~$ ls -l ~/.ssh/authorized_keys
+-rw------- 1 an an 91 Nov 23 23:36 /home/an/.ssh/authorized_keys
+
+==== p03/23-host-key.sh ====
+
+# Host key của server
+an@toinoi-app-01:~$ ls -l /etc/ssh/ssh_host_*
+-rw------- 1 root root  513 Nov 22 22:26 /etc/ssh/ssh_host_ecdsa_key
+-rw-r--r-- 1 root root  182 Nov 22 22:26 /etc/ssh/ssh_host_ecdsa_key.pub
+-rw------- 1 root root  411 Nov 22 22:26 /etc/ssh/ssh_host_ed25519_key
+-rw-r--r-- 1 root root  102 Nov 22 22:26 /etc/ssh/ssh_host_ed25519_key.pub
+-rw------- 1 root root 2610 Nov 22 22:26 /etc/ssh/ssh_host_rsa_key
+-rw-r--r-- 1 root root  574 Nov 22 22:26 /etc/ssh/ssh_host_rsa_key.pub
+an@toinoi-app-01:~$ ssh-keygen -lf /etc/ssh/ssh_host_ed25519_key.pub
+256 SHA256:/fjhnPhFNYvAMC3S/UdkbCQ039oKGZN4rJ96pPyUvkI root@buildkitsandbox (ED25519)
+an@toinoi-app-01:~$ ssh-keyscan -t ed25519 localhost 2>/dev/null | ssh-keygen -lf -
+256 SHA256:/fjhnPhFNYvAMC3S/UdkbCQ039oKGZN4rJ96pPyUvkI localhost (ED25519)
+
+# known_hosts ở phía client
+an@toinoi-app-01:~$ cat ~/.ssh/known_hosts
+|1|Chv/veqwRyhffmU2n7M9cJNC4hU=|9RR/LyyZ2RVL/ooGWDPGouWJNaM= ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIFerLccDCe220G1XWu5QIk3RBNneU4iXYx05S0FLtxn2
+an@toinoi-app-01:~$ ssh-keygen -F localhost
+# Host localhost found: line 1
+|1|Chv/veqwRyhffmU2n7M9cJNC4hU=|9RR/LyyZ2RVL/ooGWDPGouWJNaM= ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIFerLccDCe220G1XWu5QIk3RBNneU4iXYx05S0FLtxn2
+
+# Server được dựng lại: host key mới
+an@toinoi-app-01:~$ sudo cp -a /etc/ssh/ssh_host_ed25519_key /etc/ssh/ssh_host_ed25519_key.pub /root/
+an@toinoi-app-01:~$ sudo systemctl restart ssh
+an@toinoi-app-01:~$ ssh-keygen -lf /etc/ssh/ssh_host_ed25519_key.pub
+256 SHA256:5b2/eh6nvp+9USu4fWrlujTEiIJSNBhLX51PTh+yjLY root@toinoi-app-01 (ED25519)
+an@toinoi-app-01:~$ ssh -o BatchMode=yes an@localhost true
+@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+@    WARNING: REMOTE HOST IDENTIFICATION HAS CHANGED!     @
+@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+IT IS POSSIBLE THAT SOMEONE IS DOING SOMETHING NASTY!
+Someone could be eavesdropping on you right now (man-in-the-middle attack)!
+It is also possible that a host key has just been changed.
+The fingerprint for the ED25519 key sent by the remote host is
+SHA256:5b2/eh6nvp+9USu4fWrlujTEiIJSNBhLX51PTh+yjLY.
+Please contact your system administrator.
+Add correct host key in /home/an/.ssh/known_hosts to get rid of this message.
+Offending ED25519 key in /home/an/.ssh/known_hosts:1
+  remove with:
+  ssh-keygen -f '/home/an/.ssh/known_hosts' -R 'localhost'
+Host key for localhost has changed and you have requested strict checking.
+Host key verification failed.
+
+# Xử lý ở phía client OpenSSH
+an@toinoi-app-01:~$ ssh-keygen -R localhost
+# Host localhost found: line 1
+/home/an/.ssh/known_hosts updated.
+Original contents retained as /home/an/.ssh/known_hosts.old
+an@toinoi-app-01:~$ ssh -o BatchMode=yes -o StrictHostKeyChecking=accept-new an@localhost true
+Warning: Permanently added 'localhost' (ED25519) to the list of known hosts.
+an@localhost: Permission denied (publickey,password).
+
+# Dựng lại server thì đưa host key cũ về
+an@toinoi-app-01:~$ sudo cp -a /root/ssh_host_ed25519_key /root/ssh_host_ed25519_key.pub /etc/ssh/
+an@toinoi-app-01:~$ sudo systemctl restart ssh
+an@toinoi-app-01:~$ ssh-keygen -lf /etc/ssh/ssh_host_ed25519_key.pub
+256 SHA256:/fjhnPhFNYvAMC3S/UdkbCQ039oKGZN4rJ96pPyUvkI root@buildkitsandbox (ED25519)
+an@toinoi-app-01:~$ ssh-keygen -R localhost
+# Host localhost found: line 1
+/home/an/.ssh/known_hosts updated.
+Original contents retained as /home/an/.ssh/known_hosts.old
+an@toinoi-app-01:~$ ssh -o BatchMode=yes -o StrictHostKeyChecking=accept-new an@localhost true
+Warning: Permanently added 'localhost' (ED25519) to the list of known hosts.
+an@localhost: Permission denied (publickey,password).
+
+==== p03/24-sudo.sh ====
+
+# sudo của An đến từ đâu?
+an@toinoi-app-01:~$ sudo -l
+Matching Defaults entries for an on toinoi-app-01:
+    env_reset, mail_badpass,
+    secure_path=/usr/local/sbin\:/usr/local/bin\:/usr/sbin\:/usr/bin\:/sbin\:/bin\:/snap/bin,
+    use_pty
+
+User an may run the following commands on toinoi-app-01:
+    (ALL : ALL) ALL
+an@toinoi-app-01:~$ sudo grep -v -E '^(#|$)' /etc/sudoers
+Defaults        env_reset
+Defaults        mail_badpass
+Defaults        secure_path="/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/snap/bin"
+Defaults        use_pty
+root    ALL=(ALL:ALL) ALL
+%admin ALL=(ALL) ALL
+%sudo   ALL=(ALL:ALL) ALL
+@includedir /etc/sudoers.d
+an@toinoi-app-01:~$ sudo ls -l /etc/sudoers.d
+total 4
+-r--r----- 1 root root 1068 Jan 30  2024 README
+an@toinoi-app-01:~$ getent group sudo
+sudo:x:27:an,binh
+
+# Cấp quyền theo việc cho Cường
+an@toinoi-app-01:~$ sudo visudo -f /etc/sudoers.d/cuong
+an@toinoi-app-01:~$ sudo ls -l /etc/sudoers.d
+total 8
+-r--r----- 1 root root 1068 Jan 30  2024 README
+-rw-r----- 1 root root  331 Nov 23 23:36 cuong
+an@toinoi-app-01:~$ sudo visudo -c
+/etc/sudoers: parsed OK
+/etc/sudoers.d/README: parsed OK
+/etc/sudoers.d/cuong: bad permissions, should be mode 0440
+an@toinoi-app-01:~$ sudo chmod 440 /etc/sudoers.d/cuong
+an@toinoi-app-01:~$ sudo ls -l /etc/sudoers.d
+total 8
+-r--r----- 1 root root 1068 Jan 30  2024 README
+-r--r----- 1 root root  331 Nov 23 23:36 cuong
+an@toinoi-app-01:~$ sudo visudo -c
+/etc/sudoers: parsed OK
+/etc/sudoers.d/README: parsed OK
+/etc/sudoers.d/cuong: parsed OK
+an@toinoi-app-01:~$ sudo -l -U cuong
+Matching Defaults entries for cuong on toinoi-app-01:
+    env_reset, mail_badpass,
+    secure_path=/usr/local/sbin\:/usr/local/bin\:/usr/sbin\:/usr/bin\:/sbin\:/bin\:/snap/bin,
+    use_pty
+
+User cuong may run the following commands on toinoi-app-01:
+    (root) NOPASSWD: /usr/bin/journalctl -u cron *, /usr/bin/journalctl -u ssh
+        *, /usr/bin/systemctl restart cron
+
+# Thử bằng tài khoản của Cường
+an@toinoi-app-01:~$ sudo -u cuong sudo -n /usr/bin/systemctl restart cron && echo "khởi động lại cron: được"
+khởi động lại cron: được
+an@toinoi-app-01:~$ sudo -u cuong sudo -n /usr/bin/journalctl -u cron -n 2 --no-pager
+Nov 23 23:36:10 toinoi-app-01 cron[1891]: (CRON) INFO (pidfile fd = 3)
+Nov 23 23:36:10 toinoi-app-01 cron[1891]: (CRON) INFO (Skipping @reboot jobs -- not system startup)
+an@toinoi-app-01:~$ sudo -u cuong sudo -n /usr/bin/cat /etc/shadow
+sudo: a password is required
+an@toinoi-app-01:~$ sudo -u cuong sudo -n /usr/bin/systemctl stop cron
+sudo: a password is required
+
+# Một lỗi cú pháp trong sudoers
+an@toinoi-app-01:~$ vim ~/tai-lieu/sudoers-loi
+an@toinoi-app-01:~$ cat ~/tai-lieu/sudoers-loi
+cuong ALL=(root) NOPASSWD /usr/bin/systemctl restart cron
+an@toinoi-app-01:~$ sudo visudo -c -f ~/tai-lieu/sudoers-loi
+/home/an/tai-lieu/sudoers-loi:1:58: syntax error
+cuong ALL=(root) NOPASSWD /usr/bin/systemctl restart cron
+                                                         ^
+
+# sudo ghi lại mọi lần dùng
+an@toinoi-app-01:~$ sudo journalctl _COMM=sudo --no-pager | grep -E 'cuong :' | tail -n 3
+Nov 23 23:36:10 toinoi-app-01 sudo[1887]:    cuong : TTY=pts/0 ; PWD=/home/an ; USER=root ; COMMAND=/usr/bin/systemctl restart cron
+Nov 23 23:36:10 toinoi-app-01 sudo[1893]:    cuong : TTY=pts/0 ; PWD=/home/an ; USER=root ; COMMAND=/usr/bin/journalctl -u cron -n 2 --no-pager
+
+==== p03/25-sshd.sh ====
+
+# Cấu hình đang có hiệu lực
+an@toinoi-app-01:~$ sudo sshd -T | grep -E '^(permitrootlogin|pubkeyauthentication|passwordauthentication|kbdinteractiveauthentication|maxauthtries|allowgroups|x11forwarding) '
+maxauthtries 6
+permitrootlogin no
+pubkeyauthentication yes
+passwordauthentication yes
+kbdinteractiveauthentication no
+x11forwarding yes
+an@toinoi-app-01:~$ grep -v -E '^(#|$)' /etc/ssh/sshd_config
+Include /etc/ssh/sshd_config.d/*.conf
+KbdInteractiveAuthentication no
+UsePAM yes
+X11Forwarding yes
+PrintMotd no
+AcceptEnv LANG LC_*
+Subsystem       sftp    /usr/lib/openssh/sftp-server
+an@toinoi-app-01:~$ ls /etc/ssh/sshd_config.d
+10-toinoi-lab.conf
+an@toinoi-app-01:~$ cat /etc/ssh/sshd_config.d/10-toinoi-lab.conf
+PasswordAuthentication yes
+KbdInteractiveAuthentication no
+PermitRootLogin no
+PrintMotd no
+
+# Nhóm được phép SSH
+an@toinoi-app-01:~$ sudo groupadd ssh-users
+an@toinoi-app-01:~$ sudo usermod -aG ssh-users an
+an@toinoi-app-01:~$ sudo usermod -aG ssh-users binh
+an@toinoi-app-01:~$ getent group ssh-users
+ssh-users:x:2002:an,binh
+
+# Viết file cấu hình mới
+an@toinoi-app-01:~$ sudoedit /etc/ssh/sshd_config.d/20-an-toan.conf
+an@toinoi-app-01:~$ sudo sshd -t && echo "cú pháp ổn"
+cú pháp ổn
+an@toinoi-app-01:~$ sudo sshd -T | grep -E '^(passwordauthentication|allowgroups|maxauthtries) '
+maxauthtries 3
+passwordauthentication yes
+allowgroups ssh-users
+
+# Giá trị đầu tiên thắng
+an@toinoi-app-01:~$ sudo mv /etc/ssh/sshd_config.d/20-an-toan.conf /etc/ssh/sshd_config.d/05-an-toan.conf
+an@toinoi-app-01:~$ ls /etc/ssh/sshd_config.d
+05-an-toan.conf  10-toinoi-lab.conf
+an@toinoi-app-01:~$ sudo sshd -t && echo "cú pháp ổn"
+cú pháp ổn
+an@toinoi-app-01:~$ sudo sshd -T | grep -E '^(permitrootlogin|passwordauthentication|kbdinteractiveauthentication|maxauthtries|allowgroups|x11forwarding) '
+maxauthtries 3
+permitrootlogin no
+passwordauthentication no
+kbdinteractiveauthentication no
+x11forwarding no
+allowgroups ssh-users
+
+# Áp dụng mà không tự khoá mình ngoài cửa
+an@toinoi-app-01:~$ sudo systemctl reload ssh
+an@toinoi-app-01:~$ ssh -o BatchMode=yes an@localhost true
+an@localhost: Permission denied (publickey).
+an@toinoi-app-01:~$ ssh -o BatchMode=yes cuong@localhost true
+cuong@localhost: Permission denied (publickey).
+an@toinoi-app-01:~$ sudo journalctl -u ssh --no-pager | grep -E 'not allowed because|Accepted publickey' | tail -n 3
+Nov 23 23:36:08 toinoi-app-01 sshd[1751]: Accepted publickey for an from 127.0.0.1 port 48568 ssh2: ED25519 SHA256:yJ42WJZlgwZsUsCCjvAX237jMd5+ssxlWKtoaNrMTgY
+Nov 23 23:36:11 toinoi-app-01 sshd[1999]: User cuong from ::1 not allowed because none of user's groups are listed in AllowGroups
+Nov 23 23:36:11 toinoi-app-01 sshd[2004]: Accepted publickey for an from 127.0.0.1 port 48584 ssh2: ED25519 SHA256:yJ42WJZlgwZsUsCCjvAX237jMd5+ssxlWKtoaNrMTgY
+
+==== p03/26-quyen-dac-biet.sh ====
+
+# setuid: chạy với quyền của chủ file
+an@toinoi-app-01:~$ ls -l /usr/bin/passwd /usr/bin/sudo /etc/shadow
+-rw-r----- 1 root shadow    863 Nov 23 23:36 /etc/shadow
+-rwsr-xr-x 1 root root    64152 May 30  2024 /usr/bin/passwd
+-rwsr-xr-x 1 root root   282032 Oct  6 20:51 /usr/bin/sudo
+an@toinoi-app-01:~$ find /usr/bin /usr/sbin -perm -4000 -type f
+/usr/bin/newgrp
+/usr/bin/gpasswd
+/usr/bin/passwd
+/usr/bin/chfn
+/usr/bin/umount
+/usr/bin/su
+/usr/bin/chsh
+/usr/bin/mount
+/usr/bin/sudo
+an@toinoi-app-01:~$ stat -c '%a %A %U %n' /usr/bin/passwd
+4755 -rwsr-xr-x root /usr/bin/passwd
+
+# setgid trên thư mục: file mới thừa kế nhóm
+an@toinoi-app-01:~$ ls -ld /srv/toinoi/bao-gia/shared/logs
+drwxrwx--- 2 an toinoi 4096 Nov 23 23:36 /srv/toinoi/bao-gia/shared/logs
+an@toinoi-app-01:~$ touch /srv/toinoi/bao-gia/shared/logs/thu-truoc.txt
+an@toinoi-app-01:~$ chmod g+s /srv/toinoi/bao-gia/shared/logs
+an@toinoi-app-01:~$ ls -ld /srv/toinoi/bao-gia/shared/logs
+drwxrws--- 2 an toinoi 4096 Nov 23 23:36 /srv/toinoi/bao-gia/shared/logs
+an@toinoi-app-01:~$ touch /srv/toinoi/bao-gia/shared/logs/thu-sau.txt
+an@toinoi-app-01:~$ ls -l /srv/toinoi/bao-gia/shared/logs/thu-*.txt
+-rw-rw-r-- 1 an toinoi 0 Nov 23 23:36 /srv/toinoi/bao-gia/shared/logs/thu-sau.txt
+-rw-rw-r-- 1 an an     0 Nov 23 23:36 /srv/toinoi/bao-gia/shared/logs/thu-truoc.txt
+an@toinoi-app-01:~$ stat -c '%a %A %n' /srv/toinoi/bao-gia/shared/logs
+2770 drwxrws--- /srv/toinoi/bao-gia/shared/logs
+an@toinoi-app-01:~$ rm /srv/toinoi/bao-gia/shared/logs/thu-*.txt
+
+# Sticky bit: /tmp
+an@toinoi-app-01:~$ ls -ld /tmp
+drwxrwxrwt 6 root root 160 Nov 23 23:35 /tmp
+an@toinoi-app-01:~$ sudo -u binh touch /tmp/cua-binh.txt
+an@toinoi-app-01:~$ ls -l /tmp/cua-binh.txt
+-rw-rw-r-- 1 binh binh 0 Nov 23 23:36 /tmp/cua-binh.txt
+an@toinoi-app-01:~$ rm -f /tmp/cua-binh.txt
+rm: cannot remove '/tmp/cua-binh.txt': Operation not permitted
+an@toinoi-app-01:~$ sudo -u binh rm /tmp/cua-binh.txt
+
+# Thư mục dùng chung của nhóm: setgid và sticky
+an@toinoi-app-01:~$ sudo mkdir /srv/toinoi/chung
+an@toinoi-app-01:~$ sudo chown root:toinoi /srv/toinoi/chung
+an@toinoi-app-01:~$ sudo chmod 3770 /srv/toinoi/chung
+an@toinoi-app-01:~$ ls -ld /srv/toinoi/chung
+drwxrws--T 2 root toinoi 4096 Nov 23 23:36 /srv/toinoi/chung
+an@toinoi-app-01:~$ touch /srv/toinoi/chung/cua-an.txt
+an@toinoi-app-01:~$ sudo -u binh touch /srv/toinoi/chung/cua-binh.txt
+an@toinoi-app-01:~$ ls -l /srv/toinoi/chung
+total 0
+-rw-rw-r-- 1 an   toinoi 0 Nov 23 23:36 cua-an.txt
+-rw-rw-r-- 1 binh toinoi 0 Nov 23 23:36 cua-binh.txt
+an@toinoi-app-01:~$ sudo -u binh rm -f /srv/toinoi/chung/cua-an.txt
+rm: cannot remove '/srv/toinoi/chung/cua-an.txt': Operation not permitted
+an@toinoi-app-01:~$ sudo -u binh rm /srv/toinoi/chung/cua-binh.txt
+an@toinoi-app-01:~$ ls /srv/toinoi/chung
+cua-an.txt
+
+==== p03/27-acl.sh ====
+
+# Khi ba lớp quyền không đủ
+an@toinoi-app-01:~$ sudo useradd --create-home --shell /bin/bash --comment "Kiem toan noi bo" kiemtoan
+an@toinoi-app-01:~$ id kiemtoan
+uid=1003(kiemtoan) gid=1003(kiemtoan) groups=1003(kiemtoan)
+an@toinoi-app-01:~$ ls -ld /srv/toinoi/bao-gia/shared/logs
+drwxrws--- 2 an toinoi 4096 Nov 23 23:36 /srv/toinoi/bao-gia/shared/logs
+an@toinoi-app-01:~$ sudo -u kiemtoan ls /srv/toinoi/bao-gia/shared/logs
+ls: cannot open directory '/srv/toinoi/bao-gia/shared/logs': Permission denied
+an@toinoi-app-01:~$ getfacl -p /srv/toinoi/bao-gia/shared/logs
+# file: /srv/toinoi/bao-gia/shared/logs
+# owner: an
+# group: toinoi
+# flags: -s-
+user::rwx
+group::rwx
+other::---
+
+
+# Cấp quyền cho đúng một người
+an@toinoi-app-01:~$ setfacl -m u:kiemtoan:rx /srv/toinoi/bao-gia/shared/logs
+an@toinoi-app-01:~$ getfacl -p /srv/toinoi/bao-gia/shared/logs
+# file: /srv/toinoi/bao-gia/shared/logs
+# owner: an
+# group: toinoi
+# flags: -s-
+user::rwx
+user:kiemtoan:r-x
+group::rwx
+mask::rwx
+other::---
+
+an@toinoi-app-01:~$ ls -ld /srv/toinoi/bao-gia/shared/logs
+drwxrws---+ 2 an toinoi 4096 Nov 23 23:36 /srv/toinoi/bao-gia/shared/logs
+an@toinoi-app-01:~$ sudo -u kiemtoan ls /srv/toinoi/bao-gia/shared/logs
+bao-cao-2026-11-21.txt  hang-ngay.log       loi-theo-dich-vu.txt
+bao-cao-2026-11-23.txt  loi-2026-11-21.txt
+an@toinoi-app-01:~$ sudo -u kiemtoan head -n 3 /srv/toinoi/bao-gia/shared/logs/loi-theo-dich-vu.txt
+      6 dich_vu=car4
+      5 dich_vu=bike
+      4 dich_vu=car7
+an@toinoi-app-01:~$ sudo -u kiemtoan touch /srv/toinoi/bao-gia/shared/logs/thu.txt
+touch: cannot touch '/srv/toinoi/bao-gia/shared/logs/thu.txt': Permission denied
+
+# ACL mặc định cho file mới
+an@toinoi-app-01:~$ setfacl -d -m u:kiemtoan:r /srv/toinoi/bao-gia/shared/logs
+an@toinoi-app-01:~$ touch /srv/toinoi/bao-gia/shared/logs/moi.txt
+an@toinoi-app-01:~$ getfacl -p /srv/toinoi/bao-gia/shared/logs/moi.txt
+# file: /srv/toinoi/bao-gia/shared/logs/moi.txt
+# owner: an
+# group: toinoi
+user::rw-
+user:kiemtoan:r--
+group::rwx                      #effective:rw-
+mask::rw-
+other::---
+
+an@toinoi-app-01:~$ ls -l /srv/toinoi/bao-gia/shared/logs/moi.txt
+-rw-rw----+ 1 an toinoi 0 Nov 23 23:36 /srv/toinoi/bao-gia/shared/logs/moi.txt
+
+# mask giới hạn mọi quyền ACL
+an@toinoi-app-01:~$ chmod 600 /srv/toinoi/bao-gia/shared/logs/moi.txt
+an@toinoi-app-01:~$ getfacl -p /srv/toinoi/bao-gia/shared/logs/moi.txt
+# file: /srv/toinoi/bao-gia/shared/logs/moi.txt
+# owner: an
+# group: toinoi
+user::rw-
+user:kiemtoan:r--               #effective:---
+group::rwx                      #effective:---
+mask::---
+other::---
+
+an@toinoi-app-01:~$ sudo -u kiemtoan cat /srv/toinoi/bao-gia/shared/logs/moi.txt
+cat: /srv/toinoi/bao-gia/shared/logs/moi.txt: Permission denied
+an@toinoi-app-01:~$ rm /srv/toinoi/bao-gia/shared/logs/moi.txt
+
+# Gỡ ACL
+an@toinoi-app-01:~$ setfacl -k /srv/toinoi/bao-gia/shared/logs
+an@toinoi-app-01:~$ setfacl -x u:kiemtoan /srv/toinoi/bao-gia/shared/logs
+an@toinoi-app-01:~$ getfacl -p /srv/toinoi/bao-gia/shared/logs
+# file: /srv/toinoi/bao-gia/shared/logs
+# owner: an
+# group: toinoi
+# flags: -s-
+user::rwx
+group::rwx
+mask::rwx
+other::---
+
+an@toinoi-app-01:~$ setfacl -b /srv/toinoi/bao-gia/shared/logs
+an@toinoi-app-01:~$ ls -ld /srv/toinoi/bao-gia/shared/logs
+drwxrws--- 2 an toinoi 4096 Nov 23 23:36 /srv/toinoi/bao-gia/shared/logs
+an@toinoi-app-01:~$ sudo -u kiemtoan ls /srv/toinoi/bao-gia/shared/logs
+ls: cannot open directory '/srv/toinoi/bao-gia/shared/logs': Permission denied
+
+==== p03/28-agent.sh ====
+
+# Một key có passphrase trên server
+an@toinoi-app-01:~$ ssh-keygen -q -t ed25519 -C an@toinoi-app-01 -N mot-cum-tu-chi-dung-cho-lab -f ~/.ssh/id_ed25519
+an@toinoi-app-01:~$ ls -l ~/.ssh
+total 20
+-rw------- 1 an an  91 Nov 23 23:36 authorized_keys
+-rw------- 1 an an 464 Nov 23 23:36 id_ed25519
+-rw-r--r-- 1 an an  98 Nov 23 23:36 id_ed25519.pub
+-rw-r--r-- 1 an an 142 Nov 23 23:36 known_hosts
+-rw-r--r-- 1 an an 142 Nov 23 23:36 known_hosts.old
+an@toinoi-app-01:~$ head -n 1 ~/.ssh/id_ed25519
+-----BEGIN OPENSSH PRIVATE KEY-----
+an@toinoi-app-01:~$ ssh-keygen -y -P sai-passphrase -f ~/.ssh/id_ed25519
+Load key "/home/an/.ssh/id_ed25519": incorrect passphrase supplied to decrypt private key
+an@toinoi-app-01:~$ cat ~/.ssh/id_ed25519.pub >> ~/.ssh/authorized_keys
+an@toinoi-app-01:~$ ssh -o BatchMode=yes localhost hostname
+an@localhost: Permission denied (publickey).
+
+# ssh-agent giữ key đã mở khoá
+an@toinoi-app-01:~$ eval "$(ssh-agent -s)"
+Agent pid 2166
+an@toinoi-app-01:~$ ssh-add ~/.ssh/id_ed25519
+Identity added: /home/an/.ssh/id_ed25519 (an@toinoi-app-01)
+an@toinoi-app-01:~$ ssh-add -l
+256 SHA256:CVW2g3F0l0Yc+ybGD3V8Cq6MlzOmETp2tds5piMsbc0 an@toinoi-app-01 (ED25519)
+an@toinoi-app-01:~$ ssh -o BatchMode=yes localhost hostname
+toinoi-app-01
+
+# ~/.ssh/config: tên ngắn và key riêng cho từng server
+an@toinoi-app-01:~$ vim ~/.ssh/config
+an@toinoi-app-01:~$ chmod 600 ~/.ssh/config
+an@toinoi-app-01:~$ ssh -G app01 | grep -E '^(hostname|user|port|identityfile|identitiesonly) '
+user an
+hostname localhost
+port 22
+identitiesonly yes
+identityfile ~/.ssh/id_ed25519
+an@toinoi-app-01:~$ ssh app01 hostname
+toinoi-app-01
+
+# Gỡ key khỏi agent, tắt agent
+an@toinoi-app-01:~$ ssh-add -D
+All identities removed.
+an@toinoi-app-01:~$ ssh-add -l
+The agent has no identities.
+an@toinoi-app-01:~$ ssh-agent -k
+unset SSH_AUTH_SOCK;
+unset SSH_AGENT_PID;
+echo Agent pid 2166 killed;
+
+==== p03/29-mfa.sh ====
+
+# Bí mật chung của mã OTP
+an@toinoi-app-01:~$ vim ~/.google_authenticator
+an@toinoi-app-01:~$ chmod 400 ~/.google_authenticator
+an@toinoi-app-01:~$ ls -l ~/.google_authenticator
+-r-------- 1 an an 114 Nov 23 23:36 /home/an/.google_authenticator
+an@toinoi-app-01:~$ oathtool --totp -b "$(head -n 1 ~/.google_authenticator)" | wc -c
+7
+
+# PAM: thay mật khẩu Unix bằng mã OTP
+an@toinoi-app-01:~$ sudoedit /etc/pam.d/sshd
+an@toinoi-app-01:~$ grep -n -E 'google|permit|common-auth' /etc/pam.d/sshd
+5:# @include common-auth
+6:auth required pam_google_authenticator.so nullok
+7:auth required pam_permit.so
+
+# sshd: cần cả key lẫn mã OTP
+an@toinoi-app-01:~$ sudoedit /etc/ssh/sshd_config.d/05-an-toan.conf
+an@toinoi-app-01:~$ sudo sshd -t && echo "cú pháp ổn"
+cú pháp ổn
+an@toinoi-app-01:~$ sudo sshd -T | grep -E '^(usepam|kbdinteractiveauthentication|authenticationmethods) '
+usepam yes
+kbdinteractiveauthentication yes
+authenticationmethods publickey,keyboard-interactive
+an@toinoi-app-01:~$ sudo systemctl reload ssh
+
+# Bằng chứng trong log
+an@toinoi-app-01:~$ sudo journalctl -u ssh --no-pager | grep -E 'Accepted|Partial|Failed|Connection closed by authenticating' | tail -n 4
+Nov 23 23:36:14 toinoi-app-01 sshd[2189]: Accepted publickey for an from ::1 port 53200 ssh2: ED25519 SHA256:CVW2g3F0l0Yc+ybGD3V8Cq6MlzOmETp2tds5piMsbc0
+Nov 23 23:36:15 toinoi-app-01 sshd[2254]: Connection closed by authenticating user an 127.0.0.1 port 48592 [preauth]
+Nov 23 23:36:15 toinoi-app-01 sshd(pam_google_authenticator)[2261]: Accepted google_authenticator for an
+Nov 23 23:36:15 toinoi-app-01 sshd[2259]: Accepted keyboard-interactive/pam for an from 127.0.0.1 port 48600 ssh2
+
+==== p03/30-thuc-hanh.sh ====
+
+# 1. Tài khoản deploy cho CI
+an@toinoi-app-01:~$ sudo useradd --create-home --shell /bin/bash --comment "Trien khai tu dong (CI)" --groups toinoi,ssh-users deploy
+an@toinoi-app-01:~$ id deploy
+uid=1004(deploy) gid=1004(deploy) groups=1004(deploy),2000(toinoi),2002(ssh-users)
+an@toinoi-app-01:~$ sudo passwd -S deploy
+deploy L 2026-11-23 0 99999 7 -1
+an@toinoi-app-01:~$ sudo install -d -m 700 -o deploy -g deploy /home/deploy/.ssh
+an@toinoi-app-01:~$ echo 'ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAICZUGM/RB5spPmpjCeCYkOgP1vCe9YV5XT3kEL8MCG3A deploy@ci' | sudo tee /home/deploy/.ssh/authorized_keys
+ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAICZUGM/RB5spPmpjCeCYkOgP1vCe9YV5XT3kEL8MCG3A deploy@ci
+an@toinoi-app-01:~$ sudo chown deploy:deploy /home/deploy/.ssh/authorized_keys
+an@toinoi-app-01:~$ sudo chmod 600 /home/deploy/.ssh/authorized_keys
+an@toinoi-app-01:~$ sudo ls -la /home/deploy/.ssh
+total 12
+drwx------ 2 deploy deploy 4096 Nov 23 23:36 .
+drwxr-x--- 3 deploy deploy 4096 Nov 23 23:36 ..
+-rw------- 1 deploy deploy   91 Nov 23 23:36 authorized_keys
+
+# 2. sudo đúng việc
+an@toinoi-app-01:~$ sudo visudo -f /etc/sudoers.d/deploy
+an@toinoi-app-01:~$ sudo chmod 440 /etc/sudoers.d/deploy
+an@toinoi-app-01:~$ sudo visudo -c
+/etc/sudoers: parsed OK
+/etc/sudoers.d/README: parsed OK
+/etc/sudoers.d/cuong: parsed OK
+/etc/sudoers.d/deploy: parsed OK
+an@toinoi-app-01:~$ sudo -l -U deploy
+Matching Defaults entries for deploy on toinoi-app-01:
+    env_reset, mail_badpass,
+    secure_path=/usr/local/sbin\:/usr/local/bin\:/usr/sbin\:/usr/bin\:/sbin\:/bin\:/snap/bin,
+    use_pty
+
+User deploy may run the following commands on toinoi-app-01:
+    (root) NOPASSWD: /usr/bin/systemctl restart bao-gia, /usr/bin/systemctl
+        status bao-gia
+
+# 3. sshd: deploy chỉ dùng key
+an@toinoi-app-01:~$ sudoedit /etc/ssh/sshd_config.d/05-an-toan.conf
+an@toinoi-app-01:~$ sudo sshd -t && echo "cú pháp ổn"
+cú pháp ổn
+an@toinoi-app-01:~$ sudo sshd -T -C user=deploy,host=ci,addr=10.0.0.5 | grep -E '^(authenticationmethods|allowtcpforwarding|kbdinteractiveauthentication) '
+kbdinteractiveauthentication yes
+allowtcpforwarding no
+authenticationmethods publickey
+an@toinoi-app-01:~$ sudo sshd -T -C user=an,host=laptop,addr=10.0.0.9 | grep -E '^(authenticationmethods|allowtcpforwarding|kbdinteractiveauthentication) '
+kbdinteractiveauthentication yes
+allowtcpforwarding yes
+authenticationmethods publickey,keyboard-interactive
+an@toinoi-app-01:~$ sudo systemctl reload ssh
+
+# 4. Kiểm tra bằng những lần đăng nhập thật
+an@toinoi-app-01:~$ sudo journalctl -u ssh --no-pager | grep -E 'Accepted|not allowed because|ROOT LOGIN REFUSED' | tail -n 5
+Nov 23 23:36:15 toinoi-app-01 sshd(pam_google_authenticator)[2261]: Accepted google_authenticator for an
+Nov 23 23:36:15 toinoi-app-01 sshd[2259]: Accepted keyboard-interactive/pam for an from 127.0.0.1 port 48600 ssh2
+Nov 23 23:36:16 toinoi-app-01 sshd[2352]: Accepted publickey for deploy from 127.0.0.1 port 45716 ssh2: ED25519 SHA256:yAG5n1d0W3YL5Q9tRyDrxn3P+LuTYFqC8CnyLarSPKs
+Nov 23 23:36:16 toinoi-app-01 sshd[2371]: User root from 127.0.0.1 not allowed because none of user's groups are listed in AllowGroups
+Nov 23 23:36:16 toinoi-app-01 sshd[2376]: User cuong from 127.0.0.1 not allowed because none of user's groups are listed in AllowGroups
+an@toinoi-app-01:~$ ssh -o BatchMode=yes -o PreferredAuthentications=password an@localhost true
+an@localhost: Permission denied (publickey).

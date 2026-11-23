@@ -10,6 +10,11 @@
 //   #check ĐƯỜNG NGUỒN  đối chiếu file trên server với files/NGUỒN (sau một thao tác #gui)
 //   #wait N             chờ N giây
 //   #@ lệnh             bỏ qua: runner chạy thay cho thao tác giao diện đã làm thật ở đây
+//   #sudofile sudoedit|visudo ĐƯỜNG NGUỒN [NN]   như #file nhưng mở bằng sudoedit / sudo visudo -f
+//   #login NGƯỜI KEY [otp]   cùng lần đăng nhập mô phỏng như runner (đợi khung OTP mới nếu cần)
+//
+// Lệnh bắt đầu bằng sudo hoặc sudoedit: nếu sudo dừng lại hỏi mật khẩu (tiến trình sudo chạy
+// bằng root mà chưa có tiến trình con), công cụ gõ mật khẩu của lab.
 
 import { createHash } from 'node:crypto';
 import { existsSync, mkdirSync, readFileSync, readdirSync, unlinkSync } from 'node:fs';
@@ -17,7 +22,7 @@ import { createRequire } from 'node:module';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 
-import { ROOT, reset, root, scripts } from '../../lib/lab.mjs';
+import { PASSWORD, ROOT, loginCommand, reset, root, scripts } from '../../lib/lab.mjs';
 import { open } from './app.mjs';
 
 const REPO = join(ROOT, '..', '..');
@@ -76,10 +81,29 @@ export async function chayPhan({ part, slugs, gui: makeGui, only = [], fresh = t
   }
 
   /** Gõ một file bằng vim: xoá nội dung cũ (nếu có), :set paste, gõ từng dòng, lưu. */
-  async function vimFile(path, src, shotNo) {
+  /** sudo đang chờ mật khẩu: còn tiến trình sudo mà chưa có tiến trình con nào. */
+  function sudoWaiting() {
+    const out = root('for p in $(pgrep -x sudo); do [ -z "$(pgrep -P $p)" ] && echo y; done | head -n 1');
+    return out === 'y';
+  }
+  async function answerSudo() {
+    await sleep(700);
+    if (sudoWaiting()) {
+      await c.type(PASSWORD);
+      await c.enter();
+      await sleep(900);
+    }
+  }
+
+  /** Mở trình soạn thảo bằng `cmd` (vim, sudoedit, sudo visudo -f), gõ nội dung files/src, lưu. */
+  async function vimFile(path, src, shotNo, cmd = 'vim') {
     const abs = resolvePath(path);
     const existed = root(`test -e '${abs}' && echo y || echo n`) === 'y';
-    await a.run(`vim ${path}`, 1200);
+    await a.run(`${cmd} ${path}`, 1200);
+    if (cmd !== 'vim') {
+      await answerSudo();
+      await sleep(600);
+    }
     if (existed) {
       await c.type(':%d');
       await c.enter();
@@ -104,7 +128,7 @@ export async function chayPhan({ part, slugs, gui: makeGui, only = [], fresh = t
     verify(path, src);
   }
 
-  const ctx = { a, c, sleep, shot, files, verify, vimFile, LOCAL, unlinkLocal: (f) => existsSync(join(LOCAL, f)) && unlinkSync(join(LOCAL, f)) };
+  const ctx = { a, c, sleep, shot, files, verify, vimFile, answerSudo, LOCAL, unlinkLocal: (f) => existsSync(join(LOCAL, f)) && unlinkSync(join(LOCAL, f)) };
   const gui = makeGui(ctx);
 
   async function play(script) {
@@ -121,13 +145,20 @@ export async function chayPhan({ part, slugs, gui: makeGui, only = [], fresh = t
         await gui[m[1]]();
       } else if ((m = line.match(/^#root (.+)$/))) root(m[1]);
       else if ((m = line.match(/^#file (\S+) (\S+)(?: (\d\d))?$/))) await vimFile(m[1], m[2], m[3]);
-      else if ((m = line.match(/^#check (\S+) (\S+)$/))) verify(m[1], m[2]);
+      else if ((m = line.match(/^#sudofile (sudoedit|visudo) (\S+) (\S+)(?: (\d\d))?$/)))
+        await vimFile(m[2], m[3], m[4], m[1] === 'visudo' ? 'sudo visudo -f' : 'sudoedit');
+      else if ((m = line.match(/^#login (\S+) (\S+)( otp)?$/))) {
+        // Mã OTP chỉ dùng được một lần: chờ sang khung 30 giây mới.
+        if (m[3]) await sleep((31 - (Math.floor(Date.now() / 1000) % 30)) * 1000);
+        root(`${loginCommand(m[1], m[2], !!m[3])} >/dev/null 2>&1 || true`);
+      } else if ((m = line.match(/^#check (\S+) (\S+)$/))) verify(m[1], m[2]);
       else if ((m = line.match(/^#wait (\d+)$/))) await sleep(Number(m[1]) * 1000);
       else if (line.startsWith('#')) continue;
       else {
         if (line.endsWith('\\') || /<</.test(line)) throw new Error('Chưa hỗ trợ lệnh nhiều dòng: ' + line);
         const slow = /^(sudo|find|tree|grep -r|man|cp -r|zcat|tar|shellcheck|xz|zstd|env -i|bash -x)/.test(line);
         await a.run(line, slow ? 1100 : 500);
+        if (/^(sudo|sudoedit)\b/.test(line)) await answerSudo();
       }
     }
     await a.run('cd', 250);

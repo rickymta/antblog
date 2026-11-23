@@ -645,6 +645,26 @@
     "status": "published"
   },
   {
+    "slug": "linux-qua-ssh-studio-phan-03",
+    "title": "Linux qua SSH Studio · Phần 3 · Người dùng, sudo và SSH an toàn",
+    "description": "Khoá chặt cửa vào server của nhóm: tạo và khoá tài khoản, tài khoản dịch vụ không có shell, SSH key trong thư viện của SSH Studio và authorized_keys, host key và cảnh báo khi server đổi khoá, sudo theo việc bằng visudo, gia cố sshd mà không tự khoá mình ngoài cửa, setuid, setgid, sticky bit và thư mục chung của nhóm, ACL, ssh-agent và passphrase, xác thực hai bước bằng mã TOTP — kết thúc bằng bài thực hành tài khoản deploy cho CI với Match User và bộ chấm đăng nhập thật.",
+    "level": "intermediate",
+    "category": "devops-linux",
+    "articles": [
+      "linux-quan-ly-nguoi-dung-nhom",
+      "linux-ssh-key-ssh-studio",
+      "linux-host-key-known-hosts",
+      "linux-sudo-sudoers",
+      "linux-sshd-config-an-toan",
+      "linux-setuid-setgid-sticky",
+      "linux-acl-setfacl",
+      "linux-ssh-agent-passphrase",
+      "linux-ssh-mfa-totp",
+      "linux-thuc-hanh-khoa-dang-nhap-ssh"
+    ],
+    "status": "published"
+  },
+  {
     "slug": "ba-p01-tu-duy-phan-tich-nghiep-vu",
     "title": "BA · Phần 1 · Tư duy phân tích nghiệp vụ",
     "description": "Tám bài mở đầu chương trình Business Analysis qua Tới Nơi: tư duy BA, vai trò phối hợp, phân loại yêu cầu, BACCM, mục tiêu đo lường, phạm vi và quyết định khi thiếu bằng chứng. Gồm 3 bài cơ bản, 3 bài trung bình và 2 bài nâng cao; kết thúc bằng hồ sơ đề xuất cải thiện điểm đón.",

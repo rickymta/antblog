@@ -1,0 +1,4 @@
+# Cường (vận hành) được xem log của cron, ssh và khởi động lại cron, không cần mật khẩu (LNX-024).
+# Sửa bằng: sudo visudo -f /etc/sudoers.d/cuong
+Cmnd_Alias CUONG_LOG = /usr/bin/journalctl -u cron *, /usr/bin/journalctl -u ssh *
+cuong ALL=(root) NOPASSWD: CUONG_LOG, /usr/bin/systemctl restart cron

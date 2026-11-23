@@ -255,7 +255,7 @@ Bấm **Known Hosts** ở cột bên trái:
 
 Host key bạn vừa tin cậy được lưu ở đây, gắn với `[127.0.0.1]:2222`. Từ lần kết nối sau, SSH Studio so host key server đưa ra với bản đã lưu. Trùng thì kết nối thẳng, không hỏi nữa. Khác thì SSH Studio **chặn kết nối**: hoặc server đã được cài lại, hoặc có ai đó đang giả làm server.
 
-Với lab, bạn sẽ gặp trường hợp này khi **build lại ảnh Docker** (ví dụ sau khi cập nhật lab): host key mới được sinh ra, fingerprint đổi. Cách xử lý đúng: chạy `npm run info` để lấy fingerprint mới, vào Known Hosts bấm **Quên host**, kết nối lại và đối chiếu như mục 6. Tạo lại container từ ảnh cũ (`npm run reset`) thì không đổi host key. Phần 3 của series (LNX-023) bàn kỹ về host key trên server thật.
+Với lab, bạn sẽ gặp trường hợp này khi **build lại ảnh Docker** (ví dụ sau khi cập nhật lab): host key mới được sinh ra, fingerprint đổi. Cách xử lý đúng: chạy `npm run info` để lấy fingerprint mới, vào Known Hosts bấm **Quên host**, kết nối lại và đối chiếu như mục 6. Tạo lại container từ ảnh cũ (`npm run reset`) thì không đổi host key. Phần 3 của series ([LNX-023](/articles/linux-host-key-known-hosts)) bàn kỹ về host key trên server thật.
 
 Với OpenSSH, dữ liệu tương ứng nằm trong file `~/.ssh/known_hosts`, và thao tác «Quên host» là `ssh-keygen -R '[127.0.0.1]:2222'`.
 

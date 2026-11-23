@@ -235,7 +235,7 @@ Khi dán một đoạn script vào vim đang ở chế độ Insert, bạn có t
 
 **`E37: No write since last change`.** Bạn `:q` khi còn thay đổi chưa lưu. `:wq` để lưu, `:q!` để bỏ.
 
-**`E45: 'readonly' option is set`.** File không thuộc quyền ghi của bạn. Thoát bằng `:q!`; nếu thực sự cần sửa, mở lại bằng `sudoedit` hoặc `sudo vim` (LNX-024 ở Phần 3).
+**`E45: 'readonly' option is set`.** File không thuộc quyền ghi của bạn. Thoát bằng `:q!`; nếu thực sự cần sửa, mở lại bằng `sudoedit` hoặc `sudo vim` ([LNX-024](/articles/linux-sudo-sudoers) ở Phần 3).
 
 **`:%s` thay nhầm chỗ.** `u` hoàn tác cả lệnh thay thế một lần. Lần sau thêm `c` để xác nhận từng chỗ.
 

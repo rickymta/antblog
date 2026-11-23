@@ -1,0 +1,2 @@
+# Tài khoản deploy của CI: chỉ được khởi động lại và xem trạng thái dịch vụ bao-gia (LNX-030).
+deploy ALL=(root) NOPASSWD: /usr/bin/systemctl restart bao-gia, /usr/bin/systemctl status bao-gia

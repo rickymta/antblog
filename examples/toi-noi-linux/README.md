@@ -21,6 +21,7 @@ npm run down      # xoá server
 | Tài khoản dịch vụ | `baogia` (không đăng nhập được), nhóm `toinoi` |
 | Dịch vụ mẫu | `/opt/toinoi/bao-gia` · log `/var/log/toinoi/bao-gia.log` (362 dòng cố định, ngày 21/11) |
 | Log thêm từ Phần 2 | `bao-gia.log.1` (20/11, 305 dòng) và `bao-gia.log.2.gz` (19/11, 302 dòng), do `chuan-bi.sh` đưa vào ở đầu LNX-011 |
+| Thêm từ Phần 3 | `libpam-google-authenticator`, `oathtool`; key của lab, host key thay thế và bí mật TOTP cố định trong `/usr/share/toinoi-lab/p03` (chỉ root đọc được); key «trên laptop của An» ở `may-cua-ban/khoa-lab` |
 | Trình soạn thảo | `vim` (series không dùng `nano`) |
 
 Trong SSH Studio: **Thêm server** → địa chỉ `127.0.0.1`, port `2222`, username `an`, xác thực Password. Bài [LNX-002](../../api/seed/content/linux-dung-lab-docker-ket-noi-ssh-studio.md) hướng dẫn từng bước, kể cả đối chiếu fingerprint.
@@ -29,7 +30,7 @@ Trong SSH Studio: **Thêm server** → địa chỉ `127.0.0.1`, port `2222`, us
 
 ## Làm theo từng bài
 
-Mỗi bài có một **kịch bản lệnh** trong `p01/` (bài 01…10) hoặc `p02/` (bài 11…20). Kịch bản là file `.sh` thường; bạn có thể đọc để biết bài gõ những lệnh nào.
+Mỗi bài có một **kịch bản lệnh** trong `p01/` (bài 01…10), `p02/` (bài 11…20) hoặc `p03/` (bài 21…30). Kịch bản là file `.sh` thường; bạn có thể đọc để biết bài gõ những lệnh nào.
 
 ```sh
 npm run setup -- 05     # tạo lại server, đưa về trạng thái ĐẦU bài LNX-005
@@ -39,6 +40,8 @@ node run.mjs p01 07     # như trên nhưng chỉ in bản ghi của bài 07
 npm run p02             # tạo lại server, chạy Phần 1 im lặng rồi Phần 2, in bản ghi (p02/OUTPUT.txt)
 npm run kiem-tra        # chấm bài thực hành LNX-010 trên server đang chạy
 npm run kiem-tra:p02    # chấm bài thực hành LNX-020 (20 yêu cầu)
+npm run p03             # tạo lại server, chạy Phần 1–2 im lặng rồi Phần 3 (p03/OUTPUT.txt)
+npm run kiem-tra:p03    # chấm bài thực hành LNX-030 (22 yêu cầu, gồm đăng nhập SSH thật)
 npm test                # test của runner (không cần Docker)
 ```
 
@@ -52,6 +55,8 @@ Quy ước trong file kịch bản:
 | `#root lệnh` | Runner chạy với quyền root, không in: dữ liệu của lab (ví dụ log của Phần 2) |
 | `#file ĐƯỜNG NGUỒN [NN]` | In `vim ĐƯỜNG` như một lệnh rồi ghi nội dung `pNN/files/NGUỒN` vào `ĐƯỜNG`: thay cho việc gõ file đó bằng vim |
 | `#check ĐƯỜNG NGUỒN` | Ghi `pNN/files/NGUỒN` vào `ĐƯỜNG` mà không in: kết quả của một thao tác sửa bằng vim ngay trước đó |
+| `#sudofile visudo|sudoedit ĐƯỜNG NGUỒN [NN]` | In `sudo visudo -f ĐƯỜNG` hoặc `sudoedit ĐƯỜNG` rồi ghi `pNN/files/NGUỒN` vào file hệ thống đó (Phần 3) |
+| `#login NGƯỜI KEY [otp]` | Đăng nhập SSH thật vào chính server bằng key của lab (kèm mã TOTP nếu có `otp`), không in: để log của `sshd` có những lần đăng nhập mà bài đọc |
 | `#wait N` | Chờ N giây (chờ cron chạy ở LNX-020) |
 | `#@ lệnh` | Runner chạy nhưng không in: thay cho một thao tác trên giao diện SSH Studio (upload, sửa file bằng trình sửa file, sửa bằng vim) |
 | `#clear`, `#shot NN`, `#gui tên` | Chỉ dẫn cho công cụ chụp ảnh; runner bỏ qua |
@@ -69,5 +74,7 @@ Runner chạy kịch bản trong một phiên đăng nhập của `an` có TTY r
 | `p01/NN-*.sh`, `p01/OUTPUT.txt`, `p01/kiem-tra.mjs` | Kịch bản, bản ghi mẫu và bộ chấm của Phần 1 |
 | `p02/NN-*.sh`, `p02/files/`, `p02/OUTPUT.txt`, `p02/kiem-tra.mjs` | Như trên cho Phần 2; `files/` là các script và cấu hình mà bài gõ bằng vim |
 | `docker/fixtures/p02/` | Log của 19 và 20/11 và `chuan-bi.sh` |
+| `p03/NN-*.sh`, `p03/files/`, `p03/OUTPUT.txt`, `p03/kiem-tra.mjs` | Như trên cho Phần 3; `files/` có sudoers, cấu hình sshd và PAM |
+| `docker/fixtures/p03/` | Key của lab (`an-laptop`, `deploy-ci`), host key thay thế cho LNX-023, bí mật TOTP và hai script askpass; chỉ dùng cho lab |
 | `may-cua-ban/` | Thư mục "máy của bạn" dùng cho khung local của Files (file để upload) |
 | `tools/chup-anh/` | Công cụ chụp ảnh SSH Studio cho bài viết, xem [README](tools/chup-anh/README.md) |
