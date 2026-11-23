@@ -1448,5 +1448,25 @@
       "git-thuc-hanh-lam-viec-nhom"
     ],
     "status": "published"
+  },
+  {
+    "slug": "git-qua-gitstudio-phan-04",
+    "title": "Git qua GitStudio · Phần 4 · Viết lại lịch sử và hoàn tác",
+    "description": "Đủ 10 bài GIT-031–GIT-040 qua hai ngày Minh làm tính năng phụ phí đêm: bỏ thay đổi bằng restore và clean, reset soft/mixed/hard, revert commit đã push và merge commit, cứu commit bằng reflog, nút Hoàn tác của GitStudio và lệnh git bên dưới, sửa/bỏ/đổi thứ tự commit cũ, rebase tương tác với --fixup và --autosquash, rebase --onto cho nhánh tạo sai gốc, patch qua git am và rerere; kết thúc bằng runbook hoàn tác và script chấm 10 tiêu chí. Gồm 3 bài cơ bản, 4 trung bình và 3 nâng cao.",
+    "level": "intermediate",
+    "category": "git",
+    "articles": [
+      "git-restore-bo-thay-doi",
+      "git-reset-soft-mixed-hard",
+      "git-revert-commit-da-chia-se",
+      "git-reflog-tim-lai-commit",
+      "git-undo-redo-gitstudio",
+      "git-sua-commit-message-drop-thu-tu",
+      "git-rebase-tuong-tac",
+      "git-rebase-onto",
+      "git-patch-rerere",
+      "git-thuc-hanh-don-lich-su-hoan-tac"
+    ],
+    "status": "published"
   }
 ]

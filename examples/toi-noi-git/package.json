@@ -17,6 +17,9 @@
     "kiem-tra-p02": "node p02/kiem-tra.mjs",
     "p03": "node run.mjs p03",
     "p03:output": "node run.mjs p03 > p03/OUTPUT.txt",
-    "kiem-tra-p03": "node p03/kiem-tra.mjs"
+    "kiem-tra-p03": "node p03/kiem-tra.mjs",
+    "p04": "node run.mjs p04",
+    "p04:output": "node run.mjs p04 > p04/OUTPUT.txt",
+    "kiem-tra-p04": "node p04/kiem-tra.mjs"
   }
 }

@@ -6755,5 +6755,105 @@
       "REVIEW",
       "PRUNE"
     ]
+  },
+  "git-restore-bo-thay-doi": {
+    "title": "RESTORE · CLEAN",
+    "subtitle": "Bỏ thay đổi chưa commit, từng file, từng hunk",
+    "diagram": "blocks",
+    "labels": [
+      "WORKING",
+      "STAGING",
+      "CLEAN"
+    ]
+  },
+  "git-reset-soft-mixed-hard": {
+    "title": "RESET",
+    "subtitle": "Soft, mixed, hard: thay đổi nằm lại ở đâu",
+    "diagram": "layers",
+    "labels": [
+      "SOFT",
+      "MIXED",
+      "HARD"
+    ]
+  },
+  "git-revert-commit-da-chia-se": {
+    "title": "REVERT",
+    "subtitle": "Hoàn tác commit đã push, cả merge commit",
+    "diagram": "flow",
+    "labels": [
+      "COMMIT",
+      "REVERT",
+      "PUSH"
+    ]
+  },
+  "git-reflog-tim-lai-commit": {
+    "title": "REFLOG",
+    "subtitle": "Tìm lại commit sau reset, xoá nhánh, rebase",
+    "diagram": "map",
+    "labels": [
+      "HEAD@{1}",
+      "NHÁNH@{1}",
+      "ORIG_HEAD"
+    ]
+  },
+  "git-undo-redo-gitstudio": {
+    "title": "HOÀN TÁC · LÀM LẠI",
+    "subtitle": "Nút Undo của GitStudio và lệnh git bên dưới",
+    "diagram": "cycle",
+    "labels": [
+      "UNDO",
+      "REDO",
+      "RESET --KEEP"
+    ]
+  },
+  "git-sua-commit-message-drop-thu-tu": {
+    "title": "SỬA COMMIT",
+    "subtitle": "Sửa nội dung, bỏ commit, đổi thứ tự",
+    "diagram": "split",
+    "labels": [
+      "REWORD",
+      "↔",
+      "DROP"
+    ]
+  },
+  "git-rebase-tuong-tac": {
+    "title": "REBASE -I",
+    "subtitle": "Squash, fixup, --autosquash trước pull request",
+    "diagram": "checklist",
+    "labels": [
+      "PICK",
+      "FIXUP",
+      "SQUASH"
+    ]
+  },
+  "git-rebase-onto": {
+    "title": "REBASE --ONTO",
+    "subtitle": "Chuyển chuỗi commit sang gốc đúng",
+    "diagram": "network",
+    "labels": [
+      "GỐC CŨ",
+      "GỐC MỚI",
+      "NHÁNH"
+    ]
+  },
+  "git-patch-rerere": {
+    "title": "PATCH · RERERE",
+    "subtitle": "git am giữ tác giả, Git nhớ cách giải xung đột",
+    "diagram": "target",
+    "labels": [
+      "FORMAT-PATCH",
+      "AM",
+      "RERERE"
+    ]
+  },
+  "git-thuc-hanh-don-lich-su-hoan-tac": {
+    "title": "PHẦN 4 · LAB",
+    "subtitle": "Nhánh đã dọn và runbook hoàn tác · 10 tiêu chí",
+    "diagram": "matrix",
+    "labels": [
+      "REBASE",
+      "REVERT",
+      "RUNBOOK"
+    ]
   }
 }

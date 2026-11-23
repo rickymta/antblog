@@ -1,0 +1,575 @@
+
+# ==================== p04/31-restore-bo-thay-doi.mjs · GIT-031 ====================
+# Minh thử sửa hai file rồi đổi ý
+$ git status -s
+ M README.md
+ M src/BaoGia/FareCalculator.cs
+$ git restore src/BaoGia/FareCalculator.cs
+$ git status -s
+ M README.md
+
+# Lỡ stage README.md: đưa ra khỏi staging area, thay đổi vẫn còn trong file
+$ git add README.md
+$ git status -s
+M  README.md
+$ git restore --staged README.md
+$ git status -s
+ M README.md
+$ git restore README.md
+
+# Bỏ một phần: sửa hai chỗ trong WaitingFee.cs, restore -p hỏi từng hunk (y = bỏ, n = giữ)
+$ git restore -p src/BaoGia/WaitingFee.cs
+diff --git a/src/BaoGia/WaitingFee.cs b/src/BaoGia/WaitingFee.cs
+index 8a8003c..acef789 100644
+--- a/src/BaoGia/WaitingFee.cs
++++ b/src/BaoGia/WaitingFee.cs
+@@ -3,7 +3,7 @@ namespace ToiNoi.BaoGia;
+ /// <summary>Phí chờ tại điểm đón: miễn phí 5 phút đầu, sau đó 1.000 đ mỗi phút, tối đa 30.000 đ.</summary>
+ public static class WaitingFee
+ {
+-    private const int FreeMinutes = 5;
++    private const int FreeMinutes = 10;
+ 
+     public static decimal Calculate(int waitedMinutes)
+     {
+(1/2) Discard this hunk from worktree [y,n,q,a,d,j,J,g,/,e,p,?]? @@ -11,6 +11,7 @@ public static class WaitingFee
+             throw new ArgumentOutOfRangeException(nameof(waitedMinutes));
+ 
+         var billable = Math.Max(waitedMinutes - FreeMinutes, 0);
++        // TODO: xem lại mức tối đa
+         return Math.Min(billable * 1000m, 30000m);
+     }
+ }
+(2/2) Discard this hunk from worktree [y,n,q,a,d,K,g,/,e,p,?]? 
+$ git diff
+diff --git a/src/BaoGia/WaitingFee.cs b/src/BaoGia/WaitingFee.cs
+index 8a8003c..a66d9bf 100644
+--- a/src/BaoGia/WaitingFee.cs
++++ b/src/BaoGia/WaitingFee.cs
+@@ -11,6 +11,7 @@ public static class WaitingFee
+             throw new ArgumentOutOfRangeException(nameof(waitedMinutes));
+ 
+         var billable = Math.Max(waitedMinutes - FreeMinutes, 0);
++        // TODO: xem lại mức tối đa
+         return Math.Min(billable * 1000m, 30000m);
+     }
+ }
+$ git restore src/BaoGia/WaitingFee.cs
+
+# Lấy một file như ở bản phát hành v1.0.0 mà không đổi HEAD, rồi trả lại
+$ git restore --source=v1.0.0 src/BaoGia/FareCalculator.cs
+$ git diff --stat
+ src/BaoGia/FareCalculator.cs | 7 +++----
+ 1 file changed, 3 insertions(+), 4 deletions(-)
+$ git restore src/BaoGia/FareCalculator.cs
+
+# File mới chưa track: restore không đụng tới, dùng clean (xem trước bằng -n)
+$ git restore .
+$ git status -s
+?? ghi-chu-tam.txt
+$ git clean -n
+Would remove ghi-chu-tam.txt
+$ git clean -f
+Removing ghi-chu-tam.txt
+$ git status -s
+PASS working tree sạch như lúc đầu
+PASS ref của Minh trùng lịch sử chuẩn
+PASS ref của remote trùng lịch sử chuẩn
+PASS ref của Lan trùng lịch sử chuẩn
+
+# ==================== p04/32-reset-soft-mixed-hard.mjs · GIT-032 ====================
+# Nhánh thử thu/reset với ba commit, đã push
+$ git switch -c thu/reset
+Switched to a new branch 'thu/reset'
+$ git add docs/thu-reset.md
+$ git commit -q -m "Thử reset: dòng 1"
+$ git commit -q -am "Thử reset: dòng 2"
+$ git commit -q -am "Thử reset: dòng 3"
+$ git push -q -u origin thu/reset
+$ git log --oneline -4
+a08674d Thử reset: dòng 3
+d1cbbdf Thử reset: dòng 2
+1ab8585 Thử reset: dòng 1
+e93038f Ghi múi giờ áp dụng bảng giá
+
+# --soft: nhánh lùi một commit, thay đổi của commit đó nằm lại trong staging area
+$ git reset --soft HEAD~1
+$ git status -sb
+## thu/reset...origin/thu/reset [behind 1]
+M  docs/thu-reset.md
+$ git log --oneline -1
+d1cbbdf Thử reset: dòng 2
+
+# Commit lại (thành commit mới), rồi --mixed (mặc định): thay đổi nằm lại trong working tree, chưa stage
+$ git commit -q -m "Thử reset: dòng 3 (làm lại)"
+$ git reset HEAD~1
+Unstaged changes after reset:
+M	docs/thu-reset.md
+$ git status -sb
+## thu/reset...origin/thu/reset [behind 1]
+ M docs/thu-reset.md
+
+# --hard: bỏ luôn thay đổi trong staging area và working tree
+$ git reset --hard HEAD
+HEAD is now at d1cbbdf Thử reset: dòng 2
+$ git status -sb
+## thu/reset...origin/thu/reset [behind 1]
+$ git show HEAD:docs/thu-reset.md
+Dòng 1
+Dòng 2
+
+# Nhánh đã push mà lùi lại: push thường bị từ chối
+$ git push
+To <lab>/work/remote/bao-gia.git
+ ! [rejected]        thu/reset -> thu/reset (non-fast-forward)
+error: failed to push some refs to '<lab>/work/remote/bao-gia.git'
+hint: Updates were rejected because the tip of your current branch is behind
+hint: its remote counterpart. If you want to integrate the remote changes,
+hint: use 'git pull' before pushing again.
+hint: See the 'Note about fast-forwards' in 'git push --help' for details.
+
+# Dọn nhánh thử
+$ git switch -q main
+$ git push -q origin --delete thu/reset
+$ git branch -q -D thu/reset
+PASS ref của Minh trùng lịch sử chuẩn
+PASS ref của remote trùng lịch sử chuẩn
+PASS ref của Lan trùng lịch sử chuẩn
+
+# ==================== p04/33-revert-commit-da-chia-se.mjs · GIT-033 ====================
+# Minh tăng phí chờ tối đa lên 50.000 đ và push
+$ git commit -am "Tăng phí chờ tối đa lên 50.000 đ"
+[main 17b8c3c] Tăng phí chờ tối đa lên 50.000 đ
+ 1 file changed, 2 insertions(+), 2 deletions(-)
+$ git push
+To <lab>/work/remote/bao-gia.git
+   e93038f..17b8c3c  main -> main
+
+# Bộ phận vận hành chưa duyệt mức mới: hoàn tác bằng một commit đảo ngược, không viết lại main
+$ git revert --no-edit HEAD
+[main c19b370] Revert "Tăng phí chờ tối đa lên 50.000 đ"
+ Date: Tue Nov 24 09:30:00 2026 +0700
+ 1 file changed, 2 insertions(+), 2 deletions(-)
+$ git log -2 --format="%h %s%n%b"
+c19b370 Revert "Tăng phí chờ tối đa lên 50.000 đ"
+This reverts commit 17b8c3c3a02ecb3df3c72c6da63bbcfdfd93997d.
+
+17b8c3c Tăng phí chờ tối đa lên 50.000 đ
+$ git show --stat --format="%h %s" HEAD
+c19b370 Revert "Tăng phí chờ tối đa lên 50.000 đ"
+
+ src/BaoGia/WaitingFee.cs | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
+$ git push
+To <lab>/work/remote/bao-gia.git
+   17b8c3c..c19b370  main -> main
+PASS phí chờ tối đa trở lại 30.000 đ
+
+# Revert một merge commit phải chọn nhánh cha giữ lại (-m 1 = nhánh đang đứng khi merge)
+$ git switch -c thu/revert-merge
+Switched to a new branch 'thu/revert-merge'
+$ git revert --no-edit d263a4d
+error: commit d263a4dc7c76e7fc2a4624bf796c9b2f76471bb6 is a merge but no -m option was given.
+fatal: revert failed
+$ git revert --no-edit -m 1 d263a4d
+[thu/revert-merge d032b05] Revert "Merge remote-tracking branch 'lan-fork/sua/tai-lieu-phi-cho'"
+ Date: Tue Nov 24 10:00:00 2026 +0700
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+$ git show --stat --format="%h %s" HEAD
+d032b05 Revert "Merge remote-tracking branch 'lan-fork/sua/tai-lieu-phi-cho'"
+
+ docs/phi-cho.md | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+$ git switch -q main
+$ git branch -q -D thu/revert-merge
+PASS ref của Minh trùng lịch sử chuẩn
+PASS ref của remote trùng lịch sử chuẩn
+PASS ref của Lan trùng lịch sử chuẩn
+
+# ==================== p04/34-reflog-tim-lai-commit.mjs · GIT-034 ====================
+# Lỡ tay: reset --hard lùi main hai commit
+$ git reset --hard HEAD~2
+HEAD is now at e93038f Ghi múi giờ áp dụng bảng giá
+$ git log --oneline -1
+e93038f Ghi múi giờ áp dụng bảng giá
+$ git reflog -3
+e93038f HEAD@{0}: reset: moving to HEAD~2
+c19b370 HEAD@{1}: revert: Revert "Tăng phí chờ tối đa lên 50.000 đ"
+17b8c3c HEAD@{2}: commit: Tăng phí chờ tối đa lên 50.000 đ
+# Mục HEAD@{1} là chỗ HEAD đứng ngay trước lệnh reset
+$ git reset --hard HEAD@{1}
+HEAD is now at c19b370 Revert "Tăng phí chờ tối đa lên 50.000 đ"
+$ git status -sb
+## main...origin/main
+
+# Xoá nhầm một nhánh chưa merge
+$ git switch -q -c thu/ghi-chu
+$ git add docs/ghi-chu.md
+$ git commit -q -m "Ghi ý tưởng giảm phí chờ"
+$ git switch -q main
+$ git branch -D thu/ghi-chu
+Deleted branch thu/ghi-chu (was 5ff3c7d).
+$ git reflog -2
+c19b370 HEAD@{0}: checkout: moving from thu/ghi-chu to main
+5ff3c7d HEAD@{1}: commit: Ghi ý tưởng giảm phí chờ
+$ git branch thu/ghi-chu HEAD@{1}
+$ git log --oneline -1 thu/ghi-chu
+5ff3c7d Ghi ý tưởng giảm phí chờ
+$ git branch -q -D thu/ghi-chu
+
+# Rebase xong mới thấy sai: reflog của chính nhánh giữ vị trí trước rebase
+$ git switch -q -c thu/rebase HEAD~2
+$ git add docs/ghi-chu.md
+$ git commit -q -m "Nháp trên nhánh thu/rebase"
+$ git rebase -q main
+$ git reflog -3 thu/rebase
+f634cf0 thu/rebase@{0}: rebase (finish): refs/heads/thu/rebase onto c19b3708225fb4a3ed4090804fe37a706e863d92
+c96052c thu/rebase@{1}: commit: Nháp trên nhánh thu/rebase
+e93038f thu/rebase@{2}: branch: Created from HEAD~2
+$ git reset --hard thu/rebase@{1}
+HEAD is now at c96052c Nháp trên nhánh thu/rebase
+$ git log --oneline -2
+c96052c Nháp trên nhánh thu/rebase
+e93038f Ghi múi giờ áp dụng bảng giá
+$ git switch -q main
+$ git branch -q -D thu/rebase
+PASS ref của Minh trùng lịch sử chuẩn
+PASS ref của remote trùng lịch sử chuẩn
+PASS ref của Lan trùng lịch sử chuẩn
+
+# ==================== p04/35-undo-redo-gitstudio.mjs · GIT-035 ====================
+# Commit (hoặc amend): Hoàn tác = reset --soft về commit trước; thay đổi còn nguyên, đã stage
+$ git commit -q -am "Ghi chú thử"
+$ git reset --soft HEAD~1
+$ git status -s
+M  README.md
+$ git restore --staged README.md
+$ git restore README.md
+
+# Merge, pull, revert, cherry-pick, sửa/bỏ commit, rebase: Hoàn tác = reset --keep về đỉnh nhánh cũ
+$ git revert --no-edit HEAD
+[main 65d94b6] Reapply "Tăng phí chờ tối đa lên 50.000 đ"
+ Date: Tue Nov 24 12:10:00 2026 +0700
+ 1 file changed, 2 insertions(+), 2 deletions(-)
+$ git log --oneline -1
+65d94b6 Reapply "Tăng phí chờ tối đa lên 50.000 đ"
+# --keep từ chối nếu file sẽ bị đổi đang có thay đổi chưa commit (an toàn hơn --hard)
+$ git reset --keep HEAD~1
+error: Entry 'src/BaoGia/WaitingFee.cs' not uptodate. Cannot merge.
+fatal: Could not reset index file to revision 'HEAD~1'.
+$ git restore src/BaoGia/WaitingFee.cs
+$ git reset --keep HEAD~1
+$ git status -sb
+## main...origin/main
+
+# Huỷ bỏ thay đổi trong GitStudio chạy checkout -- (và clean -f cho file mới): không có bản sao nào để lấy lại
+$ git checkout -- README.md
+$ git status -s
+$ git stash list
+PASS ref của Minh trùng lịch sử chuẩn
+PASS ref của remote trùng lịch sử chuẩn
+PASS ref của Lan trùng lịch sử chuẩn
+
+# ==================== p04/36-sua-commit-message-drop-thu-tu.mjs · GIT-036 ====================
+# Nhánh tinh-nang/phu-phi-dem sau một buổi chiều: tên sai chính tả, commit debug, commit sửa nằm cách xa commit gốc
+$ git log --oneline main..HEAD
+4fa2aac Sửa giờ kết thúc phụ phí đêm thành 5h
+3d14848 Thêm test phụ phí đêm
+9336ece debug: in giờ bắt đầu chuyến
+f9bf9e9 Thêm phụ phi đêm
+
+# Sửa nội dung một commit cũ (cách GitStudio làm): commit "amend!" rỗng, rồi rebase --autosquash
+$ git commit --allow-empty --only -m "amend! Thêm phụ phi đêm" -m "Thêm phụ phí đêm"
+[tinh-nang/phu-phi-dem c10b136] amend! Thêm phụ phi đêm
+$ git rebase -i --autosquash main
+pick f9bf9e9 # Thêm phụ phi đêm
+fixup -C c10b136 # amend! Thêm phụ phi đêm # empty
+pick 9336ece # debug: in giờ bắt đầu chuyến
+pick 3d14848 # Thêm test phụ phí đêm
+pick 4fa2aac # Sửa giờ kết thúc phụ phí đêm thành 5h
+Rebasing (2/5)Rebasing (3/5)Rebasing (4/5)Rebasing (5/5)Successfully rebased and updated refs/heads/tinh-nang/phu-phi-dem.
+$ git log --oneline main..HEAD
+06693ec Sửa giờ kết thúc phụ phí đêm thành 5h
+749f67c Thêm test phụ phí đêm
+0022dbb debug: in giờ bắt đầu chuyến
+ba63c45 Thêm phụ phí đêm
+
+# Bỏ commit debug: rebase --onto <cha của nó> <nó> chép lại các commit phía sau, bỏ đúng commit đó
+$ git rebase --onto 0022dbb~1 0022dbb
+Rebasing (1/2)Rebasing (2/2)Successfully rebased and updated refs/heads/tinh-nang/phu-phi-dem.
+$ git log --oneline main..HEAD
+92544ea Sửa giờ kết thúc phụ phí đêm thành 5h
+efd6c4d Thêm test phụ phí đêm
+ba63c45 Thêm phụ phí đêm
+$ git grep -n Console.WriteLine -- src
+
+# Đổi thứ tự: đưa commit sửa giờ lên ngay sau commit đầu (đổi chỗ hai dòng trong todo)
+$ git rebase -i HEAD~2
+pick efd6c4d # Thêm test phụ phí đêm
+pick 92544ea # Sửa giờ kết thúc phụ phí đêm thành 5h
+Rebasing (1/2)Rebasing (2/2)Successfully rebased and updated refs/heads/tinh-nang/phu-phi-dem.
+$ git log --oneline main..HEAD
+c682a26 Thêm test phụ phí đêm
+ec0ae3a Sửa giờ kết thúc phụ phí đêm thành 5h
+ba63c45 Thêm phụ phí đêm
+PASS ref của Minh trùng lịch sử chuẩn
+PASS ref của remote trùng lịch sử chuẩn
+PASS ref của Lan trùng lịch sử chuẩn
+
+# ==================== p04/37-rebase-tuong-tac.mjs · GIT-037 ====================
+$ git log --oneline main..HEAD
+c682a26 Thêm test phụ phí đêm
+ec0ae3a Sửa giờ kết thúc phụ phí đêm thành 5h
+ba63c45 Thêm phụ phí đêm
+
+# Thêm ca biên 22:00 vào test, ghi thành commit fixup! cho commit test
+$ git commit -a --fixup HEAD
+[tinh-nang/phu-phi-dem b25820f] fixup! Thêm test phụ phí đêm
+ 1 file changed, 4 insertions(+)
+$ git log --oneline main..HEAD
+b25820f fixup! Thêm test phụ phí đêm
+c682a26 Thêm test phụ phí đêm
+ec0ae3a Sửa giờ kết thúc phụ phí đêm thành 5h
+ba63c45 Thêm phụ phí đêm
+
+# rebase -i --autosquash main: Git tự xếp fixup! ngay dưới commit đích;
+# ta đổi thêm commit sửa giờ thành fixup để gộp vào commit đầu (dòng in ra là todo Git đề xuất)
+$ git rebase -i --autosquash main
+pick ba63c45 # Thêm phụ phí đêm
+pick ec0ae3a # Sửa giờ kết thúc phụ phí đêm thành 5h
+pick c682a26 # Thêm test phụ phí đêm
+fixup b25820f # fixup! Thêm test phụ phí đêm
+Rebasing (2/4)Rebasing (3/4)Rebasing (4/4)Successfully rebased and updated refs/heads/tinh-nang/phu-phi-dem.
+$ git log --format="%h %ai %s" main..HEAD
+40d9795 2026-11-24 14:40:00 +0700 Thêm test phụ phí đêm
+3158035 2026-11-24 14:00:00 +0700 Thêm phụ phí đêm
+$ git show --stat --format="%h %s" HEAD~1
+3158035 Thêm phụ phí đêm
+
+ docs/phi-cho.md              |  2 +-
+ src/BaoGia/NightSurcharge.cs | 17 +++++++++++++++++
+ 2 files changed, 18 insertions(+), 1 deletion(-)
+$ git diff --stat main
+ docs/phi-cho.md                           |  2 +-
+ src/BaoGia/NightSurcharge.cs              | 17 +++++++++++++++++
+ tests/BaoGia.Tests/NightSurchargeTests.cs | 19 +++++++++++++++++++
+ 3 files changed, 37 insertions(+), 1 deletion(-)
+PASS nhánh còn đúng 2 commit
+PASS ref của Minh trùng lịch sử chuẩn
+PASS ref của remote trùng lịch sử chuẩn
+PASS ref của Lan trùng lịch sử chuẩn
+
+# ==================== p04/38-rebase-onto.mjs · GIT-038 ====================
+# Minh tạo nhánh sửa lỗi phí chờ trong lúc vẫn đứng ở nhánh tính năng
+$ git branch --show-current
+tinh-nang/phu-phi-dem
+$ git switch -c sua/lam-tron-giay-cho
+Switched to a new branch 'sua/lam-tron-giay-cho'
+$ git commit -am "Tính phí chờ từ số giây, làm tròn lên phút"
+[sua/lam-tron-giay-cho e2cc862] Tính phí chờ từ số giây, làm tròn lên phút
+ 1 file changed, 4 insertions(+)
+# Merge nhánh này vào main sẽ kéo theo cả hai commit phụ phí đêm chưa review:
+$ git log --oneline main..sua/lam-tron-giay-cho
+e2cc862 Tính phí chờ từ số giây, làm tròn lên phút
+40d9795 Thêm test phụ phí đêm
+3158035 Thêm phụ phí đêm
+
+# rebase --onto <gốc mới> <gốc cũ> <nhánh>: chép các commit sau gốc cũ lên gốc mới
+$ git rebase --onto main tinh-nang/phu-phi-dem sua/lam-tron-giay-cho
+Rebasing (1/1)Successfully rebased and updated refs/heads/sua/lam-tron-giay-cho.
+$ git log --oneline main..sua/lam-tron-giay-cho
+8a0b649 Tính phí chờ từ số giây, làm tròn lên phút
+$ git log --oneline main..tinh-nang/phu-phi-dem
+40d9795 Thêm test phụ phí đêm
+3158035 Thêm phụ phí đêm
+
+# Sửa lỗi nhỏ, đã review: đưa vào main bằng fast-forward, push, xoá nhánh
+$ git switch main
+Your branch is up to date with 'origin/main'.
+Switched to branch 'main'
+$ git merge --ff-only sua/lam-tron-giay-cho
+Updating c19b370..8a0b649
+Fast-forward
+ src/BaoGia/WaitingFee.cs | 4 ++++
+ 1 file changed, 4 insertions(+)
+$ git push
+To <lab>/work/remote/bao-gia.git
+   c19b370..8a0b649  main -> main
+$ git branch -d sua/lam-tron-giay-cho
+Deleted branch sua/lam-tron-giay-cho (was 8a0b649).
+PASS ref của Minh trùng lịch sử chuẩn
+PASS ref của remote trùng lịch sử chuẩn
+PASS ref của Lan trùng lịch sử chuẩn
+
+# ==================== p04/39-patch-rerere.mjs · GIT-039 ====================
+# Lan chưa có quyền push: sửa tài liệu trên nhánh riêng rồi xuất patch gửi Minh
+$ cd ../lan/bao-gia
+$ git fetch -q upstream
+$ git switch -c sua/phi-cho-moi-chuyen upstream/main
+branch 'sua/phi-cho-moi-chuyen' set up to track 'upstream/main'.
+Switched to a new branch 'sua/phi-cho-moi-chuyen'
+$ git commit -q -am "Ghi rõ phí chờ tối đa tính cho mỗi chuyến"
+$ git format-patch -1 -o ../patches
+../patches/0001-Ghi-r-ph-ch-t-i-a-t-nh-cho-m-i-chuy-n.patch
+$ git switch -q main
+$ git branch -q -D sua/phi-cho-moi-chuyen
+
+# Minh xem patch, thử áp, rồi git am: tác giả vẫn là Lan, Minh là người commit
+$ cd ../../bao-gia
+$ git apply --stat ../lan/patches/0001-Ghi-r-ph-ch-t-i-a-t-nh-cho-m-i-chuy-n.patch
+ docs/phi-cho.md |    2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+$ git apply --check ../lan/patches/0001-Ghi-r-ph-ch-t-i-a-t-nh-cho-m-i-chuy-n.patch
+$ git am ../lan/patches/0001-Ghi-r-ph-ch-t-i-a-t-nh-cho-m-i-chuy-n.patch
+Applying: Ghi rõ phí chờ tối đa tính cho mỗi chuyến
+$ git log -1 --format=fuller
+commit 2a6b5f910c686d98002159e445ed4f1a20137b31
+Author:     Lê Lan <lan@toinoi.test>
+AuthorDate: Wed Nov 25 11:00:00 2026 +0700
+Commit:     Trần Minh <minh@toinoi.test>
+CommitDate: Wed Nov 25 11:30:00 2026 +0700
+
+    Ghi rõ phí chờ tối đa tính cho mỗi chuyến
+$ git push
+To <lab>/work/remote/bao-gia.git
+   8a0b649..2a6b5f9  main -> main
+
+# rerere: bật, thử merge main vào nhánh tính năng; Git ghi lại xung đột và cách giải quyết
+$ git config rerere.enabled true
+$ git switch -q tinh-nang/phu-phi-dem
+$ git merge main
+Auto-merging docs/phi-cho.md
+CONFLICT (content): Merge conflict in docs/phi-cho.md
+Automatic merge failed; fix conflicts and then commit the result.
+Recorded preimage for 'docs/phi-cho.md'
+$ git diff
+diff --cc docs/phi-cho.md
+index 47677af,93d94bd..0000000
+--- a/docs/phi-cho.md
++++ b/docs/phi-cho.md
+@@@ -1,5 -1,5 +1,9 @@@
+  # Phí chờ
+  
+++<<<<<<< HEAD
+ +Tài xế chờ quá 5 phút tại điểm đón: mỗi phút tiếp theo tính thêm 1.000 đ, tối đa 30.000 đ. Phí chờ không cộng phụ phí đêm.
+++=======
++ Tài xế chờ quá 5 phút tại điểm đón: mỗi phút tiếp theo tính thêm 1.000 đ, tối đa 30.000 đ cho mỗi chuyến.
+++>>>>>>> main
+  
+  Không tính phí chờ khi khách huỷ chuyến trước khi xe tới.
+$ git add docs/phi-cho.md
+$ git merge --continue
+[tinh-nang/phu-phi-dem 062f874] Merge branch 'main' into tinh-nang/phu-phi-dem
+Recorded resolution for 'docs/phi-cho.md'.
+$ Get-ChildItem -Force -Name .git/rr-cache
+16ebe13b5b9acd41a45dde47dc5f42a6f2f5f4b0
+# Merge thử chỉ để ghi nhớ; bỏ nó, nhánh tính năng giữ nguyên hai commit đã dọn
+$ git reset -q --hard HEAD~1
+$ git switch -q main
+PASS ref của Minh trùng lịch sử chuẩn
+PASS ref của remote trùng lịch sử chuẩn
+PASS ref của Lan trùng lịch sử chuẩn
+
+# ==================== p04/40-thuc-hanh.mjs · GIT-040 ====================
+# Merge nhánh phụ phí đêm đã dọn vào main: rerere tự giải quyết xung đột đã gặp ở GIT-039
+$ git log --oneline main..tinh-nang/phu-phi-dem
+40d9795 Thêm test phụ phí đêm
+3158035 Thêm phụ phí đêm
+$ git merge --no-ff tinh-nang/phu-phi-dem
+Auto-merging docs/phi-cho.md
+CONFLICT (content): Merge conflict in docs/phi-cho.md
+Automatic merge failed; fix conflicts and then commit the result.
+Resolved 'docs/phi-cho.md' using previous resolution.
+$ git diff
+diff --cc docs/phi-cho.md
+index 93d94bd,47677af..0000000
+--- a/docs/phi-cho.md
++++ b/docs/phi-cho.md
+@@@ -1,5 -1,5 +1,5 @@@
+  # Phí chờ
+  
+- Tài xế chờ quá 5 phút tại điểm đón: mỗi phút tiếp theo tính thêm 1.000 đ, tối đa 30.000 đ cho mỗi chuyến.
+ -Tài xế chờ quá 5 phút tại điểm đón: mỗi phút tiếp theo tính thêm 1.000 đ, tối đa 30.000 đ. Phí chờ không cộng phụ phí đêm.
+++Tài xế chờ quá 5 phút tại điểm đón: mỗi phút tiếp theo tính thêm 1.000 đ, tối đa 30.000 đ cho mỗi chuyến. Phí chờ không cộng phụ phí đêm.
+  
+  Không tính phí chờ khi khách huỷ chuyến trước khi xe tới.
+$ git add docs/phi-cho.md
+$ git merge --continue
+[main 90905d3] Merge branch 'tinh-nang/phu-phi-dem'
+$ git push -q
+$ git branch -d tinh-nang/phu-phi-dem
+Deleted branch tinh-nang/phu-phi-dem (was 40d9795).
+
+# Runbook hoàn tác của nhóm, commit và push
+$ git add docs/runbook-hoan-tac.md
+$ git commit -q -m "Thêm runbook hoàn tác"
+$ git push -q
+$ git log --oneline --graph -7
+* 5f830ad Thêm runbook hoàn tác
+*   90905d3 Merge branch 'tinh-nang/phu-phi-dem'
+|\  
+| * 40d9795 Thêm test phụ phí đêm
+| * 3158035 Thêm phụ phí đêm
+* | 2a6b5f9 Ghi rõ phí chờ tối đa tính cho mỗi chuyến
+* | 8a0b649 Tính phí chờ từ số giây, làm tròn lên phút
+|/  
+* c19b370 Revert "Tăng phí chờ tối đa lên 50.000 đ"
+PASS ref của Minh trùng lịch sử chuẩn
+PASS ref của remote trùng lịch sử chuẩn
+PASS ref của Lan trùng lịch sử chuẩn
+$ node ../../p04/kiem-tra.mjs .
+ĐẠT      main cục bộ trùng main trên remote
+ĐẠT      nhánh tinh-nang/phu-phi-dem đã merge vào main
+ĐẠT      nhánh tính năng vào main gọn: đúng 2 commit
+ĐẠT      main không có commit fixup!/squash!/amend!/WIP/debug
+ĐẠT      code trên main không còn dòng in debug
+ĐẠT      phí chờ tối đa vẫn 30.000 đ (đã revert mức 50.000 đ)
+ĐẠT      đã bật rerere
+ĐẠT      main có docs/runbook-hoan-tac.md nhắc restore, reset, revert, reflog
+ĐẠT      không còn nhánh cục bộ thừa (chỉ main, phat-hanh/*)
+ĐẠT      working tree sạch, không có thao tác dở dang
+10/10 tiêu chí đạt
+PASS repository đạt mọi tiêu chí
+
+# Làm hỏng có chủ đích: commit WIP chưa push, tắt rerere, nhánh nháp còn sót
+$ git commit -q --allow-empty -m "WIP thử nghiệm"
+$ git config rerere.enabled false
+$ git branch thu/nhap
+$ node ../../p04/kiem-tra.mjs .
+CHƯA ĐẠT main cục bộ trùng main trên remote — cục bộ 3ff91a2, remote 5f830ad
+ĐẠT      nhánh tinh-nang/phu-phi-dem đã merge vào main
+ĐẠT      nhánh tính năng vào main gọn: đúng 2 commit
+CHƯA ĐẠT main không có commit fixup!/squash!/amend!/WIP/debug — 3ff91a2 WIP thử nghiệm
+ĐẠT      code trên main không còn dòng in debug
+ĐẠT      phí chờ tối đa vẫn 30.000 đ (đã revert mức 50.000 đ)
+CHƯA ĐẠT đã bật rerere — rerere.enabled chưa là true
+ĐẠT      main có docs/runbook-hoan-tac.md nhắc restore, reset, revert, reflog
+CHƯA ĐẠT không còn nhánh cục bộ thừa (chỉ main, phat-hanh/*) — thu/nhap
+ĐẠT      working tree sạch, không có thao tác dở dang
+6/10 tiêu chí đạt
+PASS kiểm tra bắt được 4 lỗi
+
+# Sửa: bỏ commit chưa push (reset về origin/main), bật lại rerere, xoá nhánh nháp
+$ git reset --hard origin/main
+HEAD is now at 5f830ad Thêm runbook hoàn tác
+$ git config rerere.enabled true
+$ git branch -D thu/nhap
+Deleted branch thu/nhap (was 3ff91a2).
+$ node ../../p04/kiem-tra.mjs .
+ĐẠT      main cục bộ trùng main trên remote
+ĐẠT      nhánh tinh-nang/phu-phi-dem đã merge vào main
+ĐẠT      nhánh tính năng vào main gọn: đúng 2 commit
+ĐẠT      main không có commit fixup!/squash!/amend!/WIP/debug
+ĐẠT      code trên main không còn dòng in debug
+ĐẠT      phí chờ tối đa vẫn 30.000 đ (đã revert mức 50.000 đ)
+ĐẠT      đã bật rerere
+ĐẠT      main có docs/runbook-hoan-tac.md nhắc restore, reset, revert, reflog
+ĐẠT      không còn nhánh cục bộ thừa (chỉ main, phat-hanh/*)
+ĐẠT      working tree sạch, không có thao tác dở dang
+10/10 tiêu chí đạt
+PASS sửa xong đạt mọi tiêu chí
+
+# [lab] Bài đã chạy: 10
+# [lab] PASS: 36
+# [lab] FAIL: 0
+# [lab] KẾT QUẢ: ĐẠT

@@ -1,11 +1,11 @@
 {
   "version": 1,
   "category": "git",
-  "generatedAt": "2026-11-23",
+  "generatedAt": "2026-11-24",
   "source": {
-    "articles": 30,
-    "checkedAgainst": "api/seed/terminology.json và các file glossary-candidates hiện có (đếm lại 23/11/2026 khi thêm Phần 3)",
-    "occurrencesMethod": "Như postgresql.json: occurrences = số bài Git P01–P03 (30 bài, git-*) có ít nhất một chỗ khớp term/english/aliases trong văn xuôi; mentions = tổng số chỗ khớp. Bỏ frontmatter, khối code, inline code, thẻ HTML (giữ alt), đích liên kết, URL. Ranh giới từ Unicode, cụm dài thắng cụm ngắn, tôn trọng caseSensitive. outsideSeriesArticles = số bài ngoài series có chỗ khớp. Phần lớn tên lệnh và tên file nằm trong inline code nên không được đếm. Đếm lại khi viết thêm phần."
+    "articles": 40,
+    "checkedAgainst": "api/seed/terminology.json và các file glossary-candidates hiện có (đếm lại 24/11/2026 khi thêm Phần 4, rà lại cả series)",
+    "occurrencesMethod": "Như postgresql.json: occurrences = số bài Git P01–P04 (40 bài, git-*) có ít nhất một chỗ khớp term/english/aliases trong văn xuôi; mentions = tổng số chỗ khớp. Bỏ frontmatter, khối code, inline code, thẻ HTML (giữ alt), đích liên kết, URL. Ranh giới từ Unicode, cụm dài thắng cụm ngắn, tôn trọng caseSensitive. outsideSeriesArticles = số bài ngoài series có chỗ khớp. Phần lớn tên lệnh và tên file nằm trong inline code nên không được đếm. Đếm lại khi viết thêm phần."
   },
   "conflicts": [
     {
@@ -37,6 +37,18 @@
       "existingId": null,
       "action": "related",
       "note": "Chữ review/code review xuất hiện ở 175 bài ngoài series (Testing, BA). Để autoLink false; nếu nạp, nên đặt ở chuyên mục chung thay vì chỉ git."
+    },
+    {
+      "candidate": "git-ref",
+      "existingId": null,
+      "action": "related",
+      "note": "Chữ ref cũng là khái niệm React (ref, useRef) ở các bài frontend: để caseSensitive và categories [\"git\"]."
+    },
+    {
+      "candidate": "git-hook",
+      "existingId": null,
+      "action": "related",
+      "note": "Chữ hook đơn lẻ trùng React hook; term là \"hook Git\", alias pre-receive, pre-commit."
     }
   ],
   "terms": [
@@ -71,8 +83,8 @@
         "git-init-clone-mo-repository",
         "git-ben-trong-object-ref-head"
       ],
-      "occurrences": 23,
-      "mentions": 211,
+      "occurrences": 28,
+      "mentions": 219,
       "outsideSeriesArticles": 245
     },
     {
@@ -86,10 +98,11 @@
         "git"
       ],
       "relatedArticleSlugs": [
-        "git-ba-vung-working-tree-staging-gitignore"
+        "git-ba-vung-working-tree-staging-gitignore",
+        "git-restore-bo-thay-doi"
       ],
-      "occurrences": 15,
-      "mentions": 61,
+      "occurrences": 22,
+      "mentions": 76,
       "outsideSeriesArticles": 1
     },
     {
@@ -104,10 +117,12 @@
       ],
       "relatedArticleSlugs": [
         "git-ba-vung-working-tree-staging-gitignore",
-        "git-commit-stage-hunk-amend"
+        "git-commit-stage-hunk-amend",
+        "git-restore-bo-thay-doi",
+        "git-reset-soft-mixed-hard"
       ],
-      "occurrences": 11,
-      "mentions": 31,
+      "occurrences": 16,
+      "mentions": 46,
       "outsideSeriesArticles": 0
     },
     {
@@ -170,10 +185,11 @@
         "git"
       ],
       "relatedArticleSlugs": [
-        "git-commit-stage-hunk-amend"
+        "git-commit-stage-hunk-amend",
+        "git-restore-bo-thay-doi"
       ],
-      "occurrences": 4,
-      "mentions": 57,
+      "occurrences": 6,
+      "mentions": 70,
       "outsideSeriesArticles": 0
     },
     {
@@ -187,10 +203,11 @@
         "git"
       ],
       "relatedArticleSlugs": [
-        "git-commit-stage-hunk-amend"
+        "git-commit-stage-hunk-amend",
+        "git-sua-commit-message-drop-thu-tu"
       ],
-      "occurrences": 9,
-      "mentions": 40,
+      "occurrences": 12,
+      "mentions": 45,
       "outsideSeriesArticles": 0
     },
     {
@@ -207,8 +224,8 @@
         "git-ben-trong-object-ref-head"
       ],
       "reviewNote": "caseSensitive bắt buộc: không khớp chữ head thường. Chỉ dò trong chuyên mục git, vì HEAD còn là phương thức HTTP.",
-      "occurrences": 10,
-      "mentions": 26,
+      "occurrences": 19,
+      "mentions": 52,
       "outsideSeriesArticles": 3
     },
     {
@@ -225,8 +242,8 @@
         "git-ben-trong-object-ref-head"
       ],
       "reviewNote": "Chỉ dò trong git: blob còn nghĩa là Blob Storage của Azure.",
-      "occurrences": 3,
-      "mentions": 22,
+      "occurrences": 4,
+      "mentions": 23,
       "outsideSeriesArticles": 21
     },
     {
@@ -276,8 +293,8 @@
       "relatedArticleSlugs": [
         "git-diff-so-sanh-thay-doi"
       ],
-      "occurrences": 2,
-      "mentions": 11,
+      "occurrences": 3,
+      "mentions": 12,
       "outsideSeriesArticles": 0
     },
     {
@@ -297,8 +314,8 @@
         "git-la-gi-va-gitstudio"
       ],
       "reviewNote": "Alias \"mã hash\" chỉ an toàn khi dò trong chuyên mục git.",
-      "occurrences": 15,
-      "mentions": 65,
+      "occurrences": 16,
+      "mentions": 66,
       "outsideSeriesArticles": 0
     },
     {
@@ -316,8 +333,8 @@
         "git-nhanh-la-gi"
       ],
       "reviewNote": "autoLink false: \"nhánh\" là từ thường (độ phủ nhánh trong kiểm thử, nhánh if). Gắn tay bằng dfn.",
-      "occurrences": 25,
-      "mentions": 580,
+      "occurrences": 35,
+      "mentions": 735,
       "outsideSeriesArticles": 219
     },
     {
@@ -335,8 +352,8 @@
         "git-xung-dot-merge"
       ],
       "reviewNote": "autoLink false vì quá dày đặc trong series. Không trùng mục MERGE (SQL) vì mục đó caseSensitive.",
-      "occurrences": 18,
-      "mentions": 198,
+      "occurrences": 26,
+      "mentions": 253,
       "outsideSeriesArticles": 32
     },
     {
@@ -352,8 +369,8 @@
       "relatedArticleSlugs": [
         "git-merge-fast-forward-merge-commit"
       ],
-      "occurrences": 10,
-      "mentions": 47,
+      "occurrences": 14,
+      "mentions": 51,
       "outsideSeriesArticles": 0
     },
     {
@@ -367,10 +384,11 @@
         "git"
       ],
       "relatedArticleSlugs": [
-        "git-merge-fast-forward-merge-commit"
+        "git-merge-fast-forward-merge-commit",
+        "git-revert-commit-da-chia-se"
       ],
-      "occurrences": 13,
-      "mentions": 60,
+      "occurrences": 18,
+      "mentions": 70,
       "outsideSeriesArticles": 0
     },
     {
@@ -405,10 +423,11 @@
       ],
       "relatedArticleSlugs": [
         "git-xung-dot-merge",
-        "git-rebase-co-ban"
+        "git-rebase-co-ban",
+        "git-patch-rerere"
       ],
-      "occurrences": 18,
-      "mentions": 82,
+      "occurrences": 25,
+      "mentions": 110,
       "outsideSeriesArticles": 68,
       "reviewNote": "Alias \"xung đột\" chỉ an toàn khi dò trong chuyên mục git (ở chuyên mục khác là từ thường)."
     },
@@ -423,10 +442,11 @@
         "git"
       ],
       "relatedArticleSlugs": [
-        "git-stash-cat-thay-doi"
+        "git-stash-cat-thay-doi",
+        "git-restore-bo-thay-doi"
       ],
-      "occurrences": 12,
-      "mentions": 103,
+      "occurrences": 17,
+      "mentions": 116,
       "outsideSeriesArticles": 0
     },
     {
@@ -491,27 +511,29 @@
         "git"
       ],
       "relatedArticleSlugs": [
-        "git-cherry-pick-revert"
+        "git-cherry-pick-revert",
+        "git-rebase-onto"
       ],
-      "occurrences": 7,
-      "mentions": 39,
+      "occurrences": 11,
+      "mentions": 45,
       "outsideSeriesArticles": 0
     },
     {
       "slug": "git-revert",
       "term": "revert",
       "aliases": [],
-      "shortDefinition": "Trong Git: tạo commit mới áp thay đổi ngược lại của một commit cũ, không xoá lịch sử. Cách an toàn để hoàn tác commit đã chia sẻ.",
+      "shortDefinition": "Trong Git: tạo commit mới áp thay đổi ngược lại của một commit cũ, không xoá lịch sử. Cách an toàn để hoàn tác commit đã chia sẻ; với merge commit phải chọn nhánh cha giữ lại bằng -m 1.",
       "caseSensitive": false,
       "autoLink": true,
       "categories": [
         "git"
       ],
       "relatedArticleSlugs": [
-        "git-cherry-pick-revert"
+        "git-cherry-pick-revert",
+        "git-revert-commit-da-chia-se"
       ],
-      "occurrences": 9,
-      "mentions": 41,
+      "occurrences": 16,
+      "mentions": 100,
       "outsideSeriesArticles": 4
     },
     {
@@ -525,10 +547,12 @@
         "git"
       ],
       "relatedArticleSlugs": [
-        "git-rebase-co-ban"
+        "git-rebase-co-ban",
+        "git-rebase-tuong-tac",
+        "git-rebase-onto"
       ],
-      "occurrences": 17,
-      "mentions": 102,
+      "occurrences": 23,
+      "mentions": 125,
       "outsideSeriesArticles": 0
     },
     {
@@ -560,7 +584,8 @@
       ],
       "relatedArticleSlugs": [
         "git-rebase-co-ban",
-        "git-tag-phien-ban"
+        "git-tag-phien-ban",
+        "git-reflog-tim-lai-commit"
       ],
       "occurrences": 4,
       "mentions": 5,
@@ -581,8 +606,8 @@
         "git-cherry-pick-revert",
         "git-worktree"
       ],
-      "occurrences": 8,
-      "mentions": 21,
+      "occurrences": 9,
+      "mentions": 23,
       "outsideSeriesArticles": 0
     },
     {
@@ -599,8 +624,8 @@
         "git-remote-origin-tracking",
         "git-fetch-pull-push"
       ],
-      "occurrences": 17,
-      "mentions": 142,
+      "occurrences": 21,
+      "mentions": 153,
       "outsideSeriesArticles": 15
     },
     {
@@ -656,8 +681,8 @@
       "relatedArticleSlugs": [
         "git-fetch-pull-push"
       ],
-      "occurrences": 11,
-      "mentions": 62,
+      "occurrences": 12,
+      "mentions": 63,
       "outsideSeriesArticles": 14
     },
     {
@@ -674,8 +699,8 @@
         "git-fetch-pull-push",
         "git-pull-xung-dot-lich-su-roi"
       ],
-      "occurrences": 13,
-      "mentions": 118,
+      "occurrences": 18,
+      "mentions": 129,
       "outsideSeriesArticles": 12
     },
     {
@@ -692,8 +717,8 @@
         "git-fetch-pull-push",
         "git-ahead-behind-push-bi-tu-choi"
       ],
-      "occurrences": 23,
-      "mentions": 188,
+      "occurrences": 31,
+      "mentions": 246,
       "outsideSeriesArticles": 43
     },
     {
@@ -727,10 +752,11 @@
       ],
       "relatedArticleSlugs": [
         "git-ahead-behind-push-bi-tu-choi",
-        "git-fork-upstream"
+        "git-fork-upstream",
+        "git-sua-commit-message-drop-thu-tu"
       ],
-      "occurrences": 1,
-      "mentions": 2,
+      "occurrences": 2,
+      "mentions": 3,
       "outsideSeriesArticles": 0
     },
     {
@@ -785,8 +811,8 @@
         "git-pull-request-code-review",
         "git-github-gitlab-gitstudio"
       ],
-      "occurrences": 11,
-      "mentions": 104,
+      "occurrences": 14,
+      "mentions": 108,
       "outsideSeriesArticles": 23
     },
     {
@@ -804,8 +830,8 @@
       "relatedArticleSlugs": [
         "git-pull-request-code-review"
       ],
-      "occurrences": 6,
-      "mentions": 26,
+      "occurrences": 8,
+      "mentions": 31,
       "outsideSeriesArticles": 175
     },
     {
@@ -823,8 +849,8 @@
       "relatedArticleSlugs": [
         "git-pull-request-code-review"
       ],
-      "occurrences": 1,
-      "mentions": 6,
+      "occurrences": 3,
+      "mentions": 9,
       "outsideSeriesArticles": 0
     },
     {
@@ -840,8 +866,8 @@
       "relatedArticleSlugs": [
         "git-fork-upstream"
       ],
-      "occurrences": 5,
-      "mentions": 50,
+      "occurrences": 6,
+      "mentions": 51,
       "outsideSeriesArticles": 9
     },
     {
@@ -951,6 +977,263 @@
       "occurrences": 4,
       "mentions": 8,
       "outsideSeriesArticles": 0
+    },
+    {
+      "slug": "git-clone",
+      "term": "clone",
+      "aliases": [
+        "git clone"
+      ],
+      "shortDefinition": "Tạo bản sao đầy đủ của một repository (mọi commit, nhánh dưới dạng remote-tracking, tag) về máy, tự đặt remote origin và nhánh mặc định theo dõi origin.",
+      "caseSensitive": false,
+      "autoLink": false,
+      "categories": [
+        "git"
+      ],
+      "relatedArticleSlugs": [
+        "git-init-clone-mo-repository",
+        "git-remote-origin-tracking"
+      ],
+      "occurrences": 10,
+      "mentions": 32,
+      "outsideSeriesArticles": 14
+    },
+    {
+      "slug": "git-ref",
+      "term": "ref",
+      "aliases": [],
+      "shortDefinition": "Tên trỏ tới một commit hoặc object, lưu trong .git/refs: nhánh (refs/heads), tag (refs/tags), nhánh remote-tracking (refs/remotes), cùng HEAD.",
+      "caseSensitive": true,
+      "autoLink": true,
+      "categories": [
+        "git"
+      ],
+      "relatedArticleSlugs": [
+        "git-ben-trong-object-ref-head",
+        "git-github-gitlab-gitstudio"
+      ],
+      "occurrences": 11,
+      "mentions": 18,
+      "outsideSeriesArticles": 9
+    },
+    {
+      "slug": "git-committer",
+      "term": "committer",
+      "aliases": [
+        "author và committer"
+      ],
+      "shortDefinition": "Người đưa commit vào lịch sử, có thể khác author (người viết thay đổi), như khi squash merge, git am hay rebase; mỗi người có ngày riêng.",
+      "caseSensitive": false,
+      "autoLink": true,
+      "categories": [
+        "git"
+      ],
+      "relatedArticleSlugs": [
+        "git-pull-request-code-review",
+        "git-patch-rerere"
+      ],
+      "occurrences": 4,
+      "mentions": 6,
+      "outsideSeriesArticles": 0
+    },
+    {
+      "slug": "ours-theirs",
+      "term": "ours/theirs",
+      "aliases": [
+        "ours",
+        "theirs"
+      ],
+      "shortDefinition": "Hai phía của một xung đột: ours là nhánh đang đứng, theirs là nhánh được đưa vào; khi rebase thì ngược lại (ours là nền đang dựng, theirs là commit của bạn).",
+      "caseSensitive": false,
+      "autoLink": false,
+      "categories": [
+        "git"
+      ],
+      "relatedArticleSlugs": [
+        "git-xung-dot-merge",
+        "git-pull-xung-dot-lich-su-roi"
+      ],
+      "occurrences": 4,
+      "mentions": 12,
+      "outsideSeriesArticles": 0
+    },
+    {
+      "slug": "git-hook",
+      "term": "hook Git",
+      "aliases": [
+        "pre-receive",
+        "pre-commit"
+      ],
+      "shortDefinition": "Script Git tự chạy ở một thời điểm cố định: phía máy (pre-commit, commit-msg, pre-push) hoặc phía máy chủ (pre-receive); thoát mã khác 0 là chặn thao tác.",
+      "caseSensitive": false,
+      "autoLink": true,
+      "categories": [
+        "git"
+      ],
+      "relatedArticleSlugs": [
+        "git-chien-luoc-nhanh"
+      ],
+      "english": "Git hook",
+      "occurrences": 1,
+      "mentions": 1,
+      "outsideSeriesArticles": 4
+    },
+    {
+      "slug": "git-reset",
+      "term": "git reset",
+      "aliases": [
+        "reset --hard",
+        "reset --soft",
+        "reset --mixed",
+        "reset --keep"
+      ],
+      "shortDefinition": "Dời nhánh hiện tại tới một commit khác; --soft giữ thay đổi trong staging area, --mixed (mặc định) giữ trong working tree, --hard bỏ luôn, --keep như hard nhưng từ chối đè thay đổi chưa commit.",
+      "caseSensitive": false,
+      "autoLink": true,
+      "categories": [
+        "git"
+      ],
+      "relatedArticleSlugs": [
+        "git-reset-soft-mixed-hard",
+        "git-undo-redo-gitstudio"
+      ],
+      "occurrences": 4,
+      "mentions": 5,
+      "outsideSeriesArticles": 0
+    },
+    {
+      "slug": "reflog",
+      "term": "reflog",
+      "aliases": [],
+      "shortDefinition": "Nhật ký cục bộ ghi mọi lần HEAD và từng nhánh di chuyển (HEAD@{n}, nhánh@{n}); dùng để tìm lại commit sau reset, xoá nhánh hay rebase; mặc định giữ 30–90 ngày.",
+      "caseSensitive": false,
+      "autoLink": true,
+      "categories": [
+        "git"
+      ],
+      "relatedArticleSlugs": [
+        "git-reflog-tim-lai-commit",
+        "git-undo-redo-gitstudio"
+      ],
+      "occurrences": 14,
+      "mentions": 52,
+      "outsideSeriesArticles": 0
+    },
+    {
+      "slug": "rewrite-history",
+      "term": "viết lại lịch sử",
+      "aliases": [],
+      "shortDefinition": "Mọi thao tác tạo commit mới thay cho commit cũ (amend, rebase, reset rồi commit lại, bỏ commit): mã commit đổi dây chuyền tới đỉnh nhánh, nên chỉ làm với commit chưa chia sẻ.",
+      "caseSensitive": false,
+      "autoLink": true,
+      "categories": [
+        "git"
+      ],
+      "relatedArticleSlugs": [
+        "git-sua-commit-message-drop-thu-tu",
+        "git-rebase-tuong-tac"
+      ],
+      "english": "rewriting history",
+      "occurrences": 12,
+      "mentions": 16,
+      "outsideSeriesArticles": 0
+    },
+    {
+      "slug": "interactive-rebase",
+      "term": "rebase tương tác",
+      "aliases": [
+        "rebase -i"
+      ],
+      "shortDefinition": "git rebase -i: Git đưa danh sách việc (todo) cho các commit từ một gốc tới đỉnh nhánh, mỗi dòng một lệnh pick, reword, edit, squash, fixup hay drop; đổi thứ tự dòng là đổi thứ tự commit.",
+      "caseSensitive": false,
+      "autoLink": true,
+      "categories": [
+        "git"
+      ],
+      "relatedArticleSlugs": [
+        "git-rebase-tuong-tac",
+        "git-sua-commit-message-drop-thu-tu"
+      ],
+      "english": "interactive rebase",
+      "occurrences": 11,
+      "mentions": 25,
+      "outsideSeriesArticles": 0
+    },
+    {
+      "slug": "fixup-commit",
+      "term": "commit fixup!",
+      "aliases": [
+        "--fixup",
+        "fixup!"
+      ],
+      "shortDefinition": "Commit có tiêu đề \"fixup! <tiêu đề commit đích>\" (git commit --fixup <commit>), ghi một sửa đổi nhắm sẵn vào commit cũ; rebase -i --autosquash tự gộp nó vào đúng chỗ.",
+      "caseSensitive": true,
+      "autoLink": true,
+      "categories": [
+        "git"
+      ],
+      "relatedArticleSlugs": [
+        "git-rebase-tuong-tac"
+      ],
+      "occurrences": 1,
+      "mentions": 4,
+      "outsideSeriesArticles": 0
+    },
+    {
+      "slug": "autosquash",
+      "term": "--autosquash",
+      "aliases": [
+        "autosquash",
+        "rebase.autoSquash"
+      ],
+      "shortDefinition": "Tuỳ chọn của rebase -i: tự xếp các commit fixup!, squash!, amend! ngay sau commit đích và đổi lệnh tương ứng trong todo.",
+      "caseSensitive": true,
+      "autoLink": true,
+      "categories": [
+        "git"
+      ],
+      "relatedArticleSlugs": [
+        "git-rebase-tuong-tac",
+        "git-sua-commit-message-drop-thu-tu"
+      ],
+      "occurrences": 1,
+      "mentions": 1,
+      "outsideSeriesArticles": 0
+    },
+    {
+      "slug": "rebase-onto",
+      "term": "rebase --onto",
+      "aliases": [],
+      "shortDefinition": "git rebase --onto <gốc mới> <gốc cũ> <nhánh>: chép các commit sau gốc cũ lên gốc mới; dùng cho nhánh tạo nhầm gốc hoặc để bỏ một đoạn commit.",
+      "caseSensitive": true,
+      "autoLink": true,
+      "categories": [
+        "git"
+      ],
+      "relatedArticleSlugs": [
+        "git-rebase-onto"
+      ],
+      "occurrences": 1,
+      "mentions": 2,
+      "outsideSeriesArticles": 0
+    },
+    {
+      "slug": "rerere",
+      "term": "rerere",
+      "aliases": [],
+      "shortDefinition": "reuse recorded resolution: khi bật rerere.enabled, Git ghi lại mỗi xung đột và cách bạn giải quyết, lần sau gặp đúng xung đột đó thì tự áp lại.",
+      "caseSensitive": false,
+      "autoLink": true,
+      "categories": [
+        "git"
+      ],
+      "relatedArticleSlugs": [
+        "git-patch-rerere",
+        "git-thuc-hanh-don-lich-su-hoan-tac"
+      ],
+      "occurrences": 3,
+      "mentions": 24,
+      "outsideSeriesArticles": 0
     }
   ],
   "deferred": [
@@ -965,12 +1248,6 @@
       "term": "origin",
       "occurrences": 1,
       "reason": "Phần 3 dùng nhiều nhưng chữ origin còn là thuật ngữ CORS/CDN ở các bài khác (Origin header, origin server); mục git-remote đã giải thích origin là tên remote quy ước. Nếu thêm thì categories [\"git\"] và caseSensitive."
-    },
-    {
-      "slug": "reflog",
-      "term": "reflog",
-      "occurrences": 3,
-      "reason": "Phần 4 (GIT-034) giải thích đầy đủ."
     },
     {
       "slug": "git-tree-object",
@@ -995,6 +1272,36 @@
       "term": "Spotlight",
       "occurrences": 4,
       "reason": "Tên tính năng của GitStudio (và của macOS); không phải thuật ngữ Git."
+    },
+    {
+      "slug": "git-restore",
+      "term": "git restore",
+      "occurrences": 0,
+      "reason": "Phần 4 chỉ nhắc trong inline code (tên lệnh), không có chỗ khớp trong văn xuôi để gắn liên kết. Thêm lại khi bài nhắc nó bằng lời."
+    },
+    {
+      "slug": "git-clean",
+      "term": "git clean",
+      "occurrences": 0,
+      "reason": "Phần 4 chỉ nhắc trong inline code (tên lệnh), không có chỗ khớp trong văn xuôi để gắn liên kết. Thêm lại khi bài nhắc nó bằng lời."
+    },
+    {
+      "slug": "orig-head",
+      "term": "ORIG_HEAD",
+      "occurrences": 0,
+      "reason": "Phần 4 chỉ nhắc trong inline code (tên lệnh), không có chỗ khớp trong văn xuôi để gắn liên kết. Thêm lại khi bài nhắc nó bằng lời."
+    },
+    {
+      "slug": "git-format-patch",
+      "term": "format-patch",
+      "occurrences": 0,
+      "reason": "Phần 4 chỉ nhắc trong inline code (tên lệnh), không có chỗ khớp trong văn xuôi để gắn liên kết. Thêm lại khi bài nhắc nó bằng lời."
+    },
+    {
+      "slug": "git-am",
+      "term": "git am",
+      "occurrences": 0,
+      "reason": "Phần 4 chỉ nhắc trong inline code (tên lệnh), không có chỗ khớp trong văn xuôi để gắn liên kết. Thêm lại khi bài nhắc nó bằng lời."
     }
   ]
 }

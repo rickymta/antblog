@@ -1,4 +1,4 @@
-// Chạy toàn bộ lab và so với kết quả mẫu p01/OUTPUT.txt, p02/OUTPUT.txt, p03/OUTPUT.txt.
+// Chạy toàn bộ lab và so với kết quả mẫu p01…p04/OUTPUT.txt.
 // Kết quả phải giống từng ký tự: git chạy với cấu hình cô lập, danh tính và thời điểm cố định.
 // Bản git khác có thể đổi câu chữ của vài thông báo; khi đó xem diff rồi cập nhật OUTPUT.txt.
 
@@ -11,7 +11,7 @@ import { fileURLToPath } from 'node:url';
 
 const root = join(dirname(fileURLToPath(import.meta.url)), '..');
 
-for (const part of ['p01', 'p02', 'p03']) {
+for (const part of ['p01', 'p02', 'p03', 'p04']) {
   test(`lab ${part} chạy đạt và khớp OUTPUT.txt`, () => {
     const r = spawnSync(process.execPath, ['run.mjs', part], { cwd: root, encoding: 'utf8' });
     assert.equal(r.status, 0, r.stdout + r.stderr);
@@ -33,4 +33,11 @@ test('setup dựng đúng trạng thái đầu bài GIT-014 (Phần 2)', () => {
   assert.equal(r.status, 0, r.stderr);
   const br = spawnSync('git', ['branch', '--no-merged', 'main'], { cwd: join(root, 'work', 'bao-gia'), encoding: 'utf8' });
   assert.equal(br.stdout.trim(), 'tinh-nang/phu-phi-gio-cao-diem');
+});
+
+test('setup dựng đúng trạng thái đầu bài GIT-036 (Phần 4)', () => {
+  const r = spawnSync(process.execPath, ['run.mjs', 'setup', '36'], { cwd: root, encoding: 'utf8' });
+  assert.equal(r.status, 0, r.stderr);
+  const log = spawnSync('git', ['log', '--format=%s', 'main..HEAD'], { cwd: join(root, 'work', 'bao-gia'), encoding: 'utf8' });
+  assert.equal(log.stdout.trim().split(/\r?\n/).length, 4);
 });

@@ -18,9 +18,12 @@ npm run kiem-tra-p02 -- <đường dẫn repository>   # chấm repository theo 
 npm run p03            # chạy cả Phần 3 (remote, fetch/pull/push, pull request, hook bảo vệ main, fork, pull.rebase)
 npm run setup -- 26    # bài Phần 3 đánh số 21–30; dựng cả repository của Minh, remote chung và bản clone của Lan
 npm run kiem-tra-p03 -- <đường dẫn repository>   # chấm bản clone và remote của nó theo 10 tiêu chí của GIT-030
+npm run p04            # chạy cả Phần 4 (restore, reset, revert, reflog, sửa commit, rebase -i, --onto, patch, rerere)
+npm run setup -- 36    # bài Phần 4 đánh số 31–40; ví dụ 36 là nhánh phụ phí đêm bốn commit lộn xộn
+npm run kiem-tra-p04 -- <đường dẫn repository>   # chấm repository của Minh theo 10 tiêu chí của GIT-040
 ```
 
-Kết quả trên máy viết bài: Phần 1 `# [lab] PASS: 31`, Phần 2 `# [lab] PASS: 23`, Phần 3 `# [lab] PASS: 38`, `# [lab] FAIL: 0`, `npm test` 5/5.
+Kết quả trên máy viết bài: Phần 1 `# [lab] PASS: 31`, Phần 2 `# [lab] PASS: 23`, Phần 3 `# [lab] PASS: 38`, Phần 4 `# [lab] PASS: 36`, `# [lab] FAIL: 0`, `npm test` 7/7.
 
 ## Vì sao mã hash trong bài trùng với máy bạn
 
@@ -46,6 +49,8 @@ Khác phiên bản git có thể khác câu chữ của vài thông báo (ví d�
 | `p02/NN-*.mjs`, `p02/kiem-tra.mjs`, `p02/OUTPUT.txt` | Bài GIT-011…GIT-020; mỗi bài so mọi nhánh và tag với lịch sử chuẩn (`p02/chung.mjs`) |
 | `lib/history3.mjs` | Lịch sử chuẩn Phần 3: 7 bước trên ba repository (Minh `work/bao-gia`, remote chung `work/remote/bao-gia.git`, Lan `work/lan/bao-gia`) và fork `work/remote/lan-bao-gia.git`; hook `pre-receive` bảo vệ `main` và tag `v*` |
 | `p03/NN-*.mjs`, `p03/kiem-tra.mjs`, `p03/OUTPUT.txt` | Bài GIT-021…GIT-030; mỗi bài so ref của Minh, remote và Lan với lịch sử chuẩn (`p03/chung.mjs`) |
+| `lib/history4.mjs` | Lịch sử chuẩn Phần 4: 7 bước (revert, nhánh phụ phí đêm lộn xộn rồi được dọn, `rebase --onto`, patch của Lan qua `git am`, rerere, merge và runbook); `todoEditor()` cho rebase tương tác không cần người gõ |
+| `p04/NN-*.mjs`, `p04/kiem-tra.mjs`, `p04/OUTPUT.txt` | Bài GIT-031…GIT-040 |
 | `p01/NN-*.mjs` | Một file cho mỗi bài GIT-001…GIT-010; `start`/`end` = số commit chuẩn ở đầu/cuối bài |
 | `p01/kiem-tra.mjs` | Script chấm repository của GIT-010 (chỉ đọc, mã thoát 0 khi đạt hết) |
 | `p01/OUTPUT.txt` | Kết quả mẫu |

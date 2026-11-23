@@ -173,4 +173,4 @@ Phần 4 xoay quanh một câu hỏi: **làm sai thì quay lại thế nào**. R
 - [Pro Git, Distributed Git](https://git-scm.com/book/en/v2/Distributed-Git-Distributed-Workflows).
 - [git-branch: `-vv`](https://git-scm.com/docs/git-branch), [git-fetch: `--prune`, `--dry-run`](https://git-scm.com/docs/git-fetch).
 
-Bài tiếp theo (Phần 4): GIT-031 · Bỏ thay đổi trong working tree và staging area *(đang viết)*
+Bài tiếp theo (Phần 4): [GIT-031 · Bỏ thay đổi trong working tree và staging area](/articles/git-restore-bo-thay-doi).

@@ -21,7 +21,7 @@ export const PEOPLE = {
 };
 
 /** Môi trường cho một lần gọi git: bỏ mọi biến GIT_* thừa hưởng, rồi đặt biến của lab. */
-export function gitEnv({ as, by, at, committedAt, globalConfig } = {}) {
+export function gitEnv({ as, by, at, committedAt, globalConfig, env: extra } = {}) {
   const env = {};
   for (const [k, v] of Object.entries(process.env)) if (!k.startsWith('GIT_')) env[k] = v;
   Object.assign(env, {
@@ -53,7 +53,12 @@ export function gitEnv({ as, by, at, committedAt, globalConfig } = {}) {
   if (at) {
     env.GIT_AUTHOR_DATE = at;
     env.GIT_COMMITTER_DATE = committedAt ?? at;
+  } else if (committedAt) {
+    // Viết lại lịch sử (rebase, am, revert…): giữ ngày của người viết, chỉ cố định ngày commit.
+    env.GIT_COMMITTER_DATE = committedAt;
   }
+  // Biến riêng của một lệnh, ví dụ GIT_SEQUENCE_EDITOR cho rebase tương tác.
+  if (extra) Object.assign(env, extra);
   return env;
 }
 

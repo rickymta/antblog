@@ -110,20 +110,22 @@ Lộ trình: `git-qua-gitstudio-phan-03` — **đã viết đủ 10 bài ngày 2
 
 ## P04 · Viết lại lịch sử và hoàn tác
 
-Đầu vào: P01–P03. Đầu ra: nhánh tính năng được dọn sạch, runbook hoàn tác. Lộ trình dự kiến `-phan-04`.
+Đầu vào: P01–P03. Đầu ra: nhánh tính năng được dọn sạch, runbook hoàn tác.
+
+Lộ trình: `git-qua-gitstudio-phan-04` — **đã viết đủ 10 bài ngày 24/11/2026**, đã thêm vào `api/seed/learning-paths.json`. Lab: `examples/toi-noi-git/p04` (lịch sử chuẩn 7 bước trong `lib/history4.mjs` dựng trên cuối P03: revert phí chờ, nhánh phụ phí đêm lộn xộn được dọn bằng amend!/drop/đổi thứ tự rồi `rebase -i --autosquash`, `rebase --onto`, patch của Lan qua `git am`, rerere; rebase tương tác chạy không cần người gõ nhờ `GIT_SEQUENCE_EDITOR`; 10 file bài, 36 kiểm tra PASS; script chấm `p04/kiem-tra.mjs` 10 tiêu chí; `npm test` 7/7). 20 ảnh GitStudio 1.0.1 (2000 × 1125). Từ điển (rà lại cả series 24/11/2026): `glossary-candidates/git.json` 64 mục, 11 mục hoãn. Ghi chú GitStudio 1.0.1 khi viết P04: Huỷ bỏ thay đổi chạy `checkout --`/`clean -f`, bỏ hunk/dòng bằng `apply --reverse`; Hoàn tác chỉ trong phiên, tối đa 50 bước, commit → `reset --soft`, merge/pull/revert/sửa commit → `reset --keep`; Revert commit tự thêm `-m 1` cho merge commit; Sửa nội dung commit cũ = commit `amend!` + `rebase -i --autosquash --autostash`; Bỏ commit = `rebase --onto <cha> <commit>`; hộp thoại Rebase tương tác (Giữ/Sửa nội dung/Squash/Fixup/Bỏ, không có edit); Áp dụng patch… dùng `git apply --3way` (không tạo commit); không có giao diện rerere, `rebase --onto`; mục reflog đánh dấu commit "mất"; vài thông báo lõi chưa dịch. Chưa seed/deploy lên website.
 
 | ID | Bài / slug | Mức | Làm được sau bài / sản phẩm thực hành | Trạng thái |
 |---|---|---|---|---|
-| GIT-031 | Bỏ thay đổi trong working tree và staging area<br>`git-restore-bo-thay-doi` | CB | `restore`, `restore --staged`, huỷ theo hunk/dòng | Dự kiến |
-| GIT-032 | Reset soft, mixed, hard<br>`git-reset-soft-mixed-hard` | CB | Chọn đúng kiểu reset từ menu commit, hậu quả với commit đã push | Dự kiến |
-| GIT-033 | Revert: hoàn tác commit đã chia sẻ<br>`git-revert-commit-da-chia-se` | CB | Revert commit thường và merge commit (`-m`) | Dự kiến |
-| GIT-034 | Reflog: tìm lại commit "đã mất"<br>`git-reflog-tim-lai-commit` | TB | Khôi phục sau reset hard, xoá nhánh, rebase hỏng | Dự kiến |
-| GIT-035 | Undo/Redo của GitStudio và giới hạn của nó<br>`git-undo-redo-gitstudio` | TB | Biết thao tác nào hoàn tác được, GitStudio làm gì bên dưới | Dự kiến |
-| GIT-036 | Sửa commit: edit message, amend, drop, đổi thứ tự<br>`git-sua-commit-message-drop-thu-tu` | TB | Sửa commit cũ từ menu commit, hiểu đây là viết lại lịch sử | Dự kiến |
-| GIT-037 | Rebase tương tác: squash, fixup, reword, edit<br>`git-rebase-tuong-tac` | TB | Dọn nhánh tính năng trước pull request, `--autosquash` | Dự kiến |
-| GIT-038 | Rebase `--onto` và tách nhánh lỡ tạo sai gốc<br>`git-rebase-onto` | NC | Chuyển chuỗi commit sang gốc khác | Dự kiến |
-| GIT-039 | Patch, rerere và merge lại nhiều lần<br>`git-patch-rerere` | NC | Tạo/áp patch, ghi nhớ cách giải quyết xung đột | Dự kiến |
-| GIT-040 | Thực hành: dọn nhánh tính năng và runbook hoàn tác<br>`git-thuc-hanh-don-lich-su-hoan-tac` | NC | Bàn giao nhánh sạch và runbook có bằng chứng chạy | Dự kiến |
+| GIT-031 | Bỏ thay đổi trong working tree và staging area: git restore, restore --staged, restore -p và clean<br>`git-restore-bo-thay-doi` | CB | `restore`, `restore --staged`, huỷ theo hunk/dòng | Đã viết |
+| GIT-032 | Reset soft, mixed, hard: lùi nhánh và chọn đúng chỗ để thay đổi nằm lại<br>`git-reset-soft-mixed-hard` | CB | Chọn đúng kiểu reset từ menu commit, hậu quả với commit đã push | Đã viết |
+| GIT-033 | Revert: hoàn tác commit đã push mà không viết lại lịch sử chung<br>`git-revert-commit-da-chia-se` | CB | Revert commit thường và merge commit (`-m`) | Đã viết |
+| GIT-034 | Reflog: tìm lại commit "đã mất" sau reset --hard, xoá nhánh hay rebase hỏng<br>`git-reflog-tim-lai-commit` | TB | Khôi phục sau reset hard, xoá nhánh, rebase hỏng | Đã viết |
+| GIT-035 | Hoàn tác và Làm lại của GitStudio: thao tác nào quay lại được, bên dưới là lệnh git nào<br>`git-undo-redo-gitstudio` | TB | Biết thao tác nào hoàn tác được, GitStudio làm gì bên dưới | Đã viết |
+| GIT-036 | Sửa commit cũ: sửa nội dung, bỏ commit debug, đổi thứ tự, và vì sao đây là viết lại lịch sử<br>`git-sua-commit-message-drop-thu-tu` | TB | Sửa commit cũ từ menu commit, hiểu đây là viết lại lịch sử | Đã viết |
+| GIT-037 | Rebase tương tác: squash, fixup, reword, drop và --autosquash để dọn nhánh trước pull request<br>`git-rebase-tuong-tac` | TB | Dọn nhánh tính năng trước pull request, `--autosquash` | Đã viết |
+| GIT-038 | Rebase --onto: chuyển chuỗi commit sang gốc khác khi lỡ tạo nhánh sai chỗ<br>`git-rebase-onto` | NC | Chuyển chuỗi commit sang gốc khác | Đã viết |
+| GIT-039 | Patch và rerere: nhận thay đổi qua file patch, và để Git nhớ cách giải quyết xung đột<br>`git-patch-rerere` | NC | Tạo/áp patch, ghi nhớ cách giải quyết xung đột | Đã viết |
+| GIT-040 | Thực hành Phần 4: merge nhánh đã dọn, viết runbook hoàn tác và chấm bằng script 10 tiêu chí<br>`git-thuc-hanh-don-lich-su-hoan-tac` | NC | Bàn giao nhánh sạch và runbook có bằng chứng chạy | Đã viết |
 
 ## P05 · Điều tra, repository lớn và bảo trì
 
