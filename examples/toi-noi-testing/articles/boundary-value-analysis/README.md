@@ -1,6 +1,6 @@
 # Boundary Value Analysis (TEST-032)
 
-Thư mục của bài [Boundary Value Analysis](https://antblog.xyz/articles/boundary-value-analysis). BVA 2-value và 3-value cho quãng đường (R-FARE-02), khối lượng (R-PARCEL-01), ngưỡng xe máy (R-PARCEL-02) và giờ cao điểm (R-FARE-04) — chú ý biên **trước** và **sau** khi làm tròn half-up.
+Thư mục của bài [Boundary Value Analysis](https://antfarms.cloud/articles/boundary-value-analysis). BVA 2-value và 3-value cho quãng đường (R-FARE-02), khối lượng (R-PARCEL-01), ngưỡng xe máy (R-PARCEL-02) và giờ cao điểm (R-FARE-04) — chú ý biên **trước** và **sau** khi làm tròn half-up.
 
 | Tệp | Nội dung |
 |---|---|

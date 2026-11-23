@@ -1,6 +1,6 @@
 # Equivalence Partitioning (TEST-031)
 
-Thư mục của bài [Equivalence Partitioning](https://antblog.xyz/articles/equivalence-partitioning). Phân vùng quãng đường (R-FARE-02), mã thành phố (R-GEN-03) và loại xe (R-GEN-04) của `POST /api/quotes`, viết test theo phân vùng ở hai test level và đo EP coverage.
+Thư mục của bài [Equivalence Partitioning](https://antfarms.cloud/articles/equivalence-partitioning). Phân vùng quãng đường (R-FARE-02), mã thành phố (R-GEN-03) và loại xe (R-GEN-04) của `POST /api/quotes`, viết test theo phân vùng ở hai test level và đo EP coverage.
 
 | Tệp | Nội dung |
 |---|---|

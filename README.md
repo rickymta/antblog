@@ -2,7 +2,7 @@
 
 Blog chia sẻ kiến thức kỹ thuật từ cơ bản tới nâng cao: database, ngôn ngữ lập trình, design pattern, architecture pattern. Mọi ví dụ dùng chung dự án mẫu hư cấu **Tới Nơi** (đặt xe + giao hàng).
 
-- Trang đọc: `https://antblog.xyz` · Quản trị: `https://admin.antblog.xyz`
+- Trang đọc: `https://antfarms.cloud` · Quản trị: `https://admin.antfarms.cloud`
 - Trang đọc cho phép máy tìm kiếm lập chỉ mục (tắt bằng `SITE_NOINDEX=true`); trang quản trị luôn `noindex`.
 
 ## Cấu trúc
@@ -43,7 +43,7 @@ Cả hai app gọi API qua proxy của dev server (`/api`, `/uploads` → `127.0
 
 ## Triển khai lên server (Docker)
 
-`docker-compose.yml` ở gốc repo chạy toàn bộ stack: nginx (cổng vào duy nhất 80/443: `antblog.xyz` trang đọc, `admin.antblog.xyz` quản trị, `/api/` ở cả hai),
+`docker-compose.yml` ở gốc repo chạy toàn bộ stack: nginx (cổng vào duy nhất 80/443: `antfarms.cloud` trang đọc, `admin.antfarms.cloud` quản trị, `/api/` ở cả hai),
 API, MongoDB có xác thực, certbot (chứng chỉ Let's Encrypt qua DNS Cloudflare) và WireGuard (VPN vào database).
 Hướng dẫn từng bước: [`deploy/README.md`](deploy/README.md).
 

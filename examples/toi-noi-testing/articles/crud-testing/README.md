@@ -1,6 +1,6 @@
 # CRUD Testing (TEST-039)
 
-Thư mục của bài [CRUD Testing](https://antblog.xyz/articles/crud-testing). CRUD testing theo CTAL-TA v4.0 mục 3.2.1 gồm hai phần: **completeness** (kiểm tĩnh trên ma trận CRUD) và **consistency** (kiểm động vòng đời từng thực thể). Thực thể chính: chuyến (`trips`) và các thực thể đi kèm.
+Thư mục của bài [CRUD Testing](https://antfarms.cloud/articles/crud-testing). CRUD testing theo CTAL-TA v4.0 mục 3.2.1 gồm hai phần: **completeness** (kiểm tĩnh trên ma trận CRUD) và **consistency** (kiểm động vòng đời từng thực thể). Thực thể chính: chuyến (`trips`) và các thực thể đi kèm.
 
 | Tệp | Nội dung |
 |---|---|

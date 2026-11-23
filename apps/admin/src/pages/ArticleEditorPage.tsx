@@ -37,7 +37,7 @@ import { displayStatus, formatDateTime, fromLocalInput, toLocalInput, wordStats 
 import { draftKey, readDraft, removeDraft, writeDraft } from '../lib/drafts';
 import { errorMessage, hasCode, hasStatus, isApiError } from '../lib/errors';
 import { imageMarkdown } from '../lib/media';
-import { IMAGE_URL_RE, SLUG_RE, siteArticleUrl } from '../lib/site';
+import { IMAGE_URL_RE, SITE_HOST, SLUG_RE, siteArticleUrl } from '../lib/site';
 import { useCategoryOptions, useGlossary } from '../lib/queries';
 import { useToast } from '../lib/toast';
 import { useLocale } from '../i18n';
@@ -1101,7 +1101,7 @@ function ArticleEditor({ article: initialArticle }: { article: AdminArticle | un
             <div>
               <p className="mb-1.5 text-xs font-semibold tracking-wide text-muted uppercase">{t('cms.seoPreview')}</p>
               <div className="rounded-ui border border-line bg-white p-3 font-[Arial,sans-serif] dark:bg-slate-900">
-                <p className="truncate text-xs text-slate-700 dark:text-slate-300">antblog.xyz › articles › {form.slug.trim() || slugify(form.title) || '…'}</p>
+                <p className="truncate text-xs text-slate-700 dark:text-slate-300">{SITE_HOST} › articles › {form.slug.trim() || slugify(form.title) || '…'}</p>
                 <p className="mt-0.5 line-clamp-1 text-lg leading-snug text-[#1a0dab] dark:text-[#8ab4f8]">{snippetTitle}</p>
                 <p className="mt-0.5 line-clamp-2 text-[13px] leading-snug text-slate-600 dark:text-slate-400">
                   {snippetDesc.length > 160 ? `${snippetDesc.slice(0, 157)}…` : snippetDesc || '—'}

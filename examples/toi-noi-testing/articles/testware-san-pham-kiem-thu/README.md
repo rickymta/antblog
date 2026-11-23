@@ -1,6 +1,6 @@
 # Testware và các sản phẩm kiểm thử (TEST-010)
 
-Thư mục của bài [Testware và các sản phẩm kiểm thử](https://antblog.xyz/articles/testware-san-pham-kiem-thu). Một bộ testware tối thiểu cho phụ phí khối lượng bưu kiện (SPEC R-PARCEL-01…04):
+Thư mục của bài [Testware và các sản phẩm kiểm thử](https://antfarms.cloud/articles/testware-san-pham-kiem-thu). Một bộ testware tối thiểu cho phụ phí khối lượng bưu kiện (SPEC R-PARCEL-01…04):
 
 | Tệp | Loại testware (CTFL v4.0.1 mục 1.4.3) |
 |---|---|

@@ -1,6 +1,6 @@
 # @tkh/web — trang đọc Tech Knowledge Hub (Next.js App Router)
 
-Trang đọc công khai (antblog.xyz): Server Components lấy dữ liệu thẳng từ API (cache 60 giây), phần tương tác
+Trang đọc công khai (antfarms.cloud): Server Components lấy dữ liệu thẳng từ API (cache 60 giây), phần tương tác
 (phiên đăng nhập, reaction, bình luận, lượt xem, đánh dấu bài, sáng/tối, đăng ký tin; VI/EN khi bật cờ) chạy ở trình duyệt qua `api` của `@tkh/shared`.
 
 ## Lệnh (chạy từ gốc repo)
@@ -24,7 +24,7 @@ PORT=3000 HOSTNAME=0.0.0.0 node apps/web/server.js
 | Biến | Mặc định | Ghi chú |
 |---|---|---|
 | `API_INTERNAL_URL` | `http://127.0.0.1:4000` | Địa chỉ API mà **máy chủ Next** gọi (không có `/api/v1`). Docker: tên service API trong mạng compose. Đọc lúc chạy. |
-| `NEXT_PUBLIC_SITE_URL` | `https://antblog.xyz` | URL gốc cho canonical, Open Graph, JSON-LD, sitemap. **Nhúng lúc build** — đặt khi build ảnh. |
+| `NEXT_PUBLIC_SITE_URL` | `https://antfarms.cloud` | URL gốc cho canonical, Open Graph, JSON-LD, sitemap. **Nhúng lúc build** — đặt khi build ảnh. |
 | `SITE_NOINDEX` | (trống) | `true` ⇒ `robots.txt` chặn toàn bộ + mọi trang `noindex, nofollow` (staging). Đọc lúc chạy. |
 | `NEXT_PUBLIC_ENABLE_I18N` | (trống = tắt) | Đúng chuỗi `true` ⇒ bật giao diện song ngữ (nút VI/EN ở thanh đầu + ngăn kéo điện thoại, cookie `tkh-locale`). **Nhúng lúc build.** Tắt (mặc định, tạm ẩn theo yêu cầu): không có nút VI/EN, ngôn ngữ luôn `vi`, máy chủ KHÔNG đọc cookie ⇒ trang bài/lộ trình là ISR; tài nguyên tiếng Anh không vào bundle trình duyệt. Bật ⇒ trang bài/lộ trình trở lại trang động (đọc cookie). |
 | `GOOGLE_SITE_VERIFICATION` | (trống) | Mã xác minh Google Search Console ⇒ `<meta name="google-site-verification">`. Đọc lúc chạy. |

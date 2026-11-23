@@ -1,6 +1,6 @@
 # Checklist-based Review (TEST-028)
 
-Thư mục của bài [Checklist-based Review](https://antblog.xyz/articles/checklist-based-review): review tĩnh chức năng
+Thư mục của bài [Checklist-based Review](https://antfarms.cloud/articles/checklist-based-review): review tĩnh chức năng
 thanh toán (SPEC R-PAY + kiến trúc §4.9, §8.3) bằng một checklist 15 mục.
 
 | Tệp | Nội dung |

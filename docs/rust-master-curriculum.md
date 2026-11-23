@@ -1,6 +1,6 @@
 # Master Curriculum — Rust qua dự án Tới Nơi
 
-Bản quản lý loạt bài **Rust** của Tech Knowledge Hub (antblog.xyz). Rust là ngôn ngữ của **service sổ cái (ledger) và đối soát** trong kiến trúc microservices của Tới Nơi, trong khi các backend nghiệp vụ chính (đặt chuyến, đơn hàng, điều phối) viết bằng C#/.NET 10 (xem `toi-noi-overall-architecture.md` §4.9 Payment & Wallet và bài `du-an-mau-toi-noi`, mục «Đa ngôn ngữ theo trách nhiệm service»). Loạt bài mở đầu bằng **lý do chọn Rust cho đúng service này**, rồi đi từ cú pháp cơ bản tới service sổ cái chạy được, nối với Booking/Payment C# qua gRPC và Kafka, có đo đạc và vận hành.
+Bản quản lý loạt bài **Rust** của Tech Knowledge Hub (antfarms.cloud). Rust là ngôn ngữ của **service sổ cái (ledger) và đối soát** trong kiến trúc microservices của Tới Nơi, trong khi các backend nghiệp vụ chính (đặt chuyến, đơn hàng, điều phối) viết bằng C#/.NET 10 (xem `toi-noi-overall-architecture.md` §4.9 Payment & Wallet và bài `du-an-mau-toi-noi`, mục «Đa ngôn ngữ theo trách nhiệm service»). Loạt bài mở đầu bằng **lý do chọn Rust cho đúng service này**, rồi đi từ cú pháp cơ bản tới service sổ cái chạy được, nối với Booking/Payment C# qua gRPC và Kafka, có đo đạc và vận hành.
 
 Gồm **3 cấp độ**, **7 phần**, **68 bài**. Mỗi phần tối đa 10 bài. Mỗi cấp độ là một lộ trình học (learning path) riêng trên trang đọc.
 

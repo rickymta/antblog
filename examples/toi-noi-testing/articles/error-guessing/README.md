@@ -1,6 +1,6 @@
 # Error Guessing (TEST-051)
 
-Thư mục của bài [Error Guessing](https://antblog.xyz/articles/error-guessing): danh sách 12 fault attack cho thanh toán
+Thư mục của bài [Error Guessing](https://antfarms.cloud/articles/error-guessing): danh sách 12 fault attack cho thanh toán
 VíXanh và huỷ chuyến (SPEC R-PAY, R-CANCEL, R-IDEM, R-STATE) và lần thử chúng trên API lab.
 
 | Tệp | Nội dung |

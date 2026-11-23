@@ -1,6 +1,6 @@
 # Master Curriculum — Flutter qua Tới Nơi: ứng dụng đặt xe iOS/Android
 
-Bản quản lý toàn bộ loạt bài **Flutter** của Tech Knowledge Hub (antblog.xyz). Ứng dụng xuyên suốt là **Tới Nơi** — ứng dụng đặt xe, giao đồ ăn và giao bưu kiện (hồ sơ: `api/seed/content/du-an-mau-toi-noi.md`, kiến trúc: `docs/toi-noi-overall-architecture.md`). Trong loạt này, hai ứng dụng di động của Tới Nơi — **app khách** và **app tài xế** — là ứng dụng **đa nền tảng iOS/Android viết bằng Flutter**, dùng chung các package Dart nội bộ, gọi backend qua API Gateway/BFF và nhận realtime qua Realtime Gateway đúng như hồ sơ kiến trúc §3, §10 và §12.
+Bản quản lý toàn bộ loạt bài **Flutter** của Tech Knowledge Hub (antfarms.cloud). Ứng dụng xuyên suốt là **Tới Nơi** — ứng dụng đặt xe, giao đồ ăn và giao bưu kiện (hồ sơ: `api/seed/content/du-an-mau-toi-noi.md`, kiến trúc: `docs/toi-noi-overall-architecture.md`). Trong loạt này, hai ứng dụng di động của Tới Nơi — **app khách** và **app tài xế** — là ứng dụng **đa nền tảng iOS/Android viết bằng Flutter**, dùng chung các package Dart nội bộ, gọi backend qua API Gateway/BFF và nhận realtime qua Realtime Gateway đúng như hồ sơ kiến trúc §3, §10 và §12.
 
 Loạt gồm **64 bài** chia **8 phần**, mỗi phần tối đa 10 bài, đi từ Dart cơ bản tới phát hành production trên App Store và Google Play. Mức bài: 14 cơ bản · 20 trung bình · 30 nâng cao.
 

@@ -3,7 +3,7 @@
 export const SITE_NAME = 'Tech Knowledge Hub';
 
 /** URL gốc của trang đọc, không có `/` cuối. NEXT_PUBLIC_* được nhúng lúc build ⇒ đặt biến này khi build ảnh Docker. */
-export const SITE_URL = (process.env.NEXT_PUBLIC_SITE_URL || 'https://antblog.xyz').replace(/\/+$/, '');
+export const SITE_URL = (process.env.NEXT_PUBLIC_SITE_URL || 'https://antfarms.cloud').replace(/\/+$/, '');
 
 /** `SITE_NOINDEX=true` ⇒ chặn lập chỉ mục toàn site (staging). Đọc lúc chạy — trang/robots là động. */
 export function siteNoindex(): boolean {

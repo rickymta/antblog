@@ -3,6 +3,15 @@
 const envUrl = import.meta.env.VITE_SITE_URL as string | undefined;
 export const SITE_URL = envUrl === undefined ? 'http://127.0.0.1:5173' : envUrl.trim().replace(/\/+$/, '');
 
+/** Tên miền trang đọc (vd `antfarms.cloud`) cho bản xem trước kết quả tìm kiếm — lấy từ SITE_URL, rỗng ⇒ origin hiện tại. */
+export const SITE_HOST = (() => {
+  try {
+    return new URL(SITE_URL || window.location.origin).host;
+  } catch {
+    return window.location.host;
+  }
+})();
+
 export function siteArticleUrl(slug: string): string {
   return `${SITE_URL}/articles/${encodeURIComponent(slug)}`;
 }

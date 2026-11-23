@@ -1,6 +1,6 @@
 # Non-functional Testing: tổng quan theo ISO/IEC 25010 (TEST-018)
 
-Thư mục của bài [Non-functional Testing: tổng quan theo ISO/IEC 25010](https://antblog.xyz/articles/non-functional-testing-tong-quan).
+Thư mục của bài [Non-functional Testing: tổng quan theo ISO/IEC 25010](https://antfarms.cloud/articles/non-functional-testing-tong-quan).
 
 | Tệp | Nội dung |
 |---|---|

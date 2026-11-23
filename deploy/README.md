@@ -3,19 +3,19 @@
 Toàn bộ stack chạy bằng một file `docker-compose.yml` ở gốc repo này.
 
 ```
-Người đọc ─▶ Cloudflare (proxy, SSL Full strict) ─▶ nginx :80/:443 ─┬─▶ antblog.xyz          trang đọc (tĩnh)
-                                                                    ├─▶ admin.antblog.xyz    trang quản trị (tĩnh)
+Người đọc ─▶ Cloudflare (proxy, SSL Full strict) ─▶ nginx :80/:443 ─┬─▶ antfarms.cloud          trang đọc (tĩnh)
+                                                                    ├─▶ admin.antfarms.cloud    trang quản trị (tĩnh)
                                                                     └─▶ <cả hai>/api/        api:4000 ─▶ mongo:27017
-Bạn (Compass/mongosh) ─▶ WireGuard UDP :51820 (vpn.antblog.xyz) ──────────────▶ mongo 172.30.0.10:27017
+Bạn (Compass/mongosh) ─▶ WireGuard UDP :51820 (vpn.antfarms.cloud) ──────────────▶ mongo 172.30.0.10:27017
 ```
 
 | Container | Vai trò | Mở ra ngoài |
 |---|---|---|
-| `nginx` | Cổng vào duy nhất. `antblog.xyz` proxy tới `web`, `admin.antblog.xyz` phục vụ tĩnh trang quản trị (luôn `noindex`); ở cả hai tên miền `/api/` proxy tới API và `/uploads/` đọc thẳng volume ảnh. Port 80 chỉ chuyển hướng sang HTTPS; host lạ hoặc gọi thẳng IP bị đóng kết nối | TCP 80, 443 |
+| `nginx` | Cổng vào duy nhất. `antfarms.cloud` proxy tới `web`, `admin.antfarms.cloud` phục vụ tĩnh trang quản trị (luôn `noindex`); ở cả hai tên miền `/api/` proxy tới API và `/uploads/` đọc thẳng volume ảnh. Port 80 chỉ chuyển hướng sang HTTPS; host lạ hoặc gọi thẳng IP bị đóng kết nối | TCP 80, 443 |
 | `web` | Trang đọc Next.js (render phía server cho SEO: metadata, JSON-LD, `sitemap.xml`, `robots.txt`). Gọi thẳng `api:4000` trong mạng nội bộ | không |
 | `api` | Express. Chỉ nghe trong mạng nội bộ; ghi ảnh tải lên vào volume `uploads` | không |
 | `mongo` | MongoDB 8.0, **bật xác thực**, 3 tài khoản (root, ứng dụng, chỉ-đọc) | không |
-| `certbot` | Xin + tự gia hạn MỘT chứng chỉ Let's Encrypt cho cả `antblog.xyz` và `admin.antblog.xyz`, bằng DNS-01 qua API Cloudflare | không |
+| `certbot` | Xin + tự gia hạn MỘT chứng chỉ Let's Encrypt cho cả `antfarms.cloud` và `admin.antfarms.cloud`, bằng DNS-01 qua API Cloudflare | không |
 | `wireguard` | VPN để bạn kết nối thẳng vào MongoDB | UDP 51820 |
 | `seed` | Chạy tay để nạp nội dung mẫu + tài khoản quản trị (`profiles: tools`) | không |
 
@@ -32,20 +32,20 @@ cd /srv/antblog
 
 ## 2. Chuẩn bị Cloudflare
 
-1. **DNS** của zone `antblog.xyz`:
+1. **DNS** của zone `antfarms.cloud`:
 
    | Loại | Tên | Trỏ tới | Proxy |
    |---|---|---|---|
-   | A | `antblog.xyz` (`@`) | IP server | **Bật** (đám mây cam) |
+   | A | `antfarms.cloud` (`@`) | IP server | **Bật** (đám mây cam) |
    | A | `admin` | IP server | **Bật** (đám mây cam) |
    | A | `vpn` | IP server | **Tắt** (đám mây xám) |
 
    (Thêm `AAAA` tương ứng nếu server có IPv6.)
-2. **VPN:** WireGuard dùng UDP mà Cloudflare không chuyển tiếp, nên `vpn.antblog.xyz` phải tắt proxy. Đặt `WG_SERVER_URL=vpn.antblog.xyz` (hoặc IP server). Lưu ý bản ghi này làm lộ IP thật của server — muốn giấu thì dùng thẳng IP và không tạo bản ghi `vpn`.
+2. **VPN:** WireGuard dùng UDP mà Cloudflare không chuyển tiếp, nên `vpn.antfarms.cloud` phải tắt proxy. Đặt `WG_SERVER_URL=vpn.antfarms.cloud` (hoặc IP server). Lưu ý bản ghi này làm lộ IP thật của server — muốn giấu thì dùng thẳng IP và không tạo bản ghi `vpn`.
 3. **SSL/TLS › Overview:** chọn **Full (strict)**. Không dùng "Flexible": Cloudflare sẽ gọi vào port 80, nginx chuyển hướng sang HTTPS ⇒ vòng lặp chuyển hướng.
-4. **API token** (My Profile › API Tokens › Create Token › mẫu "Edit zone DNS"): quyền **Zone › DNS › Edit**, Zone Resources = zone `antblog.xyz`. Dán vào `CF_API_TOKEN`.
+4. **API token** (My Profile › API Tokens › Create Token › mẫu "Edit zone DNS"): quyền **Zone › DNS › Edit**, Zone Resources = zone `antfarms.cloud`. Dán vào `CF_API_TOKEN`.
 5. Tuỳ chọn, nên bật: SSL/TLS › Edge Certificates › **Always Use HTTPS**, và HSTS sau khi đã chạy ổn.
-6. Tuỳ chọn, nên làm cho trang quản trị: **Zero Trust › Access** tạo ứng dụng cho `admin.antblog.xyz`, chỉ cho email của bạn — người lạ bị chặn ở Cloudflare trước khi tới form đăng nhập. Ứng dụng Access phủ luôn `admin.antblog.xyz/api/*` là đúng, vì trang quản trị gọi API trên chính tên miền đó; trang đọc ở `antblog.xyz` không bị ảnh hưởng.
+6. Tuỳ chọn, nên làm cho trang quản trị: **Zero Trust › Access** tạo ứng dụng cho `admin.antfarms.cloud`, chỉ cho email của bạn — người lạ bị chặn ở Cloudflare trước khi tới form đăng nhập. Ứng dụng Access phủ luôn `admin.antfarms.cloud/api/*` là đúng, vì trang quản trị gọi API trên chính tên miền đó; trang đọc ở `antfarms.cloud` không bị ảnh hưởng.
 
 Chứng chỉ ở server được xin bằng **thử thách DNS-01**: certbot tạo bản ghi TXT tạm qua API Cloudflare, nên chạy được dù tên miền đang bật proxy và không cần mở cổng nào cho Let's Encrypt.
 
@@ -59,14 +59,14 @@ Script chép `.env.example` thành `.env` (quyền 600) và **tự sinh** `JWT_S
 
 | Biến | Ví dụ |
 |---|---|
-| `DOMAIN` | `antblog.xyz` (đã điền sẵn) |
-| `ADMIN_DOMAIN` | `admin.antblog.xyz` (đã điền sẵn) |
-| `CERT_EXTRA_DOMAINS` | `www.antblog.xyz` (tuỳ chọn — nhớ tạo cả bản ghi DNS) |
+| `DOMAIN` | `antfarms.cloud` (đã điền sẵn) |
+| `ADMIN_DOMAIN` | `admin.antfarms.cloud` (đã điền sẵn) |
+| `CERT_EXTRA_DOMAINS` | `www.antfarms.cloud` (tuỳ chọn — nhớ tạo cả bản ghi DNS) |
 | `ACME_EMAIL` | email nhận cảnh báo hết hạn |
 | `CF_API_TOKEN` | token ở bước 2.4 — để trống được khi domain chưa chuyển sang Cloudflare: certbot nằm chờ, nginx dùng chứng chỉ tự ký |
-| `WG_SERVER_URL` | `vpn.antblog.xyz` (đã điền sẵn) hoặc IP server |
+| `WG_SERVER_URL` | `vpn.antfarms.cloud` (đã điền sẵn) hoặc IP server |
 | `WG_PEERS` | tên máy khách VPN, vd `laptop,desktop` |
-| `SEED_ADMIN_EMAIL` | email đăng nhập trang quản trị (mặc định `admin@antblog.xyz`) |
+| `SEED_ADMIN_EMAIL` | email đăng nhập trang quản trị (mặc định `admin@antfarms.cloud`) |
 
 Lần đầu nên đặt `ACME_STAGING=1` để thử luồng xin chứng chỉ mà không dính giới hạn tần suất của Let's Encrypt. Chạy ổn thì đổi về `0`, xoá chứng chỉ staging (`docker compose run --rm --entrypoint sh certbot -c 'rm -rf /etc/letsencrypt/live /etc/letsencrypt/archive /etc/letsencrypt/renewal'`) rồi `docker compose up -d certbot`.
 
@@ -78,7 +78,7 @@ docker compose ps                    # mọi dịch vụ "healthy"/"running"
 docker compose run --rm seed         # nạp chủ đề, bài viết, lộ trình + tài khoản quản trị
 ```
 
-- Trang đọc: `https://antblog.xyz/` · Quản trị: `https://admin.antblog.xyz/` (email `SEED_ADMIN_EMAIL`, mật khẩu `SEED_ADMIN_PASSWORD` trong `.env`).
+- Trang đọc: `https://antfarms.cloud/` · Quản trị: `https://admin.antfarms.cloud/` (email `SEED_ADMIN_EMAIL`, mật khẩu `SEED_ADMIN_PASSWORD` trong `.env`).
 - Đăng nhập ở hai tên miền là hai phiên riêng (cookie gắn theo từng tên miền): đăng nhập trang quản trị không làm bạn đăng nhập ở trang đọc và ngược lại.
 - Trong vài phút đầu nginx dùng **chứng chỉ tự ký tạm**: Cloudflare ở chế độ Full (strict) sẽ báo lỗi 526. Khi certbot xin xong (log `certbot: đã có chứng chỉ…`), nginx tự nạp chứng chỉ thật trong ≤ 5 phút.
 
@@ -129,6 +129,7 @@ Thêm máy khách: thêm tên vào `WG_PEERS` rồi `docker compose up -d wiregu
 | Khôi phục | `docker compose exec -T mongo sh -c 'mongorestore --archive --gzip --drop -u "$MONGO_INITDB_ROOT_USERNAME" -p "$MONGO_INITDB_ROOT_PASSWORD" --authenticationDatabase admin' < backup-....archive.gz` |
 | Cập nhật dải IP Cloudflare | `sh deploy/nginx/update-cloudflare-ips.sh && docker compose up -d --build nginx` |
 | Tạm chặn Google lập chỉ mục | `SITE_NOINDEX=true` trong `.env` ⇒ `docker compose up -d web` |
+| Đổi tên miền | `sh deploy/change-domain.sh <cũ> <mới>` — xem mục 8 |
 | Dừng | `docker compose down` (giữ dữ liệu) · `docker compose down -v` **xoá cả DB, ảnh và chứng chỉ** |
 
 Lưu ý:
@@ -146,13 +147,13 @@ Rebuild bản web sau khi kéo commit mới:
 ```bash
 docker compose up -d --build web
 docker compose exec nginx nginx -s reload
-curl -I https://antblog.xyz/images/articles/page-don-vi-doc-ghi.webp
+curl -I https://antfarms.cloud/images/articles/page-don-vi-doc-ghi.webp
 ```
 
 Mong đợi HTTP 200 và Content-Type: image/webp. Nếu CDN còn giữ phản hồi 404 cũ, purge cache cho /images/articles/* trên Cloudflare. Từ checkout có Node/dependencies, kiểm tra mọi ảnh qua HTTP:
 
 ```bash
-npm run covers:check -w @tkh/web -- --base-url https://antblog.xyz
+npm run covers:check -w @tkh/web -- --base-url https://antfarms.cloud
 ```
 
 Cây danh mục tối đa 3 cấp, và chủ đề cha (có chủ đề con) không chứa bài viết riêng: bài chỉ gắn vào chủ đề lá, trang chủ đề cha chỉ liệt kê các chủ đề con. Cập nhật cây và chuyển bài theo `category` trong frontmatter bằng seed:
@@ -185,3 +186,36 @@ docker compose run --rm -v "$PWD/backups/categories:/app/.migration-backups" see
 ```
 
 Lệnh đầu của categories:tree chỉ xem kế hoạch. Lệnh --apply thêm các chủ đề có trong categories.json mà DB chưa có và đặt quan hệ cha–con theo trường `parent` của từng mục. Backup các danh mục trước thay đổi nằm trên host trong backups/categories. Không chạy đồng thời với thao tác sửa cây trong CMS. Tài khoản inspector chỉ đọc, không dùng để migrate; container tools dùng tài khoản ứng dụng đã cấu hình. Sau cập nhật, cache danh mục của Next có thể cần tối đa 5 phút để làm mới.
+
+## 8. Đổi tên miền
+
+Tên miền nằm ở bốn biến `.env`: `DOMAIN`, `ADMIN_DOMAIN`, `CERT_EXTRA_DOMAINS` (vd `dbank.<DOMAIN>`), `WG_SERVER_URL`. Trang đọc (`NEXT_PUBLIC_SITE_URL`) và trang quản trị (`SITE_URL`) **nhúng tên miền lúc build**, nên đổi `.env` thôi là chưa đủ: phải build lại ảnh `web` và `nginx`. Chứng chỉ mang tên `DOMAIN` (`--cert-name`), nên tên mới sẽ có chứng chỉ mới.
+
+Chuẩn bị trên Cloudflare:
+1. Thêm zone mới. Tạo bản ghi A cho `@`, `admin`, `vpn` và mọi tên trong `CERT_EXTRA_DOMAINS` (vd `dbank`), cùng trỏ về IP server. Riêng `vpn` để **DNS-only** (đám mây xám).
+2. Sửa API token đang đặt ở `CF_API_TOKEN` (My Profile › API Tokens): **Zone › DNS › Edit**, phần Zone Resources thêm zone mới. Token cũ chỉ có quyền trên zone cũ, nên nếu bỏ qua bước này certbot sẽ không xin được chứng chỉ.
+3. Bật SSL/TLS **Full (strict)** cho zone mới (giống zone cũ).
+
+Trên server, tại thư mục repo:
+
+```bash
+git pull
+sh deploy/change-domain.sh antblog.xyz antfarms.cloud
+```
+
+Script chạy theo thứ tự an toàn:
+1. Kiểm tra DNS của các tên mới, và kiểm tra token có thấy zone mới không. Thiếu thì dừng, **chưa đổi gì**.
+2. Sao lưu `.env` thành `.env.bak-<thời điểm>`, rồi đổi bốn biến ở trên.
+3. Dựng lại `certbot` và **chờ có chứng chỉ mới**. Trong lúc chờ, nginx và web vẫn chạy tên cũ. Nếu certbot báo lỗi, script dừng và in lệnh khôi phục.
+4. Build và dựng lại `web` + `nginx`, rồi dựng lại `wireguard`.
+5. In chứng chỉ và mã HTTP của từng tên miền mới để kiểm tra.
+
+Khôi phục về `.env` cũ: `sh deploy/change-domain.sh --rollback .env.bak-<thời điểm>`.
+
+Sau khi chạy xong:
+- **VPN:** nhập lại file cấu hình máy khách ở `deploy/wireguard/config/peer_*/peer_*.conf` (Endpoint đã đổi), hoặc sửa tay dòng `Endpoint`.
+- **Chứng chỉ tên cũ:** tên cũ không gia hạn được nữa. Xoá để certbot không báo lỗi gia hạn: `docker compose exec certbot certbot delete --cert-name antblog.xyz --non-interactive`.
+- **Chuyển hướng tên cũ:** làm ở Cloudflare (zone cũ › Rules › Redirect Rules, 301 sang tên mới, giữ đường dẫn). Không thêm tên cũ vào `CERT_EXTRA_DOMAINS`: một tên không xác thực được là cả chứng chỉ không xin được.
+- **SEO:** Google Search Console thêm property tên mới, gửi `https://<DOMAIN>/sitemap.xml`, rồi dùng *Change of address* từ property cũ (cần tên cũ còn phân giải được).
+- **Tài khoản quản trị:** `SEED_ADMIN_EMAIL` chỉ dùng lúc seed tạo tài khoản lần đầu. Email đăng nhập đang có (vd `admin@antblog.xyz`) vẫn dùng bình thường; không cần đổi.
+- **Dịch vụ dbank** (container `mdt-dbank`, dự án riêng): nếu cấu hình của nó có tên miền (CORS, cookie, URL gốc) thì sửa ở dự án đó.

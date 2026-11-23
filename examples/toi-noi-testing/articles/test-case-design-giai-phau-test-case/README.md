@@ -1,6 +1,6 @@
 # Giải phẫu một test case (TCD-02)
 
-Thư mục của bài [Giải phẫu một test case](https://antblog.xyz/articles/test-case-design-giai-phau-test-case), nhánh TCD · Thiết kế Test Case. Test basis: SPEC R-ACCEPT-01…07 (tài xế nhận chuyến).
+Thư mục của bài [Giải phẫu một test case](https://antfarms.cloud/articles/test-case-design-giai-phau-test-case), nhánh TCD · Thiết kế Test Case. Test basis: SPEC R-ACCEPT-01…07 (tài xế nhận chuyến).
 
 | Tệp | Vai trò |
 |---|---|

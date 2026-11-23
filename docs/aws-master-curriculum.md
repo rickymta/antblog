@@ -1,6 +1,6 @@
 # Master Curriculum — AWS từ cơ bản tới nâng cao qua dự án Tới Nơi
 
-Bản quản lý toàn bộ lộ trình **AWS qua Tới Nơi** của Tech Knowledge Hub (antblog.xyz): **60 bài** trong **6 phần**, mỗi phần tối đa 10 bài, đi từ tài khoản đầu tiên tới kiến trúc production nhiều region. Chủ đề trên site: `devops-aws` (con của `devops`). Mỗi phần là một lộ trình học (`learning-paths.json`), mỗi bài là một tệp `api/seed/content/<slug>.md`.
+Bản quản lý toàn bộ lộ trình **AWS qua Tới Nơi** của Tech Knowledge Hub (antfarms.cloud): **60 bài** trong **6 phần**, mỗi phần tối đa 10 bài, đi từ tài khoản đầu tiên tới kiến trúc production nhiều region. Chủ đề trên site: `devops-aws` (con của `devops`). Mỗi phần là một lộ trình học (`learning-paths.json`), mỗi bài là một tệp `api/seed/content/<slug>.md`.
 
 Mọi ví dụ dùng hệ thống hư cấu [Tới Nơi](../api/seed/content/du-an-mau-toi-noi.md) (đặt xe, giao đồ ăn, giao bưu kiện ở 6 thành phố; 2 triệu chuyến/ngày, 70 chuyến/giây và 6.250 toạ độ GPS/giây lúc cao điểm) và bám [kiến trúc tổng thể](toi-noi-overall-architecture.md) (microservices, Kafka, PostgreSQL, Redis, Kubernetes tuỳ chọn, Terraform, GitOps).
 

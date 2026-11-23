@@ -13,7 +13,7 @@ RUN --mount=type=cache,target=/root/.npm,sharing=locked npm ci
 COPY packages ./packages
 COPY apps/admin ./apps/admin
 # Địa chỉ trang đọc — nút "Xem trang đọc" và liên kết mở bài trong trang quản trị (khác tên miền).
-ARG SITE_URL=https://antblog.xyz
+ARG SITE_URL=https://antfarms.cloud
 RUN VITE_SITE_URL="$SITE_URL" npm run build -w @tkh/admin
 
 FROM nginx:1.27-alpine AS runtime

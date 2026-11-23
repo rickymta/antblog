@@ -1,6 +1,6 @@
 # Khung chương trình — Azure từ cơ bản tới nâng cao qua Tới Nơi
 
-Loạt bài Azure của Tech Knowledge Hub (antblog.xyz), chủ đề `devops-azure`. Gồm **58 bài** trong **6 phần** (mỗi phần tối đa 10 bài), đi từ người chưa dùng cloud tới người thiết kế và vận hành hệ thống đặt xe Tới Nơi trên Azure. Mỗi phần là một lộ trình học riêng trong `api/seed/learning-paths.json`; bài viết nằm ở `api/seed/content/azure-*.md`; ảnh bìa sinh từ `apps/web/src/lib/article-covers.json`.
+Loạt bài Azure của Tech Knowledge Hub (antfarms.cloud), chủ đề `devops-azure`. Gồm **58 bài** trong **6 phần** (mỗi phần tối đa 10 bài), đi từ người chưa dùng cloud tới người thiết kế và vận hành hệ thống đặt xe Tới Nơi trên Azure. Mỗi phần là một lộ trình học riêng trong `api/seed/learning-paths.json`; bài viết nằm ở `api/seed/content/azure-*.md`; ảnh bìa sinh từ `apps/web/src/lib/article-covers.json`.
 
 ## Trạng thái (06/11/2026)
 

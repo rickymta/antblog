@@ -1,16 +1,16 @@
-# Copy into antblog/deploy/nginx/templates/dbank.conf.template.
-# Uses the certificate already managed by antblog; add dbank.antblog.xyz to its SANs first.
+# dbank.${DOMAIN}: proxy tới container mdt-dbank (dự án riêng, cùng mạng Docker).
+# Dùng chung chứng chỉ của stack — PHẢI có `dbank.<DOMAIN>` trong CERT_EXTRA_DOMAINS của .env.
 server {
     listen 80;
-    server_name dbank.antblog.xyz;
-    return 301 https://dbank.antblog.xyz$request_uri;
+    server_name dbank.${DOMAIN};
+    return 301 https://dbank.${DOMAIN}$request_uri;
 }
 
 server {
     listen 443 ssl;
     # Match antblog virtual hosts when browsers reuse an HTTP/2 TLS connection.
     http2 on;
-    server_name dbank.antblog.xyz;
+    server_name dbank.${DOMAIN};
 
     include /etc/nginx/tkh-ssl.conf;
     add_header X-Robots-Tag "noindex, nofollow" always;

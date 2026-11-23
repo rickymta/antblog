@@ -12,7 +12,7 @@ COPY packages/ui/package.json packages/ui/package.json
 RUN --mount=type=cache,target=/root/.npm,sharing=locked npm ci
 COPY packages ./packages
 COPY apps/web ./apps/web
-ARG NEXT_PUBLIC_SITE_URL=https://antblog.xyz
+ARG NEXT_PUBLIC_SITE_URL=https://antfarms.cloud
 ENV NEXT_PUBLIC_SITE_URL=$NEXT_PUBLIC_SITE_URL
 RUN npm run covers:check -w @tkh/web && npm run banners:check -w @tkh/web && npm run paths:check -w @tkh/web && npm run build -w @tkh/web
 

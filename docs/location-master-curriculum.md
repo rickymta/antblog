@@ -1,6 +1,6 @@
 # Master Curriculum — Service định vị bản đồ qua Tới Nơi (Rust, Go, Python)
 
-Bản quản lý loạt bài về **service xử lý vị trí trên bản đồ** của Tech Knowledge Hub (antblog.xyz). Loạt bài phục vụ hai phía của một chuyến: **khách đặt xe** trên ứng dụng và **tài xế** đi tìm khách rồi tới điểm trả. Câu hỏi xuyên suốt: **làm sao tổng quãng đường và thời gian của cả hai người nhỏ nhất**, thay vì tối ưu cho riêng một bên.
+Bản quản lý loạt bài về **service xử lý vị trí trên bản đồ** của Tech Knowledge Hub (antfarms.cloud). Loạt bài phục vụ hai phía của một chuyến: **khách đặt xe** trên ứng dụng và **tài xế** đi tìm khách rồi tới điểm trả. Câu hỏi xuyên suốt: **làm sao tổng quãng đường và thời gian của cả hai người nhỏ nhất**, thay vì tối ưu cho riêng một bên.
 
 Gồm **3 lộ trình**, **7 phần**, **64 bài**. Mỗi phần tối đa 10 bài. Trạng thái: **bản đề xuất, chờ chủ blog duyệt** (§7).
 

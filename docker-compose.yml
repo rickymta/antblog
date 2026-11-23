@@ -1,7 +1,7 @@
 # Tech Knowledge Hub — toàn bộ stack chạy bằng Docker trên server.
 #
-#   Internet ─▶ Cloudflare (proxy, SSL Full strict) ─▶ nginx :80/:443 ─┬─▶ antblog.xyz         ─▶ web:3000 (Next.js, SSR)
-#                                                                     ├─▶ admin.antblog.xyz   trang quản trị (tĩnh)
+#   Internet ─▶ Cloudflare (proxy, SSL Full strict) ─▶ nginx :80/:443 ─┬─▶ antfarms.cloud         ─▶ web:3000 (Next.js, SSR)
+#                                                                     ├─▶ admin.antfarms.cloud   trang quản trị (tĩnh)
 #                                                                     ├─▶ <cả hai>/uploads/   volume ảnh (chỉ đọc)
 #                                                                     └─▶ <cả hai>/api/  ─▶ api:4000 ─▶ mongo:27017
 #   web (render phía server) gọi thẳng api:4000 trong mạng nội bộ, không qua nginx.

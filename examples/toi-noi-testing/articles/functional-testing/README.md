@@ -1,6 +1,6 @@
 # Functional Testing (TEST-017)
 
-Thư mục của bài [Functional Testing](https://antblog.xyz/articles/functional-testing). Functional testing là một **test type**; ở đây cùng một loại test chạy ở hai test level (component và system qua API) và tách hai câu hỏi của ISO/IEC 25010: functional **correctness** và functional **completeness**.
+Thư mục của bài [Functional Testing](https://antfarms.cloud/articles/functional-testing). Functional testing là một **test type**; ở đây cùng một loại test chạy ở hai test level (component và system qua API) và tách hai câu hỏi của ISO/IEC 25010: functional **correctness** và functional **completeness**.
 
 | Tệp | Nội dung |
 |---|---|

@@ -1,6 +1,6 @@
 # Master Curriculum — Python qua dự án Tới Nơi
 
-Bản quản lý loạt bài **Python** của Tech Knowledge Hub (antblog.xyz). Python là ngôn ngữ của các service **OCR giấy tờ định danh**, **so khớp khuôn mặt (face matching)**, **chấm điểm gian lận (fraud scoring)** và **phân tích / dự đoán** trong kiến trúc microservices của Tới Nơi (xem `toi-noi-overall-architecture.md` và bài `du-an-mau-toi-noi`). Loạt bài đi từ cú pháp cơ bản tới service chạy được trong kiến trúc đó.
+Bản quản lý loạt bài **Python** của Tech Knowledge Hub (antfarms.cloud). Python là ngôn ngữ của các service **OCR giấy tờ định danh**, **so khớp khuôn mặt (face matching)**, **chấm điểm gian lận (fraud scoring)** và **phân tích / dự đoán** trong kiến trúc microservices của Tới Nơi (xem `toi-noi-overall-architecture.md` và bài `du-an-mau-toi-noi`). Loạt bài đi từ cú pháp cơ bản tới service chạy được trong kiến trúc đó.
 
 Gồm **3 cấp độ**, **10 phần**, **79 bài**. Mỗi phần tối đa 10 bài. Mỗi cấp độ là một lộ trình học (learning path) riêng trên trang đọc.
 

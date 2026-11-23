@@ -1,6 +1,6 @@
 # Inspection: review hình thức nhất (TEST-026)
 
-Thư mục của bài [Inspection: review hình thức nhất](https://antblog.xyz/articles/inspection-review-hinh-thuc).
+Thư mục của bài [Inspection: review hình thức nhất](https://antfarms.cloud/articles/inspection-review-hinh-thuc).
 Bài thực hành là **static testing** — không có code chạy; chỉ có tài liệu review dạng Markdown:
 
 | Tệp | Vai trò trong inspection |

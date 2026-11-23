@@ -1,6 +1,6 @@
 # Test analysis và test condition cho voucher (TCD-01)
 
-Thư mục của bài [Test analysis: từ test basis tới test condition](https://antblog.xyz/articles/test-case-design-test-analysis-test-condition), nhánh TCD · Thiết kế Test Case. Test basis: SPEC R-VOUCHER-01…08, R-FARE-06, R-FARE-07, R-FOOD-05.
+Thư mục của bài [Test analysis: từ test basis tới test condition](https://antfarms.cloud/articles/test-case-design-test-analysis-test-condition), nhánh TCD · Thiết kế Test Case. Test basis: SPEC R-VOUCHER-01…08, R-FARE-06, R-FARE-07, R-FOOD-05.
 
 | Tệp | Vai trò |
 |---|---|
