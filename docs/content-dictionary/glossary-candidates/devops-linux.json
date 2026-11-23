@@ -1,13 +1,34 @@
 {
   "version": 1,
   "category": "devops-linux",
-  "generatedAt": "2026-11-23",
+  "generatedAt": "2026-11-24",
   "source": {
     "articles": 30,
     "checkedAgainst": "api/seed/terminology.json (working tree 22/11/2026, 422 mục) và các file khác trong glossary-candidates/",
     "occurrencesMethod": "Như postgresql.json: occurrences = số bài trong series (Phần 1–3, 30 bài linux-*) có ít nhất một chỗ khớp term/english/aliases trong văn xuôi; mentions = tổng số chỗ khớp; outsideSeriesArticles = số bài ngoài series có chỗ khớp. Bỏ frontmatter, khối code, inline code, <pre>/<code>/<script>/<style>, thẻ HTML (giữ alt/title/aria-label), đích liên kết, URL. Ranh giới từ Unicode, tôn trọng caseSensitive. Phần lớn tên lệnh trong series nằm trong inline code nên không được tính. Cập nhật lại khi viết các phần sau."
   },
-  "conflicts": [],
+  "conflicts": [
+    {
+      "slug": "totp",
+      "with": "terminology.json: otp",
+      "note": "Alias «mã OTP» của totp chồng một phần với mục otp đã có. Bộ dò ưu tiên cụm dài hơn nên «mã OTP» trong bài Linux trỏ tới totp; nếu gộp, cân nhắc bỏ alias này và để otp định nghĩa chung."
+    },
+    {
+      "slug": "journal",
+      "with": "terminology.json: journal-entry",
+      "note": "Không trùng chữ («journal entry» dài hơn và chỉ ở bài kế toán), nhưng journal giữ categories [\"devops-linux\"] để không bắt nhầm chữ journal ở chuyên mục khác."
+    },
+    {
+      "slug": "sha-256",
+      "with": "postgresql.json: scram-sha-256",
+      "note": "Trong «SCRAM-SHA-256», ranh giới từ cho phép khớp «SHA-256». Khi gộp cả hai, cụm dài hơn thắng nên không sai; nếu chỉ gộp sha-256, bài PostgreSQL có SCRAM-SHA-256 sẽ bị đánh dấu phần SHA-256."
+    },
+    {
+      "slug": "file-khoa",
+      "with": "postgresql.json: row-lock, table-lock",
+      "note": "Khác chữ («file khoá» với «khoá dòng», «khoá bảng»), ghi lại để người gộp biết «khoá» mang hai nghĩa."
+    }
+  ],
   "terms": [
     {
       "slug": "kernel",
@@ -258,7 +279,7 @@
       "scopeNote": "Thuật ngữ riêng của Linux/Unix, cùng nghĩa ở mọi chuyên mục.",
       "occurrences": 12,
       "mentions": 46,
-      "outsideSeriesArticles": 53,
+      "outsideSeriesArticles": 54,
       "reviewNote": "Dò toàn site sẽ đánh dấu ở 53 bài ngoài series; soát vài bài trước khi gộp."
     },
     {
@@ -630,7 +651,7 @@
       "scopeNote": "Viết hoa, phân biệt với chữ \"path\" (đường dẫn) ở các bài khác.",
       "occurrences": 3,
       "mentions": 8,
-      "outsideSeriesArticles": 6
+      "outsideSeriesArticles": 7
     },
     {
       "slug": "command-substitution",
@@ -1116,6 +1137,651 @@
       "occurrences": 2,
       "mentions": 5,
       "outsideSeriesArticles": 2
+    },
+    {
+      "slug": "terminal",
+      "term": "terminal",
+      "aliases": [
+        "cửa sổ dòng lệnh"
+      ],
+      "shortDefinition": "Cửa sổ hiển thị chữ và nhận phím gõ cho một chương trình dòng lệnh, thường là shell. Trong SSH Studio, mỗi tab Terminal là một phiên SSH tới server: chữ bạn gõ đi tới shell trên server, kết quả quay về hiển thị trên máy bạn.",
+      "categories": [],
+      "relatedArticleSlugs": [
+        "linux-la-gi-va-ssh-studio",
+        "linux-shell-dong-lenh-tro-giup"
+      ],
+      "scopeNote": "Khái niệm chung của ngành, cùng nghĩa ở mọi chuyên mục.",
+      "occurrences": 30,
+      "mentions": 155,
+      "outsideSeriesArticles": 46
+    },
+    {
+      "slug": "ssh-studio",
+      "term": "SSH Studio",
+      "shortDefinition": "SSH client trên máy tính dùng xuyên suốt series Linux: terminal nhiều tab, khung Files (SFTP), trình sửa file, thư viện SSH key, Known Hosts, port forwarding. Mọi thao tác trên giao diện đều tương ứng một lệnh hoặc một cơ chế của SSH trên server.",
+      "caseSensitive": true,
+      "categories": [],
+      "relatedArticleSlugs": [
+        "linux-la-gi-va-ssh-studio",
+        "linux-dung-lab-docker-ket-noi-ssh-studio"
+      ],
+      "scopeNote": "Tên công cụ, chỉ một nghĩa.",
+      "occurrences": 30,
+      "mentions": 354,
+      "outsideSeriesArticles": 0
+    },
+    {
+      "slug": "docker",
+      "term": "Docker",
+      "aliases": [
+        "Docker Desktop"
+      ],
+      "shortDefinition": "Nền tảng đóng gói và chạy ứng dụng trong container: một môi trường tách biệt có hệ thống file, tiến trình và mạng riêng nhưng dùng chung kernel với máy chủ. Lab của series Linux chạy server Ubuntu trong một container Docker.",
+      "caseSensitive": true,
+      "categories": [],
+      "relatedArticleSlugs": [
+        "linux-dung-lab-docker-ket-noi-ssh-studio"
+      ],
+      "scopeNote": "Cùng nghĩa ở mọi chuyên mục (DevOps, AWS, Azure, các lab database).",
+      "occurrences": 4,
+      "mentions": 16,
+      "outsideSeriesArticles": 102
+    },
+    {
+      "slug": "ubuntu",
+      "term": "Ubuntu",
+      "aliases": [
+        "Ubuntu Server"
+      ],
+      "shortDefinition": "Bản phân phối Linux phổ biến trên server, dựa trên Debian, quản lý gói bằng apt. Bản LTS (ví dụ 24.04) được hỗ trợ bản vá bảo mật nhiều năm; server lab của series là Ubuntu 24.04 LTS.",
+      "caseSensitive": true,
+      "categories": [],
+      "relatedArticleSlugs": [
+        "linux-la-gi-va-ssh-studio",
+        "linux-dung-lab-docker-ket-noi-ssh-studio"
+      ],
+      "scopeNote": "Tên bản phân phối, chỉ một nghĩa.",
+      "occurrences": 17,
+      "mentions": 41,
+      "outsideSeriesArticles": 5
+    },
+    {
+      "slug": "openssh",
+      "term": "OpenSSH",
+      "shortDefinition": "Bộ phần mềm SSH phổ biến nhất: sshd ở phía server, các lệnh ssh, scp, sftp, ssh-keygen, ssh-agent ở phía client. Có sẵn trên Linux, macOS và Windows 10/11.",
+      "caseSensitive": true,
+      "categories": [],
+      "relatedArticleSlugs": [
+        "linux-dung-lab-docker-ket-noi-ssh-studio",
+        "linux-host-key-known-hosts",
+        "linux-ssh-agent-passphrase"
+      ],
+      "scopeNote": "Tên phần mềm, chỉ một nghĩa.",
+      "occurrences": 6,
+      "mentions": 24,
+      "outsideSeriesArticles": 1
+    },
+    {
+      "slug": "putty",
+      "term": "PuTTY",
+      "aliases": [
+        "Pageant"
+      ],
+      "shortDefinition": "SSH client lâu đời trên Windows. Key của PuTTY có định dạng riêng (.ppk); Pageant là ssh-agent của PuTTY. SSH Studio nhập được key .ppk.",
+      "caseSensitive": true,
+      "categories": [],
+      "relatedArticleSlugs": [
+        "linux-ssh-key-ssh-studio",
+        "linux-ssh-agent-passphrase"
+      ],
+      "scopeNote": "Tên phần mềm, chỉ một nghĩa.",
+      "occurrences": 3,
+      "mentions": 4,
+      "outsideSeriesArticles": 0
+    },
+    {
+      "slug": "utf-8",
+      "term": "UTF-8",
+      "shortDefinition": "Cách mã hoá ký tự phổ biến nhất: chữ Latin không dấu chiếm 1 byte, chữ tiếng Việt có dấu chiếm 2–3 byte. Vì vậy với văn bản tiếng Việt, số byte và số ký tự khác nhau, và một số lệnh đếm theo byte cho kết quả bất ngờ.",
+      "caseSensitive": true,
+      "categories": [],
+      "relatedArticleSlugs": [
+        "linux-cut-sort-uniq-tr",
+        "linux-awk-xu-ly-log"
+      ],
+      "scopeNote": "Khái niệm chung của ngành, cùng nghĩa ở mọi chuyên mục.",
+      "occurrences": 6,
+      "mentions": 9,
+      "outsideSeriesArticles": 19
+    },
+    {
+      "slug": "sha-256",
+      "term": "SHA-256",
+      "aliases": [
+        "SHA256"
+      ],
+      "shortDefinition": "Hàm băm cho ra chuỗi 256 bit từ dữ liệu bất kỳ; dữ liệu đổi một bit là kết quả đổi hoàn toàn. OpenSSH và SSH Studio dùng SHA-256 để tính fingerprint của khoá, in dạng SHA256:… (base64).",
+      "caseSensitive": true,
+      "categories": [],
+      "relatedArticleSlugs": [
+        "linux-dung-lab-docker-ket-noi-ssh-studio",
+        "linux-host-key-known-hosts",
+        "linux-ssh-key-ssh-studio"
+      ],
+      "scopeNote": "Khái niệm chung của ngành, cùng nghĩa ở mọi chuyên mục.",
+      "occurrences": 4,
+      "mentions": 11,
+      "outsideSeriesArticles": 12
+    },
+    {
+      "slug": "thu-muc-hien-tai",
+      "term": "thư mục hiện tại",
+      "english": "working directory",
+      "aliases": [
+        "thư mục làm việc"
+      ],
+      "shortDefinition": "Thư mục mà shell (hoặc một tiến trình) đang đứng; đường dẫn tương đối được tính từ đây. Xem bằng pwd, đổi bằng cd. Mỗi tiến trình có thư mục hiện tại riêng, nên cd trong script không đổi thư mục của shell đã gọi script.",
+      "categories": [
+        "devops-linux"
+      ],
+      "relatedArticleSlugs": [
+        "linux-cay-thu-muc-duong-dan",
+        "linux-bien-moi-truong-path-bashrc"
+      ],
+      "scopeNote": "Trong lập trình còn gọi là current working directory của một tiến trình (cùng khái niệm).",
+      "occurrences": 8,
+      "mentions": 18,
+      "outsideSeriesArticles": 10
+    },
+    {
+      "slug": "thu-muc-home",
+      "term": "thư mục home",
+      "english": "home directory",
+      "aliases": [
+        "thư mục nhà"
+      ],
+      "shortDefinition": "Thư mục riêng của mỗi người dùng, thường là /home/TÊN, viết tắt là dấu ~. Chứa file cấu hình cá nhân (.bashrc, .ssh); người khác mặc định không đọc được. Cũng là thư mục hiện tại ngay sau khi đăng nhập.",
+      "categories": [
+        "devops-linux"
+      ],
+      "relatedArticleSlugs": [
+        "linux-cay-thu-muc-duong-dan",
+        "linux-quan-ly-nguoi-dung-nhom"
+      ],
+      "scopeNote": "Thuật ngữ riêng của Linux/Unix, cùng nghĩa ở mọi chuyên mục.",
+      "occurrences": 4,
+      "mentions": 4,
+      "outsideSeriesArticles": 1
+    },
+    {
+      "slug": "lich-su-lenh",
+      "term": "lịch sử lệnh",
+      "english": "shell history",
+      "shortDefinition": "Danh sách lệnh bạn đã gõ, bash lưu trong ~/.bash_history khi thoát phiên. Gọi lại bằng phím mũi tên lên, tìm bằng Ctrl+R, xem bằng history. Lệnh có mật khẩu trên dòng lệnh cũng nằm lại ở đây.",
+      "categories": [
+        "devops-linux"
+      ],
+      "relatedArticleSlugs": [
+        "linux-shell-dong-lenh-tro-giup",
+        "linux-bien-moi-truong-path-bashrc"
+      ],
+      "scopeNote": "Thuật ngữ riêng của Linux/Unix, cùng nghĩa ở mọi chuyên mục.",
+      "occurrences": 3,
+      "mentions": 5,
+      "outsideSeriesArticles": 1
+    },
+    {
+      "slug": "lenh-dung-san",
+      "term": "lệnh dựng sẵn",
+      "english": "shell builtin",
+      "aliases": [
+        "lệnh nội bộ"
+      ],
+      "shortDefinition": "Lệnh do chính shell thực hiện, không phải chương trình riêng trên đĩa: cd, echo, export, source, type, read. type TÊN cho biết một lệnh là builtin, alias hay file trong PATH; trợ giúp của builtin xem bằng help TÊN thay vì man.",
+      "categories": [
+        "devops-linux"
+      ],
+      "relatedArticleSlugs": [
+        "linux-shell-dong-lenh-tro-giup"
+      ],
+      "scopeNote": "Thuật ngữ riêng của Linux/Unix, cùng nghĩa ở mọi chuyên mục.",
+      "occurrences": 2,
+      "mentions": 3,
+      "outsideSeriesArticles": 0
+    },
+    {
+      "slug": "shell-dang-nhap",
+      "term": "shell đăng nhập",
+      "english": "login shell",
+      "shortDefinition": "Shell được khởi động khi bạn đăng nhập (qua SSH, console hoặc su -). Bash ở chế độ này đọc ~/.profile (và /etc/profile); trường cuối của /etc/passwd quy định chương trình nào là shell đăng nhập của mỗi người dùng.",
+      "categories": [
+        "devops-linux"
+      ],
+      "relatedArticleSlugs": [
+        "linux-bien-moi-truong-path-bashrc",
+        "linux-quan-ly-nguoi-dung-nhom"
+      ],
+      "scopeNote": "Thuật ngữ riêng của Linux/Unix, cùng nghĩa ở mọi chuyên mục.",
+      "occurrences": 2,
+      "mentions": 5,
+      "outsideSeriesArticles": 0
+    },
+    {
+      "slug": "shell-tuong-tac",
+      "term": "shell tương tác",
+      "english": "interactive shell",
+      "shortDefinition": "Shell đang chờ bạn gõ lệnh ở dấu nhắc, khác với shell chạy một script. Bash tương tác đọc ~/.bashrc; script không tương tác thì không, nên alias và biến đặt trong .bashrc không có tác dụng trong script.",
+      "categories": [
+        "devops-linux"
+      ],
+      "relatedArticleSlugs": [
+        "linux-bien-moi-truong-path-bashrc"
+      ],
+      "scopeNote": "Thuật ngữ riêng của Linux/Unix, cùng nghĩa ở mọi chuyên mục.",
+      "occurrences": 1,
+      "mentions": 2,
+      "outsideSeriesArticles": 1
+    },
+    {
+      "slug": "che-do-vim",
+      "term": "chế độ của vim",
+      "english": "vim modes",
+      "aliases": [
+        "chế độ Normal",
+        "chế độ Insert",
+        "Normal mode",
+        "Insert mode"
+      ],
+      "shortDefinition": "vim có ba chế độ chính: Normal (mặc định, phím là lệnh di chuyển, xoá, sao chép), Insert (gõ chữ vào file, vào bằng i, ra bằng Esc) và Command-line (gõ : để lưu, thoát, tìm và thay thế). Không biết đang ở chế độ nào thì bấm Esc.",
+      "categories": [
+        "devops-linux"
+      ],
+      "relatedArticleSlugs": [
+        "linux-xem-sua-file-van-ban",
+        "linux-vim-hang-ngay"
+      ],
+      "scopeNote": "Riêng của vim (và các trình soạn thảo kiểu vi).",
+      "occurrences": 3,
+      "mentions": 8,
+      "outsideSeriesArticles": 0
+    },
+    {
+      "slug": "dau-phan-cach",
+      "term": "dấu phân cách",
+      "english": "delimiter",
+      "aliases": [
+        "ký tự phân cách"
+      ],
+      "shortDefinition": "Ký tự tách một dòng thành các cột (trường), ví dụ dấu phẩy trong CSV hay dấu cách trong log. cut -d, sort -t, awk -F chọn dấu phân cách; với sed, ký tự đi ngay sau s là dấu phân cách của lệnh thay thế.",
+      "categories": [],
+      "relatedArticleSlugs": [
+        "linux-cut-sort-uniq-tr",
+        "linux-awk-xu-ly-log",
+        "linux-sed-sua-van-ban"
+      ],
+      "scopeNote": "Khái niệm chung của ngành, cùng nghĩa ở mọi chuyên mục.",
+      "occurrences": 4,
+      "mentions": 9,
+      "outsideSeriesArticles": 6
+    },
+    {
+      "slug": "file-tam",
+      "term": "file tạm",
+      "english": "temporary file",
+      "shortDefinition": "File chỉ dùng trong lúc một chương trình chạy, thường đặt trong /tmp. Trong script nên tạo bằng mktemp (tên không đoán được, chỉ chủ đọc được) và xoá bằng trap khi script kết thúc, kể cả khi lỗi giữa chừng.",
+      "categories": [],
+      "relatedArticleSlugs": [
+        "linux-shell-script-an-toan",
+        "linux-chuyen-huong-pipe"
+      ],
+      "scopeNote": "Khái niệm chung của ngành, cùng nghĩa ở mọi chuyên mục.",
+      "occurrences": 3,
+      "mentions": 14,
+      "outsideSeriesArticles": 8
+    },
+    {
+      "slug": "file-khoa",
+      "term": "file khoá",
+      "english": "lock file",
+      "aliases": [
+        "file khóa",
+        "lock file"
+      ],
+      "shortDefinition": "File đánh dấu một việc đang chạy để lần chạy thứ hai không chồng lên. Cách an toàn trên Linux là flock trên một file cố định: khoá tự nhả khi tiến trình kết thúc, kể cả khi bị giết, nên không có file khoá «mồ côi».",
+      "categories": [],
+      "relatedArticleSlugs": [
+        "linux-shell-script-an-toan"
+      ],
+      "scopeNote": "Ngoài chuyên mục: khoá của database (row lock, table lock) là cơ chế khác.",
+      "occurrences": 2,
+      "mentions": 3,
+      "outsideSeriesArticles": 2
+    },
+    {
+      "slug": "pipefail",
+      "term": "pipefail",
+      "aliases": [
+        "set -o pipefail"
+      ],
+      "shortDefinition": "Tuỳ chọn của bash: mã thoát của cả pipeline là mã khác 0 của lệnh hỏng cuối cùng, thay vì chỉ của lệnh cuối. Thiếu nó, lỗi ở giữa pipe (ví dụ file không tồn tại) bị che và set -e không dừng script.",
+      "caseSensitive": true,
+      "categories": [
+        "devops-linux"
+      ],
+      "relatedArticleSlugs": [
+        "linux-shell-script-dau-tien",
+        "linux-shell-script-an-toan"
+      ],
+      "scopeNote": "Thuật ngữ riêng của Linux/Unix, cùng nghĩa ở mọi chuyên mục.",
+      "occurrences": 3,
+      "mentions": 3,
+      "outsideSeriesArticles": 0
+    },
+    {
+      "slug": "xz",
+      "term": "xz",
+      "shortDefinition": "Chương trình nén cho tỉ lệ nén cao nhưng chậm, đuôi file .xz (tar.xz). Hợp với bản lưu trữ lâu dài ít khi giải nén; với log nén hằng ngày, gzip hoặc zstd thường cân bằng hơn.",
+      "caseSensitive": true,
+      "categories": [
+        "devops-linux"
+      ],
+      "relatedArticleSlugs": [
+        "linux-tar-gzip-nen-luu-tru"
+      ],
+      "scopeNote": "Thuật ngữ riêng của Linux/Unix, cùng nghĩa ở mọi chuyên mục.",
+      "occurrences": 2,
+      "mentions": 5,
+      "outsideSeriesArticles": 0
+    },
+    {
+      "slug": "nhom-chinh",
+      "term": "nhóm chính",
+      "english": "primary group",
+      "shortDefinition": "Nhóm ghi trong trường GID của /etc/passwd; file mới bạn tạo thuộc nhóm này (trừ khi thư mục có bit setgid). Trên Ubuntu, mỗi người dùng có một nhóm chính cùng tên.",
+      "categories": [
+        "devops-linux"
+      ],
+      "relatedArticleSlugs": [
+        "linux-nguoi-dung-nhom-quyen-file",
+        "linux-quan-ly-nguoi-dung-nhom",
+        "linux-setuid-setgid-sticky"
+      ],
+      "scopeNote": "Thuật ngữ riêng của Linux/Unix, cùng nghĩa ở mọi chuyên mục.",
+      "occurrences": 5,
+      "mentions": 6,
+      "outsideSeriesArticles": 0
+    },
+    {
+      "slug": "nhom-phu",
+      "term": "nhóm phụ",
+      "english": "supplementary group",
+      "shortDefinition": "Các nhóm khác mà người dùng thuộc về ngoài nhóm chính, liệt kê trong /etc/group. Thêm bằng usermod -aG (thiếu -a là mất các nhóm cũ); chỉ có hiệu lực từ lần đăng nhập sau.",
+      "categories": [
+        "devops-linux"
+      ],
+      "relatedArticleSlugs": [
+        "linux-nguoi-dung-nhom-quyen-file",
+        "linux-quan-ly-nguoi-dung-nhom"
+      ],
+      "scopeNote": "Thuật ngữ riêng của Linux/Unix, cùng nghĩa ở mọi chuyên mục.",
+      "occurrences": 3,
+      "mentions": 5,
+      "outsideSeriesArticles": 1
+    },
+    {
+      "slug": "authorized-keys",
+      "term": "authorized_keys",
+      "aliases": [
+        "authorized keys"
+      ],
+      "shortDefinition": "File ~/.ssh/authorized_keys trên server: mỗi dòng một khoá công khai được phép đăng nhập vào tài khoản đó. sshd từ chối file nếu ~/.ssh hoặc chính file cho người khác ghi (StrictModes). Gỡ một dòng là thu hồi quyền của key đó.",
+      "categories": [
+        "devops-linux"
+      ],
+      "relatedArticleSlugs": [
+        "linux-ssh-key-ssh-studio",
+        "linux-thuc-hanh-khoa-dang-nhap-ssh"
+      ],
+      "scopeNote": "Thuật ngữ riêng của Linux/Unix, cùng nghĩa ở mọi chuyên mục.",
+      "occurrences": 2,
+      "mentions": 5,
+      "outsideSeriesArticles": 0
+    },
+    {
+      "slug": "sshd-config",
+      "term": "sshd_config",
+      "shortDefinition": "File cấu hình của sshd, /etc/ssh/sshd_config, cùng các file trong sshd_config.d được Include ở đầu. Với hầu hết tuỳ chọn, giá trị đọc được đầu tiên thắng; kiểm tra cú pháp bằng sshd -t, giá trị có hiệu lực bằng sshd -T.",
+      "caseSensitive": true,
+      "categories": [
+        "devops-linux"
+      ],
+      "relatedArticleSlugs": [
+        "linux-sshd-config-an-toan",
+        "linux-ssh-mfa-totp",
+        "linux-thuc-hanh-khoa-dang-nhap-ssh"
+      ],
+      "scopeNote": "Thuật ngữ riêng của Linux/Unix, cùng nghĩa ở mọi chuyên mục.",
+      "occurrences": 3,
+      "mentions": 5,
+      "outsideSeriesArticles": 0
+    },
+    {
+      "slug": "visudo",
+      "term": "visudo",
+      "shortDefinition": "Lệnh sửa sudoers an toàn: mở bản sao, chỉ ghi khi cú pháp đúng, nên một lỗi gõ không làm hỏng sudo. visudo -f FILE sửa file trong /etc/sudoers.d, visudo -c kiểm tra cú pháp toàn bộ.",
+      "caseSensitive": true,
+      "categories": [
+        "devops-linux"
+      ],
+      "relatedArticleSlugs": [
+        "linux-sudo-sudoers",
+        "linux-thuc-hanh-khoa-dang-nhap-ssh"
+      ],
+      "scopeNote": "Thuật ngữ riêng của Linux/Unix, cùng nghĩa ở mọi chuyên mục.",
+      "occurrences": 2,
+      "mentions": 7,
+      "outsideSeriesArticles": 0
+    },
+    {
+      "slug": "sudoedit",
+      "term": "sudoedit",
+      "aliases": [
+        "sudo -e"
+      ],
+      "shortDefinition": "Sửa file của root mà trình soạn thảo vẫn chạy bằng quyền của bạn: sudo chép file ra bản tạm, mở vim trên bản đó, lưu xong mới chép đè lại. An toàn hơn sudo vim, vì từ trong vim không mở được shell root.",
+      "caseSensitive": true,
+      "categories": [
+        "devops-linux"
+      ],
+      "relatedArticleSlugs": [
+        "linux-sshd-config-an-toan",
+        "linux-ssh-mfa-totp"
+      ],
+      "scopeNote": "Thuật ngữ riêng của Linux/Unix, cùng nghĩa ở mọi chuyên mục.",
+      "occurrences": 3,
+      "mentions": 5,
+      "outsideSeriesArticles": 0
+    },
+    {
+      "slug": "keyboard-interactive",
+      "term": "keyboard-interactive",
+      "shortDefinition": "Phương thức xác thực hỏi-đáp của SSH: server gửi câu hỏi (ví dụ Verification code), client hiển thị và gửi câu trả lời. Là kênh để PAM hỏi mã OTP; bật bằng KbdInteractiveAuthentication yes.",
+      "caseSensitive": true,
+      "categories": [
+        "devops-linux"
+      ],
+      "relatedArticleSlugs": [
+        "linux-ssh-mfa-totp",
+        "linux-thuc-hanh-khoa-dang-nhap-ssh"
+      ],
+      "scopeNote": "Thuật ngữ riêng của Linux/Unix, cùng nghĩa ở mọi chuyên mục.",
+      "occurrences": 2,
+      "mentions": 5,
+      "outsideSeriesArticles": 0
+    },
+    {
+      "slug": "authentication-methods",
+      "term": "AuthenticationMethods",
+      "shortDefinition": "Tuỳ chọn của sshd buộc phải qua đủ một chuỗi phương thức xác thực. Dấu phẩy là «và theo thứ tự» (publickey,keyboard-interactive: key rồi mã OTP), dấu cách tách các chuỗi thay thế nhau.",
+      "caseSensitive": true,
+      "categories": [
+        "devops-linux"
+      ],
+      "relatedArticleSlugs": [
+        "linux-ssh-mfa-totp",
+        "linux-thuc-hanh-khoa-dang-nhap-ssh"
+      ],
+      "scopeNote": "Thuật ngữ riêng của Linux/Unix, cùng nghĩa ở mọi chuyên mục.",
+      "occurrences": 2,
+      "mentions": 2,
+      "outsideSeriesArticles": 0
+    },
+    {
+      "slug": "brute-force",
+      "term": "brute force",
+      "aliases": [
+        "dò mật khẩu",
+        "đoán mật khẩu"
+      ],
+      "shortDefinition": "Tấn công thử lần lượt rất nhiều mật khẩu hoặc mã cho tới khi đúng. Server SSH mở ra Internet nhận các lần thử như vậy liên tục; chống bằng tắt đăng nhập mật khẩu, MaxAuthTries, giới hạn tần suất và xác thực hai bước.",
+      "categories": [],
+      "relatedArticleSlugs": [
+        "linux-sshd-config-an-toan",
+        "linux-ssh-mfa-totp"
+      ],
+      "scopeNote": "Khái niệm chung của ngành, cùng nghĩa ở mọi chuyên mục.",
+      "occurrences": 1,
+      "mentions": 1,
+      "outsideSeriesArticles": 4
+    },
+    {
+      "slug": "port-forwarding",
+      "term": "port forwarding",
+      "aliases": [
+        "chuyển tiếp cổng"
+      ],
+      "shortDefinition": "Chuyển kết nối tới một cổng trên máy này qua đường hầm SSH sang một cổng ở phía bên kia (ssh -L, -R; tab Ports của SSH Studio). Dùng để mở dịch vụ nội bộ của server mà không mở cổng ra mạng; tắt cho tài khoản máy bằng AllowTcpForwarding no.",
+      "categories": [],
+      "relatedArticleSlugs": [
+        "linux-la-gi-va-ssh-studio",
+        "linux-thuc-hanh-khoa-dang-nhap-ssh"
+      ],
+      "scopeNote": "Ngoài SSH còn có port forwarding trên router/NAT: cùng ý «chuyển kết nối từ cổng này sang cổng khác», cơ chế khác.",
+      "occurrences": 2,
+      "mentions": 2,
+      "outsideSeriesArticles": 1
+    },
+    {
+      "slug": "bastion-host",
+      "term": "bastion host",
+      "aliases": [
+        "bastion",
+        "jump host"
+      ],
+      "shortDefinition": "Máy trung gian duy nhất mở SSH ra ngoài; muốn vào các server nội bộ phải đi qua nó (ssh -J, ProxyJump, «Kết nối qua: Jump host» trong SSH Studio). Gom điểm vào để kiểm soát và ghi log một chỗ.",
+      "categories": [],
+      "relatedArticleSlugs": [
+        "linux-ssh-agent-passphrase",
+        "linux-dung-lab-docker-ket-noi-ssh-studio"
+      ],
+      "scopeNote": "Cùng nghĩa ở mọi chuyên mục (AWS, Azure có dịch vụ bastion riêng).",
+      "occurrences": 2,
+      "mentions": 2,
+      "outsideSeriesArticles": 7
+    },
+    {
+      "slug": "pager",
+      "term": "pager",
+      "aliases": [
+        "trình xem trang"
+      ],
+      "shortDefinition": "Chương trình hiển thị văn bản dài từng trang, thường là less: Space sang trang, / để tìm, q để thoát. man, git, systemctl và journalctl tự mở pager khi output dài; thêm --no-pager hoặc chuyển qua pipe để in thẳng ra terminal.",
+      "categories": [
+        "devops-linux"
+      ],
+      "relatedArticleSlugs": [
+        "linux-cay-thu-muc-duong-dan",
+        "linux-thuc-hanh-khoa-dang-nhap-ssh"
+      ],
+      "scopeNote": "Thuật ngữ riêng của Linux/Unix, cùng nghĩa ở mọi chuyên mục.",
+      "occurrences": 2,
+      "mentions": 2,
+      "outsideSeriesArticles": 0
+    },
+    {
+      "slug": "journal",
+      "term": "journal",
+      "english": "systemd journal",
+      "aliases": [
+        "journald",
+        "systemd-journald"
+      ],
+      "shortDefinition": "Kho log tập trung của systemd (dịch vụ systemd-journald): gom log của mọi dịch vụ kèm thời điểm, unit, PID, mức ưu tiên. Đọc bằng journalctl, ví dụ journalctl -u ssh; người dùng thường cần thuộc nhóm systemd-journal hoặc adm, hoặc dùng sudo.",
+      "categories": [
+        "devops-linux"
+      ],
+      "relatedArticleSlugs": [
+        "linux-sshd-config-an-toan",
+        "linux-sudo-sudoers",
+        "linux-ssh-mfa-totp"
+      ],
+      "scopeNote": "Ngoài chuyên mục: journal entry (bút toán) trong kế toán, journal của hệ thống file là các khái niệm khác.",
+      "occurrences": 2,
+      "mentions": 3,
+      "outsideSeriesArticles": 7
+    },
+    {
+      "slug": "chmod",
+      "term": "chmod",
+      "english": "change mode",
+      "shortDefinition": "Lệnh đổi quyền của file và thư mục, dạng chữ (u+x, g-w, o=) hoặc dạng số (750: chủ rwx, nhóm r-x, người khác không gì). Chỉ chủ file hoặc root đổi được; với file có ACL, đổi quyền nhóm là đổi mask.",
+      "caseSensitive": true,
+      "categories": [
+        "devops-linux"
+      ],
+      "relatedArticleSlugs": [
+        "linux-nguoi-dung-nhom-quyen-file",
+        "linux-setuid-setgid-sticky",
+        "linux-acl-setfacl"
+      ],
+      "scopeNote": "Thuật ngữ riêng của Linux/Unix, cùng nghĩa ở mọi chuyên mục.",
+      "occurrences": 10,
+      "mentions": 22,
+      "outsideSeriesArticles": 0
+    },
+    {
+      "slug": "grep",
+      "term": "grep",
+      "shortDefinition": "Lệnh lọc các dòng khớp một mẫu (chuỗi hoặc biểu thức chính quy) trong file hoặc trong dữ liệu từ pipe. Hay dùng: -i bỏ qua hoa thường, -v đảo điều kiện, -r tìm đệ quy, -E biểu thức chính quy mở rộng, -c đếm.",
+      "caseSensitive": true,
+      "categories": [
+        "devops-linux"
+      ],
+      "relatedArticleSlugs": [
+        "linux-tim-kiem-find-grep",
+        "linux-chuyen-huong-pipe"
+      ],
+      "scopeNote": "Thuật ngữ riêng của Linux/Unix, cùng nghĩa ở mọi chuyên mục.",
+      "occurrences": 5,
+      "mentions": 9,
+      "outsideSeriesArticles": 1
+    },
+    {
+      "slug": "find",
+      "term": "find",
+      "shortDefinition": "Lệnh tìm file theo tên, loại, kích thước, thời gian sửa, quyền hay chủ sở hữu, rồi in ra hoặc làm gì đó với từng file (-exec, -delete). Khác grep: find tìm file, grep tìm trong nội dung.",
+      "caseSensitive": true,
+      "categories": [
+        "devops-linux"
+      ],
+      "relatedArticleSlugs": [
+        "linux-tim-kiem-find-grep",
+        "linux-setuid-setgid-sticky"
+      ],
+      "scopeNote": "Trong văn bản tiếng Việt của series, «find» chỉ lệnh này.",
+      "occurrences": 4,
+      "mentions": 9,
+      "outsideSeriesArticles": 6
     }
   ],
   "deferred": [
@@ -1160,21 +1826,6 @@
       "reason": "Atomic write bằng file tạm rồi mv; chỉ LNX-019 dùng, đã giải nghĩa tại chỗ."
     },
     {
-      "slug": "nhom-chinh",
-      "term": "nhóm chính",
-      "reason": "Primary group; đã giải thích trong LNX-007 và LNX-010, ít dùng ngoài hai bài đó."
-    },
-    {
-      "slug": "authorized-keys",
-      "term": "authorized_keys",
-      "reason": "Gần như luôn nằm trong inline code (~/.ssh/authorized_keys); đã giải nghĩa ở LNX-022. Mục ssh-key đủ để liên kết."
-    },
-    {
-      "slug": "sudoedit",
-      "term": "sudoedit",
-      "reason": "Tên lệnh, chỉ xuất hiện trong inline code; giải nghĩa tại chỗ ở LNX-025."
-    },
-    {
       "slug": "acl-mask",
       "term": "mask (ACL)",
       "reason": "Chỉ có nghĩa trong ngữ cảnh ACL (LNX-027); từ «mask» quá chung để tự liên kết."
@@ -1193,6 +1844,36 @@
       "slug": "match-block-sshd",
       "term": "Match (sshd)",
       "reason": "Khối Match của sshd_config; tên chỉ dẫn nằm trong code, từ «match» quá chung."
+    },
+    {
+      "slug": "tai-khoan-he-thong",
+      "term": "tài khoản hệ thống",
+      "reason": "System account (UID dưới 1000); bài LNX-021 giải thích cùng tài khoản dịch vụ, mục tai-khoan-dich-vu đã đủ."
+    },
+    {
+      "slug": "quyen-dang-so",
+      "term": "quyền dạng số",
+      "reason": "Chmod dạng số (750); mục chmod đã giải nghĩa, cụm «dạng số» quá chung để tự liên kết."
+    },
+    {
+      "slug": "nopasswd",
+      "term": "NOPASSWD",
+      "reason": "Từ khoá của sudoers, chỉ hai bài, luôn có giải thích tại chỗ; mục sudoers đủ."
+    },
+    {
+      "slug": "allowgroups",
+      "term": "AllowGroups",
+      "reason": "Tuỳ chọn của sshd; giải thích tại chỗ ở LNX-025, mục sshd-config đủ."
+    },
+    {
+      "slug": "leo-thang-dac-quyen",
+      "term": "leo thang đặc quyền",
+      "reason": "Privilege escalation; mới nhắc một lần ở LNX-026. Đề xuất lại nếu Phần 6 (xử lý sự cố) dùng nhiều."
+    },
+    {
+      "slug": "etc-passwd",
+      "term": "/etc/passwd",
+      "reason": "Đường dẫn file, luôn nằm trong code; mục uid-gid và shell-dang-nhap mô tả nội dung của nó."
     }
   ]
 }
