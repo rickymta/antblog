@@ -18,7 +18,7 @@ Tối thứ Sáu, Tới Nơi chạy khuyến mãi «giảm 50% chuyến đầu t
 <tr><th scope="row">Cấp độ</th><td>Nâng cao — đã nắm latency, throughput, percentile, open model và dropped slots ở SYS-07/08</td></tr>
 <tr><th scope="row">Test level / hướng kiểm</th><td>System · Non-functional (performance efficiency — hành vi dưới tải cao hơn mức thường)</td></tr>
 <tr><th scope="row">Bài cần đọc trước</th><td><a href="/articles/system-testing-load-test">SYS-08 Load Test</a> · <a href="/articles/system-testing-performance-test">SYS-07 Performance Test</a> · <a href="/articles/non-functional-testing-tong-quan">Non-functional testing tổng quan</a></td></tr>
-<tr><th scope="row">Thực hành</th><td>Lab (script Node): 4 bước tải 30/s×3s → 150/s×4s → 600/s×4s → 30/s×3s (3.180 slots), trần 40 in-flight, deadline 2 s, dừng gửi sau 10 lỗi; probe báo giá và health sau tải (R-API-07, R-FARE-01…08, R-NFR-03, R-API-15) — <code>examples/toi-noi-testing/articles/system-testing-stress-test/</code></td></tr>
+<tr><th scope="row">Thực hành</th><td>Lab (script Node): 4 bước tải 30/s×3s → 150/s×4s → 600/s×4s → 30/s×3s (3.180 slots), trần 40 in-flight, deadline 2 s, dừng gửi sau 10 lỗi; probe báo giá và health sau tải (R-API-07, R-FARE-01…08, R-NFR-03, R-API-15) — <code>examples/toi-noi-testing/articles/system-testing-stress-test/</code> · Minh hoạ: CurlStudio với collection <code>examples/toi-noi-testing/curlstudio/</code></td></tr>
 <tr><th scope="row">Nguồn chính</th><td>Grafana k6 — Load test types và Stress testing (phân loại, cần baseline trước); <code>SPEC.md</code> của lab; evidence <code>stress-observed.json</code></td></tr>
 </tbody>
 </table>
@@ -254,6 +254,35 @@ if (results.some(r => r.errors > 0 || (['baseline', 'return-low'].includes(r.nam
 
 Raw JSON được ghi **trước** khi quyết định exit code, để lần chạy thất bại vẫn để lại bằng chứng điều tra.
 
+### 5.6. Minh hoạ với CurlStudio
+
+Một profile tải cao cũng dựng được bằng load test của CurlStudio, với collection giới thiệu ở [SYS-01](/articles/system-testing-smoke-test). Chuột phải folder «SYS-07…09 · Request cho kịch bản tải» → **Load test thư mục**, chọn executor arrival rate, tự nhập các stage (ô preset hiện «Tuỳ chỉnh»), environment «Tới Nơi lab (local, API test bật)». Profile này **khác** profile của script ở mục 4.1, nên phải đọc như một thí nghiệm riêng.
+
+<figure class="tkh-fig">
+<div class="tkh-fig-box"><img src="/images/articles/system-testing/sys-09/01-load-profile-stress.webp" alt="Tab Load profile của CurlStudio cho folder «SYS-07…09 · Request cho kịch bản tải», preset Tuỳ chỉnh, thời lượng 1m 10s: executor «Arrival rate (open model) – số iteration mỗi giây», rate ban đầu 30, đơn vị thời gian 1 giây, số VU cấp phát trước 10, số VU tối đa 100. Năm stage: 15 giây → 30, 10 giây → 300, 20 giây → 300, 10 giây → 30, 15 giây → 30 iterations/s; biểu đồ Tải dự kiến hình thang, ghi «1m 10s · đỉnh 300 iterations / s»." width="2000" height="1125" loading="lazy"></div>
+<figcaption><b>Hình 2 · Profile tải cao trong CurlStudio.</b> Lên 300/s, giữ 20 giây, rồi hạ về 30/s và giữ thêm 15 giây — đoạn cuối là pha hạ tải để quan sát hồi phục. Các stage tăng/giảm tuyến tính trên một timeline liên tục, không drain giữa các bước như script lab.</figcaption>
+</figure>
+
+So với Hình 1, có ba khác biệt cần ghi vào báo cáo:
+
+- **Đỉnh 300/s** (gấp 10 mức thường 30/s), thấp hơn bước high 600/s của script.
+- **Một timeline liên tục**, ramp tuyến tính, không drain — gần với gợi ý ở mục 8.4 hơn, nhưng chưa có định nghĩa «đã phục hồi» đặt trước.
+- **Guard là ngân sách VU:** cấp phát trước 10, tối đa 100; iteration bị bỏ khi mọi VU đều bận — tương đương nhánh `in-flight-cap`, không phải cùng bộ guard của bảng 4.1.
+
+<figure class="tkh-fig">
+<div class="tkh-fig-box"><img src="/images/articles/system-testing/sys-09/02-bao-cao-stress.webp" alt="Báo cáo load test của CurlStudio, nhãn ĐẠT, 1m 10s, custom, environment Tới Nơi lab: Requests 10,198; Throughput 145.1/s, đỉnh 315/s; Tỷ lệ lỗi 0.00%; Latency p95 25 ms (p99 30 ms, max 49 ms); trung bình 15 ms; Virtual users 10 đồng thời tối đa; Checks 100.0%; Thời lượng 1m 10s; Iteration bị bỏ 0. Hai threshold dropped_iterations count == 0 và http_req_duration p(95) &lt; 500 (thực tế 25 ms) đều PASS. Biểu đồ throughput dâng lên khoảng 300 request mỗi giây rồi về khoảng 30; biểu đồ percentile theo giây dao động khoảng 15–45 ms. Góc phải trên có nút Chạy lại và Xuất." width="2000" height="1125" loading="lazy"></div>
+<figcaption><b>Hình 3 · Báo cáo stress của CurlStudio.</b> Throughput 145.1/s là trung bình cả lượt, gộp pha thấp lẫn pha cao; mức 300/s chỉ thấy trên biểu đồ theo giây (đỉnh 315/s). Checks 100% chỉ là «status is 2xx».</figcaption>
+</figure>
+
+Đọc theo thứ tự của mục 6.3:
+
+1. **Đủ tải chưa?** Iteration bị bỏ 0, threshold `dropped_iterations count == 0` PASS; biểu đồ throughput bám theo profile, dâng lên khoảng 300/s rồi về khoảng 30/s. Đừng đọc 145.1/s thành «mức tải của lượt».
+2. **Có lỗi không?** 0.00% trên 10,198 request — nhưng chỉ ở mức status. Load test không chạy test script của request, nên oracle 35.000 đ, thứ «không bao giờ được suy giảm» ở mục 2.3, **không** được kiểm. Rủi ro 1 ở mục 3.2 (200 nhưng giá sai) nằm ngoài tầm của lượt này.
+3. **Suy giảm thế nào?** p95 25 ms (p99 30 ms, max 49 ms), trung bình 15 ms; percentile theo giây dao động khoảng 15–45 ms; threshold `p(95) < 500` PASS. VU tối đa 10, bằng số cấp phát trước — trần 100 chưa được dùng tới.
+4. **Sau hạ tải?** Throughput trở về khoảng 30/s và tỷ lệ lỗi vẫn 0%. Đó là quan sát, chưa phải phép đo time-to-recover.
+
+**Ảnh này cho thấy** ở 300/s, lab trên máy này **vẫn chưa chạm điểm gãy** — cùng hướng với «chưa quan sát thấy điểm gãy» ở mục 6.4, nhưng ở mức thấp hơn, nên không thêm thông tin gì về breakpoint. Muốn tìm breakpoint phải tăng tiếp theo bậc, với điều kiện dừng đặt trước. **Ảnh này không cho thấy** capacity, R-NFR-03, hay bất cứ điều gì về production. Cũng đừng đặt các con số này cạnh bảng ở mục 6.2 để so: client là phần Rust của CurlStudio ở tiến trình riêng, máy chủ lab Node v22.18.0 chạy độc lập, profile và thời điểm khác — chênh lệch không phải regression hay cải thiện. Lượt này là minh hoạ ngày 23/11/2026 (CurlStudio 0.2.1 chạy bằng `pnpm tauri dev`, Windows 11, đồng hồ lab cố định 09:00 ngày 04/11/2026); bằng chứng của bài vẫn là `stress-observed.json`.
+
 ## 6. Kết quả thực đo và cách đọc
 
 ### 6.1. Môi trường của lần chạy
@@ -441,6 +470,7 @@ Trên staging có autoscaler, cần ghi số replica, thời gian khởi động
 - Grafana k6 — *Stress testing*: https://grafana.com/docs/k6/latest/testing-guides/test-types/stress-testing/ — tải cao hơn thông thường, cần baseline/load trước, mức tăng tuỳ hệ thống (tra cứu 13/11/2026).
 - Lab Tới Nơi: `SPEC.md` (R-API-07, R-API-15, R-FARE-01…08, R-QUOTE-01, R-NFR-03, R-NFR-07) và mã bài — https://github.com/rickymta/antblog/tree/main/examples/toi-noi-testing/articles/system-testing-stress-test
 - Bằng chứng: `stress-observed.json` cùng thư mục (báo cáo gốc 13/11/2026, cấu hình máy ở mục 6.1).
+- CurlStudio 0.2.1 — API client và load test (mã nguồn, tra cứu 23/11/2026): https://github.com/rickymta/curl-studio · collection minh hoạ: `examples/toi-noi-testing/curlstudio/`
 - Bài liên quan: [SYS-07 · Performance Test](/articles/system-testing-performance-test) · [SYS-08 · Load Test](/articles/system-testing-load-test) · [Non-functional testing tổng quan](/articles/non-functional-testing-tong-quan) · [SYS-13 · Data Integrity Test](/articles/system-testing-data-integrity-test) · [SYS-14 · Recovery Test](/articles/system-testing-recovery-test)
 
 Bài tiếp theo: [SYS-10 · Security Test – Pen test](/articles/system-testing-security-pentest).

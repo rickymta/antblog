@@ -18,7 +18,7 @@ Thứ Sáu, 17:40. Bản mới của Tới Nơi vừa lên. Pipeline xanh từ u
 <tr><th scope="row">Cấp độ</th><td>Advanced — QA/SDET, kỹ sư release/vận hành đã nắm smoke, SQL và khái niệm rollback</td></tr>
 <tr><th scope="row">Test level / hướng kiểm</th><td>Cuối system testing, giáp operational acceptance: kiểm hành động triển khai, cấu hình đang chạy và khả năng rollback; không kiểm lại logic nghiệp vụ</td></tr>
 <tr><th scope="row">Bài cần đọc trước</th><td><a href="/articles/system-testing-smoke-test">SYS-01 · Smoke Test</a> · <a href="/articles/system-testing-recovery-test">SYS-14 · Recovery Test</a> · <a href="/articles/system-testing-uat">SYS-15 · UAT</a></td></tr>
-<tr><th scope="row">Thực hành</th><td>Lab (code): 5 test case DP-01…05 khởi động <code>src/server.ts</code> thành tiến trình riêng và kiểm qua HTTP thật (R-API-15, R-TEST-01, R-NFR-06, R-FARE-01/08); 3 test case MG-01…03 kiểm migration expand/contract với mã đang chạy — <code>examples/toi-noi-testing/articles/system-testing-deployment-test/</code></td></tr>
+<tr><th scope="row">Thực hành</th><td>Lab (code): 5 test case DP-01…05 khởi động <code>src/server.ts</code> thành tiến trình riêng và kiểm qua HTTP thật (R-API-15, R-TEST-01, R-NFR-06, R-FARE-01/08); 3 test case MG-01…03 kiểm migration expand/contract với mã đang chạy — <code>examples/toi-noi-testing/articles/system-testing-deployment-test/</code> · Minh hoạ: CurlStudio với collection <code>examples/toi-noi-testing/curlstudio/</code></td></tr>
 <tr><th scope="row">Nguồn chính</th><td>ISTQB CTFL v4.0.1 (test level/type, maintenance testing); PostgreSQL 18 · ALTER TABLE; <code>SPEC.md</code>, <code>src/server.ts</code>, <code>src/infra/pglite/pg-trip-repository.ts</code> của lab</td></tr>
 </tbody>
 </table>
@@ -283,6 +283,31 @@ afterEach(async () => {
 
 Test chờ sự kiện `exit` trước khi sang test case sau, không chỉ gửi tín hiệu rồi đi tiếp; báo cáo kiểm lại bằng `Get-CimInstance Win32_Process`. Trên Windows `kill()` dừng cưỡng bức, nên lab **không** kiểm graceful shutdown dù `src/server.ts` có xử lý `SIGTERM`.
 
+### 6.7. Minh hoạ với CurlStudio
+
+Post-deploy smoke cũng chạy được bằng một API client có giao diện, dùng lại collection «Tới Nơi lab · Kiểm thử hệ thống» đã giới thiệu ở [SYS-01](/articles/system-testing-smoke-test). Điểm khác duy nhất so với các bài trước là **environment**:
+
+1. Khởi động bản prod-like theo README của collection: cổng 3101, `NODE_ENV=production`, `TOINOI_DB=pglite`, giờ 09:00 ngày 04/11/2026 — cùng cấu hình `PROD_LIKE` của DP-02, API kiểm thử tắt.
+2. Chuột phải folder «SYS-16 · Post-deploy smoke» → **Chạy thư mục**; trong runner chọn environment «Tới Nơi bản triển khai (prod-like)» (`baseUrl = http://localhost:3101`).
+3. Chạy, rồi đọc thanh tổng trước, từng dòng sau.
+
+<figure class="tkh-fig">
+<div class="tkh-fig-box"><img src="/images/articles/system-testing/sys-16/01-post-deploy-smoke-prod-like.webp" alt="Collection Runner của CurlStudio chạy folder «SYS-16 · Post-deploy smoke» với environment «Tới Nơi bản triển khai (prod-like)»; ô environment ở góc phải trên và thanh trạng thái cũng hiện tên này. Thanh tổng ghi Requests 3, Tests 4 / 4 (100%), Thất bại 0, Non-2xx 1. Ba dòng kết quả: DP · Health trả 200; DP · API kiểm thử phải đóng gọi POST localhost:3101/api/test/reset nhận 404 với test R-TEST-01 pass; DP · Báo giá 5 km trả 200 với test cước 35.000 đ pass." width="2000" height="1125" loading="lazy"></div>
+<figcaption><b>Hình 3 · Post-deploy smoke trên bản prod-like.</b> Non-2xx duy nhất là 404 của <code>/api/test/reset</code> — kết quả mong đợi, có dấu ✓ «R-TEST-01: /api/test/* trả 404 trên bản triển khai» đi kèm. Mọi URL đều trỏ <code>localhost:3101</code>, không phải cổng 3100 của lab.</figcaption>
+</figure>
+
+Ba chi tiết đáng đọc trong ảnh:
+
+- **Non-2xx 1 không phải lỗi.** Đó là phép kiểm của DP-02 làm bằng GUI: bản triển khai phải đóng cửa hậu, nên 404 là đạt. Với post-deploy smoke, con số Non-2xx chỉ có nghĩa khi đặt cạnh danh sách mã lỗi mong đợi.
+- **Cùng collection, khác bản.** Đổi environment là chạy cùng các request trên bản khác — đúng tinh thần «build một lần, chỉ cấu hình khác nhau» ở mục 10.1. URL trong từng dòng là bằng chứng runner đã gọi đúng cổng 3101.
+- **Environment đổi cho cả ứng dụng.** Chọn environment trong runner cũng đổi environment chung của CurlStudio (ô góc phải trên). Chạy xong phải đổi lại «Tới Nơi lab (local, API test bật)»; quên bước này thì folder kế tiếp gọi `/api/test/*` vào bản prod-like và nhận 404 ngay ở bước reset.
+
+<div class="tkh-callout tkh-callout--warn">
+<span class="tkh-callout-title">Ảnh này chứng minh gì và không chứng minh gì</span>
+<p><b>Có:</b> trên tiến trình nghe cổng 3101 (máy chủ chạy <code>NODE_ENV=production</code>), health trả 200, API kiểm thử trả 404, báo giá xe máy 5 km đúng 35.000 đ theo oracle tính tay ở mục 3.3.</p>
+<p><b>Không:</b> lab không có endpoint version nên runner <b>không xác nhận được build ID</b> — nó không biết bản nào đang nghe cổng 3101. Folder không đọc log khởi động như DP-03, không đi hết đường tiền như DP-04 (chỉ báo giá, không đặt, hoàn tất hay đọc lại), không có bản cấu hình sai như DP-05 nên không cho thấy phép kiểm biết đỏ, và tiến trình do người khởi động, không có vòng chờ readiness. Staging, canary và rollback thật không được thực hiện. Đây là lượt minh hoạ ngày 23/11/2026 bằng CurlStudio 0.2.1 (<code>pnpm tauri dev</code>) trên Windows 11, máy chủ lab chạy Node v22.18.0; bằng chứng của bài vẫn là DP-01…05 và MG-01…03 trong Vitest.</p>
+</div>
+
 ## 7. Thực hành B — migration và khả năng rollback
 
 ### 7.1. Đọc mã trước khi thiết kế test case
@@ -543,6 +568,7 @@ Tra cứu và đối chiếu ngày 13/11/2026.
 - ISTQB, *Certified Tester Foundation Level Syllabus v4.0.1* (2024) — test levels và test types, operational acceptance testing, maintenance testing: https://istqb.org/wp-content/uploads/2024/11/ISTQB_CTFL_Syllabus_v4.0.1.pdf
 - PostgreSQL 18 — *ALTER TABLE* (ADD COLUMN, SET NOT NULL, RENAME COLUMN, mức khoá): https://www.postgresql.org/docs/18/sql-altertable.html
 - Lab Tới Nơi: `SPEC.md` (R-API-15, R-TEST-01, R-NFR-06, R-FARE-01/04/08, R-STATE-02, R-PAY-03), `src/server.ts`, `src/infra/pglite/pg-trip-repository.ts`, `articles/system-testing-deployment-test/` (`deployment.test.ts`, `migration-compat.test.ts`) — https://github.com/rickymta/antblog/tree/main/examples/toi-noi-testing
+- CurlStudio 0.2.1 — API client và load test (mã nguồn, tra cứu 23/11/2026): https://github.com/rickymta/curl-studio · collection minh hoạ: `examples/toi-noi-testing/curlstudio/`
 - Bài liên quan: [SYS-01 Smoke Test](/articles/system-testing-smoke-test) · [SYS-13 Data Integrity Test](/articles/system-testing-data-integrity-test) · [SYS-14 Recovery Test](/articles/system-testing-recovery-test) · [SYS-15 UAT](/articles/system-testing-uat) · [Schema migration tương thích](/articles/postgresql-schema-migration-tuong-thich) · [Lock hàng và bảng](/articles/postgresql-lock-row-table)
 
 Bài tiếp theo: [SYS-17 · Release Dossier](/articles/system-testing-release-dossier) — gom bằng chứng của cả mười sáu bài thành một đề xuất release có người chịu trách nhiệm.

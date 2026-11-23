@@ -18,7 +18,7 @@ Báo cáo tải ghi «p95 = 6 ms, 0 lỗi, PASS». Nghe rất đẹp — cho t�
 <tr><th scope="row">Cấp độ</th><td>Nâng cao — đã nắm latency, percentile, throughput và baseline ở SYS-07; biết HTTP và TypeScript</td></tr>
 <tr><th scope="row">Test level / hướng kiểm</th><td>System · Non-functional (hiệu năng — load testing), giữ oracle nghiệp vụ trên từng response</td></tr>
 <tr><th scope="row">Bài cần đọc trước</th><td><a href="/articles/system-testing-performance-test">SYS-07 Performance Test</a>; nền tảng phi chức năng ở <a href="/articles/non-functional-testing-tong-quan">Non-functional testing tổng quan</a></td></tr>
-<tr><th scope="row">Thực hành</th><td>Lab (script): 300 slot theo lịch 10/s × 3 s → 30/s × 8 s → 10/s × 3 s vào <code>POST /api/quotes</code> (R-API-07, oracle 35.000 theo R-FARE-01…08), PGlite, HTTP loopback — <code>examples/toi-noi-testing/articles/system-testing-load-test/load.ts</code>, evidence <code>load-observed.json</code></td></tr>
+<tr><th scope="row">Thực hành</th><td>Lab (script): 300 slot theo lịch 10/s × 3 s → 30/s × 8 s → 10/s × 3 s vào <code>POST /api/quotes</code> (R-API-07, oracle 35.000 theo R-FARE-01…08), PGlite, HTTP loopback — <code>examples/toi-noi-testing/articles/system-testing-load-test/load.ts</code>, evidence <code>load-observed.json</code> · Minh hoạ: CurlStudio với collection <code>examples/toi-noi-testing/curlstudio/</code></td></tr>
 <tr><th scope="row">Nguồn chính</th><td>Grafana k6 — Load test types, Arrival-rate VU allocation, Dropped iterations; <code>SPEC.md</code> của lab (R-API-07, R-FARE, R-NFR-03, R-NFR-07)</td></tr>
 </tbody>
 </table>
@@ -318,6 +318,34 @@ Ba quan sát thu hẹp kết luận:
 
 Kết luận được phép: *đạt tải giả định 30 arrival/s trong lab local, oracle nghiệp vụ đúng trên 300/300 response*. Chưa xác định capacity hay bottleneck.
 
+### 6.7. Minh hoạ với CurlStudio
+
+Một thí nghiệm open model cùng tinh thần có thể dựng bằng load test của CurlStudio, với collection giới thiệu ở [SYS-01](/articles/system-testing-smoke-test). Chuột phải folder «SYS-07…09 · Request cho kịch bản tải» → **Load test thư mục**, xuất phát từ preset **Test RPS cố định**, environment «Tới Nơi lab (local, API test bật)». Ảnh chụp sau khi chỉnh stage nên ô preset hiện «Tuỳ chỉnh». Profile **khác** script lab: một stage phẳng 30 iteration/giây trong 40 giây, không có bước 10/s trước và sau. Mỗi iteration là một request báo giá, nên ở đây arrival rate trùng request rate.
+
+<figure class="tkh-fig">
+<div class="tkh-fig-box"><img src="/images/articles/system-testing/sys-08/01-load-profile-arrival-rate.webp" alt="Tab Load profile của CurlStudio cho folder «SYS-07…09 · Request cho kịch bản tải», thời lượng 40s, environment Tới Nơi lab (local, API test bật): executor «Arrival rate (open model) – số iteration mỗi giây», rate ban đầu 30, đơn vị thời gian 1 giây, số VU cấp phát trước 5, số VU tối đa 20 kèm chú thích «Iteration bị bỏ khi tất cả VU đều bận». Một stage 40 giây, mục tiêu 30 iterations/s; biểu đồ Tải dự kiến là đường phẳng ở 30, ghi «40s · đỉnh 30 iterations / s»." width="2000" height="1125" loading="lazy"></div>
+<figcaption><b>Hình 2 · Open model 30 iteration/giây trong CurlStudio.</b> <b>Rate ban đầu</b> và <b>Đơn vị thời gian</b> là arrival rate; <b>Số VU cấp phát trước</b> và <b>Số VU tối đa</b> là ngân sách worker của generator. Hết VU rảnh thì iteration bị bỏ chứ không gửi trễ — cùng ý với drop có lý do của scheduler lab.</figcaption>
+</figure>
+
+Dòng chú thích dưới **Số VU tối đa** tương ứng nhánh `in-flight-cap` ở mục 4.2: trần 20 VU ở đây cùng con số với trần 20 request in-flight của lab, dù VU của công cụ và slot của script không hoàn toàn cùng ngữ nghĩa (mục 4.3).
+
+<figure class="tkh-fig">
+<div class="tkh-fig-box"><img src="/images/articles/system-testing/sys-08/02-bao-cao-arrival-rate.webp" alt="Báo cáo load test của CurlStudio, nhãn ĐẠT, 40s, custom, environment Tới Nơi lab: Requests 1,199; Throughput 29.8/s; Tỷ lệ lỗi 0.00%; Latency p95 12 ms (p99 17 ms, max 19 ms); trung bình 6.8 ms; Virtual users 5 đồng thời tối đa; Checks 100.0%, 0 thất bại trên 1,199; Thời lượng 40s; Iteration bị bỏ 0. Hai threshold dropped_iterations count == 0 và http_req_duration p(95) &lt; 500 (thực tế 12 ms) đều PASS; biểu đồ throughput giữ quanh 30 request mỗi giây suốt 40 giây." width="2000" height="1125" loading="lazy"></div>
+<figcaption><b>Hình 3 · Báo cáo arrival rate của CurlStudio.</b> Achieved load (Requests 1,199, Throughput 29.8/s) và dropped iterations (0) đọc được ngay trên thanh tổng. Offered load thì không có ô nào: con số kế hoạch phải tự tính từ profile.</figcaption>
+</figure>
+
+Đọc theo thứ tự của mục 7 — planned/sent/drop trước, p95 sau:
+
+1. **Offered load (planned):** 30 × 40 = 1.200 iteration theo kế hoạch.
+2. **Achieved load (sent):** Requests 1,199, Throughput 29.8/s; **Iteration bị bỏ 0**. Đối soát theo kiểu `planned = sent + dropped`: 1.200 so với 1.199 + 0 — còn 1 iteration báo cáo không giải thích. Có thể do cách công cụ cắt mốc cuối 40 giây; đó là giả thuyết chưa kiểm. Bài học vẫn là: tự đối soát, đừng thấy «0 dropped» rồi coi như đã đủ tải.
+3. **Lỗi:** 0.00% — nhưng check chỉ là «status is 2xx» (xem dưới).
+4. **Latency:** p95 12 ms (p99 17 ms, max 19 ms), trung bình 6.8 ms.
+5. **VU:** tối đa đồng thời 5, bằng số VU cấp phát trước; công cụ không phải cấp thêm VU nào, nên trần 20 chưa bị chạm — giống quan sát «các nhánh drop chưa được kích hoạt» ở mục 6.6.
+
+Hai threshold của preset — `dropped_iterations count == 0` và `http_req_duration p(95) < 500` — là hai trong ba điều kiện của gate ở mục 5.2. Điều kiện thứ ba, **zero errors theo oracle nghiệp vụ**, không có: load test không chạy test script của request, nên không kiểm 35.000 đ trên response nào. Một response 200 sai tiền vẫn qua cả hai threshold — đúng lỗ hổng «0 drop, p95 thấp nhưng sai tiền» mà mục 5.2 cảnh báo.
+
+**Ảnh này cho thấy** cách đọc offered vs achieved load và dropped iterations trên một công cụ GUI. **Ảnh này không cho thấy** tải dự kiến được xử lý *đúng*, và không được đặt cạnh bảng ở mục 6.5 để so: client là phần Rust của CurlStudio ở tiến trình riêng, máy chủ lab Node v22.18.0 chạy độc lập, profile và thời lượng khác, thời điểm khác. Chênh lệch latency giữa hai bên không phải regression hay cải thiện. Lượt này là minh hoạ ngày 23/11/2026 (CurlStudio 0.2.1 chạy bằng `pnpm tauri dev`, Windows 11, đồng hồ lab cố định 09:00 ngày 04/11/2026); bằng chứng của bài vẫn là `load-observed.json`.
+
 ## 7. Đọc báo cáo và phân loại lỗi
 
 Thứ tự đọc: **planned/sent/drop → lỗi HTTP và nghiệp vụ → latency từng bước → lag và in-flight → thời gian drain.** Không bắt đầu bằng con số p95 đẹp nhất.
@@ -470,6 +498,7 @@ Các nguồn ngoài được tra cứu 13/11/2026.
 - Grafana k6 — Dropped iterations: https://grafana.com/docs/k6/latest/using-k6/scenarios/concepts/dropped-iterations/ (nguyên nhân cấu hình và hệ thống; đưa drop vào tiêu chí đánh giá).
 - ISTQB, *Certified Tester Foundation Level Syllabus v4.0.1* (2024) — https://istqb.org/wp-content/uploads/2024/11/ISTQB_CTFL_Syllabus_v4.0.1.pdf: thuật ngữ test type phi chức năng. Cách dựng scheduler và gate là thực hành của series.
 - Lab Tới Nơi: `SPEC.md` (R-API-07, R-API-13, R-FARE-01…08, R-QUOTE-01, R-IDEM, R-NFR-03, R-NFR-07), script `load.ts`, bằng chứng `load-observed.json` — https://github.com/rickymta/antblog/tree/main/examples/toi-noi-testing/articles/system-testing-load-test
+- CurlStudio 0.2.1 — API client và load test (mã nguồn, tra cứu 23/11/2026): https://github.com/rickymta/curl-studio · collection minh hoạ: `examples/toi-noi-testing/curlstudio/`
 - Bài liên quan: [SYS-07 Performance Test](/articles/system-testing-performance-test) · [SYS-09 Stress Test](/articles/system-testing-stress-test) · [SYS-03 Functional Test](/articles/system-testing-functional-test) · [Non-functional testing tổng quan](/articles/non-functional-testing-tong-quan)
 
 Bài tiếp theo: [SYS-09 · Stress Test](/articles/system-testing-stress-test).

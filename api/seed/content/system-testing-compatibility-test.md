@@ -18,7 +18,7 @@ Trên laptop của developer, trang đặt xe của Tới Nơi chạy trơn tru.
 <tr><th scope="row">Cấp độ</th><td>Trung cấp — đã đọc System Test, biết Playwright cơ bản</td></tr>
 <tr><th scope="row">Test level / hướng kiểm</th><td>System · Non-functional (compatibility), giữ oracle chức năng làm điều kiện đạt</td></tr>
 <tr><th scope="row">Bài cần đọc trước</th><td><a href="/articles/system-testing-security-pentest">SYS-10 · Security Test – Pen test</a>; hành trình UI và server riêng ở <a href="/articles/system-testing-system-test">SYS-05 · System Test</a>; nhóm đặc tính chất lượng ở <a href="/articles/non-functional-testing-tong-quan">Non-functional testing tổng quan</a></td></tr>
-<tr><th scope="row">Thực hành</th><td>Lab (code): 2 test case CP-01…02 × 3 Playwright project (Chrome desktop vi-VN, Edge desktop en-US/New York, Chrome 390×844 touch emulation), server PGlite riêng cổng 3116 — <code>examples/toi-noi-testing/articles/system-testing-compatibility-test/</code>, config <code>compatibility.config.ts</code></td></tr>
+<tr><th scope="row">Thực hành</th><td>Lab (code): 2 test case CP-01…02 × 3 Playwright project (Chrome desktop vi-VN, Edge desktop en-US/New York, Chrome 390×844 touch emulation), server PGlite riêng cổng 3116 — <code>examples/toi-noi-testing/articles/system-testing-compatibility-test/</code>, config <code>compatibility.config.ts</code> · Minh hoạ: CurlStudio với collection <code>examples/toi-noi-testing/curlstudio/</code></td></tr>
 <tr><th scope="row">Nguồn chính</th><td>Playwright Projects và Emulation; <code>SPEC.md</code> của lab (R-UI-01, R-UI-04, R-FARE, R-FOOD, R-CANCEL-01)</td></tr>
 </tbody>
 </table>
@@ -105,7 +105,7 @@ Lab tận dụng hai browser đã cài trên máy Windows và một cấu hình 
 
 1. Chrome và Edge đều thuộc họ Chromium. Không có Firefox (Gecko) hay Safari/WebKit trong matrix.
 2. `chrome-narrow-touch` là emulation trên Windows, không phải Android hay iPhone thật.
-3. Project Edge đổi **cùng lúc** browser, locale và timezone để phủ nhiều cấu hình hơn với ít project. Đổi lại, nếu project này fail, ta chưa biết yếu tố nào gây lỗi — cần thí nghiệm tách (mục 6.2).
+3. Project Edge đổi **cùng lúc** browser, locale và timezone để phủ nhiều cấu hình hơn với ít project. Đổi lại, nếu project này fail, ta chưa biết yếu tố nào gây lỗi — cần thí nghiệm tách (mục 7.5).
 
 <figure class="tkh-fig">
 <div class="tkh-fig-box">
@@ -337,6 +337,25 @@ test('CP-02 · chọn food rồi quay lại ride, trường động và lỗi kh
 
 CP-02 nhắm vào sự kiện `change` của `<select>` — loại hành vi các engine từng xử lý khác nhau — và vào khối lỗi, nơi thông báo dài dễ làm tràn khung hẹp. `book-button` disabled ngay sau khi đổi dịch vụ là oracle cho «sửa ô sau khi báo giá ⇒ phải báo giá lại» (R-UI-01). 0,1 km nằm dưới mức 0,5 km của R-FARE-02 nên phải ra lỗi.
 
+### 6.7. Minh hoạ với CurlStudio
+
+Ma trận ở trên là phía trình duyệt. Mục 2.1 có nhắc một trục khác: hệ thống có nhiều client. Ngay cả một request API đơn giản cũng có «cấu hình» riêng — shell và ngôn ngữ mà người gọi dùng. Với collection đã giới thiệu ở [SYS-01 · Smoke Test](/articles/system-testing-smoke-test), mở request «SM-03 · Báo giá xe máy 5 km» trong folder «SYS-01 · Smoke», bấm nút `</>` cạnh **Lưu** để mở hộp thoại **Đoạn code**, bật «Thay giá trị biến», rồi lần lượt chọn từng dạng ở cột trái.
+
+<figure class="tkh-fig">
+<div class="tkh-fig-box"><img src="/images/articles/system-testing/sys-11/01-doan-code-powershell.webp" alt="Hộp thoại Đoạn code của CurlStudio mở trên request SM-03 · Báo giá xe máy 5 km. Cột trái liệt kê các dạng cURL (bash), cURL (cmd.exe), cURL (PowerShell), HTTP (raw), JavaScript – fetch, Node.js – axios, Python – requests, Go – net/http, C# – HttpClient, Java – OkHttp, PowerShell – Invoke-WebRequest, HTTPie và PHP – cURL; dạng cURL (PowerShell) đang được chọn. Khung bên phải hiện lệnh curl.exe --% gọi http://localhost:3100/api/quotes với header Content-Type và x-user: customer:C001, thân JSON có mọi dấu nháy kép được escape bằng dấu gạch chéo ngược; bên dưới là ô Thay giá trị biến đang bật cùng hai nút Chạy trong terminal và Sao chép." width="2000" height="1125" loading="lazy"></div>
+<figcaption><b>Hình 2 · Cùng một request, cách viết khác nhau theo shell.</b> Ở dạng cURL (PowerShell), mọi dấu nháy kép trong JSON phải viết thành <code>\"</code>; bản cURL (bash) bọc thân bằng nháy đơn nên không cần. Ô «Thay giá trị biến» đã thay <code>{{baseUrl}}</code> bằng địa chỉ máy chủ lab.</figcaption>
+</figure>
+
+Đọc ảnh:
+
+- Cột trái là các «cấu hình phía client» của cùng một request: ba biến thể cURL cho bash, cmd.exe và PowerShell, HTTP thô, rồi các thư viện JavaScript, Node.js, Python, Go, C#, Java, PowerShell, HTTPie, PHP.
+- Dạng đang chọn bắt đầu bằng `curl.exe --%` và escape từng dấu nháy kép trong thân JSON (`\"kind\": \"ride\"`…). Dán nguyên bản bash vào PowerShell, hoặc ngược lại, là cách rất phổ biến để một request đúng trở thành request hỏng chỉ trên máy của một người — đúng kiểu báo lỗi «chỉ máy tôi bị» ở mục 2.3, nhưng ở phía người gọi API.
+- Đoạn code mang theo header `x-user: customer:C001` và `localhost:3100`: đó là danh tính giả và địa chỉ của lab, chỉ dùng trong lab.
+
+**Ảnh này chứng minh gì.** Công cụ sinh được cùng một request ở nhiều dạng, và cách quote khác nhau rõ rệt giữa các shell — một nguồn lỗi tích hợp thường gặp khi tài liệu API chỉ đưa một dạng lệnh. Đây là tương thích ở **phía client API**, gần với dòng «Version contract» và «nhiều client» ở mục 2.1 hơn là với ma trận browser.
+
+**Ảnh này không chứng minh gì.** Đây **không** phải compatibility test của trình duyệt và không thay ma trận ba Playwright project ở mục 6.1: không có engine, viewport, locale hay timezone nào được kiểm, và trang khách không được mở. Ảnh cũng chỉ cho thấy văn bản được sinh ra; lượt minh hoạ không chạy từng đoạn code trên từng shell. Nếu đội muốn biến nó thành phép kiểm, hãy chạy mỗi dạng trên đúng shell/runtime đích và giữ một oracle chung như mục 4 — báo giá xe máy 5 km lúc 09:00 phải trả 35.000 — chứ không lấy output của dạng đầu tiên làm chuẩn cho các dạng sau.
+
 ## 7. Kết quả thực đo và cách đọc lỗi
 
 ### 7.1. Mong đợi
@@ -515,6 +534,7 @@ Nguồn ngoài tra cứu 13/11/2026.
 - Playwright — *Emulation*: viewport, `isMobile`, `hasTouch`, locale, timezone và phạm vi của emulation. https://playwright.dev/docs/emulation
 - ISTQB, *Certified Tester Foundation Level Syllabus v4.0.1* — test types và đặc tính chất lượng phi chức năng (dùng để chuẩn hoá thuật ngữ). https://istqb.org/wp-content/uploads/2024/11/ISTQB_CTFL_Syllabus_v4.0.1.pdf
 - Phòng lab: `SPEC.md` (R-UI-01, R-UI-04, R-FARE-01…08, R-FOOD-01, R-FOOD-04, R-CANCEL-01), `compatibility.config.ts` và spec của bài — https://github.com/rickymta/antblog/tree/main/examples/toi-noi-testing/articles/system-testing-compatibility-test
+- CurlStudio 0.2.1 — API client và load test (mã nguồn, tra cứu 23/11/2026): https://github.com/rickymta/curl-studio · collection minh hoạ: `examples/toi-noi-testing/curlstudio/`
 - Bài liên quan: [Dự án mẫu Tới Nơi](/articles/du-an-mau-toi-noi) · [Non-functional testing tổng quan](/articles/non-functional-testing-tong-quan) · [SYS-05 · System Test](/articles/system-testing-system-test) · [SYS-10 · Security Test – Pen test](/articles/system-testing-security-pentest)
 
 Bài tiếp theo: [SYS-12 · Usability Test](/articles/system-testing-usability-test).

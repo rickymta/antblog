@@ -1,0 +1,14 @@
+[
+  {
+    "mode": "none",
+    "paymentStatus": "paid"
+  },
+  {
+    "mode": "decline",
+    "paymentStatus": "failed"
+  },
+  {
+    "mode": "error",
+    "paymentStatus": "failed"
+  }
+]

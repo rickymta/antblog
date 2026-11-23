@@ -18,7 +18,7 @@ API hoàn tất chuyến trả `completed`, DB lưu đúng, nhưng trang khách 
 <tr><th scope="row">Cấp độ</th><td>Trung cấp — biết HTTP, test case, Playwright cơ bản</td></tr>
 <tr><th scope="row">Test level / hướng kiểm</th><td>System · Functional (có nhắc phần phi chức năng ở mục mở rộng)</td></tr>
 <tr><th scope="row">Bài cần đọc trước</th><td><a href="/articles/system-testing-integration-test">SYS-04 Integration Test</a>; khái niệm cấp hệ thống theo ISTQB ở <a href="/articles/system-testing">TEST-014 System Testing</a></td></tr>
-<tr><th scope="row">Thực hành</th><td>Lab (code): 3 hành trình SY-01…03 qua trang <code>/</code> và <code>/driver.html</code>, server riêng cổng 3115 với PGlite — <code>examples/toi-noi-testing/articles/system-testing-system-test/</code>, config <code>system-testing.config.ts</code></td></tr>
+<tr><th scope="row">Thực hành</th><td>Lab (code): 3 hành trình SY-01…03 qua trang <code>/</code> và <code>/driver.html</code>, server riêng cổng 3115 với PGlite — <code>examples/toi-noi-testing/articles/system-testing-system-test/</code>, config <code>system-testing.config.ts</code> · Minh hoạ: CurlStudio với collection <code>examples/toi-noi-testing/curlstudio/</code></td></tr>
 <tr><th scope="row">Nguồn chính</th><td>ISTQB CTFL v4.0.1 mục 2.2.1; tài liệu Playwright (Web server, Assertions); <code>SPEC.md</code> của lab (R-UI, R-STATE, R-PAY, R-CANCEL, R-API, R-TEST)</td></tr>
 </tbody>
 </table>
@@ -319,6 +319,21 @@ Running 3 tests using 1 worker
 
 Tổng thời gian khác nhau giữa hai lượt (11,4 so với 18,2 giây) có thể do khởi động server và tải máy — chưa đo riêng nên chỉ là giả thuyết; SY-01 dài nhất vì phải chờ ít nhất một chu kỳ polling. Không có lỗi sản phẩm được phát hiện. Lượt pass không sinh trace/screenshot vì config chỉ giữ chúng khi fail — bằng chứng ở đây là assertion và output runner.
 
+### 6.6. Minh hoạ với CurlStudio
+
+Bước 4 kiểm hai mặt của kết quả. Phía API có thể xem bằng tay với CurlStudio, dùng collection giới thiệu ở [SYS-01](/articles/system-testing-smoke-test). Chuột phải folder **SYS-01 · Smoke** → **Chạy thư mục**: hành trình SM-03 báo giá xe máy 5 km, đặt chuyến VíXanh, tài xế D101 đi hết các bước và hoàn tất; script của request «Đặt chuyến» lưu `tripId` vào biến collection. Sau đó mở request «SM-03 · Khách đọc lại chuyến» (GET `{{baseUrl}}/api/trips/{{tripId}}` với danh tính `customer:C001`) và bấm **Gửi**.
+
+<figure class="tkh-fig">
+<div class="tkh-fig-box"><img src="/images/articles/system-testing/sys-05/01-api-doc-lai-chuyen.webp" alt="Cửa sổ CurlStudio mở request SM-03 · Khách đọc lại chuyến trong folder SYS-01 · Smoke: phương thức GET tới {{baseUrl}}/api/trips/{{tripId}}, environment Tới Nơi lab (local, API test bật). Nửa dưới là response với Trạng thái 200 OK, Kết quả test 2/2 và body JSON dạng Pretty: trip có pricingVersion fare-2026.1, customerId C001, driverId D101, vehicle bike, status completed, distanceKm 5." width="2000" height="1125" loading="lazy"></div>
+<figcaption><b>Hình 2 · Phía API của phép đối chiếu UI–API.</b> Request đọc lại chuyến trả <code>200 OK</code>, hai test đều đạt; body cho thấy chuyến <code>completed</code> của khách C001 với tài xế D101. Đây là trạng thái trang khách phải hiển thị — ảnh không cho biết trang có hiển thị nó hay không.</figcaption>
+</figure>
+
+Đọc ảnh: body có `"status": "completed"`, `"customerId": "C001"`, `"driverId": "D101"`, `"vehicle": "bike"`, `"distanceKm": 5` và `"pricingVersion": "fare-2026.1"`. Tab **Kết quả test 2/2** gồm «HTTP 200» và «Đọc lại: completed, 35.000 đ, paid» — test thứ hai kiểm thêm `fare` và `paymentStatus`, hai trường nằm thấp hơn trong body. Đây chính là dòng «Chỉ kiểm API» của bảng ở mục 6.4, tương ứng phần `toMatchObject` của SY-01.
+
+Ảnh này **không** phải system test theo nghĩa của bài. CurlStudio không thấy trang khách hay trang tài xế, không có hai browser context, không đo được vòng hỏi lại 2 giây, không kiểm nút huỷ bị disabled — tức là bỏ lọt đúng loại lỗi ở đầu bài: API `completed` mà trang khách vẫn «Đang tìm tài xế». Chuyến ở đây cũng được tạo qua API, nên theo mục 4 ta không có bằng chứng nút «Đặt chuyến» hoạt động. Máy chủ là bản chạy theo environment local của collection, không phải server riêng cổng 3115 của config Playwright, nên đây không phải môi trường được báo cáo ở mục 6.5. Phép kiểm khách C002 nhận 404 có folder riêng (SYS-10).
+
+Lượt minh hoạ chạy ngày 23/11/2026 bằng CurlStudio 0.2.1 (`pnpm tauri dev`) trên Windows 11, máy chủ lab Node v22.18.0, đồng hồ lab cố định 09:00 ngày 04/11/2026. Dùng nó để khám phá và chia sẻ cách đọc API; bằng chứng của bài vẫn là ba hành trình Playwright.
+
 ## 7. Điều tra failure và exit criteria
 
 | Failure | Phân loại ban đầu | Việc kiểm tiếp |
@@ -462,6 +477,7 @@ Các nguồn ngoài được tra cứu 13/11/2026.
 - Playwright — Web server: https://playwright.dev/docs/test-webserver (quản lý server, `reuseExistingServer`).
 - Playwright — Assertions: https://playwright.dev/docs/test-assertions (assertion tự chờ khác assertion giá trị tức thời).
 - Lab Tới Nơi: `SPEC.md` (R-UI, R-STATE, R-FARE, R-PAY, R-CANCEL, R-API, R-TEST, R-NFR), `src/server.ts`, `src/web/customer.js`, `src/web/driver.js` và bộ test của bài — https://github.com/rickymta/antblog/tree/main/examples/toi-noi-testing/articles/system-testing-system-test
+- CurlStudio 0.2.1 — API client và load test (mã nguồn, tra cứu 23/11/2026): https://github.com/rickymta/curl-studio · collection minh hoạ: `examples/toi-noi-testing/curlstudio/`
 - Bài liên quan: [TEST-014 System Testing](/articles/system-testing) · [TEST-015 System Integration Testing](/articles/system-integration-testing) · [TEST-016 Acceptance Testing](/articles/acceptance-testing-tong-quan) · [SYS-01 Smoke Test](/articles/system-testing-smoke-test) · [SYS-03 Functional Test](/articles/system-testing-functional-test) · [SYS-04 Integration Test](/articles/system-testing-integration-test)
 
 Bài tiếp theo: [SYS-06 · Regression Test](/articles/system-testing-regression-test).

@@ -18,7 +18,7 @@ language: vi
 <tr><th scope="row">Cấp độ</th><td>Intermediate — cần biết test oracle, assertion, Vitest + supertest; phần 8–9 dành cho QA/SDET duy trì gate CI</td></tr>
 <tr><th scope="row">Test level / hướng kiểm</th><td>Regression là mục đích đánh giá ảnh hưởng thay đổi, không phải test level: bài dùng component test cho hàm cước và API test cho ba consumer (ride, parcel, food)</td></tr>
 <tr><th scope="row">Bài cần đọc trước</th><td><a href="/articles/system-testing-system-test">SYS-05 · System Test</a>; nền tảng khái niệm: <a href="/articles/confirmation-testing-va-regression-testing">Confirmation Testing và Regression Testing</a></td></tr>
-<tr><th scope="row">Thực hành</th><td>Lab (code): 8 test case RG-01…RG-08 (8 lượt chạy) cho refactor công thức cước giả lập, kiểm R-FARE-03/04/05/08/09, R-PARCEL-03/04, R-FOOD-04/05 — <code>examples/toi-noi-testing/articles/system-testing-regression-test/</code></td></tr>
+<tr><th scope="row">Thực hành</th><td>Lab (code): 8 test case RG-01…RG-08 (8 lượt chạy) cho refactor công thức cước giả lập, kiểm R-FARE-03/04/05/08/09, R-PARCEL-03/04, R-FOOD-04/05 — <code>examples/toi-noi-testing/articles/system-testing-regression-test/</code> · Minh hoạ: CurlStudio với collection <code>examples/toi-noi-testing/curlstudio/</code></td></tr>
 <tr><th scope="row">Nguồn chính</th><td>ISTQB CTFL v4.0.1 (mục 2.2.3 confirmation/regression); Stryker — mutant states and metrics; <code>SPEC.md</code> của lab</td></tr>
 </tbody>
 </table>
@@ -319,6 +319,25 @@ Mong đợi 50 tests — nhóm SYS-01…04 và SYS-06, **không phải** toàn b
 <p>Lab không sửa sản phẩm, không chạy một build lỗi đỏ rồi sửa xanh, không chạy mutation engine nên <b>không có mutation score</b>. RG-05 chỉ chứng minh <b>một</b> fault cụ thể bị oracle phân biệt. Các test case API dùng kho dữ liệu trong bộ nhớ và đồng hồ/thời tiết giả; bằng chứng SQL nằm ở SYS-04, bằng chứng trình duyệt ở SYS-05 (lần chạy SYS-06 không chạy lại browser vì không đổi UI hay cấu hình). Chưa kiểm phí huỷ, ô tô, cước tối thiểu với voucher lớn, hiệu năng, provider thanh toán thật hay lựa chọn test tự động theo diff.</p>
 </div>
 
+### 6.6. Minh hoạ với CurlStudio
+
+Thực hành ở trên chạy một suite nhỏ chọn theo impact map. Collection CurlStudio (giới thiệu ở [SYS-01](/articles/system-testing-smoke-test)) cho phép xem chiều ngược lại: chạy cả collection như một lượt hồi quy qua API, rồi chủ động bỏ ra những phần không hợp với một lượt chạy chung.
+
+1. Chuột phải collection «Tới Nơi lab · Kiểm thử hệ thống» → **Chạy collection**.
+2. Trong danh sách request, bỏ chọn các folder cần tệp dữ liệu riêng (SYS-03, SYS-04, SYS-15), folder đặt ví vào chế độ lỗi (SYS-14), folder dùng environment khác (SYS-16) và các request cho kịch bản tải SYS-07…09.
+3. Chạy với environment local, rồi xuất **JUnit** nếu muốn đưa kết quả vào CI.
+
+<figure class="tkh-fig">
+<div class="tkh-fig-box"><img src="/images/articles/system-testing/sys-06/01-runner-hoi-quy.webp" alt="Collection Runner của CurlStudio chạy cả collection Tới Nơi lab · Kiểm thử hệ thống với environment Tới Nơi lab (local, API test bật). Danh sách Requests (44/78) cho thấy các request của SYS-15, SYS-16 và SYS-07…09 bị bỏ chọn, nút Chọn tất cả ở góc. Thanh tổng hiện Requests 44, Tests 62 / 62 (100%), Thất bại 0, Non-2xx 7, kèm nút xuất HTML, JUnit, JSON; bên dưới là biểu đồ thời gian response trung bình theo request, thang log." width="2000" height="1125" loading="lazy"></div>
+<figcaption><b>Hình 2 · Lượt hồi quy qua API trên tập request đã chọn.</b> «44/78» là mẫu số phải đi cùng «62 / 62 (100%)». Bảy response non-2xx là các mã lỗi 401/403/404/422 mà test mong đợi; nút <b>JUnit</b> xuất kết quả cho CI.</figcaption>
+</figure>
+
+Đọc ảnh: **Requests (44/78)** — 34 request bị bỏ, và nút đã đổi thành «Chọn tất cả», nhắc rằng đây là tập con. Thanh tổng **Requests 44 · Tests 62 / 62 (100%) · Thất bại 0 · Non-2xx 7**: bảy response non-2xx là lỗi có chủ đích (401/403/404/422) mà test mong đợi, không phải failure. Đọc «Non-2xx 7» mà không biết test mong đợi gì sẽ dễ hiểu sai — cũng như mục 9.5: tỷ lệ pass phải đi kèm mẫu số.
+
+Điều ảnh này chứng minh là một **suite đã định nghĩa** chạy đủ và pass: 44 request được chọn, phần bỏ lại ghi rõ kèm lý do — đúng cách viết báo cáo ở mục 7.3, chọn suite là quyết định có ghi lại chứ không phải «chạy hết». Điều nó **không** chứng minh: lượt xanh này không bắt được fault của bài. Mọi folder đặt đồng hồ 09:00 và trời không mưa trước khi kiểm; ở tổ hợp thường/khô, candidate sai và hàm thật cùng cho 35.000 (bảng mục 4.2). Folder bảng cước SYS-03 lại nằm trong phần bị bỏ. Muốn một suite qua API phủ refactor này, cần thêm request cao điểm + mưa như RG-04/RG-06 — tức là chọn **input kích hoạt**, không phải chạy thêm nhiều request giống nhau.
+
+Lượt minh hoạ chạy ngày 23/11/2026 bằng CurlStudio 0.2.1 (`pnpm tauri dev`) trên Windows 11, máy chủ lab Node v22.18.0, đồng hồ lab cố định 09:00 ngày 04/11/2026. Nó không thay tám lượt Vitest RG-01…08, và thời gian trên biểu đồ không so được với số liệu Vitest ở mục 6.5: khác công cụ, khác ranh giới đo, khác thời điểm.
+
 ## 7. Gate, báo cáo và xử lý failure
 
 ### 7.1. Đọc failure
@@ -482,6 +501,7 @@ Nguồn ngoài tra cứu 13/11/2026.
 - Stryker Mutator — *Mutant states and metrics*: https://stryker-mutator.io/docs/mutation-testing-elements/mutant-states-and-metrics/ — cách đọc killed/survived/no coverage và mẫu số của metric.
 - Vitest — `it.each`, `toMatchObject`: https://vitest.dev/api/expect.html
 - Phòng lab Tới Nơi: `SPEC.md` (R-FARE-01…10, R-PARCEL-03/04, R-FOOD-04/05, R-VOUCHER-06), `src/domain/fare.ts`, `pricing.ts`, `food.ts` và bộ test của bài — https://github.com/rickymta/antblog/tree/main/examples/toi-noi-testing/articles/system-testing-regression-test
+- CurlStudio 0.2.1 — API client và load test (mã nguồn, tra cứu 23/11/2026): https://github.com/rickymta/curl-studio · collection minh hoạ: `examples/toi-noi-testing/curlstudio/`
 - Bài liên quan: [Dự án mẫu Tới Nơi](/articles/du-an-mau-toi-noi) · [Confirmation Testing và Regression Testing](/articles/confirmation-testing-va-regression-testing) · [Maintenance Testing](/articles/maintenance-testing) · [SYS-02 · Sanity Test](/articles/system-testing-sanity-test) · [SYS-03 · Functional Test](/articles/system-testing-functional-test) · [SYS-05 · System Test](/articles/system-testing-system-test)
 
 Bài tiếp theo: [SYS-07 · Performance Test](/articles/system-testing-performance-test).

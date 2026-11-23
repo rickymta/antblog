@@ -18,7 +18,7 @@ Khách Tới Nơi dán mã ` giam20 ` từ tin nhắn vào ô voucher — có m�
 <tr><th scope="row">Cấp độ</th><td>Beginner — cần biết HTTP status, cấu trúc Arrange–Act–Assert và cách chạy Vitest</td></tr>
 <tr><th scope="row">Test level / hướng kiểm</th><td>Component + API (hệ thống lắp ráp trong tiến trình); chọn phạm vi theo thay đổi: confirmation cộng regression gần</td></tr>
 <tr><th scope="row">Bài cần đọc trước</th><td><a href="/articles/system-testing-smoke-test">SYS-01 · Smoke Test</a>; nên đọc thêm <a href="/articles/confirmation-testing-va-regression-testing">Confirmation Testing và Regression Testing</a></td></tr>
-<tr><th scope="row">Thực hành</th><td>Lab (code): 6 test case SN-01…SN-06 (8 lượt chạy) cho thay đổi chuẩn hoá voucher R-VOUCHER-02, kiểm tới R-VOUCHER-03/06/07 và R-QUOTE-04 — <code>examples/toi-noi-testing/articles/system-testing-sanity-test/</code></td></tr>
+<tr><th scope="row">Thực hành</th><td>Lab (code): 6 test case SN-01…SN-06 (8 lượt chạy) cho thay đổi chuẩn hoá voucher R-VOUCHER-02, kiểm tới R-VOUCHER-03/06/07 và R-QUOTE-04 — <code>examples/toi-noi-testing/articles/system-testing-sanity-test/</code> · Minh hoạ: CurlStudio với collection <code>examples/toi-noi-testing/curlstudio/</code></td></tr>
 <tr><th scope="row">Nguồn chính</th><td>ISTQB CTFL v4.0.1 (confirmation/regression, impact analysis); <code>SPEC.md</code> của lab; Vitest</td></tr>
 </tbody>
 </table>
@@ -285,6 +285,19 @@ Thời gian phần test khác nhau giữa hai lượt (160 ms so với 538 ms; �
 <p>Lab dùng kho bộ nhớ, đồng hồ/thời tiết/ví giả và danh tính qua header <code>x-user</code> (giản lược R-API-03, không phải xác thực thật). Lab này <b>không</b> chứng minh: query, collation hay transaction của PostgreSQL; hai request đồng thời tranh một lượt voucher; trình duyệt; Unicode ngoài ASCII; lịch sử một bug thật. Suite cũng không chạy một build API lỗi rồi sửa — lỗi chỉ được so ở cấp hàm qua fixture.</p>
 </div>
 
+### 5.6. Minh hoạ với CurlStudio
+
+Collection CurlStudio giới thiệu ở [SYS-01 · Smoke Test](/articles/system-testing-smoke-test) có folder **SYS-02 · Sanity voucher**: bốn request chuẩn bị (reset, đồng hồ 09:00 ngày 04/11/2026, trời không mưa, ví bình thường) rồi ba request báo giá — «SN · Mã chuẩn GIAM20» (ứng với SN-03), «SN · Mã có khoảng trắng và chữ thường» (ứng với SN-02) và «SN · Mã không tồn tại» (gần SN-05, gửi `khongco` không kèm khoảng trắng, mong đợi 422 `VOUCHER_NOT_FOUND`). Chuột phải folder → **Chạy thư mục** để chạy cả bảy request, hoặc mở từng request và bấm **Gửi** sau khi đã chạy bốn request chuẩn bị.
+
+<figure class="tkh-fig">
+<div class="tkh-fig-box"><img src="/images/articles/system-testing/sys-02/01-voucher-khoang-trang.webp" alt="Request «SN · Mã có khoảng trắng và chữ thường» trong folder SYS-02 · Sanity voucher của CurlStudio: POST {{baseUrl}}/api/quotes, tab Body là JSON raw với kind ride, cityCode SG, vehicle bike, distanceKm 5 và voucherCode « giam20 » còn khoảng trắng hai đầu. Nửa dưới là response Trạng thái 200 OK, Kết quả test 2/2, thân JSON của quote có voucherCode GIAM20." width="2000" height="1125" loading="lazy"></div>
+<figcaption><b>Hình 2 · Input của lỗi gốc đi qua API của lab đang chạy.</b> Body gửi <code>" giam20 "</code> nguyên trạng, collection không trim hộ; response trả <code>"voucherCode": "GIAM20"</code> đã chuẩn hoá, tab Kết quả test báo 2/2.</figcaption>
+</figure>
+
+Hai test trong tab **Tests** của request này là «HTTP 200» và «Giảm 6.900 đ, còn 28.000 đ» — kiểm cả `discount` lẫn `total` với con số viết cứng từ oracle mục 3.3, đúng lý do đã nêu ở đó: chỉ kiểm tổng thì phép làm tròn có thể che lỗi thứ tự. Body gửi mã nguyên trạng cũng là nguyên tắc của helper `quote` ở mục 5.1: công cụ không được sửa input hộ sản phẩm.
+
+**Ảnh này chứng minh gì, không chứng minh gì.** Lượt minh hoạ ngày 23/11/2026 (CurlStudio 0.2.1 chạy bằng `pnpm tauri dev` trên Windows 11; máy chủ lab trên Node v22.18.0, đồng hồ lab cố định 09:00 ngày 04/11/2026) cho thấy phần confirmation ở API của SN-02 cũng đúng trên một máy chủ lab chạy thật với PGlite, không chỉ trong kho bộ nhớ của suite. Nhưng folder chỉ có ba trong sáu test case: thiếu SN-01 (so fixture ở cấp hàm, chỉ làm được trong code), SN-04 (ba dạng «không nhập») và SN-06 — test case có trạng thái mà mục 5.4 giải thích là cần nhất, vì hậu quả của thay đổi nằm ở lượt dùng chứ không ở chuỗi. Vì vậy CurlStudio hợp để khám phá nhanh hoặc để người khác tự gửi thử input lỗi; kết luận sanity vẫn dựa trên 8 lượt của `sanity.test.ts`.
+
 ## 6. Đọc thất bại và ra quyết định
 
 Khi sanity đỏ, việc đầu tiên là xác định **bước đầu tiên lệch** trên impact map, không phải sửa giá trị mong đợi cho xanh.
@@ -409,6 +422,7 @@ Nguồn ngoài tra cứu 13/11/2026.
 - ISTQB, *Certified Tester Foundation Level Syllabus v4.0.1* (2024) — mục 2.2.3 Confirmation Testing and Regression Testing, impact analysis. PDF: https://istqb.org/wp-content/uploads/2024/11/ISTQB_CTFL_Syllabus_v4.0.1.pdf. Thuật ngữ «sanity suite» và cách ghép confirmation + regression gần trong bài là thực tiễn của series, không phải định nghĩa của syllabus.
 - Vitest — Expect API (`toBe`, `toMatchObject`, `it.each`): https://vitest.dev/api/expect.html
 - Lab Tới Nơi: `SPEC.md` (R-VOUCHER-02/03/06/07, R-QUOTE-04, R-FARE-01…08), `src/domain/voucher.ts`, bộ test của bài — https://github.com/rickymta/antblog/tree/main/examples/toi-noi-testing/articles/system-testing-sanity-test
+- CurlStudio 0.2.1 — API client và load test (mã nguồn, tra cứu 23/11/2026): https://github.com/rickymta/curl-studio · collection minh hoạ: `examples/toi-noi-testing/curlstudio/`
 - Bài liên quan: [Dự án mẫu Tới Nơi](/articles/du-an-mau-toi-noi) · [SYS-01 · Smoke Test](/articles/system-testing-smoke-test) · [Confirmation Testing và Regression Testing](/articles/confirmation-testing-va-regression-testing) · [Equivalence Partitioning](/articles/equivalence-partitioning) · [Phân tích tác động của change request](/articles/ba-change-request-impact-analysis)
 
 Bài tiếp theo: [SYS-03 · Functional Test](/articles/system-testing-functional-test).

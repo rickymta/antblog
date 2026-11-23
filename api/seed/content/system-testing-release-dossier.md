@@ -18,7 +18,7 @@ Thứ Hai, 10:00, họp release. Trưởng nhóm sản phẩm hỏi: «Bản nà
 <tr><th scope="row">Cấp độ</th><td>Advanced — QA lead, SDET, người điều phối release đã đọc phần lớn series</td></tr>
 <tr><th scope="row">Test level / hướng kiểm</th><td>Không phải test level: thuộc test completion và quyết định release — gom, kiểm hiệu lực và diễn giải bằng chứng của mọi level/type trước đó</td></tr>
 <tr><th scope="row">Bài cần đọc trước</th><td><a href="/articles/system-testing-uat">SYS-15 · UAT</a> · <a href="/articles/system-testing-deployment-test">SYS-16 · Deployment Test</a></td></tr>
-<tr><th scope="row">Thực hành</th><td>Lab (code): luật đề xuất thuần <code>rules.ts</code> với 8 test case RD-01…08, danh mục 17 mục bằng chứng <code>registry.ts</code> với RD-09, và <code>build-dossier.ts</code> chạy lại 9 suite Vitest, đọc git, kiểm độ mới rồi ghi dossier — <code>examples/toi-noi-testing/articles/system-testing-release-dossier/</code></td></tr>
+<tr><th scope="row">Thực hành</th><td>Lab (code): luật đề xuất thuần <code>rules.ts</code> với 8 test case RD-01…08, danh mục 17 mục bằng chứng <code>registry.ts</code> với RD-09, và <code>build-dossier.ts</code> chạy lại 9 suite Vitest, đọc git, kiểm độ mới rồi ghi dossier — <code>examples/toi-noi-testing/articles/system-testing-release-dossier/</code> · Minh hoạ: CurlStudio với collection <code>examples/toi-noi-testing/curlstudio/</code></td></tr>
 <tr><th scope="row">Nguồn chính</th><td>ISTQB CTFL v4.0.1 (quy trình test, test completion, test completion report); tài liệu git cho <code>git diff --name-only</code>, <code>git log --diff-filter</code>; mười sáu báo cáo SYS của series</td></tr>
 </tbody>
 </table>
@@ -313,6 +313,23 @@ Commit lab, dựng lại. Mong đợi suy từ các báo cáo **trước** khi c
 - SYS-12 ⇒ `missing` (rủi ro); SYS-15 ⇒ `missing` (**chặn**).
 - Đề xuất: NOT_READY.
 
+### 6.5. Minh hoạ với CurlStudio
+
+Dossier hỏi mỗi bằng chứng «thuộc lượt chạy nào, trên bản nào». Khi bằng chứng đến từ công cụ GUI, câu hỏi đó sắc hơn: cùng một folder có thể được bấm chạy nhiều lần trong một buổi. Các bài trước minh hoạ bằng collection CurlStudio giới thiệu ở [SYS-01](/articles/system-testing-smoke-test); sau khi chạy, mở **Nhật ký hoạt động** (Ctrl+Shift+L) và chọn tab «Load test & runner».
+
+<figure class="tkh-fig">
+<div class="tkh-fig-box"><img src="/images/articles/system-testing/sys-17/01-nhat-ky-hoat-dong.webp" alt="Hộp thoại Nhật ký hoạt động của CurlStudio, tab Load test & runner đang hiện 40 trên 54 mục. Danh sách theo thời gian gồm bốn lượt load test của folder SYS-07…09, mỗi lượt ghi preset (smoke hoặc custom), environment Tới Nơi lab (local, API test bật), mã run dạng 20261123-160921-d5c8cf, số request và thời lượng; tiếp theo là các collection run SYS-14, SYS-01, SYS-15 và cả collection Tới Nơi lab · Kiểm thử hệ thống, đều ghi all passed. Chân hộp thoại ghi lưu vào activity.jsonl, 8 KB trên 10 MB, giữ 30 ngày." width="2000" height="1125" loading="lazy"></div>
+<figcaption><b>Hình 2 · Nhật ký hoạt động: mỗi lượt chạy có danh tính riêng.</b> Load test ghi preset, environment và mã run; collection run ghi số request và «all passed». Chân hộp thoại cho biết nhật ký nằm trong <code>activity.jsonl</code> và chỉ giữ 30 ngày.</figcaption>
+</figure>
+
+Đọc ảnh theo câu hỏi của dossier:
+
+- **Hai lượt smoke, hai kết quả khác nhau.** Folder SYS-07…09 có hai lượt preset smoke: «run 20261123-160732-e3be62» với 12893 request trong 30.16s và «run 20261123-160921-d5c8cf» với 16039 request trong 30.11s. Cả hai đều xanh. «Baseline là lượt smoke xanh gần nhất» trỏ vào lượt nào tuỳ lúc ai đọc; số 16.039 request trong ảnh minh hoạ của SYS-07 chỉ thuộc về lượt `…d5c8cf`. Dossier dẫn **mã run, thời điểm và environment**, không dẫn «lượt xanh gần nhất».
+- **Cùng tên, khác lượt.** Collection run SYS-14 xuất hiện hai lần trong danh sách; tên folder không phải danh tính của bằng chứng.
+- **Lượt đỏ không biến mất.** Nhật ký giữ cả các lượt thất bại trước đó (tab «Tất cả», ô «Chỉ mục thất bại») — chất liệu cho anti-pattern «chạy lại tới khi xanh, chỉ ghi lần xanh» ở mục 10.
+
+Nhưng nhật ký này **chưa phải** bằng chứng release. Nó nằm cục bộ trên một máy, chỉ giữ 30 ngày, và ghi environment chứ không ghi commit: không dòng nào cho biết bản mã nào đang nghe cổng. Theo đúng luật ở mục 5.1, một bằng chứng không gắn được commit là `stale`. Muốn dùng một lượt CurlStudio trong dossier, phải xuất kết quả runner (**HTML · JUnit · JSON**), lưu cùng mã run và commit ứng viên vào nơi lưu trữ release — đúng điều kiện «thời hạn lưu dài hơn vòng đời quyết định» ở mục 9.2. Các lượt trong ảnh là minh hoạ ngày 23/11/2026 (CurlStudio 0.2.1 chạy bằng `pnpm tauri dev` trên Windows 11, máy chủ lab Node v22.18.0), không gắn với ứng viên `2980c69`, và `registry.ts` không đọc chúng: không dòng nào của dossier ở mục 7 dựa vào nhật ký này. Dù nhật ký có xanh hết, luật vẫn không ký thay ai, và đề xuất của lab vẫn là NOT_READY vì SYS-15 chưa chạy.
+
 ## 7. Kết quả: mong đợi và thực tế
 
 **Mong đợi:** 9/9 test luật; typecheck pass; dossier trên ứng viên bẩn là INVALID_CANDIDATE; trên ứng viên sạch là NOT_READY với đúng một blocker SYS-15 và bốn rủi ro SYS-07, 08, 09, 12.
@@ -489,6 +506,7 @@ Tra cứu và đối chiếu ngày 13/11/2026.
 - Git — `git diff` (`--name-only`): https://git-scm.com/docs/git-diff
 - Git — `git log` (`--diff-filter`): https://git-scm.com/docs/git-log
 - Lab Tới Nơi: `articles/system-testing-release-dossier/` (`rules.ts`, `registry.ts`, `build-dossier.ts`, `dossier.test.ts`) và mười sáu báo cáo `docs/system-testing/*-test-report.md` — https://github.com/rickymta/antblog/tree/main/examples/toi-noi-testing
+- CurlStudio 0.2.1 — API client và load test (mã nguồn, tra cứu 23/11/2026): https://github.com/rickymta/curl-studio · collection minh hoạ: `examples/toi-noi-testing/curlstudio/`
 - Bài liên quan: [Quy trình kiểm thử](/articles/quy-trinh-kiem-thu-test-process) · [Testware](/articles/testware-san-pham-kiem-thu) · [Acceptance testing tổng quan](/articles/acceptance-testing-tong-quan) · [Confirmation và regression testing](/articles/confirmation-testing-va-regression-testing) · [SYS-15 UAT](/articles/system-testing-uat) · [SYS-16 Deployment Test](/articles/system-testing-deployment-test)
 
 ## Khép lại series

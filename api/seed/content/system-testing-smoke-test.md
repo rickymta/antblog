@@ -18,7 +18,7 @@ Thứ Hai, Tới Nơi vừa đóng gói bản build mới. Trang chủ vẫn m�
 <tr><th scope="row">Cấp độ</th><td>Beginner — tester mới biết HTTP và TypeScript cơ bản; mục 6 dành cho QA/SDET thiết kế release gate</td></tr>
 <tr><th scope="row">Test level / hướng kiểm</th><td>Smoke là cách chọn phạm vi suite, không phải một test level; ở bài này các case chạy qua API với kho dữ liệu thật của lab (PGlite)</td></tr>
 <tr><th scope="row">Bài cần đọc trước</th><td><a href="/articles/du-an-mau-toi-noi">Dự án mẫu Tới Nơi</a> · <a href="/articles/tong-quan-5-test-level-istqb">TEST-011 Tổng quan 5 test level</a></td></tr>
-<tr><th scope="row">Thực hành</th><td>Lab (code): 3 test case smoke SM-01…03 — health, chặn yêu cầu thiếu danh tính, đặt → nhận → hoàn tất → đọc lại → kiểm tra số tiền đã thu (R-API-15, R-API-03, R-STATE-02, R-PAY-03) — <code>examples/toi-noi-testing/articles/system-testing-smoke-test/</code></td></tr>
+<tr><th scope="row">Thực hành</th><td>Lab (code): 3 test case smoke SM-01…03 — health, chặn yêu cầu thiếu danh tính, đặt → nhận → hoàn tất → đọc lại → kiểm tra số tiền đã thu (R-API-15, R-API-03, R-STATE-02, R-PAY-03) — <code>examples/toi-noi-testing/articles/system-testing-smoke-test/</code> · Minh hoạ: CurlStudio với collection <code>examples/toi-noi-testing/curlstudio/</code></td></tr>
 <tr><th scope="row">Nguồn chính</th><td>ISTQB CTFL v4.0.1 (thuật ngữ test level/type, confirmation/regression); Grafana k6 Load test types (đối chiếu nghĩa "smoke" trong hiệu năng); <code>SPEC.md</code> của lab</td></tr>
 </tbody>
 </table>
@@ -284,6 +284,55 @@ Khoá ví được dựng từ `id` sinh trong test, không hardcode. `toMatchOb
 
 Lần thử đầu tiên **trước khi cài dependency** đã thất bại ở bước nạp config vì thiếu Vitest cục bộ; `npx` tự tải một Vitest khác ngoài lab và không giải quyết được import. Đây là lỗi chuẩn bị môi trường — được ghi là *blocked*, không phải defect sản phẩm. Cài theo lockfile rồi chạy lại mới cho kết quả trên.
 
+### 4.6. Dựng môi trường CurlStudio cho cả series
+
+Ba test case ở trên là bằng chứng chính của bài. Từ bài này, series dùng thêm **CurlStudio** — API client kiểu Postman, có Collection Runner, test script `pm.test` và load test — để làm lại cùng phép kiểm bằng giao diện: tiện cho người mới làm quen với API, cho lúc khám phá và khi cần chia sẻ collection cho người khác chạy. Collection nằm ở `examples/toi-noi-testing/curlstudio/` (định dạng Postman v2.1, mở được cả bằng Postman/Newman); các bước dưới đây có đủ trong `examples/toi-noi-testing/curlstudio/README.md`.
+
+1. **Chạy hai máy chủ lab** từ thư mục `examples/toi-noi-testing`, mỗi lệnh một cửa sổ PowerShell:
+
+```powershell
+$env:NODE_ENV='test'; $env:TOINOI_DB='pglite'; $env:TOINOI_START_AT='2026-11-04T09:00:00+07:00'; $env:PORT='3100'; npm start
+# cửa sổ khác — bản prod-like cho SYS-16
+$env:NODE_ENV='production'; $env:TOINOI_DB='pglite'; $env:TOINOI_START_AT='2026-11-04T09:00:00+07:00'; $env:PORT='3101'; npm start
+```
+
+Máy chủ cổng 3100 là lab có API kiểm thử (`/api/test/*`) để reset dữ liệu, đặt đồng hồ, thời tiết và chế độ ví giả. Máy chủ cổng 3101 là bản «triển khai» tắt API đó, chỉ dùng ở SYS-16.
+2. **Mở CurlStudio** (bản cài đặt, hoặc từ mã nguồn: `pnpm install` rồi `pnpm tauri dev` trong repo curl-studio), bấm **Nhập** và nhập ba tệp: `toi-noi-lab.postman_collection.json`, `toi-noi-lab-local.postman_environment.json`, `toi-noi-prod-like.postman_environment.json`.
+3. **Chọn environment** «Tới Nơi lab (local, API test bật)» ở ô chọn góc phải trên — biến `baseUrl` trỏ `http://localhost:3100`. Environment «Tới Nơi bản triển khai (prod-like)» trỏ `http://localhost:3101`, để dành cho SYS-16.
+4. **Đọc cấu trúc collection.** Cây bên trái «Tới Nơi lab · Kiểm thử hệ thống» có folder `00 · Chuẩn bị lab` (đưa lab về trạng thái cố định), mỗi bài có minh hoạ là một folder mang mã bài (`SYS-01 · Smoke`, `SYS-02 · Sanity voucher`, `SYS-03 · Functional theo bảng cước`…), và folder `SYS-07…09 · Request cho kịch bản tải` làm nguồn cho load test. Chuột phải một folder → **Chạy thư mục** để mở Collection Runner; folder của SYS-03, SYS-04 và SYS-15 cần chọn tệp dữ liệu trong runner bằng **Chọn file**.
+
+Folder của bài này tự reset dữ liệu, đặt đồng hồ 09:00 ngày 04/11/2026, trời không mưa và ví bình thường trước khi kiểm — cùng các điều kiện kiểm soát như mục 4.1. Lab giới hạn 5 lần tạo chuyến mỗi phút cho mỗi khách (R-API-13): chạy một folder nhiều lần liên tiếp có thể gặp 429, khi đó đợi một phút hoặc chạy folder `00 · Chuẩn bị lab`. Chỉ trỏ collection vào lab cô lập, không trỏ vào hệ thống thật.
+
+### 4.7. Minh hoạ với CurlStudio
+
+Chuột phải folder **SYS-01 · Smoke** → **Chạy thư mục**, giữ environment local và 1 iteration, rồi bấm **Chạy SYS-01 · Smoke**. Folder có 14 request: bốn request chuẩn bị (reset, đặt đồng hồ, trời không mưa, ví bình thường), SM-01, SM-02 và tám bước của SM-03 — báo giá, đặt chuyến bằng VíXanh, bốn bước của tài xế, hoàn tất, khách đọc lại.
+
+<figure class="tkh-fig">
+<div class="tkh-fig-box"><img src="/images/articles/system-testing/sys-01/01-runner-smoke.webp" alt="Collection Runner của CurlStudio sau khi chạy folder SYS-01 · Smoke với environment Tới Nơi lab (local, API test bật), 1 iteration, 14 request được chọn và ô «Giữ giá trị biến do script đặt» đang bật. Thanh tổng ghi Requests 14, Tests 20/20 (100%), Thất bại 0, Non-2xx 1; giữa là biểu đồ thời gian response trung bình theo từng request, thang log; bên dưới là danh sách kết quả, mỗi request một dòng có dấu tích và HTTP 200." width="2000" height="1125" loading="lazy"></div>
+<figcaption><b>Hình 2 · Smoke SYS-01 trong Collection Runner.</b> 20/20 test pass trên 14 request. Con số Non-2xx 1 không phải lỗi: đó là SM-02, nơi 401 là kết quả mong đợi. Ba nút HTML · JUnit · JSON ở góc phải trên xuất báo cáo của lượt chạy.</figcaption>
+</figure>
+
+Oracle nằm trong tab **Tests** của từng request. Request «SM-03 · Khách đọc lại chuyến» gửi `GET {{baseUrl}}/api/trips/{{tripId}}` và kiểm:
+
+```js
+pm.test('HTTP 200', () => pm.response.to.have.status(200));
+const t = pm.response.json().trip;
+pm.test('Đọc lại: completed, 35.000 đ, paid', () => {
+  pm.expect(t.status).to.eql('completed');
+  pm.expect(t.fare).to.eql(35000);
+  pm.expect(t.paymentStatus).to.eql('paid');
+});
+```
+
+<figure class="tkh-fig">
+<div class="tkh-fig-box"><img src="/images/articles/system-testing/sys-01/02-tests-doc-lai-chuyen.webp" alt="Tab request SM-03 · Khách đọc lại chuyến trong CurlStudio, GET {{baseUrl}}/api/trips/{{tripId}}, đang mở tab Tests với script pm.test HTTP 200 và pm.test Đọc lại: completed, 35.000 đ, paid gồm ba dòng pm.expect cho status, fare và paymentStatus. Nửa dưới là tab Kết quả test 2/2: PASS HTTP 200 và PASS Đọc lại: completed, 35.000 đ, paid; trạng thái 200 OK." width="2000" height="1125" loading="lazy"></div>
+<figcaption><b>Hình 3 · Oracle của SM-03 và kết quả của nó.</b> Nửa trên là chính đoạn script ở trên, viết trong tab <b>Tests</b> của request; nửa dưới là <b>Kết quả test 2/2</b> sau khi gửi lại request với <code>tripId</code> do lượt runner để lại. Mỗi <code>pm.test</code> thành một dòng PASS/FAIL có tên — tên test là thứ người đọc báo cáo thấy đầu tiên, nên đặt theo yêu cầu (completed, 35.000 đ, paid) thay vì «test 1».</figcaption>
+</figure>
+
+`tripId` không gõ tay: request «SM-03 · Đặt chuyến (vixanh)» lưu id chuyến vào biến collection bằng `pm.collectionVariables.set`, và runner bật «Giữ giá trị biến do script đặt» (thấy trong Hình 2) để các request sau dùng lại — giống việc lab code lấy `id` từ response thay vì đoán. `Idempotency-Key` sinh mới mỗi lượt bằng `{{$guid}}`. Con số 35.000 vẫn là kết quả tính tay ở mục 3.1, viết cứng trong script, cùng nguyên tắc oracle độc lập. Nếu muốn runner dừng ngay ở bước đỏ đầu tiên như `.expect()` trong Vitest, bật «Dừng chạy khi gặp lỗi đầu tiên».
+
+**Ảnh này chứng minh gì, không chứng minh gì.** Lượt minh hoạ ngày 23/11/2026 (CurlStudio 0.2.1 chạy bằng `pnpm tauri dev` trên Windows 11; máy chủ lab trên Node v22.18.0, đồng hồ lab cố định 09:00 ngày 04/11/2026) cho thấy ba phép smoke đi được qua HTTP thật tới một máy chủ lab đang chạy với PGlite — khác lab code, vốn gọi Express trong tiến trình qua Supertest. Nó **không** thay `smoke.test.ts`: runner chỉ nhìn thấy response, nên không kiểm được hai lớp assertion còn lại của SM-03 ở mục 4.4 — trạng thái đọc qua repository và sổ ví giả (đúng một lần gọi, khoá `trip:<id>:fare`, tổng 35.000). Thời gian trong biểu đồ đo từ phía CurlStudio, không phải số liệu hiệu năng và không so được với thời lượng Vitest ở mục 4.5. Và như mọi smoke, 20/20 xanh cho phép kiểm tiếp, không cho phép release.
+
 ## 5. Đọc thất bại và ra quyết định
 
 ### 5.1. Từ dấu hiệu tới giả thuyết
@@ -431,6 +480,7 @@ Nguồn ngoài tra cứu 13/11/2026.
 - ISTQB, *Certified Tester Foundation Level Syllabus v4.0.1* (2024) — test levels, test types, confirmation và regression testing: https://istqb.org/wp-content/uploads/2024/11/ISTQB_CTFL_Syllabus_v4.0.1.pdf. Phần lựa chọn smoke và thiết kế pipeline trong bài là hướng dẫn thực tiễn, không phải yêu cầu của syllabus.
 - Grafana k6 — *Load test types*: https://grafana.com/docs/k6/latest/testing-guides/test-types/ — đối chiếu nghĩa «smoke» trong kiểm thử hiệu năng.
 - Lab Tới Nơi: `SPEC.md` (R-API-03, R-API-05, R-API-08, R-API-15, R-VALID-01, R-STATE-02, R-PAY-03, R-FARE-01…08) và mã bài — https://github.com/rickymta/antblog/tree/main/examples/toi-noi-testing/articles/system-testing-smoke-test
+- CurlStudio 0.2.1 — API client và load test (mã nguồn, tra cứu 23/11/2026): https://github.com/rickymta/curl-studio · collection minh hoạ: `examples/toi-noi-testing/curlstudio/`
 - Bài liên quan: [Dự án mẫu Tới Nơi](/articles/du-an-mau-toi-noi) · [TEST-011 Tổng quan 5 test level](/articles/tong-quan-5-test-level-istqb) · [Quy trình kiểm thử](/articles/quy-trinh-kiem-thu-test-process) · [Confirmation testing và regression testing](/articles/confirmation-testing-va-regression-testing) · [System Testing (series ISTQB)](/articles/system-testing)
 
 Bài tiếp theo: [SYS-02 · Sanity Test](/articles/system-testing-sanity-test).

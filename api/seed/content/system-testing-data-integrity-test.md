@@ -18,7 +18,7 @@ API trả 201, giao diện hiện «Đang tìm tài xế», test E2E xanh. Ba tu
 <tr><th scope="row">Cấp độ</th><td>Advanced — QA/SDET, backend developer; cần SELECT/JOIN, khoá chính/khoá ngoại, transaction</td></tr>
 <tr><th scope="row">Test level / hướng kiểm</th><td>Kiểm ở cấp tích hợp API + repository + database; hướng kiểm là toàn vẹn dữ liệu (một đặc tính chất lượng), oracle là trạng thái cuối trong DB chứ không phải response</td></tr>
 <tr><th scope="row">Bài cần đọc trước</th><td><a href="/articles/system-testing-integration-test">SYS-04 Integration Test</a> · <a href="/articles/system-testing-functional-test">SYS-03 Functional Test</a> · <a href="/articles/system-testing-usability-test">SYS-12 Usability Test</a> (bài liền trước) · <a href="/articles/postgresql-transaction-commit-rollback">Transaction, COMMIT và ROLLBACK</a></td></tr>
-<tr><th scope="row">Thực hành</th><td>Lab (code): 6 test case DI-01…06 — đối soát snapshot và nhật ký, UNIQUE, rollback khi lỗi event thứ hai, CHECK/NOT NULL, round-trip tiền lẻ, phát hiện fare bị sửa (R-QUOTE-02/03/04, R-STATE-01/06, R-GEN-01, R-FARE-03/10) — <code>examples/toi-noi-testing/articles/system-testing-data-integrity-test/</code></td></tr>
+<tr><th scope="row">Thực hành</th><td>Lab (code): 6 test case DI-01…06 — đối soát snapshot và nhật ký, UNIQUE, rollback khi lỗi event thứ hai, CHECK/NOT NULL, round-trip tiền lẻ, phát hiện fare bị sửa (R-QUOTE-02/03/04, R-STATE-01/06, R-GEN-01, R-FARE-03/10) — <code>examples/toi-noi-testing/articles/system-testing-data-integrity-test/</code> · Minh hoạ: CurlStudio với collection <code>examples/toi-noi-testing/curlstudio/</code></td></tr>
 <tr><th scope="row">Nguồn chính</th><td>PostgreSQL 18 docs: Constraints, Transactions, Error Codes; <code>SPEC.md</code> và <code>schema.sql</code> của lab</td></tr>
 </tbody>
 </table>
@@ -354,6 +354,26 @@ Lượt chạy lại không chạy typecheck; kết quả typecheck lấy từ b
 <p><b>Không chứng minh:</b> hai request đồng thời không tạo hai chuyến (R-QUOTE-03 «cùng lúc»); cả use case đặt chuyến là nguyên tử; dữ liệu còn sau mất điện hay restore; migration giữ nghĩa dữ liệu; tiền khớp ledger nhà cung cấp thanh toán. DI-06 xanh nghĩa là <b>phát hiện được</b>, không phải <b>ngăn được</b>: schema vẫn cho phép UPDATE fare khác báo giá.</p>
 </div>
 
+### 6.8. Minh hoạ với CurlStudio
+
+Phần idempotency của đường ghi — header `Idempotency-Key` ở Hình 1 — cũng quan sát được từ phía client bằng CurlStudio, với collection đã giới thiệu ở [SYS-01](/articles/system-testing-smoke-test). Chọn environment «Tới Nơi lab (local, API test bật)», chuột phải folder «SYS-13 · Idempotency đặt chuyến» → **Chạy thư mục**, giữ đủ 8 request rồi bấm chạy. Folder tự reset dữ liệu, đặt đồng hồ 09:00 ngày 04/11/2026, trời không mưa, ví bình thường và lấy một báo giá, sau đó gửi ba request đặt chuyến dùng chung một khoá.
+
+<figure class="tkh-fig">
+<div class="tkh-fig-box"><img src="/images/articles/system-testing/sys-13/01-runner-idempotency.webp" alt="Cửa sổ CurlStudio với Collection Runner chạy folder «SYS-13 · Idempotency đặt chuyến» trên environment Tới Nơi lab local: thanh tổng Requests 8, Tests 10/10 (100%), Thất bại 0, Non-2xx 1. Danh sách kết quả cho thấy «DI · Lần gửi đầu» và «DI · Gửi lại cùng khoá, cùng thân» đều HTTP 201, dòng sau có test «Trả lại đúng chuyến cũ (R-IDEM-02)» đạt; «DI · Cùng khoá, thân khác» trả HTTP 422 với mã lỗi IDEMPOTENCY_KEY_REUSED." width="2000" height="1125" loading="lazy"></div>
+<figcaption><b>Hình 2 · Folder SYS-13 trong Collection Runner của CurlStudio.</b> Ba dòng cuối là phần đáng đọc: gửi lại cùng khoá, cùng thân vẫn trả 201 và nhận lại đúng chuyến cũ (R-IDEM-02); cùng khoá nhưng thân khác bị từ chối 422 với IDEMPOTENCY_KEY_REUSED — đó cũng là response non-2xx duy nhất của lượt chạy.</figcaption>
+</figure>
+
+Đọc ảnh từ trên xuống:
+
+- Thanh tổng **Requests 8 · Tests 10 / 10 (100%) · Thất bại 0 · Non-2xx 1**; 422 là mã lỗi có chủ đích, không phải lỗi của lượt chạy.
+- «DI · Lần gửi đầu» trả 201 — chuyến được tạo.
+- «DI · Gửi lại cùng khoá, cùng thân» vẫn 201, test «Trả lại đúng chuyến cũ (R-IDEM-02)» xanh: client gửi lại không nhận về một chuyến thứ hai.
+- «DI · Cùng khoá, thân khác» trả 422, mã lỗi `IDEMPOTENCY_KEY_REUSED`: một khoá đã gắn với một thân request thì không được dùng cho thân khác.
+
+Lưu ý tên: tiền tố «DI ·» chỉ để nhóm request theo bài; ba request này **không** phải DI-01…06 của mục 5.2. Sáu test case đó đọc trạng thái trong database và không chạy qua CurlStudio.
+
+Ảnh này chứng minh hành vi idempotency **nhìn từ API**: cùng khoá, cùng thân thì cùng chuyến; cùng khoá, thân khác thì bị chặn bằng mã lỗi riêng. Nó **không** cho thấy điều bài này quan tâm nhất: bảng `trips` có đúng một dòng cho báo giá đó, `trip_events` không bị ghi đôi, `quotes.used_by_trip_id` trỏ đúng chuyến, và ràng buộc UNIQUE, CHECK, NOT NULL vẫn còn trong schema. Runner chỉ đọc response — và như mở đầu bài, response đúng vẫn có thể đi cùng một trạng thái dữ liệu sai. Những phần đó cần oracle SQL độc lập với API như các bước 6.2–6.6; lab dùng SQL assertion chính vì lý do này. Lượt chạy trong ảnh là minh hoạ ngày 23/11/2026 (CurlStudio 0.2.1 chạy bằng `pnpm tauri dev` trên Windows 11, máy chủ lab Node v22.18.0), không thay cho 6/6 test Vitest ở mục 6.7.
+
 ## 7. Đọc thất bại và ra quyết định
 
 | Dấu hiệu | Giả thuyết cần kiểm trước | Bằng chứng tiếp theo |
@@ -502,6 +522,7 @@ Tra cứu và đối chiếu ngày 13/11/2026.
 - PostgreSQL 18 — *13.2. Transaction Isolation*: https://www.postgresql.org/docs/18/transaction-iso.html
 - PGlite — tài liệu (PostgreSQL WASM trong tiến trình, một kết nối): https://pglite.dev/docs/ — lab dùng phiên bản 0.3.16.
 - Lab Tới Nơi: `SPEC.md` (R-GEN-01, R-FARE-03/04/10, R-QUOTE-02/03/04, R-STATE-01/06, R-ARCH-02), `src/infra/pglite/schema.sql`, `src/infra/pglite/pg-trip-repository.ts`, `src/app/trips.ts` và bộ test của bài — https://github.com/rickymta/antblog/tree/main/examples/toi-noi-testing
+- CurlStudio 0.2.1 — API client và load test (mã nguồn, tra cứu 23/11/2026): https://github.com/rickymta/curl-studio · collection minh hoạ: `examples/toi-noi-testing/curlstudio/`
 - Bài liên quan: [SYS-03 Functional Test](/articles/system-testing-functional-test) · [SYS-04 Integration Test](/articles/system-testing-integration-test) · [CREATE TABLE và ràng buộc dữ liệu](/articles/postgresql-create-table-constraints) · [Transaction, COMMIT và ROLLBACK](/articles/postgresql-transaction-commit-rollback) · [Chọn kiểu dữ liệu cho tiền, thời gian và định danh](/articles/postgresql-kieu-du-lieu-tien-thoi-gian-uuid)
 
 Bài tiếp theo: [SYS-14 · Recovery Test](/articles/system-testing-recovery-test).

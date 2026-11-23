@@ -1,0 +1,7 @@
+caseId,vehicle,distanceKm,status,expected
+FN-T01,bike,5,200,35000
+FN-T02,bike,2,200,21000
+FN-T03,bike,0.5,200,15000
+FN-T04,car,5,200,80000
+FN-T05,car,10,200,135000
+FN-T06,bike,0.1,422,DISTANCE_OUT_OF_RANGE

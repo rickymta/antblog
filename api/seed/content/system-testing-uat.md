@@ -18,7 +18,7 @@ Chiều thứ Sáu, pipeline của Tới Nơi xanh từ smoke tới recovery. Pr
 <tr><th scope="row">Cấp độ</th><td>Intermediate — tester/QA lead, BA, product owner chuẩn bị nghiệm thu một phạm vi bàn giao</td></tr>
 <tr><th scope="row">Test level / hướng kiểm</th><td>Acceptance (user acceptance); hướng kiểm chức năng theo nhu cầu nghiệp vụ, kèm quan sát khả năng tự hoàn thành công việc</td></tr>
 <tr><th scope="row">Bài cần đọc trước</th><td><a href="/articles/system-testing-recovery-test">SYS-14 · Recovery Test</a> · <a href="/articles/acceptance-testing-tong-quan">Acceptance Testing tổng quan</a> · <a href="/articles/system-testing-functional-test">SYS-03 · Functional Test</a> · <a href="/articles/system-testing-system-test">SYS-05 · System Test</a></td></tr>
-<tr><th scope="row">Thực hành</th><td>(1) Acceptance kit: 6 scenario UA-01…06, worksheet, risk register, biên bản quyết định trống. (2) Lab (code): 4 supporting check API + PGlite cho UA-01…03 (R-QUOTE-01/03/04, R-IDEM-02, R-STATE-06, R-CANCEL-01/02/03/06/07, R-PAY-01) — <code>examples/toi-noi-testing/articles/system-testing-uat/</code></td></tr>
+<tr><th scope="row">Thực hành</th><td>(1) Acceptance kit: 6 scenario UA-01…06, worksheet, risk register, biên bản quyết định trống. (2) Lab (code): 4 supporting check API + PGlite cho UA-01…03 (R-QUOTE-01/03/04, R-IDEM-02, R-STATE-06, R-CANCEL-01/02/03/06/07, R-PAY-01) — <code>examples/toi-noi-testing/articles/system-testing-uat/</code> · Minh hoạ: CurlStudio với collection <code>examples/toi-noi-testing/curlstudio/</code></td></tr>
 <tr><th scope="row">Nguồn chính</th><td>ISTQB Glossary (acceptance testing); ISTQB CT-AcT syllabus v1.0; <code>SPEC.md</code> của lab; báo cáo SYS-12/13/14</td></tr>
 </tbody>
 </table>
@@ -259,6 +259,21 @@ Lượt chạy lại không chạy typecheck; kết quả typecheck lấy từ b
 <p>Chứng minh: trong lab API/PGlite với clock cố định, dữ liệu lưu đúng tiêu chí UA-01…03. Không chứng minh: người dùng hiểu màn hình (không có browser trong suite), xác thực thật (header <code>x-user</code> là mô phỏng danh tính), ví/provider thật, hiệu năng, khả năng vận hành production, phạm vi food/parcel. Không được báo «UAT đạt 4/4» hay «100%» khi sáu scenario người dùng chưa chạy.</p>
 </div>
 
+### 6.4. Minh hoạ với CurlStudio
+
+Supporting check UA-02 cũng chạy được bằng Collection Runner của CurlStudio, với collection đã giới thiệu ở [SYS-01](/articles/system-testing-smoke-test). Chuột phải folder «SYS-15 · Supporting check UA-02 (huỷ chuyến)» → **Chạy thư mục**, rồi trong runner bấm **Chọn file** và chọn `huy-chuyen.json` — 2 dòng, mỗi dòng một iteration: huỷ sau 1 phút và huỷ sau 3 phút. Mỗi iteration reset dữ liệu, đặt đồng hồ 09:00 ngày 04/11/2026, báo giá xe máy 5 km, đặt chuyến tiền mặt, cho tài xế D101 nhận, dời đồng hồ lab qua `/api/test/clock` theo số phút trong tệp dữ liệu, rồi khách huỷ.
+
+<figure class="tkh-fig">
+<div class="tkh-fig-box"><img src="/images/articles/system-testing/sys-15/01-runner-ua02-huy-chuyen.webp" alt="Collection Runner của CurlStudio chạy folder «SYS-15 · Supporting check UA-02 (huỷ chuyến)» với tệp dữ liệu huy-chuyen.json, 2 dòng, mỗi dòng một iteration: thanh tổng Requests 14, Tests 16/16 (100%), Thất bại 0. Danh sách kết quả cho thấy các request «UA-02 · Dời đồng hồ theo dữ liệu» và «UA-02 · Khách huỷ chuyến» ở cả hai iteration; iteration #1 có test «Huỷ sau 1 phút → phí 0 đ (grace_period)», iteration #2 có test «Huỷ sau 3 phút → phí 10000 đ (charged)»." width="2000" height="1125" loading="lazy"></div>
+<figcaption><b>Hình 2 · Supporting check UA-02 chạy bằng tệp dữ liệu hai dòng.</b> Iteration #1 huỷ sau 1 phút: phí 0 đ, <code>grace_period</code>; iteration #2 huỷ sau 3 phút: phí 10000 đ, <code>charged</code>. Mốc đúng 2 phút không có ở đây — nó thuộc test Vitest UA-02.</figcaption>
+</figure>
+
+Thanh tổng ghi **Requests 14 · Tests 16 / 16 (100%) · Thất bại 0**. Hai test đáng đọc nằm ở request «UA-02 · Khách huỷ chuyến» của mỗi iteration: «Huỷ sau 1 phút → phí 0 đ (grace_period)» và «Huỷ sau 3 phút → phí 10000 đ (charged)» — một mốc mỗi bên của biên R-CANCEL-02.
+
+Vì sao 3 phút chứ không đúng 2? `FixedClock` trong suite Vitest đứng yên giữa các bước, nên `clock.advanceMinutes(2)` chạm đúng 2 phút 0 giây. Đồng hồ lab trên máy chủ thì vẫn trôi sau khi được dời: giữa request dời đồng hồ và request huỷ luôn có thêm một khoảng thời gian, nên runner không đặt được đúng mốc biên. Folder vì vậy dùng 3 phút; giá trị biên dễ sai nhất vẫn do test Vitest UA-02 ở 6.2 kiểm.
+
+Ảnh này là một supporting check bằng công cụ GUI, cùng loại bằng chứng với 4/4 Vitest ở 6.3: dữ liệu API đúng tiêu chí ở hai mốc. Nó **không** phải phiên UAT — không có đại diện khách hay tài xế thao tác trên `/` và `/driver.html`, không ai được hỏi có hiểu phí và lý do không, không có người ký; bảng ở mục 4 vẫn ghi UA-02 «Phiên: NOT RUN». Chỗ dùng hợp lý của nó là **vật liệu chuẩn bị phiên**: QA chạy folder trước buổi UAT để chắc môi trường và móc đồng hồ hoạt động, và cho business owner xem trước dữ liệu mong đợi của hai lượt huỷ. Lượt chạy là minh hoạ ngày 23/11/2026 (CurlStudio 0.2.1 qua `pnpm tauri dev`, Windows 11, máy chủ lab Node v22.18.0); không cộng vào «4/4» và không quy đổi thành tỷ lệ UAT.
+
 ## 7. Thực hành 2 — acceptance kit cho phiên người dùng
 
 Đây là bộ mẫu dùng được ngay. Khởi động lab theo README của `examples/toi-noi-testing`, dùng trang khách `/` và trang tài xế `/driver.html`. QA chuẩn bị clock cho UA-02/03 bằng móc test có sẵn của lab; không bắt người dùng thao tác SQL hay canh biên 2 phút bằng đồng hồ tay. **Không bao giờ bật móc test trên production.**
@@ -492,6 +507,7 @@ Tra cứu ngày 13/11/2026.
 - Lab và bộ test của bài: https://github.com/rickymta/antblog/tree/main/examples/toi-noi-testing/articles/system-testing-uat — `SPEC.md` (R-QUOTE, R-IDEM, R-STATE, R-CANCEL, R-PAY, R-UI) là test basis trực tiếp.
 - Nguồn nội bộ: báo cáo SYS-12 (usability), SYS-13 (data integrity), SYS-14 (recovery).
 - Các mẫu worksheet, risk register, gate và biên bản trong bài là thiết kế thực hành cho lab, không phải biểu mẫu bắt buộc của ISTQB.
+- CurlStudio 0.2.1 — API client và load test (mã nguồn, tra cứu 23/11/2026): https://github.com/rickymta/curl-studio · collection minh hoạ: `examples/toi-noi-testing/curlstudio/`
 - Bài liên quan: [Acceptance Testing tổng quan](/articles/acceptance-testing-tong-quan) · [Acceptance criteria Given–When–Then](/articles/ba-acceptance-criteria-given-when-then) · [Thiết kế UAT scenario](/articles/ba-thiet-ke-uat-scenario) · [UAT: vai trò người dùng nghiệp vụ](/articles/ba-uat-vai-tro-nguoi-dung-nghiep-vu) · [SYS-14 · Recovery Test](/articles/system-testing-recovery-test)
 
 Bài tiếp theo: [SYS-16 · Deployment Test](/articles/system-testing-deployment-test).

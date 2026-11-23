@@ -18,7 +18,7 @@ API báo giá đúng 35.000 đ, nút «Đặt chuyến» chạy tốt trên Chro
 <tr><th scope="row">Cấp độ</th><td>Intermediate — tester, BA, designer, product; không cần viết code để tổ chức study</td></tr>
 <tr><th scope="row">Test level / hướng kiểm</th><td>Đặc tính phi chức năng (usability) ở cấp hệ thống; phương pháp formative, moderated; accessibility chỉ ở mức kiểm bổ trợ</td></tr>
 <tr><th scope="row">Bài cần đọc trước</th><td><a href="/articles/system-testing-compatibility-test">SYS-11 · Compatibility Test</a> · <a href="/articles/non-functional-testing-tong-quan">Non-functional testing tổng quan</a></td></tr>
-<tr><th scope="row">Thực hành</th><td>Human testing: study kit gồm kế hoạch phiên, script mở đầu, ba task card U1–U3, quy tắc ghi số liệu, worksheet, mẫu finding. Code bổ trợ: 2 check Playwright US-A01, US-A02 (R-UI-01, R-UI-03, R-UI-04) — <code>examples/toi-noi-testing/articles/system-testing-usability-test/</code></td></tr>
+<tr><th scope="row">Thực hành</th><td>Human testing: study kit gồm kế hoạch phiên, script mở đầu, ba task card U1–U3, quy tắc ghi số liệu, worksheet, mẫu finding. Code bổ trợ: 2 check Playwright US-A01, US-A02 (R-UI-01, R-UI-03, R-UI-04) — <code>examples/toi-noi-testing/articles/system-testing-usability-test/</code> · Minh hoạ: CurlStudio với collection <code>examples/toi-noi-testing/curlstudio/</code></td></tr>
 <tr><th scope="row">Nguồn chính</th><td>GOV.UK Service Manual (moderated usability testing); W3C WAI (Involving Users in Evaluating Web Accessibility); <code>SPEC.md</code> của lab</td></tr>
 </tbody>
 </table>
@@ -335,6 +335,23 @@ Running 2 tests using 1 worker
 
 **Thực tế — báo cáo gốc (13/11/2026)** (Node v24.15.0): 2 pass trong 5,3 giây (US-A01 740 ms, US-A02 508 ms); `npm run typecheck` pass. Chênh thời gian do máy và tải khác nhau, không nói gì về usability. Không chạy axe, không đánh giá WCAG đầy đủ, không review trực quan bằng ảnh.
 
+### 7.4. Minh hoạ với CurlStudio
+
+US-A02 chỉ đòi alert *chứa* chữ «Quãng đường». Nội dung đầy đủ của thông điệp mà API trả cho task U2 có thể xem thêm bằng API client, với collection đã giới thiệu ở [SYS-01 · Smoke Test](/articles/system-testing-smoke-test). Trong folder «SYS-12 · Thông điệp lỗi cho người dùng», mở request «UX · Quãng đường 0,1 km» (POST `{{baseUrl}}/api/quotes`, quãng đường 0,1 km) và bấm **Gửi**.
+
+<figure class="tkh-fig">
+<div class="tkh-fig-box"><img src="/images/articles/system-testing/sys-12/01-thong-diep-loi.webp" alt="CurlStudio mở request UX · Quãng đường 0,1 km trong folder SYS-12 · Thông điệp lỗi cho người dùng, gửi POST tới {{baseUrl}}/api/quotes. Thanh response ghi Trạng thái 422 Unprocessable Entity, thời gian 4.9 ms, kết quả test 4/4. Thân JSON có error.code là DISTANCE_OUT_OF_RANGE và error.message là: Quãng đường phải từ 0.5 đến 100 km (sau khi làm tròn 0,1 km)." width="2000" height="1125" loading="lazy"></div>
+<figcaption><b>Hình 2 · Thông điệp lỗi API cho task U2.</b> Response 422 với mã <code>DISTANCE_OUT_OF_RANGE</code>, bốn test của request đều đạt. Chú ý cách viết số trong <code>message</code>: «0.5» dùng dấu chấm, còn «0,1» trong cùng câu dùng dấu phẩy.</figcaption>
+</figure>
+
+Đọc ảnh: trạng thái **422 Unprocessable Entity**, **Kết quả test 4/4**. Bốn test của request kiểm HTTP 422, mã lỗi `DISTANCE_OUT_OF_RANGE`, thông điệp nêu khoảng hợp lệ «0.5 đến 100 km», và thông điệp không lộ chi tiết kỹ thuật. Số 4,9 ms trên thanh response là thời gian phản hồi của API — không phải time-on-task, đúng như anti-pattern ở mục 10.1.
+
+**Ảnh này chứng minh gì.** Ở tầng API, thông điệp cho U2 có nội dung người dùng cần để tự sửa: nói rõ khoảng hợp lệ và giá trị hệ thống đã nhận, không kèm stack hay tên nội bộ. Đây là một kiểm bổ trợ thêm vào bước «dọn đường» của mục 7.1, cùng loại với US-A01 và US-A02.
+
+**Ảnh này không chứng minh gì.** Nó **không** chứng minh người dùng hiểu thông điệp hay tự sửa được: chưa có user study nào, participant vẫn bằng 0, và 4/4 không đi vào bảng kết quả ở mục 6.3. Ảnh cũng không cho biết trang khách hiển thị nguyên văn thông điệp này hay không; muốn biết thì nhìn trên trang, trong chính phiên quan sát.
+
+Ảnh còn gợi ý một điểm đáng mang vào phiên. Thông điệp viết «0.5» bằng dấu chấm, trong khi cách viết số kiểu Việt Nam dùng dấu phẩy cho phần thập phân và dấu chấm cho hàng nghìn — như «35.000 đ» (R-UI-04), như «0,1» ngay trong cùng câu và trong prompt U2. Đây là **giả thuyết để quan sát**, chưa phải finding: ghi vào cột «Diễn giải / giả thuyết» của worksheet, rồi để hành vi của người tham gia đã thấy thông điệp (exposed) xác nhận hoặc bác bỏ — ví dụ họ gõ gì vào ô quãng đường ngay sau khi đọc lỗi.
+
 ## 8. Từ quan sát tới finding và ưu tiên
 
 ### 8.1. Tách ba lớp
@@ -482,6 +499,7 @@ Một vòng sáu phiên tốn khoảng một ngày quan sát cộng thời gian 
 - W3C WAI — *Evaluating Web Accessibility Overview*: https://www.w3.org/WAI/test-evaluate/ — vì sao cần cả người đánh giá và công cụ. Tra cứu 13/11/2026.
 - Playwright — *Locators* (`getByLabel`, `getByRole`): https://playwright.dev/docs/locators — công cụ cho supporting check, không phải phương pháp usability. Tra cứu 13/11/2026.
 - Lab Tới Nơi: `SPEC.md` (R-UI-01, R-UI-03, R-UI-04, R-FARE-02, R-CANCEL-01, R-CANCEL-06) và supporting check — https://github.com/rickymta/antblog/tree/main/examples/toi-noi-testing/articles/system-testing-usability-test
+- CurlStudio 0.2.1 — API client và load test (mã nguồn, tra cứu 23/11/2026): https://github.com/rickymta/curl-studio · collection minh hoạ: `examples/toi-noi-testing/curlstudio/`
 - Bài liên quan: [Non-functional testing tổng quan](/articles/non-functional-testing-tong-quan) · [Acceptance testing tổng quan](/articles/acceptance-testing-tong-quan) · [SYS-05 · System Test](/articles/system-testing-system-test) · [SYS-11 · Compatibility Test](/articles/system-testing-compatibility-test) · [SYS-15 · UAT](/articles/system-testing-uat)
 
 Bài tiếp theo: [SYS-13 · Data Integrity Test](/articles/system-testing-data-integrity-test).

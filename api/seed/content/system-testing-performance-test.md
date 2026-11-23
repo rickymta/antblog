@@ -18,7 +18,7 @@ Khách mở Tới Nơi, bấm «Báo giá», chờ, rồi bấm lại. API báo 
 <tr><th scope="row">Cấp độ</th><td>Trung cấp — biết HTTP, TypeScript, khái niệm test oracle; không cần cài k6</td></tr>
 <tr><th scope="row">Test level / hướng kiểm</th><td>Phi chức năng — hiệu năng (time behaviour, resource utilization); thực hiện trên hệ thống lắp ráp qua HTTP</td></tr>
 <tr><th scope="row">Bài cần đọc trước</th><td><a href="/articles/system-testing-regression-test">SYS-06 Regression Test</a>; nền tảng ở <a href="/articles/non-functional-testing-tong-quan">Non-functional testing tổng quan</a></td></tr>
-<tr><th scope="row">Thực hành</th><td>Lab (code): baseline closed model, 3 vòng × (50 warm-up + 300 đo) cho <code>POST /api/quotes</code>, oracle tiền 35.000 đ, lưu 900 mẫu gốc (R-API-07, R-FARE-01…08, R-NFR-03) — <code>examples/toi-noi-testing/articles/system-testing-performance-test/</code></td></tr>
+<tr><th scope="row">Thực hành</th><td>Lab (code): baseline closed model, 3 vòng × (50 warm-up + 300 đo) cho <code>POST /api/quotes</code>, oracle tiền 35.000 đ, lưu 900 mẫu gốc (R-API-07, R-FARE-01…08, R-NFR-03) — <code>examples/toi-noi-testing/articles/system-testing-performance-test/</code> · Minh hoạ: CurlStudio với collection <code>examples/toi-noi-testing/curlstudio/</code></td></tr>
 <tr><th scope="row">Nguồn chính</th><td>Grafana k6 (Load test types, Metrics, Open vs closed models); Node.js Performance measurement APIs; <code>SPEC.md</code> của lab</td></tr>
 </tbody>
 </table>
@@ -249,6 +249,34 @@ Script ghi `reports/performance/sys07-baseline.json` (thư mục `reports/` khô
 
 CPU là delta user + system của **cả tiến trình** (client và server) — `combinedCpuMs`. RSS là ảnh chụp đầu và cuối mỗi vòng, **không** phải peak. Không suy ra memory leak chỉ từ việc RSS tăng: V8 có thể giữ bộ nhớ đã cấp phát, và mỗi vòng tích luỹ 300 quote theo thiết kế.
 
+### 6.6. Minh hoạ với CurlStudio
+
+Cùng câu hỏi «một luồng nối tiếp gọi báo giá» có thể dựng bằng load test của CurlStudio, với collection giới thiệu ở [SYS-01](/articles/system-testing-smoke-test). Chuột phải folder «SYS-07…09 · Request cho kịch bản tải» → **Load test thư mục**. Folder chỉ có một request, «PERF · Báo giá xe máy 5 km» (C001, ride SG xe máy 5 km như bảng 4.2). Chọn preset **Smoke test**, environment «Tới Nơi lab (local, API test bật)», giữ 30 giây và 1 VU rồi bấm **Chạy test**.
+
+<figure class="tkh-fig">
+<div class="tkh-fig-box"><img src="/images/articles/system-testing/sys-07/01-load-profile-closed-model.webp" alt="Trình dựng load test của CurlStudio cho folder «SYS-07…09 · Request cho kịch bản tải»: preset Smoke test, environment Tới Nơi lab (local, API test bật), thời lượng 30s. Tab Load profile chọn executor «Virtual users (closed model) – ramping / constant VUs», số VU ban đầu 1, graceful stop 10 giây, một stage 30 giây mục tiêu 1 VU; biểu đồ Tải dự kiến bên phải là đường phẳng, ghi «30s · đỉnh 1 VUs»." width="2000" height="1125" loading="lazy"></div>
+<figcaption><b>Hình 2 · Load profile closed model 1 VU trong CurlStudio.</b> Dòng mô tả preset dưới tiêu đề hỏi đúng câu của smoke tải thấp kiểu k6: kịch bản có chạy được không và số liệu nền có hợp lý không. Tab <b>Thresholds</b> có 2 ngưỡng mặc định của preset.</figcaption>
+</figure>
+
+«Smoke test» ở đây là nghĩa của k6 đã nói ở mục 2 — chạy tải thấp để kiểm kịch bản — không phải smoke build của SYS-01. Executor closed model, 1 VU, không think time: cùng mô hình với concurrency 1 của script lab, nên throughput vẫn là **output** của thí nghiệm như mục 5.
+
+<figure class="tkh-fig">
+<div class="tkh-fig-box"><img src="/images/articles/system-testing/sys-07/02-bao-cao-baseline.webp" alt="Báo cáo load test hoàn tất của CurlStudio, nhãn ĐẠT, 30s, preset smoke, environment Tới Nơi lab: Requests 16,039; Throughput 532.7/s, đỉnh 616/s; Tỷ lệ lỗi 0.00%; Latency p95 2.7 ms (p99 3.3 ms, max 7.9 ms); trung bình 1.8 ms, trung vị 1.7 ms; Virtual users 1; Checks 100.0%, 0 thất bại trên 16,039; Thời lượng 30s; Iteration bị bỏ 0. Hai threshold http_req_failed rate &lt; 0.01 (thực tế 0.00%) và http_req_duration p(95) &lt; 1000 (thực tế 2.7 ms) đều PASS; bên dưới là biểu đồ throughput và percentile theo từng giây." width="2000" height="1125" loading="lazy"></div>
+<figcaption><b>Hình 3 · Báo cáo baseline của CurlStudio.</b> Threshold <code>p(95) &lt; 1000</code> chính là gate giả định của bài, nên biểu đồ percentile ghi chú threshold nằm ngoài biểu đồ. Checks 100% ở đây chỉ là «status is 2xx», không phải oracle 35.000 đ.</figcaption>
+</figure>
+
+Đọc báo cáo theo các định nghĩa ở mục 3 (giao diện dùng dấu phẩy ngăn nghìn, dấu chấm thập phân):
+
+- **Mẫu số:** 16,039 request trong 30 giây, tỷ lệ lỗi 0.00%, Checks 100% (0 thất bại trên 16,039).
+- **Phân bố:** p95 2.7 ms, p99 3.3 ms, max 7.9 ms; trung bình 1.8 ms, trung vị 1.7 ms. Bảng tổng hợp (kiểu JMeter aggregate report) cho thêm p90 2.5 ms. Max vẫn gấp mấy lần trung vị — đuôi tồn tại như mục 7.3 đã nói.
+- **Throughput:** 532.7/s (đỉnh 616/s) là tốc độ mà 1 VU nối tiếp tự đạt được, không phải offered load, càng không phải công suất.
+- **Gate:** threshold `http_req_duration p(95) < 1000` trùng ngưỡng 1.000 ms mà callout ở mục 4.2 gọi là **giả định bài tập**. PASS chỉ là PASS của gate đó — không phải SLO của Tới Nơi, không phải R-NFR-03.
+- **Iteration bị bỏ 0:** ô này ghi chú «arrival-rate executor» — chỉ số của open model ([SYS-08](/articles/system-testing-load-test)). Trong closed model không có lịch nào để bỏ, nên số 0 không chứng minh gì thêm.
+
+**Ảnh này cho thấy** một baseline có ngưỡng đặt trước dựng được bằng GUI, có báo cáo **Xuất** được. **Ảnh này không cho thấy** độ đúng nghiệp vụ: check mặc định chỉ là «status is 2xx», và load test không chạy test script của request — kể cả test «Cước 35.000 đ» có sẵn trong collection. Một response 200 với `total` sai vẫn được tính là đạt. So với `sample()` ở mục 6.2, đây là phép đo thiếu đúng phần «correctness vẫn là một phần của phép đo».
+
+**Không đặt cạnh bảng 7.2 để so.** p95 2.7 ms khác các con số của báo cáo gốc, nhưng đó không phải regression hay «chậm đi»: client là phần Rust của CurlStudio, tiến trình riêng; máy chủ lab chạy độc lập (Node v22.18.0, PGlite theo README của collection) thay vì app kho bộ nhớ chung tiến trình; đồng hồ do CurlStudio đặt, không phải t0/t1 của Hình 1; thời điểm đo khác. Đổi nhiều yếu tố cùng lúc thì, như mục 7.4, không quy được nguyên nhân. Lượt này là minh hoạ ngày 23/11/2026 (CurlStudio 0.2.1 chạy bằng `pnpm tauri dev`, Windows 11, đồng hồ lab cố định 09:00 ngày 04/11/2026); bằng chứng của bài vẫn là `baseline-observed.json`.
+
 ## 7. Kết quả thực đo và cách đọc
 
 ### 7.1. Mong đợi
@@ -432,6 +460,7 @@ Các nguồn ngoài được tra cứu 13/11/2026.
 - Node.js — Performance measurement APIs: https://nodejs.org/api/perf_hooks.html (`performance.now()`).
 - ISTQB, *Certified Tester Foundation Level Syllabus v4.0.1* (2024): https://istqb.org/wp-content/uploads/2024/11/ISTQB_CTFL_Syllabus_v4.0.1.pdf — thuật ngữ test type phi chức năng; thiết kế đo trong bài là hướng dẫn thực tiễn của series.
 - Lab Tới Nơi: `SPEC.md` (R-API-07, R-FARE-01…08, R-QUOTE-01, R-NFR-03, R-NFR-07), `baseline.ts`, `baseline-observed.json` — https://github.com/rickymta/antblog/tree/main/examples/toi-noi-testing/articles/system-testing-performance-test
+- CurlStudio 0.2.1 — API client và load test (mã nguồn, tra cứu 23/11/2026): https://github.com/rickymta/curl-studio · collection minh hoạ: `examples/toi-noi-testing/curlstudio/`
 - Bài liên quan: [Non-functional testing tổng quan](/articles/non-functional-testing-tong-quan) · [SYS-01 Smoke Test](/articles/system-testing-smoke-test) · [SYS-03 Functional Test](/articles/system-testing-functional-test) · [SYS-06 Regression Test](/articles/system-testing-regression-test)
 
 Bài tiếp theo: [SYS-08 · Load Test](/articles/system-testing-load-test).

@@ -19,7 +19,7 @@ Khách đặt xe máy 5 km lúc 9 giờ sáng thấy cước 35.000 đ — đún
 <tr><th scope="row">Test level / hướng kiểm</th><td>Kiểm qua API của ứng dụng đã lắp ráp (system, phạm vi hẹp) · Functional</td></tr>
 <tr><th scope="row">Kỹ thuật</th><td>Phân vùng tương đương, phân tích giá trị biên, bảng quyết định, chuyển trạng thái</td></tr>
 <tr><th scope="row">Bài cần đọc trước</th><td><a href="/articles/system-testing-sanity-test">SYS-02 · Sanity Test</a>; khái niệm: <a href="/articles/functional-testing">TEST-017 · Functional Testing</a></td></tr>
-<tr><th scope="row">Thực hành</th><td>Lab (code): 24 test execution cho cước xe máy, validation, sàn giá, trần giảm, snapshot báo giá và chuyển trạng thái (R-FARE-02/03/06/07/08, R-VALID-01, R-VOUCHER-06, R-QUOTE-04, R-STATE-02/03) — <code>examples/toi-noi-testing/articles/system-testing-functional-test/</code></td></tr>
+<tr><th scope="row">Thực hành</th><td>Lab (code): 24 test execution cho cước xe máy, validation, sàn giá, trần giảm, snapshot báo giá và chuyển trạng thái (R-FARE-02/03/06/07/08, R-VALID-01, R-VOUCHER-06, R-QUOTE-04, R-STATE-02/03) — <code>examples/toi-noi-testing/articles/system-testing-functional-test/</code> · Minh hoạ: CurlStudio với collection <code>examples/toi-noi-testing/curlstudio/</code></td></tr>
 <tr><th scope="row">Nguồn chính</th><td><code>SPEC.md</code> của lab (test basis); ISTQB CTFL v4.0.1 mục 2.2.2 và 4.2 (thuật ngữ)</td></tr>
 </tbody>
 </table>
@@ -306,6 +306,29 @@ npm run typecheck
 
 Chỉ cần `npm ci` lần đầu. Test gọi Express trong tiến trình qua Supertest — **chưa** phải bản triển khai truy cập qua mạng, chưa có DB thật (giới hạn đầy đủ ở mục 10).
 
+### 7.4. Minh hoạ với CurlStudio
+
+Collection CurlStudio giới thiệu ở [SYS-01 · Smoke Test](/articles/system-testing-smoke-test) có folder **SYS-03 · Functional theo bảng cước** với đúng một request, «FN · Báo giá theo bảng dữ liệu». Dữ liệu nằm ngoài request, trong `curlstudio/data/bang-cuoc.csv`:
+
+```text
+caseId,vehicle,distanceKm,status,expected
+FN-T01,bike,5,200,35000
+FN-T02,bike,2,200,21000
+FN-T03,bike,0.5,200,15000
+FN-T04,car,5,200,80000
+FN-T05,car,10,200,135000
+FN-T06,bike,0.1,422,DISTANCE_OUT_OF_RANGE
+```
+
+Giá trị mong đợi tính tay theo R-FARE-01…08 (xe máy 12.000 + 4.500/km, ô tô 25.000 + 11.000/km, làm tròn lên nghìn, tối thiểu 15.000 với xe máy), không gọi lại mã lab — ví dụ FN-T03: 12.000 + 2.250 = 14.250 < 15.000 ⇒ 15.000; FN-T05: 25.000 + 11.000 × 10 = 135.000. Folder này không có request chuẩn bị, nên chạy folder `00 · Chuẩn bị lab` trước để đồng hồ về 09:00 và trời không mưa. Sau đó chuột phải folder → **Chạy thư mục**, ở mục «File dữ liệu» bấm **Chọn file** và chọn `bang-cuoc.csv`. Body dùng biến `{{vehicle}}` và `{{distanceKm}}`; script lấy `caseId`, `status`, `expected` từ `pm.iterationData`, nên tên test mang luôn mã dòng — cùng ý với tên test của `it.each` ở mục 7.1: dòng nào đỏ thì tên chỉ ngay dòng đó.
+
+<figure class="tkh-fig">
+<div class="tkh-fig-box"><img src="/images/articles/system-testing/sys-03/01-runner-bang-cuoc.webp" alt="Collection Runner của CurlStudio chạy folder SYS-03 · Functional theo bảng cước với environment Tới Nơi lab (local, API test bật), File dữ liệu bang-cuoc.csv kèm ghi chú 6 dòng → mỗi dòng một iteration, 1 request được chọn. Thanh tổng ghi Requests 6, Tests 12/12 (100%), Thất bại 0, Non-2xx 1. Danh sách kết quả có sáu dòng FN · Báo giá theo bảng dữ liệu: FN-T01 đến FN-T05 trả 200 với cước 35000, 21000, 15000, 80000, 135000; FN-T06 trả 422 với mã lỗi DISTANCE_OUT_OF_RANGE." width="2000" height="1125" loading="lazy"></div>
+<figcaption><b>Hình 3 · Bảng cước chạy theo dữ liệu.</b> Mỗi dòng CSV thành một iteration với hai test (HTTP và cước hoặc mã lỗi), tên test mang <code>caseId</code>. Non-2xx 1 là FN-T06: 0,1 km bị từ chối có chủ đích.</figcaption>
+</figure>
+
+**Ảnh này chứng minh gì, không chứng minh gì.** Lượt minh hoạ ngày 23/11/2026 (CurlStudio 0.2.1 chạy bằng `pnpm tauri dev` trên Windows 11; máy chủ lab trên Node v22.18.0, đồng hồ lab cố định 09:00 ngày 04/11/2026) cho thấy sáu dòng dữ liệu khớp oracle tính tay trên một máy chủ lab chạy thật, và cho thấy cách thêm test case bằng một dòng CSV thay vì viết thêm code. Nó **không** thay `functional.test.ts`: script chỉ kiểm `total`, không kiểm `beforeDiscount` và `discount` như FN-02, nên loại lỗi «tổng đúng, tiền giảm sai» ở mục 5.2 sẽ lọt qua; bảng không có cao điểm, mưa hay voucher, không có biên thô 0,45/100,04, snapshot giá hay chuyển trạng thái. Mã FN-T01…T06 là của tệp dữ liệu, không trùng FN-01…FN-07 trong ma trận 7.2. Hai dòng ô tô (FN-T04, FN-T05) nằm ngoài phạm vi lab của bài: chúng minh hoạ cách mở sang vùng mới, còn muốn tính là bằng chứng thì phải đưa vào ma trận truy vết và lab code.
+
 ## 8. Kết quả và cách đọc
 
 ### 8.1. Mong đợi và thực tế
@@ -479,6 +502,7 @@ Nguồn ngoài tra cứu 13/11/2026.
 - ISTQB, *Certified Tester Foundation Level Syllabus v4.0.1* (2024) — mục 2.2.2 Test Types; mục 4.2 Black-Box Test Techniques (phân vùng tương đương, phân tích giá trị biên, bảng quyết định, chuyển trạng thái). https://istqb.org/wp-content/uploads/2024/11/ISTQB_CTFL_Syllabus_v4.0.1.pdf — dùng để chuẩn hoá thuật ngữ; chiến lược chọn dữ liệu và lab trong bài là thiết kế riêng cho Tới Nơi.
 - Vitest — `test.each`: https://vitest.dev/api/#test-each (phiên bản chạy trong lab: 3.2.7).
 - Lab Tới Nơi: `SPEC.md` (R-FARE, R-VOUCHER, R-VALID, R-QUOTE, R-STATE, R-API) và README — https://github.com/rickymta/antblog/tree/main/examples/toi-noi-testing
+- CurlStudio 0.2.1 — API client và load test (mã nguồn, tra cứu 23/11/2026): https://github.com/rickymta/curl-studio · collection minh hoạ: `examples/toi-noi-testing/curlstudio/`
 - Bài liên quan: [Dự án mẫu Tới Nơi](/articles/du-an-mau-toi-noi) · [TEST-017 Functional Testing](/articles/functional-testing) · [Equivalence Partitioning](/articles/equivalence-partitioning) · [Boundary Value Analysis](/articles/boundary-value-analysis) · [Decision Table Testing](/articles/decision-table-testing) · [State Transition Testing](/articles/state-transition-testing-co-ban) · [Pairwise Testing](/articles/pairwise-testing) · [Confirmation và Regression Testing](/articles/confirmation-testing-va-regression-testing)
 
 Bài tiếp theo: [SYS-04 · Integration Test](/articles/system-testing-integration-test).

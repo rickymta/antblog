@@ -18,7 +18,7 @@ Hàm cước trả đúng 35.000 đồng, repository lưu được chuyến, c�
 <tr><th scope="row">Cấp độ</th><td>Intermediate — đã biết API test, SQL cơ bản và test double</td></tr>
 <tr><th scope="row">Test level / hướng kiểm</th><td>Component integration (API → use case → repository → PostgreSQL WASM) và consumer side của cổng thanh toán; functional + reliability ở chỗ nối</td></tr>
 <tr><th scope="row">Bài cần đọc trước</th><td><a href="/articles/system-testing-functional-test">SYS-03 Functional Test</a>; nền tảng khái niệm: <a href="/articles/component-integration-testing">TEST-013 Component Integration Testing</a>, <a href="/articles/test-doubles-dummy-stub-fake-mock-spy">Test double</a></td></tr>
-<tr><th scope="row">Thực hành</th><td>Lab (code): 7 execution — replay idempotency, foreign key, 5 dataset chế độ ví — một đường thu bình thường và bốn chế độ lỗi (R-QUOTE-03, R-IDEM-02, R-PAY-03/04/06) — <code>examples/toi-noi-testing/articles/system-testing-integration-test/</code></td></tr>
+<tr><th scope="row">Thực hành</th><td>Lab (code): 7 execution — replay idempotency, foreign key, 5 dataset chế độ ví — một đường thu bình thường và bốn chế độ lỗi (R-QUOTE-03, R-IDEM-02, R-PAY-03/04/06) — <code>examples/toi-noi-testing/articles/system-testing-integration-test/</code> · Minh hoạ: CurlStudio với collection <code>examples/toi-noi-testing/curlstudio/</code></td></tr>
 <tr><th scope="row">Nguồn chính</th><td>ISTQB CTFL v4.0.1 mục 2.2.1; PostgreSQL 18 Constraints; PGlite docs; <code>SPEC.md</code> của lab</td></tr>
 </tbody>
 </table>
@@ -298,6 +298,27 @@ Thời gian khác nhau giữa hai lượt là bình thường — máy đang ch�
 <p>PGlite là PostgreSQL <b>một kết nối</b> trong tiến trình — không thay một server có nhiều connection, nên tranh chấp và isolation chưa được kiểm. Ví, đồng hồ, thời tiết là fake: «lost_response thu một lần» chứng minh ứng dụng giữ nguyên khoá khi retry, <b>không</b> chứng minh provider thật dedupe theo khoá. Timeout 50 ms là cấu hình thử, không phải ngưỡng 3 giây của SPEC.</p>
 </div>
 
+### 6.6. Minh hoạ với CurlStudio
+
+Ý tưởng «đưa chuyến tới cuối hành trình qua API, tiêm lỗi ở port ví rồi so trạng thái thanh toán» cũng chạy được bằng CurlStudio, với collection giới thiệu ở [SYS-01](/articles/system-testing-smoke-test). Khác với lab code, máy chủ ở đây là bản chạy riêng (`npm start`, environment local) nên mọi bước đi qua HTTP thật, và chế độ ví được đặt qua kênh kiểm thử `/api/test/payment` thay cho `setMode`.
+
+1. Chuột phải folder **SYS-04 · Tích hợp ví theo chế độ lỗi** → **Chạy thư mục**.
+2. Ở **File dữ liệu**, bấm **Chọn file** và chọn `data/che-do-vi.json`: ba dòng `none → paid`, `decline → failed`, `error → failed`, mỗi dòng một iteration.
+3. Giữ ô «Giữ giá trị biến do script đặt» để `quoteId`, `tripId` do request trước lưu được request sau dùng, rồi bấm nút chạy.
+
+Mỗi iteration gồm chín request: reset dữ liệu, đặt chế độ ví theo dòng dữ liệu, báo giá, đặt chuyến VíXanh, tài xế nhận/tới/đón/bắt đầu, cuối cùng hoàn tất và so `paymentStatus` với cột mong đợi trong tệp.
+
+<figure class="tkh-fig">
+<div class="tkh-fig-box"><img src="/images/articles/system-testing/sys-04/01-runner-che-do-vi.webp" alt="Collection Runner của CurlStudio cho folder SYS-04 · Tích hợp ví theo chế độ lỗi, environment Tới Nơi lab (local, API test bật), tệp dữ liệu che-do-vi.json 3 dòng và chín request được chọn. Thanh tổng hiện Requests 27, Tests 36 / 36 (100%), Thất bại 0, Non-2xx 0. Danh sách kết quả bên phải có dòng hoàn tất chuyến của iteration #2 với test decline → failed và của iteration #3 với test error → failed, mỗi request kèm HTTP 200 hoặc 201." width="2000" height="1125" loading="lazy"></div>
+<figcaption><b>Hình 2 · Runner SYS-04 chạy ba chế độ ví từ tệp dữ liệu.</b> Tên test lấy từ dòng dữ liệu nên đọc ra ngay chế độ nào cho kết quả nào: iteration #2 «decline → failed», iteration #3 «error → failed» (iteration #1 là none → paid, nằm phía trên danh sách). Request hoàn tất chuyến chỉ mất khoảng 8–10 ms.</figcaption>
+</figure>
+
+Đọc ảnh: **Requests 27** là 3 iteration × 9 request; **Tests 36 / 36 (100%)**; **Non-2xx 0** — kể cả khi ví từ chối hay lỗi, request hoàn tất vẫn trả HTTP 200. Đó đúng là hợp đồng R-PAY-06 ở mục 6.4: hoàn tất chuyến và thu tiền là hai kết quả khác nhau.
+
+Lượt chạy này chứng minh: trên máy chủ chạy riêng, với ba chế độ ví, chuyến vẫn `completed` và `paymentStatus` khớp mong đợi — tương ứng ba dòng IN-03 `none`, `decline`, `error` của bảng 5.2, nhìn từ phía client. Nó **không** chứng minh những gì làm nên integration test của bài: runner chỉ thấy response, không đếm được số lần gọi ví (1 với decline, 3 với error), không thấy khoá idempotency của từng lần, không đọc ledger, không SELECT bảng `trips` hay `drivers`. Một bản lỗi «retry cả decline» (mục 9) vẫn cho runner xanh hoàn toàn, vì `paymentStatus` cuối cùng vẫn là `failed`. Hai dataset `timeout` và `lost_response` cũng không có trong tệp dữ liệu, nên tình huống «không thấy response không có nghĩa provider chưa thu» không được minh hoạ ở đây. Số lần gọi và số tiền đã trừ chỉ kiểm được trong lab code, với fake gateway — đó là giới hạn của kiểm qua API.
+
+Lượt minh hoạ chạy ngày 23/11/2026 bằng CurlStudio 0.2.1 (`pnpm tauri dev`) trên Windows 11, máy chủ lab Node v22.18.0, đồng hồ lab cố định 09:00 ngày 04/11/2026. Nó không thay bảy test case Vitest ở trên, và thời gian 8–10 ms không so được với thời gian chạy của Vitest: khác công cụ, khác ranh giới đo, khác thời điểm.
+
 ## 7. Đọc thất bại và ra quyết định
 
 | Dấu hiệu | Giả thuyết cần kiểm | Bằng chứng tiếp theo |
@@ -430,6 +451,7 @@ Tra cứu và đối chiếu ngày 13/11/2026.
 - PostgreSQL 18 — *Appendix A. Error Codes* (SQLSTATE 23503 `foreign_key_violation`): https://www.postgresql.org/docs/18/errcodes-appendix.html
 - PGlite — *Getting Started*: PostgreSQL WASM trong tiến trình, query có tham số, in-memory vs filesystem. https://pglite.dev/docs/
 - Lab Tới Nơi: `SPEC.md` (R-QUOTE-03, R-IDEM-02/03, R-PAY-02/03/04/06), `src/infra/pglite/schema.sql`, `src/infra/fake-payment-gateway.ts`, `src/app/payment.ts` và bộ test của bài — https://github.com/rickymta/antblog/tree/main/examples/toi-noi-testing
+- CurlStudio 0.2.1 — API client và load test (mã nguồn, tra cứu 23/11/2026): https://github.com/rickymta/curl-studio · collection minh hoạ: `examples/toi-noi-testing/curlstudio/`
 - Bài liên quan: [SYS-01 Smoke Test](/articles/system-testing-smoke-test) · [SYS-03 Functional Test](/articles/system-testing-functional-test) · [TEST-013 Component Integration Testing](/articles/component-integration-testing) · [TEST-015 System Integration Testing](/articles/system-integration-testing) · [Test double: dummy, stub, fake, mock, spy](/articles/test-doubles-dummy-stub-fake-mock-spy)
 
 Bài tiếp theo: [SYS-05 · System Test](/articles/system-testing-system-test).

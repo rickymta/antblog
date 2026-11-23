@@ -18,7 +18,7 @@ language: vi
 <tr><th scope="row">Cấp độ</th><td>Advanced — QA/SDET và kỹ sư vận hành đã nắm transaction, idempotency và SQL</td></tr>
 <tr><th scope="row">Test level / hướng kiểm</th><td>System test, đặc tính phi chức năng: khả năng phục hồi (recoverability) của dịch vụ và dữ liệu</td></tr>
 <tr><th scope="row">Bài cần đọc trước</th><td><a href="/articles/system-testing-data-integrity-test">SYS-13 · Data Integrity Test</a> · <a href="/articles/system-testing-integration-test">SYS-04 · Integration Test</a></td></tr>
-<tr><th scope="row">Thực hành</th><td>Lab A (code): 5 execution RC-01…03 — lỗi ví tạm thời, outage rồi việc mới, mất phản hồi kéo dài (R-PAY-03/04/06, R-NFR-05, R-STATE-03/06, R-ACCEPT-05). Lab B (script): logical backup/restore trên cluster PostgreSQL tạm — <code>examples/toi-noi-testing/articles/system-testing-recovery-test/</code></td></tr>
+<tr><th scope="row">Thực hành</th><td>Lab A (code): 5 execution RC-01…03 — lỗi ví tạm thời, outage rồi việc mới, mất phản hồi kéo dài (R-PAY-03/04/06, R-NFR-05, R-STATE-03/06, R-ACCEPT-05). Lab B (script): logical backup/restore trên cluster PostgreSQL tạm — <code>examples/toi-noi-testing/articles/system-testing-recovery-test/</code> · Minh hoạ: CurlStudio với collection <code>examples/toi-noi-testing/curlstudio/</code></td></tr>
 <tr><th scope="row">Nguồn chính</th><td>PostgreSQL 18 · SQL Dump và Continuous Archiving/PITR; <code>SPEC.md</code>, <code>src/app/payment.ts</code>, <code>src/infra/fake-payment-gateway.ts</code> của lab</td></tr>
 </tbody>
 </table>
@@ -353,6 +353,25 @@ Test Files  1 passed (1)
 
 Lượt chạy lại diễn ra khi máy chạy song song các lab khác nên lâu hơn báo cáo gốc; thời gian chỉ để tham khảo, **không** phải số đo hiệu năng hay RTO. Typecheck không chạy lại; kết quả PASS lấy từ báo cáo gốc.
 
+### 6.8. Minh hoạ với CurlStudio
+
+RC-03 có thể tái hiện bằng giao diện trên máy chủ lab, với collection đã giới thiệu ở [SYS-01](/articles/system-testing-smoke-test). Chọn environment «Tới Nơi lab (local, API test bật)», chuột phải folder «SYS-14 · Ví mất phản hồi kéo dài (RC-03)» → **Chạy thư mục**. Folder có 13 request: chuẩn bị lab (reset dữ liệu, đồng hồ 09:00 ngày 04/11/2026, trời không mưa, ví bình thường); «Ví: mất phản hồi» đặt chế độ `lost_response` cho mọi lần gọi — tương đương `setMode('lost_response')` ở 6.6; báo giá, đặt chuyến VíXanh và đưa chuyến qua các bước của tài xế tới «Bắt đầu chuyến»; hoàn tất; cuối cùng «Ví: trở lại bình thường» để folder sau không bị ảnh hưởng.
+
+<figure class="tkh-fig">
+<div class="tkh-fig-box"><img src="/images/articles/system-testing/sys-14/01-runner-vi-mat-phan-hoi.webp" alt="Collection Runner của CurlStudio chạy folder «SYS-14 · Ví mất phản hồi kéo dài (RC-03)»: thanh tổng Requests 13, Tests 16/16 (100%), Thất bại 0. Danh sách kết quả có request «Ví: mất phản hồi», chuỗi request RC đưa một chuyến VíXanh từ báo giá tới bắt đầu chuyến, rồi «RC · Hoàn tất khi ví mất phản hồi» trả HTTP 200 sau 9,04 s với test «RC-03 · ghi failed dù ví đã trừ tiền (cần đối soát)» đạt; dòng cuối là «Ví: trở lại bình thường»." width="2000" height="1125" loading="lazy"></div>
+<figcaption><b>Hình 2 · RC-03 tái hiện trong Collection Runner của CurlStudio.</b> Request hoàn tất trả 200 sau 9,04 s, test «RC-03 · ghi failed dù ví đã trừ tiền (cần đối soát)» xanh. Dấu xanh nghĩa là trạng thái <code>failed</code> được ghi đúng, không phải khoản tiền đã được đối soát.</figcaption>
+</figure>
+
+Ba chi tiết trong ảnh:
+
+- Thanh tổng **Requests 13 · Tests 16 / 16 (100%) · Thất bại 0**.
+- «RC · Hoàn tất khi ví mất phản hồi» trả 200: lỗi thu tiền không chặn hoàn thành, đúng R-PAY-06.
+- Cùng request đó mất **9,04 s**, trong khi các request khác chỉ tính bằng mili-giây. Máy chủ lab giữ timeout 3 giây của SPEC chứ không rút xuống 30 ms như 6.2, nên con số khớp với 3 lần gọi ví, mỗi lần hết giờ sau 3 giây (R-PAY-04, R-NFR-05). Runner không đếm được lần gọi ví; đây là suy ra từ thời gian.
+
+Dấu ✓ ở test RC-03 phải đọc đúng như callout «RC-03 xanh không có nghĩa là đã phục hồi»: nó xác nhận hệ thống **ghi đúng** chuyến là `failed` theo SPEC, không xác nhận điều gì đã được phục hồi. Nửa kia của mâu thuẫn — ví đã trừ 35.000 với khoá `trip:<id>:fare` — nằm ở phía ví, mà CurlStudio chỉ thấy response HTTP. Trong lab code, `chargedKeys()` và `totalCharged()` của ví giả mới chứng minh được tiền đã bị trừ; còn trong runner, cụm «ví đã trừ tiền» ở tên test là điều ta biết từ thiết kế ví giả (mục 5.3), không phải điều request kiểm được. Folder cũng không gửi lại lệnh hoàn tất sau khi gỡ lỗi, nên phần «complete lại ⇒ 409, không gọi ví thêm» chỉ có trong Vitest. Kết luận giữ nguyên: khoản này **cần đối soát**, không «sửa» bằng cách thu lại với khoá mới.
+
+Hai giới hạn nữa. Một: 9,04 s là một lượt minh hoạ ngày 23/11/2026 (CurlStudio 0.2.1 qua `pnpm tauri dev`, Windows 11, máy chủ lab Node v22.18.0) — không phải số đo RTO hay hiệu năng, và không so được với thời gian Vitest ở 6.7. Hai: CurlStudio chỉ minh hoạ Thực hành A; restore drill của Thực hành B chạy bằng script PowerShell trên cluster PostgreSQL riêng, không làm bằng CurlStudio.
+
 ## 7. Thực hành B — backup/restore thật trên dữ liệu tổng hợp
 
 ### 7.1. Chạy script
@@ -598,6 +617,7 @@ Tra cứu và đối chiếu ngày 13/11/2026.
 - PostgreSQL 18 — *pg_restore* (`--exit-on-error`, `--single-transaction`): https://www.postgresql.org/docs/18/app-pgrestore.html
 - ISTQB, *Certified Tester Foundation Level Syllabus v4.0.1* (2024) — test types, non-functional testing: https://istqb.org/wp-content/uploads/2024/11/ISTQB_CTFL_Syllabus_v4.0.1.pdf
 - Lab Tới Nơi: `SPEC.md` (R-PAY-03/04/06, R-NFR-05, R-STATE-03/06, R-ACCEPT-05, R-IDEM-05), `src/app/payment.ts`, `src/infra/fake-payment-gateway.ts`, `articles/system-testing-recovery-test/` (`recovery.test.ts`, `restore-drill.ps1`) — https://github.com/rickymta/antblog/tree/main/examples/toi-noi-testing
+- CurlStudio 0.2.1 — API client và load test (mã nguồn, tra cứu 23/11/2026): https://github.com/rickymta/curl-studio · collection minh hoạ: `examples/toi-noi-testing/curlstudio/`
 - Bài liên quan: [SYS-04 Integration Test](/articles/system-testing-integration-test) · [SYS-13 Data Integrity Test](/articles/system-testing-data-integrity-test) · [Backup logic với pg_dump](/articles/postgresql-pg-dump-restore) · [PITR với base backup và WAL](/articles/postgresql-pitr-base-backup-wal) · [Runbook phục hồi PostgreSQL](/articles/postgresql-thuc-hanh-runbook-phuc-hoi) · [Idempotency, outbox và transaction](/articles/postgresql-idempotency-outbox-transaction)
 
 Bài tiếp theo: [SYS-15 · UAT](/articles/system-testing-uat).
