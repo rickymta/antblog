@@ -21,7 +21,7 @@ export const PEOPLE = {
 };
 
 /** Môi trường cho một lần gọi git: bỏ mọi biến GIT_* thừa hưởng, rồi đặt biến của lab. */
-export function gitEnv({ as, at, committedAt, globalConfig } = {}) {
+export function gitEnv({ as, by, at, committedAt, globalConfig } = {}) {
   const env = {};
   for (const [k, v] of Object.entries(process.env)) if (!k.startsWith('GIT_')) env[k] = v;
   Object.assign(env, {
@@ -42,6 +42,13 @@ export function gitEnv({ as, at, committedAt, globalConfig } = {}) {
     env.GIT_AUTHOR_EMAIL = p.email;
     env.GIT_COMMITTER_NAME = p.name;
     env.GIT_COMMITTER_EMAIL = p.email;
+  }
+  if (by) {
+    // Người commit khác người viết (squash merge, merge pull request…)
+    const c = PEOPLE[by];
+    if (!c) throw new Error(`Không có người tên ${by}`);
+    env.GIT_COMMITTER_NAME = c.name;
+    env.GIT_COMMITTER_EMAIL = c.email;
   }
   if (at) {
     env.GIT_AUTHOR_DATE = at;

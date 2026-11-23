@@ -1,4 +1,4 @@
-// Chạy toàn bộ lab và so với kết quả mẫu p01/OUTPUT.txt, p02/OUTPUT.txt.
+// Chạy toàn bộ lab và so với kết quả mẫu p01/OUTPUT.txt, p02/OUTPUT.txt, p03/OUTPUT.txt.
 // Kết quả phải giống từng ký tự: git chạy với cấu hình cô lập, danh tính và thời điểm cố định.
 // Bản git khác có thể đổi câu chữ của vài thông báo; khi đó xem diff rồi cập nhật OUTPUT.txt.
 
@@ -11,7 +11,7 @@ import { fileURLToPath } from 'node:url';
 
 const root = join(dirname(fileURLToPath(import.meta.url)), '..');
 
-for (const part of ['p01', 'p02']) {
+for (const part of ['p01', 'p02', 'p03']) {
   test(`lab ${part} chạy đạt và khớp OUTPUT.txt`, () => {
     const r = spawnSync(process.execPath, ['run.mjs', part], { cwd: root, encoding: 'utf8' });
     assert.equal(r.status, 0, r.stdout + r.stderr);

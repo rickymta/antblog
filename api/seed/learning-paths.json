@@ -1408,5 +1408,25 @@
       "git-thuc-hanh-nhanh-merge-tag"
     ],
     "status": "published"
+  },
+  {
+    "slug": "git-qua-gitstudio-phan-03",
+    "title": "Git qua GitStudio · Phần 3 · Remote và làm việc nhóm",
+    "description": "Đủ 10 bài GIT-021–GIT-030 qua tuần làm việc chung đầu tiên của Minh và Lan ở Tới Nơi: remote, origin và nhánh remote-tracking, fetch/pull/push, ahead/behind và push bị từ chối với --force-with-lease, xác thực HTTPS token và SSH key, GitHub/GitLab trong GitStudio, pull request có review và squash merge, chiến lược nhánh với main được bảo vệ bằng hook, fork và upstream, pull rẽ đôi và pull.rebase; kết thúc bằng bài thực hành có script chấm 10 tiêu chí. Lab chạy với remote cục bộ, không cần tài khoản. Gồm 3 bài cơ bản, 4 trung bình và 3 nâng cao.",
+    "level": "intermediate",
+    "category": "git",
+    "articles": [
+      "git-remote-origin-tracking",
+      "git-fetch-pull-push",
+      "git-ahead-behind-push-bi-tu-choi",
+      "git-xac-thuc-https-ssh",
+      "git-github-gitlab-gitstudio",
+      "git-pull-request-code-review",
+      "git-chien-luoc-nhanh",
+      "git-fork-upstream",
+      "git-pull-xung-dot-lich-su-roi",
+      "git-thuc-hanh-lam-viec-nhom"
+    ],
+    "status": "published"
   }
 ]

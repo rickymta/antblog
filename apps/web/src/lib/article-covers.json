@@ -6655,5 +6655,105 @@
       "TAG",
       "CHECKS"
     ]
+  },
+  "git-remote-origin-tracking": {
+    "title": "REMOTE · ORIGIN",
+    "subtitle": "Repository chung, upstream, origin/main",
+    "diagram": "network",
+    "labels": [
+      "MINH",
+      "ORIGIN",
+      "LAN"
+    ]
+  },
+  "git-fetch-pull-push": {
+    "title": "FETCH · PULL · PUSH",
+    "subtitle": "Kéo về, tích hợp, đẩy lên",
+    "diagram": "flow",
+    "labels": [
+      "FETCH",
+      "PULL",
+      "PUSH"
+    ]
+  },
+  "git-ahead-behind-push-bi-tu-choi": {
+    "title": "AHEAD · BEHIND",
+    "subtitle": "Push bị từ chối và --force-with-lease",
+    "diagram": "split",
+    "labels": [
+      "AHEAD 1",
+      "↔",
+      "BEHIND 1"
+    ]
+  },
+  "git-xac-thuc-https-ssh": {
+    "title": "HTTPS · SSH",
+    "subtitle": "Token, credential helper, SSH key",
+    "diagram": "layers",
+    "labels": [
+      "TOKEN",
+      "HELPER",
+      "SSH KEY"
+    ]
+  },
+  "git-github-gitlab-gitstudio": {
+    "title": "GITHUB · GITLAB",
+    "subtitle": "Đăng repository, pull request trong GitStudio",
+    "diagram": "blocks",
+    "labels": [
+      "GIT",
+      "GITHUB",
+      "GITLAB"
+    ]
+  },
+  "git-pull-request-code-review": {
+    "title": "PULL REQUEST",
+    "subtitle": "Review ba chấm, sửa theo review, squash",
+    "diagram": "cycle",
+    "labels": [
+      "PUSH",
+      "REVIEW",
+      "SQUASH"
+    ]
+  },
+  "git-chien-luoc-nhanh": {
+    "title": "CHIẾN LƯỢC NHÁNH",
+    "subtitle": "GitHub flow, trunk-based, main được bảo vệ",
+    "diagram": "map",
+    "labels": [
+      "MAIN",
+      "TÍNH NĂNG",
+      "PHÁT HÀNH"
+    ]
+  },
+  "git-fork-upstream": {
+    "title": "FORK · UPSTREAM",
+    "subtitle": "Đóng góp khi không có quyền push",
+    "diagram": "network",
+    "labels": [
+      "UPSTREAM",
+      "FORK",
+      "MÁY BẠN"
+    ]
+  },
+  "git-pull-xung-dot-lich-su-roi": {
+    "title": "PULL RẼ ĐÔI",
+    "subtitle": "Merge commit thừa, ORIG_HEAD, pull.rebase",
+    "diagram": "target",
+    "labels": [
+      "MERGE",
+      "REBASE",
+      "FF-ONLY"
+    ]
+  },
+  "git-thuc-hanh-lam-viec-nhom": {
+    "title": "PHẦN 3 · LAB",
+    "subtitle": "Hai developer, một remote · 10 tiêu chí",
+    "diagram": "checklist",
+    "labels": [
+      "PUSH",
+      "REVIEW",
+      "PRUNE"
+    ]
   }
 }

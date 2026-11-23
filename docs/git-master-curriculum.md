@@ -91,20 +91,22 @@ Lộ trình: `git-qua-gitstudio-phan-02` — **đã viết đủ 10 bài ngày 2
 
 ## P03 · Remote và làm việc nhóm
 
-Đầu vào: P01–P02. Đầu ra: repository trên remote, nhánh theo dõi, pull request có review. Lộ trình dự kiến `-phan-03`.
+Đầu vào: P01–P02. Đầu ra: repository trên remote, nhánh theo dõi, pull request có review.
+
+Lộ trình: `git-qua-gitstudio-phan-03` — **đã viết đủ 10 bài ngày 23/11/2026**, đã thêm vào `api/seed/learning-paths.json`. Lab: `examples/toi-noi-git/p03` (remote chung, bản clone của Lan và fork là các bare repository trong `work/remote/`, không cần mạng hay tài khoản; lịch sử chuẩn 7 bước trong `lib/history3.mjs` dựng trên cuối P02; 10 file bài, 38 kiểm tra PASS, mọi bài so ref của Minh, remote và Lan với lịch sử chuẩn; script chấm `p03/kiem-tra.mjs` 10 tiêu chí; `npm test` 5/5). 20 ảnh GitStudio 1.0.1 (2000 × 1125). Thuật ngữ đề xuất bổ sung vào `glossary-candidates/git.json`. Ghi chú GitStudio 1.0.1 khi viết P03: nút Pull mặc định `git pull --no-rebase` (Cách pull lưu trong cài đặt GitStudio, không ghi `pull.rebase`), không tự stash; Hoàn tác sau pull chạy `reset --keep`; hộp thoại Push bị từ chối có nút Force push (`--force-with-lease`, không có `--force-if-includes`) mà tự động fetch nền làm lease mất tác dụng; So sánh hai nhánh là diff cây với cây (hai chấm); pull request/Launchpad/Đăng lên GitHub cần kết nối tài khoản. Chưa seed/deploy lên website.
 
 | ID | Bài / slug | Mức | Làm được sau bài / sản phẩm thực hành | Trạng thái |
 |---|---|---|---|---|
-| GIT-021 | Remote, origin và nhánh remote-tracking<br>`git-remote-origin-tracking` | CB | Thêm/sửa remote, đọc `origin/main`, upstream của nhánh | Dự kiến |
-| GIT-022 | Fetch, pull và push<br>`git-fetch-pull-push` | CB | Fetch có prune, pull merge/rebase/ff-only, push lần đầu với upstream | Dự kiến |
-| GIT-023 | Ahead/behind và push bị từ chối<br>`git-ahead-behind-push-bi-tu-choi` | CB | Đọc số ahead/behind, xử lý non-fast-forward, `--force-with-lease` | Dự kiến |
-| GIT-024 | Xác thực: HTTPS token, credential helper và SSH key<br>`git-xac-thuc-https-ssh` | TB | Tạo/thêm SSH key, token trong kho mật khẩu hệ điều hành, nhiều tài khoản | Dự kiến |
-| GIT-025 | GitHub và GitLab trong GitStudio<br>`git-github-gitlab-gitstudio` | TB | Đăng nhập, clone repository của mình, mở pull/merge request | Dự kiến |
-| GIT-026 | Pull request và code review<br>`git-pull-request-code-review` | TB | Chuẩn bị nhánh để review, phản hồi review, merge/squash/rebase merge | Dự kiến |
-| GIT-027 | Chiến lược nhánh: GitHub flow, trunk-based, Git flow<br>`git-chien-luoc-nhanh` | TB | Chọn quy ước nhánh cho nhóm Tới Nơi, bảo vệ nhánh `main` | Dự kiến |
-| GIT-028 | Fork và đóng góp vào repository của người khác<br>`git-fork-upstream` | NC | Remote `upstream`, đồng bộ fork, pull request từ fork | Dự kiến |
-| GIT-029 | Pull kéo về xung đột và lịch sử rối: chẩn đoán và sửa<br>`git-pull-xung-dot-lich-su-roi` | NC | Nhận ra merge commit thừa, cấu hình `pull.rebase`/`pull.ff` | Dự kiến |
-| GIT-030 | Thực hành: hai developer, một remote<br>`git-thuc-hanh-lam-viec-nhom` | NC | Bàn giao lịch sử của hai người qua remote, pull request đã review | Dự kiến |
+| GIT-021 | Remote, origin và nhánh remote-tracking: đưa repository báo giá lên chỗ chung của nhóm<br>`git-remote-origin-tracking` | CB | Thêm/sửa remote, đọc `origin/main`, upstream của nhánh | Đã viết |
+| GIT-022 | Fetch, pull và push: kéo commit của đồng nghiệp về và đẩy commit của mình lên<br>`git-fetch-pull-push` | CB | Fetch có prune, pull merge/rebase/ff-only, push lần đầu với upstream | Đã viết |
+| GIT-023 | Ahead/behind và push bị từ chối: khi cả hai cùng đẩy lên một nhánh<br>`git-ahead-behind-push-bi-tu-choi` | CB | Đọc số ahead/behind, xử lý non-fast-forward, `--force-with-lease` | Đã viết |
+| GIT-024 | Xác thực với remote: HTTPS và token, credential helper, SSH key<br>`git-xac-thuc-https-ssh` | TB | Tạo/thêm SSH key, token trong kho mật khẩu hệ điều hành, nhiều tài khoản | Đã viết |
+| GIT-025 | GitHub và GitLab trong GitStudio: đăng repository, kết nối tài khoản, xem pull request<br>`git-github-gitlab-gitstudio` | TB | Đăng nhập, clone repository của mình, mở pull/merge request | Đã viết |
+| GIT-026 | Pull request và code review: từ nhánh tính năng của Lan đến một commit gọn trên main<br>`git-pull-request-code-review` | TB | Chuẩn bị nhánh để review, phản hồi review, merge/squash/rebase merge | Đã viết |
+| GIT-027 | Chiến lược nhánh cho nhóm: GitHub flow, trunk-based, Git flow và nhánh được bảo vệ<br>`git-chien-luoc-nhanh` | TB | Chọn quy ước nhánh cho nhóm Tới Nơi, bảo vệ nhánh `main` | Đã viết |
+| GIT-028 | Fork và upstream: đóng góp khi không có quyền push vào repository gốc<br>`git-fork-upstream` | NC | Remote `upstream`, đồng bộ fork, pull request từ fork | Đã viết |
+| GIT-029 | Pull khi hai bên cùng có commit: merge commit thừa, pull.rebase và cách gỡ<br>`git-pull-xung-dot-lich-su-roi` | NC | Nhận ra merge commit thừa, cấu hình `pull.rebase`/`pull.ff` | Đã viết |
+| GIT-030 | Thực hành Phần 3: hai developer, một remote, bàn giao repository sạch<br>`git-thuc-hanh-lam-viec-nhom` | NC | Bàn giao lịch sử của hai người qua remote, pull request đã review | Đã viết |
 
 ## P04 · Viết lại lịch sử và hoàn tác
 

@@ -1,0 +1,657 @@
+
+# ==================== p03/21-remote-origin-tracking.mjs · GIT-021 ====================
+# Repository của Minh chưa có remote nào
+$ git remote -v
+
+# Tạo remote chung của nhóm (lab dùng một bare repository thay cho GitHub)
+$ git init --bare -b main <lab>/work/remote/bao-gia.git
+Initialized empty Git repository in <lab>/work/remote/bao-gia.git/
+$ git remote add origin <lab>/work/remote/bao-gia.git
+$ git remote -v
+origin	<lab>/work/remote/bao-gia.git (fetch)
+origin	<lab>/work/remote/bao-gia.git (push)
+
+# Push lần đầu, đặt upstream cho main; đẩy cả nhánh phát hành và tag
+$ git push -u origin main
+branch 'main' set up to track 'origin/main'.
+To <lab>/work/remote/bao-gia.git
+ * [new branch]      main -> main
+$ git push origin phat-hanh/1.0
+To <lab>/work/remote/bao-gia.git
+ * [new branch]      phat-hanh/1.0 -> phat-hanh/1.0
+$ git push origin --tags
+To <lab>/work/remote/bao-gia.git
+ * [new tag]         v1.0.0 -> v1.0.0
+ * [new tag]         v1.0.1 -> v1.0.1
+ * [new tag]         v1.1.0 -> v1.1.0
+$ git branch -vv
+* main          61f5ed6 [origin/main] Thêm tài liệu phí chờ
+  phat-hanh/1.0 c6e65d7 Thêm ghi chú phát hành 1.0.1
+$ git branch -r
+  origin/main
+  origin/phat-hanh/1.0
+$ git ls-remote origin
+61f5ed6fe9bd350f1159ce8c1276b36c44748e97	HEAD
+61f5ed6fe9bd350f1159ce8c1276b36c44748e97	refs/heads/main
+c6e65d730f741d9af24e5bc222acef8e501ae995	refs/heads/phat-hanh/1.0
+42dff92596716b74170e440625b7647d3b6b7ebf	refs/tags/v1.0.0
+89855d5ae9eeadc33e9969090faabe175773a520	refs/tags/v1.0.0^{}
+f957ba379f37f32219c41141c406e4ea4efb3db8	refs/tags/v1.0.1
+b0477836a7c2bf0607072c73330110dd6883b180	refs/tags/v1.0.1^{}
+6f8275087e154fa88431d5023b938fe3404a6e8d	refs/tags/v1.1.0
+70b18f6ef606e77c6d57b2ace5cdbd3652a5f7f2	refs/tags/v1.1.0^{}
+
+# Lan clone repository chung về máy mình
+$ git clone <lab>/work/remote/bao-gia.git ../lan/bao-gia
+Cloning into '<lab>\work\lan\bao-gia'...
+done.
+$ cd ../lan/bao-gia
+$ git config user.name "Lê Lan"
+$ git config user.email lan@toinoi.test
+$ git branch -a
+* main
+  remotes/origin/HEAD -> origin/main
+  remotes/origin/main
+  remotes/origin/phat-hanh/1.0
+$ git remote show origin
+* remote origin
+  Fetch URL: <lab>/work/remote/bao-gia.git
+  Push  URL: <lab>/work/remote/bao-gia.git
+  HEAD branch: main
+  Remote branches:
+    main          tracked
+    phat-hanh/1.0 tracked
+  Local branch configured for 'git pull':
+    main merges with remote main
+  Local ref configured for 'git push':
+    main pushes to main (up to date)
+PASS ref của Minh trùng lịch sử chuẩn
+PASS ref của remote trùng lịch sử chuẩn
+PASS ref của Lan trùng lịch sử chuẩn
+
+# ==================== p03/22-fetch-pull-push.mjs · GIT-022 ====================
+# Lan sửa tài liệu phí chờ, commit và push
+$ cd ../lan/bao-gia
+$ git commit -am "Không tính phí chờ khi khách huỷ trước khi xe tới"
+[main 25ffc61] Không tính phí chờ khi khách huỷ trước khi xe tới
+ 1 file changed, 2 insertions(+)
+$ git push
+To <lab>/work/remote/bao-gia.git
+   61f5ed6..25ffc61  main -> main
+
+# Phía Minh: status chưa biết gì, vì chưa liên lạc với remote
+$ cd ../../bao-gia
+$ git status -sb
+## main...origin/main
+$ git fetch
+From <lab>/work/remote/bao-gia
+   61f5ed6..25ffc61  main       -> origin/main
+$ git status -sb
+## main...origin/main [behind 1]
+$ git log --oneline main..origin/main
+25ffc61 Không tính phí chờ khi khách huỷ trước khi xe tới
+$ git diff --stat main origin/main
+ docs/phi-cho.md | 2 ++
+ 1 file changed, 2 insertions(+)
+
+# Fetch chỉ cập nhật origin/main; pull = fetch + đưa thay đổi vào nhánh hiện tại
+$ git pull --ff-only
+Updating 61f5ed6..25ffc61
+Fast-forward
+ docs/phi-cho.md | 2 ++
+ 1 file changed, 2 insertions(+)
+$ git status -sb
+## main...origin/main
+PASS main của Minh trùng origin/main
+PASS ref của Minh trùng lịch sử chuẩn
+PASS ref của remote trùng lịch sử chuẩn
+PASS ref của Lan trùng lịch sử chuẩn
+
+# ==================== p03/23-ahead-behind-push-bi-tu-choi.mjs · GIT-023 ====================
+# Lan push trước
+$ git commit -q -am "Ghi đầu mối đổi bảng giá vào tài liệu"
+$ git push -q
+
+# Minh commit trên main cũ rồi push: bị từ chối
+$ git commit -am "Ghi quy ước dùng remote vào README"
+[main d3d3f7e] Ghi quy ước dùng remote vào README
+ 1 file changed, 2 insertions(+)
+$ git status -sb
+## main...origin/main [ahead 1]
+$ git push
+To <lab>/work/remote/bao-gia.git
+ ! [rejected]        main -> main (fetch first)
+error: failed to push some refs to '<lab>/work/remote/bao-gia.git'
+hint: Updates were rejected because the remote contains work that you do not
+hint: have locally. This is usually caused by another repository pushing to
+hint: the same ref. If you want to integrate the remote changes, use
+hint: 'git pull' before pushing again.
+hint: See the 'Note about fast-forwards' in 'git push --help' for details.
+
+# Fetch rồi đọc ahead/behind
+$ git fetch
+From <lab>/work/remote/bao-gia
+   25ffc61..bf45730  main       -> origin/main
+$ git status -sb
+## main...origin/main [ahead 1, behind 1]
+$ git rev-list --left-right --count main...origin/main
+1	1
+$ git log --oneline --graph main origin/main -3
+* d3d3f7e Ghi quy ước dùng remote vào README
+| * bf45730 Ghi đầu mối đổi bảng giá vào tài liệu
+|/  
+* 25ffc61 Không tính phí chờ khi khách huỷ trước khi xe tới
+
+# Đặt commit của mình lên sau commit của Lan, rồi push
+$ git pull --rebase
+Rebasing (1/1)Successfully rebased and updated refs/heads/main.
+$ git push
+To <lab>/work/remote/bao-gia.git
+   bf45730..dbdf678  main -> main
+$ git status -sb
+## main...origin/main
+
+# Force push an toàn trên nhánh của riêng mình: --force-with-lease
+$ git switch -c thu/force-with-lease
+Switched to a new branch 'thu/force-with-lease'
+$ git add ghi-chu-review.md
+$ git commit -q -m "Ghi chú review"
+$ git push -q -u origin thu/force-with-lease
+$ git commit -q -a --amend --no-edit
+$ git push
+To <lab>/work/remote/bao-gia.git
+ ! [rejected]        thu/force-with-lease -> thu/force-with-lease (non-fast-forward)
+error: failed to push some refs to '<lab>/work/remote/bao-gia.git'
+hint: Updates were rejected because the tip of your current branch is behind
+hint: its remote counterpart. If you want to integrate the remote changes,
+hint: use 'git pull' before pushing again.
+hint: See the 'Note about fast-forwards' in 'git push --help' for details.
+$ git push --force-with-lease
+To <lab>/work/remote/bao-gia.git
+ + 5708378...5bc2095 thu/force-with-lease -> thu/force-with-lease (forced update)
+
+# Lan cũng push lên nhánh đó; Minh chưa fetch mà ép push: lease chặn lại
+$ git fetch -q
+$ git switch -q thu/force-with-lease
+$ git commit -q -am "Thêm việc của Lan"
+$ git push -q
+$ git commit -q --allow-empty -m "Thử ép push"
+$ git push --force-with-lease
+To <lab>/work/remote/bao-gia.git
+ ! [rejected]        thu/force-with-lease -> thu/force-with-lease (stale info)
+error: failed to push some refs to '<lab>/work/remote/bao-gia.git'
+
+# Dọn nhánh thử ở cả ba nơi
+$ git switch -q main
+$ git push -q origin --delete thu/force-with-lease
+$ git branch -q -D thu/force-with-lease
+$ git switch -q main
+$ git branch -q -D thu/force-with-lease
+$ git pull -q --ff-only --prune
+PASS ref của Minh trùng lịch sử chuẩn
+PASS ref của remote trùng lịch sử chuẩn
+PASS ref của Lan trùng lịch sử chuẩn
+
+# ==================== p03/24-xac-thuc-https-ssh.mjs · GIT-024 ====================
+# Cùng một repository trên GitHub, hai dạng URL, hai cách xác thực
+$ git remote add github https://github.com/toinoi/bao-gia.git
+$ git remote -v
+github	https://github.com/toinoi/bao-gia.git (fetch)
+github	https://github.com/toinoi/bao-gia.git (push)
+origin	<lab>/work/remote/bao-gia.git (fetch)
+origin	<lab>/work/remote/bao-gia.git (push)
+$ git remote set-url github git@github.com:toinoi/bao-gia.git
+$ git remote get-url github
+git@github.com:toinoi/bao-gia.git
+$ git remote remove github
+
+# Credential helper: lab không đặt, nên git sẽ hỏi (và lab tắt việc hỏi)
+$ git config --show-scope --get credential.helper
+$ git config --get core.sshCommand
+
+# Viết tắt URL bằng insteadOf: toinoi:<repo> thay cho đường dẫn đầy đủ
+$ git config url.<lab>/work/remote/.insteadOf toinoi:
+$ git ls-remote --heads toinoi:bao-gia.git
+dbdf6787a37810fbf1b918f3f9d1e4c8d26b862e	refs/heads/main
+c6e65d730f741d9af24e5bc222acef8e501ae995	refs/heads/phat-hanh/1.0
+$ git config --remove-section url.<lab>/work/remote/
+PASS đã gỡ cấu hình insteadOf
+PASS ref của Minh trùng lịch sử chuẩn
+PASS ref của remote trùng lịch sử chuẩn
+PASS ref của Lan trùng lịch sử chuẩn
+
+# ==================== p03/25-github-gitlab-gitstudio.mjs · GIT-025 ====================
+# Lan đẩy một nhánh; "GitHub" (remote của lab) gắn cho pull request số 12 một ref riêng
+$ git switch -q -c thu/pr
+$ git add src/BaoGia/WaitingFee.cs
+$ git commit -q -m "Thử phí chờ"
+$ git push -q origin thu/pr
+
+# Phía Minh: refs/pull/* không nằm trong refspec mặc định, phải fetch riêng
+$ git ls-remote origin "refs/pull/*"
+b9e865e38d4f0ad92616f97a6748383f54717ce2	refs/pull/12/head
+$ git fetch origin pull/12/head:pr-12
+From <lab>/work/remote/bao-gia
+ * [new ref]         refs/pull/12/head -> pr-12
+$ git log --oneline -1 pr-12
+b9e865e Thử phí chờ
+$ git config --get remote.origin.fetch
++refs/heads/*:refs/remotes/origin/*
+
+# Dọn: xoá nhánh thử và ref của pull request
+$ git branch -q -D pr-12
+$ git push -q origin --delete thu/pr
+$ git switch -q main
+$ git branch -q -D thu/pr
+$ git fetch -q --prune
+PASS remote không còn ref pull request
+PASS ref của Minh trùng lịch sử chuẩn
+PASS ref của remote trùng lịch sử chuẩn
+PASS ref của Lan trùng lịch sử chuẩn
+
+# ==================== p03/26-pull-request-code-review.mjs · GIT-026 ====================
+# Lan: nhánh tính năng, commit, push với upstream (rồi mở pull request trên GitHub)
+$ cd ../lan/bao-gia
+$ git switch -c tinh-nang/tinh-phi-cho
+Switched to a new branch 'tinh-nang/tinh-phi-cho'
+$ git add src tests
+$ git commit -m "Tính phí chờ theo phút, tối đa 30.000 đ"
+[tinh-nang/tinh-phi-cho 6559212] Tính phí chờ theo phút, tối đa 30.000 đ
+ 2 files changed, 26 insertions(+)
+ create mode 100644 src/BaoGia/WaitingFee.cs
+ create mode 100644 tests/BaoGia.Tests/WaitingFeeTests.cs
+$ git push -u origin tinh-nang/tinh-phi-cho
+branch 'tinh-nang/tinh-phi-cho' set up to track 'origin/tinh-nang/tinh-phi-cho'.
+To <lab>/work/remote/bao-gia.git
+ * [new branch]      tinh-nang/tinh-phi-cho -> tinh-nang/tinh-phi-cho
+
+# Minh review: nhánh có gì mà main chưa có, đổi những file nào
+$ cd ../../bao-gia
+$ git fetch
+From <lab>/work/remote/bao-gia
+ * [new branch]      tinh-nang/tinh-phi-cho -> origin/tinh-nang/tinh-phi-cho
+$ git log --oneline main..origin/tinh-nang/tinh-phi-cho
+6559212 Tính phí chờ theo phút, tối đa 30.000 đ
+$ git diff --stat main...origin/tinh-nang/tinh-phi-cho
+ src/BaoGia/WaitingFee.cs              | 13 +++++++++++++
+ tests/BaoGia.Tests/WaitingFeeTests.cs | 13 +++++++++++++
+ 2 files changed, 26 insertions(+)
+$ git diff main...origin/tinh-nang/tinh-phi-cho -- src
+diff --git a/src/BaoGia/WaitingFee.cs b/src/BaoGia/WaitingFee.cs
+new file mode 100644
+index 0000000..f67a2c7
+--- /dev/null
++++ b/src/BaoGia/WaitingFee.cs
+@@ -0,0 +1,13 @@
++namespace ToiNoi.BaoGia;
++
++/// <summary>Phí chờ tại điểm đón: 1.000 đ mỗi phút, tối đa 30.000 đ.</summary>
++public static class WaitingFee
++{
++    public static decimal Calculate(int waitedMinutes)
++    {
++        if (waitedMinutes < 0)
++            throw new ArgumentOutOfRangeException(nameof(waitedMinutes));
++
++        return Math.Min(waitedMinutes * 1000m, 30000m);
++    }
++}
+# Nhận xét review: docs/phi-cho.md ghi "chờ quá 5 phút" mới tính, code đang tính từ phút đầu.
+
+# Lan sửa theo review, push thêm commit vào cùng nhánh (pull request tự cập nhật)
+$ cd ../lan/bao-gia
+$ git commit -am "Miễn phí 5 phút chờ đầu tiên theo tài liệu"
+[tinh-nang/tinh-phi-cho d0c8e3b] Miễn phí 5 phút chờ đầu tiên theo tài liệu
+ 2 files changed, 9 insertions(+), 3 deletions(-)
+$ git push
+To <lab>/work/remote/bao-gia.git
+   6559212..d0c8e3b  tinh-nang/tinh-phi-cho -> tinh-nang/tinh-phi-cho
+
+# Minh xem phần mới kể từ lần review trước, rồi merge kiểu squash
+$ cd ../../bao-gia
+$ git fetch
+From <lab>/work/remote/bao-gia
+   6559212..d0c8e3b  tinh-nang/tinh-phi-cho -> origin/tinh-nang/tinh-phi-cho
+$ git log --oneline main..origin/tinh-nang/tinh-phi-cho
+d0c8e3b Miễn phí 5 phút chờ đầu tiên theo tài liệu
+6559212 Tính phí chờ theo phút, tối đa 30.000 đ
+$ git merge --squash origin/tinh-nang/tinh-phi-cho
+Updating dbdf678..d0c8e3b
+Fast-forward
+Squash commit -- not updating HEAD
+ src/BaoGia/WaitingFee.cs              | 16 ++++++++++++++++
+ tests/BaoGia.Tests/WaitingFeeTests.cs | 16 ++++++++++++++++
+ 2 files changed, 32 insertions(+)
+ create mode 100644 src/BaoGia/WaitingFee.cs
+ create mode 100644 tests/BaoGia.Tests/WaitingFeeTests.cs
+$ git commit --author="Lê Lan <lan@toinoi.test>" -m "Tính phí chờ tại điểm đón" -m "Pull request của Lê Lan (2 commit), Trần Minh review: miễn phí 5 phút đầu, tối đa 30.000 đ."
+[main cb31b2e] Tính phí chờ tại điểm đón
+ Author: Lê Lan <lan@toinoi.test>
+ 2 files changed, 32 insertions(+)
+ create mode 100644 src/BaoGia/WaitingFee.cs
+ create mode 100644 tests/BaoGia.Tests/WaitingFeeTests.cs
+$ git log -1 --format=fuller --stat
+commit cb31b2e274c4e4503d5a4fdac87e62e90000d87d
+Author:     Lê Lan <lan@toinoi.test>
+AuthorDate: Sat Nov 21 10:00:00 2026 +0700
+Commit:     Trần Minh <minh@toinoi.test>
+CommitDate: Sat Nov 21 10:00:00 2026 +0700
+
+    Tính phí chờ tại điểm đón
+    
+    Pull request của Lê Lan (2 commit), Trần Minh review: miễn phí 5 phút đầu, tối đa 30.000 đ.
+
+ src/BaoGia/WaitingFee.cs              | 16 ++++++++++++++++
+ tests/BaoGia.Tests/WaitingFeeTests.cs | 16 ++++++++++++++++
+ 2 files changed, 32 insertions(+)
+$ git push
+To <lab>/work/remote/bao-gia.git
+   dbdf678..cb31b2e  main -> main
+$ git push origin --delete tinh-nang/tinh-phi-cho
+To <lab>/work/remote/bao-gia.git
+ - [deleted]         tinh-nang/tinh-phi-cho
+
+# Lan dọn nhánh: -d từ chối vì squash tạo commit mới, các commit cũ không nằm trên main
+$ cd ../lan/bao-gia
+$ git switch main
+Your branch is up to date with 'origin/main'.
+Switched to branch 'main'
+$ git pull --ff-only --prune
+Updating dbdf678..cb31b2e
+Fast-forward
+ src/BaoGia/WaitingFee.cs              | 16 ++++++++++++++++
+ tests/BaoGia.Tests/WaitingFeeTests.cs | 16 ++++++++++++++++
+ 2 files changed, 32 insertions(+)
+ create mode 100644 src/BaoGia/WaitingFee.cs
+ create mode 100644 tests/BaoGia.Tests/WaitingFeeTests.cs
+From <lab>/work/remote/bao-gia
+ - [deleted]         (none)     -> origin/tinh-nang/tinh-phi-cho
+   dbdf678..cb31b2e  main       -> origin/main
+$ git branch -d tinh-nang/tinh-phi-cho
+error: the branch 'tinh-nang/tinh-phi-cho' is not fully merged
+hint: If you are sure you want to delete it, run 'git branch -D tinh-nang/tinh-phi-cho'
+hint: Disable this message with "git config set advice.forceDeleteBranch false"
+$ git branch -D tinh-nang/tinh-phi-cho
+Deleted branch tinh-nang/tinh-phi-cho (was d0c8e3b).
+PASS ref của Minh trùng lịch sử chuẩn
+PASS ref của remote trùng lịch sử chuẩn
+PASS ref của Lan trùng lịch sử chuẩn
+
+# ==================== p03/27-chien-luoc-nhanh.mjs · GIT-027 ====================
+# Cài hook pre-receive vào remote (trên GitHub/GitLab: Branch protection / Protected branches)
+# hooks/pre-receive của remote:
+#   #!/bin/sh
+#   # Bảo vệ nhánh main và tag phát hành trên remote của nhóm Tới Nơi.
+#   zero=0000000000000000000000000000000000000000
+#   while read old new ref; do
+#     case "$ref" in
+#       refs/heads/main)
+#         if [ "$new" = "$zero" ]; then
+#           echo "Từ chối: không được xoá main"; exit 1
+#         fi
+#         if [ "$old" != "$zero" ] && ! git merge-base --is-ancestor "$old" "$new"; then
+#           echo "Từ chối: main được bảo vệ, không cho push ghi đè lịch sử"; exit 1
+#         fi ;;
+#       refs/tags/v*)
+#         if [ "$old" != "$zero" ]; then
+#           echo "Từ chối: tag phát hành $ref đã có, không được sửa hay xoá"; exit 1
+#         fi ;;
+#     esac
+#   done
+#   exit 0
+
+# Lan thử viết lại lịch sử main trên remote
+$ cd ../lan/bao-gia
+$ git push --force origin HEAD~1:main
+remote: Từ chối: main được bảo vệ, không cho push ghi đè lịch sử        
+To <lab>/work/remote/bao-gia.git
+ ! [remote rejected] HEAD~1 -> main (pre-receive hook declined)
+error: failed to push some refs to '<lab>/work/remote/bao-gia.git'
+
+# Lan thử xoá tag phát hành
+$ git push origin --delete v1.0.0
+remote: Từ chối: tag phát hành refs/tags/v1.0.0 đã có, không được sửa hay xoá        
+To <lab>/work/remote/bao-gia.git
+ ! [remote rejected] v1.0.0 (pre-receive hook declined)
+error: failed to push some refs to '<lab>/work/remote/bao-gia.git'
+
+# Push bình thường (fast-forward) vẫn được: thử bằng một nhánh rồi xoá
+$ git push origin HEAD:refs/heads/thu/hook
+To <lab>/work/remote/bao-gia.git
+ * [new branch]      HEAD -> thu/hook
+$ git push -q origin --delete thu/hook
+PASS main trên remote không đổi
+PASS ref của Minh trùng lịch sử chuẩn
+PASS ref của remote trùng lịch sử chuẩn
+PASS ref của Lan trùng lịch sử chuẩn
+
+# ==================== p03/28-fork-upstream.mjs · GIT-028 ====================
+# "Fork" trên GitHub = một bản sao repository trên máy chủ, thuộc tài khoản của Lan
+$ git clone --bare <lab>/work/remote/bao-gia.git <lab>/work/remote/lan-bao-gia.git
+Cloning into bare repository '<lab>/work/remote/lan-bao-gia.git'...
+done.
+
+# Lan: repository chung thành upstream, fork thành origin
+$ cd ../lan/bao-gia
+$ git remote rename origin upstream
+$ git remote add origin <lab>/work/remote/lan-bao-gia.git
+$ git fetch -q origin
+$ git remote -v
+origin	<lab>/work/remote/lan-bao-gia.git (fetch)
+origin	<lab>/work/remote/lan-bao-gia.git (push)
+upstream	<lab>/work/remote/bao-gia.git (fetch)
+upstream	<lab>/work/remote/bao-gia.git (push)
+$ git switch -c sua/tai-lieu-phi-cho
+Switched to a new branch 'sua/tai-lieu-phi-cho'
+$ git commit -am "Nói rõ phí chờ tính thêm mỗi phút"
+[sua/tai-lieu-phi-cho 8e97cd9] Nói rõ phí chờ tính thêm mỗi phút
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+$ git push -u origin sua/tai-lieu-phi-cho
+branch 'sua/tai-lieu-phi-cho' set up to track 'origin/sua/tai-lieu-phi-cho'.
+To <lab>/work/remote/lan-bao-gia.git
+ * [new branch]      sua/tai-lieu-phi-cho -> sua/tai-lieu-phi-cho
+
+# Trong lúc đó main của repository chung có commit mới
+$ cd ../../bao-gia
+$ git commit -q -am "Hướng dẫn báo lỗi qua issue"
+$ git push -q
+
+# Lan đồng bộ fork với upstream trước khi mở pull request
+$ cd ../lan/bao-gia
+$ git fetch upstream
+From <lab>/work/remote/bao-gia
+   cb31b2e..22a7c58  main       -> upstream/main
+$ git rebase upstream/main
+Rebasing (1/1)Successfully rebased and updated refs/heads/sua/tai-lieu-phi-cho.
+$ git push --force-with-lease
+To <lab>/work/remote/lan-bao-gia.git
+ + 8e97cd9...951c43d sua/tai-lieu-phi-cho -> sua/tai-lieu-phi-cho (forced update)
+
+# Minh nhận pull request từ fork: thêm remote của fork, fetch, merge --no-ff
+$ cd ../../bao-gia
+$ git remote add lan-fork <lab>/work/remote/lan-bao-gia.git
+$ git fetch lan-fork
+From <lab>/work/remote/lan-bao-gia
+ * [new branch]      main                 -> lan-fork/main
+ * [new branch]      phat-hanh/1.0        -> lan-fork/phat-hanh/1.0
+ * [new branch]      sua/tai-lieu-phi-cho -> lan-fork/sua/tai-lieu-phi-cho
+$ git merge --no-ff --no-edit lan-fork/sua/tai-lieu-phi-cho
+Merge made by the 'ort' strategy.
+ docs/phi-cho.md | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+$ git push -q
+$ git remote remove lan-fork
+$ git log --oneline --graph -4
+*   d263a4d Merge remote-tracking branch 'lan-fork/sua/tai-lieu-phi-cho'
+|\  
+| * 951c43d Nói rõ phí chờ tính thêm mỗi phút
+|/  
+* 22a7c58 Hướng dẫn báo lỗi qua issue
+* cb31b2e Tính phí chờ tại điểm đón
+
+# Lan cập nhật main của mình và của fork, xoá nhánh đã merge
+$ cd ../lan/bao-gia
+$ git switch -q main
+$ git pull --ff-only upstream main
+Updating cb31b2e..d263a4d
+Fast-forward
+ README.md       | 2 ++
+ docs/phi-cho.md | 2 +-
+ 2 files changed, 3 insertions(+), 1 deletion(-)
+From <lab>/work/remote/bao-gia
+ * branch            main       -> FETCH_HEAD
+   22a7c58..d263a4d  main       -> upstream/main
+$ git push -q origin main
+$ git push -q origin --delete sua/tai-lieu-phi-cho
+$ git branch -d sua/tai-lieu-phi-cho
+Deleted branch sua/tai-lieu-phi-cho (was 951c43d).
+PASS ref của Minh trùng lịch sử chuẩn
+PASS ref của remote trùng lịch sử chuẩn
+PASS ref của Lan trùng lịch sử chuẩn
+
+# ==================== p03/29-pull-xung-dot-lich-su-roi.mjs · GIT-029 ====================
+# Lan push lên main của repository chung
+$ git commit -q -am "Nhắc chạy test trước khi push"
+$ git push -q upstream main
+
+# Minh có commit riêng chưa push, rồi pull khi chưa cấu hình gì
+$ git commit -q -am "Ghi múi giờ áp dụng bảng giá"
+$ git pull
+From <lab>/work/remote/bao-gia
+   d263a4d..49a409f  main       -> origin/main
+hint: You have divergent branches and need to specify how to reconcile them.
+hint: You can do so by running one of the following commands sometime before
+hint: your next pull:
+hint:
+hint:   git config pull.rebase false  # merge
+hint:   git config pull.rebase true   # rebase
+hint:   git config pull.ff only       # fast-forward only
+hint:
+hint: You can replace "git config" with "git config --global" to set a default
+hint: preference for all repositories. You can also pass --rebase, --no-rebase,
+hint: or --ff-only on the command line to override the configured default per
+hint: invocation.
+fatal: Need to specify how to reconcile divergent branches.
+
+# Chọn merge cho nhanh: lịch sử có thêm một merge commit vô nghĩa
+$ git pull --no-rebase
+Merge made by the 'ort' strategy.
+ README.md | 2 ++
+ 1 file changed, 2 insertions(+)
+$ git log --graph --format=%s -4
+*   Merge branch 'main' of <lab>/work/remote/bao-gia
+|\  
+| * Nhắc chạy test trước khi push
+* | Ghi múi giờ áp dụng bảng giá
+|/  
+*   Merge remote-tracking branch 'lan-fork/sua/tai-lieu-phi-cho'
+|\  
+$ git log -1 --format=%s
+Merge branch 'main' of <lab>/work/remote/bao-gia
+
+# Chưa push: bỏ merge commit vừa tạo (ORIG_HEAD = main trước khi pull)
+$ git reset --hard ORIG_HEAD
+HEAD is now at feb990f Ghi múi giờ áp dụng bảng giá
+$ git status -sb
+## main...origin/main [ahead 1, behind 1]
+
+# Cấu hình pull mặc định là rebase cho repository này, rồi pull lại
+$ git config pull.rebase true
+$ git pull
+Rebasing (1/1)Successfully rebased and updated refs/heads/main.
+$ git log --oneline --graph -3
+* e93038f Ghi múi giờ áp dụng bảng giá
+* 49a409f Nhắc chạy test trước khi push
+*   d263a4d Merge remote-tracking branch 'lan-fork/sua/tai-lieu-phi-cho'
+|\  
+$ git push
+To <lab>/work/remote/bao-gia.git
+   49a409f..e93038f  main -> main
+$ git pull -q --ff-only upstream main
+PASS main của Minh không có merge commit "Merge branch 'main' of"
+PASS ref của Minh trùng lịch sử chuẩn
+PASS ref của remote trùng lịch sử chuẩn
+PASS ref của Lan trùng lịch sử chuẩn
+
+# ==================== p03/30-thuc-hanh.mjs · GIT-030 ====================
+# Repository mẫu: lịch sử chuẩn của Phần 3 (Minh, Lan, remote chung)
+$ cd bao-gia
+$ git log --oneline --graph -10
+* e93038f Ghi múi giờ áp dụng bảng giá
+* 49a409f Nhắc chạy test trước khi push
+*   d263a4d Merge remote-tracking branch 'lan-fork/sua/tai-lieu-phi-cho'
+|\  
+| * 951c43d Nói rõ phí chờ tính thêm mỗi phút
+|/  
+* 22a7c58 Hướng dẫn báo lỗi qua issue
+* cb31b2e Tính phí chờ tại điểm đón
+* dbdf678 Ghi quy ước dùng remote vào README
+* bf45730 Ghi đầu mối đổi bảng giá vào tài liệu
+* 25ffc61 Không tính phí chờ khi khách huỷ trước khi xe tới
+* 61f5ed6 Thêm tài liệu phí chờ
+PASS ref của Minh trùng lịch sử chuẩn
+PASS ref của remote trùng lịch sử chuẩn
+PASS ref của Lan trùng lịch sử chuẩn
+$ node ../../p03/kiem-tra.mjs .
+ĐẠT      có remote origin
+ĐẠT      main theo dõi origin/main
+ĐẠT      main cục bộ trùng main trên remote (đã push, đã pull)
+ĐẠT      ref remote-tracking đã cập nhật (fetch --prune không còn gì để làm)
+ĐẠT      remote có tag v1.0.0, v1.1.0, v1.0.1
+ĐẠT      remote không còn nhánh đã merge
+ĐẠT      main không có merge commit thừa do pull ("Merge branch … of …")
+ĐẠT      đã cấu hình cách pull (pull.rebase hoặc pull.ff)
+ĐẠT      không còn nhánh cục bộ theo dõi nhánh remote đã xoá
+ĐẠT      working tree sạch, không có thao tác dở dang
+10/10 tiêu chí đạt
+PASS repository của Minh đạt mọi tiêu chí
+
+# Làm hỏng có chủ đích: commit chưa push, nhánh đã merge còn trên remote, nhánh theo dõi nhánh đã xoá, bỏ cấu hình pull
+$ git commit -q -am "Ghi chú chưa push"
+$ git push -q origin main~1:refs/heads/sua/da-merge
+$ git switch -q -c sua/theo-doi-nhanh-da-xoa
+$ git push -q -u origin sua/theo-doi-nhanh-da-xoa
+$ git push -q origin --delete sua/theo-doi-nhanh-da-xoa
+$ git switch -q main
+$ git config --unset pull.rebase
+$ node ../../p03/kiem-tra.mjs .
+ĐẠT      có remote origin
+ĐẠT      main theo dõi origin/main
+CHƯA ĐẠT main cục bộ trùng main trên remote (đã push, đã pull) — cục bộ a410af9, remote e93038f
+ĐẠT      ref remote-tracking đã cập nhật (fetch --prune không còn gì để làm)
+ĐẠT      remote có tag v1.0.0, v1.1.0, v1.0.1
+CHƯA ĐẠT remote không còn nhánh đã merge — sua/da-merge
+ĐẠT      main không có merge commit thừa do pull ("Merge branch … of …")
+CHƯA ĐẠT đã cấu hình cách pull (pull.rebase hoặc pull.ff) — chưa đặt pull.rebase hay pull.ff
+CHƯA ĐẠT không còn nhánh cục bộ theo dõi nhánh remote đã xoá — sua/theo-doi-nhanh-da-xoa
+ĐẠT      working tree sạch, không có thao tác dở dang
+6/10 tiêu chí đạt
+PASS kiểm tra bắt được 4 lỗi
+
+# Sửa từng lỗi
+$ git config pull.rebase true
+$ git push -q
+$ git push origin --delete sua/da-merge
+To <lab>/work/remote/bao-gia.git
+ - [deleted]         sua/da-merge
+$ git fetch --prune
+$ git branch -D sua/theo-doi-nhanh-da-xoa
+Deleted branch sua/theo-doi-nhanh-da-xoa (was a410af9).
+$ node ../../p03/kiem-tra.mjs .
+ĐẠT      có remote origin
+ĐẠT      main theo dõi origin/main
+ĐẠT      main cục bộ trùng main trên remote (đã push, đã pull)
+ĐẠT      ref remote-tracking đã cập nhật (fetch --prune không còn gì để làm)
+ĐẠT      remote có tag v1.0.0, v1.1.0, v1.0.1
+ĐẠT      remote không còn nhánh đã merge
+ĐẠT      main không có merge commit thừa do pull ("Merge branch … of …")
+ĐẠT      đã cấu hình cách pull (pull.rebase hoặc pull.ff)
+ĐẠT      không còn nhánh cục bộ theo dõi nhánh remote đã xoá
+ĐẠT      working tree sạch, không có thao tác dở dang
+10/10 tiêu chí đạt
+PASS sửa xong đạt mọi tiêu chí
+
+# [lab] Bài đã chạy: 10
+# [lab] PASS: 38
+# [lab] FAIL: 0
+# [lab] KẾT QUẢ: ĐẠT

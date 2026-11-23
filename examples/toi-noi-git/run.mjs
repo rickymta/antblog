@@ -16,10 +16,16 @@ import { pathToFileURL } from 'node:url';
 
 import { build, expectedHashes } from './lib/history.mjs';
 import { build2, expectedRefs2 } from './lib/history2.mjs';
+import { build3, expectedRefs3 } from './lib/history3.mjs';
 import { LAB, Session, WORK, freshDir } from './lib/lab.mjs';
 
 /** Cách dựng repository dựng sẵn cho từng phần: n = số commit (P01) hoặc số bước (P02). */
-const BUILDERS = { p01: build, p02: build2 };
+const BUILDERS = { p01: build, p02: build2, p03: build3 };
+/** Ref chuẩn sau n bước của từng phần (dựng trong thư mục tạm riêng). */
+const EXPECTED = {
+  p02: (n) => expectedRefs2(join(WORK, '.chuan2'), n),
+  p03: (n) => expectedRefs3(join(WORK, '.chuan3', 'bao-gia'), n),
+};
 const PARTS = Object.keys(BUILDERS);
 
 async function loadPart(part) {
@@ -76,14 +82,14 @@ const only = args[1]?.padStart(2, '0');
 const articles = (await loadPart(part)).filter((a) => !only || a.num === only);
 
 // Ref chuẩn của Phần 2 tính trước cho mọi mốc bài cần (tránh dựng giữa lúc bài đang chạy).
-const refs2 = new Map();
-if (part === 'p02') {
+const refsAt = new Map();
+if (EXPECTED[part]) {
   for (const a of articles) {
     for (const n of [a.start, a.end]) {
-      if (n != null && !refs2.has(n)) refs2.set(n, expectedRefs2(join(WORK, '.chuan2'), n));
+      if (n != null && !refsAt.has(n)) refsAt.set(n, EXPECTED[part](n));
     }
   }
-  rmSync(join(WORK, '.chuan2'), { recursive: true, force: true });
+  for (const d of ['.chuan2', '.chuan3']) rmSync(join(WORK, d), { recursive: true, force: true });
 }
 
 let pass = 0;
@@ -97,7 +103,7 @@ for (const art of articles) {
     s.cd('bao-gia', { show: false });
   }
   try {
-    await art.run(s, { hashes, refs2: (n) => refs2.get(n) });
+    await art.run(s, { hashes, refs2: (n) => refsAt.get(n), refs3: (n) => refsAt.get(n) });
   } catch (e) {
     s.fail++;
     console.log(`FAIL ${art.id} dừng giữa chừng: ${e.message}`);

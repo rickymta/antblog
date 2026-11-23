@@ -1,11 +1,11 @@
 {
   "version": 1,
   "category": "git",
-  "generatedAt": "2026-11-22",
+  "generatedAt": "2026-11-23",
   "source": {
-    "articles": 20,
-    "checkedAgainst": "api/seed/terminology.json (working tree 22/11/2026, 422 mục) và các file glossary-candidates hiện có",
-    "occurrencesMethod": "Như postgresql.json: occurrences = số bài Git P01–P02 (20 bài, git-*) có ít nhất một chỗ khớp term/english/aliases trong văn xuôi; mentions = tổng số chỗ khớp. Bỏ frontmatter, khối code, inline code, thẻ HTML (giữ alt), đích liên kết, URL. Ranh giới từ Unicode, cụm dài thắng cụm ngắn, tôn trọng caseSensitive. outsideSeriesArticles = số bài ngoài series có chỗ khớp. Phần lớn tên lệnh và tên file nằm trong inline code nên không được đếm. Đếm lại khi viết thêm phần."
+    "articles": 30,
+    "checkedAgainst": "api/seed/terminology.json và các file glossary-candidates hiện có (đếm lại 23/11/2026 khi thêm Phần 3)",
+    "occurrencesMethod": "Như postgresql.json: occurrences = số bài Git P01–P03 (30 bài, git-*) có ít nhất một chỗ khớp term/english/aliases trong văn xuôi; mentions = tổng số chỗ khớp. Bỏ frontmatter, khối code, inline code, thẻ HTML (giữ alt), đích liên kết, URL. Ranh giới từ Unicode, cụm dài thắng cụm ngắn, tôn trọng caseSensitive. outsideSeriesArticles = số bài ngoài series có chỗ khớp. Phần lớn tên lệnh và tên file nằm trong inline code nên không được đếm. Đếm lại khi viết thêm phần."
   },
   "conflicts": [
     {
@@ -25,6 +25,18 @@
       "existingId": null,
       "action": "related",
       "note": "Chưa có mục Azure Blob Storage trong terminology.json nhưng 21 bài ngoài series có chữ blob (Azure, AWS). Bắt buộc categories [\"git\"]."
+    },
+    {
+      "candidate": "ssh-key",
+      "existingId": "ssh-key",
+      "action": "related",
+      "note": "Phần 3 (GIT-024) nói về SSH key nhưng không đề xuất mục riêng: glossary-candidates/devops-linux.json đã có ssh-key. Khi nạp vào terminology.json nên thêm categories [\"git\"] và relatedArticleSlugs git-xac-thuc-https-ssh cho mục đó."
+    },
+    {
+      "candidate": "code-review",
+      "existingId": null,
+      "action": "related",
+      "note": "Chữ review/code review xuất hiện ở 175 bài ngoài series (Testing, BA). Để autoLink false; nếu nạp, nên đặt ở chuyên mục chung thay vì chỉ git."
     }
   ],
   "terms": [
@@ -59,8 +71,8 @@
         "git-init-clone-mo-repository",
         "git-ben-trong-object-ref-head"
       ],
-      "occurrences": 14,
-      "mentions": 127,
+      "occurrences": 23,
+      "mentions": 211,
       "outsideSeriesArticles": 245
     },
     {
@@ -76,8 +88,8 @@
       "relatedArticleSlugs": [
         "git-ba-vung-working-tree-staging-gitignore"
       ],
-      "occurrences": 11,
-      "mentions": 50,
+      "occurrences": 15,
+      "mentions": 61,
       "outsideSeriesArticles": 1
     },
     {
@@ -94,8 +106,8 @@
         "git-ba-vung-working-tree-staging-gitignore",
         "git-commit-stage-hunk-amend"
       ],
-      "occurrences": 9,
-      "mentions": 29,
+      "occurrences": 11,
+      "mentions": 31,
       "outsideSeriesArticles": 0
     },
     {
@@ -177,8 +189,8 @@
       "relatedArticleSlugs": [
         "git-commit-stage-hunk-amend"
       ],
-      "occurrences": 7,
-      "mentions": 35,
+      "occurrences": 9,
+      "mentions": 40,
       "outsideSeriesArticles": 0
     },
     {
@@ -285,8 +297,8 @@
         "git-la-gi-va-gitstudio"
       ],
       "reviewNote": "Alias \"mã hash\" chỉ an toàn khi dò trong chuyên mục git.",
-      "occurrences": 13,
-      "mentions": 63,
+      "occurrences": 15,
+      "mentions": 65,
       "outsideSeriesArticles": 0
     },
     {
@@ -304,9 +316,9 @@
         "git-nhanh-la-gi"
       ],
       "reviewNote": "autoLink false: \"nhánh\" là từ thường (độ phủ nhánh trong kiểm thử, nhánh if). Gắn tay bằng dfn.",
-      "occurrences": 16,
-      "mentions": 385,
-      "outsideSeriesArticles": 220
+      "occurrences": 25,
+      "mentions": 580,
+      "outsideSeriesArticles": 219
     },
     {
       "slug": "git-merge",
@@ -323,8 +335,8 @@
         "git-xung-dot-merge"
       ],
       "reviewNote": "autoLink false vì quá dày đặc trong series. Không trùng mục MERGE (SQL) vì mục đó caseSensitive.",
-      "occurrences": 11,
-      "mentions": 123,
+      "occurrences": 18,
+      "mentions": 198,
       "outsideSeriesArticles": 32
     },
     {
@@ -340,8 +352,8 @@
       "relatedArticleSlugs": [
         "git-merge-fast-forward-merge-commit"
       ],
-      "occurrences": 4,
-      "mentions": 22,
+      "occurrences": 10,
+      "mentions": 47,
       "outsideSeriesArticles": 0
     },
     {
@@ -357,8 +369,8 @@
       "relatedArticleSlugs": [
         "git-merge-fast-forward-merge-commit"
       ],
-      "occurrences": 7,
-      "mentions": 33,
+      "occurrences": 13,
+      "mentions": 60,
       "outsideSeriesArticles": 0
     },
     {
@@ -395,8 +407,8 @@
         "git-xung-dot-merge",
         "git-rebase-co-ban"
       ],
-      "occurrences": 11,
-      "mentions": 65,
+      "occurrences": 18,
+      "mentions": 82,
       "outsideSeriesArticles": 68,
       "reviewNote": "Alias \"xung đột\" chỉ an toàn khi dò trong chuyên mục git (ở chuyên mục khác là từ thường)."
     },
@@ -413,8 +425,8 @@
       "relatedArticleSlugs": [
         "git-stash-cat-thay-doi"
       ],
-      "occurrences": 9,
-      "mentions": 98,
+      "occurrences": 12,
+      "mentions": 103,
       "outsideSeriesArticles": 0
     },
     {
@@ -430,8 +442,8 @@
       "relatedArticleSlugs": [
         "git-tag-phien-ban"
       ],
-      "occurrences": 3,
-      "mentions": 15,
+      "occurrences": 4,
+      "mentions": 16,
       "outsideSeriesArticles": 0
     },
     {
@@ -481,8 +493,8 @@
       "relatedArticleSlugs": [
         "git-cherry-pick-revert"
       ],
-      "occurrences": 5,
-      "mentions": 37,
+      "occurrences": 7,
+      "mentions": 39,
       "outsideSeriesArticles": 0
     },
     {
@@ -498,8 +510,8 @@
       "relatedArticleSlugs": [
         "git-cherry-pick-revert"
       ],
-      "occurrences": 8,
-      "mentions": 40,
+      "occurrences": 9,
+      "mentions": 41,
       "outsideSeriesArticles": 4
     },
     {
@@ -515,8 +527,8 @@
       "relatedArticleSlugs": [
         "git-rebase-co-ban"
       ],
-      "occurrences": 9,
-      "mentions": 53,
+      "occurrences": 17,
+      "mentions": 102,
       "outsideSeriesArticles": 0
     },
     {
@@ -569,8 +581,375 @@
         "git-cherry-pick-revert",
         "git-worktree"
       ],
+      "occurrences": 8,
+      "mentions": 21,
+      "outsideSeriesArticles": 0
+    },
+    {
+      "slug": "git-remote",
+      "term": "remote",
+      "aliases": [],
+      "shortDefinition": "Một repository khác (thường trên GitHub, GitLab hay máy chủ của nhóm) mà repository của bạn biết địa chỉ và gọi bằng một tên ngắn như origin; fetch kéo commit về, push đẩy commit lên.",
+      "caseSensitive": false,
+      "autoLink": true,
+      "categories": [
+        "git"
+      ],
+      "relatedArticleSlugs": [
+        "git-remote-origin-tracking",
+        "git-fetch-pull-push"
+      ],
+      "occurrences": 17,
+      "mentions": 142,
+      "outsideSeriesArticles": 15
+    },
+    {
+      "slug": "remote-tracking-branch",
+      "term": "nhánh remote-tracking",
+      "english": "remote-tracking branch",
+      "aliases": [
+        "remote-tracking"
+      ],
+      "shortDefinition": "Bản ghi nhớ trên máy bạn về vị trí một nhánh của remote ở lần fetch/pull/push gần nhất, ví dụ origin/main; không tự cập nhật.",
+      "caseSensitive": false,
+      "autoLink": true,
+      "categories": [
+        "git"
+      ],
+      "relatedArticleSlugs": [
+        "git-remote-origin-tracking",
+        "git-fetch-pull-push"
+      ],
+      "occurrences": 7,
+      "mentions": 19,
+      "outsideSeriesArticles": 0
+    },
+    {
+      "slug": "upstream-branch",
+      "term": "upstream",
+      "english": "upstream branch",
+      "aliases": [],
+      "shortDefinition": "Nhánh trên remote mà một nhánh cục bộ theo dõi (đặt bằng push -u hoặc branch -u); nhờ đó git pull, git push, git status không cần nói remote và nhánh nào. Trong mô hình fork, upstream còn là tên remote trỏ về repository gốc.",
+      "caseSensitive": false,
+      "autoLink": true,
+      "categories": [
+        "git"
+      ],
+      "relatedArticleSlugs": [
+        "git-remote-origin-tracking",
+        "git-fork-upstream"
+      ],
+      "occurrences": 8,
+      "mentions": 31,
+      "outsideSeriesArticles": 3
+    },
+    {
+      "slug": "git-fetch",
+      "term": "fetch",
+      "aliases": [],
+      "shortDefinition": "Tải commit và ref mới từ remote về, chỉ cập nhật các nhánh remote-tracking; không đổi nhánh cục bộ hay file đang làm.",
+      "caseSensitive": false,
+      "autoLink": false,
+      "categories": [
+        "git"
+      ],
+      "relatedArticleSlugs": [
+        "git-fetch-pull-push"
+      ],
+      "occurrences": 11,
+      "mentions": 62,
+      "outsideSeriesArticles": 14
+    },
+    {
+      "slug": "git-pull",
+      "term": "pull",
+      "aliases": [],
+      "shortDefinition": "Fetch rồi tích hợp nhánh upstream vào nhánh hiện tại, bằng merge, rebase hoặc chỉ fast-forward tuỳ tham số và cấu hình pull.rebase/pull.ff.",
+      "caseSensitive": false,
+      "autoLink": false,
+      "categories": [
+        "git"
+      ],
+      "relatedArticleSlugs": [
+        "git-fetch-pull-push",
+        "git-pull-xung-dot-lich-su-roi"
+      ],
+      "occurrences": 13,
+      "mentions": 118,
+      "outsideSeriesArticles": 12
+    },
+    {
+      "slug": "git-push",
+      "term": "push",
+      "aliases": [],
+      "shortDefinition": "Đẩy commit của nhánh cục bộ lên nhánh trên remote; mặc định chỉ được nhận nếu là fast-forward trên remote.",
+      "caseSensitive": false,
+      "autoLink": false,
+      "categories": [
+        "git"
+      ],
+      "relatedArticleSlugs": [
+        "git-fetch-pull-push",
+        "git-ahead-behind-push-bi-tu-choi"
+      ],
+      "occurrences": 23,
+      "mentions": 188,
+      "outsideSeriesArticles": 43
+    },
+    {
+      "slug": "ahead-behind",
+      "term": "ahead/behind",
+      "aliases": [],
+      "shortDefinition": "Số commit nhánh cục bộ có mà upstream chưa có (ahead, cần push) và ngược lại (behind, cần pull); cả hai khác 0 là hai nhánh đã rẽ đôi.",
+      "caseSensitive": false,
+      "autoLink": true,
+      "categories": [
+        "git"
+      ],
+      "relatedArticleSlugs": [
+        "git-ahead-behind-push-bi-tu-choi"
+      ],
+      "occurrences": 3,
+      "mentions": 7,
+      "outsideSeriesArticles": 0
+    },
+    {
+      "slug": "force-with-lease",
+      "term": "--force-with-lease",
+      "aliases": [
+        "force-with-lease"
+      ],
+      "shortDefinition": "Force push có điều kiện: chỉ ghi đè nhánh trên remote nếu nó vẫn ở đúng chỗ nhánh remote-tracking của bạn ghi nhớ; kết hợp --force-if-includes để an toàn hơn.",
+      "caseSensitive": true,
+      "autoLink": true,
+      "categories": [
+        "git"
+      ],
+      "relatedArticleSlugs": [
+        "git-ahead-behind-push-bi-tu-choi",
+        "git-fork-upstream"
+      ],
+      "occurrences": 1,
+      "mentions": 2,
+      "outsideSeriesArticles": 0
+    },
+    {
+      "slug": "credential-helper",
+      "term": "credential helper",
+      "aliases": [],
+      "shortDefinition": "Chương trình Git gọi để lấy và lưu tên người dùng, mật khẩu hay token cho remote HTTPS (Git Credential Manager, wincred, osxkeychain…), đặt bằng credential.helper.",
+      "caseSensitive": false,
+      "autoLink": true,
+      "categories": [
+        "git"
+      ],
+      "relatedArticleSlugs": [
+        "git-xac-thuc-https-ssh"
+      ],
+      "occurrences": 3,
+      "mentions": 10,
+      "outsideSeriesArticles": 1
+    },
+    {
+      "slug": "personal-access-token",
+      "term": "personal access token",
+      "aliases": [
+        "PAT"
+      ],
+      "shortDefinition": "Chuỗi bí mật tạo trên GitHub/GitLab dùng thay mật khẩu khi Git làm việc qua HTTPS, có phạm vi quyền và hạn dùng, thu hồi được riêng.",
+      "caseSensitive": false,
+      "autoLink": true,
+      "categories": [
+        "git"
+      ],
+      "relatedArticleSlugs": [
+        "git-xac-thuc-https-ssh"
+      ],
+      "occurrences": 1,
+      "mentions": 3,
+      "outsideSeriesArticles": 0
+    },
+    {
+      "slug": "pull-request",
+      "term": "pull request",
+      "aliases": [
+        "merge request"
+      ],
+      "shortDefinition": "Yêu cầu trên GitHub (GitLab gọi là merge request) để đưa một nhánh vào nhánh khác sau khi được review; không phải khái niệm của Git mà của dịch vụ lưu trữ.",
+      "caseSensitive": false,
+      "autoLink": true,
+      "categories": [
+        "git"
+      ],
+      "relatedArticleSlugs": [
+        "git-pull-request-code-review",
+        "git-github-gitlab-gitstudio"
+      ],
+      "occurrences": 11,
+      "mentions": 104,
+      "outsideSeriesArticles": 23
+    },
+    {
+      "slug": "code-review",
+      "term": "code review",
+      "aliases": [
+        "review"
+      ],
+      "shortDefinition": "Một người khác đọc thay đổi trước khi nó vào nhánh chung, so với yêu cầu và quy ước, để lại nhận xét để tác giả sửa.",
+      "caseSensitive": false,
+      "autoLink": false,
+      "categories": [
+        "git"
+      ],
+      "relatedArticleSlugs": [
+        "git-pull-request-code-review"
+      ],
+      "occurrences": 6,
+      "mentions": 26,
+      "outsideSeriesArticles": 175
+    },
+    {
+      "slug": "squash-merge",
+      "term": "squash merge",
+      "aliases": [
+        "squash and merge"
+      ],
+      "shortDefinition": "Gộp toàn bộ thay đổi của một nhánh thành một commit mới trên nhánh đích (git merge --squash rồi commit); commit cũ của nhánh không vào lịch sử.",
+      "caseSensitive": false,
+      "autoLink": true,
+      "categories": [
+        "git"
+      ],
+      "relatedArticleSlugs": [
+        "git-pull-request-code-review"
+      ],
+      "occurrences": 1,
+      "mentions": 6,
+      "outsideSeriesArticles": 0
+    },
+    {
+      "slug": "git-fork",
+      "term": "fork",
+      "aliases": [],
+      "shortDefinition": "Bản sao repository trên máy chủ thuộc tài khoản của bạn, dùng để đóng góp khi không có quyền push vào repository gốc; gửi thay đổi về gốc bằng pull request.",
+      "caseSensitive": false,
+      "autoLink": true,
+      "categories": [
+        "git"
+      ],
+      "relatedArticleSlugs": [
+        "git-fork-upstream"
+      ],
+      "occurrences": 5,
+      "mentions": 50,
+      "outsideSeriesArticles": 9
+    },
+    {
+      "slug": "protected-branch",
+      "term": "nhánh được bảo vệ",
+      "english": "protected branch",
+      "aliases": [
+        "branch protection"
+      ],
+      "shortDefinition": "Nhánh (thường là main) có luật phía máy chủ: cấm force push, cấm xoá, bắt buộc pull request và CI; GitHub gọi là branch protection, GitLab là protected branches.",
+      "caseSensitive": false,
+      "autoLink": true,
+      "categories": [
+        "git"
+      ],
+      "relatedArticleSlugs": [
+        "git-chien-luoc-nhanh"
+      ],
+      "occurrences": 3,
+      "mentions": 4,
+      "outsideSeriesArticles": 3
+    },
+    {
+      "slug": "github-flow",
+      "term": "GitHub flow",
+      "aliases": [],
+      "shortDefinition": "Chiến lược nhánh chỉ có main sống lâu; mọi thay đổi làm trên nhánh ngắn và vào main qua pull request.",
+      "caseSensitive": false,
+      "autoLink": true,
+      "categories": [
+        "git"
+      ],
+      "relatedArticleSlugs": [
+        "git-chien-luoc-nhanh"
+      ],
+      "occurrences": 1,
+      "mentions": 4,
+      "outsideSeriesArticles": 0
+    },
+    {
+      "slug": "trunk-based-development",
+      "term": "trunk-based development",
+      "aliases": [
+        "trunk-based"
+      ],
+      "shortDefinition": "Chiến lược nhánh mà mọi người tích hợp vào nhánh chính rất thường xuyên (nhánh sống vài giờ đến một hai ngày), giấu việc dở bằng feature flag.",
+      "caseSensitive": false,
+      "autoLink": true,
+      "categories": [
+        "git"
+      ],
+      "relatedArticleSlugs": [
+        "git-chien-luoc-nhanh"
+      ],
+      "occurrences": 1,
+      "mentions": 2,
+      "outsideSeriesArticles": 0
+    },
+    {
+      "slug": "git-flow",
+      "term": "Git flow",
+      "aliases": [],
+      "shortDefinition": "Chiến lược nhánh có main và develop sống lâu cùng các nhánh feature/*, release/*, hotfix/*; hợp với sản phẩm có nhiều phiên bản song song.",
+      "caseSensitive": false,
+      "autoLink": true,
+      "categories": [
+        "git"
+      ],
+      "relatedArticleSlugs": [
+        "git-chien-luoc-nhanh"
+      ],
+      "occurrences": 1,
+      "mentions": 4,
+      "outsideSeriesArticles": 0
+    },
+    {
+      "slug": "bare-repository",
+      "term": "bare repository",
+      "aliases": [],
+      "shortDefinition": "Repository chỉ có phần dữ liệu .git, không có working tree; dạng repository trên máy chủ nhận push.",
+      "caseSensitive": false,
+      "autoLink": true,
+      "categories": [
+        "git"
+      ],
+      "relatedArticleSlugs": [
+        "git-remote-origin-tracking",
+        "git-fork-upstream"
+      ],
+      "occurrences": 3,
+      "mentions": 5,
+      "outsideSeriesArticles": 0
+    },
+    {
+      "slug": "refspec",
+      "term": "refspec",
+      "aliases": [],
+      "shortDefinition": "Cú pháp nguồn:đích chỉ ref nào trên remote ánh xạ vào ref nào ở máy (khi fetch) hoặc ngược lại (khi push), ví dụ +refs/heads/*:refs/remotes/origin/*.",
+      "caseSensitive": false,
+      "autoLink": true,
+      "categories": [
+        "git"
+      ],
+      "relatedArticleSlugs": [
+        "git-github-gitlab-gitstudio"
+      ],
       "occurrences": 4,
-      "mentions": 15,
+      "mentions": 8,
       "outsideSeriesArticles": 0
     }
   ],
@@ -582,16 +961,10 @@
       "reason": "Quá chung và xuất hiện dày đặc ở mọi bài Git; gạch chân mọi chỗ gây nhiễu. Nếu thêm thì autoLink false, gắn tay."
     },
     {
-      "slug": "git-remote",
-      "term": "remote",
-      "occurrences": 4,
-      "reason": "Phần 3 (GIT-021); P01 chỉ nhắc khi clone."
-    },
-    {
       "slug": "origin",
       "term": "origin",
       "occurrences": 1,
-      "reason": "Phần 3; chữ origin còn xuất hiện ở bài về CORS, CDN."
+      "reason": "Phần 3 dùng nhiều nhưng chữ origin còn là thuật ngữ CORS/CDN ở các bài khác (Origin header, origin server); mục git-remote đã giải thích origin là tên remote quy ước. Nếu thêm thì categories [\"git\"] và caseSensitive."
     },
     {
       "slug": "reflog",

@@ -200,4 +200,4 @@ Bạn đã đi trọn vòng đời một tính năng trên một máy: nhánh, m
 - Mã nguồn script chấm: `examples/toi-noi-git/p02/kiem-tra.mjs`; lịch sử chuẩn: `examples/toi-noi-git/lib/history2.mjs`.
 - [Pro Git, chương 3: Git Branching](https://git-scm.com/book/en/v2/Git-Branching-Branches-in-a-Nutshell).
 
-Bài tiếp theo (Phần 3): GIT-021 · Remote, origin và nhánh remote-tracking *(đang viết)*.
+Bài tiếp theo (Phần 3): [GIT-021 · Remote, origin và nhánh remote-tracking](/articles/git-remote-origin-tracking).

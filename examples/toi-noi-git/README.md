@@ -15,9 +15,12 @@ npm run kiem-tra -- <đường dẫn repository>   # chấm repository theo 11 t
 npm run p02            # chạy cả Phần 2 (nhánh, merge, xung đột, stash, tag, cherry-pick, rebase, worktree)
 npm run setup -- 14    # bài Phần 2 đánh số 11–20; setup tự dựng Phần 1 rồi các bước Phần 2 cần thiết
 npm run kiem-tra-p02 -- <đường dẫn repository>   # chấm repository theo 11 tiêu chí của GIT-020
+npm run p03            # chạy cả Phần 3 (remote, fetch/pull/push, pull request, hook bảo vệ main, fork, pull.rebase)
+npm run setup -- 26    # bài Phần 3 đánh số 21–30; dựng cả repository của Minh, remote chung và bản clone của Lan
+npm run kiem-tra-p03 -- <đường dẫn repository>   # chấm bản clone và remote của nó theo 10 tiêu chí của GIT-030
 ```
 
-Kết quả trên máy viết bài: Phần 1 `# [lab] PASS: 31`, Phần 2 `# [lab] PASS: 23`, `# [lab] FAIL: 0`, `npm test` 4/4.
+Kết quả trên máy viết bài: Phần 1 `# [lab] PASS: 31`, Phần 2 `# [lab] PASS: 23`, Phần 3 `# [lab] PASS: 38`, `# [lab] FAIL: 0`, `npm test` 5/5.
 
 ## Vì sao mã hash trong bài trùng với máy bạn
 
@@ -41,6 +44,8 @@ Khác phiên bản git có thể khác câu chữ của vài thông báo (ví d�
 | `lib/history.mjs` | Nội dung file và **lịch sử chuẩn** 10 commit của repository `bao-gia` (Phần 1) |
 | `lib/history2.mjs` | Lịch sử chuẩn Phần 2: 12 bước (nhánh, merge, xung đột, tag, cherry-pick, revert, rebase, worktree) dựng trên cuối Phần 1 |
 | `p02/NN-*.mjs`, `p02/kiem-tra.mjs`, `p02/OUTPUT.txt` | Bài GIT-011…GIT-020; mỗi bài so mọi nhánh và tag với lịch sử chuẩn (`p02/chung.mjs`) |
+| `lib/history3.mjs` | Lịch sử chuẩn Phần 3: 7 bước trên ba repository (Minh `work/bao-gia`, remote chung `work/remote/bao-gia.git`, Lan `work/lan/bao-gia`) và fork `work/remote/lan-bao-gia.git`; hook `pre-receive` bảo vệ `main` và tag `v*` |
+| `p03/NN-*.mjs`, `p03/kiem-tra.mjs`, `p03/OUTPUT.txt` | Bài GIT-021…GIT-030; mỗi bài so ref của Minh, remote và Lan với lịch sử chuẩn (`p03/chung.mjs`) |
 | `p01/NN-*.mjs` | Một file cho mỗi bài GIT-001…GIT-010; `start`/`end` = số commit chuẩn ở đầu/cuối bài |
 | `p01/kiem-tra.mjs` | Script chấm repository của GIT-010 (chỉ đọc, mã thoát 0 khi đạt hết) |
 | `p01/OUTPUT.txt` | Kết quả mẫu |
