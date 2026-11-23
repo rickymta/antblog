@@ -1,0 +1,36 @@
+#!/usr/bin/env bash
+# bao-cao-log: tóm tắt log của dịch vụ bao-gia, mỗi file một dòng.
+# Dùng: bao-cao-log FILE...    (đọc được cả file .gz)
+# Mã thoát: 0 nếu đọc được mọi file, 1 nếu bỏ qua file nào đó, 2 nếu dùng sai.
+set -euo pipefail
+
+doc_log() {
+  case $1 in
+    *.gz) zcat -- "$1" ;;
+    *) cat -- "$1" ;;
+  esac
+}
+
+tom_tat() {
+  local file=$1 tong loi cham
+  tong=$(doc_log "$file" | wc -l)
+  loi=$(doc_log "$file" | grep -c ' ERROR ' || true)
+  cham=$(doc_log "$file" | grep -c ' WARN ' || true)
+  printf '%-33s %4d dòng %4d lỗi %4d chậm\n' "$file" "$tong" "$loi" "$cham"
+}
+
+if [ "$#" -eq 0 ]; then
+  echo "Dùng: bao-cao-log FILE..." >&2
+  exit 2
+fi
+
+ma_thoat=0
+for file in "$@"; do
+  if [ ! -r "$file" ]; then
+    echo "bao-cao-log: bỏ qua $file (không đọc được)" >&2
+    ma_thoat=1
+    continue
+  fi
+  tom_tat "$file"
+done
+exit "$ma_thoat"

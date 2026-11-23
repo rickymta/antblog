@@ -1,0 +1,46 @@
+#!/usr/bin/env bash
+# sao-luu-log: đóng gói log của bao-gia thành ĐÍCH/log-NGÀY.tar.gz, giữ lại N bản mới nhất.
+# Dùng: sao-luu-log [-d THƯ_MỤC_ĐÍCH] [-g SỐ_BẢN_GIỮ]
+#       NGAY=2026-11-21 sao-luu-log    đặt ngày trong tên file (mặc định: hôm nay)
+set -euo pipefail
+
+nguon=/var/log/toinoi
+dich=$HOME/sao-luu
+giu=7
+
+while getopts 'd:g:' opt; do
+  case $opt in
+    d) dich=$OPTARG ;;
+    g) giu=$OPTARG ;;
+    *) echo "Dùng: sao-luu-log [-d THƯ_MỤC_ĐÍCH] [-g SỐ_BẢN_GIỮ]" >&2; exit 2 ;;
+  esac
+done
+
+case $giu in
+  '' | *[!0-9]* | 0) echo "sao-luu-log: -g cần một số nguyên dương, nhận '$giu'" >&2; exit 2 ;;
+esac
+
+ngay=${NGAY:-$(date +%F)}
+mkdir -p "$dich"
+
+# Chỉ một lần sao lưu chạy tại một thời điểm.
+exec 9> "$dich/.sao-luu.lock"
+if ! flock -n 9; then
+  echo "sao-luu-log: đang có một lần sao lưu khác chạy" >&2
+  exit 1
+fi
+
+# Ghi ra file tạm trong cùng thư mục, xong mới đổi tên: không bao giờ để lại file dở dang.
+tam=$(mktemp "$dich/.log-$ngay.XXXXXX")
+trap 'rm -f -- "$tam"' EXIT
+
+tar -czf "$tam" -C "$nguon" .
+chmod 640 "$tam"
+mv -- "$tam" "$dich/log-$ngay.tar.gz"
+echo "sao-luu-log: đã ghi $dich/log-$ngay.tar.gz"
+
+# Chỉ giữ $giu bản mới nhất. Tên file chứa ngày nên xếp theo tên cũng là xếp theo ngày.
+find "$dich" -maxdepth 1 -name 'log-*.tar.gz' | sort | head -n -"$giu" | while read -r cu; do
+  rm -f -- "$cu"
+  echo "sao-luu-log: đã xoá bản cũ $cu"
+done

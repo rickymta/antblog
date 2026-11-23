@@ -1,0 +1,11 @@
+" Cấu hình vim tối thiểu cho server (series Linux qua SSH Studio, LNX-012)
+" Có ~/.vimrc thì vim không tự nạp defaults.vim nữa, nên nạp lại trước.
+unlet! skip_defaults_vim
+source $VIMRUNTIME/defaults.vim
+
+set number            " hiện số dòng
+set hlsearch          " tô sáng mọi kết quả tìm
+set ignorecase        " tìm không phân biệt hoa thường…
+set smartcase         " …trừ khi chuỗi tìm có chữ hoa
+set expandtab         " Tab chèn dấu cách
+set shiftwidth=2 tabstop=2

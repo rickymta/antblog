@@ -25,6 +25,9 @@
    node tools/chup-anh/p01.mjs          # tạo lại server lab, chụp cả Phần 1
    node tools/chup-anh/p01.mjs 09 10    # chỉ vài bài; server phải đang ở đầu bài 09
    npm run kiem-tra
+
+   node tools/chup-anh/p02.mjs          # đưa server về đầu LNX-011 (setup 11) rồi chụp cả Phần 2
+   npm run kiem-tra:p02
    ```
 
    Ảnh ghi vào `apps/web/public/images/articles/<slug>/ssh-studio-NN.webp` (WebP, chất lượng 90, dùng `sharp` của repo).
@@ -34,4 +37,5 @@
 - Khung local của Files luôn được trỏ vào `examples/toi-noi-linux/may-cua-ban` trước khi chụp, để ảnh không lộ thư mục cá nhân.
 - Mật khẩu gõ vào hộp thoại là mật khẩu của lab (`toinoi-lab`); hộp thoại hiện dấu chấm.
 - Master key của vault vẫn nằm trong kho khoá của hệ điều hành dưới service `dev.sshstudio.desktop` (tên service cố định trong mã nguồn), dùng chung với bản SSH Studio đã cài. Công cụ chỉ đọc, không ghi đè.
-- `cdp.mjs`: client CDP tối thiểu. `app.mjs`: thao tác mức người dùng (kết nối, gõ lệnh, khung Files). `p01.mjs`: trình tự của Phần 1.
+- Từ Phần 2, các dòng `#file` được gõ thật bằng vim (`:set paste`, gõ từng dòng, `:wq`) rồi đối chiếu SHA-256 với file mẫu trong `pNN/files/`; `#check` đối chiếu sau một thao tác `#gui`. Nội dung lệch là công cụ dừng ngay.
+- `cdp.mjs`: client CDP tối thiểu. `app.mjs`: thao tác mức người dùng (kết nối, gõ lệnh, khung Files). `p01.mjs`: trình tự của Phần 1. `phan.mjs`: trình phát kịch bản dùng chung từ Phần 2. `p02.mjs`: thao tác giao diện của Phần 2.

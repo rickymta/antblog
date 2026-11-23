@@ -1,0 +1,12 @@
+#!/usr/bin/env bash
+# Thử trap: file tạm được xoá kể cả khi script dừng giữa chừng vì lỗi.
+set -euo pipefail
+
+tam=$(mktemp /tmp/bao-cao.XXXXXX)
+trap 'echo "dọn $tam"; rm -f -- "$tam"' EXIT
+
+echo "file tạm: $tam"
+grep ERROR /var/log/toinoi/bao-gia.log > "$tam"
+echo "đã ghi $(wc -l < "$tam") dòng"
+grep ERROR /khong-co >> "$tam"
+echo "dòng này không bao giờ được in"

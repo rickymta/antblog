@@ -12,6 +12,12 @@
 //   #@ lệnh           chạy nhưng không in (chuẩn bị trạng thái, thay cho thao tác trên giao diện)
 //   lệnh \            dòng kết thúc bằng \ nối với dòng sau
 //   lệnh <<'EOF' …    heredoc được giữ nguyên tới dòng EOF
+//   #root lệnh        chạy với quyền root, không in (dữ liệu của lab, ví dụ log mới)
+//   #file ĐƯỜNG NGUỒN in "vim ĐƯỜNG" như một lệnh rồi ghi nội dung của files/NGUỒN vào ĐƯỜNG:
+//                     thay cho việc gõ file đó bằng vim (công cụ chụp ảnh gõ thật)
+//   #check ĐƯỜNG NGUỒN ghi files/NGUỒN vào ĐƯỜNG mà không in: kết quả của thao tác sửa bằng vim
+//                     hoặc giao diện ngay trước đó (công cụ chụp ảnh đối chiếu nội dung)
+//   #wait N           chờ N giây (ví dụ chờ cron chạy)
 
 import { spawnSync } from 'node:child_process';
 import { readFileSync, readdirSync } from 'node:fs';
@@ -75,17 +81,21 @@ export function scripts(part) {
 const quote = (s) => `'${s.replace(/'/g, `'\\''`)}'`;
 
 /** Đổi file kịch bản thành script bash in lại từng lệnh kèm dấu nhắc. */
-export function compile(source, { echo = true } = {}) {
+export function compile(source, { echo = true, dir = '.' } = {}) {
   const out = [
     'stty cols 100 rows 40 2>/dev/null',
     // Shell tương tác của Ubuntu đặt sẵn hai alias này trong ~/.bashrc. Script không tương tác
     // thì không có, nên runner bật lại để kết quả giống hệt khi bạn tự gõ (màu bị lọc khỏi bản ghi).
     'shopt -s expand_aliases',
-    "alias ls='ls --color=auto' grep='grep --color=auto'",
+    // ~/.bashrc thoát ngay khi shell không tương tác (khối `case $- in`). Runner nạp phần còn lại
+    // để có cùng alias (ls, grep, ll…) và cùng những dòng bạn tự thêm, như một phiên SSH thật.
+    // Lệnh `source ~/.bashrc` trong kịch bản cũng được chạy theo cách này.
+    "__rc() { source <(sed '/^case \\$- in$/,/^esac$/d' ~/.bashrc); }",
+    '__rc',
   ];
   // Trong phiên SSH thật, sudo hỏi mật khẩu ở lần gọi đầu tiên. Runner xác thực sẵn (chỉ ở
   // kịch bản có dùng sudo) nên bản ghi không có dòng "[sudo] password for an:".
-  if (/^\s*sudo\b/m.test(source)) out.push(`echo ${quote(PASSWORD)} | sudo -S -v 2>/dev/null`);
+  if (/^\s*sudo\b|^#root /m.test(source)) out.push(`echo ${quote(PASSWORD)} | sudo -S -v 2>/dev/null`);
   out.push(
     // Dấu nhắc giống PS1 mặc định của Ubuntu: user@host:thư-mục$. Hàm trả lại mã thoát của
     // lệnh đứng trước, để `echo $?` trong kịch bản vẫn đúng.
@@ -97,6 +107,22 @@ export function compile(source, { echo = true } = {}) {
     if (!line.trim()) continue;
     if (line.startsWith('## ')) {
       if (echo) out.push(`printf '\\n# %s\\n' ${quote(line.slice(3))}`);
+      continue;
+    }
+    if (line.startsWith('#wait ')) {
+      out.push(`sleep ${Number(line.slice(6))}`);
+      continue;
+    }
+    if (line.startsWith('#root ')) {
+      out.push(`sudo -n bash -c ${quote(line.slice(6))} >/dev/null`);
+      continue;
+    }
+    // Số thứ hai sau #file (nếu có) là ảnh mà công cụ chụp ảnh chụp lúc file còn mở trong vim.
+    const file = line.match(/^#(file|check) (\S+) (\S+)(?: \d\d)?$/);
+    if (file) {
+      const body = readFileSync(join(dir, 'files', file[3])).toString('base64').replace(/.{76}/g, '$&\n');
+      if (file[1] === 'file' && echo) out.push(`__p ${quote('vim ' + file[2])}`);
+      out.push(`base64 -d > ${file[2]} <<'__B64__'\n${body.trimEnd()}\n__B64__`);
       continue;
     }
     if (line.startsWith('#@ ')) {
@@ -116,14 +142,14 @@ export function compile(source, { echo = true } = {}) {
       while (block[block.length - 1].endsWith('\\') && i + 1 < lines.length) block.push(lines[++i]);
     }
     if (echo) out.push(`__p ${block.map(quote).join(' ')}`);
-    out.push(block.join('\n'));
+    out.push(/^(source|\.) ~\/\.bashrc$/.test(line) ? '__rc' : block.join('\n'));
   }
   return out.join('\n') + '\n';
 }
 
 /** Chạy một kịch bản; trả về bản ghi (transcript) dạng chữ. */
 export function runScript(path, { echo = true } = {}) {
-  const script = compile(readFileSync(path, 'utf8'), { echo });
+  const script = compile(readFileSync(path, 'utf8'), { echo, dir: dirname(path) });
   const put = docker(['exec', '-i', CONTAINER, 'bash', '-c', 'cat > /run/lab.sh && chmod 644 /run/lab.sh'], {
     input: script,
   });

@@ -1,0 +1,11 @@
+#!/usr/bin/env bash
+# sao-luu-log: đóng gói log của bao-gia vào ~/sao-luu/log-NGÀY.tar.gz
+set -euo pipefail
+
+nguon=/var/log/toinoi
+dich=$HOME/sao-luu
+file=$dich/log-$(date +%F).tar.gz
+
+mkdir -p "$dich"
+tar -czf "$file" -C "$nguon" .
+echo "Đã sao lưu $(tar -tzf "$file" | grep -vc '/$') file vào $file"

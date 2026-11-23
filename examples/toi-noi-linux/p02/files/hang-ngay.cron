@@ -1,0 +1,3 @@
+# Việc hằng ngày của bao-gia (LNX-020). Đang chạy thử mỗi phút.
+MAILTO=""
+* * * * * /srv/toinoi/bao-gia/scripts/hang-ngay >> /srv/toinoi/bao-gia/shared/logs/hang-ngay.log 2>&1

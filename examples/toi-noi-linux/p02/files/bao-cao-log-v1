@@ -1,0 +1,20 @@
+#!/usr/bin/env bash
+# bao-cao-log: tóm tắt một file log của dịch vụ bao-gia.
+# Dùng: bao-cao-log FILE
+set -euo pipefail
+
+file=${1:?Dùng: bao-cao-log FILE}
+
+if [ ! -r "$file" ]; then
+  echo "bao-cao-log: không đọc được $file" >&2
+  exit 2
+fi
+
+tong=$(wc -l < "$file")
+loi=$(grep -c ' ERROR ' "$file")
+cham=$(grep -c ' WARN ' "$file")
+
+echo "File   : $file"
+echo "Số dòng: $tong"
+echo "Lỗi    : $loi"
+echo "Chậm   : $cham"

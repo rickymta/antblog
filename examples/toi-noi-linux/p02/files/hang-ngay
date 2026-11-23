@@ -1,0 +1,21 @@
+#!/usr/bin/env bash
+# hang-ngay: việc chạy mỗi ngày của bao-gia: báo cáo log rồi sao lưu log.
+# cron chạy script với môi trường tối giản, nên script tự đặt PATH và chỉ dùng đường dẫn tuyệt đối.
+set -euo pipefail
+PATH=/usr/local/bin:/usr/bin:/bin
+export LANG=C.UTF-8   # để awk đếm đúng chữ có dấu khi căn cột
+
+goc=/srv/toinoi/bao-gia
+ngay=${NGAY:-$(date +%F)}
+bao_cao=$goc/shared/logs/bao-cao-$ngay.txt
+
+{
+  echo "Báo cáo log bao-gia ngày $ngay"
+  echo
+  "$goc/scripts/bao-cao-log" /var/log/toinoi/bao-gia.log*
+  echo
+  zcat -f /var/log/toinoi/bao-gia.log* | awk -f "$goc/scripts/tom-tat.awk"
+} > "$bao_cao"
+
+NGAY=$ngay "$goc/scripts/sao-luu-log" -d /srv/toinoi/sao-luu -g 7
+echo "hang-ngay: xong $ngay, báo cáo ở $bao_cao"

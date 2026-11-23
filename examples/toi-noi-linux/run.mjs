@@ -5,12 +5,19 @@
 //   node run.mjs down          xoá server lab
 //   node run.mjs reset         tạo lại server lab từ ảnh (xoá mọi thay đổi)
 //   node run.mjs p01           tạo lại server rồi chạy kịch bản của cả Phần 1, in bản ghi
-//   node run.mjs p01 05        như trên nhưng chỉ in bản ghi của bài 05 (các bài trước chạy im lặng)
-//   node run.mjs setup 05      đưa server về đúng trạng thái ĐẦU bài 05 để bạn tự làm theo
+//   node run.mjs p02 15        tạo lại server, chạy im lặng các bài trước, chỉ in bản ghi bài 15
+//   node run.mjs setup 15      đưa server về đúng trạng thái ĐẦU bài LNX-015 để bạn tự làm theo
 //   node run.mjs info          in thông tin kết nối và fingerprint của server lab
+//
+// Bài được đánh số liên tục qua các phần: p01/01…10, p02/11…20. Mỗi bài bắt đầu từ trạng thái
+// cuối của bài trước nó.
 
-import { CONTAINER, PASSWORD, USER, down, reset, root, runScript, scripts, up } from './lib/lab.mjs';
+import { existsSync } from 'node:fs';
+import { join } from 'node:path';
 
+import { CONTAINER, PASSWORD, ROOT, USER, down, reset, root, runScript, scripts, up } from './lib/lab.mjs';
+
+const PARTS = ['p01', 'p02'];
 const [cmd, arg] = process.argv.slice(2);
 
 function info() {
@@ -21,12 +28,18 @@ function info() {
   console.log(`Fingerprint: ${fp} (ED25519)`);
 }
 
+/** Mọi kịch bản của các phần, theo thứ tự bài. */
+const all = () =>
+  PARTS.filter((p) => existsSync(join(ROOT, p))).flatMap((p) => scripts(p).map((s) => ({ ...s, part: p })));
+
 function part(name, only) {
+  if (!PARTS.includes(name)) throw new Error('Không có phần ' + name);
   reset();
   const out = [];
-  for (const s of scripts(name)) {
-    const show = !only || s.id === only;
-    if (only && s.id > only) break;
+  for (const s of all()) {
+    const mine = s.part === name;
+    if (PARTS.indexOf(s.part) > PARTS.indexOf(name) || (only && s.id > only)) break;
+    const show = mine && (!only || s.id === only);
     const text = runScript(s.path, { echo: show });
     if (show) out.push(`==== ${name}/${s.name} ====\n${text.trimEnd()}\n`);
   }
@@ -49,9 +62,9 @@ switch (cmd) {
     info();
     break;
   case 'setup': {
-    if (!/^\d\d$/.test(arg || '')) throw new Error('Dùng: node run.mjs setup <số bài, ví dụ 05>');
+    if (!/^\d\d$/.test(arg || '')) throw new Error('Dùng: node run.mjs setup <số bài, ví dụ 05 hoặc 15>');
     reset();
-    for (const s of scripts('p01')) {
+    for (const s of all()) {
       if (s.id >= arg) break;
       runScript(s.path, { echo: false });
     }
@@ -59,10 +72,11 @@ switch (cmd) {
     info();
     break;
   }
-  case 'p01':
-    part('p01', arg);
-    break;
   default:
-    console.log('Dùng: node run.mjs up | down | reset | info | setup <NN> | p01 [NN]');
+    if (PARTS.includes(cmd)) {
+      part(cmd, arg);
+      break;
+    }
+    console.log(`Dùng: node run.mjs up | down | reset | info | setup <NN> | ${PARTS.join(' | ')} [NN]`);
     process.exit(cmd ? 1 : 0);
 }

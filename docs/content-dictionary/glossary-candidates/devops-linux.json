@@ -3,9 +3,9 @@
   "category": "devops-linux",
   "generatedAt": "2026-11-22",
   "source": {
-    "articles": 10,
+    "articles": 20,
     "checkedAgainst": "api/seed/terminology.json (working tree 22/11/2026, 422 mục) và các file khác trong glossary-candidates/",
-    "occurrencesMethod": "Như postgresql.json: occurrences = số bài trong series (Phần 1, 10 bài linux-*) có ít nhất một chỗ khớp term/english/aliases trong văn xuôi; mentions = tổng số chỗ khớp; outsideSeriesArticles = số bài ngoài series có chỗ khớp. Bỏ frontmatter, khối code, inline code, <pre>/<code>/<script>/<style>, thẻ HTML (giữ alt/title/aria-label), đích liên kết, URL. Ranh giới từ Unicode, tôn trọng caseSensitive. Phần lớn tên lệnh trong series nằm trong inline code nên không được tính. Cập nhật lại khi viết các phần sau."
+    "occurrencesMethod": "Như postgresql.json: occurrences = số bài trong series (Phần 1–2, 20 bài linux-*) có ít nhất một chỗ khớp term/english/aliases trong văn xuôi; mentions = tổng số chỗ khớp; outsideSeriesArticles = số bài ngoài series có chỗ khớp. Bỏ frontmatter, khối code, inline code, <pre>/<code>/<script>/<style>, thẻ HTML (giữ alt/title/aria-label), đích liên kết, URL. Ranh giới từ Unicode, tôn trọng caseSensitive. Phần lớn tên lệnh trong series nằm trong inline code nên không được tính. Cập nhật lại khi viết các phần sau."
   },
   "conflicts": [],
   "terms": [
@@ -18,8 +18,8 @@
         "linux-la-gi-va-ssh-studio"
       ],
       "scopeNote": "Thuật ngữ riêng của Linux/Unix, cùng nghĩa ở mọi chuyên mục.",
-      "occurrences": 3,
-      "mentions": 23,
+      "occurrences": 4,
+      "mentions": 25,
       "outsideSeriesArticles": 5,
       "reviewNote": "Alias \"nhân\" rất dễ bắt nhầm (nhân vật, phép nhân, nguyên nhân là từ khác nhưng \"nhân\" đứng riêng vẫn gặp); chỉ nên giữ \"kernel\"."
     },
@@ -55,9 +55,9 @@
         "linux-shell-dong-lenh-tro-giup"
       ],
       "scopeNote": "Ngoài chuyên mục: Azure Cloud Shell, ShellRoute của go_router.",
-      "occurrences": 10,
-      "mentions": 46,
-      "outsideSeriesArticles": 19
+      "occurrences": 16,
+      "mentions": 88,
+      "outsideSeriesArticles": 20
     },
     {
       "slug": "bash",
@@ -69,8 +69,8 @@
         "linux-shell-dong-lenh-tro-giup"
       ],
       "scopeNote": "Thuật ngữ riêng của Linux/Unix, cùng nghĩa ở mọi chuyên mục.",
-      "occurrences": 6,
-      "mentions": 25,
+      "occurrences": 10,
+      "mentions": 49,
       "outsideSeriesArticles": 14
     },
     {
@@ -85,9 +85,9 @@
         "linux-dung-lab-docker-ket-noi-ssh-studio"
       ],
       "scopeNote": "Thuật ngữ riêng của Linux/Unix, cùng nghĩa ở mọi chuyên mục.",
-      "occurrences": 10,
-      "mentions": 165,
-      "outsideSeriesArticles": 14
+      "occurrences": 20,
+      "mentions": 249,
+      "outsideSeriesArticles": 15
     },
     {
       "slug": "sftp",
@@ -184,8 +184,8 @@
         "linux-shell-dong-lenh-tro-giup"
       ],
       "scopeNote": "\"prompt\" ngoài chuyên mục thường là prompt của mô hình AI.",
-      "occurrences": 6,
-      "mentions": 20,
+      "occurrences": 7,
+      "mentions": 21,
       "outsideSeriesArticles": 3
     },
     {
@@ -201,8 +201,8 @@
         "linux-shell-dong-lenh-tro-giup"
       ],
       "scopeNote": "Từ rất chung; chỉ gắn tay ở chỗ định nghĩa.",
-      "occurrences": 6,
-      "mentions": 18,
+      "occurrences": 11,
+      "mentions": 28,
       "outsideSeriesArticles": 118
     },
     {
@@ -217,9 +217,9 @@
         "linux-shell-dong-lenh-tro-giup"
       ],
       "scopeNote": "Ngoài chuyên mục: đối số của hàm trong các series lập trình (cùng nghĩa rộng, khác ngữ cảnh).",
-      "occurrences": 7,
-      "mentions": 14,
-      "outsideSeriesArticles": 34
+      "occurrences": 13,
+      "mentions": 21,
+      "outsideSeriesArticles": 35
     },
     {
       "slug": "alias-shell",
@@ -233,8 +233,8 @@
         "linux-shell-dong-lenh-tro-giup"
       ],
       "scopeNote": "Ngoài chuyên mục: alias trong SQL, alias của keyword trong từ điển này.",
-      "occurrences": 4,
-      "mentions": 5,
+      "occurrences": 7,
+      "mentions": 28,
       "outsideSeriesArticles": 24
     },
     {
@@ -252,8 +252,8 @@
         "linux-chuyen-huong-pipe"
       ],
       "scopeNote": "Thuật ngữ riêng của Linux/Unix, cùng nghĩa ở mọi chuyên mục.",
-      "occurrences": 5,
-      "mentions": 19,
+      "occurrences": 11,
+      "mentions": 45,
       "outsideSeriesArticles": 53,
       "reviewNote": "Dò toàn site sẽ đánh dấu ở 53 bài ngoài series; soát vài bài trước khi gộp."
     },
@@ -269,8 +269,8 @@
         "linux-cay-thu-muc-duong-dan"
       ],
       "scopeNote": "Ngoài chuyên mục: thư mục gốc của repository, của dự án.",
-      "occurrences": 1,
-      "mentions": 5,
+      "occurrences": 2,
+      "mentions": 6,
       "outsideSeriesArticles": 136
     },
     {
@@ -283,8 +283,8 @@
         "linux-cay-thu-muc-duong-dan"
       ],
       "scopeNote": "Thuật ngữ riêng của Linux/Unix, cùng nghĩa ở mọi chuyên mục.",
-      "occurrences": 1,
-      "mentions": 6,
+      "occurrences": 3,
+      "mentions": 8,
       "outsideSeriesArticles": 5
     },
     {
@@ -297,8 +297,8 @@
         "linux-cay-thu-muc-duong-dan"
       ],
       "scopeNote": "Thuật ngữ riêng của Linux/Unix, cùng nghĩa ở mọi chuyên mục.",
-      "occurrences": 2,
-      "mentions": 6,
+      "occurrences": 3,
+      "mentions": 7,
       "outsideSeriesArticles": 7
     },
     {
@@ -316,8 +316,8 @@
         "linux-thuc-hanh-thu-muc-trien-khai"
       ],
       "scopeNote": "Thuật ngữ riêng của Linux/Unix, cùng nghĩa ở mọi chuyên mục.",
-      "occurrences": 3,
-      "mentions": 35,
+      "occurrences": 5,
+      "mentions": 38,
       "outsideSeriesArticles": 0
     },
     {
@@ -350,8 +350,8 @@
         "linux-tim-kiem-find-grep"
       ],
       "scopeNote": "Ngoài chuyên mục: wildcard của SQL LIKE, wildcard certificate, wildcard trong CORS.",
-      "occurrences": 2,
-      "mentions": 11,
+      "occurrences": 5,
+      "mentions": 19,
       "outsideSeriesArticles": 8
     },
     {
@@ -381,8 +381,8 @@
         "linux-xem-sua-file-van-ban"
       ],
       "scopeNote": "Thuật ngữ riêng của Linux/Unix, cùng nghĩa ở mọi chuyên mục.",
-      "occurrences": 1,
-      "mentions": 7,
+      "occurrences": 10,
+      "mentions": 74,
       "outsideSeriesArticles": 1
     },
     {
@@ -415,8 +415,8 @@
         "linux-nguoi-dung-nhom-quyen-file"
       ],
       "scopeNote": "Ngoài chuyên mục: service account của Kubernetes, của nhà cung cấp đám mây (khái niệm gần nhưng cơ chế khác).",
-      "occurrences": 1,
-      "mentions": 1,
+      "occurrences": 2,
+      "mentions": 2,
       "outsideSeriesArticles": 6
     },
     {
@@ -477,8 +477,8 @@
         "linux-chuyen-huong-pipe"
       ],
       "scopeNote": "Thuật ngữ riêng của Linux/Unix, cùng nghĩa ở mọi chuyên mục.",
-      "occurrences": 2,
-      "mentions": 31,
+      "occurrences": 8,
+      "mentions": 42,
       "outsideSeriesArticles": 13
     },
     {
@@ -496,8 +496,8 @@
         "linux-chuyen-huong-pipe"
       ],
       "scopeNote": "Ngoài chuyên mục: HTTP redirect, redirect URI của OAuth.",
-      "occurrences": 2,
-      "mentions": 6,
+      "occurrences": 5,
+      "mentions": 11,
       "outsideSeriesArticles": 8
     },
     {
@@ -543,8 +543,8 @@
         "linux-tim-kiem-find-grep"
       ],
       "scopeNote": "Thuật ngữ riêng của Linux/Unix, cùng nghĩa ở mọi chuyên mục.",
-      "occurrences": 2,
-      "mentions": 10,
+      "occurrences": 5,
+      "mentions": 23,
       "outsideSeriesArticles": 25,
       "reviewNote": "Dò toàn site sẽ đánh dấu ở 25 bài ngoài series; soát vài bài trước khi gộp."
     },
@@ -560,8 +560,8 @@
         "linux-la-gi-va-ssh-studio"
       ],
       "scopeNote": "Ngoài chuyên mục: \"tiến trình\" còn là quy trình nghiệp vụ, process của hệ điều hành trong series lập trình.",
-      "occurrences": 6,
-      "mentions": 19,
+      "occurrences": 9,
+      "mentions": 29,
       "outsideSeriesArticles": 221
     },
     {
@@ -592,6 +592,249 @@
       "occurrences": 1,
       "mentions": 1,
       "outsideSeriesArticles": 0
+    },
+    {
+      "slug": "bien-moi-truong",
+      "term": "biến môi trường",
+      "english": "environment variable",
+      "shortDefinition": "Biến mà shell truyền (bản sao) cho mọi tiến trình con. Biến của shell chỉ thành biến môi trường sau khi export. Ví dụ: HOME, USER, PATH, LANG. Tiến trình con sửa biến của nó không làm đổi biến của tiến trình cha.",
+      "categories": [],
+      "relatedArticleSlugs": [
+        "linux-bien-moi-truong-path-bashrc"
+      ],
+      "scopeNote": "Cùng nghĩa ở mọi chuyên mục (Docker, cloud, ứng dụng).",
+      "occurrences": 2,
+      "mentions": 12,
+      "outsideSeriesArticles": 65,
+      "reviewNote": "Dò toàn site sẽ đánh dấu ở 65 bài ngoài series; soát vài bài trước khi gộp."
+    },
+    {
+      "slug": "path-env",
+      "term": "PATH",
+      "english": "PATH environment variable",
+      "shortDefinition": "Biến môi trường chứa danh sách thư mục, cách nhau bằng dấu hai chấm, mà shell lần lượt tìm khi bạn gõ một tên lệnh không có dấu /. \"command not found\" nghĩa là không thư mục nào trong PATH có file thực thi tên đó.",
+      "caseSensitive": true,
+      "categories": [
+        "devops-linux"
+      ],
+      "relatedArticleSlugs": [
+        "linux-bien-moi-truong-path-bashrc"
+      ],
+      "scopeNote": "Viết hoa, phân biệt với chữ \"path\" (đường dẫn) ở các bài khác.",
+      "occurrences": 3,
+      "mentions": 8,
+      "outsideSeriesArticles": 5
+    },
+    {
+      "slug": "command-substitution",
+      "term": "command substitution",
+      "shortDefinition": "Cú pháp $(lệnh) của shell: chạy lệnh bên trong, lấy stdout (bỏ dấu xuống dòng ở cuối) và đặt vào chỗ đó, thường để gán cho biến: so_loi=$(grep -c ERROR file).",
+      "categories": [],
+      "relatedArticleSlugs": [
+        "linux-bien-moi-truong-path-bashrc",
+        "linux-shell-script-dau-tien"
+      ],
+      "scopeNote": "Thuật ngữ riêng của Linux/Unix, cùng nghĩa ở mọi chuyên mục.",
+      "occurrences": 1,
+      "mentions": 2,
+      "outsideSeriesArticles": 0
+    },
+    {
+      "slug": "shebang",
+      "term": "shebang",
+      "shortDefinition": "Dòng đầu tiên của một script, bắt đầu bằng #!, cho kernel biết dùng chương trình nào để chạy file, ví dụ #!/usr/bin/env bash. Chạy bằng \"bash file\" thì dòng này bị bỏ qua.",
+      "categories": [],
+      "relatedArticleSlugs": [
+        "linux-shell-script-dau-tien"
+      ],
+      "scopeNote": "Thuật ngữ riêng của Linux/Unix, cùng nghĩa ở mọi chuyên mục.",
+      "occurrences": 4,
+      "mentions": 10,
+      "outsideSeriesArticles": 0
+    },
+    {
+      "slug": "shell-script",
+      "term": "shell script",
+      "shortDefinition": "File văn bản chứa các lệnh shell, chạy như một lệnh. Script tốt có shebang, set -euo pipefail, kiểm tra tham số, báo lỗi ra stderr, trả mã thoát có nghĩa và qua được shellcheck.",
+      "categories": [],
+      "relatedArticleSlugs": [
+        "linux-shell-script-dau-tien",
+        "linux-shell-script-an-toan"
+      ],
+      "scopeNote": "Thuật ngữ riêng của Linux/Unix, cùng nghĩa ở mọi chuyên mục.",
+      "occurrences": 3,
+      "mentions": 3,
+      "outsideSeriesArticles": 1
+    },
+    {
+      "slug": "sed",
+      "term": "sed",
+      "english": "stream editor",
+      "shortDefinition": "Công cụ sửa văn bản theo dòng: đọc từng dòng, áp lệnh (in, xoá, thay bằng s/mẫu/thay/) lên những dòng khớp địa chỉ. -i sửa file tại chỗ, -i.bak giữ bản gốc. Cùng cú pháp thay thế với :s của vim.",
+      "caseSensitive": true,
+      "categories": [],
+      "relatedArticleSlugs": [
+        "linux-sed-sua-van-ban"
+      ],
+      "scopeNote": "Thuật ngữ riêng của Linux/Unix, cùng nghĩa ở mọi chuyên mục.",
+      "occurrences": 4,
+      "mentions": 18,
+      "outsideSeriesArticles": 0
+    },
+    {
+      "slug": "awk",
+      "term": "awk",
+      "aliases": [
+        "gawk"
+      ],
+      "shortDefinition": "Ngôn ngữ nhỏ xử lý văn bản chia cột: tự tách mỗi dòng thành các trường $1, $2… theo khoảng trắng, cho viết điều kiện, phép tính, mảng kết hợp và khối BEGIN/END. Hợp với tổng, trung bình, gom nhóm trên log.",
+      "caseSensitive": true,
+      "categories": [],
+      "relatedArticleSlugs": [
+        "linux-awk-xu-ly-log"
+      ],
+      "scopeNote": "Thuật ngữ riêng của Linux/Unix, cùng nghĩa ở mọi chuyên mục.",
+      "occurrences": 3,
+      "mentions": 12,
+      "outsideSeriesArticles": 0
+    },
+    {
+      "slug": "tar",
+      "term": "tar",
+      "english": "tape archive",
+      "shortDefinition": "Công cụ đóng gói nhiều file (kèm tên, quyền, chủ sở hữu, thời điểm sửa) thành một file. Không tự nén; tar -czf nén thêm bằng gzip. -c tạo, -t liệt kê, -x giải nén, -C chọn thư mục.",
+      "caseSensitive": true,
+      "categories": [],
+      "relatedArticleSlugs": [
+        "linux-tar-gzip-nen-luu-tru"
+      ],
+      "scopeNote": "Thuật ngữ riêng của Linux/Unix, cùng nghĩa ở mọi chuyên mục.",
+      "occurrences": 3,
+      "mentions": 12,
+      "outsideSeriesArticles": 0
+    },
+    {
+      "slug": "gzip",
+      "term": "gzip",
+      "shortDefinition": "Công cụ nén một file thành file .gz, có trên mọi hệ thống. Mặc định xoá file gốc (-k để giữ). Đọc file nén bằng zcat, zless, zgrep. Lựa chọn an toàn khi không chắc máy khôi phục có công cụ nào.",
+      "caseSensitive": true,
+      "categories": [],
+      "relatedArticleSlugs": [
+        "linux-tar-gzip-nen-luu-tru",
+        "linux-cut-sort-uniq-tr"
+      ],
+      "scopeNote": "Thuật ngữ riêng của Linux/Unix, cùng nghĩa ở mọi chuyên mục.",
+      "occurrences": 3,
+      "mentions": 13,
+      "outsideSeriesArticles": 0
+    },
+    {
+      "slug": "zstd",
+      "term": "zstd",
+      "english": "Zstandard",
+      "shortDefinition": "Công cụ nén hiện đại, nén và giải nén rất nhanh; ở mức mặc định kích thước tương đương gzip, ở mức cao gần bằng xz. File có đuôi .zst, đọc bằng zstdcat; tar dùng qua tuỳ chọn --zstd.",
+      "caseSensitive": true,
+      "categories": [],
+      "relatedArticleSlugs": [
+        "linux-tar-gzip-nen-luu-tru"
+      ],
+      "scopeNote": "Thuật ngữ riêng của Linux/Unix, cùng nghĩa ở mọi chuyên mục.",
+      "occurrences": 2,
+      "mentions": 6,
+      "outsideSeriesArticles": 0
+    },
+    {
+      "slug": "cron",
+      "term": "cron",
+      "aliases": [
+        "crontab"
+      ],
+      "shortDefinition": "Dịch vụ chạy lệnh theo lịch. Mỗi người dùng có một crontab: mỗi dòng gồm năm trường phút, giờ, ngày, tháng, thứ rồi tới lệnh. Cron chạy lệnh với môi trường tối giản: không đọc ~/.bashrc, PATH rất ngắn, không có LANG.",
+      "categories": [
+        "devops-linux"
+      ],
+      "relatedArticleSlugs": [
+        "linux-thuc-hanh-script-sao-luu-log"
+      ],
+      "scopeNote": "Cú pháp lịch cron cũng có ở dịch vụ lên lịch của cloud; bản cloud khác chi tiết, nên giới hạn trong chuyên mục.",
+      "occurrences": 6,
+      "mentions": 52,
+      "outsideSeriesArticles": 10
+    },
+    {
+      "slug": "trap-bash",
+      "term": "trap",
+      "english": "trap (bash)",
+      "shortDefinition": "Lệnh dựng sẵn của bash đăng ký một lệnh chạy khi script nhận tín hiệu hoặc kết thúc. Với EXIT, lệnh đó dọn file tạm dù script chạy hết, gặp lỗi hay bị Ctrl+C.",
+      "categories": [
+        "devops-linux"
+      ],
+      "relatedArticleSlugs": [
+        "linux-shell-script-an-toan"
+      ],
+      "scopeNote": "Từ tiếng Anh thông dụng; giới hạn trong chuyên mục.",
+      "occurrences": 1,
+      "mentions": 4,
+      "outsideSeriesArticles": 0
+    },
+    {
+      "slug": "shellcheck",
+      "term": "shellcheck",
+      "shortDefinition": "Công cụ đọc shell script mà không chạy và cảnh báo lỗi thường gặp: biến thiếu nháy, biến chưa gán, lặp qua $(ls), rm với biến có thể rỗng. Mỗi cảnh báo có mã SCxxxx kèm giải thích trên wiki.",
+      "categories": [],
+      "relatedArticleSlugs": [
+        "linux-shell-script-an-toan",
+        "linux-thuc-hanh-script-sao-luu-log"
+      ],
+      "scopeNote": "Thuật ngữ riêng của Linux/Unix, cùng nghĩa ở mọi chuyên mục.",
+      "occurrences": 2,
+      "mentions": 3,
+      "outsideSeriesArticles": 10
+    },
+    {
+      "slug": "xoay-vong-log",
+      "term": "xoay vòng log",
+      "english": "log rotation",
+      "shortDefinition": "Cách giữ log không lớn mãi: định kỳ đổi tên file log đang ghi (bao-gia.log thành bao-gia.log.1), nén các bản cũ (.2.gz) và xoá bản quá hạn. Trên Linux thường do logrotate làm.",
+      "categories": [],
+      "relatedArticleSlugs": [
+        "linux-bien-moi-truong-path-bashrc",
+        "linux-cut-sort-uniq-tr"
+      ],
+      "scopeNote": "Thuật ngữ riêng của Linux/Unix, cùng nghĩa ở mọi chuyên mục.",
+      "occurrences": 2,
+      "mentions": 3,
+      "outsideSeriesArticles": 0
+    },
+    {
+      "slug": "mang-ket-hop",
+      "term": "mảng kết hợp",
+      "english": "associative array",
+      "shortDefinition": "Mảng có chỉ số là chuỗi bất kỳ thay vì số thứ tự, như n[\"car4\"]. Trong awk, mọi mảng đều là mảng kết hợp; dùng để đếm và cộng dồn theo khoá. Thứ tự duyệt không xác định.",
+      "categories": [],
+      "relatedArticleSlugs": [
+        "linux-awk-xu-ly-log"
+      ],
+      "scopeNote": "Thuật ngữ riêng của Linux/Unix, cùng nghĩa ở mọi chuyên mục.",
+      "occurrences": 1,
+      "mentions": 2,
+      "outsideSeriesArticles": 0
+    },
+    {
+      "slug": "tach-tu-shell",
+      "term": "tách từ",
+      "english": "word splitting",
+      "shortDefinition": "Việc shell cắt giá trị của một biến hoặc $( ) không nằm trong nháy kép thành nhiều đối số theo khoảng trắng. Tên file có dấu cách vỡ thành nhiều phần; đặt biến trong nháy kép để tránh.",
+      "categories": [
+        "devops-linux"
+      ],
+      "relatedArticleSlugs": [
+        "linux-shell-script-an-toan"
+      ],
+      "scopeNote": "\"tách từ\" ở bài xử lý ngôn ngữ có nghĩa khác (tokenization); giới hạn trong chuyên mục.",
+      "occurrences": 2,
+      "mentions": 3,
+      "outsideSeriesArticles": 4
     },
     {
       "slug": "lts",
@@ -634,6 +877,26 @@
       "slug": "scrollback",
       "term": "scrollback",
       "reason": "Vùng cuộn của terminal; nhắc một lần ở LNX-009."
+    },
+    {
+      "slug": "getopts",
+      "term": "getopts",
+      "reason": "Lệnh dựng sẵn đọc tuỳ chọn dòng lệnh; chỉ dùng trong LNX-019 và nằm trong code."
+    },
+    {
+      "slug": "mktemp-flock",
+      "term": "mktemp",
+      "reason": "mktemp và flock luôn xuất hiện trong inline code; bộ dò không bắt. Đề xuất lại nếu bài sau nhắc trong văn xuôi."
+    },
+    {
+      "slug": "logrotate",
+      "term": "logrotate",
+      "reason": "Phần 4 (LNX-039) mới dạy; hiện chỉ được nhắc trước."
+    },
+    {
+      "slug": "ghi-nguyen-tu",
+      "term": "ghi nguyên tử",
+      "reason": "Atomic write bằng file tạm rồi mv; chỉ LNX-019 dùng, đã giải nghĩa tại chỗ."
     },
     {
       "slug": "nhom-chinh",

@@ -1,0 +1,15 @@
+{
+  "Service": {
+    "Name": "bao-gia",
+    "Port": 8081,
+    "Environment": "production"
+  },
+  "Fare": {
+    "RuleFile": "/srv/toinoi/bao-gia/current/bang-gia.csv",
+    "RoundTo": 1000
+  },
+  "Logging": {
+    "File": "/var/log/toinoi/bao-gia.log",
+    "Level": "Warning"
+  }
+}

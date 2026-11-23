@@ -1,0 +1,796 @@
+==== p02/11-bien-path.sh ====
+
+# Log sau khi Bình bật xoay vòng log
+an@toinoi-app-01:~$ ls -l /var/log/toinoi
+total 60
+-rw-r--r-- 1 baogia toinoi 27260 Nov 21 12:17 bao-gia.log
+-rw-r--r-- 1 baogia toinoi 23353 Nov 20 11:16 bao-gia.log.1
+-rw-r--r-- 1 baogia toinoi  4314 Nov 19 11:07 bao-gia.log.2.gz
+
+# Biến của shell
+an@toinoi-app-01:~$ dich_vu=bao-gia
+an@toinoi-app-01:~$ echo $dich_vu
+bao-gia
+an@toinoi-app-01:~$ echo "Dịch vụ: $dich_vu"
+Dịch vụ: bao-gia
+an@toinoi-app-01:~$ echo 'Dịch vụ: $dich_vu'
+Dịch vụ: $dich_vu
+an@toinoi-app-01:~$ phien_ban=1.4.2
+an@toinoi-app-01:~$ echo "$dich_vu-$phien_ban.tar.gz"
+bao-gia-1.4.2.tar.gz
+an@toinoi-app-01:~$ echo "$dich_vu_$phien_ban.tar.gz"
+1.4.2.tar.gz
+an@toinoi-app-01:~$ echo "${dich_vu}_${phien_ban}.tar.gz"
+bao-gia_1.4.2.tar.gz
+an@toinoi-app-01:~$ dich_vu = bao-gia
+-bash: dich_vu: command not found
+
+# Lưu kết quả của một lệnh vào biến
+an@toinoi-app-01:~$ so_loi=$(grep -c ERROR /var/log/toinoi/bao-gia.log)
+an@toinoi-app-01:~$ ngay=$(head -n 1 /var/log/toinoi/bao-gia.log | cut -d' ' -f1)
+an@toinoi-app-01:~$ echo "Ngày $ngay có $so_loi lỗi"
+Ngày 2026-11-21 có 17 lỗi
+
+# Biến môi trường
+an@toinoi-app-01:~$ printenv HOME USER SHELL LANG
+/home/an
+an
+/bin/bash
+C.UTF-8
+an@toinoi-app-01:~$ bash -c 'echo "Shell con thấy: [$dich_vu]"'
+Shell con thấy: []
+an@toinoi-app-01:~$ export dich_vu
+an@toinoi-app-01:~$ bash -c 'echo "Shell con thấy: [$dich_vu]"'
+Shell con thấy: [bao-gia]
+an@toinoi-app-01:~$ date -d '2026-11-21 06:37:58' '+%F %T %Z'
+2026-11-21 06:37:58 +07
+an@toinoi-app-01:~$ TZ=UTC date -d '2026-11-21 06:37:58 +07' '+%F %T %Z'
+2026-11-20 23:37:58 UTC
+an@toinoi-app-01:~$ echo $TZ
+
+
+# PATH
+an@toinoi-app-01:~$ echo $PATH
+/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+an@toinoi-app-01:~$ type -a ls
+ls is aliased to `ls --color=auto'
+ls is /usr/bin/ls
+ls is /bin/ls
+an@toinoi-app-01:~$ mkdir -p ~/bin
+an@toinoi-app-01:~$ vim bin/xin-chao
+an@toinoi-app-01:~$ chmod u+x bin/xin-chao
+an@toinoi-app-01:~$ xin-chao
+-bash: xin-chao: command not found
+an@toinoi-app-01:~$ ./bin/xin-chao
+Xin chào an, đây là máy toinoi-app-01.
+an@toinoi-app-01:~$ export PATH="$HOME/bin:$PATH"
+an@toinoi-app-01:~$ echo $PATH
+/home/an/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+an@toinoi-app-01:~$ xin-chao
+Xin chào an, đây là máy toinoi-app-01.
+an@toinoi-app-01:~$ which xin-chao
+/home/an/bin/xin-chao
+
+# File khởi động: ~/.profile và ~/.bashrc
+an@toinoi-app-01:~$ grep -n -A2 'HOME/bin' ~/.profile
+20:if [ -d "$HOME/bin" ] ; then
+21:    PATH="$HOME/bin:$PATH"
+22-fi
+23-
+an@toinoi-app-01:~$ grep -n '^alias l' ~/.bashrc
+91:alias ll='ls -alF'
+92:alias la='ls -A'
+93:alias l='ls -CF'
+an@toinoi-app-01:~$ tail -n 3 ~/.bashrc
+# Lối tắt cho dịch vụ bao-gia (LNX-011)
+alias cdbg='cd /srv/toinoi/bao-gia'
+alias loibg='grep -c ERROR /var/log/toinoi/bao-gia.log'
+an@toinoi-app-01:~$ loibg
+-bash: loibg: command not found
+an@toinoi-app-01:~$ source ~/.bashrc
+an@toinoi-app-01:~$ loibg
+17
+an@toinoi-app-01:~$ cdbg
+an@toinoi-app-01:/srv/toinoi/bao-gia$ pwd
+/srv/toinoi/bao-gia
+an@toinoi-app-01:/srv/toinoi/bao-gia$ type cdbg loibg
+cdbg is aliased to `cd /srv/toinoi/bao-gia'
+loibg is aliased to `grep -c ERROR /var/log/toinoi/bao-gia.log'
+
+==== p02/12-vim.sh ====
+
+# Phiên đăng nhập mới: ~/bin đã nằm trong PATH
+an@toinoi-app-01:~$ echo $PATH
+/home/an/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+an@toinoi-app-01:~$ type cdbg
+cdbg is aliased to `cd /srv/toinoi/bao-gia'
+an@toinoi-app-01:~$ mkdir -p ~/vim
+an@toinoi-app-01:~$ cp /opt/toinoi/bao-gia/bang-gia.csv /opt/toinoi/bao-gia/appsettings.json ~/vim/
+an@toinoi-app-01:~$ cd ~/vim
+an@toinoi-app-01:~/vim$ cat -n bang-gia.csv
+     1  dich_vu,ten,gia_mo_cua,gia_moi_km,gia_toi_thieu
+     2  bike,Xe máy,8000,2500,12000
+     3  car4,Ô tô 4 chỗ,12000,4500,25000
+     4  car7,Ô tô 7 chỗ,15000,5500,30000
+     5  delivery,Giao hàng,10000,3000,15000
+
+# Sửa bảng giá: nhân đôi dòng, đổi từ, thay thế
+an@toinoi-app-01:~/vim$ cat -n bang-gia.csv
+     1  dich_vu,ten,gia_mo_cua,gia_moi_km,gia_toi_thieu
+     2  bike,Xe máy,8000,2500,12000
+     3  car4,Xe 4 chỗ,12000,4500,25000
+     4  car7,Xe 7 chỗ,15000,5500,30000
+     5  van16,Xe 16 chỗ,25000,8000,45000
+     6  delivery,Giao hàng,10000,3000,15000
+an@toinoi-app-01:~/vim$ diff /opt/toinoi/bao-gia/bang-gia.csv bang-gia.csv
+3,4c3,5
+< car4,Ô tô 4 chỗ,12000,4500,25000
+< car7,Ô tô 7 chỗ,15000,5500,30000
+---
+> car4,Xe 4 chỗ,12000,4500,25000
+> car7,Xe 7 chỗ,15000,5500,30000
+> van16,Xe 16 chỗ,25000,8000,45000
+
+# Sửa cấu hình: tìm, thay trong cả file, chạy lệnh từ vim
+an@toinoi-app-01:~/vim$ diff /opt/toinoi/bao-gia/appsettings.json appsettings.json
+4c4
+<     "Port": 8080,
+---
+>     "Port": 8081,
+8c8
+<     "RuleFile": "/opt/toinoi/bao-gia/bang-gia.csv",
+---
+>     "RuleFile": "/srv/toinoi/bao-gia/current/bang-gia.csv",
+13c13
+<     "Level": "Information"
+---
+>     "Level": "Warning"
+
+# Cấu hình vim tối thiểu
+an@toinoi-app-01:~/vim$ vim ~/.vimrc
+an@toinoi-app-01:~/vim$ cat ~/.vimrc
+" Cấu hình vim tối thiểu cho server (series Linux qua SSH Studio, LNX-012)
+" Có ~/.vimrc thì vim không tự nạp defaults.vim nữa, nên nạp lại trước.
+unlet! skip_defaults_vim
+source $VIMRUNTIME/defaults.vim
+
+set number            " hiện số dòng
+set hlsearch          " tô sáng mọi kết quả tìm
+set ignorecase        " tìm không phân biệt hoa thường…
+set smartcase         " …trừ khi chuỗi tìm có chữ hoa
+set expandtab         " Tab chèn dấu cách
+set shiftwidth=2 tabstop=2
+
+==== p02/13-cot-sort-uniq.sh ====
+
+# Ba ngày log, một file đã nén
+an@toinoi-app-01:~$ cd /var/log/toinoi
+an@toinoi-app-01:/var/log/toinoi$ ls -l
+total 60
+-rw-r--r-- 1 baogia toinoi 27260 Nov 21 12:17 bao-gia.log
+-rw-r--r-- 1 baogia toinoi 23353 Nov 20 11:16 bao-gia.log.1
+-rw-r--r-- 1 baogia toinoi  4314 Nov 19 11:07 bao-gia.log.2.gz
+an@toinoi-app-01:/var/log/toinoi$ file bao-gia.log.2.gz
+bao-gia.log.2.gz: gzip compressed data, max compression, from Unix, original size modulo 2^32 22916
+an@toinoi-app-01:/var/log/toinoi$ zcat bao-gia.log.2.gz | head -n 3
+2026-11-19 06:00:00 INFO  bao-gia 1.4.1 khoi dong, cong 8080, moi truong production
+2026-11-19 06:00:00 INFO  nap bang gia: 4 loai dich vu tu /opt/toinoi/bao-gia/bang-gia.csv
+2026-11-19 06:00:43 INFO  q-099401 dich_vu=delivery km=9.1 gia=38000 179 ms
+an@toinoi-app-01:/var/log/toinoi$ wc -l bao-gia.log.1 bao-gia.log
+  305 bao-gia.log.1
+  362 bao-gia.log
+  667 total
+an@toinoi-app-01:/var/log/toinoi$ zcat bao-gia.log.2.gz | wc -l
+302
+an@toinoi-app-01:/var/log/toinoi$ zcat -f bao-gia.log.2.gz bao-gia.log.1 bao-gia.log | wc -l
+969
+an@toinoi-app-01:/var/log/toinoi$ zcat -f bao-gia.log.2.gz bao-gia.log.1 bao-gia.log | cut -d' ' -f1 | uniq -c
+    302 2026-11-19
+    305 2026-11-20
+    362 2026-11-21
+
+# Dấu cách kép: vì sao cut lấy sai cột và tr -s sửa thế nào
+an@toinoi-app-01:/var/log/toinoi$ head -n 4 bao-gia.log | cut -d' ' -f3,4
+INFO
+INFO
+INFO
+WARN
+an@toinoi-app-01:/var/log/toinoi$ head -n 4 bao-gia.log | tr -s ' ' | cut -d' ' -f3,4
+INFO bao-gia
+INFO nap
+INFO q-100001
+WARN q-100002
+
+# Mức log theo từng ngày
+an@toinoi-app-01:/var/log/toinoi$ zcat -f bao-gia.log.2.gz bao-gia.log.1 bao-gia.log | cut -c1-10,21-25 --output-delimiter=' ' | sort | uniq -c
+     18 2026-11-19 ERROR
+    259 2026-11-19 INFO
+     25 2026-11-19 WARN
+     26 2026-11-20 ERROR
+    260 2026-11-20 INFO
+     19 2026-11-20 WARN
+     17 2026-11-21 ERROR
+    321 2026-11-21 INFO
+     24 2026-11-21 WARN
+
+# tr: đổi ký tự
+an@toinoi-app-01:/var/log/toinoi$ head -n 1 bao-gia.log | tr ' ' '\n' | head -n 4
+2026-11-21
+06:00:00
+INFO
+
+an@toinoi-app-01:/var/log/toinoi$ echo "dich_vu=car4" | tr 'a-z' 'A-Z'
+DICH_VU=CAR4
+
+# Hai loại lỗi trong ba ngày
+an@toinoi-app-01:/var/log/toinoi$ zcat -f bao-gia.log.2.gz bao-gia.log.1 bao-gia.log | grep ' ERROR ' | cut -d' ' -f6- | sort | uniq -c | sort -rn
+     54 khong lay duoc quang duong: timeout sau 3000 ms goi ban-do
+      7 khong doc duoc bang gia: file dang bi khoa
+an@toinoi-app-01:/var/log/toinoi$ zcat -f bao-gia.log.2.gz bao-gia.log.1 bao-gia.log | grep 'bi khoa' | cut -d' ' -f1,2 | head -n 3
+2026-11-20 09:07:12
+2026-11-20 09:09:21
+2026-11-20 09:12:04
+
+# sort theo cột số: yêu cầu chậm nhất của ba ngày
+an@toinoi-app-01:/var/log/toinoi$ zcat -f bao-gia.log.2.gz bao-gia.log.1 bao-gia.log | grep ' WARN ' | tr -s ' ' | sort -t' ' -k10,10n | tail -n 3
+2026-11-19 10:22:34 WARN q-099661 dich_vu=bike km=20.1 bao gia cham: 2671 ms
+2026-11-21 11:21:33 WARN q-100311 dich_vu=bike km=20.1 bao gia cham: 2671 ms
+2026-11-19 07:19:28 WARN q-099483 dich_vu=car7 km=16.8 bao gia cham: 2685 ms
+
+# Lỗi theo ngày và dịch vụ, xếp thành bảng
+an@toinoi-app-01:/var/log/toinoi$ zcat -f bao-gia.log.2.gz bao-gia.log.1 bao-gia.log | grep ' ERROR ' | cut -d' ' -f1,5 | sort | uniq -c | column -t
+4   2026-11-19  dich_vu=bike
+5   2026-11-19  dich_vu=car4
+5   2026-11-19  dich_vu=car7
+4   2026-11-19  dich_vu=delivery
+8   2026-11-20  dich_vu=bike
+1   2026-11-20  dich_vu=car4
+5   2026-11-20  dich_vu=car7
+12  2026-11-20  dich_vu=delivery
+5   2026-11-21  dich_vu=bike
+6   2026-11-21  dich_vu=car4
+4   2026-11-21  dich_vu=car7
+2   2026-11-21  dich_vu=delivery
+
+# column với file CSV; wc đếm byte và ký tự
+an@toinoi-app-01:/var/log/toinoi$ column -t -s, /opt/toinoi/bao-gia/bang-gia.csv
+dich_vu   ten         gia_mo_cua  gia_moi_km  gia_toi_thieu
+bike      Xe máy      8000        2500        12000
+car4      Ô tô 4 chỗ  12000       4500        25000
+car7      Ô tô 7 chỗ  15000       5500        30000
+delivery  Giao hàng   10000       3000        15000
+an@toinoi-app-01:/var/log/toinoi$ wc -l -c /opt/toinoi/bao-gia/bang-gia.csv
+  5 188 /opt/toinoi/bao-gia/bang-gia.csv
+an@toinoi-app-01:/var/log/toinoi$ wc -m /opt/toinoi/bao-gia/bang-gia.csv
+178 /opt/toinoi/bao-gia/bang-gia.csv
+
+# Phiên bản đã chạy; dòng chỉ có ở một file: uniq -u
+an@toinoi-app-01:/var/log/toinoi$ zcat -f bao-gia.log.2.gz bao-gia.log.1 bao-gia.log | grep -o 'bao-gia 1\.4\.[0-9] khoi dong' | sort | uniq -c
+      2 bao-gia 1.4.1 khoi dong
+      2 bao-gia 1.4.2 khoi dong
+an@toinoi-app-01:/var/log/toinoi$ cut -d, -f1 /opt/toinoi/bao-gia/bang-gia.csv ~/vim/bang-gia.csv | sort | uniq -u
+van16
+
+==== p02/14-sed.sh ====
+an@toinoi-app-01:~$ cd ~/tai-lieu
+
+# In theo dòng và theo mẫu
+an@toinoi-app-01:~/tai-lieu$ sed -n '1,3p' /var/log/toinoi/bao-gia.log
+2026-11-21 06:00:00 INFO  bao-gia 1.4.2 khoi dong, cong 8080, moi truong production
+2026-11-21 06:00:00 INFO  nap bang gia: 4 loai dich vu tu /opt/toinoi/bao-gia/bang-gia.csv
+2026-11-21 06:01:45 INFO  q-100001 dich_vu=delivery km=23.8 gia=82000 178 ms
+an@toinoi-app-01:~/tai-lieu$ sed -n '$p' /var/log/toinoi/bao-gia.log
+2026-11-21 12:17:05 INFO  q-100360 dich_vu=car4 km=14.3 gia=77000 59 ms
+an@toinoi-app-01:~/tai-lieu$ sed -n '/SIGTERM/,+2p' /var/log/toinoi/bao-gia.log.1
+2026-11-20 09:15:41 INFO  nhan tin hieu SIGTERM, dung bao-gia 1.4.1
+2026-11-20 09:16:21 INFO  bao-gia 1.4.2 khoi dong, cong 8080, moi truong production
+2026-11-20 09:16:21 INFO  nap bang gia: 4 loai dich vu tu /opt/toinoi/bao-gia/bang-gia.csv
+
+# Thay thế
+an@toinoi-app-01:~/tai-lieu$ echo "bao-gia 1.4.1 dang chay" | sed 's/1.4.1/1.4.2/'
+bao-gia 1.4.2 dang chay
+an@toinoi-app-01:~/tai-lieu$ echo "km=2.5 km=3.0" | sed 's/km=/quang_duong=/'
+quang_duong=2.5 km=3.0
+an@toinoi-app-01:~/tai-lieu$ echo "km=2.5 km=3.0" | sed 's/km=/quang_duong=/g'
+quang_duong=2.5 quang_duong=3.0
+an@toinoi-app-01:~/tai-lieu$ echo "1x4y1" | sed 's/1.4.1/1.4.2/'
+1.4.2
+an@toinoi-app-01:~/tai-lieu$ echo "1x4y1" | sed 's/1\.4\.1/1.4.2/'
+1x4y1
+
+# Nhóm trong biểu thức chính quy: đổi định dạng dòng log
+an@toinoi-app-01:~/tai-lieu$ grep -m 3 ' WARN ' /var/log/toinoi/bao-gia.log
+2026-11-21 06:02:30 WARN  q-100002 dich_vu=bike km=16.9 bao gia cham: 1406 ms
+2026-11-21 06:18:02 WARN  q-100017 dich_vu=delivery km=18.6 bao gia cham: 2295 ms
+2026-11-21 06:40:06 WARN  q-100037 dich_vu=bike km=2.2 bao gia cham: 1548 ms
+an@toinoi-app-01:~/tai-lieu$ grep -m 3 ' WARN ' /var/log/toinoi/bao-gia.log | sed -E 's/^([0-9-]+) ([0-9:]+) +WARN +(q-[0-9]+) .* ([0-9]+) ms$/\3 \1T\2 \4ms/'
+q-100002 2026-11-21T06:02:30 1406ms
+q-100017 2026-11-21T06:18:02 2295ms
+q-100037 2026-11-21T06:40:06 1548ms
+an@toinoi-app-01:~/tai-lieu$ zcat -f /var/log/toinoi/bao-gia.log* | sed -n 's/.*cham: \([0-9]*\) ms$/\1/p' | sort -n | tail -n 3
+2671
+2671
+2685
+
+# Xoá dòng
+an@toinoi-app-01:~/tai-lieu$ sed -e '/^#/d' -e '/^$/d' /opt/toinoi/bao-gia/kiem-tra-cau-hinh.sh
+set -eu
+thu_muc="$(cd "$(dirname "$0")" && pwd)"
+bang_gia="$thu_muc/bang-gia.csv"
+if [ ! -r "$bang_gia" ]; then
+  echo "LOI: khong doc duoc $bang_gia" >&2
+  exit 1
+fi
+so_dich_vu=$(($(wc -l < "$bang_gia") - 1))
+echo "bao-gia: bang gia co $so_dich_vu loai dich vu"
+echo "bao-gia: cau hinh hop le"
+
+# Sửa file tại chỗ, có bản sao lưu
+an@toinoi-app-01:~/tai-lieu$ cp /opt/toinoi/bao-gia/appsettings.json appsettings.json
+an@toinoi-app-01:~/tai-lieu$ sed -i.bak 's/"Level": "Information"/"Level": "Warning"/' appsettings.json
+an@toinoi-app-01:~/tai-lieu$ ls appsettings.json*
+appsettings.json  appsettings.json.bak
+an@toinoi-app-01:~/tai-lieu$ diff appsettings.json.bak appsettings.json
+13c13
+<     "Level": "Information"
+---
+>     "Level": "Warning"
+an@toinoi-app-01:~/tai-lieu$ sed -i 's#/opt/toinoi/bao-gia#/srv/toinoi/bao-gia/current#' appsettings.json
+an@toinoi-app-01:~/tai-lieu$ grep -n current appsettings.json
+8:    "RuleFile": "/srv/toinoi/bao-gia/current/bang-gia.csv",
+
+# Chỉ sửa trong một khối
+an@toinoi-app-01:~/tai-lieu$ sed -n '/"Fare"/,/}/p' appsettings.json
+  "Fare": {
+    "RuleFile": "/srv/toinoi/bao-gia/current/bang-gia.csv",
+    "RoundTo": 1000
+  },
+an@toinoi-app-01:~/tai-lieu$ sed -i '/"Fare"/,/}/ s/1000/500/' appsettings.json
+an@toinoi-app-01:~/tai-lieu$ diff appsettings.json.bak appsettings.json
+8,9c8,9
+<     "RuleFile": "/opt/toinoi/bao-gia/bang-gia.csv",
+<     "RoundTo": 1000
+---
+>     "RuleFile": "/srv/toinoi/bao-gia/current/bang-gia.csv",
+>     "RoundTo": 500
+13c13
+<     "Level": "Information"
+---
+>     "Level": "Warning"
+
+==== p02/15-awk.sh ====
+an@toinoi-app-01:~$ cd /var/log/toinoi
+
+# Trường: awk tự tách theo khoảng trắng
+an@toinoi-app-01:/var/log/toinoi$ head -n 4 bao-gia.log | awk '{ print $3, $4 }'
+INFO bao-gia
+INFO nap
+INFO q-100001
+WARN q-100002
+an@toinoi-app-01:/var/log/toinoi$ head -n 4 bao-gia.log | awk '{ print NF, $NF }'
+12 production
+12 /opt/toinoi/bao-gia/bang-gia.csv
+9 ms
+11 ms
+
+# Lọc theo điều kiện
+an@toinoi-app-01:/var/log/toinoi$ awk '$3 == "ERROR"' bao-gia.log | head -n 2
+2026-11-21 06:37:58 ERROR q-100034 dich_vu=car7 khong lay duoc quang duong: timeout sau 3000 ms goi ban-do
+2026-11-21 06:41:18 ERROR q-100038 dich_vu=car4 khong lay duoc quang duong: timeout sau 3000 ms goi ban-do
+an@toinoi-app-01:/var/log/toinoi$ awk '$3 == "ERROR" { n++ } END { print n, "lỗi" }' bao-gia.log
+17 lỗi
+an@toinoi-app-01:/var/log/toinoi$ awk '$NF == "ms" && $(NF-1) > 2500 { print $2, $4, $(NF-1) }' bao-gia.log
+09:12:56 q-100180 2637
+09:56:45 q-100226 2615
+11:21:33 q-100311 2671
+11:27:22 q-100315 2570
+
+# Tổng và trung bình
+an@toinoi-app-01:/var/log/toinoi$ awk '$3 == "INFO" && $NF == "ms" { tong += $(NF-1); n++ } END { printf "%d yêu cầu, trung bình %.1f ms\n", n, tong / n }' bao-gia.log
+319 yêu cầu, trung bình 95.3 ms
+
+# Mảng: gom theo dịch vụ
+an@toinoi-app-01:/var/log/toinoi$ awk '$3 == "INFO" && $NF == "ms" { split($5, a, "="); n[a[2]]++; t[a[2]] += $(NF-1) } END { for (dv in n) printf "%-9s %4d %6.1f ms\n", dv, n[dv], t[dv] / n[dv] }' bao-gia.log | sort
+bike        73   97.0 ms
+car4        89   91.6 ms
+car7        84  100.1 ms
+delivery    73   92.4 ms
+
+# Đếm hai loại lỗi theo ngày
+an@toinoi-app-01:/var/log/toinoi$ zcat -f bao-gia.log.2.gz bao-gia.log.1 bao-gia.log | awk '$3 == "ERROR" { loai = ($0 ~ /bi khoa/) ? "bang-gia" : "ban-do"; n[$1 " " loai]++ } END { for (k in n) print k, n[k] }' | sort
+2026-11-19 ban-do 18
+2026-11-20 ban-do 19
+2026-11-20 bang-gia 7
+2026-11-21 ban-do 17
+
+# File CSV: -F và -v
+an@toinoi-app-01:/var/log/toinoi$ awk -F, 'NR > 1 { print $1, $3 }' /opt/toinoi/bao-gia/bang-gia.csv
+bike 8000
+car4 12000
+car7 15000
+delivery 10000
+an@toinoi-app-01:/var/log/toinoi$ awk -F, -v km=10 'NR > 1 { gia = $3 + $4 * km; if (gia < $5) gia = $5; printf "%-9s %7d đ\n", $1, gia }' /opt/toinoi/bao-gia/bang-gia.csv
+bike        33000 đ
+car4        57000 đ
+car7        70000 đ
+delivery    40000 đ
+
+# Chương trình awk trong file
+an@toinoi-app-01:/var/log/toinoi$ vim ~/bin/tom-tat.awk
+an@toinoi-app-01:/var/log/toinoi$ zcat -f bao-gia.log.2.gz bao-gia.log.1 bao-gia.log | awk -f ~/bin/tom-tat.awk
+ngày        yêu cầu   lỗi  chậm   tb ms
+2026-11-19      300    18    25    98.7
+2026-11-20      300    26    19   101.2
+2026-11-21      360    17    24    95.3
+
+==== p02/16-script-dau-tien.sh ====
+
+# Viết script bằng vim
+an@toinoi-app-01:~$ vim bin/bao-cao-log
+an@toinoi-app-01:~$ bao-cao-log /var/log/toinoi/bao-gia.log
+-bash: /home/an/bin/bao-cao-log: Permission denied
+an@toinoi-app-01:~$ ls -l bin/bao-cao-log
+-rw-rw-r-- 1 an an 448 Nov 22 23:21 bin/bao-cao-log
+an@toinoi-app-01:~$ chmod u+x bin/bao-cao-log
+an@toinoi-app-01:~$ bao-cao-log /var/log/toinoi/bao-gia.log
+File   : /var/log/toinoi/bao-gia.log
+Số dòng: 362
+Lỗi    : 17
+Chậm   : 24
+an@toinoi-app-01:~$ bash bin/bao-cao-log /var/log/toinoi/bao-gia.log.1
+File   : /var/log/toinoi/bao-gia.log.1
+Số dòng: 305
+Lỗi    : 26
+Chậm   : 19
+
+# Tham số sai và mã thoát
+an@toinoi-app-01:~$ bao-cao-log
+/home/an/bin/bao-cao-log: line 6: 1: Dùng: bao-cao-log FILE
+an@toinoi-app-01:~$ echo $?
+1
+an@toinoi-app-01:~$ bao-cao-log /khong-co
+bao-cao-log: không đọc được /khong-co
+an@toinoi-app-01:~$ echo $?
+2
+an@toinoi-app-01:~$ bao-cao-log /var/log/toinoi/bao-gia.log.1 > /dev/null && echo "báo cáo xong"
+báo cáo xong
+
+# Khi grep không tìm thấy gì
+an@toinoi-app-01:~$ grep -v ' ERROR ' /var/log/toinoi/bao-gia.log > ~/tai-lieu/khong-loi.log
+an@toinoi-app-01:~$ bao-cao-log ~/tai-lieu/khong-loi.log
+an@toinoi-app-01:~$ echo $?
+1
+
+# Tìm chỗ hỏng bằng bash -x
+an@toinoi-app-01:~$ bash -n bin/bao-cao-log && echo "cú pháp ổn"
+cú pháp ổn
+an@toinoi-app-01:~$ bash -x bin/bao-cao-log ~/tai-lieu/khong-loi.log
++ set -euo pipefail
++ file=/home/an/tai-lieu/khong-loi.log
++ '[' '!' -r /home/an/tai-lieu/khong-loi.log ']'
+++ wc -l
++ tong=345
+++ grep -c ' ERROR ' /home/an/tai-lieu/khong-loi.log
++ loi=0
+an@toinoi-app-01:~$ grep -c ' ERROR ' ~/tai-lieu/khong-loi.log
+0
+an@toinoi-app-01:~$ echo $?
+1
+
+# Sửa bằng sed, chạy lại
+an@toinoi-app-01:~$ sed -i 's/\(grep -c .*\))$/\1 || true)/' bin/bao-cao-log
+an@toinoi-app-01:~$ grep -n 'grep -c' bin/bao-cao-log
+14:loi=$(grep -c ' ERROR ' "$file" || true)
+15:cham=$(grep -c ' WARN ' "$file" || true)
+an@toinoi-app-01:~$ bao-cao-log ~/tai-lieu/khong-loi.log
+File   : /home/an/tai-lieu/khong-loi.log
+Số dòng: 345
+Lỗi    : 0
+Chậm   : 24
+an@toinoi-app-01:~$ echo $?
+0
+
+==== p02/17-dieu-kien-vong-lap.sh ====
+
+# test, [ ] và [[ ]]
+an@toinoi-app-01:~$ [ -r /var/log/toinoi/bao-gia.log ] && echo "đọc được"
+đọc được
+an@toinoi-app-01:~$ [ -w /var/log/toinoi/bao-gia.log ] || echo "không ghi được"
+không ghi được
+an@toinoi-app-01:~$ so_loi=$(grep -c ' ERROR ' /var/log/toinoi/bao-gia.log)
+an@toinoi-app-01:~$ [ "$so_loi" -gt 10 ] && echo "$so_loi lỗi: nhiều hơn 10"
+17 lỗi: nhiều hơn 10
+an@toinoi-app-01:~$ [ "$so_loi" -gt 9 ] && echo "so sánh số: 17 > 9"
+so sánh số: 17 > 9
+an@toinoi-app-01:~$ [ "$so_loi" \> 9 ] || echo "so sánh chuỗi: \"17\" đứng trước \"9\""
+so sánh chuỗi: "17" đứng trước "9"
+an@toinoi-app-01:~$ [[ bao-gia.log.2.gz == *.gz ]] && echo "file nén"
+file nén
+
+# if, elif, else
+an@toinoi-app-01:~$ if [ "$so_loi" -eq 0 ]; then echo "không có lỗi"; elif [ "$so_loi" -lt 20 ]; then echo "ít lỗi"; else echo "nhiều lỗi"; fi
+ít lỗi
+
+# for: lặp qua danh sách và qua file
+an@toinoi-app-01:~$ for dv in bike car4 car7 delivery; do echo "$dv: $(grep -c "dich_vu=$dv " /var/log/toinoi/bao-gia.log) yêu cầu"; done
+bike: 83 yêu cầu
+car4: 99 yêu cầu
+car7: 94 yêu cầu
+delivery: 84 yêu cầu
+an@toinoi-app-01:~$ for f in /var/log/toinoi/bao-gia.log*; do echo "$f"; done
+/var/log/toinoi/bao-gia.log
+/var/log/toinoi/bao-gia.log.1
+/var/log/toinoi/bao-gia.log.2.gz
+
+# while read: lặp qua từng dòng
+an@toinoi-app-01:~$ grep ' ERROR ' /var/log/toinoi/bao-gia.log | head -n 3 | while read -r ngay gio muc ma dv _; do echo "$gio $ma $dv"; done
+06:37:58 q-100034 dich_vu=car7
+06:41:18 q-100038 dich_vu=car4
+07:20:18 q-100076 dich_vu=bike
+
+# case: rẽ nhánh theo mẫu
+an@toinoi-app-01:~$ for f in /var/log/toinoi/bao-gia.log*; do case $f in *.gz) echo "$f: nén gzip" ;; *.log) echo "$f: đang ghi" ;; *) echo "$f: đã xoay vòng" ;; esac; done
+/var/log/toinoi/bao-gia.log: đang ghi
+/var/log/toinoi/bao-gia.log.1: đã xoay vòng
+/var/log/toinoi/bao-gia.log.2.gz: nén gzip
+
+# Script phiên bản 2: hàm, nhiều file, file nén
+an@toinoi-app-01:~$ vim bin/bao-cao-log
+an@toinoi-app-01:~$ bao-cao-log /var/log/toinoi/bao-gia.log*
+/var/log/toinoi/bao-gia.log        362 dòng   17 lỗi   24 chậm
+/var/log/toinoi/bao-gia.log.1      305 dòng   26 lỗi   19 chậm
+/var/log/toinoi/bao-gia.log.2.gz   302 dòng   18 lỗi   25 chậm
+an@toinoi-app-01:~$ bao-cao-log /var/log/toinoi/bao-gia.log /khong-co /var/log/toinoi/bao-gia.log.1
+/var/log/toinoi/bao-gia.log        362 dòng   17 lỗi   24 chậm
+bao-cao-log: bỏ qua /khong-co (không đọc được)
+/var/log/toinoi/bao-gia.log.1      305 dòng   26 lỗi   19 chậm
+an@toinoi-app-01:~$ echo $?
+1
+an@toinoi-app-01:~$ bao-cao-log
+Dùng: bao-cao-log FILE...
+an@toinoi-app-01:~$ echo $?
+2
+
+==== p02/18-nen-luu-tru.sh ====
+an@toinoi-app-01:~$ mkdir -p ~/sao-luu
+an@toinoi-app-01:~$ cd ~/sao-luu
+
+# gzip một file
+an@toinoi-app-01:~/sao-luu$ cp /var/log/toinoi/bao-gia.log.1 .
+an@toinoi-app-01:~/sao-luu$ ls -l
+total 24
+-rw-r--r-- 1 an an 23353 Nov 22 23:21 bao-gia.log.1
+an@toinoi-app-01:~/sao-luu$ gzip bao-gia.log.1
+an@toinoi-app-01:~/sao-luu$ ls -l
+total 8
+-rw-r--r-- 1 an an 4570 Nov 22 23:21 bao-gia.log.1.gz
+an@toinoi-app-01:~/sao-luu$ gzip -l bao-gia.log.1.gz
+         compressed        uncompressed  ratio uncompressed_name
+               4570               23353  80.6% bao-gia.log.1
+an@toinoi-app-01:~/sao-luu$ gunzip bao-gia.log.1.gz
+an@toinoi-app-01:~/sao-luu$ gzip -k bao-gia.log.1
+an@toinoi-app-01:~/sao-luu$ ls -l
+total 32
+-rw-r--r-- 1 an an 23353 Nov 22 23:21 bao-gia.log.1
+-rw-r--r-- 1 an an  4570 Nov 22 23:21 bao-gia.log.1.gz
+
+# So sánh gzip, xz và zstd
+an@toinoi-app-01:~/sao-luu$ xz -k bao-gia.log.1
+an@toinoi-app-01:~/sao-luu$ zstd -q -k bao-gia.log.1
+an@toinoi-app-01:~/sao-luu$ ls -l bao-gia.log.1*
+-rw-r--r-- 1 an an 23353 Nov 22 23:21 bao-gia.log.1
+-rw-r--r-- 1 an an  4570 Nov 22 23:21 bao-gia.log.1.gz
+-rw-r--r-- 1 an an  3620 Nov 22 23:21 bao-gia.log.1.xz
+-rw-r--r-- 1 an an  4817 Nov 22 23:21 bao-gia.log.1.zst
+an@toinoi-app-01:~/sao-luu$ xzcat bao-gia.log.1.xz | wc -l
+305
+an@toinoi-app-01:~/sao-luu$ zstdcat bao-gia.log.1.zst | wc -l
+305
+an@toinoi-app-01:~/sao-luu$ rm bao-gia.log.1.gz bao-gia.log.1.xz bao-gia.log.1.zst
+
+# tar: gom nhiều file thành một
+an@toinoi-app-01:~/sao-luu$ tar -cf log.tar -C /var/log/toinoi bao-gia.log bao-gia.log.1 bao-gia.log.2.gz
+an@toinoi-app-01:~/sao-luu$ tar -tvf log.tar
+-rw-r--r-- baogia/toinoi 27260 2026-11-21 12:17 bao-gia.log
+-rw-r--r-- baogia/toinoi 23353 2026-11-20 11:16 bao-gia.log.1
+-rw-r--r-- baogia/toinoi  4314 2026-11-19 11:07 bao-gia.log.2.gz
+an@toinoi-app-01:~/sao-luu$ tar -czf log-ba-ngay.tar.gz -C /var/log/toinoi .
+an@toinoi-app-01:~/sao-luu$ tar --zstd -cf log-ba-ngay.tar.zst -C /var/log/toinoi .
+an@toinoi-app-01:~/sao-luu$ tar -tzf log-ba-ngay.tar.gz
+./
+./bao-gia.log
+./bao-gia.log.2.gz
+./bao-gia.log.1
+an@toinoi-app-01:~/sao-luu$ ls -l
+total 116
+-rw-r--r-- 1 an an 23353 Nov 22 23:21 bao-gia.log.1
+-rw-rw-r-- 1 an an 15111 Nov 22 23:21 log-ba-ngay.tar.gz
+-rw-rw-r-- 1 an an 15622 Nov 22 23:21 log-ba-ngay.tar.zst
+-rw-rw-r-- 1 an an 61440 Nov 22 23:21 log.tar
+
+# Giải nén vào thư mục khác và kiểm tra
+an@toinoi-app-01:~/sao-luu$ mkdir thu-giai-nen
+an@toinoi-app-01:~/sao-luu$ tar -xzf log-ba-ngay.tar.gz -C thu-giai-nen
+an@toinoi-app-01:~/sao-luu$ ls -l thu-giai-nen
+total 60
+-rw-r--r-- 1 an an 27260 Nov 21 12:17 bao-gia.log
+-rw-r--r-- 1 an an 23353 Nov 20 11:16 bao-gia.log.1
+-rw-r--r-- 1 an an  4314 Nov 19 11:07 bao-gia.log.2.gz
+an@toinoi-app-01:~/sao-luu$ diff -r /var/log/toinoi thu-giai-nen && echo "giống hệt bản gốc"
+giống hệt bản gốc
+an@toinoi-app-01:~/sao-luu$ rm -r thu-giai-nen log.tar bao-gia.log.1
+an@toinoi-app-01:~/sao-luu$ mkdir thu-giai-nen
+an@toinoi-app-01:~/sao-luu$ tar -xzf log-ba-ngay.tar.gz -C thu-giai-nen ./bao-gia.log.1
+an@toinoi-app-01:~/sao-luu$ ls thu-giai-nen
+bao-gia.log.1
+an@toinoi-app-01:~/sao-luu$ zgrep -c ' ERROR ' /var/log/toinoi/bao-gia.log.2.gz
+18
+
+# Tải bản sao lưu về máy bằng khung Files
+
+# Script sao lưu đầu tiên
+an@toinoi-app-01:~/sao-luu$ vim ~/bin/sao-luu-log
+an@toinoi-app-01:~/sao-luu$ chmod u+x ~/bin/sao-luu-log
+an@toinoi-app-01:~/sao-luu$ sao-luu-log
+Đã sao lưu 3 file vào /home/an/sao-luu/log-2026-11-22.tar.gz
+an@toinoi-app-01:~/sao-luu$ ls ~/sao-luu
+log-2026-11-22.tar.gz  log-ba-ngay.tar.gz  log-ba-ngay.tar.zst  thu-giai-nen
+
+==== p02/19-script-an-toan.sh ====
+an@toinoi-app-01:~$ mkdir -p ~/thu-an-toan
+an@toinoi-app-01:~$ cd ~/thu-an-toan
+
+# Dấu nháy và tên file có dấu cách
+an@toinoi-app-01:~/thu-an-toan$ touch "bao cao 21-11.txt" bao-cao-20-11.txt
+an@toinoi-app-01:~/thu-an-toan$ ls
+'bao cao 21-11.txt'   bao-cao-20-11.txt
+an@toinoi-app-01:~/thu-an-toan$ f="bao cao 21-11.txt"
+an@toinoi-app-01:~/thu-an-toan$ ls -l $f
+ls: cannot access 'bao': No such file or directory
+ls: cannot access 'cao': No such file or directory
+ls: cannot access '21-11.txt': No such file or directory
+an@toinoi-app-01:~/thu-an-toan$ ls -l "$f"
+-rw-rw-r-- 1 an an 0 Nov 22 23:21 'bao cao 21-11.txt'
+an@toinoi-app-01:~/thu-an-toan$ for x in $(ls); do echo "[$x]"; done
+[bao]
+[cao]
+[21-11.txt]
+[bao-cao-20-11.txt]
+an@toinoi-app-01:~/thu-an-toan$ for x in *; do echo "[$x]"; done
+[bao cao 21-11.txt]
+[bao-cao-20-11.txt]
+
+# Một chữ gõ sai và lệnh rm -rf
+an@toinoi-app-01:~/thu-an-toan$ vim xoa-tam-loi
+an@toinoi-app-01:~/thu-an-toan$ bash xoa-tam-loi
+rm -rf /bin /bin.usr-is-merged /boot /dev /etc /home /lib /lib.usr-is-merged /lib64 /media /mnt /opt /proc /root /run /sbin /sbin.usr-is-merged /srv /sys /tmp /usr /var
+an@toinoi-app-01:~/thu-an-toan$ bash -u xoa-tam-loi
+xoa-tam-loi: line 4: thu_muc_tm: unbound variable
+an@toinoi-app-01:~/thu-an-toan$ echo $?
+1
+an@toinoi-app-01:~/thu-an-toan$ shellcheck xoa-tam-loi
+
+In xoa-tam-loi line 3:
+thu_muc_tam=$HOME/thu-an-toan/tam
+^---------^ SC2034 (warning): thu_muc_tam appears unused. Verify use (or export if used externally).
+
+
+In xoa-tam-loi line 4:
+echo rm -rf "$thu_muc_tm"/*
+             ^---------^ SC2154 (warning): thu_muc_tm is referenced but not assigned (did you mean 'thu_muc_tam'?).
+
+For more information:
+  https://www.shellcheck.net/wiki/SC2034 -- thu_muc_tam appears unused. Verif...
+  https://www.shellcheck.net/wiki/SC2154 -- thu_muc_tm is referenced but not ...
+
+# trap và mktemp: dọn file tạm kể cả khi script hỏng giữa chừng
+an@toinoi-app-01:~/thu-an-toan$ mktemp
+/tmp/tmp.XgdqlMMjov
+an@toinoi-app-01:~/thu-an-toan$ vim thu-trap
+an@toinoi-app-01:~/thu-an-toan$ bash thu-trap
+file tạm: /tmp/bao-cao.KdFeW4
+đã ghi 17 dòng
+grep: /khong-co: No such file or directory
+dọn /tmp/bao-cao.KdFeW4
+an@toinoi-app-01:~/thu-an-toan$ echo $?
+2
+an@toinoi-app-01:~/thu-an-toan$ ls /tmp/bao-cao.* 2>/dev/null | wc -l
+0
+
+# flock: không cho hai bản chạy chồng nhau
+an@toinoi-app-01:~/thu-an-toan$ flock -n /tmp/thu.lock echo "lấy được khoá"
+lấy được khoá
+an@toinoi-app-01:~/thu-an-toan$ flock -n /tmp/thu.lock bash -c 'flock -n /tmp/thu.lock echo "lấy được khoá" || echo "khoá đang bị giữ"'
+khoá đang bị giữ
+
+# Script sao lưu phiên bản 2
+an@toinoi-app-01:~/thu-an-toan$ vim ~/bin/sao-luu-log
+an@toinoi-app-01:~/thu-an-toan$ shellcheck ~/bin/sao-luu-log ~/bin/bao-cao-log && echo "shellcheck: không có cảnh báo"
+shellcheck: không có cảnh báo
+an@toinoi-app-01:~/thu-an-toan$ NGAY=2026-11-19 sao-luu-log -d ~/sao-luu/thu
+sao-luu-log: đã ghi /home/an/sao-luu/thu/log-2026-11-19.tar.gz
+an@toinoi-app-01:~/thu-an-toan$ NGAY=2026-11-20 sao-luu-log -d ~/sao-luu/thu
+sao-luu-log: đã ghi /home/an/sao-luu/thu/log-2026-11-20.tar.gz
+an@toinoi-app-01:~/thu-an-toan$ NGAY=2026-11-21 sao-luu-log -d ~/sao-luu/thu -g 2
+sao-luu-log: đã ghi /home/an/sao-luu/thu/log-2026-11-21.tar.gz
+sao-luu-log: đã xoá bản cũ /home/an/sao-luu/thu/log-2026-11-19.tar.gz
+an@toinoi-app-01:~/thu-an-toan$ ls -l ~/sao-luu/thu
+total 32
+-rw-r----- 1 an an 15111 Nov 22 23:21 log-2026-11-20.tar.gz
+-rw-r----- 1 an an 15111 Nov 22 23:21 log-2026-11-21.tar.gz
+an@toinoi-app-01:~/thu-an-toan$ flock -n ~/sao-luu/thu/.sao-luu.lock sao-luu-log -d ~/sao-luu/thu
+sao-luu-log: đang có một lần sao lưu khác chạy
+an@toinoi-app-01:~/thu-an-toan$ echo $?
+1
+an@toinoi-app-01:~/thu-an-toan$ sao-luu-log -g abc
+sao-luu-log: -g cần một số nguyên dương, nhận 'abc'
+an@toinoi-app-01:~/thu-an-toan$ echo $?
+2
+
+==== p02/20-thuc-hanh.sh ====
+
+# 1. Đưa script vào thư mục dùng chung
+an@toinoi-app-01:~$ mkdir -p /srv/toinoi/bao-gia/scripts
+an@toinoi-app-01:~$ cp ~/bin/bao-cao-log ~/bin/sao-luu-log ~/bin/tom-tat.awk /srv/toinoi/bao-gia/scripts/
+an@toinoi-app-01:~$ vim /srv/toinoi/bao-gia/scripts/hang-ngay
+an@toinoi-app-01:~$ cd /srv/toinoi/bao-gia/scripts
+an@toinoi-app-01:/srv/toinoi/bao-gia/scripts$ chgrp toinoi . bao-cao-log sao-luu-log tom-tat.awk hang-ngay
+an@toinoi-app-01:/srv/toinoi/bao-gia/scripts$ chmod 750 . bao-cao-log sao-luu-log hang-ngay
+an@toinoi-app-01:/srv/toinoi/bao-gia/scripts$ chmod 640 tom-tat.awk
+an@toinoi-app-01:/srv/toinoi/bao-gia/scripts$ ls -la
+total 24
+drwxr-x--- 2 an toinoi 4096 Nov 22 23:21 .
+drwxr-xr-x 5 an toinoi 4096 Nov 22 23:21 ..
+-rwxr-x--- 1 an toinoi  913 Nov 22 23:21 bao-cao-log
+-rwxr-x--- 1 an toinoi  794 Nov 22 23:21 hang-ngay
+-rwxr-x--- 1 an toinoi 1515 Nov 22 23:21 sao-luu-log
+-rw-r----- 1 an toinoi  686 Nov 22 23:21 tom-tat.awk
+an@toinoi-app-01:/srv/toinoi/bao-gia/scripts$ shellcheck bao-cao-log sao-luu-log hang-ngay && echo "shellcheck: sạch"
+shellcheck: sạch
+
+# 2. Chạy thử với môi trường trống như của cron
+an@toinoi-app-01:/srv/toinoi/bao-gia/scripts$ env -i /usr/bin/env
+an@toinoi-app-01:/srv/toinoi/bao-gia/scripts$ env -i NGAY=2026-11-21 /srv/toinoi/bao-gia/scripts/hang-ngay
+/srv/toinoi/bao-gia/scripts/sao-luu-log: line 8: HOME: unbound variable
+an@toinoi-app-01:/srv/toinoi/bao-gia/scripts$ echo $?
+1
+an@toinoi-app-01:/srv/toinoi/bao-gia/scripts$ env -i HOME=/home/an NGAY=2026-11-21 /srv/toinoi/bao-gia/scripts/hang-ngay
+sao-luu-log: đã ghi /srv/toinoi/sao-luu/log-2026-11-21.tar.gz
+hang-ngay: xong 2026-11-21, báo cáo ở /srv/toinoi/bao-gia/shared/logs/bao-cao-2026-11-21.txt
+an@toinoi-app-01:/srv/toinoi/bao-gia/scripts$ cat /srv/toinoi/bao-gia/shared/logs/bao-cao-2026-11-21.txt
+Báo cáo log bao-gia ngày 2026-11-21
+
+/var/log/toinoi/bao-gia.log        362 dòng   17 lỗi   24 chậm
+/var/log/toinoi/bao-gia.log.1      305 dòng   26 lỗi   19 chậm
+/var/log/toinoi/bao-gia.log.2.gz   302 dòng   18 lỗi   25 chậm
+
+ngày        yêu cầu   lỗi  chậm   tb ms
+2026-11-19      300    18    25    98.7
+2026-11-20      300    26    19   101.2
+2026-11-21      360    17    24    95.3
+an@toinoi-app-01:/srv/toinoi/bao-gia/scripts$ ls -l /srv/toinoi/sao-luu
+total 16
+-rw-r----- 1 an an 15111 Nov 22 23:21 log-2026-11-21.tar.gz
+
+# 3. Lên lịch bằng cron: chạy thử mỗi phút
+an@toinoi-app-01:/srv/toinoi/bao-gia/scripts$ crontab -l
+no crontab for an
+an@toinoi-app-01:/srv/toinoi/bao-gia/scripts$ vim ~/hang-ngay.cron
+an@toinoi-app-01:/srv/toinoi/bao-gia/scripts$ crontab ~/hang-ngay.cron
+an@toinoi-app-01:/srv/toinoi/bao-gia/scripts$ crontab -l
+# Việc hằng ngày của bao-gia (LNX-020). Đang chạy thử mỗi phút.
+MAILTO=""
+* * * * * /srv/toinoi/bao-gia/scripts/hang-ngay >> /srv/toinoi/bao-gia/shared/logs/hang-ngay.log 2>&1
+an@toinoi-app-01:/srv/toinoi/bao-gia/scripts$ cat /srv/toinoi/bao-gia/shared/logs/hang-ngay.log
+sao-luu-log: đã ghi /srv/toinoi/sao-luu/log-2026-11-22.tar.gz
+hang-ngay: xong 2026-11-22, báo cáo ở /srv/toinoi/bao-gia/shared/logs/bao-cao-2026-11-22.txt
+an@toinoi-app-01:/srv/toinoi/bao-gia/scripts$ ls /srv/toinoi/sao-luu
+log-2026-11-21.tar.gz  log-2026-11-22.tar.gz
+
+# 4. Đổi sang lịch thật: 01:17 mỗi ngày
+an@toinoi-app-01:/srv/toinoi/bao-gia/scripts$ sed -i -e 's/^[*] [*] [*] [*] [*]/17 1 * * */' -e 's/Đang chạy thử mỗi phút/Chạy lúc 01:17 mỗi ngày/' ~/hang-ngay.cron
+an@toinoi-app-01:/srv/toinoi/bao-gia/scripts$ crontab ~/hang-ngay.cron
+an@toinoi-app-01:/srv/toinoi/bao-gia/scripts$ crontab -l
+# Việc hằng ngày của bao-gia (LNX-020). Chạy lúc 01:17 mỗi ngày.
+MAILTO=""
+17 1 * * * /srv/toinoi/bao-gia/scripts/hang-ngay >> /srv/toinoi/bao-gia/shared/logs/hang-ngay.log 2>&1

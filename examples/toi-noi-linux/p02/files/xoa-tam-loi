@@ -1,0 +1,4 @@
+#!/usr/bin/env bash
+# Dọn thư mục tạm của báo cáo. Bản có lỗi gõ sai tên biến: chỉ IN lệnh rm, không chạy.
+thu_muc_tam=$HOME/thu-an-toan/tam
+echo rm -rf "$thu_muc_tm"/*

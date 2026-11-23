@@ -625,6 +625,26 @@
     "status": "published"
   },
   {
+    "slug": "linux-qua-ssh-studio-phan-02",
+    "title": "Linux qua SSH Studio · Phần 2 · Xử lý văn bản và shell script",
+    "description": "Biến những dòng lệnh gõ tay thành công cụ chạy hằng ngày: biến, PATH và ~/.bashrc, vim cho việc sửa nhanh, đọc log nén nhiều ngày bằng cut, sort, uniq, sửa văn bản bằng sed, tính toán trên log bằng awk, viết shell script có tham số, mã thoát, điều kiện, vòng lặp, hàm, nén và sao lưu bằng tar, gzip, zstd, và các thói quen an toàn với set -u, trap, mktemp, flock, shellcheck — kết thúc bằng bài thực hành báo cáo và sao lưu log của dịch vụ báo giá chạy mỗi đêm bằng cron, có bộ chấm tự động.",
+    "level": "intermediate",
+    "category": "devops-linux",
+    "articles": [
+      "linux-bien-moi-truong-path-bashrc",
+      "linux-vim-hang-ngay",
+      "linux-cut-sort-uniq-tr",
+      "linux-sed-sua-van-ban",
+      "linux-awk-xu-ly-log",
+      "linux-shell-script-dau-tien",
+      "linux-bash-dieu-kien-vong-lap-ham",
+      "linux-tar-gzip-nen-luu-tru",
+      "linux-shell-script-an-toan",
+      "linux-thuc-hanh-script-sao-luu-log"
+    ],
+    "status": "published"
+  },
+  {
     "slug": "ba-p01-tu-duy-phan-tich-nghiep-vu",
     "title": "BA · Phần 1 · Tư duy phân tích nghiệp vụ",
     "description": "Tám bài mở đầu chương trình Business Analysis qua Tới Nơi: tư duy BA, vai trò phối hợp, phân loại yêu cầu, BACCM, mục tiêu đo lường, phạm vi và quyết định khi thiếu bằng chứng. Gồm 3 bài cơ bản, 3 bài trung bình và 2 bài nâng cao; kết thúc bằng hồ sơ đề xuất cải thiện điểm đón.",

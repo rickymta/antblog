@@ -30,7 +30,8 @@ CB = `beginner`, TB = `intermediate`, NC = `advanced`; toàn khung có 18 CB / 2
 - **SSH Studio** (SSH client của tác giả, Tauri 2 + React + xterm.js, lõi Rust), bản **0.3.0**. Giao diện tiếng Việt, nền tối. **Ảnh chụp màn hình trong bài lấy từ SSH Studio chạy trực tiếp từ repository `ssh-studio`** với thư mục dữ liệu riêng (`dev.sshstudio.blog`, không có server nào khác ngoài lab), kết nối tới server lab thật. Khi SSH Studio chưa hỗ trợ một việc, bài làm bằng lệnh trong terminal và nói rõ.
 - **Trình soạn thảo trong terminal: `vim`.** Cả series chỉ dùng `vim` (và trình sửa file của SSH Studio); không dùng `nano`. Ảnh lab cài gói `vim`, không cài `nano`.
 - **Lab tái lập:** `examples/toi-noi-linux`, runner Node 22 không có dependency npm. Mỗi bài có một **kịch bản lệnh** `pNN/MM-ten.sh`; runner chạy kịch bản trong một phiên đăng nhập của người dùng `an` (có TTY) và in lại từng lệnh kèm dấu nhắc. `pNN/OUTPUT.txt` là bản ghi mẫu. Ngày giờ, kích thước thư mục, số inode, phiên bản kernel và fingerprint host key khác nhau giữa các máy; bài nói rõ chỗ nào phải trùng, chỗ nào không.
-- **Trạng thái đầu bài:** `npm run setup -- 05` tạo lại server và chạy im lặng các kịch bản trước, đưa server về đúng trạng thái đầu bài LNX-005 để kết nối bằng SSH Studio và làm theo.
+- **Trạng thái đầu bài:** `npm run setup -- 05` tạo lại server và chạy im lặng các kịch bản trước, đưa server về đúng trạng thái đầu bài LNX-005 để kết nối bằng SSH Studio và làm theo. Bài đánh số liên tục qua các phần (`setup -- 15` chạy cả Phần 1 rồi LNX-011…014).
+- **Script gõ bằng vim:** trong kịch bản, `#file ĐƯỜNG NGUỒN` cho runner ghi nội dung `pNN/files/NGUỒN` (và in `vim ĐƯỜNG` như một lệnh); công cụ chụp ảnh gõ thật nội dung đó bằng vim trong SSH Studio rồi đối chiếu từng byte với file mẫu. `#check` đối chiếu kết quả của một thao tác sửa bằng vim.
 - **Tài khoản lab:** `an` và `binh` (mật khẩu `toinoi-lab`, chỉ dùng cho lab), tài khoản dịch vụ `baogia` (không đăng nhập được), nhóm `toinoi`. Không dùng `root` để đăng nhập.
 
 ## Tổ chức chuyên mục
@@ -72,20 +73,22 @@ Lộ trình: `linux-qua-ssh-studio`. Lab: `examples/toi-noi-linux/p01`.
 
 ## P02 · Xử lý văn bản và shell script
 
-Đầu vào: P01. Đầu ra: script sao lưu và báo cáo log của `bao-gia`. Lộ trình dự kiến `linux-qua-ssh-studio-phan-02`.
+Đầu vào: P01. Đầu ra: thư mục `/srv/toinoi/bao-gia/scripts` với `bao-cao-log`, `sao-luu-log`, `tom-tat.awk` và `hang-ngay` chạy lúc 01:17 mỗi đêm bằng cron; báo cáo và bản sao lưu log của `bao-gia`.
+
+Lộ trình: `linux-qua-ssh-studio-phan-02`. Lab: `examples/toi-noi-linux/p02` (bài đánh số tiếp 11…20). Đầu phần, lab thêm log đã xoay vòng của 19/11 (`bao-gia.log.2.gz`) và 20/11 (`bao-gia.log.1`, có lần nâng cấp 1.4.1 → 1.4.2 và sự cố khoá bảng giá lúc 09:05–09:15); ảnh lab cài thêm `zstd`, `xz`, `shellcheck`. Bộ chấm: `npm run kiem-tra:p02` (20 yêu cầu).
 
 | ID | Bài / slug | Mức | Làm được sau bài / sản phẩm thực hành | Trạng thái |
 |---|---|---|---|---|
-| LNX-011 | Biến môi trường, `PATH` và file khởi động của shell<br>`linux-bien-moi-truong-path-bashrc` | CB | `export`, `PATH`, `.bashrc` vs `.profile`, alias, vì sao lệnh "không tìm thấy" | Dự kiến |
-| LNX-012 | vim cho công việc hằng ngày trên server<br>`linux-vim-hang-ngay` | CB | Di chuyển, tìm/thay thế, sao chép/dán, undo, sửa nhiều file, `.vimrc` tối thiểu | Dự kiến |
-| LNX-013 | Trích cột và dòng: `cut`, `sort`, `uniq`, `tr`, `wc`<br>`linux-cut-sort-uniq-tr` | CB | Báo cáo số lỗi theo dịch vụ và theo giờ từ log | Dự kiến |
-| LNX-014 | `sed`: sửa văn bản theo dòng<br>`linux-sed-sua-van-ban` | TB | Thay thế, xoá dòng, sửa tại chỗ có bản sao lưu, biểu thức chính quy cơ bản | Dự kiến |
-| LNX-015 | `awk`: xử lý log có cột<br>`linux-awk-xu-ly-log` | TB | Lọc theo điều kiện, tính tổng/trung bình thời gian báo giá, nhóm theo khoá | Dự kiến |
-| LNX-016 | Shell script đầu tiên: shebang, biến, tham số, mã thoát<br>`linux-shell-script-dau-tien` | TB | Script có `set -euo pipefail`, đọc tham số, trả mã thoát đúng | Dự kiến |
-| LNX-017 | Điều kiện, vòng lặp và hàm trong bash<br>`linux-bash-dieu-kien-vong-lap-ham` | TB | `if`/`case`/`for`/`while`, `test`, hàm, xử lý tên file có dấu cách | Dự kiến |
-| LNX-018 | Nén và lưu trữ: `tar`, `gzip`, `zstd`<br>`linux-tar-gzip-nen-luu-tru` | NC | Đóng gói log theo ngày, kiểm tra và giải nén, tải về bằng khung Files | Dự kiến |
-| LNX-019 | Script an toàn: quoting, `trap`, file tạm, khoá chạy đơn<br>`linux-shell-script-an-toan` | NC | Script không hỏng khi lỗi giữa chừng, không chạy chồng nhau | Dự kiến |
-| LNX-020 | Thực hành: script sao lưu và báo cáo log của bao-gia<br>`linux-thuc-hanh-script-sao-luu-log` | NC | Bàn giao script có kiểm tra tự động, chạy bằng cron | Dự kiến |
+| LNX-011 | Biến môi trường, `PATH` và file khởi động của shell<br>`linux-bien-moi-truong-path-bashrc` | CB | `export`, `PATH`, `.bashrc` vs `.profile`, alias, vì sao lệnh "không tìm thấy" | Đã viết |
+| LNX-012 | vim cho công việc hằng ngày trên server<br>`linux-vim-hang-ngay` | CB | Di chuyển, tìm/thay thế, sao chép/dán, undo, sửa nhiều file, `.vimrc` tối thiểu | Đã viết |
+| LNX-013 | Trích cột và dòng: `cut`, `sort`, `uniq`, `tr`, `wc`<br>`linux-cut-sort-uniq-tr` | CB | Báo cáo số lỗi theo dịch vụ và theo giờ từ log | Đã viết |
+| LNX-014 | `sed`: sửa văn bản theo dòng<br>`linux-sed-sua-van-ban` | TB | Thay thế, xoá dòng, sửa tại chỗ có bản sao lưu, biểu thức chính quy cơ bản | Đã viết |
+| LNX-015 | `awk`: xử lý log có cột<br>`linux-awk-xu-ly-log` | TB | Lọc theo điều kiện, tính tổng/trung bình thời gian báo giá, nhóm theo khoá | Đã viết |
+| LNX-016 | Shell script đầu tiên: shebang, biến, tham số, mã thoát<br>`linux-shell-script-dau-tien` | TB | Script có `set -euo pipefail`, đọc tham số, trả mã thoát đúng | Đã viết |
+| LNX-017 | Điều kiện, vòng lặp và hàm trong bash<br>`linux-bash-dieu-kien-vong-lap-ham` | TB | `if`/`case`/`for`/`while`, `test`, hàm, xử lý tên file có dấu cách | Đã viết |
+| LNX-018 | Nén và lưu trữ: `tar`, `gzip`, `zstd`<br>`linux-tar-gzip-nen-luu-tru` | NC | Đóng gói log theo ngày, kiểm tra và giải nén, tải về bằng khung Files | Đã viết |
+| LNX-019 | Script an toàn: quoting, `trap`, file tạm, khoá chạy đơn<br>`linux-shell-script-an-toan` | NC | Script không hỏng khi lỗi giữa chừng, không chạy chồng nhau | Đã viết |
+| LNX-020 | Thực hành: script sao lưu và báo cáo log của bao-gia<br>`linux-thuc-hanh-script-sao-luu-log` | NC | Bàn giao script có kiểm tra tự động, chạy bằng cron | Đã viết |
 
 ## P03 · Người dùng, sudo và SSH an toàn
 

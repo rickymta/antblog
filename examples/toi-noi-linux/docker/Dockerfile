@@ -76,6 +76,22 @@ RUN chown -R baogia:toinoi /opt/toinoi /var/log/toinoi \
  && touch -d '2026-11-20 08:30:00' /home/an/huong-dan.txt \
  && touch -d '2026-11-20 09:20:00' /opt/toinoi/bao-gia /opt/toinoi /var/log/toinoi
 
+# ---- Phần 2 ----
+# Thêm ở cuối file: các lớp phía trên giữ nguyên trong cache của Docker, nên host key (sinh ở
+# lớp ssh-keygen) không đổi với người đã dựng lab từ Phần 1.
+RUN apt-get update \
+ && apt-get install -y --no-install-recommends zstd xz-utils shellcheck \
+ && rm -rf /var/lib/apt/lists/*
+# PATH giống nhau cho phiên SSH và phiên `su -` của runner (hai bên mặc định khác nhau).
+RUN printf '%s\n' 'PATH="/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"' 'export PATH' \
+      > /etc/profile.d/00-toinoi-path.sh
+# Log của 19 và 20/11 cho Phần 2; `chuan-bi.sh` đưa chúng vào /var/log/toinoi ở đầu LNX-011.
+COPY fixtures/p02/ /usr/share/toinoi-lab/p02/
+RUN cd /usr/share/toinoi-lab/p02 \
+ && gzip -n -9 bao-gia-2026-11-19.log \
+ && chmod 755 chuan-bi.sh \
+ && chmod 644 bao-gia-2026-11-20.log bao-gia-2026-11-19.log.gz
+
 EXPOSE 22
 STOPSIGNAL SIGRTMIN+3
 CMD ["/sbin/init"]
