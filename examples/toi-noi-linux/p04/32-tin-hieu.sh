@@ -3,10 +3,15 @@
 ## Danh sách tín hiệu
 kill -l | head -n 4
 kill -l 15 9 1
+#shot 04
+#clear
 ## Gửi SIGTERM cho tiến trình của người khác
 pgrep -a -u binh
 kill $(pgrep -u binh -f tinh-lai)
 sudo kill $(pgrep -u binh -f tinh-lai)
+#wait 1
+#shot 05
+#clear
 #wait 1
 pgrep -a -u binh
 cat /tmp/tinh-lai-bao-cao.log
@@ -18,6 +23,8 @@ sudo kill -TERM $(pgrep -u binh -f xuat-du-lieu)
 #wait 1
 ps -o pid,stat,etime,cmd -u binh
 grep -E '^Sig(Ign|Cgt)' /proc/$(pgrep -u binh -f xuat-du-lieu)/status
+#shot 06
+#clear
 ## SIGKILL: lựa chọn cuối
 sudo kill -KILL $(pgrep -u binh -f xuat-du-lieu)
 #wait 1

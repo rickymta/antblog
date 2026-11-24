@@ -6,6 +6,8 @@ xuat-chuyen 40 > xuat-1.log &
 jobs -l
 #wait 3
 cat xuat-1.log
+#shot 05
+#clear
 ## Mất kết nối thì job chết
 xuat-chuyen 600 > xuat-2.log 2>&1 &
 nohup xuat-chuyen 600 > xuat-3.log 2>&1 &
@@ -25,12 +27,14 @@ pkill -f 'xuat-chuyen 600'
 ## tmux: phiên vẫn sống khi SSH đứt
 tmux new-session -d -s xuat 'xuat-chuyen 600'
 tmux ls
+#shot 07
 #wait 3
 #ngat
 #gui ngat-ket-noi
 #clear
 tmux ls
 tmux capture-pane -p -t xuat | grep -v '^$' | tail -n 3
+#shot 06
 #gui tmux-attach
 #clear
 ## Dọn dẹp

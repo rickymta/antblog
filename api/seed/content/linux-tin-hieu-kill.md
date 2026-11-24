@@ -31,6 +31,8 @@ KILL
 HUP
 ```
 
+<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/linux-tin-hieu-kill/ssh-studio-04.webp" alt="Terminal của SSH Studio: kill -l | head -n 4 liệt kê tín hiệu 1 SIGHUP đến 20 SIGTSTP, kill -l 15 9 1 in TERM, KILL, HUP" width="2400" height="1350" loading="lazy"></div><figcaption>SSH Studio · danh sách tín hiệu và số hiệu của chúng</figcaption></figure>
+
 Những tín hiệu bạn sẽ gặp hằng ngày:
 
 | Tín hiệu | Số | Khi nào | Mặc định |
@@ -61,13 +63,15 @@ an@toinoi-app-01:~$ ls /tmp/tinh-lai-bao-cao.*.tmp
 ls: cannot access '/tmp/tinh-lai-bao-cao.*.tmp': No such file or directory
 ```
 
+<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/linux-tin-hieu-kill/ssh-studio-05.webp" alt="Terminal của SSH Studio: pgrep -a -u binh thấy tinh-lai-bao-cao và xuat-du-lieu, kill không sudo báo Operation not permitted, sudo kill hỏi mật khẩu của an rồi gửi SIGTERM" width="2400" height="1350" loading="lazy"></div><figcaption>SSH Studio · dừng tiến trình của người khác cần <code>sudo</code></figcaption></figure>
+
 - **`kill PID`** gửi `SIGTERM`. An không dừng được tiến trình của Bình: `Operation not permitted`. Người dùng thường chỉ gửi tín hiệu được cho tiến trình của chính mình; tiến trình của người khác cần `sudo` (hoặc chính người đó).
 - Với `sudo kill`, `tinh-lai-bao-cao` biến mất khỏi danh sách.
 - Log của nó cho thấy chuyện gì đã xảy ra: script **bắt** `SIGTERM` bằng `trap` ([LNX-019](/articles/linux-shell-script-an-toan)), xoá file tạm rồi mới thoát. File tạm đã không còn.
 
 Đó là lý do `SIGTERM` là lựa chọn đầu tiên: nó cho chương trình cơ hội ghi nốt dữ liệu, đóng kết nối, xoá file tạm, nhả khoá. Dịch vụ viết tốt (cơ sở dữ liệu, web server, `bao-gia` ở [LNX-036](/articles/linux-systemd-unit-bao-gia)) đều làm vậy.
 
-<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/linux-tin-hieu-kill/ssh-studio-01.webp" alt="Terminal của SSH Studio: kill -l liệt kê tín hiệu, kill -l 15 9 1 in TERM KILL HUP, an kill tiến trình của binh bị Operation not permitted, sudo kill thành công, pgrep chỉ còn xuat-du-lieu, log của tinh-lai-bao-cao ghi nhan SIGTERM xoa file tam thoat, ls không còn file tạm" width="2400" height="1350" loading="lazy"></div><figcaption>SSH Studio · <code>SIGTERM</code>: chương trình tự dọn dẹp rồi thoát</figcaption></figure>
+<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/linux-tin-hieu-kill/ssh-studio-01.webp" alt="Terminal của SSH Studio: pgrep -a -u binh chỉ còn xuat-du-lieu, log của tinh-lai-bao-cao ghi nhận SIGTERM, xoá file tạm rồi thoát, ls không còn file .tmp nào" width="2400" height="1350" loading="lazy"></div><figcaption>SSH Studio · SIGTERM: chương trình kịp dọn file tạm trước khi thoát</figcaption></figure>
 
 ## 3. Một chương trình bỏ qua SIGTERM
 
@@ -81,6 +85,8 @@ an@toinoi-app-01:~$ grep -E '^Sig(Ign|Cgt)' /proc/$(pgrep -u binh -f xuat-du-lie
 SigIgn: 0000000000004007
 SigCgt: 0000000000010000
 ```
+
+<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/linux-tin-hieu-kill/ssh-studio-06.webp" alt="Terminal của SSH Studio: sudo kill -TERM xuat-du-lieu, ps -o vẫn thấy tiến trình chạy, grep SigIgn và SigCgt trong /proc/PID/status cho mặt nạ tín hiệu bị bỏ qua" width="2400" height="1350" loading="lazy"></div><figcaption>SSH Studio · chương trình bỏ qua SIGTERM: xem <code>SigIgn</code> trong <code>/proc</code></figcaption></figure>
 
 `xuat-du-lieu` vẫn sống sau `SIGTERM`. Lý do nằm trong `/proc/PID/status`:
 
@@ -116,7 +122,7 @@ Thứ tự đúng khi cần dừng một tiến trình:
 
 Một trường hợp ngay cả `SIGKILL` cũng phải đợi: tiến trình ở trạng thái `D` (chờ đĩa hoặc mạng ở mức kernel, ví dụ ổ mạng bị treo). Tín hiệu chỉ được xử lý khi nó thoát khỏi trạng thái đó.
 
-<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/linux-tin-hieu-kill/ssh-studio-02.webp" alt="Terminal của SSH Studio: sudo kill -TERM xuat-du-lieu không có tác dụng, ps vẫn thấy tiến trình, SigIgn 0000000000004007 và SigCgt 0000000000010000, sudo kill -KILL dừng được script, pgrep vẫn thấy tiến trình con sleep 5 của nó, file /tmp/xuat-du-lieu.lock còn nằm lại chứa PID cũ, sudo rm xoá nó" width="2400" height="1350" loading="lazy"></div><figcaption>SSH Studio · <code>SIGKILL</code> dừng được, nhưng để lại file khoá</figcaption></figure>
+<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/linux-tin-hieu-kill/ssh-studio-02.webp" alt="Terminal của SSH Studio: sudo kill -KILL xuat-du-lieu, pgrep báo binh khong con tien trinh nao, file khoá /tmp/xuat-du-lieu.lock vẫn còn với PID 2606, sudo rm xoá khoá" width="2400" height="1350" loading="lazy"></div><figcaption>SSH Studio · SIGKILL dừng ngay nhưng để lại file khoá</figcaption></figure>
 
 ## 5. pkill, killall: dừng theo tên
 

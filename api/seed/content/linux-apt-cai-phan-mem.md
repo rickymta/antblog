@@ -85,6 +85,8 @@ Need to get 1483 kB of archives.
 After this operation, 4226 kB of additional disk space will be used.
 ```
 
+<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/linux-apt-cai-phan-mem/ssh-studio-05.webp" alt="Terminal của SSH Studio: jq chưa có (command not found), apt search tìm jq, sysstat, tmux, apt show jq cho Version, Section, Installed-Size, Depends, apt-cache policy tmux cho Installed (none) và Candidate 3.4-1ubuntu0.2" width="2400" height="1350" loading="lazy"></div><figcaption>SSH Studio · tìm và xem gói trước khi cài</figcaption></figure>
+
 - **`apt search`** tìm theo tên và mô tả; `--names-only` với biểu thức chính quy cho kết quả gọn. Mỗi dòng ghi tên, suite chứa bản mới nhất, phiên bản, kiến trúc.
 - **`apt show`** in thông tin một gói: phiên bản, phụ thuộc (`Depends`), dung lượng sau khi cài, mô tả.
 - **`apt-cache policy`** cho biết bản nào đang cài (`Installed`), bản nào sẽ được cài (`Candidate`), và mỗi bản đến từ kho nào. Hữu ích khi có nhiều bản.
@@ -92,7 +94,7 @@ After this operation, 4226 kB of additional disk space will be used.
 
 Bài lọc bớt output của `apt install`; khi bạn tự chạy, apt in thêm từng bước tải (`Get:`), giải nén (`Unpacking`) và cài đặt (`Setting up`).
 
-<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/linux-apt-cai-phan-mem/ssh-studio-02.webp" alt="Terminal của SSH Studio: cuối kết quả apt search với sysstat và tmux, apt show jq với Version, Depends, Installed-Size, apt-cache policy tmux với Installed none và Candidate, sudo apt install -y jq tmux sysstat liệt kê 9 gói mới, jq --version và tmux -V" width="2400" height="1350" loading="lazy"></div><figcaption>SSH Studio · tìm, xem và cài gói</figcaption></figure>
+<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/linux-apt-cai-phan-mem/ssh-studio-02.webp" alt="Terminal của SSH Studio: sudo apt install -y jq tmux sysstat liệt kê các gói NEW gồm cả thư viện phụ thuộc, 9 newly installed, jq --version in jq-1.7, tmux -V in tmux 3.4" width="2400" height="1350" loading="lazy"></div><figcaption>SSH Studio · <code>apt install</code> kéo theo các gói phụ thuộc</figcaption></figure>
 
 ## 3. Gói đã cài: dpkg
 
@@ -110,6 +112,8 @@ cron: /usr/bin/crontab
 an@toinoi-app-01:~$ echo '{"dich_vu":"car4","gia":69000}' | jq .gia
 69000
 ```
+
+<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/linux-apt-cai-phan-mem/ssh-studio-06.webp" alt="Terminal của SSH Studio: dpkg -l cho jq, sysstat, tmux trạng thái ii, dpkg -L jq tìm /usr/bin/jq, dpkg -S cho biết pstree thuộc psmisc và crontab thuộc cron, jq .gia in 69000" width="2400" height="1350" loading="lazy"></div><figcaption>SSH Studio · <code>dpkg</code>: gói đã cài gồm file nào, file thuộc gói nào</figcaption></figure>
 
 - **`dpkg -l`**: hai chữ đầu là trạng thái, `ii` = đã cài đầy đủ.
 - **`dpkg -L GÓI`**: các file gói đã cài lên máy.
@@ -148,7 +152,7 @@ Removing libsensors-config (1:3.6.0-9build1) ...
 
 `remove` giữ cấu hình để lần cài lại không mất những gì bạn đã chỉnh; `/etc/sysstat` vẫn còn. Gỡ hẳn thì `purge`. Sau đó `autoremove` dọn hai thư viện `libsensors` mà chỉ `sysstat` cần. Trước khi `autoremove` trên server thật, đọc danh sách: đôi khi một gói bạn cài tay bị đánh dấu nhầm là «cài tự động».
 
-<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/linux-apt-cai-phan-mem/ssh-studio-03.webp" alt="Terminal của SSH Studio: dpkg -l với trạng thái ii, dpkg -L jq, dpkg -S /usr/bin/pstree thuộc psmisc, jq .gia in 69000, apt remove sysstat, dpkg -l sysstat trạng thái rc và /etc/sysstat còn, apt purge xoá cấu hình, autoremove gỡ libsensors" width="2400" height="1350" loading="lazy"></div><figcaption>SSH Studio · <code>dpkg</code>, <code>remove</code>, <code>purge</code></figcaption></figure>
+<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/linux-apt-cai-phan-mem/ssh-studio-03.webp" alt="Terminal của SSH Studio: apt remove sysstat, dpkg -l còn trạng thái rc, /etc/sysstat vẫn còn file cấu hình, apt purge xoá cấu hình, dpkg-query không còn gói, autoremove gỡ libsensors5 và libsensors-config" width="2400" height="1350" loading="lazy"></div><figcaption>SSH Studio · <code>remove</code> giữ cấu hình, <code>purge</code> xoá sạch, <code>autoremove</code> dọn phụ thuộc</figcaption></figure>
 
 ## 5. Ghim phiên bản
 
@@ -174,11 +178,13 @@ Start-Date: 2026-11-24  07:05:30
 Commandline: apt autoremove -y
 ```
 
+<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/linux-apt-cai-phan-mem/ssh-studio-07.webp" alt="Terminal của SSH Studio: sudo apt-mark hold tmux báo tmux set on hold, apt-mark showhold in tmux, apt list --upgradable | wc -l" width="2400" height="1350" loading="lazy"></div><figcaption>SSH Studio · ghim phiên bản bằng <code>apt-mark hold</code></figcaption></figure>
+
 - **`apt-mark hold`**: `apt upgrade` sẽ bỏ qua gói này. `showhold` liệt kê các gói đang ghim; `unhold` gỡ ghim.
 - Ghim là quyết định tạm thời có lý do: ghi lại vì sao và khi nào gỡ, nếu không bạn sẽ quên một gói không bao giờ nhận bản vá bảo mật.
 - **`/var/log/apt/history.log`** ghi mọi lần cài, gỡ, nâng cấp: thời điểm, lệnh, gói. Khi dịch vụ bỗng hỏng, câu hỏi đầu tiên là «hôm qua có ai cài gì không?».
 
-<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/linux-apt-cai-phan-mem/ssh-studio-04.webp" alt="Terminal của SSH Studio: sudo apt-mark hold tmux, apt-mark showhold in tmux, apt list --upgradable, sudo apt-mark unhold tmux, ls /var/log/apt, history.log với các dòng Start-Date và Commandline của apt remove, purge, autoremove" width="2400" height="1350" loading="lazy"></div><figcaption>SSH Studio · ghim phiên bản và lịch sử của apt</figcaption></figure>
+<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/linux-apt-cai-phan-mem/ssh-studio-04.webp" alt="Terminal của SSH Studio: apt-mark unhold tmux, ls /var/log/apt có history.log và term.log, grep Start-Date và Commandline cho ba lần apt remove, purge, autoremove" width="2400" height="1350" loading="lazy"></div><figcaption>SSH Studio · nhật ký của apt ghi lại mọi lần cài gỡ</figcaption></figure>
 
 Ubuntu còn có **bản vá bảo mật tự động** (gói `unattended-upgrades`, timer `apt-daily-upgrade` mà bạn sẽ thấy ở [LNX-038](/articles/linux-cron-systemd-timer)): mặc định chỉ cài bản vá từ `noble-security`.
 

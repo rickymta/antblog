@@ -28,6 +28,8 @@ an@toinoi-app-01:~$ cat xuat-1.log
 07:05:36 da xuat 10/40 chuyen
 ```
 
+<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/linux-job-nen-nohup-tmux/ssh-studio-05.webp" alt="Terminal của SSH Studio: xuat-chuyen 40 chạy nền với dấu &amp;, jobs -l cho [1]+ Running kèm PID, cat xuat-1.log đã có 10/40 và 20/40 chuyến" width="2400" height="1350" loading="lazy"></div><figcaption>SSH Studio · chạy nền bằng <code>&amp;</code> và xem job bằng <code>jobs -l</code></figcaption></figure>
+
 - **`jobs -l`** liệt kê các job của **shell hiện tại**: số job `[1]`, PID, trạng thái. `%1` là cách gọi job số 1 (`kill %1`, `fg %1`).
 - Trong shell tương tác, **`fg`** đưa job lên trước (Ctrl+C dừng được), **Ctrl+Z** tạm dừng lệnh đang chạy và **`bg`** cho nó chạy tiếp ở nền.
 - Job nền vẫn thuộc về shell và terminal đã chạy nó. Đây là điểm mấu chốt.
@@ -47,7 +49,7 @@ an@toinoi-app-01:~$ jobs -l
 [3]+  3480 Running                 nohup xuat-chuyen 600 > xuat-3.log 2>&1 &
 ```
 
-<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/linux-job-nen-nohup-tmux/ssh-studio-01.webp" alt="Terminal của SSH Studio: xuat-chuyen 40 chạy nền, jobs -l, cat xuat-1.log có dòng đầu tiên, rồi xuat-chuyen 600 chạy nền thường và nohup xuat-chuyen 600 chạy nền, jobs -l liệt kê ba job" width="2400" height="1350" loading="lazy"></div><figcaption>SSH Studio · ba job nền trước khi đóng phiên</figcaption></figure>
+<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/linux-job-nen-nohup-tmux/ssh-studio-01.webp" alt="Terminal của SSH Studio: xuat-chuyen 600 chạy nền thường và chạy nền qua nohup, job xuat-chuyen 40 báo Done, jobs -l còn hai job Running" width="2400" height="1350" loading="lazy"></div><figcaption>SSH Studio · hai job chạy nền: một job thường, một job qua <code>nohup</code></figcaption></figure>
 
 Bây giờ An **đóng hẳn tab phiên** trong SSH Studio (nút ✕ trên tab, xác nhận Ngắt kết nối), rồi kết nối lại bằng một tab mới:
 
@@ -71,7 +73,7 @@ an@toinoi-app-01:~$ pkill -f 'xuat-chuyen 600'
 - `xuat-3.log` vẫn tăng đều; trong ảnh nó đã lên 220, rồi 230 chuyến, vì kết nối lại (kèm mã OTP) mất khoảng nửa phút. `nohup` không «tách» lệnh khỏi phiên, nó chỉ khiến lệnh không chết vì `SIGHUP`.
 - `jobs` trong phiên mới trống: job là khái niệm của từng shell, shell mới không biết gì về tiến trình của shell cũ. Tìm lại bằng `pgrep`.
 
-<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/linux-job-nen-nohup-tmux/ssh-studio-02.webp" alt="Terminal của SSH Studio sau khi kết nối lại: pgrep chỉ còn tiến trình chạy bằng nohup, tail cho thấy xuat-2.log dừng ở 20/600 còn xuat-3.log tiếp tục tăng từ 220 lên 230/600, pkill dừng nó" width="2400" height="1350" loading="lazy"></div><figcaption>SSH Studio · sau khi kết nối lại: chỉ job chạy bằng <code>nohup</code> còn sống</figcaption></figure>
+<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/linux-job-nen-nohup-tmux/ssh-studio-02.webp" alt="Terminal của SSH Studio sau khi kết nối lại: pgrep chỉ còn một xuat-chuyen 600, tail xuat-2.log dừng ở 20/600, xuat-3.log vẫn tăng từ 110 lên 130/600, pkill dọn tiến trình còn lại" width="2400" height="1350" loading="lazy"></div><figcaption>SSH Studio · sau khi mất kết nối: job thường chết, job <code>nohup</code> vẫn chạy</figcaption></figure>
 
 `nohup` đủ cho việc «chạy rồi để đó». Nhưng bạn không xem tiến độ trực tiếp được nữa (chỉ đọc file), không trả lời được nếu chương trình hỏi gì, và không quay lại đúng màn hình cũ được.
 
@@ -85,6 +87,8 @@ an@toinoi-app-01:~$ tmux ls
 xuat: 1 windows (created Tue Nov 24 07:05:41 2026)
 ```
 
+<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/linux-job-nen-nohup-tmux/ssh-studio-07.webp" alt="Terminal của SSH Studio: tmux new-session -d -s xuat 'xuat-chuyen 600' tạo phiên chạy ngầm, tmux ls cho xuat: 1 windows" width="2400" height="1350" loading="lazy"></div><figcaption>SSH Studio · tạo phiên tmux tách rời ngay từ đầu</figcaption></figure>
+
 - **`tmux new-session -d -s xuat 'LỆNH'`**: tạo phiên tên `xuat`, chạy lệnh trong đó, `-d` là tách ngay (không gắn vào). Gõ tay thì thường là `tmux new -s xuat`, làm việc bên trong, rồi tách ra.
 - **`tmux ls`**: các phiên đang có.
 
@@ -97,6 +101,8 @@ an@toinoi-app-01:~$ tmux capture-pane -p -t xuat | grep -v '^$' | tail -n 3
 07:05:43 da xuat 10/600 chuyen
 07:05:45 da xuat 20/600 chuyen
 ```
+
+<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/linux-job-nen-nohup-tmux/ssh-studio-06.webp" alt="Terminal của SSH Studio sau khi kết nối lại: tmux ls vẫn thấy phiên xuat, tmux capture-pane in ba dòng cuối 90, 100, 110/600 chuyến" width="2400" height="1350" loading="lazy"></div><figcaption>SSH Studio · mất kết nối nhưng phiên tmux vẫn sống</figcaption></figure>
 
 Phiên `xuat` vẫn còn, tiến độ vẫn tăng. **`tmux capture-pane -p`** in nội dung đang hiển thị trong phiên mà không cần gắn vào, tiện cho script. Gắn vào để xem và làm việc tiếp:
 

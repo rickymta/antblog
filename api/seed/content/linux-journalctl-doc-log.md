@@ -39,6 +39,8 @@ an@toinoi-app-01:~$ journalctl -u bao-gia --no-pager --since '5 min ago' -o shor
 2026-11-24T07:05:52+07:00 toinoi-app-01 systemd[1]: Reloaded bao-gia.service - bao-gia: dich vu bao gia cua Toi Noi.
 ```
 
+<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/linux-journalctl-doc-log/ssh-studio-05.webp" alt="Terminal của SSH Studio: journalctl -u bao-gia | head -n 8 từ lần khởi động lỗi status=203/EXEC, -n 3 cho ba dòng reload mới nhất, --since '5 min ago' -o short-iso" width="2400" height="1350" loading="lazy"></div><figcaption>SSH Studio · log của một unit: từ đầu, mấy dòng cuối, hoặc theo thời gian</figcaption></figure>
+
 | Tuỳ chọn | Tác dụng |
 |---|---|
 | `-u TÊN` | Chỉ log của một unit |
@@ -81,7 +83,7 @@ an@toinoi-app-01:~$ journalctl -u bao-gia --no-pager -p warning -o short-iso
 
 **`-p warning`** lấy mức `warning` **và nghiêm trọng hơn**. Có cả dòng của chính systemd (dịch vụ không lên, bị giết bằng `SIGKILL` ở bài trước) lẫn hai yêu cầu sai của `bao-gia`. Khi sự cố xảy ra, `-p err` hay `-p warning` cắt bỏ hàng trăm dòng `info` để còn lại thứ đáng đọc. Trên terminal (như trong ảnh), `journalctl` còn tô màu theo mức: cảnh báo màu vàng, lỗi màu đỏ.
 
-<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/linux-journalctl-doc-log/ssh-studio-01.webp" alt="Terminal của SSH Studio: journalctl -u bao-gia với các dòng khởi động, -n 3 với Reloading, nhan SIGHUP, Reloaded, --since 5 min ago -o short-iso, hai lệnh curl trả JSON lỗi, journalctl -p warning liệt kê dòng Failed, status=9/KILL và hai dòng WARN yeu cau khong hop le" width="2400" height="1350" loading="lazy"></div><figcaption>SSH Studio · lọc log theo unit, thời gian và mức ưu tiên</figcaption></figure>
+<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/linux-journalctl-doc-log/ssh-studio-01.webp" alt="Terminal của SSH Studio: hai yêu cầu curl không hợp lệ trả lỗi JSON, journalctl -u bao-gia -p warning -o short-iso lọc các dòng Failed của systemd và hai dòng WARN yeu cau khong hop le" width="2400" height="1350" loading="lazy"></div><figcaption>SSH Studio · lọc log theo mức ưu tiên với <code>-p warning</code></figcaption></figure>
 
 ## 3. Lần theo một lỗi thật
 
@@ -100,6 +102,8 @@ an@toinoi-app-01:~$ journalctl -u bao-gia --no-pager -n 2 -o cat
 INFO nhan SIGHUP: mo lai file log, nap lai bang gia (4 loai dich vu)
 Reloaded bao-gia.service - bao-gia: dich vu bao gia cua Toi Noi.
 ```
+
+<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/linux-journalctl-doc-log/ssh-studio-06.webp" alt="Terminal của SSH Studio: chuyển bang-gia.csv sang /tmp, reload, journalctl -p err cho dòng LOI nhan SIGHUP: khong doc duoc bang gia, giu bang gia cu; curl /suc-khoe vẫn trả trạng thái ok" width="2400" height="1350" loading="lazy"></div><figcaption>SSH Studio · lần theo một lỗi thật: dịch vụ vẫn sống nhưng log ghi lỗi</figcaption></figure>
 
 - `journalctl -p err -n 1` chỉ ra ngay: `bao-gia` không đọc được bảng giá khi nhận `SIGHUP`, và **giữ bảng giá cũ** trong bộ nhớ.
 - `/suc-khoe` vẫn trả `ok` với 4 loại dịch vụ: dịch vụ không sập. Một chương trình reload tốt thì nạp cấu hình mới thất bại không làm hỏng cấu hình đang chạy, nhưng lỗi phải hiện trong log, nếu không sẽ không ai biết bảng giá mới chưa được áp dụng.
@@ -123,7 +127,7 @@ INFO nhan SIGHUP: mo lai file log, nap lai bang gia (4 loai dich vu)
 
 Với `-o json-pretty`, mỗi bản ghi là một tập trường. Trường bắt đầu bằng `_` do **journald tự ghi**, chương trình không giả mạo được: `_PID`, `_UID` (990 là `baogia`), `_SYSTEMD_UNIT`, `_COMM` (tên tiến trình). Lọc theo bất kỳ trường nào bằng `TRƯỜNG=giá trị`: `_UID=990` lấy mọi log do `baogia` in ra, ở bất kỳ unit nào.
 
-<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/linux-journalctl-doc-log/ssh-studio-02.webp" alt="Terminal của SSH Studio: mv bảng giá sang /tmp, reload, journalctl -p err với dòng LOI nhan SIGHUP khong doc duoc bang gia, suc-khoe vẫn ok với so_dich_vu 4, trả file về và reload thành công, json-pretty với PRIORITY 6, MESSAGE, _SYSTEMD_UNIT bao-gia.service, _UID 990, _COMM bao-gia, journalctl _UID=990" width="2400" height="1350" loading="lazy"></div><figcaption>SSH Studio · một lỗi thật khi reload, và các trường của bản ghi</figcaption></figure>
+<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/linux-journalctl-doc-log/ssh-studio-02.webp" alt="Terminal của SSH Studio: trả bang-gia.csv về chỗ cũ, reload, log báo nạp lại 4 loại dịch vụ; journalctl -o json-pretty cho các trường _SYSTEMD_UNIT, MESSAGE, SYSLOG_IDENTIFIER, _PID, _COMM, _UID 990, PRIORITY 6; lọc _UID=990" width="2400" height="1350" loading="lazy"></div><figcaption>SSH Studio · một bản ghi journal gồm nhiều trường, lọc được theo từng trường</figcaption></figure>
 
 ## 5. Theo dõi trực tiếp
 
@@ -167,6 +171,8 @@ Vacuuming done, freed 0B of archived journals from /var/log/journal.
 Vacuuming done, freed 0B of archived journals from /run/log/journal.
 ```
 
+<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/linux-journalctl-doc-log/ssh-studio-07.webp" alt="Terminal của SSH Studio: journalctl --disk-usage cho 32.0M, ls /var/log/journal có thư mục machine-id, journalctl --list-boots cho một lần boot" width="2400" height="1350" loading="lazy"></div><figcaption>SSH Studio · journal chiếm bao nhiêu chỗ và lưu ở đâu</figcaption></figure>
+
 - **`--disk-usage`**: journal đang chiếm bao nhiêu.
 - `/var/log/journal/` có một thư mục theo mã máy: journal được lưu **bền** qua các lần khởi động lại (`--list-boots` liệt kê các lần boot). Nếu thư mục này không có, journal chỉ ở `/run/log/journal` và mất khi tắt máy.
 - Mặc định journald tự giới hạn ở 10% dung lượng hệ thống file (tối đa 4 GB). An đặt giới hạn rõ ràng bằng một **drop-in**, file trong `journald.conf.d/` ghi đè đúng những dòng cần đổi, không sửa file gốc:
@@ -181,7 +187,7 @@ MaxRetentionSec=30day
 - **`systemd-analyze cat-config`** in cấu hình gộp từ mọi file, theo đúng thứ tự áp dụng.
 - **`journalctl --vacuum-time=30d`** (hoặc `--vacuum-size=100M`) dọn ngay các file journal cũ đã đóng, không đợi giới hạn.
 
-<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/linux-journalctl-doc-log/ssh-studio-04.webp" alt="Terminal của SSH Studio: journalctl --disk-usage, ls /var/log/journal, list-boots, mkdir journald.conf.d, sudoedit 50-toinoi.conf, restart systemd-journald, systemd-analyze cat-config với SystemMaxUse=200M và MaxRetentionSec=30day, vacuum-time=30d" width="2400" height="1350" loading="lazy"></div><figcaption>SSH Studio · giới hạn dung lượng journal</figcaption></figure>
+<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/linux-journalctl-doc-log/ssh-studio-04.webp" alt="Terminal của SSH Studio: tạo journald.conf.d/50-toinoi.conf bằng sudoedit, restart systemd-journald, systemd-analyze cat-config cho SystemMaxUse=200M, MaxRetentionSec=30day, journalctl --vacuum-time=30d" width="2400" height="1350" loading="lazy"></div><figcaption>SSH Studio · giới hạn dung lượng và thời gian giữ journal</figcaption></figure>
 
 ## 7. Đối chiếu thao tác
 

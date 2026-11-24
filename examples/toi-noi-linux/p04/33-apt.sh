@@ -10,6 +10,8 @@ jq --version
 apt search --names-only '^(jq|tmux|sysstat)$' 2>/dev/null | grep -v -E '^$|\.\.\.$'
 apt show jq 2>/dev/null | grep -E '^(Package|Version|Depends|Installed-Size|Section|Description):'
 apt-cache policy tmux
+#shot 05
+#clear
 ## Cài
 sudo apt install -y jq tmux sysstat 2>&1 | grep -E -A2 '^(The following NEW|[0-9]+ upgraded)'
 jq --version
@@ -22,6 +24,8 @@ dpkg -L jq | grep bin/
 dpkg -S /usr/bin/pstree
 dpkg -S "$(command -v crontab)"
 echo '{"dich_vu":"car4","gia":69000}' | jq .gia
+#shot 06
+#clear
 ## Gỡ gói
 sudo apt remove -y sysstat 2>&1 | grep -E '^(Removing|The following packages will be REMOVED)' -A1
 dpkg -l sysstat | tail -n 1
@@ -36,6 +40,8 @@ sudo apt autoremove -y 2>&1 | grep -E '^Removing'
 sudo apt-mark hold tmux
 apt-mark showhold
 apt list --upgradable 2>/dev/null | wc -l
+#shot 07
+#clear
 sudo apt-mark unhold tmux
 ls /var/log/apt/
 grep -E '^(Start-Date|Commandline)' /var/log/apt/history.log | tail -n 6

@@ -68,6 +68,8 @@ an@toinoi-app-01:/srv/toinoi/bao-gia/shared/logs$ ls -l --time-style=+%F bao-cao
 -rw-rw-r-- 1 an an     413 2026-11-24 bao-cao-2026-11-24.txt
 ```
 
+<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/linux-cron-systemd-timer/ssh-studio-05.webp" alt="Terminal của SSH Studio: cd vào shared/logs, touch -d tạo ba báo cáo giả ngày 30/10, 05/11, 15/11, ls -l --time-style=+%F liệt kê năm file bao-cao theo ngày" width="2400" height="1350" loading="lazy"></div><figcaption>SSH Studio · chuẩn bị báo cáo cũ để thử việc dọn dẹp</figcaption></figure>
+
 **Service**, chạy một lần rồi thoát:
 
 <figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/linux-cron-systemd-timer/ssh-studio-02.webp" alt="Vim mở /etc/systemd/system/bao-gia-don-bao-cao.service qua sudoedit trong SSH Studio: [Unit] Description, [Service] Type=oneshot, User=baogia, Group=toinoi, ExecStart=/usr/bin/find /srv/toinoi/bao-gia/shared/logs -name bao-cao-*.txt -mtime +14 -print -delete" width="2400" height="1350" loading="lazy"></div><figcaption>SSH Studio · service dọn báo cáo cũ</figcaption></figure>
@@ -129,6 +131,8 @@ Wed 2026-11-25 02:31:57 +07  19h -         - bao-gia-don-bao-cao.timer bao-gia-d
 Pass --all to see loaded but inactive timers, too.
 ```
 
+<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/linux-cron-systemd-timer/ssh-studio-06.webp" alt="Terminal của SSH Studio: systemd-analyze calendar cho lần chạy kế tiếp 02:30, systemd-analyze verify không báo lỗi, daemon-reload, enable --now timer tạo symlink trong timers.target.wants, list-timers thấy bao-gia-don-bao-cao.timer" width="2400" height="1350" loading="lazy"></div><figcaption>SSH Studio · kiểm tra lịch, bật timer và xem nó trong <code>list-timers</code></figcaption></figure>
+
 - **`systemd-analyze calendar`** dịch một biểu thức lịch và cho biết lần chạy tới: cách nhanh nhất để không viết sai lịch.
 - **`systemd-analyze verify`** kiểm tra file unit; không in gì là ổn.
 - **`enable --now`** cho **timer** (không phải service). `NEXT` là 02:31:57 chứ không phải 02:30: đó là `RandomizedDelaySec`.
@@ -164,11 +168,13 @@ stamp-apt-daily.timer            stamp-e2scrub_all.timer     stamp-motd-news.tim
 stamp-bao-gia-don-bao-cao.timer  stamp-logrotate.timer
 ```
 
+<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/linux-cron-systemd-timer/ssh-studio-07.webp" alt="Terminal của SSH Studio: sudo systemctl start bao-gia-don-bao-cao.service, status cho inactive (dead) TriggeredBy timer, journalctl in hai báo cáo 30/10 và 05/11 đã xoá, ls chỉ còn báo cáo từ 15/11" width="2400" height="1350" loading="lazy"></div><figcaption>SSH Studio · chạy thử service ngay, không chờ đến 02:30</figcaption></figure>
+
 - `systemctl start` với `Type=oneshot` **đợi** việc chạy xong rồi mới trả dấu nhắc. `status` là `inactive (dead)`, kết quả thành công; `TriggeredBy` cho biết timer nào gọi nó.
 - Journal ghi lại tên hai báo cáo đã xoá (30/10 và 05/11, hơn 14 ngày). Báo cáo 15/11 còn, vì chưa đủ 14 ngày.
 - **`Persistent=yes`** lưu mốc thời gian vào **`/var/lib/systemd/timers/stamp-TÊN.timer`**. Khi máy bật lại, systemd so mốc đó với lịch: lỡ lần nào thì chạy bù một lần.
 
-<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/linux-cron-systemd-timer/ssh-studio-04.webp" alt="Terminal của SSH Studio: sudo systemctl start bao-gia-don-bao-cao.service, status inactive dead với TriggeredBy timer, journalctl liệt kê hai file bao-cao-2026-10-30.txt và bao-cao-2026-11-05.txt đã xoá và Finished, ls còn bao-cao-2026-11-15, systemctl show với Persistent=yes và TimersCalendar, ls /var/lib/systemd/timers có stamp-bao-gia-don-bao-cao.timer" width="2400" height="1350" loading="lazy"></div><figcaption>SSH Studio · chạy thử ngay, đọc kết quả trong journal</figcaption></figure>
+<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/linux-cron-systemd-timer/ssh-studio-04.webp" alt="Terminal của SSH Studio: systemctl show bao-gia-don-bao-cao.timer cho Unit, TimersCalendar OnCalendar=*-*-* 02:30:00 với lần chạy kế tiếp, Persistent=yes; sudo ls /var/lib/systemd/timers có file stamp-bao-gia-don-bao-cao.timer" width="2400" height="1350" loading="lazy"></div><figcaption>SSH Studio · <code>Persistent=true</code>: systemd ghi dấu lần chạy để bù việc bị lỡ</figcaption></figure>
 
 ## 4. Cron hay timer?
 

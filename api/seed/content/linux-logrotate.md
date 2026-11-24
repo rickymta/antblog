@@ -62,11 +62,13 @@ an@toinoi-app-01:~$ cat /etc/logrotate.d/apt
 }
 ```
 
+<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/linux-logrotate/ssh-studio-04.webp" alt="Terminal của SSH Studio: ls -l /var/log/toinoi có bao-gia.log 27 KB cùng bao-gia.log.1 và bao-gia.log.2.gz, vòng for gửi năm yêu cầu curl, tail -n 2 thấy hai dòng log mới" width="2400" height="1350" loading="lazy"></div><figcaption>SSH Studio · log của bao-gia lớn dần theo từng yêu cầu</figcaption></figure>
+
 - Mỗi yêu cầu báo giá thêm một dòng vào `bao-gia.log`.
 - **logrotate** đã cài sẵn và chạy mỗi ngày bằng **`logrotate.timer`** ([LNX-038](/articles/linux-cron-systemd-timer)).
 - **`/etc/logrotate.conf`** đặt mặc định (`weekly`, `rotate 4`, `create`, `su root adm`) rồi `include /etc/logrotate.d`: mỗi gói thêm một file cấu hình cho log của nó, như `apt`.
 
-<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/linux-logrotate/ssh-studio-01.webp" alt="Terminal của SSH Studio: list-timers logrotate.timer chạy lúc 00:00, logrotate.conf với weekly, su root adm, rotate 4, create, include, ls /etc/logrotate.d và nội dung file apt" width="2400" height="1350" loading="lazy"></div><figcaption>SSH Studio · log của bao-gia và logrotate có sẵn</figcaption></figure>
+<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/linux-logrotate/ssh-studio-01.webp" alt="Terminal của SSH Studio: list-timers cho logrotate.timer chạy lúc 00:00, /etc/logrotate.conf với weekly, su root adm, rotate 4, create, include /etc/logrotate.d; ls /etc/logrotate.d; cat /etc/logrotate.d/apt" width="2400" height="1350" loading="lazy"></div><figcaption>SSH Studio · logrotate đã có sẵn: timer hằng ngày và cấu hình chung</figcaption></figure>
 
 ## 2. Cấu hình cho bao-gia
 
@@ -108,6 +110,8 @@ considering log /var/log/toinoi/bao-gia.log
   log does not need rotating (log has already been rotated)
 ```
 
+<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/linux-logrotate/ssh-studio-05.webp" alt="Terminal của SSH Studio: sudoedit /etc/logrotate.d/bao-gia, logrotate -d chạy thử: rotating pattern bao-gia.log after 1 days (14 rotations), log does not need rotating" width="2400" height="1350" loading="lazy"></div><figcaption>SSH Studio · <code>logrotate -d</code> chạy thử, không đổi file nào</figcaption></figure>
+
 **`logrotate -d`** (*debug*) chạy thử, không đổi gì, in ra sẽ làm gì. Nó hiểu cấu hình (`after 1 days (14 rotations)`), và nói log **chưa cần xoay**: logrotate chưa từng thấy file này, nên coi «bây giờ» là lần xoay gần nhất; lần xoay thật đầu tiên là ngày mai.
 
 ## 3. Xoay ngay và kiểm chứng
@@ -140,12 +144,14 @@ an@toinoi-app-01:~$ sudo cat /var/lib/logrotate/status | grep toinoi
 "/var/log/toinoi/bao-gia.log" 2026-11-24-7:6:0
 ```
 
+<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/linux-logrotate/ssh-studio-06.webp" alt="Terminal của SSH Studio: logrotate -f -v nén bằng gzip, đổi bao-gia.log thành bao-gia.log.1, tạo bao-gia.log mới mode 0644, chạy postrotate; ls -l thấy log mới 0 byte và các bản .1, .2.gz, .3.gz; journalctl ghi nhận SIGHUP" width="2400" height="1350" loading="lazy"></div><figcaption>SSH Studio · <code>logrotate -f</code>: xoay ngay và gửi reload cho dịch vụ</figcaption></figure>
+
 - Sau khi xoay: `bao-gia.log` mới trống, của `baogia:toinoi`, quyền `0644`; bản hôm nay thành `.1` (chưa nén, vì `delaycompress`); bản `.1` cũ (20/11) được nén thành `.2.gz`; `.2.gz` cũ (19/11) thành `.3.gz`.
 - Journal cho thấy `postrotate` đã chạy: `bao-gia` nhận `SIGHUP`, mở lại file log.
 - Bằng chứng quyết định: một yêu cầu mới ghi vào **`bao-gia.log` mới** (`q-100006`), còn `bao-gia.log.1` dừng ở `q-100005`. Không có `postrotate`, dòng `q-100006` sẽ nằm trong `.1`.
 - **`/var/lib/logrotate/status`** ghi lần xoay cuối của mỗi file; logrotate dựa vào đó để biết «đã một ngày chưa».
 
-<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/linux-logrotate/ssh-studio-03.webp" alt="Terminal của SSH Studio: logrotate -f -v in compressing, renaming bao-gia.log to bao-gia.log.1, creating new, running postrotate script; ls -l với bao-gia.log 0 byte, .1, .2.gz, .3.gz; journal nhan SIGHUP mo lai file log; yêu cầu mới q-100006 nằm trong file mới còn .1 kết thúc ở q-100005; zcat .2.gz; dòng trạng thái trong /var/lib/logrotate/status" width="2400" height="1350" loading="lazy"></div><figcaption>SSH Studio · xoay ngay và kiểm chứng file mới</figcaption></figure>
+<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/linux-logrotate/ssh-studio-03.webp" alt="Terminal của SSH Studio: sau khi xoay, bao-gia.log nhận dòng mới, bao-gia.log.1 giữ dòng cũ, zcat đọc bao-gia.log.2.gz, /var/lib/logrotate/status ghi thời điểm xoay của bao-gia.log" width="2400" height="1350" loading="lazy"></div><figcaption>SSH Studio · log mới, bản cũ và bản nén đều đọc được</figcaption></figure>
 
 ## 4. Đối chiếu thao tác
 

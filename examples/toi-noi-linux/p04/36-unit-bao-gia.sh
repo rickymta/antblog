@@ -7,10 +7,12 @@ head -n 3 /srv/toinoi/bao-gia/releases/1.5.0/bao-gia
 readlink /srv/toinoi/bao-gia/current
 #file /srv/toinoi/bao-gia/shared/config/bao-gia.env bao-gia.env
 ls -l /srv/toinoi/bao-gia/shared/config
+#shot 05
 ## File unit
 #sudofile sudoedit /etc/systemd/system/bao-gia.service bao-gia.service 01
 sudo systemctl daemon-reload
 systemctl cat bao-gia --no-pager
+#shot 06
 #clear
 ## Lần khởi động đầu tiên
 id -nG
@@ -37,6 +39,8 @@ sudo kill -KILL $(systemctl show bao-gia -p MainPID --value)
 #wait 4
 systemctl show bao-gia --no-pager -p MainPID -p NRestarts
 journalctl -u bao-gia --no-pager -n 6 -o cat
+#shot 07
+#clear
 ## reload: gửi SIGHUP
 sudo systemctl reload bao-gia
 journalctl -u bao-gia --no-pager -n 2 -o cat

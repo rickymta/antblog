@@ -26,6 +26,8 @@ Cuối tuần, Bình duyệt lại `bao-gia` trước khi bàn giao cho nhóm v�
 
 **Drop-in** là file `.conf` trong thư mục `TÊN.service.d/`, ghi đè hoặc thêm vào đúng những dòng cần đổi của unit gốc, giống `journald.conf.d` ở [LNX-037](/articles/linux-journalctl-doc-log). Unit gốc giữ nguyên; muốn bỏ thay đổi thì xoá một file. (`sudo systemctl edit bao-gia` tạo và mở đúng file drop-in đó.)
 
+<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/linux-thuc-hanh-dich-vu-systemd/ssh-studio-05.webp" alt="Terminal của SSH Studio: systemd-analyze security bao-gia trước khi siết cho Overall exposure level 9.2 UNSAFE" width="2400" height="1350" loading="lazy"></div><figcaption>SSH Studio · trước khi siết: unit mặc định bị chấm 9.2 UNSAFE</figcaption></figure>
+
 <figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/linux-thuc-hanh-dich-vu-systemd/ssh-studio-01.webp" alt="Vim mở /etc/systemd/system/bao-gia.service.d/50-an-toan.conf qua sudoedit trong SSH Studio, mục [Service] với NoNewPrivileges=yes, PrivateTmp=yes, ProtectSystem=strict, ProtectHome=yes, ReadWritePaths=/var/log/toinoi, ProtectKernelTunables=yes, ProtectControlGroups=yes, RestrictSUIDSGID=yes, MemoryMax=200M" width="2400" height="1350" loading="lazy"></div><figcaption>SSH Studio · drop-in siết <code>bao-gia</code></figcaption></figure>
 
 ```ini
@@ -82,7 +84,7 @@ ProtectSystem=strict
 - `status` có thêm dòng **`Drop-In:`**: dấu hiệu luôn cần nhìn khi đọc một dịch vụ lạ, vì cấu hình thật là unit gốc **cộng** các drop-in.
 - **`systemd-analyze security`** chấm mức phơi nhiễm từ 0 (chặt) tới 10 (mở): từ 9.2 xuống 7.8. Đừng chạy theo con số: mỗi tuỳ chọn có thể làm hỏng một ứng dụng cụ thể, nên thêm dần, thử từng bước. Lệnh không có `tail` liệt kê từng mục còn hở, là danh sách việc tiếp theo.
 
-<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/linux-thuc-hanh-dich-vu-systemd/ssh-studio-02.webp" alt="Terminal của SSH Studio: systemd-analyze security 9.2 UNSAFE, mkdir bao-gia.service.d, sudoedit 50-an-toan.conf, daemon-reload, restart, status với dòng Drop-In 50-an-toan.conf, security 7.8 EXPOSED, systemctl show ProtectSystem=strict, ProtectHome=yes, PrivateTmp=yes, MemoryMax=209715200, ReadWritePaths=/var/log/toinoi" width="2400" height="1350" loading="lazy"></div><figcaption>SSH Studio · drop-in và điểm của <code>systemd-analyze security</code></figcaption></figure>
+<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/linux-thuc-hanh-dich-vu-systemd/ssh-studio-02.webp" alt="Terminal của SSH Studio: tạo thư mục bao-gia.service.d, sudoedit 50-an-toan.conf, daemon-reload, restart, status có dòng Drop-In: 50-an-toan.conf, systemd-analyze security còn 7.8 EXPOSED, systemctl show cho ProtectSystem=strict, ProtectHome=yes, PrivateTmp=yes, MemoryMax, ReadWritePaths=/var/log/toinoi" width="2400" height="1350" loading="lazy"></div><figcaption>SSH Studio · drop-in đã có hiệu lực: điểm phơi nhiễm giảm từ 9.2 xuống 7.8</figcaption></figure>
 
 ## 2. Dịch vụ vẫn làm đúng việc của nó
 
@@ -107,10 +109,12 @@ sudo: a password is required
 deploy: stop bi tu choi
 ```
 
+<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/linux-thuc-hanh-dich-vu-systemd/ssh-studio-06.webp" alt="Terminal của SSH Studio: curl /suc-khoe | jq -c trả trạng thái ok phiên bản 1.5.0, curl báo giá delivery 7 km, tail bao-gia.log có dòng yêu cầu mới, reload và journalctl ghi nhận SIGHUP" width="2400" height="1350" loading="lazy"></div><figcaption>SSH Studio · sau khi siết dịch vụ vẫn trả lời, ghi log và reload được</figcaption></figure>
+
 - Báo giá giao hàng 7 km ra 31 000 đồng, dòng log mới được ghi. Mã yêu cầu bắt đầu lại từ `q-100001` vì bộ đếm nằm trong bộ nhớ của tiến trình, và dịch vụ vừa được khởi động lại.
 - **`deploy`** khởi động lại được (đúng quy tắc sudoers của [LNX-030](/articles/linux-thuc-hanh-khoa-dang-nhap-ssh)), nhưng **dừng** thì không: CI không làm sập được dịch vụ, cả khi bị chiếm.
 
-<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/linux-thuc-hanh-dich-vu-systemd/ssh-studio-03.webp" alt="Terminal của SSH Studio: curl suc-khoe qua jq -c với trang_thai ok, phien_ban 1.5.0, báo giá delivery 7 km 31000, tail log q-100001, reload và journal nhan SIGHUP, deploy restart duoc, deploy stop bị từ chối a password is required, is-active active" width="2400" height="1350" loading="lazy"></div><figcaption>SSH Studio · dịch vụ vẫn chạy đúng, <code>deploy</code> chỉ khởi động lại được</figcaption></figure>
+<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/linux-thuc-hanh-dich-vu-systemd/ssh-studio-03.webp" alt="Terminal của SSH Studio: deploy chạy sudo systemctl restart bao-gia được, stop bao-gia bị từ chối vì cần mật khẩu, is-active bao-gia vẫn active" width="2400" height="1350" loading="lazy"></div><figcaption>SSH Studio · CI chỉ được khởi động lại bao-gia, không được dừng</figcaption></figure>
 
 ## 3. Bảng kiểm tra bàn giao
 
@@ -137,9 +141,11 @@ an@toinoi-app-01:~$ systemctl --failed --no-pager
 0 loaded units listed.
 ```
 
+<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/linux-thuc-hanh-dich-vu-systemd/ssh-studio-07.webp" alt="Terminal của SSH Studio: is-enabled và is-active cho bao-gia, bao-gia-don-bao-cao.timer, logrotate.timer đều enabled và active, systemctl show bao-gia cho User=baogia, Restart=on-failure, NRestarts=0" width="2400" height="1350" loading="lazy"></div><figcaption>SSH Studio · cả dịch vụ và hai timer đều bật lúc boot và đang chạy</figcaption></figure>
+
 `NRestarts=0` ở đây vì `restart` bằng tay đặt lại bộ đếm; bộ chấm sẽ tự giết tiến trình để thử `Restart=`.
 
-<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/linux-thuc-hanh-dich-vu-systemd/ssh-studio-04.webp" alt="Terminal của SSH Studio: is-enabled và is-active của bao-gia, bao-gia-don-bao-cao.timer, logrotate.timer đều enabled và active, show User=baogia Restart=on-failure NRestarts=0, logrotate -d đếm 0 lỗi, journalctl --disk-usage, systemctl --failed không có unit lỗi" width="2400" height="1350" loading="lazy"></div><figcaption>SSH Studio · bảng kiểm tra trước khi bàn giao</figcaption></figure>
+<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/linux-thuc-hanh-dich-vu-systemd/ssh-studio-04.webp" alt="Terminal của SSH Studio: logrotate -d đếm 0 lỗi, journalctl --disk-usage 32.0M, systemctl --failed báo 0 loaded units listed" width="2400" height="1350" loading="lazy"></div><figcaption>SSH Studio · bảng kiểm tra bàn giao: log, journal, không unit nào lỗi</figcaption></figure>
 
 ## 4. Chấm cả Phần 4
 

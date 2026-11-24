@@ -2,6 +2,8 @@
 #clear
 ## 1. Siết unit bằng drop-in
 systemd-analyze security bao-gia --no-pager | tail -n 1
+#shot 05
+#clear
 sudo mkdir -p /etc/systemd/system/bao-gia.service.d
 #sudofile sudoedit /etc/systemd/system/bao-gia.service.d/50-an-toan.conf bao-gia-an-toan.conf 01
 sudo systemctl daemon-reload
@@ -18,6 +20,8 @@ curl -s 'http://127.0.0.1:8080/bao-gia?dich_vu=delivery&km=7'
 tail -n 1 /var/log/toinoi/bao-gia.log
 sudo systemctl reload bao-gia
 journalctl -u bao-gia --no-pager -n 2 -o cat
+#shot 06
+#clear
 ## 3. CI khởi động lại bằng tài khoản deploy
 sudo -u deploy sudo -n /usr/bin/systemctl restart bao-gia && echo "deploy: restart duoc"
 sudo -u deploy sudo -n /usr/bin/systemctl stop bao-gia || echo "deploy: stop bi tu choi"
@@ -29,6 +33,8 @@ systemctl is-active bao-gia
 systemctl is-enabled bao-gia bao-gia-don-bao-cao.timer logrotate.timer
 systemctl is-active bao-gia bao-gia-don-bao-cao.timer logrotate.timer
 systemctl show bao-gia --no-pager -p User -p Restart -p NRestarts
+#shot 07
+#clear
 sudo logrotate -d /etc/logrotate.d/bao-gia 2>&1 | grep -ci error
 journalctl --disk-usage
 systemctl --failed --no-pager

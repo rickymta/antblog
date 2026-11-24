@@ -4,6 +4,8 @@
 journalctl -u bao-gia --no-pager | head -n 8
 journalctl -u bao-gia --no-pager -n 3
 journalctl -u bao-gia --no-pager --since '5 min ago' -o short-iso | tail -n 3
+#shot 05
+#clear
 ## Mức ưu tiên
 curl -s 'http://127.0.0.1:8080/bao-gia?dich_vu=xe-tai&km=5'
 curl -s 'http://127.0.0.1:8080/bao-gia?dich_vu=bike&km=abc'
@@ -16,6 +18,8 @@ sudo systemctl reload bao-gia
 #wait 1
 journalctl -u bao-gia --no-pager -p err -n 1 -o short-iso
 curl -s http://127.0.0.1:8080/suc-khoe
+#shot 06
+#clear
 mv /tmp/bang-gia.csv /srv/toinoi/bao-gia/releases/1.5.0/bang-gia.csv
 sudo systemctl reload bao-gia
 #wait 1
@@ -34,6 +38,8 @@ timeout 4 journalctl -u bao-gia -f -n 0 -o short-iso
 journalctl --disk-usage
 ls /var/log/journal/
 journalctl --list-boots --no-pager | tail -n 2
+#shot 07
+#clear
 sudo mkdir -p /etc/systemd/journald.conf.d
 #sudofile sudoedit /etc/systemd/journald.conf.d/50-toinoi.conf journald-toinoi.conf
 sudo systemctl restart systemd-journald

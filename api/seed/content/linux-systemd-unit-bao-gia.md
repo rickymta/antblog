@@ -36,6 +36,8 @@ total 12
 -rw------- 1 an toinoi 126 Nov 24 07:03 bi-mat.env
 ```
 
+<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/linux-systemd-unit-bao-gia/ssh-studio-05.webp" alt="Terminal của SSH Studio: ls -l releases/1.5.0 có bang-gia.csv, bao-gia, kiem-tra-cau-hinh.sh, head -n 3 cho #!/usr/bin/python3, current vẫn trỏ releases/1.4.2, vim bao-gia.env, ls -l shared/config" width="2400" height="1350" loading="lazy"></div><figcaption>SSH Studio · bản 1.5.0 đã có, <code>current</code> vẫn ở 1.4.2</figcaption></figure>
+
 - `bao-gia` 1.5.0 là một chương trình Python chỉ dùng thư viện chuẩn; dòng shebang `#!/usr/bin/python3` ([LNX-016](/articles/linux-shell-script-dau-tien)) cho phép chạy thẳng file. Nó lắng nghe cổng 8080 ở `127.0.0.1`, đọc cấu hình từ **biến môi trường**, in log vòng đời ra stdout và ghi từng yêu cầu vào file log.
 - `current` vẫn trỏ tới `1.4.2`. An để nguyên, có chủ đích, để thấy chuyện gì xảy ra.
 - An gõ file cấu hình bằng vim. Không có bí mật nào ở đây; khoá dịch vụ bản đồ nằm riêng trong `bi-mat.env` (quyền `600`) từ [LNX-010](/articles/linux-thuc-hanh-thu-muc-trien-khai).
@@ -116,6 +118,8 @@ RestartSec=2
 [Install]
 WantedBy=multi-user.target
 ```
+
+<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/linux-systemd-unit-bao-gia/ssh-studio-06.webp" alt="Terminal của SSH Studio: sudoedit bao-gia.service, sudo systemctl daemon-reload, systemctl cat bao-gia in file unit trong /etc/systemd/system với User=baogia, EnvironmentFile, ExecStartPre, ExecStart, Restart=on-failure" width="2400" height="1350" loading="lazy"></div><figcaption>SSH Studio · <code>daemon-reload</code> rồi kiểm tra systemd đã đọc đúng file unit</figcaption></figure>
 
 **`daemon-reload`** bảo systemd đọc lại file unit sau mỗi lần thêm hoặc sửa.
 
@@ -218,13 +222,15 @@ INFO nhan SIGHUP: mo lai file log, nap lai bang gia (4 loai dich vu)
 Reloaded bao-gia.service - bao-gia: dich vu bao gia cua Toi Noi.
 ```
 
+<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/linux-systemd-unit-bao-gia/ssh-studio-07.webp" alt="Terminal của SSH Studio: enable bao-gia tạo symlink, MainPID 6839 NRestarts 0, kill -KILL tiến trình chính, sau vài giây MainPID 7020 NRestarts 1, journalctl cho thấy dịch vụ khởi động lại" width="2400" height="1350" loading="lazy"></div><figcaption>SSH Studio · <code>Restart=on-failure</code>: bị giết thì systemd dựng lại</figcaption></figure>
+
 - **`enable`** tạo symlink trong `multi-user.target.wants` ([LNX-035](/articles/linux-systemd-systemctl)).
 - An giết tiến trình chính bằng **`SIGKILL`**, mô phỏng một lần chương trình chết bất ngờ. Bốn giây sau: `MainPID` mới, **`NRestarts=1`**, journal ghi lại cả quá trình khởi động. Đó là `Restart=on-failure`.
 - **`systemctl reload`** chạy `ExecReload`: `bao-gia` nhận `SIGHUP`, mở lại file log và nạp lại bảng giá mà không ngừng phục vụ. Ứng dụng phải tự hỗ trợ việc đó; không phải chương trình nào cũng có.
 
 `Restart=on-failure` không khởi động lại khi bạn `systemctl stop` (đó là dừng có chủ đích), cũng không khi chương trình thoát với mã 0. Nó cũng có giới hạn: mặc định quá 5 lần trong 10 giây thì systemd bỏ cuộc (`start-limit-hit`), để một dịch vụ hỏng hẳn không quay vòng mãi.
 
-<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/linux-systemd-unit-bao-gia/ssh-studio-04.webp" alt="Terminal của SSH Studio: enable tạo symlink, systemctl show MainPID và NRestarts=0, sudo kill -KILL tiến trình chính, sau 4 giây MainPID mới và NRestarts=1, journalctl -o cat với các dòng khởi động lại, reload rồi journal có nhan SIGHUP và Reloaded" width="2400" height="1350" loading="lazy"></div><figcaption>SSH Studio · <code>Restart=on-failure</code> và <code>reload</code></figcaption></figure>
+<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/linux-systemd-unit-bao-gia/ssh-studio-04.webp" alt="Terminal của SSH Studio: sudo systemctl reload bao-gia, journalctl -u bao-gia -n 2 cho INFO nhan SIGHUP: mo lai file log, nap lai bang gia và Reloaded bao-gia.service" width="2400" height="1350" loading="lazy"></div><figcaption>SSH Studio · <code>reload</code> gửi SIGHUP, dịch vụ nạp lại mà không dừng</figcaption></figure>
 
 ## 6. Đối chiếu thao tác
 

@@ -55,6 +55,8 @@ an@toinoi-app-01:~$ readlink /proc/$$/exe
 /usr/bin/bash
 ```
 
+<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/linux-tien-trinh-ps-top/ssh-studio-05.webp" alt="Terminal của SSH Studio: echo $$ in PID 2562 của shell, ps chỉ có bash và ps, ps -o cho PPID 2561 và thời gian chạy, ls /proc/$$ liệt kê các file của tiến trình, readlink /proc/$$/exe trỏ tới /usr/bin/bash" width="2400" height="1350" loading="lazy"></div><figcaption>SSH Studio · shell của bạn cũng là một tiến trình, có thư mục riêng trong <code>/proc</code></figcaption></figure>
+
 - **`$$`** là PID của chính shell.
 - **`ps`** không tham số liệt kê tiến trình thuộc terminal hiện tại: shell và chính `ps`.
 - **`ps -o …`** chọn cột: `PPID` là cha, `STAT` là trạng thái (`S` đang ngủ, `s` là trưởng phiên), `ELAPSED` là đã chạy bao lâu.
@@ -91,6 +93,8 @@ binh        2427       1  0 07:05 ?        00:00:00 bash /usr/local/bin/xuat-du-
 binh        2429    2427  0 07:05 ?        00:00:00  \_ sleep 5
 ```
 
+<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/linux-tien-trinh-ps-top/ssh-studio-06.webp" alt="Terminal của SSH Studio: ps aux | head -n 6 với các cột USER, PID, %CPU, %MEM, VSZ, RSS, STAT, START, TIME, COMMAND; ps aux | wc -l đếm 14 dòng" width="2400" height="1350" loading="lazy"></div><figcaption>SSH Studio · <code>ps aux</code>: mọi tiến trình trên server</figcaption></figure>
+
 **`ps aux`** là cách xem mọi tiến trình quen thuộc nhất (`a`: của mọi người dùng, `u`: định dạng theo người dùng, `x`: cả tiến trình không gắn terminal):
 
 | Cột | Ý nghĩa |
@@ -105,7 +109,7 @@ binh        2429    2427  0 07:05 ?        00:00:00  \_ sleep 5
 
 Server lab chỉ có hơn chục tiến trình; server thật thường có vài trăm. **`ps -ef --forest`** vẽ **cây tiến trình**: mỗi tiến trình nằm dưới cha của nó. PID 1 (`/sbin/init`, tức systemd) là gốc của mọi tiến trình dịch vụ. Hai script của Bình có cha là PID 1: người chạy chúng đã thoát, và tiến trình «mồ côi» được PID 1 nhận nuôi.
 
-<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/linux-tien-trinh-ps-top/ssh-studio-01.webp" alt="Terminal của SSH Studio: cuối danh sách /proc/PID, readlink exe là /usr/bin/bash, ps aux với các cột USER PID %CPU %MEM VSZ RSS STAT COMMAND, ps -ef --forest vẽ cây tiến trình từ sshd: an@pts/0 tới -bash của an và các lệnh trong pipe, cùng hai script của binh nằm dưới PID 1" width="2400" height="1350" loading="lazy"></div><figcaption>SSH Studio · <code>ps aux</code> và cây tiến trình: shell của An là con của <code>sshd</code></figcaption></figure>
+<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/linux-tien-trinh-ps-top/ssh-studio-01.webp" alt="Terminal của SSH Studio: ps -ef --forest cho cây tiến trình: /sbin/init là PID 1, sshd: an@pts/0 sinh ra -bash, bash sinh ra ps, grep, cut, head; hai tiến trình của binh tinh-lai-bao-cao và xuat-du-lieu" width="2400" height="1350" loading="lazy"></div><figcaption>SSH Studio · cây tiến trình: mỗi tiến trình có một tiến trình cha</figcaption></figure>
 
 ## 3. Ai đang ăn CPU?
 
@@ -185,13 +189,15 @@ Mem:            31Gi       1.6Gi        27Gi        26Mi       2.2Gi        29Gi
 Swap:          8.0Gi          0B       8.0Gi
 ```
 
+<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/linux-tien-trinh-ps-top/ssh-studio-07.webp" alt="Terminal của SSH Studio: top -b -n 1 -o %CPU in phần đầu và các tiến trình, bash của binh 100% CPU; uptime cho load average 0.68, 0.51, 0.31" width="2400" height="1350" loading="lazy"></div><figcaption>SSH Studio · <code>top</code> chế độ batch, chụp một lần để lưu hoặc so sánh</figcaption></figure>
+
 - Dòng đầu của `top` giống **`uptime`**: giờ, đã chạy bao lâu, và **load average** trong 1, 5, 15 phút. Load là số tiến trình trung bình đang chạy hoặc chờ CPU (và chờ đĩa). So với **`nproc`** (số nhân): load nhỏ hơn số nhân là CPU còn rảnh.
 - Dòng `%Cpu(s)` tính trên **mọi** nhân: một tiến trình ăn 100% một nhân trên máy 16 nhân chỉ hiện khoảng 6% ở đây. Cột `%CPU` của từng tiến trình thì tính theo một nhân.
 - **`free -h`**: `available` là bộ nhớ còn dùng được (kể cả phần cache có thể nhả ra), con số đáng nhìn hơn `free`.
 
 Lab chạy trong Docker, nên `top`, `free`, `nproc` thấy CPU và RAM của **cả máy chạy Docker** (ở đây 16 nhân, 31 GB), không phải giới hạn 512 MB của container. Trên máy ảo hay server thật, các con số này là của chính server.
 
-<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/linux-tien-trinh-ps-top/ssh-studio-04.webp" alt="Terminal của SSH Studio: top -b -n 1 sắp theo CPU với dòng tóm tắt và tinh-lai-bao-cao ở đầu, uptime với load average, nproc in 16, free -h với total, used, free, buff/cache, available" width="2400" height="1350" loading="lazy"></div><figcaption>SSH Studio · <code>top -b</code>, <code>uptime</code>, <code>free</code></figcaption></figure>
+<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/linux-tien-trinh-ps-top/ssh-studio-04.webp" alt="Terminal của SSH Studio: nproc in 16, free -h cho Mem total 31Gi, used 1.5Gi, available 29Gi, Swap 8.0Gi chưa dùng" width="2400" height="1350" loading="lazy"></div><figcaption>SSH Studio · số nhân CPU và bộ nhớ để đọc đúng load average</figcaption></figure>
 
 ## 5. Đối chiếu thao tác
 

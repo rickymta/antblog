@@ -10,9 +10,13 @@ ps
 ps -o pid,ppid,user,stat,etime,cmd -p $$
 ls /proc/$$ | head -n 8
 readlink /proc/$$/exe
+#shot 05
+#clear
 ## Mọi tiến trình trên server
 ps aux | head -n 6
 ps aux | wc -l
+#shot 06
+#clear
 ps -ef --forest | grep -v ' \[' | cut -c1-100 | head -n 25
 #shot 01
 #clear
@@ -27,6 +31,8 @@ grep -E '^(Name|State|PPid|Uid|VmRSS|Threads)' /proc/$(pgrep -u binh -f tinh-lai
 ## top chạy một lần (chế độ batch)
 top -b -n 1 -o %CPU | head -n 12
 uptime
+#shot 07
+#clear
 nproc
 free -h
 #shot 04

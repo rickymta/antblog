@@ -48,6 +48,8 @@ Legend: LOAD   → Reflects whether the unit definition was properly loaded.
 4 loaded units listed.
 ```
 
+<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/linux-systemd-systemctl/ssh-studio-04.webp" alt="Terminal của SSH Studio: ps -o pid,cmd -p 1 cho /sbin/init, systemctl --version cho systemd 255, list-units --type=service --state=running liệt kê cron, dbus, ssh, systemd-journald" width="2400" height="1350" loading="lazy"></div><figcaption>SSH Studio · systemd là PID 1 và các dịch vụ đang chạy</figcaption></figure>
+
 Server lab tối giản nên chỉ có bốn dịch vụ đang chạy; một máy ảo Ubuntu thường có vài chục.
 
 ## 2. Đọc `systemctl status`
@@ -78,7 +80,7 @@ an@toinoi-app-01:~$ systemctl status cron --no-pager
 
 **cgroup** là cơ chế của kernel gom các tiến trình của một dịch vụ vào một nhóm: systemd biết chính xác tiến trình nào thuộc dịch vụ nào (kể cả tiến trình con, cháu), giới hạn tài nguyên theo nhóm, và dừng được cả nhóm.
 
-<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/linux-systemd-systemctl/ssh-studio-01.webp" alt="Terminal của SSH Studio: ps -o pid,cmd -p 1 cho /sbin/init, systemctl --version 255, list-units liệt kê cron, dbus, ssh, systemd-journald đang chạy, systemctl status cron với Loaded enabled, Active active running, Main PID, Tasks, Memory, CPU, CGroup" width="2400" height="1350" loading="lazy"></div><figcaption>SSH Studio · systemd là PID 1 và <code>systemctl status</code></figcaption></figure>
+<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/linux-systemd-systemctl/ssh-studio-01.webp" alt="Terminal của SSH Studio: systemctl status cron --no-pager cho cron.service loaded từ /usr/lib/systemd/system, enabled, Active: active (running), Main PID 1899, Tasks, Memory, CGroup" width="2400" height="1350" loading="lazy"></div><figcaption>SSH Studio · đọc <code>systemctl status</code>: nạp từ đâu, có bật lúc boot không, đang chạy không</figcaption></figure>
 
 ## 3. Hỏi nhanh, xem file unit
 
@@ -113,6 +115,8 @@ SyslogFacility=cron
 WantedBy=multi-user.target
 ```
 
+<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/linux-systemd-systemctl/ssh-studio-05.webp" alt="Terminal của SSH Studio: is-active và is-enabled cho cron và ssh, systemctl show cron với MainPID, ActiveState, SubState, Restart=on-failure, systemctl cat cron in file unit với [Unit], [Service], [Install]" width="2400" height="1350" loading="lazy"></div><figcaption>SSH Studio · hỏi nhanh trạng thái và đọc file unit</figcaption></figure>
+
 - **`is-active`**, **`is-enabled`**: in một từ, mã thoát 0 nếu đúng. Hợp cho script: `systemctl is-active --quiet bao-gia || báo động`.
 - **`systemctl show -p THUỘC_TÍNH`**: đọc từng thuộc tính chính xác, không phải đoán từ `status`. `NRestarts` là số lần systemd tự khởi động lại dịch vụ.
 - **`systemctl cat`**: nội dung file unit đang được dùng, kèm đường dẫn ở dòng đầu. File của gói nằm ở `/usr/lib/systemd/system/`; file bạn viết đặt ở `/etc/systemd/system/` (ưu tiên hơn).
@@ -144,6 +148,8 @@ an@toinoi-app-01:~$ systemctl is-enabled cron
 enabled
 ```
 
+<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/linux-systemd-systemctl/ssh-studio-06.webp" alt="Terminal của SSH Studio: sudo systemctl stop cron, is-active in inactive, status cho Active: inactive (dead) nhưng vẫn enabled" width="2400" height="1350" loading="lazy"></div><figcaption>SSH Studio · <code>stop</code> dừng dịch vụ, không đổi trạng thái lúc boot</figcaption></figure>
+
 | Lệnh | Ảnh hưởng | Khi nào |
 |---|---|---|
 | `start` / `stop` / `restart` | **Bây giờ** | Chạy, dừng, khởi động lại ngay |
@@ -154,7 +160,7 @@ enabled
 
 `stop` gửi `SIGTERM` cho tiến trình chính, đợi, rồi mới `SIGKILL` ([LNX-032](/articles/linux-tin-hieu-kill)). Vì `cron` có `Restart=on-failure`, nếu bạn `kill -9` nó thay vì `systemctl stop`, systemd sẽ khởi động lại ngay: dịch vụ systemd thì dừng bằng `systemctl`.
 
-<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/linux-systemd-systemctl/ssh-studio-02.webp" alt="Terminal của SSH Studio: cuối systemctl cat cron với Restart=on-failure và mục [Install] WantedBy=multi-user.target, sudo systemctl stop cron rồi is-active inactive và status với ○ inactive dead, start, disable xoá symlink trong multi-user.target.wants, enable --now tạo lại symlink" width="2400" height="1350" loading="lazy"></div><figcaption>SSH Studio · <code>start</code>/<code>stop</code> và <code>enable</code>/<code>disable</code></figcaption></figure>
+<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/linux-systemd-systemctl/ssh-studio-02.webp" alt="Terminal của SSH Studio: sudo systemctl start cron, disable xoá symlink trong multi-user.target.wants, ls thư mục wants không còn cron, enable --now tạo lại symlink, is-enabled in enabled" width="2400" height="1350" loading="lazy"></div><figcaption>SSH Studio · <code>enable</code>/<code>disable</code> chỉ là tạo hoặc xoá symlink</figcaption></figure>
 
 ## 5. Phụ thuộc, lỗi, và quyền đọc journal
 
@@ -193,12 +199,14 @@ an sudo toinoi ssh-users
 an@toinoi-app-01:~$ sudo usermod -aG systemd-journal an
 ```
 
+<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/linux-systemd-systemctl/ssh-studio-07.webp" alt="Terminal của SSH Studio: list-dependencies ssh cho cây phụ thuộc system.slice và sysinit.target, show ssh -p After -p Wants, systemctl --failed báo 0 loaded units listed" width="2400" height="1350" loading="lazy"></div><figcaption>SSH Studio · phụ thuộc giữa các unit và unit đang lỗi</figcaption></figure>
+
 - **`list-dependencies`** vẽ cây những gì một unit cần (`Wants=`, `Requires=`). **`After=`** chỉ là thứ tự (khởi động sau), không kéo theo; muốn «cần và sau», unit ghi cả hai.
 - **`systemctl --failed`**: các unit đang lỗi. Câu lệnh đầu tiên nên chạy khi đăng nhập vào một server có vấn đề.
 - **`list-unit-files --type=timer`**: các timer cài sẵn của Ubuntu, sẽ gặp lại ở [LNX-038](/articles/linux-cron-systemd-timer).
 - **`journalctl` trả về rỗng** với dòng `Hint`: người dùng thường chỉ đọc được log của chính mình. Log hệ thống dành cho nhóm **`systemd-journal`** (hoặc `adm`). An thêm mình vào nhóm; như mọi thay đổi nhóm ([LNX-007](/articles/linux-nguoi-dung-nhom-quyen-file)), nó có hiệu lực từ lần đăng nhập sau. Bài tiếp theo bắt đầu bằng một phiên mới.
 
-<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/linux-systemd-systemctl/ssh-studio-03.webp" alt="Terminal của SSH Studio: list-dependencies ssh vẽ cây system.slice và sysinit.target, systemctl show ssh After, systemctl --failed với 0 loaded units listed, list-unit-files timer, journalctl -u cron trả Hint và No entries, id -nG chưa có systemd-journal, sudo usermod -aG systemd-journal an" width="2400" height="1350" loading="lazy"></div><figcaption>SSH Studio · phụ thuộc, unit lỗi và quyền đọc journal</figcaption></figure>
+<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/linux-systemd-systemctl/ssh-studio-03.webp" alt="Terminal của SSH Studio: list-unit-files --type=timer liệt kê các timer enabled, journalctl -u cron báo không thấy log của người khác và hệ thống vì an chưa thuộc nhóm adm hoặc systemd-journal, id -nG, usermod -aG systemd-journal an" width="2400" height="1350" loading="lazy"></div><figcaption>SSH Studio · timer có sẵn và quyền đọc journal</figcaption></figure>
 
 ## 6. Đối chiếu thao tác
 
