@@ -705,6 +705,26 @@
     "status": "published"
   },
   {
+    "slug": "linux-qua-ssh-studio-phan-06",
+    "title": "Linux qua SSH Studio · Phần 6 · Vận hành nhiều server và xử lý sự cố",
+    "description": "Từ một server lên nhiều server: workspace, thư mục và Launchpad của SSH Studio, vào server nội bộ qua bastion bằng jump host, sao lưu và khôi phục cấu hình SSH Studio có mã hoá, vá tự động bằng unattended-upgrades và quay lui một gói, checklist gia cố và fail2ban, chạy lệnh trên nhiều máy bằng vòng lặp SSH và Ansible, triển khai bằng thư mục release và symlink có đo khoảng gián đoạn, xử lý sự cố đĩa đầy, hết inode, OOM killer và không SSH được — kết thúc bằng runbook vận hành có script kiểm tra và diễn tập.",
+    "level": "advanced",
+    "category": "devops-linux",
+    "articles": [
+      "linux-workspace-launchpad-nhieu-server",
+      "linux-bastion-jump-host",
+      "linux-sao-luu-khoi-phuc-ssh-studio",
+      "linux-cap-nhat-he-thong-an-toan",
+      "linux-gia-co-server-fail2ban",
+      "linux-nhieu-server-ansible-toi-thieu",
+      "linux-trien-khai-release-symlink",
+      "linux-su-co-dia-day-oom",
+      "linux-su-co-khong-ssh-duoc",
+      "linux-thuc-hanh-runbook-van-hanh"
+    ],
+    "status": "published"
+  },
+  {
     "slug": "ba-p01-tu-duy-phan-tich-nghiep-vu",
     "title": "BA · Phần 1 · Tư duy phân tích nghiệp vụ",
     "description": "Tám bài mở đầu chương trình Business Analysis qua Tới Nơi: tư duy BA, vai trò phối hợp, phân loại yêu cầu, BACCM, mục tiêu đo lường, phạm vi và quyết định khi thiếu bằng chứng. Gồm 3 bài cơ bản, 3 bài trung bình và 2 bài nâng cao; kết thúc bằng hồ sơ đề xuất cải thiện điểm đón.",

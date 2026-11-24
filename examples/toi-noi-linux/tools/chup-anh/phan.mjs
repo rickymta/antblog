@@ -22,17 +22,25 @@ import { createRequire } from 'node:module';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 
-import { PASSWORD, ROOT, loginCommand, reset, root, runSegment, scripts } from '../../lib/lab.mjs';
+import { MAY, PASSWORD, ROOT, containerOf, loginCommand, reset, rootOn, runSegment, scripts } from '../../lib/lab.mjs';
 import { open } from './app.mjs';
 
 const REPO = join(ROOT, '..', '..');
 const sharp = createRequire(join(REPO, 'package.json'))('sharp');
 export const LOCAL = join(ROOT, 'may-cua-ban');
 
-/** Thư mục hiện tại của shell trong phiên SSH (shell con trực tiếp của sshd). */
+/** Máy của tab SSH Studio đang gõ (đổi bằng `#phien TÊN`, Phần 6); mặc định toinoi-app-01. */
+let hienTai = 'app01';
+/** Lệnh root trên máy của tab đang gõ. */
+const root = (cmd) => rootOn(containerOf(hienTai), cmd);
+
+/**
+ * Thư mục hiện tại của shell trong phiên SSH (shell con trực tiếp của sshd). Có nhiều phiên (một
+ * phiên cũ chưa thoát hẳn) thì lấy phiên mở gần nhất: đó là tab đang gõ.
+ */
 function sessionCwd() {
   return root(
-    "for p in $(pgrep -f '^sshd: an@pts'); do for c in $(pgrep -P $p -x bash); do readlink /proc/$c/cwd; done; done | head -n 1",
+    "for p in $(pgrep -f '^sshd: an@pts' | sort -n); do for c in $(pgrep -P $p -x bash); do readlink /proc/$c/cwd; done; done | tail -n 1",
   );
 }
 
@@ -147,8 +155,9 @@ export async function chayPhan({ part, slugs, gui: makeGui, only = [], fresh = t
     slug = slugs[script.id];
     console.log(`${script.name} → ${slug}`);
     const lines = readFileSync(script.path, 'utf8').replace(/\r\n/g, '\n').split('\n');
-    // Đoạn `#may appNN` (Phần 5) chạy trên server khác mà SSH Studio không mở: chạy ngầm bằng
-    // runner để trạng thái đúng như bản ghi, không gõ, không chụp.
+    // Đoạn `#may TÊN` (từ Phần 5) chạy trên server khác mà bài không mở trong SSH Studio: chạy ngầm
+    // bằng runner để trạng thái đúng như bản ghi, không gõ, không chụp. `#may app01` quay lại gõ
+    // trên tab đang mở. `#phien TÊN` (Phần 6) chuyển sang gõ trong tab SSH Studio của máy đó.
     let khac = null;
     const chayKhac = () => {
       if (!khac) return;
@@ -156,11 +165,19 @@ export async function chayPhan({ part, slugs, gui: makeGui, only = [], fresh = t
       console.log(`  chạy ngầm ${khac.lines.filter((l) => l.trim() && !l.startsWith('#')).length} lệnh trên ${khac.may}`);
       khac = null;
     };
+    const doiPhien = async (may) => {
+      if (may === hienTai) return;
+      if (!gui.phien) throw new Error('Phần này chưa có thao tác chuyển phiên (gui.phien)');
+      await gui.phien(may);
+      hienTai = may;
+    };
+    if (hienTai !== 'app01') await doiPhien('app01');
     for (const line of lines) {
-      const may = line.match(/^#may (app\d\d)$/);
+      const may = line.match(MAY);
       if (may) {
         chayKhac();
-        if (may[1] !== 'app01') khac = { may: may[1], lines: [] };
+        if (may[1] === 'phien') await doiPhien(may[2]);
+        else if (may[2] !== 'app01') khac = { may: may[2], lines: [] };
         continue;
       }
       if (khac) {

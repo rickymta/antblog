@@ -1,0 +1,4 @@
+// Vá tự động trên toinoi-app-01 (LNX-054): mỗi ngày cập nhật danh sách gói và cài bản vá.
+APT::Periodic::Update-Package-Lists "1";
+APT::Periodic::Unattended-Upgrade "1";
+APT::Periodic::AutocleanInterval "7";

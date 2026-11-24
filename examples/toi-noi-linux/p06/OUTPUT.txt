@@ -1,0 +1,576 @@
+==== p06/51-workspace.sh ====
+
+# Trên toinoi-bastion: ai đang đăng nhập
+an@toinoi-bastion:~$ hostname
+toinoi-bastion
+an@toinoi-bastion:~$ who
+an@toinoi-bastion:~$ w -h
+an@toinoi-bastion:~$ last -n 3 an
+
+wtmp begins Tue Nov 24 09:36:20 2026
+
+# Trên toinoi-app-01
+an@toinoi-app-01:~$ who
+an@toinoi-app-01:~$ last -n 3 an | head -n 3
+an       pts/1        tmux(3526).%0    Tue Nov 24 09:38 - 09:38  (00:00)
+
+wtmp begins Tue Nov 24 09:36:20 2026
+
+==== p06/52-bastion.sh ====
+
+# Bastion được dựng thế nào
+an@toinoi-bastion:~$ cat /etc/ssh/sshd_config.d/10-bastion.conf
+# toinoi-bastion: cửa vào duy nhất từ ngoài vào mạng nội bộ 10.20.0.0/24 (Bình dựng, LNX-052).
+PasswordAuthentication no
+KbdInteractiveAuthentication no
+PermitRootLogin no
+AllowAgentForwarding no
+X11Forwarding no
+AllowTcpForwarding yes
+an@toinoi-bastion:~$ sudo sshd -T | grep -E '^(passwordauthentication|kbdinteractiveauthentication|permitrootlogin|allowagentforwarding|allowtcpforwarding|x11forwarding) '
+permitrootlogin no
+passwordauthentication no
+kbdinteractiveauthentication no
+x11forwarding no
+allowtcpforwarding yes
+allowagentforwarding no
+an@toinoi-bastion:~$ ip -br addr show eth0
+eth0@if144       UP             10.20.0.10/24
+an@toinoi-bastion:~$ nc -zv -w 3 toinoi-app-02 22
+Connection to toinoi-app-02 (10.20.0.12) 22 port [tcp/ssh] succeeded!
+
+# Trên toinoi-app-02, qua bastion
+an@toinoi-app-02:~$ hostname
+toinoi-app-02
+an@toinoi-app-02:~$ who
+an@toinoi-app-02:~$ echo $SSH_CONNECTION
+
+
+# Trên bastion: đường hầm tới app02 là một kết nối của sshd
+an@toinoi-bastion:~$ sudo ss -tnp | grep -E 'State|10.20.0.12:22'
+State Recv-Q Send-Q Local Address:Port Peer Address:PortProcess
+
+# Chỉ nhận SSH từ bastion (và từ app01 cho rsync)
+an@toinoi-app-02:~$ sudo ufw allow from 10.20.0.10 to any port 22 proto tcp comment 'SSH qua bastion'
+Rules updated
+an@toinoi-app-02:~$ sudo ufw allow from 10.20.0.11 to any port 22 proto tcp comment 'rsync tu app01'
+Rules updated
+an@toinoi-app-02:~$ sudo ufw default deny incoming
+Default incoming policy changed to 'deny'
+(be sure to update your rules accordingly)
+an@toinoi-app-02:~$ sudo ufw --force enable
+Firewall is active and enabled on system startup
+an@toinoi-app-02:~$ sudo ufw status
+Status: active
+
+To                         Action      From
+--                         ------      ----
+22/tcp                     ALLOW       10.20.0.10                 # SSH qua bastion
+22/tcp                     ALLOW       10.20.0.11                 # rsync tu app01
+
+
+# Từ app01: rsync sang app02 vẫn chạy
+an@toinoi-app-01:~$ ssh app02 hostname
+toinoi-app-02
+an@toinoi-app-01:~$ nc -zv -w 3 toinoi-app-02 22
+Connection to toinoi-app-02 (10.20.0.12) 22 port [tcp/ssh] succeeded!
+
+==== p06/53-sao-luu.sh ====
+
+
+==== p06/54-cap-nhat.sh ====
+
+# Có gì cần cập nhật
+an@toinoi-app-01:~$ sudo apt update 2>&1 | tail -n 1
+All packages are up to date.
+an@toinoi-app-01:~$ apt list --upgradable 2>/dev/null | tail -n +2 | wc -l
+0
+an@toinoi-app-01:~$ apt list --upgradable 2>/dev/null | grep -c -- '-security'
+0
+an@toinoi-app-01:~$ apt list --upgradable 2>/dev/null | head -n 6
+Listing...
+
+# Vá tự động: unattended-upgrades
+an@toinoi-app-01:~$ sudo apt install -y unattended-upgrades 2>&1 | grep -E '^Setting up unattended-upgrades'
+Setting up unattended-upgrades (2.9.1+nmu4ubuntu1) ...
+an@toinoi-app-01:~$ sudoedit /etc/apt/apt.conf.d/20auto-upgrades
+an@toinoi-app-01:~$ sudoedit /etc/apt/apt.conf.d/52unattended-toinoi
+an@toinoi-app-01:~$ grep -E '^\s*"\$\{distro_id\}' /etc/apt/apt.conf.d/50unattended-upgrades
+        "${distro_id}:${distro_codename}";
+        "${distro_id}:${distro_codename}-security";
+        "${distro_id}ESMApps:${distro_codename}-apps-security";
+        "${distro_id}ESM:${distro_codename}-infra-security";
+an@toinoi-app-01:~$ sudo unattended-upgrade --dry-run -v 2>&1 | tail -n 3
+Initial whitelist (not strict):
+No packages found that can be upgraded unattended and no pending auto-removals
+The list of kept packages can't be calculated in dry-run mode.
+an@toinoi-app-01:~$ systemctl list-timers 'apt-daily*' --no-pager | head -n 3
+NEXT                        LEFT LAST PASSED UNIT                    ACTIVATES
+Tue 2026-11-24 23:26:17 +07  13h -         - apt-daily.timer         apt-daily.service
+Wed 2026-11-25 06:45:02 +07  21h -         - apt-daily-upgrade.timer apt-daily-upgrade.service
+
+# Có cần khởi động lại không
+an@toinoi-app-01:~$ ls /var/run/reboot-required 2>/dev/null || echo "chua can khoi dong lai"
+chua can khoi dong lai
+an@toinoi-app-01:~$ cat /var/run/reboot-required.pkgs 2>/dev/null || true
+
+# Quay lui một bản vá: nginx
+an@toinoi-app-01:~$ apt-cache madison nginx
+     nginx | 1.24.0-2ubuntu7.21 | http://archive.ubuntu.com/ubuntu noble-updates/main amd64 Packages
+     nginx | 1.24.0-2ubuntu7.21 | http://security.ubuntu.com/ubuntu noble-security/main amd64 Packages
+     nginx | 1.24.0-2ubuntu7 | http://archive.ubuntu.com/ubuntu noble/main amd64 Packages
+an@toinoi-app-01:~$ sudo apt install -y --allow-downgrades nginx=1.24.0-2ubuntu7 nginx-common=1.24.0-2ubuntu7 2>&1 | grep -E '^(Setting up|dpkg: warning)'
+dpkg: warning: downgrading nginx from 1.24.0-2ubuntu7.21 to 1.24.0-2ubuntu7
+dpkg: warning: downgrading nginx-common from 1.24.0-2ubuntu7.21 to 1.24.0-2ubuntu7
+Setting up nginx (1.24.0-2ubuntu7) ...
+Setting up nginx-common (1.24.0-2ubuntu7) ...
+an@toinoi-app-01:~$ nginx -v
+nginx version: nginx/1.24.0 (Ubuntu)
+an@toinoi-app-01:~$ sudo apt-mark hold nginx nginx-common
+nginx set on hold.
+nginx-common set on hold.
+an@toinoi-app-01:~$ apt list --upgradable 2>/dev/null | grep nginx
+nginx-common/noble-updates,noble-security 1.24.0-2ubuntu7.21 all [upgradable from: 1.24.0-2ubuntu7]
+nginx/noble-updates,noble-security 1.24.0-2ubuntu7.21 amd64 [upgradable from: 1.24.0-2ubuntu7]
+an@toinoi-app-01:~$ sudo nginx -t 2>&1 | tail -n 1
+nginx: configuration file /etc/nginx/nginx.conf test is successful
+
+# Bản vá đã ổn: bỏ giữ, nâng lại
+an@toinoi-app-01:~$ sudo apt-mark unhold nginx nginx-common
+Canceled hold on nginx.
+Canceled hold on nginx-common.
+an@toinoi-app-01:~$ sudo apt install -y nginx nginx-common 2>&1 | grep -E '^Setting up nginx '
+Setting up nginx (1.24.0-2ubuntu7.21) ...
+an@toinoi-app-01:~$ nginx -v
+nginx version: nginx/1.24.0 (Ubuntu)
+
+==== p06/55-gia-co.sh ====
+
+# Checklist: cửa nào đang mở, ai vào được
+an@toinoi-app-01:~$ sudo ss -tlnpH | grep -v 127.0.0 | awk '{ split($6, p, "\""); print $4, p[2] }'
+0.0.0.0:443 nginx
+0.0.0.0:22 sshd
+0.0.0.0:80 nginx
+[::]:22 sshd
+an@toinoi-app-01:~$ sudo ufw status | head -n 7
+Status: active
+
+To                         Action      From
+--                         ------      ----
+OpenSSH                    LIMIT       Anywhere
+443/tcp                    ALLOW       10.20.0.0/24               # https bao-gia noi bo
+OpenSSH (v6)               LIMIT       Anywhere (v6)
+an@toinoi-app-01:~$ sudo sshd -T | grep -E '^(permitrootlogin|passwordauthentication|authenticationmethods|maxauthtries|x11forwarding|allowagentforwarding) '
+maxauthtries 3
+permitrootlogin no
+passwordauthentication no
+x11forwarding no
+allowagentforwarding yes
+authenticationmethods publickey,keyboard-interactive
+an@toinoi-app-01:~$ awk -F: '$7 !~ /(nologin|false)$/ { print $1, $7 }' /etc/passwd
+root /bin/bash
+sync /bin/sync
+an /bin/bash
+binh /bin/bash
+cuong /bin/bash
+kiemtoan /bin/bash
+deploy /bin/bash
+an@toinoi-app-01:~$ getent group sudo
+sudo:x:27:an,binh
+an@toinoi-app-01:~$ systemctl list-unit-files --type=service --state=enabled --no-pager --no-legend | awk '{ print $1 }' | paste -sd ' '
+bao-gia.service cron.service e2scrub_reap.service getty@.service nginx.service ssh.service systemd-pstore.service ufw.service unattended-upgrades.service
+
+# fail2ban: chặn IP dò mật khẩu
+an@toinoi-app-01:~$ sudo apt install -y fail2ban 2>&1 | grep -E '^Setting up fail2ban'
+Setting up fail2ban (1.0.2-3ubuntu0.1) ...
+an@toinoi-app-01:~$ sudoedit /etc/fail2ban/jail.d/toinoi.local
+an@toinoi-app-01:~$ sudo systemctl restart fail2ban
+an@toinoi-app-01:~$ sleep 3; sudo fail2ban-client status sshd
+Status for the jail: sshd
+|- Filter
+|  |- Currently failed: 0
+|  |- Total failed:     0
+|  `- Journal matches:  _SYSTEMD_UNIT=sshd.service + _COMM=sshd
+`- Actions
+   |- Currently banned: 0
+   |- Total banned:     0
+   `- Banned IP list:
+
+# Từ app02: ai đó thử đăng nhập bằng tài khoản không tồn tại
+an@toinoi-app-02:~$ for u in admin test oracle ubuntu; do ssh -o BatchMode=yes -o ConnectTimeout=3 -o StrictHostKeyChecking=no $u@toinoi-app-01 true 2>&1 | tail -n 1; done
+admin@toinoi-app-01: Permission denied (publickey).
+test@toinoi-app-01: Permission denied (publickey).
+oracle@toinoi-app-01: Permission denied (publickey).
+ubuntu@toinoi-app-01: Permission denied (publickey).
+an@toinoi-app-02:~$ sleep 2; nc -zv -w 3 toinoi-app-01 22
+nc: connect to toinoi-app-01 (10.20.0.11) port 22 (tcp) failed: Connection refused
+
+# Trên app01: fail2ban đã chặn
+an@toinoi-app-01:~$ sudo fail2ban-client status sshd
+Status for the jail: sshd
+|- Filter
+|  |- Currently failed: 1
+|  |- Total failed:     4
+|  `- Journal matches:  _SYSTEMD_UNIT=sshd.service + _COMM=sshd
+`- Actions
+   |- Currently banned: 1
+   |- Total banned:     1
+   `- Banned IP list:   10.20.0.12
+an@toinoi-app-01:~$ sudo ufw status | head -n 5
+Status: active
+
+To                         Action      From
+--                         ------      ----
+Anywhere                   REJECT      10.20.0.12                 # by Fail2Ban after 3 attempts against sshd
+an@toinoi-app-01:~$ sudo grep -E 'Found|Ban' /var/log/fail2ban.log | tail -n 5
+2026-11-24 09:40:38,733 fail2ban.filter         [7653]: INFO    [sshd] Found 10.20.0.12 - 2026-11-24 09:40:38
+2026-11-24 09:40:38,733 fail2ban.filter         [7653]: INFO    [sshd] Found 10.20.0.12 - 2026-11-24 09:40:38
+2026-11-24 09:40:38,734 fail2ban.filter         [7653]: INFO    [sshd] Found 10.20.0.12 - 2026-11-24 09:40:38
+2026-11-24 09:40:38,965 fail2ban.actions        [7653]: NOTICE  [sshd] Ban 10.20.0.12
+2026-11-24 09:40:39,157 fail2ban.filter         [7653]: INFO    [sshd] Found 10.20.0.12 - 2026-11-24 09:40:38
+
+# Gỡ chặn
+an@toinoi-app-01:~$ sudo fail2ban-client set sshd unbanip 10.20.0.12
+1
+an@toinoi-app-01:~$ sudo fail2ban-client status sshd | grep -E 'Currently banned|Banned IP'
+   |- Currently banned: 0
+   `- Banned IP list:
+
+==== p06/56-nhieu-server.sh ====
+
+# Vòng lặp SSH
+an@toinoi-app-01:~$ vim ~/.ssh/config
+an@toinoi-app-01:~$ ssh toinoi-bastion hostname
+Warning: Permanently added 'toinoi-bastion' (ED25519) to the list of known hosts.
+toinoi-bastion
+an@toinoi-app-01:~$ for h in toinoi-app-02 toinoi-bastion; do echo "== $h"; ssh $h 'uptime; df -h / | tail -n 1'; done
+== toinoi-app-02
+ 09:40:45 up  2:42,  0 user,  load average: 0.76, 0.46, 0.40
+overlay        1007G  8.9G  947G   1% /
+== toinoi-bastion
+ 09:40:45 up  2:42,  0 user,  load average: 0.76, 0.46, 0.40
+overlay        1007G  8.9G  947G   1% /
+an@toinoi-app-01:~$ for h in toinoi-app-02 toinoi-bastion; do ssh $h 'grep PRETTY /etc/os-release' | sed "s/^/$h: /"; done
+toinoi-app-02: PRETTY_NAME="Ubuntu 24.04.5 LTS"
+toinoi-bastion: PRETTY_NAME="Ubuntu 24.04.5 LTS"
+an@toinoi-app-01:~$ for h in toinoi-app-02 toinoi-khong-co; do ssh -o ConnectTimeout=3 $h hostname || echo "LOI: $h"; done
+toinoi-app-02
+ssh: Could not resolve hostname toinoi-khong-co: No address associated with hostname
+LOI: toinoi-khong-co
+
+# Ansible tối thiểu
+an@toinoi-app-01:~$ sudo apt install -y ansible-core 2>&1 | grep -E '^Setting up ansible-core'
+Setting up ansible-core (2.16.3-0ubuntu2) ...
+an@toinoi-app-01:~$ ansible --version | head -n 1
+ansible [core 2.16.3]
+an@toinoi-app-01:~$ mkdir -p ~/van-hanh && cd ~/van-hanh
+an@toinoi-app-01:~/van-hanh$ vim hosts.ini
+an@toinoi-app-01:~/van-hanh$ ansible all -i hosts.ini -m ping
+toinoi-app-02 | SUCCESS => {
+    "changed": false,
+    "ping": "pong"
+}
+toinoi-bastion | SUCCESS => {
+    "changed": false,
+    "ping": "pong"
+}
+an@toinoi-app-01:~/van-hanh$ ansible all -i hosts.ini -a 'uptime'
+toinoi-app-02 | CHANGED | rc=0 >>
+ 09:41:35 up  2:43,  0 user,  load average: 0.86, 0.53, 0.43
+toinoi-bastion | CHANGED | rc=0 >>
+ 09:41:35 up  2:43,  0 user,  load average: 0.86, 0.53, 0.43
+
+# Playbook: cùng một cấu hình cho mọi server
+an@toinoi-app-01:~/van-hanh$ vim ssh-toinoi.yml
+an@toinoi-app-01:~/van-hanh$ mkdir -p ~/.config
+an@toinoi-app-01:~/van-hanh$ vim ~/.config/ansible-become
+an@toinoi-app-01:~/van-hanh$ chmod 600 ~/.config/ansible-become
+an@toinoi-app-01:~/van-hanh$ ansible-playbook -i hosts.ini ssh-toinoi.yml --become-password-file ~/.config/ansible-become
+
+PLAY [Chinh sach SSH cua Toi Noi] ******************************************************************
+
+TASK [Gathering Facts] *****************************************************************************
+ok: [toinoi-app-02]
+ok: [toinoi-bastion]
+
+TASK [Gioi han so lan thu xac thuc moi ket noi] ****************************************************
+changed: [toinoi-bastion]
+changed: [toinoi-app-02]
+
+RUNNING HANDLER [Nap lai sshd] *********************************************************************
+changed: [toinoi-app-02]
+changed: [toinoi-bastion]
+
+PLAY RECAP *****************************************************************************************
+toinoi-app-02              : ok=3    changed=2    unreachable=0    failed=0    skipped=0    rescued=0    ignored=0
+toinoi-bastion             : ok=3    changed=2    unreachable=0    failed=0    skipped=0    rescued=0    ignored=0
+
+an@toinoi-app-01:~/van-hanh$ ansible-playbook -i hosts.ini ssh-toinoi.yml --become-password-file ~/.config/ansible-become | tail -n 3
+toinoi-app-02              : ok=2    changed=0    unreachable=0    failed=0    skipped=0    rescued=0    ignored=0
+toinoi-bastion             : ok=2    changed=0    unreachable=0    failed=0    skipped=0    rescued=0    ignored=0
+
+an@toinoi-app-01:~/van-hanh$ ansible all -i hosts.ini -a 'sshd -T' --become --become-password-file ~/.config/ansible-become | grep -E 'CHANGED|SUCCESS|maxauthtries'
+toinoi-app-02 | CHANGED | rc=0 >>
+maxauthtries 3
+toinoi-bastion | CHANGED | rc=0 >>
+maxauthtries 3
+an@toinoi-app-01:~/van-hanh$ cd ~
+
+==== p06/57-trien-khai.sh ====
+
+# Cấu trúc triển khai hiện tại
+an@toinoi-app-01:~$ cd /srv/toinoi/bao-gia
+an@toinoi-app-01:/srv/toinoi/bao-gia$ ls -l
+total 12
+lrwxrwxrwx 1 an an       14 Nov 24 09:38 current -> releases/1.5.0
+drwxr-xr-x 5 an toinoi 4096 Nov 24 09:39 releases
+drwxr-x--- 2 an toinoi 4096 Nov 24 09:36 scripts
+drwxr-xr-x 4 an toinoi 4096 Nov 24 09:36 shared
+an@toinoi-app-01:/srv/toinoi/bao-gia$ ls releases
+1.4.2  1.5.0  1.6.0
+an@toinoi-app-01:/srv/toinoi/bao-gia$ readlink current
+releases/1.5.0
+an@toinoi-app-01:/srv/toinoi/bao-gia$ curl -s --cacert /etc/ssl/certs/bao-gia.toinoi.lab.crt https://bao-gia.toinoi.lab/suc-khoe
+{"trang_thai": "ok", "phien_ban": "1.5.0", "pid": 4279, "moi_truong": "production", "so_dich_vu": 4}
+
+# Bản build 1.6.0 từ CI
+an@toinoi-app-01:/srv/toinoi/bao-gia$ sudo install -m 755 -o an -g toinoi /usr/share/toinoi-lab/p06/bao-gia-1.6.0 releases/1.6.0/bao-gia
+an@toinoi-app-01:/srv/toinoi/bao-gia$ diff -rq releases/1.5.0 releases/1.6.0
+Only in releases/1.6.0: THAY-DOI.txt
+Files releases/1.5.0/bang-gia.csv and releases/1.6.0/bang-gia.csv differ
+Files releases/1.5.0/bao-gia and releases/1.6.0/bao-gia differ
+an@toinoi-app-01:/srv/toinoi/bao-gia$ grep -m1 PHIEN_BAN releases/1.6.0/bao-gia
+PHIEN_BAN = '1.6.0'
+
+# Đổi current: tạo symlink mới rồi đổi tên đè lên (một thao tác nguyên tử)
+an@toinoi-app-01:/srv/toinoi/bao-gia$ ln -sfn releases/1.6.0 current.moi
+an@toinoi-app-01:/srv/toinoi/bao-gia$ mv -T current.moi current
+an@toinoi-app-01:/srv/toinoi/bao-gia$ readlink current
+releases/1.6.0
+
+# Đo trong lúc khởi động lại: 60 yêu cầu qua nginx, mỗi 50 ms
+an@toinoi-app-01:/srv/toinoi/bao-gia$ (for i in $(seq 60); do curl -s -o /dev/null -w '%{http_code}\n' --cacert /etc/ssl/certs/bao-gia.toinoi.lab.crt https://bao-gia.toinoi.lab/suc-khoe; sleep 0.05; done > /tmp/do-trien-khai.txt) &
+an@toinoi-app-01:/srv/toinoi/bao-gia$ sleep 1; sudo systemctl restart bao-gia
+an@toinoi-app-01:/srv/toinoi/bao-gia$ wait
+an@toinoi-app-01:/srv/toinoi/bao-gia$ sort /tmp/do-trien-khai.txt | uniq -c
+     58 200
+      2 502
+an@toinoi-app-01:/srv/toinoi/bao-gia$ curl -s --cacert /etc/ssl/certs/bao-gia.toinoi.lab.crt https://bao-gia.toinoi.lab/suc-khoe
+{"trang_thai": "ok", "phien_ban": "1.6.0", "pid": 8829, "moi_truong": "production", "so_dich_vu": 5}
+
+# Quay lui trong một lệnh
+an@toinoi-app-01:/srv/toinoi/bao-gia$ ln -sfn releases/1.5.0 current.moi && mv -T current.moi current && sudo systemctl restart bao-gia
+an@toinoi-app-01:/srv/toinoi/bao-gia$ sleep 1; curl -s --cacert /etc/ssl/certs/bao-gia.toinoi.lab.crt https://bao-gia.toinoi.lab/suc-khoe
+{"trang_thai": "ok", "phien_ban": "1.5.0", "pid": 9024, "moi_truong": "production", "so_dich_vu": 4}
+
+# Đóng gói thành script
+an@toinoi-app-01:/srv/toinoi/bao-gia$ vim ~/bin/trien-khai
+an@toinoi-app-01:/srv/toinoi/bao-gia$ chmod 755 ~/bin/trien-khai
+an@toinoi-app-01:/srv/toinoi/bao-gia$ trien-khai 1.9.9
+LOI: khong co release 1.9.9
+an@toinoi-app-01:/srv/toinoi/bao-gia$ trien-khai 1.6.0
+trien khai 1.6.0 (dang chay: 1.5.0)
+OK: bao-gia 1.6.0 dang chay
+an@toinoi-app-01:/srv/toinoi/bao-gia$ readlink current
+releases/1.6.0
+an@toinoi-app-01:/srv/toinoi/bao-gia$ cd ~
+
+==== p06/58-su-co-dia-oom.sh ====
+
+# 1. Triệu chứng: job sao lưu đêm thất bại
+an@toinoi-app-01:~$ systemctl --failed --no-legend
+● sao-luu-dem.service loaded failed failed Sao luu dem bao-gia vao /du-lieu
+an@toinoi-app-01:~$ journalctl -u sao-luu-dem --no-pager -o cat | grep -E 'tar:|gzip:|Failed' | head -n 4
+gzip: stdout: No space left on device
+/usr/bin/tar: /du-lieu/sao-luu/bao-gia-2026-11-24.tar.gz: Wrote only 6144 of 10240 bytes
+/usr/bin/tar: Child returned status 1
+/usr/bin/tar: Error is not recoverable: exiting now
+
+# 2. Đĩa nào đầy, cái gì chiếm chỗ
+an@toinoi-app-01:~$ df -h /du-lieu
+Filesystem      Size  Used Avail Use% Mounted on
+/dev/loop2      488M  452M  4.0K 100% /du-lieu
+an@toinoi-app-01:~$ sudo du -xh --max-depth=1 /du-lieu | sort -h
+16K     /du-lieu/lost+found
+452M    /du-lieu
+452M    /du-lieu/sao-luu
+an@toinoi-app-01:~$ ls -lh /du-lieu/sao-luu
+total 452M
+-rw-r--r-- 1 an toinoi 75M Nov 18 02:00 bao-gia-2026-11-18.tar.gz
+-rw-r--r-- 1 an toinoi 75M Nov 19 02:00 bao-gia-2026-11-19.tar.gz
+-rw-r--r-- 1 an toinoi 75M Nov 20 02:00 bao-gia-2026-11-20.tar.gz
+-rw-r--r-- 1 an toinoi 75M Nov 21 02:00 bao-gia-2026-11-21.tar.gz
+-rw-r--r-- 1 an toinoi 75M Nov 22 02:00 bao-gia-2026-11-22.tar.gz
+-rw-r--r-- 1 an toinoi 77M Nov 23 02:00 bao-gia-2026-11-23.tar.gz
+-rw-r--r-- 1 an an       0 Nov 24 09:41 bao-gia-2026-11-24.tar.gz
+
+# 3. Xử lý: giữ 3 bản mới nhất, chạy lại job
+an@toinoi-app-01:~$ ls -t /du-lieu/sao-luu/*.tar.gz | tail -n +4
+/du-lieu/sao-luu/bao-gia-2026-11-21.tar.gz
+/du-lieu/sao-luu/bao-gia-2026-11-20.tar.gz
+/du-lieu/sao-luu/bao-gia-2026-11-19.tar.gz
+/du-lieu/sao-luu/bao-gia-2026-11-18.tar.gz
+an@toinoi-app-01:~$ ls -t /du-lieu/sao-luu/*.tar.gz | tail -n +4 | xargs rm -v
+removed '/du-lieu/sao-luu/bao-gia-2026-11-21.tar.gz'
+removed '/du-lieu/sao-luu/bao-gia-2026-11-20.tar.gz'
+removed '/du-lieu/sao-luu/bao-gia-2026-11-19.tar.gz'
+removed '/du-lieu/sao-luu/bao-gia-2026-11-18.tar.gz'
+an@toinoi-app-01:~$ sudo systemctl reset-failed sao-luu-dem
+an@toinoi-app-01:~$ sudo systemctl start sao-luu-dem
+an@toinoi-app-01:~$ systemctl is-failed sao-luu-dem; df -h /du-lieu
+inactive
+Filesystem      Size  Used Avail Use% Mounted on
+/dev/loop2      488M  152M  300M  34% /du-lieu
+
+# 4. Còn chỗ mà không tạo được file: hết inode
+an@toinoi-app-01:~$ touch /du-lieu/bao-cao-moi.txt
+touch: cannot touch '/du-lieu/bao-cao-moi.txt': No space left on device
+an@toinoi-app-01:~$ df -h /du-lieu
+Filesystem      Size  Used Avail Use% Mounted on
+/dev/loop2      488M  153M  299M  34% /du-lieu
+an@toinoi-app-01:~$ df -i /du-lieu
+Filesystem     Inodes IUsed IFree IUse% Mounted on
+/dev/loop2      32768 32768     0  100% /du-lieu
+an@toinoi-app-01:~$ sudo find /du-lieu -xdev -type f | cut -d/ -f1-3 | sort | uniq -c | sort -n | tail -n 3
+      1 /du-lieu/thu.txt
+      3 /du-lieu/sao-luu
+  32751 /du-lieu/tam
+an@toinoi-app-01:~$ find /du-lieu/tam -type f -name 'phien-*' -delete
+an@toinoi-app-01:~$ df -i /du-lieu
+Filesystem     Inodes IUsed IFree IUse% Mounted on
+/dev/loop2      32768    17 32751    1% /du-lieu
+
+# 5. Tiến trình bị giết: OOM killer
+an@toinoi-app-01:~$ sudo systemd-run --unit bao-cao-thang -p MemoryMax=64M -p MemorySwapMax=0 /usr/bin/python3 -c "a = [bytearray(10**6) for _ in range(500)]"
+Running as unit: bao-cao-thang.service; invocation ID: 1311bd64b5bb4f828bd10e10a0414ce0
+an@toinoi-app-01:~$ sleep 3; systemctl is-failed bao-cao-thang
+failed
+an@toinoi-app-01:~$ systemctl status bao-cao-thang --no-pager | grep -E 'Active|Main PID|oom'
+     Active: failed (Result: oom-kill) since Tue 2026-11-24 09:41:52 +07; 2s ago
+   Main PID: 9209 (code=killed, signal=KILL)
+Nov 24 09:41:52 toinoi-app-01 systemd[1]: bao-cao-thang.service: Failed with result 'oom-kill'.
+an@toinoi-app-01:~$ journalctl -u bao-cao-thang --no-pager -o cat | tail -n 4
+Started bao-cao-thang.service - /usr/bin/python3 -c "a = [bytearray(10**6) for _ in range(500)]".
+bao-cao-thang.service: A process of this unit has been killed by the OOM killer.
+bao-cao-thang.service: Main process exited, code=killed, status=9/KILL
+bao-cao-thang.service: Failed with result 'oom-kill'.
+an@toinoi-app-01:~$ sudo systemctl reset-failed bao-cao-thang
+
+==== p06/59-khong-ssh-duoc.sh ====
+
+# Tình huống 1: sai cổng, không có gì nghe ở đó
+
+# Tình huống 2: sshd trên app02 không chạy
+an@toinoi-bastion:~$ nc -zv -w 3 toinoi-app-02 22
+nc: connect to toinoi-app-02 (10.20.0.12) port 22 (tcp) failed: Connection refused
+an@toinoi-bastion:~$ nc -zv -w 3 toinoi-app-02 443
+nc: connect to toinoi-app-02 (10.20.0.12) port 443 (tcp) timed out: Operation now in progress
+an@toinoi-bastion:~$ ping -c 1 -W 2 toinoi-app-02 | tail -n 2
+1 packets transmitted, 1 received, 0% packet loss, time 0ms
+rtt min/avg/max/mdev = 0.050/0.050/0.050/0.000 ms
+
+# Console của nhà cung cấp, trên app02
+an@toinoi-app-02:~$ systemctl is-active ssh
+inactive
+an@toinoi-app-02:~$ sudo journalctl -u ssh -n 3 --no-pager -o cat
+ssh.service: Unit process 1344 (sshd) remains running after unit stopped.
+Stopped ssh.service - OpenBSD Secure Shell server.
+ssh.service: Consumed 2.735s CPU time, 38.8M memory peak, 0B memory swap peak.
+an@toinoi-app-02:~$ sudo systemctl start ssh
+an@toinoi-bastion:~$ nc -zv -w 3 toinoi-app-02 22
+Connection to toinoi-app-02 (10.20.0.12) 22 port [tcp/ssh] succeeded!
+
+# Tình huống 3: tường lửa của app02 chặn bastion
+an@toinoi-bastion:~$ nc -zv -w 3 toinoi-app-02 22
+nc: connect to toinoi-app-02 (10.20.0.12) port 22 (tcp) timed out: Operation now in progress
+
+# Console: quy tắc ufw
+an@toinoi-app-02:~$ sudo ufw status numbered
+Status: active
+
+     To                         Action      From
+     --                         ------      ----
+[ 1] 22/tcp                     ALLOW IN    10.20.0.11                 # rsync tu app01
+
+an@toinoi-app-02:~$ sudo ufw insert 1 allow from 10.20.0.10 to any port 22 proto tcp comment 'SSH qua bastion'
+Rule inserted
+an@toinoi-bastion:~$ nc -zv -w 3 toinoi-app-02 22
+Connection to toinoi-app-02 (10.20.0.12) 22 port [tcp/ssh] succeeded!
+
+# Tình huống 4: server từ chối key
+an@toinoi-app-01:~$ ssh -o BatchMode=yes app02 true
+an@toinoi-app-02: Permission denied (publickey,password).
+
+# Console: sshd ghi lý do
+an@toinoi-app-02:~$ sudo journalctl -u ssh -n 20 --no-pager -o cat | grep -E 'Authentication refused|bad ownership' | tail -n 1
+Authentication refused: bad ownership or modes for file /home/an/.ssh/authorized_keys
+an@toinoi-app-02:~$ ls -l ~/.ssh/authorized_keys
+-rw-rw-rw- 1 an an 194 Nov 24 09:39 /home/an/.ssh/authorized_keys
+an@toinoi-app-02:~$ chmod 600 ~/.ssh/authorized_keys
+
+# Tình huống 5: host key đổi
+
+# Console: fingerprint thật của app02 sau khi Bình dựng lại
+an@toinoi-app-02:~$ ssh-keygen -lf /etc/ssh/ssh_host_ed25519_key.pub
+256 SHA256:RtHbm5duo8D/RDMzT9K2WtYCVwf4ZTjRpWNu9aFVFhw root@toinoi-app-02 (ED25519)
+
+# app01 cũng ghi host key cũ của app02 (rsync, Ansible): cập nhật sau khi đã đối chiếu
+an@toinoi-app-01:~$ ssh -o BatchMode=yes app02 hostname 2>&1 | grep -E 'IDENTIFICATION|Host key verification'
+@    WARNING: REMOTE HOST IDENTIFICATION HAS CHANGED!     @
+Host key verification failed.
+an@toinoi-app-01:~$ ssh-keygen -R toinoi-app-02
+# Host toinoi-app-02 found: line 4
+/home/an/.ssh/known_hosts updated.
+Original contents retained as /home/an/.ssh/known_hosts.old
+an@toinoi-app-01:~$ ssh app02 hostname
+Warning: Permanently added 'toinoi-app-02' (ED25519) to the list of known hosts.
+toinoi-app-02
+an@toinoi-app-01:~$ ssh-keygen -lF toinoi-app-02 | tail -n 1
+toinoi-app-02 ED25519 SHA256:RtHbm5duo8D/RDMzT9K2WtYCVwf4ZTjRpWNu9aFVFhw
+
+==== p06/60-thuc-hanh.sh ====
+
+# 1. Một lệnh cho mọi bằng chứng
+an@toinoi-app-01:~$ sudoedit /usr/local/bin/kiem-tra-van-hanh
+an@toinoi-app-01:~$ sudo chmod 755 /usr/local/bin/kiem-tra-van-hanh
+an@toinoi-app-01:~$ kiem-tra-van-hanh; echo "ma thoat: $?"
+OK        dich vu ssh: active
+OK        dich vu bao-gia: active
+OK        dich vu nginx: active
+OK        dich vu ufw: active
+OK        dich vu fail2ban: active
+OK        HTTPS /suc-khoe: phien ban 1.6.0
+OK        dia /: dung 1%, inode 1%
+OK        dia /du-lieu: dung 34%, inode 1%
+OK        chung chi TLS con han tren 30 ngay (Nov 24 02:39:42 2027 GMT)
+OK        fail2ban sshd: dang chan 0 IP
+OK        va tu dong: bat
+OK        chua can khoi dong lai
+OK        sao luu tren app02: 1.4.2 1.5.0 1.6.0
+---- 0 muc LOI
+ma thoat: 0
+
+# 2. Runbook nằm cạnh server
+an@toinoi-app-01:~$ sudo install -d -o an -g toinoi -m 2775 /srv/toinoi/runbook
+an@toinoi-app-01:~$ vim /srv/toinoi/runbook/van-hanh.md
+an@toinoi-app-01:~$ grep -c '^## ' /srv/toinoi/runbook/van-hanh.md
+6
+
+# 3. Diễn tập: bao-gia dừng giữa giờ
+an@toinoi-app-01:~$ sudo systemctl stop bao-gia
+an@toinoi-app-01:~$ kiem-tra-van-hanh | grep -E 'LOI|----'
+LOI       dich vu bao-gia: inactive
+LOI       HTTPS /suc-khoe khong tra loi
+---- 2 muc LOI
+an@toinoi-app-01:~$ sed -n '/^## bao-gia/,/^## Đĩa/p' /srv/toinoi/runbook/van-hanh.md | head -n 5
+## bao-gia không trả lời
+1. `systemctl status bao-gia` và `journalctl -u bao-gia -n 20`.
+2. Đang dừng: `sudo systemctl start bao-gia`, chạy lại `kiem-tra-van-hanh`.
+3. Vừa triển khai: `trien-khai <bản trước>` (xem `ls /srv/toinoi/bao-gia/releases`).
+
+an@toinoi-app-01:~$ journalctl -u bao-gia -n 2 --no-pager -o cat
+bao-gia.service: Deactivated successfully.
+Stopped bao-gia.service - bao-gia: dich vu bao gia cua Toi Noi.
+an@toinoi-app-01:~$ sudo systemctl start bao-gia
+an@toinoi-app-01:~$ sleep 2; kiem-tra-van-hanh | tail -n 1
+---- 0 muc LOI

@@ -1,0 +1,50 @@
+#!/usr/bin/env bash
+# Kiểm tra vận hành toinoi-app-01 (LNX-060): mỗi dòng một bằng chứng, OK / CANH BAO / LOI.
+# Mã thoát = số mục LOI. Chạy bằng an (cần sudo cho fail2ban, key đồng bộ cho app02).
+set -uo pipefail
+loi=0
+ok()   { printf 'OK        %s\n' "$*"; }
+canh() { printf 'CANH BAO  %s\n' "$*"; }
+hong() { printf 'LOI       %s\n' "$*"; loi=$((loi + 1)); }
+
+for dv in ssh bao-gia nginx ufw fail2ban; do
+  tt=$(systemctl is-active "$dv")
+  [ "$tt" = active ] && ok "dich vu $dv: $tt" || hong "dich vu $dv: $tt"
+done
+
+kq=$(curl -s --max-time 3 --cacert /etc/ssl/certs/bao-gia.toinoi.lab.crt https://bao-gia.toinoi.lab/suc-khoe)
+if grep -q '"trang_thai": "ok"' <<<"$kq"; then
+  ok "HTTPS /suc-khoe: phien ban $(sed -E 's/.*"phien_ban": "([^"]+)".*/\1/' <<<"$kq")"
+else
+  hong "HTTPS /suc-khoe khong tra loi"
+fi
+
+for mp in / /du-lieu; do
+  read -r dung inode < <(df --output=pcent,ipcent "$mp" | tail -n 1 | tr -d '%')
+  if [ "$dung" -ge 90 ] || [ "$inode" -ge 90 ]; then hong "dia $mp: dung ${dung}%, inode ${inode}%"
+  elif [ "$dung" -ge 80 ] || [ "$inode" -ge 80 ]; then canh "dia $mp: dung ${dung}%, inode ${inode}%"
+  else ok "dia $mp: dung ${dung}%, inode ${inode}%"; fi
+done
+
+if openssl x509 -checkend $((30 * 86400)) -noout -in /etc/ssl/certs/bao-gia.toinoi.lab.crt >/dev/null; then
+  ok "chung chi TLS con han tren 30 ngay ($(openssl x509 -enddate -noout -in /etc/ssl/certs/bao-gia.toinoi.lab.crt | cut -d= -f2))"
+else
+  hong "chung chi TLS het han trong 30 ngay"
+fi
+
+ban=$(sudo fail2ban-client status sshd | awk -F'\t' '/Currently banned/ { print $2 }')
+ok "fail2ban sshd: dang chan ${ban:-0} IP"
+
+[ "$(apt-config dump APT::Periodic::Unattended-Upgrade | cut -d'"' -f2)" = 1 ] \
+  && ok "va tu dong: bat" || canh "va tu dong: tat"
+[ -e /var/run/reboot-required ] && canh "can khoi dong lai: $(tr '\n' ' ' < /var/run/reboot-required.pkgs 2>/dev/null)" \
+  || ok "chua can khoi dong lai"
+
+if sl=$(ssh -o BatchMode=yes -o ConnectTimeout=3 app02 'ls sao-luu/releases' 2>/dev/null); then
+  ok "sao luu tren app02: $(tr '\n' ' ' <<<"$sl")"
+else
+  hong "khong doc duoc sao luu tren app02"
+fi
+
+echo "---- $loi muc LOI"
+exit "$loi"

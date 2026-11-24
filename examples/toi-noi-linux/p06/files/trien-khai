@@ -1,0 +1,35 @@
+#!/usr/bin/env bash
+# Triển khai một release của bao-gia (LNX-057): trien-khai PHIEN_BAN
+# Đổi current sang releases/PHIEN_BAN, khởi động lại, kiểm tra sức khoẻ; hỏng thì quay về bản cũ.
+set -euo pipefail
+GOC=/srv/toinoi/bao-gia
+URL=https://bao-gia.toinoi.lab/suc-khoe
+CA=/etc/ssl/certs/bao-gia.toinoi.lab.crt
+
+moi=${1:?Dung: trien-khai PHIEN_BAN}
+[ -x "$GOC/releases/$moi/bao-gia" ] || { echo "LOI: khong co release $moi" >&2; exit 1; }
+cu=$(basename "$(readlink "$GOC/current")")
+
+doi_sang() {
+  ln -sfn "releases/$1" "$GOC/current.moi"
+  mv -T "$GOC/current.moi" "$GOC/current"
+  sudo systemctl restart bao-gia
+}
+
+kiem_tra() {
+  for _ in 1 2 3 4 5; do
+    curl -s --cacert "$CA" "$URL" | grep -q "\"phien_ban\": \"$1\"" && return 0
+    sleep 1
+  done
+  return 1
+}
+
+echo "trien khai $moi (dang chay: $cu)"
+doi_sang "$moi"
+if kiem_tra "$moi"; then
+  echo "OK: bao-gia $moi dang chay"
+else
+  echo "LOI: $moi khong khoe, quay ve $cu" >&2
+  doi_sang "$cu"
+  exit 1
+fi

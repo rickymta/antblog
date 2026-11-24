@@ -5,6 +5,9 @@
 # Từ Phần 5 có thêm toinoi-app-02 (cùng ảnh), chỉ nằm trong mạng nội bộ "lan" của lab, không mở
 # cổng nào ra máy của bạn: dùng để thử cổng, tường lửa và DNS giữa hai máy. IP cố định để bản ghi
 # của lab giống nhau trên mọi máy.
+#
+# Từ Phần 6 có thêm toinoi-bastion: cửa vào duy nhất từ ngoài vào mạng nội bộ, SSH ở 127.0.0.1 cổng
+# 2200. SSH Studio vào toinoi-app-02 qua bastion (jump host).
 name: toinoi-linux-lab
 
 x-server: &server
@@ -40,6 +43,17 @@ services:
       lan:
         ipv4_address: 10.20.0.11
         aliases: [toinoi-app-01]
+
+  bastion:
+    <<: *server
+    container_name: toinoi-bastion
+    hostname: toinoi-bastion
+    ports:
+      - "127.0.0.1:2200:22"
+    networks:
+      lan:
+        ipv4_address: 10.20.0.10
+        aliases: [toinoi-bastion]
 
   app02:
     <<: *server

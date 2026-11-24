@@ -129,6 +129,15 @@ RUN chmod 700 /usr/share/toinoi-lab/p05 \
  && chmod 600 /usr/share/toinoi-lab/p05/dong-bo /usr/share/toinoi-lab/p05/dong-bo.pub \
  && chmod 700 /usr/share/toinoi-lab/p05/chuan-bi.sh
 
+# ---- Phần 6 ----
+# Host key riêng cho toinoi-app-02 và toinoi-bastion (ba container chung một ảnh), bản build bao-gia
+# 1.6.0 cho LNX-057 và chuan-bi.sh. fail2ban, unattended-upgrades, ansible-core do các bài cài bằng apt.
+COPY fixtures/p06/ /usr/share/toinoi-lab/p06/
+RUN chmod 700 /usr/share/toinoi-lab/p06 \
+ && chmod 600 /usr/share/toinoi-lab/p06/ssh_host_ed25519_key_* \
+ && chmod 700 /usr/share/toinoi-lab/p06/chuan-bi.sh \
+ && chmod 755 /usr/share/toinoi-lab/p06/bao-gia-1.6.0
+
 EXPOSE 22
 STOPSIGNAL SIGRTMIN+3
 CMD ["/sbin/init"]

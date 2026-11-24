@@ -149,17 +149,19 @@ Lộ trình: `linux-qua-ssh-studio-phan-05`. Lab: `examples/toi-noi-linux/p05` (
 
 ## P06 · Vận hành nhiều server và xử lý sự cố
 
-Đầu vào: P01–P05. Lộ trình dự kiến `-phan-06`.
+Đầu vào: P01–P05. Đầu ra: workspace SSH Studio có thư mục, `toinoi-app-02` chỉ vào được qua bastion (ufw của app02 chỉ mở SSH cho bastion và app01), bản sao lưu SSH Studio đã khôi phục thử, vá tự động có chính sách riêng, fail2ban chặn bằng ufw, playbook Ansible áp chính sách SSH cho app02 và bastion, `bao-gia` 1.6.0 triển khai bằng `trien-khai`, runbook và script `kiem-tra-van-hanh` cho 0 lỗi.
+
+Lộ trình: `linux-qua-ssh-studio-phan-06`. Lab: `examples/toi-noi-linux/p06` (bài 51…60). Lab có thêm `toinoi-bastion` (10.20.0.10, SSH ở 127.0.0.1:2200); đầu phần, `chuan-bi.sh` cho app02 và bastion host key riêng (cố định) và cài key `an-laptop`. Kịch bản có chỉ dẫn `#phien TÊN`: công cụ chụp gõ đoạn đó trong tab SSH Studio của máy đó (runner coi như `#may`). LNX-054, 055, 056 cài `unattended-upgrades`, `fail2ban`, `ansible-core` từ kho của Ubuntu (cần Internet). LNX-053 làm hoàn toàn trên giao diện. Bộ chấm: `npm run kiem-tra:p06` (24 yêu cầu).
 
 | ID | Bài / slug | Mức | Làm được sau bài / sản phẩm thực hành | Trạng thái |
 |---|---|---|---|---|
-| LNX-051 | Workspace, thư mục và Launchpad: nhiều server cùng lúc<br>`linux-workspace-launchpad-nhieu-server` | CB | Gom server của Tới Nơi theo môi trường, kết nối tất cả, theo dõi phiên | Dự kiến |
-| LNX-052 | Bastion và jump host<br>`linux-bastion-jump-host` | CB | Vào server nội bộ qua một bước nhảy, chuỗi nhiều bước | Dự kiến |
-| LNX-053 | Sao lưu và khôi phục cấu hình SSH Studio, chuyển máy<br>`linux-sao-luu-khoi-phuc-ssh-studio` | CB | Backup mã hoá, khôi phục gộp, vì sao chép `workspace.json` là chưa đủ | Dự kiến |
-| LNX-054 | Cập nhật hệ thống an toàn: bản vá, khởi động lại, unattended-upgrades<br>`linux-cap-nhat-he-thong-an-toan` | TB | Lịch vá, kiểm tra cần reboot, quay lui | Dự kiến |
-| LNX-055 | Gia cố server: checklist tối thiểu và fail2ban<br>`linux-gia-co-server-fail2ban` | TB | Giảm bề mặt tấn công, chặn dò mật khẩu | Dự kiến |
-| LNX-056 | Chạy một lệnh trên nhiều server: vòng lặp SSH và Ansible tối thiểu<br>`linux-nhieu-server-ansible-toi-thieu` | TB | Thu thập thông tin và áp cấu hình đồng loạt | Dự kiến |
-| LNX-057 | Triển khai không gián đoạn bằng thư mục release và symlink<br>`linux-trien-khai-release-symlink` | TB | Đổi `current`, quay lui trong một lệnh | Dự kiến |
-| LNX-058 | Sự cố: đĩa đầy, hết inode, OOM killer<br>`linux-su-co-dia-day-oom` | NC | Chẩn đoán theo trình tự, có bằng chứng từ log | Dự kiến |
-| LNX-059 | Sự cố: không SSH được vào server<br>`linux-su-co-khong-ssh-duoc` | NC | Đọc thông báo lỗi của SSH Studio, khoanh vùng mạng/sshd/xác thực | Dự kiến |
-| LNX-060 | Thực hành: runbook vận hành toinoi-app-01<br>`linux-thuc-hanh-runbook-van-hanh` | NC | Bàn giao runbook có bằng chứng chạy trên lab | Dự kiến |
+| LNX-051 | Workspace, thư mục và Launchpad: nhiều server cùng lúc<br>`linux-workspace-launchpad-nhieu-server` | CB | Thêm bastion bằng key, nhóm → thư mục (Production / Hạ tầng / Lab), Kết nối tất cả, đối chiếu fingerprint server mới, `who`/`w`/`last`, Launchpad và mục Cần chú ý | Đã viết |
+| LNX-052 | Bastion và jump host<br>`linux-bastion-jump-host` | CB | Bastion chỉ key, không agent/X11, `AllowTcpForwarding yes`; app02 qua Jump host (địa chỉ nhìn từ bastion, host key và xác thực từng bước), `ssh -J`/`ProxyJump`, ufw của app02 chỉ mở cho bastion và app01 | Đã viết |
+| LNX-053 | Sao lưu và khôi phục cấu hình SSH Studio, chuyển máy<br>`linux-sao-luu-khoi-phuc-ssh-studio` | CB | `workspace.json` chỉ có bí mật đã mã hoá (khoá ở Credential Manager), Sao lưu (Argon2id + AES-256-GCM), «máy mới» thiếu app02, Khôi phục gộp có xem trước, xung đột fingerprint | Đã viết |
+| LNX-054 | Cập nhật hệ thống an toàn: bản vá, khởi động lại, unattended-upgrades<br>`linux-cap-nhat-he-thong-an-toan` | TB | `apt list --upgradable` và kho `-security`, `20auto-upgrades`, `52unattended-toinoi` (không tự khởi động lại, giữ nginx), `--dry-run`, `reboot-required`, hạ nginx bằng `--allow-downgrades` + `apt-mark hold` | Đã viết |
+| LNX-055 | Gia cố server: checklist tối thiểu và fail2ban<br>`linux-gia-co-server-fail2ban` | TB | Checklist năm câu hỏi (cổng, ufw, `sshd -T`, shell/sudo, dịch vụ bật), jail `sshd` (`backend = systemd`, `banaction = ufw`, `ignoreip`), dò từ app02 bị chặn REJECT, `fail2ban.log`, gỡ chặn | Đã viết |
+| LNX-056 | Chạy một lệnh trên nhiều server: vòng lặp SSH và Ansible tối thiểu<br>`linux-nhieu-server-ansible-toi-thieu` | TB | Vòng lặp `ssh` qua `~/.ssh/config` có gắn tên máy và xử lý máy chết, `ansible-core`, inventory, ad-hoc `ping`/`-a`, playbook `copy` + `validate` + handler, lần hai `changed=0` | Đã viết |
+| LNX-057 | Triển khai bằng thư mục release và symlink<br>`linux-trien-khai-release-symlink` | TB | Bản build 1.6.0 vào `releases/`, đổi `current` nguyên tử (`ln -sfn` tên tạm + `mv -T`), đo 60 yêu cầu qua nginx khi khởi động lại (vài 502), quay lui một dòng, script `trien-khai` kiểm tra phiên bản và tự quay lui | Đã viết |
+| LNX-058 | Sự cố: đĩa đầy, hết inode, OOM killer<br>`linux-su-co-dia-day-oom` | NC | Job sao lưu thất bại vì `/du-lieu` đầy (journal, `df`, `du`, giữ 3 bản), hết inode khi `df -h` còn chỗ (`df -i`, đếm file theo thư mục, `find -delete`), `Result: oom-kill` với `MemoryMax` | Đã viết |
+| LNX-059 | Sự cố: không SSH được vào server<br>`linux-su-co-khong-ssh-duoc` | NC | Năm tình huống: sai cổng (refused), sshd dừng, ufw chặn bastion (timeout), `authorized_keys` 666 (StrictModes), host key đổi; khoanh vùng bằng `nc` từ bastion, console, cập nhật `known_hosts` của app01 | Đã viết |
+| LNX-060 | Thực hành: runbook vận hành toinoi-app-01<br>`linux-thuc-hanh-runbook-van-hanh` | NC | Script `kiem-tra-van-hanh` (OK/CANH BAO/LOI, mã thoát = số lỗi), runbook `/srv/toinoi/runbook/van-hanh.md`, diễn tập `bao-gia` dừng; `kiem-tra` 24 PASS | Đã viết |

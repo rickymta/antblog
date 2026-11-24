@@ -190,4 +190,4 @@ Tất cả `PASS` (20 mục) là xong Phần 5.
 
 ## Đọc tiếp
 
-Phần 5 khép lại với một server có hàng rào rõ ràng, dịch vụ có TLS và số liệu tài nguyên được ghi lại đều đặn. **Phần 6** chuyển sang vận hành nhiều server: workspace nhiều server và bastion trong SSH Studio, chạy lệnh trên nhiều máy, và xử lý sự cố có bằng chứng. Xem lại [lộ trình của series](/articles/linux-la-gi-va-ssh-studio).
+Phần 5 khép lại với một server có hàng rào rõ ràng, dịch vụ có TLS và số liệu tài nguyên được ghi lại đều đặn. **Phần 6** chuyển sang vận hành nhiều server: workspace nhiều server và bastion trong SSH Studio, chạy lệnh trên nhiều máy, và xử lý sự cố có bằng chứng. Bắt đầu với [LNX-051 · Workspace, thư mục và Launchpad: quản lý nhiều server cùng lúc](/articles/linux-workspace-launchpad-nhieu-server).

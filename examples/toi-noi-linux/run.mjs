@@ -17,7 +17,7 @@ import { join } from 'node:path';
 
 import { CONTAINER, PASSWORD, ROOT, USER, down, reset, root, runScript, scripts, up } from './lib/lab.mjs';
 
-const PARTS = ['p01', 'p02', 'p03', 'p04', 'p05'];
+const PARTS = ['p01', 'p02', 'p03', 'p04', 'p05', 'p06'];
 const [cmd, arg] = process.argv.slice(2);
 
 function info() {
@@ -26,6 +26,8 @@ function info() {
   console.log('Địa chỉ    : 127.0.0.1   Cổng: 2222');
   console.log(`Người dùng : ${USER}   Mật khẩu: ${PASSWORD} (chỉ dùng cho lab)`);
   console.log(`Fingerprint: ${fp} (ED25519)`);
+  // Phần 6: bastion là cửa vào mạng nội bộ (chỉ nhận key; host key riêng sau LNX-051).
+  console.log('Bastion    : 127.0.0.1   Cổng: 2200 (toinoi-bastion, chỉ nhận key an-laptop từ LNX-051)');
 }
 
 /** Mọi kịch bản của các phần, theo thứ tự bài. */

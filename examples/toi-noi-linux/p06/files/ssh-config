@@ -1,0 +1,22 @@
+# Cấu hình client SSH của An trên toinoi-app-01 (LNX-028, LNX-046, LNX-056).
+Host app01
+    HostName localhost
+    User an
+    IdentityFile ~/.ssh/id_ed25519
+    IdentitiesOnly yes
+
+# Server dự phòng trong mạng nội bộ: chỉ dùng key đồng bộ, không passphrase (LNX-046).
+Host toinoi-app-02 app02
+    HostName toinoi-app-02
+    User an
+    IdentityFile ~/.ssh/dong-bo
+    IdentitiesOnly yes
+    StrictHostKeyChecking accept-new
+
+# Bastion: app01 nằm trong mạng nội bộ nên đi thẳng, cùng key đồng bộ (LNX-056).
+Host toinoi-bastion bastion
+    HostName toinoi-bastion
+    User an
+    IdentityFile ~/.ssh/dong-bo
+    IdentitiesOnly yes
+    StrictHostKeyChecking accept-new

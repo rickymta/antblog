@@ -1,0 +1,10 @@
+// Chính sách vá của Tới Nơi (LNX-054). Ghi đè 50unattended-upgrades, không sửa file gốc của gói.
+// Không tự khởi động lại: nhóm vận hành khởi động lại trong khung giờ đã báo (runbook, LNX-060).
+Unattended-Upgrade::Automatic-Reboot "false";
+// nginx đứng trước bao-gia: cập nhật cùng lịch triển khai, không để máy tự nâng.
+Unattended-Upgrade::Package-Blacklist {
+    "nginx";
+    "nginx-common";
+};
+Unattended-Upgrade::Remove-Unused-Dependencies "true";
+Unattended-Upgrade::SyslogEnable "true";

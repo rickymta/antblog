@@ -51,12 +51,15 @@ export function compose(args, opts = {}) {
   return docker(['compose', ...args], { stdio: 'inherit', ...opts });
 }
 
-/** Chạy một lệnh shell trong container với quyền root, trả về stdout (đã bỏ khoảng trắng cuối). */
-export function root(cmd) {
-  const r = docker(['exec', CONTAINER, 'bash', '-c', cmd]);
-  if (r.status !== 0) throw new Error(`root: ${cmd}\n${r.stderr || r.stdout}`);
+/** Chạy một lệnh shell trong một container với quyền root, trả về stdout (đã bỏ khoảng trắng cuối). */
+export function rootOn(container, cmd) {
+  const r = docker(['exec', container, 'bash', '-c', cmd]);
+  if (r.status !== 0) throw new Error(`root@${container}: ${cmd}\n${r.stderr || r.stdout}`);
   return r.stdout.trimEnd();
 }
+
+/** Như rootOn, trên toinoi-app-01. */
+export const root = (cmd) => rootOn(CONTAINER, cmd);
 
 /** Chạy một lệnh shell với tư cách người dùng của lab (phiên đăng nhập mới, không TTY). */
 export function asUser(cmd, user = USER) {
@@ -180,18 +183,24 @@ export function compile(source, { echo = true, dir = '.' } = {}) {
   return out.join('\n') + '\n';
 }
 
-/** Tên container của một server trong lab: app01 → toinoi-app-01. */
+/** Tên container của một server trong lab: app01 → toinoi-app-01, bastion → toinoi-bastion. */
 export const containerOf = (may) => 'toinoi-' + may.replace(/^app/, 'app-');
 
 /**
- * Tách kịch bản thành các đoạn theo chỉ dẫn `#may appNN` (Phần 5): mỗi đoạn chạy trên một server,
- * trong một phiên đăng nhập riêng của `an`. Kịch bản không có chỉ dẫn này là một đoạn trên app01.
+ * Chỉ dẫn đổi máy: `#may appNN` (Phần 5: công cụ chụp chạy đoạn đó ngầm) và `#phien TÊN` (Phần 6:
+ * công cụ chụp gõ đoạn đó trong tab SSH Studio của máy đó). Với runner, cả hai là một phiên mới.
+ */
+export const MAY = /^#(may|phien) (app\d\d|bastion)$/;
+
+/**
+ * Tách kịch bản thành các đoạn theo chỉ dẫn đổi máy: mỗi đoạn chạy trên một server, trong một
+ * phiên đăng nhập riêng của `an`. Kịch bản không có chỉ dẫn này là một đoạn trên app01.
  */
 export function segments(source) {
   const out = [{ may: 'app01', lines: [] }];
   for (const line of source.replace(/\r\n/g, '\n').split('\n')) {
-    const m = line.match(/^#may (app\d\d)$/);
-    if (m) out.push({ may: m[1], lines: [] });
+    const m = line.match(MAY);
+    if (m) out.push({ may: m[2], lines: [] });
     else out[out.length - 1].lines.push(line);
   }
   return out.filter((seg) => seg.lines.some((l) => l.trim() && !/^# /.test(l)));
@@ -219,6 +228,8 @@ export function runSegment(may, source, { echo, dir }) {
     // systemctl in đường dẫn dạng liên kết OSC 8 (ESC ] 8 ;; URL ESC \); giữ chữ, bỏ mã điều khiển.
     .replace(/\x1b\]8;[^\x07\x1b]*(\x07|\x1b\\)/g, '')
     .replace(/\x1b\[[0-9;?]*[A-Za-z]/g, '')
+    // Bật/tắt chế độ bàn phím số (ESC = / ESC >) mà systemctl gửi khi có TTY.
+    .replace(/\x1b[=>]/g, '')
     // Shell tương tác báo lỗi bằng tên "-bash", không phải tên file kịch bản.
     .replace(/^\/run\/lab\.sh: line \d+: /gm, '-bash: ')
     .split('\n')

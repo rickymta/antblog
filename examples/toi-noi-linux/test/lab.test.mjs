@@ -209,3 +209,37 @@ test('OUTPUT.txt của Phần 5 có bản ghi của cả 10 bài, có dấu nh�
   assert.ok(!/\x1b/.test(out), 'không còn ký tự ESC');
   assert.match(out, /^an@toinoi-app-02:~\$ /m);
 });
+
+test('Phần 6 có đủ 10 kịch bản, đánh số tiếp từ 51', () => {
+  assert.deepEqual(
+    scripts('p06').map((s) => s.id),
+    ['51', '52', '53', '54', '55', '56', '57', '58', '59', '60'],
+  );
+});
+
+test('#phien đổi máy như #may, nhận cả bastion', () => {
+  const segs = segments('hostname\n#phien bastion\nwho\n#phien app02\nhostname\n#may app01\nls\n');
+  assert.deepEqual(
+    segs.map((s) => s.may),
+    ['app01', 'bastion', 'app02', 'app01'],
+  );
+  assert.equal(containerOf('bastion'), 'toinoi-bastion');
+});
+
+test('mọi file được #file/#sudofile nhắc tới đều có trong p06/files', () => {
+  for (const s of scripts('p06')) {
+    const src = readFileSync(s.path, 'utf8');
+    for (const m of src.matchAll(/^#(?:file|check) \S+ (\S+)(?: \d\d)?$|^#sudofile \S+ \S+ (\S+)(?: \d\d)?$/gm)) {
+      const f = m[1] || m[2];
+      assert.ok(existsSync(join(ROOT, 'p06', 'files', f)), `${s.name}: thiếu files/${f}`);
+    }
+  }
+});
+
+test('OUTPUT.txt của Phần 6 có bản ghi của các bài có lệnh, có dấu nhắc của bastion và app02', () => {
+  const out = readFileSync(join(ROOT, 'p06', 'OUTPUT.txt'), 'utf8');
+  for (const s of scripts('p06')) assert.ok(out.includes(`==== p06/${s.name} ====`), s.name);
+  assert.ok(!/\x1b/.test(out), 'không còn ký tự ESC');
+  assert.match(out, /^an@toinoi-bastion:~\$ /m);
+  assert.match(out, /^an@toinoi-app-02:~\$ /m);
+});

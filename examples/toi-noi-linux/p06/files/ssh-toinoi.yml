@@ -1,0 +1,23 @@
+# Cùng một chính sách SSH cho mọi server của Tới Nơi (LNX-056).
+- name: Chinh sach SSH cua Toi Noi
+  hosts: all
+  become: true
+  tasks:
+    - name: Gioi han so lan thu xac thuc moi ket noi
+      ansible.builtin.copy:
+        dest: /etc/ssh/sshd_config.d/20-toinoi.conf
+        content: |
+          # Do Ansible quan ly (~/van-hanh/ssh-toinoi.yml tren toinoi-app-01). Sua o do, khong sua tay.
+          MaxAuthTries 3
+          LoginGraceTime 30
+        owner: root
+        group: root
+        mode: "0644"
+        validate: /usr/sbin/sshd -t -f %s
+      notify: Nap lai sshd
+
+  handlers:
+    - name: Nap lai sshd
+      ansible.builtin.systemd:
+        name: ssh
+        state: reloaded

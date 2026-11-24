@@ -1,0 +1,12 @@
+# fail2ban trên toinoi-app-01 (LNX-055): chặn IP đăng nhập SSH sai nhiều lần, chặn bằng ufw.
+[DEFAULT]
+# Không bao giờ chặn: chính máy này, đường vào của An (cổng 2222 đi qua 10.20.0.1) và bastion.
+ignoreip = 127.0.0.1/8 ::1 10.20.0.1 10.20.0.10
+banaction = ufw
+
+[sshd]
+enabled = true
+backend = systemd
+maxretry = 3
+findtime = 10m
+bantime = 30m
