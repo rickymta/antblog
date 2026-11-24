@@ -51,6 +51,8 @@ an@toinoi-app-01:~/tai-lieu$ sed -n '/SIGTERM/,+2p' /var/log/toinoi/bao-gia.log.
 2026-11-20 09:16:21 INFO  nap bang gia: 4 loai dich vu tu /opt/toinoi/bao-gia/bang-gia.csv
 ```
 
+<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/linux-sed-sua-van-ban/ssh-studio-04.webp" alt="Terminal của SSH Studio trong ~/tai-lieu: sed -n '1,3p' in ba dòng đầu log, sed -n '$p' in dòng cuối, sed -n '/SIGTERM/,+2p' in đoạn bao-gia dừng rồi khởi động lại ngày 20/11" width="2400" height="1350" loading="lazy"></div><figcaption>SSH Studio · <code>sed -n</code> in theo số dòng và theo mẫu</figcaption></figure>
+
 **`-n`** tắt việc tự in mọi dòng, nên chỉ những dòng được lệnh `p` in ra mới xuất hiện. `sed -n '1,3p'` là `head -n 3`, `sed -n '$p'` là `tail -n 1`; lợi thế của `sed` là in được **khoảng ở giữa** (`sed -n '120,140p'`) và in **theo mẫu**.
 
 Lệnh thứ ba tìm ra lần nâng cấp mà [LNX-013](/articles/linux-cut-sort-uniq-tr) nhắc tới: 09:15:41 ngày 20/11, bản 1.4.1 nhận tín hiệu dừng; 40 giây sau, bản 1.4.2 khởi động và nạp bảng giá. Địa chỉ `/SIGTERM/,+2` in dòng khớp cùng hai dòng sau nó, đủ để thấy chuyện gì xảy ra quanh một sự kiện.
@@ -80,7 +82,7 @@ Hai lệnh cuối là cái bẫy kinh điển. Mẫu của `sed` là **biểu th
 
 Phần THAY không phải regex, nhưng có hai ký tự đặc biệt: `&` là toàn bộ chuỗi vừa khớp (`s/[0-9]* ms/[&]/` bọc số mili giây trong ngoặc vuông), và `\1`…`\9` là các nhóm (mục 4). Muốn chữ `&` thật, viết `\&`.
 
-<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/linux-sed-sua-van-ban/ssh-studio-01.webp" alt="Terminal của SSH Studio: sed -n in ba dòng đầu, dòng cuối và đoạn quanh SIGTERM của ngày 20/11; các ví dụ s/// thay một lần, thay mọi lần với cờ g, và mẫu 1.4.1 khớp nhầm chuỗi 1x4y1 trong khi 1\.4\.1 thì không" width="2400" height="1350" loading="lazy"></div><figcaption>SSH Studio · <code>sed -n</code> theo địa chỉ và bẫy dấu chấm trong mẫu</figcaption></figure>
+<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/linux-sed-sua-van-ban/ssh-studio-01.webp" alt="Terminal của SSH Studio: các ví dụ sed s: đổi 1.4.1 thành 1.4.2, đổi km= một lần và với cờ g đổi mọi chỗ, dấu chấm không thoát khớp nhầm 1x4y1, thoát bằng \. thì không" width="2400" height="1350" loading="lazy"></div><figcaption>SSH Studio · lệnh <code>s</code>, cờ <code>g</code> và dấu chấm phải thoát</figcaption></figure>
 
 ## 4. Nhóm: đổi định dạng dòng log
 
@@ -121,6 +123,8 @@ an@toinoi-app-01:~/tai-lieu$ zcat -f /var/log/toinoi/bao-gia.log* | sed -n 's/.*
 2685
 ```
 
+<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/linux-sed-sua-van-ban/ssh-studio-05.webp" alt="Terminal của SSH Studio: ba dòng WARN gốc, sed -E với ba nhóm đổi thành q-100002 2026-11-21T06:02:30 1406ms, sed -n …p lấy ba thời gian chậm nhất 2671, 2671, 2685" width="2400" height="1350" loading="lazy"></div><figcaption>SSH Studio · nhóm <code>\(…\)</code> và <code>\1</code>: đổi định dạng dòng log</figcaption></figure>
+
 Mẫu `-n 's/…/…/p'` rất đáng nhớ: chỉ in những dòng **đã được thay thành công**. Một lệnh `sed` vừa lọc vừa trích, thay cho cặp `grep | sed`.
 
 ### Xoá dòng
@@ -141,7 +145,7 @@ echo "bao-gia: cau hinh hop le"
 
 `d` xoá dòng khỏi kết quả. `-e` cho phép viết nhiều lệnh; lệnh được áp theo thứ tự lên từng dòng. `/^#/d` bỏ dòng chú thích (kể cả dòng shebang `#!/usr/bin/env bash`, vì nó cũng bắt đầu bằng `#`), `/^$/d` bỏ dòng trống. Cách nhanh để đọc phần lõi của một file cấu hình nhiều chú thích như `/etc/ssh/sshd_config`.
 
-<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/linux-sed-sua-van-ban/ssh-studio-02.webp" alt="Terminal của SSH Studio: ba dòng WARN gốc và sau khi sed -E đổi thành dạng q-100002 2026-11-21T06:02:30 1406ms; sed -n với cờ p lấy ba thời gian chậm nhất 2671, 2671, 2685; kiem-tra-cau-hinh.sh sau khi bỏ chú thích và dòng trống" width="2400" height="1350" loading="lazy"></div><figcaption>SSH Studio · nhóm trong regex, <code>s///p</code> và xoá dòng</figcaption></figure>
+<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/linux-sed-sua-van-ban/ssh-studio-02.webp" alt="Terminal của SSH Studio: sed -e /^#/d -e /^$/d in kiem-tra-cau-hinh.sh không còn dòng chú thích và dòng trống" width="2400" height="1350" loading="lazy"></div><figcaption>SSH Studio · xoá dòng theo mẫu với lệnh <code>d</code></figcaption></figure>
 
 ## 5. Sửa file tại chỗ, có đường lui
 
@@ -159,6 +163,8 @@ an@toinoi-app-01:~/tai-lieu$ sed -i 's#/opt/toinoi/bao-gia#/srv/toinoi/bao-gia/c
 an@toinoi-app-01:~/tai-lieu$ grep -n current appsettings.json
 8:    "RuleFile": "/srv/toinoi/bao-gia/current/bang-gia.csv",
 ```
+
+<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/linux-sed-sua-van-ban/ssh-studio-06.webp" alt="Terminal của SSH Studio: sed -i.bak đổi Level thành Warning, ls thấy appsettings.json.bak, diff 13c13, sed -i với dấu # làm phân cách đổi đường dẫn, grep -n current thấy dòng 8" width="2400" height="1350" loading="lazy"></div><figcaption>SSH Studio · <code>sed -i.bak</code>: sửa tại chỗ, có bản lưu để lui</figcaption></figure>
 
 **`-i`** (*in-place*) ghi kết quả đè lên chính file. **`-i.bak`** làm như vậy nhưng giữ bản gốc với đuôi `.bak`, rồi `diff` cho biết đúng những gì đã đổi.
 
@@ -197,7 +203,7 @@ an@toinoi-app-01:~/tai-lieu$ diff appsettings.json.bak appsettings.json
 
 Cách này hợp với những file có cấu trúc đơn giản. Với JSON hay YAML phức tạp (khối lồng nhau, dấu `}` trong chuỗi), hãy dùng công cụ hiểu cấu trúc đó, như `jq` cho JSON. `sed` hiểu dòng, không hiểu JSON.
 
-<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/linux-sed-sua-van-ban/ssh-studio-03.webp" alt="Terminal của SSH Studio: sed -i.bak đổi Level thành Warning và để lại appsettings.json.bak, diff xác nhận thay đổi, sed -i với dấu phân cách # đổi đường dẫn sang /srv/toinoi/bao-gia/current, sed -n in khối Fare, sed sửa RoundTo trong khối đó và diff cuối cùng với ba khối thay đổi" width="2400" height="1350" loading="lazy"></div><figcaption>SSH Studio · <code>sed -i.bak</code> và sửa trong một khối địa chỉ</figcaption></figure>
+<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/linux-sed-sua-van-ban/ssh-studio-03.webp" alt="Terminal của SSH Studio: sed -n in khối Fare của appsettings.json, sed -i chỉ đổi 1000 thành 500 trong khối đó, diff với bản .bak còn ba khối thay đổi" width="2400" height="1350" loading="lazy"></div><figcaption>SSH Studio · chỉ sửa trong một khối địa chỉ <code>/Fare/,/}/</code></figcaption></figure>
 
 ## 6. sed trong vim, vim trong sed
 

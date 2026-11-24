@@ -34,6 +34,8 @@ an@toinoi-app-01:/var/log/toinoi$ zcat bao-gia.log.2.gz | head -n 3
 2026-11-19 06:00:43 INFO  q-099401 dich_vu=delivery km=9.1 gia=38000 179 ms
 ```
 
+<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/linux-cut-sort-uniq-tr/ssh-studio-05.webp" alt="Terminal của SSH Studio: cd /var/log/toinoi, ls -l ba file log, file nhận ra bao-gia.log.2.gz là gzip compressed data, zcat bao-gia.log.2.gz | head -n 3" width="2400" height="1350" loading="lazy"></div><figcaption>SSH Studio · một file log đã nén: <code>file</code> nhận ra, <code>zcat</code> đọc</figcaption></figure>
+
 `file` cho biết `bao-gia.log.2.gz` là dữ liệu nén gzip, không phải văn bản: `cat` hay `grep` thẳng lên nó chỉ ra ký tự rác. **`zcat`** giải nén ra stdout, file trên đĩa giữ nguyên. Gia đình của nó: `zless` để xem từng trang, `zgrep` để tìm.
 
 ```text
@@ -57,7 +59,7 @@ an@toinoi-app-01:/var/log/toinoi$ zcat -f bao-gia.log.2.gz bao-gia.log.1 bao-gia
 
 Từ đây, mẫu `zcat -f bao-gia.log.2.gz bao-gia.log.1 bao-gia.log | …` là cách đọc «toàn bộ log» của bài. Bạn sẽ thấy nó ở đầu hầu hết các pipeline.
 
-<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/linux-cut-sort-uniq-tr/ssh-studio-01.webp" alt="Terminal của SSH Studio trong /var/log/toinoi: ls -l ba file log, file nhận ra bao-gia.log.2.gz là gzip, zcat in ba dòng đầu của ngày 19/11, wc -l, zcat -f gộp ba file được 969 dòng và số dòng theo từng ngày" width="2400" height="1350" loading="lazy"></div><figcaption>SSH Studio · đọc log nén bằng <code>zcat</code>, gộp ba ngày bằng <code>zcat -f</code></figcaption></figure>
+<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/linux-cut-sort-uniq-tr/ssh-studio-01.webp" alt="Terminal của SSH Studio trong /var/log/toinoi: wc -l hai file chưa nén, zcat … | wc -l đếm file nén 302 dòng, zcat -f ghép ba ngày 969 dòng, cut -f1 | uniq -c đếm số dòng theo ngày" width="2400" height="1350" loading="lazy"></div><figcaption>SSH Studio · <code>zcat -f</code> đọc cả file nén lẫn chưa nén; đếm dòng theo ngày</figcaption></figure>
 
 ## 2. Cái bẫy của dấu cách kép
 
@@ -75,6 +77,8 @@ INFO nap
 INFO q-100001
 WARN q-100002
 ```
+
+<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/linux-cut-sort-uniq-tr/ssh-studio-06.webp" alt="Terminal của SSH Studio: head -n 4 | cut -d' ' -f3,4 chỉ in INFO vì dấu cách kép, thêm tr -s ' ' thì ra đúng INFO bao-gia, INFO q-100001, WARN q-100002" width="2400" height="1350" loading="lazy"></div><figcaption>SSH Studio · <code>tr -s ' '</code> gộp dấu cách kép trước khi <code>cut</code></figcaption></figure>
 
 `cut -d' '` coi **mỗi** dấu cách là một ranh giới. Giữa hai dấu cách liền nhau là một trường rỗng, nên trường 4 của dòng `INFO` là chuỗi rỗng, còn mã yêu cầu bị đẩy sang trường 5. Trên dòng `ERROR`, mã yêu cầu lại ở trường 4. Cùng một lệnh `cut`, hai kết quả khác nhau tuỳ mức log.
 
@@ -115,7 +119,7 @@ DICH_VU=CAR4
 
 `tr` làm việc với **từng ký tự**, không phải với chuỗi. `tr 'abc' 'xyz'` không thay chuỗi `abc` bằng `xyz`; nó đổi mọi `a` thành `x`, mọi `b` thành `y`, mọi `c` thành `z`. Thay chuỗi là việc của `sed` ([LNX-014](/articles/linux-sed-sua-van-ban)). `tr` cũng không xử lý tốt chữ có dấu, vì một chữ như `ỗ` là nhiều byte.
 
-<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/linux-cut-sort-uniq-tr/ssh-studio-02.webp" alt="Terminal của SSH Studio: cut -d' ' -f3,4 cho kết quả lệch trên dòng INFO, tr -s ' ' sửa thành INFO bao-gia, INFO nap, INFO q-100001, WARN q-100002; bảng số dòng theo ngày và mức log của ba ngày; tr đổi dấu cách thành xuống dòng và chữ thường thành chữ hoa" width="2400" height="1350" loading="lazy"></div><figcaption>SSH Studio · dấu cách kép, <code>tr -s</code> và đếm theo hai khoá</figcaption></figure>
+<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/linux-cut-sort-uniq-tr/ssh-studio-02.webp" alt="Terminal của SSH Studio: cut -c1-10,21-25 | sort | uniq -c đếm mức log theo từng ngày, tr đổi dấu cách thành xuống dòng, tr a-z A-Z đổi chữ hoa" width="2400" height="1350" loading="lazy"></div><figcaption>SSH Studio · mức log theo ngày; <code>tr</code> đổi ký tự</figcaption></figure>
 
 ## 3. Trả lời câu hỏi của Bình
 
@@ -128,6 +132,8 @@ an@toinoi-app-01:/var/log/toinoi$ zcat -f bao-gia.log.2.gz bao-gia.log.1 bao-gia
 2026-11-20 09:09:21
 2026-11-20 09:12:04
 ```
+
+<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/linux-cut-sort-uniq-tr/ssh-studio-07.webp" alt="Terminal của SSH Studio: hai loại thông báo lỗi trong ba ngày, 54 lỗi không lấy được quãng đường và 7 lỗi bảng giá bị khoá, ba lần bảng giá bị khoá đầu tiên đều sáng 20/11" width="2400" height="1350" loading="lazy"></div><figcaption>SSH Studio · hai loại lỗi và thời điểm lỗi khoá bảng giá</figcaption></figure>
 
 `cut -d' ' -f6-` lấy **từ trường 6 tới hết dòng**: phần thông báo lỗi. (Trên dòng `ERROR` chỉ có dấu cách đơn nên `cut -d' '` dùng được.) Đếm các thông báo giống nhau cho ra câu trả lời: ba ngày có **hai loại lỗi**. 54 lỗi là timeout khi gọi dịch vụ bản đồ, loại quen thuộc. 7 lỗi còn lại là loại mới: «không đọc được bảng giá: file đang bị khoá», và cả 7 đều nằm trong khoảng 09:05 đến 09:15 sáng 20/11.
 
@@ -174,7 +180,7 @@ an@toinoi-app-01:/var/log/toinoi$ zcat -f bao-gia.log.2.gz bao-gia.log.1 bao-gia
 
 **`column -t`** dàn các cột cho thẳng hàng. Bảng này cho thấy lỗi ngày 20/11 dồn vào `delivery` (12 lỗi) và `bike` (8 lỗi), khác hẳn hai ngày còn lại.
 
-<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/linux-cut-sort-uniq-tr/ssh-studio-03.webp" alt="Terminal của SSH Studio: hai loại thông báo lỗi trong ba ngày với 54 lỗi bản đồ và 7 lỗi khoá bảng giá, ba thời điểm đầu của lỗi khoá bảng giá sáng 20/11, ba yêu cầu chậm nhất của ba ngày và bảng số lỗi theo ngày và dịch vụ do column -t dàn" width="2400" height="1350" loading="lazy"></div><figcaption>SSH Studio · trả lời câu hỏi của Bình bằng <code>uniq -c</code>, <code>sort -k</code> và <code>column -t</code></figcaption></figure>
+<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/linux-cut-sort-uniq-tr/ssh-studio-03.webp" alt="Terminal của SSH Studio: ba yêu cầu WARN chậm nhất của ba ngày nhờ tr -s và sort -k10,10n, bảng số lỗi theo ngày và dịch vụ dàn cột bằng column -t" width="2400" height="1350" loading="lazy"></div><figcaption>SSH Studio · <code>sort</code> theo cột số và bảng lỗi theo ngày, dịch vụ</figcaption></figure>
 
 ## 4. Bảng CSV, byte và ký tự
 
@@ -190,6 +196,8 @@ an@toinoi-app-01:/var/log/toinoi$ wc -l -c /opt/toinoi/bao-gia/bang-gia.csv
 an@toinoi-app-01:/var/log/toinoi$ wc -m /opt/toinoi/bao-gia/bang-gia.csv
 178 /opt/toinoi/bao-gia/bang-gia.csv
 ```
+
+<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/linux-cut-sort-uniq-tr/ssh-studio-08.webp" alt="Terminal của SSH Studio: column -t -s, dàn bang-gia.csv thành bảng thẳng cột, wc -l -c in 5 dòng 188 byte, wc -m in 178 ký tự" width="2400" height="1350" loading="lazy"></div><figcaption>SSH Studio · <code>column</code> cho CSV; byte và ký tự khác nhau với chữ có dấu</figcaption></figure>
 
 - `column -t -s,` dàn file CSV thành bảng, dùng dấu phẩy làm phân cách. Cách nhanh nhất để đọc một file CSV trên server.
 - `wc -c` đếm **byte**: 188. `wc -m` đếm **ký tự**: 178. Mười byte chênh lệch là các chữ có dấu: trong UTF-8, `á` hay `ỗ` chiếm hai hoặc ba byte. `wc -m` đúng khi `LANG` là UTF-8 ([LNX-011](/articles/linux-bien-moi-truong-path-bashrc)); với `LANG=C`, nó đếm byte như `-c`.
@@ -210,7 +218,7 @@ Lệnh đầu đếm số lần dịch vụ khởi động theo phiên bản: 1.
 
 Lệnh sau ghép cột đầu của hai file, xếp lại, rồi **`uniq -u`** chỉ giữ dòng **không lặp**: mã dịch vụ có ở một file mà không có ở file kia. Kết quả là `van16`, loại xe An vừa thêm ở [LNX-012](/articles/linux-vim-hang-ngay). Ngược lại, `uniq -d` chỉ in các dòng **có lặp**. Hai tuỳ chọn này là cách nhanh để so hai danh sách.
 
-<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/linux-cut-sort-uniq-tr/ssh-studio-04.webp" alt="Terminal của SSH Studio: column -t -s, dàn bang-gia.csv thành bảng, wc -l -c và wc -m cho 188 byte nhưng 178 ký tự, số lần khởi động theo phiên bản 1.4.1 và 1.4.2, và uniq -u tìm ra van16" width="2400" height="1350" loading="lazy"></div><figcaption>SSH Studio · <code>column</code>, byte khác ký tự, và <code>uniq -u</code></figcaption></figure>
+<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/linux-cut-sort-uniq-tr/ssh-studio-04.webp" alt="Terminal của SSH Studio: grep -o đếm các phiên bản 1.4.1 và 1.4.2 đã khởi động, cut -d, -f1 hai bảng giá | sort | uniq -u tìm ra van16 chỉ có ở một file" width="2400" height="1350" loading="lazy"></div><figcaption>SSH Studio · <code>uniq -u</code>: dòng chỉ xuất hiện một lần</figcaption></figure>
 
 ## 5. Tóm tắt
 

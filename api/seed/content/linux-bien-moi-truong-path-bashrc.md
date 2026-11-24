@@ -43,6 +43,8 @@ an@toinoi-app-01:~$ echo 'Dịch vụ: $dich_vu'
 Dịch vụ: $dich_vu
 ```
 
+<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/linux-bien-moi-truong-path-bashrc/ssh-studio-05.webp" alt="Terminal của SSH Studio: ls -l /var/log/toinoi với ba file log, dich_vu=bao-gia, echo $dich_vu, nháy kép mở rộng biến còn nháy đơn in nguyên chữ $dich_vu" width="2400" height="1350" loading="lazy"></div><figcaption>SSH Studio · gán biến; nháy kép và nháy đơn khác nhau</figcaption></figure>
+
 - **Gán**: `tên=giá trị`, **không có dấu cách** quanh dấu `=`. Tên biến gồm chữ, số và dấu gạch dưới, không bắt đầu bằng số.
 - **Dùng**: đặt `$` trước tên. Shell thay `$dich_vu` bằng giá trị trước khi chạy lệnh, như cách nó mở rộng wildcard ([LNX-005](/articles/linux-tao-sao-chep-di-chuyen-xoa-file)).
 - **Dấu nháy kép** `"…"` vẫn cho shell thay biến bên trong. **Dấu nháy đơn** `'…'` giữ nguyên mọi ký tự, kể cả `$`.
@@ -63,6 +65,8 @@ an@toinoi-app-01:~$ dich_vu = bao-gia
 -bash: dich_vu: command not found
 ```
 
+<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/linux-bien-moi-truong-path-bashrc/ssh-studio-06.webp" alt="Terminal của SSH Studio: phien_ban=1.4.2, $dich_vu-$phien_ban đúng, $dich_vu_$phien_ban mất phần đầu, ${dich_vu}_${phien_ban} đúng, dich_vu = bao-gia báo command not found" width="2400" height="1350" loading="lazy"></div><figcaption>SSH Studio · <code>${…}</code> khi tên biến dính chữ; không được có dấu cách quanh <code>=</code></figcaption></figure>
+
 Dòng thứ ba in thiếu `bao-gia`: shell đọc `$dich_vu_` là tên biến `dich_vu_`, vì dấu gạch dưới hợp lệ trong tên. Biến đó không tồn tại, nên được thay bằng chuỗi rỗng, **không báo lỗi gì**. Dấu `-` ở dòng trên không thuộc tên biến nên không gặp chuyện này. Cách chắc chắn: viết `${dich_vu}` để chỉ rõ tên kết thúc ở đâu.
 
 Dòng cuối là lỗi hay gặp nhất của người mới: có dấu cách quanh `=`, shell hiểu `dich_vu` là **tên lệnh**, còn `=` và `bao-gia` là hai đối số.
@@ -78,7 +82,7 @@ Ngày 2026-11-21 có 17 lỗi
 
 `$(lệnh)` là **command substitution**: shell chạy lệnh bên trong, lấy stdout của nó (bỏ dấu xuống dòng ở cuối) và đặt vào chỗ đó. Kết hợp với biến, bạn đặt tên được cho một con số hay một chuỗi lấy từ log, rồi dùng lại nhiều lần. Bạn sẽ còn thấy cách viết cũ hơn bằng dấu backtick `` `lệnh` ``; `$(…)` dễ đọc hơn và lồng được vào nhau.
 
-<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/linux-bien-moi-truong-path-bashrc/ssh-studio-01.webp" alt="Terminal của SSH Studio: ls -l /var/log/toinoi với ba file log, các lệnh gán và in biến dich_vu, phien_ban với nháy kép, nháy đơn, lỗi khi viết dich_vu_ và lỗi command not found khi có dấu cách quanh dấu bằng, rồi so_loi và ngay lấy từ log" width="2400" height="1350" loading="lazy"></div><figcaption>SSH Studio · biến, dấu nháy và command substitution</figcaption></figure>
+<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/linux-bien-moi-truong-path-bashrc/ssh-studio-01.webp" alt="Terminal của SSH Studio: so_loi=$(grep -c ERROR …), ngay=$(head -n 1 … | cut -d' ' -f1), echo in Ngày 2026-11-21 có 17 lỗi" width="2400" height="1350" loading="lazy"></div><figcaption>SSH Studio · lưu kết quả của một lệnh vào biến bằng <code>$(…)</code></figcaption></figure>
 
 ## 2. Biến môi trường
 
@@ -124,6 +128,8 @@ an@toinoi-app-01:~$ TZ=UTC date -d '2026-11-21 06:37:58 +07' '+%F %T %Z'
 an@toinoi-app-01:~$ echo $TZ
 ```
 
+<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/linux-bien-moi-truong-path-bashrc/ssh-studio-07.webp" alt="Terminal của SSH Studio: printenv HOME USER SHELL LANG, shell con không thấy dich_vu cho tới khi export, date theo múi giờ +07 và TZ=UTC date chỉ cho riêng lệnh đó, echo $TZ rỗng" width="2400" height="1350" loading="lazy"></div><figcaption>SSH Studio · biến môi trường: <code>export</code> và biến cho riêng một lệnh</figcaption></figure>
+
 Viết `TÊN=giá_trị lệnh` trên cùng một dòng thì biến chỉ có trong môi trường của **lệnh đó**. Ở đây `TZ=UTC` khiến `date` đổi 06:37:58 giờ Việt Nam (lỗi đầu tiên của ngày 21/11) sang giờ UTC, còn shell của bạn không bị ảnh hưởng: `echo $TZ` in một dòng trống. Cách viết này rất hay dùng để chạy thử một lệnh với cấu hình khác, ví dụ `LANG=C sort` để sắp xếp theo byte.
 
 ## 3. PATH: vì sao lệnh được tìm thấy
@@ -165,7 +171,7 @@ An tạo thư mục `~/bin` cho các script của riêng mình và viết một 
 3. `export PATH="$HOME/bin:$PATH"`: thêm `~/bin` vào **đầu** `PATH`, giữ nguyên phần còn lại. Đặt ở đầu nghĩa là script của bạn thắng nếu trùng tên với lệnh hệ thống; đặt ở cuối (`"$PATH:$HOME/bin"`) thì ngược lại.
 4. Từ đó `xin-chao` chạy được ở mọi thư mục, và `which` cho biết nó nằm ở đâu.
 
-<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/linux-bien-moi-truong-path-bashrc/ssh-studio-02.webp" alt="Terminal của SSH Studio: printenv, export dich_vu và shell con, TZ=UTC cho riêng lệnh date, echo $PATH, type -a ls, rồi xin-chao báo command not found, ./bin/xin-chao chạy được, export PATH thêm /home/an/bin vào đầu và xin-chao chạy được" width="2400" height="1350" loading="lazy"></div><figcaption>SSH Studio · biến môi trường và PATH</figcaption></figure>
+<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/linux-bien-moi-truong-path-bashrc/ssh-studio-02.webp" alt="Terminal của SSH Studio: echo $PATH, type -a ls, tạo ~/bin/xin-chao bằng vim, xin-chao báo command not found, ./bin/xin-chao chạy được, export PATH thêm $HOME/bin, xin-chao chạy được, which xin-chao" width="2400" height="1350" loading="lazy"></div><figcaption>SSH Studio · <code>PATH</code> quyết định lệnh được tìm ở đâu</figcaption></figure>
 
 Hai điều không nên làm với `PATH`:
 
@@ -194,6 +200,8 @@ an@toinoi-app-01:~$ grep -n '^alias l' ~/.bashrc
 92:alias la='ls -A'
 93:alias l='ls -CF'
 ```
+
+<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/linux-bien-moi-truong-path-bashrc/ssh-studio-08.webp" alt="Terminal của SSH Studio: grep -n -A2 HOME/bin trong ~/.profile thấy đoạn thêm ~/bin vào PATH, grep -n ^alias l trong ~/.bashrc thấy ba alias ll, la, l" width="2400" height="1350" loading="lazy"></div><figcaption>SSH Studio · <code>~/.profile</code> thêm <code>~/bin</code> vào PATH, <code>~/.bashrc</code> giữ alias</figcaption></figure>
 
 Đoạn `if [ -d "$HOME/bin" ]` thêm `~/bin` vào `PATH` **nếu thư mục đó tồn tại lúc đăng nhập**. Lúc An đăng nhập, `~/bin` chưa có, nên phải `export` tay. Từ phiên sau thì không cần nữa; bài sau mở đầu bằng việc kiểm tra điều đó.
 

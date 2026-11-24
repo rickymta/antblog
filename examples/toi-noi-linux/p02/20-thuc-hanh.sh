@@ -11,11 +11,14 @@ chmod 640 tom-tat.awk
 ls -la
 shellcheck bao-cao-log sao-luu-log hang-ngay && echo "shellcheck: sạch"
 #shot 02
+#xem files /srv/toinoi/bao-gia/scripts 07
 #clear
 ## 2. Chạy thử với môi trường trống như của cron
 env -i /usr/bin/env
 env -i NGAY=2026-11-21 /srv/toinoi/bao-gia/scripts/hang-ngay
 echo $?
+#shot 06
+#clear
 env -i HOME=/home/an NGAY=2026-11-21 /srv/toinoi/bao-gia/scripts/hang-ngay
 cat /srv/toinoi/bao-gia/shared/logs/bao-cao-2026-11-21.txt
 ls -l /srv/toinoi/sao-luu
@@ -30,6 +33,7 @@ crontab -l
 cat /srv/toinoi/bao-gia/shared/logs/hang-ngay.log
 ls /srv/toinoi/sao-luu
 #shot 04
+#xem files /srv/toinoi/sao-luu 08
 ## 4. Đổi sang lịch thật: 01:17 mỗi ngày
 sed -i -e 's/^[*] [*] [*] [*] [*]/17 1 * * */' -e 's/Đang chạy thử mỗi phút/Chạy lúc 01:17 mỗi ngày/' ~/hang-ngay.cron
 crontab ~/hang-ngay.cron

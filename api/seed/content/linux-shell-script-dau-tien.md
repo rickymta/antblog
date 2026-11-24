@@ -83,13 +83,15 @@ Lỗi    : 26
 Chậm   : 19
 ```
 
+<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/linux-shell-script-dau-tien/ssh-studio-05.webp" alt="Terminal của SSH Studio: vim bin/bao-cao-log, chạy bao-cao-log bị Permission denied, ls -l cho thấy file -rw-rw-r-- chưa có quyền x" width="2400" height="1350" loading="lazy"></div><figcaption>SSH Studio · script mới viết chưa có quyền chạy</figcaption></figure>
+
 1. Gõ tên script: `Permission denied`. Bash tìm thấy file trong `~/bin` (đã nằm trong `PATH`), nhưng file mới tạo có quyền `-rw-rw-r--`, không có `x` ([LNX-007](/articles/linux-nguoi-dung-nhom-quyen-file)).
 2. `chmod u+x`: từ đó `bao-cao-log` chạy được như mọi lệnh khác, ở bất kỳ thư mục nào.
 3. `bash bin/bao-cao-log`: chạy bằng cách đưa file cho `bash` làm đối số. Cách này không cần quyền `x` và bỏ qua dòng shebang. Hữu ích khi thử nhanh, hoặc khi script nằm trên ổ không cho chạy file.
 
 Kết quả đúng với những gì các bài trước đếm bằng tay: ngày 21/11 có 362 dòng, 17 lỗi, 24 yêu cầu chậm; ngày 20/11 có 26 lỗi.
 
-<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/linux-shell-script-dau-tien/ssh-studio-02.webp" alt="Terminal của SSH Studio: chạy bao-cao-log bị Permission denied, ls -l cho thấy file chưa có quyền x, chmod u+x, chạy lại in bốn dòng File, Số dòng 362, Lỗi 17, Chậm 24, và chạy bằng bash với bao-gia.log.1 cho 26 lỗi" width="2400" height="1350" loading="lazy"></div><figcaption>SSH Studio · quyền thực thi và hai cách chạy script</figcaption></figure>
+<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/linux-shell-script-dau-tien/ssh-studio-02.webp" alt="Terminal của SSH Studio: chmod u+x bin/bao-cao-log, bao-cao-log in báo cáo của bao-gia.log với 362 dòng, 17 lỗi, 24 chậm, bash bin/bao-cao-log chạy cho bao-gia.log.1" width="2400" height="1350" loading="lazy"></div><figcaption>SSH Studio · có quyền chạy thì gọi thẳng bằng tên nhờ <code>~/bin</code> trong PATH</figcaption></figure>
 
 ## 3. Dùng sai thì sao?
 
@@ -105,6 +107,8 @@ an@toinoi-app-01:~$ echo $?
 an@toinoi-app-01:~$ bao-cao-log /var/log/toinoi/bao-gia.log.1 > /dev/null && echo "báo cáo xong"
 báo cáo xong
 ```
+
+<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/linux-shell-script-dau-tien/ssh-studio-06.webp" alt="Terminal của SSH Studio: bao-cao-log không tham số in Dùng: bao-cao-log FILE và mã 1, bao-cao-log /khong-co in không đọc được và mã 2" width="2400" height="1350" loading="lazy"></div><figcaption>SSH Studio · tham số sai: thông báo rõ ràng và mã thoát khác 0</figcaption></figure>
 
 | Tình huống | Script làm gì | Mã thoát |
 |---|---|---|
@@ -139,7 +143,7 @@ an@toinoi-app-01:~$ echo $?
 
 Script không in gì cả, không một thông báo lỗi, và trả mã 1. Với một người dùng không đọc mã nguồn, đó là trường hợp tệ nhất: không biết hỏng ở đâu, không biết có hỏng không.
 
-<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/linux-shell-script-dau-tien/ssh-studio-03.webp" alt="Terminal của SSH Studio: bao-cao-log không có tham số in thông báo cách dùng và trả mã 1, với /khong-co trả mã 2, dùng với && in báo cáo xong; sau đó với file khong-loi.log script không in gì và trả mã 1" width="2400" height="1350" loading="lazy"></div><figcaption>SSH Studio · mã thoát của từng tình huống, và một lần chạy hỏng mà không báo gì</figcaption></figure>
+<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/linux-shell-script-dau-tien/ssh-studio-03.webp" alt="Terminal của SSH Studio: bao-cao-log … > /dev/null &amp;&amp; echo báo cáo xong, lọc bỏ dòng ERROR vào khong-loi.log, bao-cao-log trên file đó im lặng và echo $? in 1" width="2400" height="1350" loading="lazy"></div><figcaption>SSH Studio · script chết im lặng khi <code>grep</code> không tìm thấy gì</figcaption></figure>
 
 ### Tìm chỗ hỏng
 
@@ -159,6 +163,8 @@ an@toinoi-app-01:~$ grep -c ' ERROR ' ~/tai-lieu/khong-loi.log
 an@toinoi-app-01:~$ echo $?
 1
 ```
+
+<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/linux-shell-script-dau-tien/ssh-studio-07.webp" alt="Terminal của SSH Studio: bash -n báo cú pháp ổn, bash -x in từng bước và dừng ngay sau loi=0, grep -c ERROR trên khong-loi.log in 0 với mã thoát 1" width="2400" height="1350" loading="lazy"></div><figcaption>SSH Studio · <code>bash -x</code> chỉ ra chỗ script dừng: <code>grep -c</code> trả mã 1</figcaption></figure>
 
 - **`bash -n`** đọc script mà không chạy, chỉ kiểm tra cú pháp. Cú pháp ổn: lỗi nằm ở lúc chạy.
 - **`bash -x`** in từng lệnh **sau khi** đã thay biến, trước khi chạy, với dấu `+` ở đầu (`++` cho lệnh nằm trong `$( )`). Dòng cuối cùng được in là lệnh cuối cùng đã chạy: `loi=0`, ngay sau `grep -c`. Script dừng ở đó.
@@ -187,7 +193,7 @@ an@toinoi-app-01:~$ echo $?
 
 Viết `|| true` có chủ đích và chỉ ở chỗ bạn biết mã khác 0 là bình thường. Rải `|| true` khắp script là tắt `set -e` mà không nói ra.
 
-<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/linux-shell-script-dau-tien/ssh-studio-04.webp" alt="Terminal của SSH Studio: bash -n báo cú pháp ổn, bash -x in từng bước và dừng sau loi=0, grep -c in 0 nhưng trả mã 1, sed thêm phần hoặc true vào hai dòng grep -c, grep -n xác nhận, và bao-cao-log chạy lại in Lỗi 0 với mã thoát 0" width="2400" height="1350" loading="lazy"></div><figcaption>SSH Studio · <code>bash -x</code> tìm ra chỗ dừng, <code>sed</code> sửa hai dòng</figcaption></figure>
+<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/linux-shell-script-dau-tien/ssh-studio-04.webp" alt="Terminal của SSH Studio: sed -i thêm || true sau hai lệnh grep -c, grep -n thấy dòng 14 và 15 đã sửa, bao-cao-log trên khong-loi.log in Lỗi 0 và mã thoát 0" width="2400" height="1350" loading="lazy"></div><figcaption>SSH Studio · sửa bằng <code>sed</code>, chạy lại: báo cáo đúng, mã thoát 0</figcaption></figure>
 
 ## 6. Script nằm ở đâu, đặt tên thế nào
 

@@ -48,6 +48,8 @@ an@toinoi-app-01:/var/log/toinoi$ head -n 4 bao-gia.log | awk '{ print NF, $NF }
 11 ms
 ```
 
+<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/linux-awk-xu-ly-log/ssh-studio-05.webp" alt="Terminal của SSH Studio trong /var/log/toinoi: awk '{ print $3, $4 }' in đúng mức và mã yêu cầu dù dòng có dấu cách kép, awk '{ print NF, $NF }' in số trường và trường cuối" width="2400" height="1350" loading="lazy"></div><figcaption>SSH Studio · awk tự tách trường theo khoảng trắng; <code>NF</code> và <code>$NF</code></figcaption></figure>
+
 So với [LNX-013](/articles/linux-cut-sort-uniq-tr): cũng bốn dòng đó, `cut -d' ' -f3,4` cho kết quả lệch vì dấu cách kép, còn `awk` cho kết quả đúng ngay. Mặc định `awk` coi **mọi chuỗi khoảng trắng** là một dấu phân cách, và bỏ khoảng trắng ở đầu dòng. Đây là lý do chính khiến người làm vận hành dùng `awk '{print $5}'` thay cho `cut` khi đọc log và kết quả của các lệnh như `ls -l`, `ps`, `df`.
 
 `print $3, $4`: dấu phẩy giữa hai giá trị in ra một dấu cách. Viết liền `print $3 $4` thì hai giá trị dính vào nhau.
@@ -77,7 +79,9 @@ Lệnh cuối liệt kê bốn yêu cầu chậm hơn 2,5 giây trong ngày 21/1
 
 So sánh chuỗi dùng `==` với nháy kép quanh chuỗi; so khớp regex dùng `~`: `$5 ~ /car/` (trường 5 chứa `car`), `$0 !~ /INFO/` (dòng không chứa `INFO`). Mẫu chỉ có regex, `awk '/bi khoa/'`, tương đương `grep 'bi khoa'`.
 
-<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/linux-awk-xu-ly-log/ssh-studio-01.webp" alt="Terminal của SSH Studio trong /var/log/toinoi: awk in trường 3 và 4 đúng cả trên dòng có dấu cách kép, in NF và trường cuối, lọc dòng ERROR theo cột 3, đếm 17 lỗi trong khối END, và liệt kê bốn yêu cầu chậm hơn 2500 ms" width="2400" height="1350" loading="lazy"></div><figcaption>SSH Studio · trường, điều kiện và khối <code>END</code></figcaption></figure>
+<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/linux-awk-xu-ly-log/ssh-studio-01.webp" alt="Terminal của SSH Studio: awk '$3 == &quot;ERROR&quot;' in hai lỗi đầu, đếm 17 lỗi bằng n++ và END, lọc yêu cầu có thời gian trên 2500 ms in giờ, mã và số ms" width="2400" height="1350" loading="lazy"></div><figcaption>SSH Studio · awk lọc theo điều kiện trên trường</figcaption></figure>
+
+<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/linux-awk-xu-ly-log/ssh-studio-06.webp" alt="Terminal của SSH Studio: awk cộng thời gian của các yêu cầu INFO và chia trong END: 319 yêu cầu, trung bình 95,3 ms" width="2400" height="1350" loading="lazy"></div><figcaption>SSH Studio · tổng và trung bình trong khối <code>END</code></figcaption></figure>
 
 ## 4. Tổng và trung bình
 
@@ -122,7 +126,7 @@ an@toinoi-app-01:/var/log/toinoi$ zcat -f bao-gia.log.2.gz bao-gia.log.1 bao-gia
 
 `điều_kiện ? A : B` chọn A hoặc B. Khoá của mảng ghép hai giá trị: `$1 " " loai` (hai chuỗi đặt cạnh nhau là phép nối chuỗi trong `awk`). Kết quả khớp với những gì [LNX-013](/articles/linux-cut-sort-uniq-tr) tìm ra bằng ba lệnh: lỗi khoá bảng giá chỉ có ở ngày 20/11, còn lỗi bản đồ thì ngày nào cũng có, 17 tới 19 lỗi mỗi ngày.
 
-<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/linux-awk-xu-ly-log/ssh-studio-02.webp" alt="Terminal của SSH Studio: tổng và trung bình thời gian của 319 yêu cầu thành công là 95,3 ms; bảng thời gian trung bình theo bốn dịch vụ bike, car4, car7, delivery; và số lỗi bản đồ, lỗi bảng giá theo từng ngày" width="2400" height="1350" loading="lazy"></div><figcaption>SSH Studio · trung bình, mảng kết hợp và khoá ghép</figcaption></figure>
+<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/linux-awk-xu-ly-log/ssh-studio-02.webp" alt="Terminal của SSH Studio: mảng gom theo dịch vụ in số yêu cầu và thời gian trung bình của bike, car4, car7, delivery; đếm hai loại lỗi bản đồ và bảng giá theo ngày" width="2400" height="1350" loading="lazy"></div><figcaption>SSH Studio · mảng của awk: gom theo khoá</figcaption></figure>
 
 ## 6. File CSV: `-F` và `-v`
 
@@ -143,6 +147,8 @@ delivery    40000 đ
 - **`NR > 1`** bỏ dòng tiêu đề.
 - **`-v km=10`** truyền giá trị từ shell vào biến `km` của chương trình. Đây là cách đúng để đưa biến shell vào `awk`: `-v km="$so_km"`. Đừng chèn `$so_km` vào giữa chương trình nằm trong nháy đơn.
 - `if (…) …` hoạt động như trong C.
+
+<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/linux-awk-xu-ly-log/ssh-studio-07.webp" alt="Terminal của SSH Studio: awk -F, in mã dịch vụ và giá mở cửa từ bang-gia.csv, awk -F, -v km=10 tính giá cước 10 km cho từng loại với giá tối thiểu" width="2400" height="1350" loading="lazy"></div><figcaption>SSH Studio · CSV với <code>-F,</code>; truyền giá trị từ shell bằng <code>-v</code></figcaption></figure>
 
 Lệnh thứ hai tính lại giá cước 10 km theo đúng công thức của dịch vụ báo giá: giá mở cửa cộng đơn giá mỗi km nhân số km, nhưng không thấp hơn giá tối thiểu. Một dòng lệnh để kiểm tra bảng giá trước khi triển khai.
 
@@ -186,7 +192,7 @@ Một bảng tóm tắt ba ngày. Số liệu khớp với các bài trước (n
 
 Cột tiêu đề tiếng Việt thẳng hàng vì `gawk` đếm **ký tự** khi `LANG` là UTF-8. Với `LANG=C`, nó đếm byte và chữ có dấu làm lệch cột. Điều này sẽ quay lại ở bài thực hành, khi script chạy dưới cron.
 
-<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/linux-awk-xu-ly-log/ssh-studio-04.webp" alt="Terminal của SSH Studio: awk -F, in mã dịch vụ và giá mở cửa từ bang-gia.csv, tính giá cước 10 km cho bốn dịch vụ, rồi tom-tat.awk in bảng ba ngày với số yêu cầu, lỗi, chậm và thời gian trung bình" width="2400" height="1350" loading="lazy"></div><figcaption>SSH Studio · <code>-F</code>, <code>-v</code> và chương trình <code>tom-tat.awk</code></figcaption></figure>
+<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/linux-awk-xu-ly-log/ssh-studio-04.webp" alt="Terminal của SSH Studio: zcat -f ba file log | awk -f ~/bin/tom-tat.awk in bảng mỗi ngày một dòng: số yêu cầu, lỗi, chậm và thời gian trung bình" width="2400" height="1350" loading="lazy"></div><figcaption>SSH Studio · <code>awk -f</code>: chương trình trong file, chạy trên ba ngày log</figcaption></figure>
 
 ## 8. Khi nào dùng công cụ nào
 

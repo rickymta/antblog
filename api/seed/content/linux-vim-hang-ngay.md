@@ -35,6 +35,8 @@ an@toinoi-app-01:~/vim$ cat -n bang-gia.csv
      5  delivery,Giao hàng,10000,3000,15000
 ```
 
+<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/linux-vim-hang-ngay/ssh-studio-06.webp" alt="Terminal của SSH Studio ở phiên mới: echo $PATH đã có /home/an/bin, type cdbg là alias, chép bang-gia.csv và appsettings.json vào ~/vim, cat -n bảng giá năm dòng" width="2400" height="1350" loading="lazy"></div><figcaption>SSH Studio · phiên mới đã có <code>~/bin</code> trong PATH; chuẩn bị file để sửa</figcaption></figure>
+
 Đây là phiên đăng nhập mới sau bài trước. `~/.profile` thấy thư mục `~/bin` tồn tại nên tự thêm vào `PATH`, và alias `cdbg` trong `~/.bashrc` có sẵn: đúng như [LNX-011](/articles/linux-bien-moi-truong-path-bashrc) đã nói. An chép bảng giá và file cấu hình sang `~/vim` để thử.
 
 ## 1. Ngữ pháp của chế độ Normal
@@ -122,6 +124,8 @@ an@toinoi-app-01:~/vim$ diff /opt/toinoi/bao-gia/bang-gia.csv bang-gia.csv
 > van16,Xe 16 chỗ,25000,8000,45000
 ```
 
+<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/linux-vim-hang-ngay/ssh-studio-07.webp" alt="Terminal của SSH Studio sau khi lưu trong vim: cat -n bảng giá sáu dòng có van16 và chữ Xe thay cho Ô tô, diff với bản gốc in khối 3,4c3,5" width="2400" height="1350" loading="lazy"></div><figcaption>SSH Studio · <code>diff</code> kiểm lại mọi thay đổi vừa làm trong vim</figcaption></figure>
+
 `diff` xác nhận đúng ba thay đổi: hai dòng đổi tên, một dòng mới.
 
 ## 3. Sửa cấu hình: đường dẫn, tìm rồi đổi, chạy lệnh từ vim
@@ -162,6 +166,8 @@ an@toinoi-app-01:~/vim$ diff /opt/toinoi/bao-gia/appsettings.json appsettings.js
 ---
 >     "Level": "Warning"
 ```
+
+<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/linux-vim-hang-ngay/ssh-studio-08.webp" alt="Terminal của SSH Studio sau khi thoát vim: diff appsettings.json với bản gốc in ba khối 4c4 Port, 8c8 RuleFile, 13c13 Level" width="2400" height="1350" loading="lazy"></div><figcaption>SSH Studio · ba chỗ đã đổi trong <code>appsettings.json</code></figcaption></figure>
 
 ## 4. Những lệnh nên thuộc
 
@@ -207,6 +213,8 @@ set smartcase         " …trừ khi chuỗi tìm có chữ hoa
 set expandtab         " Tab chèn dấu cách
 set shiftwidth=2 tabstop=2
 ```
+
+<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/linux-vim-hang-ngay/ssh-studio-09.webp" alt="Terminal của SSH Studio: cat ~/.vimrc vừa viết, gồm unlet skip_defaults_vim, source defaults.vim, set number, hlsearch, ignorecase, smartcase, expandtab, shiftwidth=2 tabstop=2, mỗi dòng có chú thích" width="2400" height="1350" loading="lazy"></div><figcaption>SSH Studio · <code>~/.vimrc</code> tối thiểu cho server</figcaption></figure>
 
 - **Hai dòng đầu là bắt buộc.** Khi không có `~/.vimrc`, vim của Ubuntu tự nạp `defaults.vim`: tô màu cú pháp, nhận loại file, hiện vị trí con trỏ. **Có `~/.vimrc` thì vim bỏ qua `defaults.vim`**, và nhiều người thấy vim «tự nhiên xấu đi» sau khi tạo file cấu hình. Hai dòng này nạp lại nó trước.
 - `set number`, `hlsearch`: số dòng và tô sáng mọi kết quả tìm (bỏ tô sáng tạm thời bằng `:noh`).

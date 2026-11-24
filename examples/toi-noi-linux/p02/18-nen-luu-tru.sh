@@ -7,6 +7,8 @@ cp /var/log/toinoi/bao-gia.log.1 .
 ls -l
 gzip bao-gia.log.1
 ls -l
+#shot 06
+#clear
 gzip -l bao-gia.log.1.gz
 gunzip bao-gia.log.1.gz
 gzip -k bao-gia.log.1
@@ -20,6 +22,8 @@ ls -l bao-gia.log.1*
 xzcat bao-gia.log.1.xz | wc -l
 zstdcat bao-gia.log.1.zst | wc -l
 rm bao-gia.log.1.gz bao-gia.log.1.xz bao-gia.log.1.zst
+#shot 07
+#clear
 ## tar: gom nhiều file thành một
 tar -cf log.tar -C /var/log/toinoi bao-gia.log bao-gia.log.1 bao-gia.log.2.gz
 tar -tvf log.tar
@@ -35,6 +39,8 @@ tar -xzf log-ba-ngay.tar.gz -C thu-giai-nen
 ls -l thu-giai-nen
 diff -r /var/log/toinoi thu-giai-nen && echo "giống hệt bản gốc"
 rm -r thu-giai-nen log.tar bao-gia.log.1
+#shot 08
+#clear
 mkdir thu-giai-nen
 tar -xzf log-ba-ngay.tar.gz -C thu-giai-nen ./bao-gia.log.1
 ls thu-giai-nen

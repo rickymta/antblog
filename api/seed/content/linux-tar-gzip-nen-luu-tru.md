@@ -42,6 +42,8 @@ total 32
 -rw-r--r-- 1 an an  4570 Nov 22 23:21 bao-gia.log.1.gz
 ```
 
+<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/linux-tar-gzip-nen-luu-tru/ssh-studio-06.webp" alt="Terminal của SSH Studio: mkdir -p ~/sao-luu, cp bao-gia.log.1 vào, ls -l thấy 23353 byte, gzip bao-gia.log.1, ls -l chỉ còn bao-gia.log.1.gz 4570 byte" width="2400" height="1350" loading="lazy"></div><figcaption>SSH Studio · <code>gzip</code> thay file gốc bằng bản nén</figcaption></figure>
+
 - **`gzip FILE`** nén thành `FILE.gz` và **xoá file gốc**. Log văn bản nén rất tốt: 23 KB còn 4,5 KB.
 - **`gzip -l`** cho biết kích thước trước và sau nén, tỉ lệ nén, mà không cần giải nén.
 - **`gunzip FILE.gz`** (hoặc `gzip -d`) giải nén và xoá file `.gz`.
@@ -51,7 +53,7 @@ total 32
 
 `gzip -1` nén nhanh nhất, `gzip -9` nén nhỏ nhất; mặc định là `-6`. Với log, `-6` thường đủ.
 
-<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/linux-tar-gzip-nen-luu-tru/ssh-studio-01.webp" alt="Terminal của SSH Studio trong ~/sao-luu: chép bao-gia.log.1, gzip nén từ 23353 byte còn 4570 byte và xoá bản gốc, gzip -l cho tỉ lệ 80,6%, gunzip giải nén, gzip -k giữ cả hai file" width="2400" height="1350" loading="lazy"></div><figcaption>SSH Studio · <code>gzip</code>, <code>gzip -l</code>, <code>gunzip</code> và <code>gzip -k</code></figcaption></figure>
+<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/linux-tar-gzip-nen-luu-tru/ssh-studio-01.webp" alt="Terminal của SSH Studio trong ~/sao-luu: gzip -l cho thấy 23353 byte nén còn 4570 byte, tỉ lệ 80,6%, gunzip trả lại file gốc, gzip -k nén mà giữ bản gốc, ls -l thấy cả hai" width="2400" height="1350" loading="lazy"></div><figcaption>SSH Studio · <code>gzip -l</code>, <code>gunzip</code> và <code>gzip -k</code></figcaption></figure>
 
 ## 2. gzip, xz hay zstd?
 
@@ -69,6 +71,8 @@ an@toinoi-app-01:~/sao-luu$ zstdcat bao-gia.log.1.zst | wc -l
 305
 an@toinoi-app-01:~/sao-luu$ rm bao-gia.log.1.gz bao-gia.log.1.xz bao-gia.log.1.zst
 ```
+
+<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/linux-tar-gzip-nen-luu-tru/ssh-studio-07.webp" alt="Terminal của SSH Studio: xz -k và zstd -q -k nén cùng file, ls -l so ba bản 4570 byte gzip, 3620 byte xz, 4817 byte zstd, xzcat và zstdcat đọc lại đủ 305 dòng" width="2400" height="1350" loading="lazy"></div><figcaption>SSH Studio · gzip, xz, zstd trên cùng một file log</figcaption></figure>
 
 | Công cụ | Đuôi | Trên file này | Đặc điểm |
 |---|---|---|---|
@@ -126,7 +130,7 @@ Các lệnh trên:
 
 Thứ tự các file trong gói là thứ tự `tar` gặp chúng trên đĩa, không phải thứ tự chữ cái. Lab của bạn có thể ra thứ tự khác.
 
-<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/linux-tar-gzip-nen-luu-tru/ssh-studio-02.webp" alt="Terminal của SSH Studio: so sánh kích thước bao-gia.log.1 nén bằng gzip, xz, zstd; xzcat và zstdcat đếm 305 dòng; tar -cf gom ba file, tar -tvf liệt kê kèm chủ sở hữu baogia/toinoi; tar -czf và tar --zstd gói cả thư mục; ls -l bốn file" width="2400" height="1350" loading="lazy"></div><figcaption>SSH Studio · ba cách nén và đóng gói bằng <code>tar</code></figcaption></figure>
+<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/linux-tar-gzip-nen-luu-tru/ssh-studio-02.webp" alt="Terminal của SSH Studio: tar -cf gom ba file log, tar -tvf liệt kê với quyền và chủ, tar -czf và tar --zstd -cf đóng gói cả thư mục, tar -tzf xem bên trong, ls -l so kích thước" width="2400" height="1350" loading="lazy"></div><figcaption>SSH Studio · <code>tar</code> đóng gói rồi nén bằng gzip hoặc zstd</figcaption></figure>
 
 ## 4. Giải nén và kiểm tra
 
@@ -151,13 +155,15 @@ an@toinoi-app-01:~/sao-luu$ zgrep -c ' ERROR ' /var/log/toinoi/bao-gia.log.2.gz
 18
 ```
 
+<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/linux-tar-gzip-nen-luu-tru/ssh-studio-08.webp" alt="Terminal của SSH Studio: tar -xzf giải nén log-ba-ngay.tar.gz vào thu-giai-nen, ls -l giữ nguyên thời điểm sửa, diff -r so với /var/log/toinoi báo giống hệt bản gốc" width="2400" height="1350" loading="lazy"></div><figcaption>SSH Studio · giải nén vào thư mục riêng và kiểm tra bằng <code>diff -r</code></figcaption></figure>
+
 - **`tar -xzf GÓI -C THƯ_MỤC`**: giải nén vào một thư mục **khác**. Luôn giải nén vào thư mục riêng để thử: `tar -x` sẽ ghi đè file trùng tên ở chỗ giải nén mà không hỏi.
 - Thời điểm sửa được giữ nguyên (21, 20, 19/11). Chủ sở hữu thì không: file thuộc về `an`, người giải nén. Chỉ `root` khôi phục được chủ sở hữu gốc.
 - **`diff -r`** so hai thư mục từng file một. Không in gì và mã thoát 0: bản giải nén giống hệt bản gốc.
 - **Lấy riêng một file**: ghi tên file **đúng như trong gói**, ở đây là `./bao-gia.log.1` (có `./` vì gói được tạo từ `.`). Không chắc tên, chạy `tar -tzf` trước.
 - **`zgrep`** tìm thẳng trong file nén.
 
-<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/linux-tar-gzip-nen-luu-tru/ssh-studio-03.webp" alt="Terminal của SSH Studio: tar -xzf giải nén vào thu-giai-nen với thời điểm sửa giữ nguyên, diff -r báo giống hệt bản gốc, giải nén riêng ./bao-gia.log.1, và zgrep đếm 18 lỗi trong bao-gia.log.2.gz" width="2400" height="1350" loading="lazy"></div><figcaption>SSH Studio · giải nén, so bằng <code>diff -r</code>, lấy riêng một file</figcaption></figure>
+<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/linux-tar-gzip-nen-luu-tru/ssh-studio-03.webp" alt="Terminal của SSH Studio: tar -xzf chỉ lấy ./bao-gia.log.1 ra thu-giai-nen, zgrep -c ERROR đếm 18 lỗi trong file nén mà không cần giải nén" width="2400" height="1350" loading="lazy"></div><figcaption>SSH Studio · lấy một file ra khỏi gói; <code>zgrep</code> tìm thẳng trong file nén</figcaption></figure>
 
 ## 5. Tải bản sao lưu về máy
 

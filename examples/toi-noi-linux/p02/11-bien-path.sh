@@ -8,11 +8,15 @@ dich_vu=bao-gia
 echo $dich_vu
 echo "Dịch vụ: $dich_vu"
 echo 'Dịch vụ: $dich_vu'
+#shot 05
+#clear
 phien_ban=1.4.2
 echo "$dich_vu-$phien_ban.tar.gz"
 echo "$dich_vu_$phien_ban.tar.gz"
 echo "${dich_vu}_${phien_ban}.tar.gz"
 dich_vu = bao-gia
+#shot 06
+#clear
 ## Lưu kết quả của một lệnh vào biến
 so_loi=$(grep -c ERROR /var/log/toinoi/bao-gia.log)
 ngay=$(head -n 1 /var/log/toinoi/bao-gia.log | cut -d' ' -f1)
@@ -27,6 +31,8 @@ bash -c 'echo "Shell con thấy: [$dich_vu]"'
 date -d '2026-11-21 06:37:58' '+%F %T %Z'
 TZ=UTC date -d '2026-11-21 06:37:58 +07' '+%F %T %Z'
 echo $TZ
+#shot 07
+#clear
 ## PATH
 echo $PATH
 type -a ls
@@ -44,6 +50,7 @@ which xin-chao
 ## File khởi động: ~/.profile và ~/.bashrc
 grep -n -A2 'HOME/bin' ~/.profile
 grep -n '^alias l' ~/.bashrc
+#shot 08
 #gui vim-bashrc
 #check ~/.bashrc bashrc
 tail -n 3 ~/.bashrc

@@ -89,6 +89,8 @@ shellcheck: sạch
 
 <figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/linux-thuc-hanh-script-sao-luu-log/ssh-studio-02.webp" alt="Terminal của SSH Studio: tạo thư mục scripts, chép ba file, mở hang-ngay bằng vim, chgrp toinoi và chmod 750, 640, ls -la cho thấy thư mục drwxr-x--- an toinoi và bốn file với quyền đúng, shellcheck ba script sạch" width="2400" height="1350" loading="lazy"></div><figcaption>SSH Studio · thư mục <code>scripts</code> với nhóm, quyền đúng và <code>shellcheck</code> sạch</figcaption></figure>
 
+<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/linux-thuc-hanh-script-sao-luu-log/ssh-studio-07.webp" alt="Chế độ Files của SSH Studio: khung Remote server mở /srv/toinoi/bao-gia/scripts với bốn file bao-cao-log, hang-ngay, sao-luu-log, tom-tat.awk" width="2400" height="1350" loading="lazy"></div><figcaption>SSH Studio · thư mục script dùng chung nhìn từ khung Files</figcaption></figure>
+
 ## 3. Chạy thử trong môi trường của cron
 
 Khi cron chạy một việc, nó **không** đọc `~/.profile`, `~/.bashrc`; không có alias, không có `~/bin` trong `PATH`, không có `LANG`. Môi trường chỉ gồm vài biến tối thiểu: `HOME`, `LOGNAME`, `SHELL=/bin/sh`, `PATH=/usr/bin:/bin`. Script nào dựa vào thứ gì khác đều có thể gãy lúc 01:17, khi không ai nhìn.
@@ -120,6 +122,8 @@ total 16
 -rw-r----- 1 an an 15111 Nov 22 23:21 log-2026-11-21.tar.gz
 ```
 
+<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/linux-thuc-hanh-script-sao-luu-log/ssh-studio-06.webp" alt="Terminal của SSH Studio: env -i /usr/bin/env không in biến nào, env -i NGAY=2026-11-21 chạy hang-ngay hỏng ở sao-luu-log dòng 8 vì HOME unbound variable, mã thoát 1" width="2400" height="1350" loading="lazy"></div><figcaption>SSH Studio · môi trường trống của cron làm lộ một biến mà script ngầm dựa vào</figcaption></figure>
+
 Đọc từ trên xuống:
 
 1. `env -i /usr/bin/env` không in gì: môi trường thật sự trống.
@@ -138,7 +142,7 @@ Không có `LANG`, `awk` làm việc ở chế độ byte: chữ `ngày` dài 6 
 
 `ls -l /srv/toinoi/sao-luu`: bản sao lưu đầu tiên, quyền `640` như `sao-luu-log` đặt.
 
-<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/linux-thuc-hanh-script-sao-luu-log/ssh-studio-03.webp" alt="Terminal của SSH Studio: env -i /usr/bin/env không in gì, chạy hang-ngay với env -i hỏng vì HOME unbound variable và trả mã 1, chạy lại với HOME=/home/an thành công, cat báo cáo ngày 21/11 với ba dòng của bao-cao-log và bảng tom-tat thẳng cột, ls -l thư mục sao-luu có log-2026-11-21.tar.gz quyền rw-r-----" width="2400" height="1350" loading="lazy"></div><figcaption>SSH Studio · thử <code>hang-ngay</code> trong môi trường trống bằng <code>env -i</code></figcaption></figure>
+<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/linux-thuc-hanh-script-sao-luu-log/ssh-studio-03.webp" alt="Terminal của SSH Studio: env -i HOME=/home/an NGAY=2026-11-21 chạy hang-ngay thành công, cat báo cáo của ngày 21/11 với bảng ba file và bảng theo ngày, ls -l /srv/toinoi/sao-luu thấy log-2026-11-21.tar.gz" width="2400" height="1350" loading="lazy"></div><figcaption>SSH Studio · có <code>HOME</code> thì <code>hang-ngay</code> chạy được trong môi trường trống như của cron</figcaption></figure>
 
 ## 4. Lên lịch bằng cron
 
@@ -193,6 +197,8 @@ Sau khoảng một phút (lab chờ 65 giây), `hang-ngay.log` có dòng `hang-n
 Muốn xem cron đã khởi chạy những gì, kể cả khi script không ghi log: `journalctl -u cron` (Phần 4).
 
 <figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/linux-thuc-hanh-script-sao-luu-log/ssh-studio-04.webp" alt="Terminal của SSH Studio: crontab -l báo no crontab for an, vim tạo hang-ngay.cron, crontab cài file, crontab -l in ba dòng với lịch mỗi phút, sau khi chờ thì cat hang-ngay.log cho thấy cron đã chạy hang-ngay và ghi bản sao lưu ngày hôm nay, ls thư mục sao-luu có hai bản" width="2400" height="1350" loading="lazy"></div><figcaption>SSH Studio · cron chạy thử mỗi phút và để lại bằng chứng trong <code>hang-ngay.log</code></figcaption></figure>
+
+<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/linux-thuc-hanh-script-sao-luu-log/ssh-studio-08.webp" alt="Chế độ Files của SSH Studio: khung Remote server mở /srv/toinoi/sao-luu với file khoá .sao-luu.lock và hai bản sao lưu log-2026-11-21.tar.gz, log-2026-11-24.tar.gz" width="2400" height="1350" loading="lazy"></div><figcaption>SSH Studio · bản sao lưu do cron tạo, kèm file khoá của <code>flock</code></figcaption></figure>
 
 ### Chuyển sang lịch thật
 

@@ -43,13 +43,15 @@ an@toinoi-app-01:~/thu-an-toan$ for x in *; do echo "[$x]"; done
 [bao-cao-20-11.txt]
 ```
 
+<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/linux-shell-script-an-toan/ssh-studio-06.webp" alt="Terminal của SSH Studio trong ~/thu-an-toan: touch tạo bao cao 21-11.txt và bao-cao-20-11.txt, ls -l $f không nháy báo ba lỗi, ls -l &quot;$f&quot; có nháy in đúng một file" width="2400" height="1350" loading="lazy"></div><figcaption>SSH Studio · luôn đặt biến trong nháy kép</figcaption></figure>
+
 Khi một biến không nằm trong nháy kép, shell làm thêm hai việc với giá trị của nó: **tách từ** theo khoảng trắng, rồi **mở rộng wildcard** trên từng từ. `ls -l $f` với `f="bao cao 21-11.txt"` thành `ls -l bao cao 21-11.txt`: ba đối số, ba file không tồn tại. `"$f"` giữ nguyên là một đối số.
 
 `$(ls)` bị tách từ theo cùng cách, nên `for x in $(ls)` chia tên file làm ba. `for x in *` thì shell tự liệt kê file, mỗi tên là một phần tử, dấu cách hay ký tự lạ đều không sao.
 
 Quy tắc, không có ngoại lệ đáng kể: **đặt mọi biến và mọi `$( )` trong nháy kép**: `"$f"`, `"$@"`, `"$(lệnh)"`. Tên file trên server có thể do người dùng đặt, do một ứng dụng sinh ra, và sớm muộn sẽ có dấu cách, dấu nháy, hay ký tự bắt đầu bằng `-`. Để phòng trường hợp cuối, viết `--` trước danh sách file: `rm -- "$f"`.
 
-<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/linux-shell-script-an-toan/ssh-studio-01.webp" alt="Terminal của SSH Studio: touch tạo file bao cao 21-11.txt và bao-cao-20-11.txt, ls -l $f không có nháy báo ba lỗi không tìm thấy bao, cao, 21-11.txt, ls -l &quot;$f&quot; đúng, vòng for x in $(ls) tách thành bốn phần, for x in * cho đúng hai file" width="2400" height="1350" loading="lazy"></div><figcaption>SSH Studio · biến không có nháy bị tách theo dấu cách</figcaption></figure>
+<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/linux-shell-script-an-toan/ssh-studio-01.webp" alt="Terminal của SSH Studio: for x in $(ls) tách tên bao cao 21-11.txt thành ba mảnh, for x in * giữ nguyên từng tên file" width="2400" height="1350" loading="lazy"></div><figcaption>SSH Studio · lặp qua file bằng <code>*</code>, đừng dùng <code>$(ls)</code></figcaption></figure>
 
 ## 2. `set -u`: một chữ gõ sai và lệnh `rm -rf`
 
@@ -86,13 +88,15 @@ For more information:
   https://www.shellcheck.net/wiki/SC2154 -- thu_muc_tm is referenced but not ...
 ```
 
+<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/linux-shell-script-an-toan/ssh-studio-07.webp" alt="Terminal của SSH Studio: bash xoa-tam-loi in lệnh rm -rf với toàn bộ thư mục gốc, bash -u xoa-tam-loi dừng ở dòng 4 vì thu_muc_tm unbound variable, mã thoát 1" width="2400" height="1350" loading="lazy"></div><figcaption>SSH Studio · một chữ gõ sai thành <code>rm -rf /*</code>; <code>set -u</code> chặn lại</figcaption></figure>
+
 1. **Chạy thường**: `$thu_muc_tm` chưa từng được gán, bash lặng lẽ thay bằng chuỗi rỗng. `""/*` thành `/*`, và shell mở rộng nó thành mọi thư mục ở gốc. Nếu không có chữ `echo`, đó là `rm -rf /bin /boot /dev /etc /home …`. Với tài khoản `an`, lệnh đó sẽ xoá sạch thư mục riêng và mọi thứ khác `an` có quyền xoá; với `root`, nó xoá hệ thống.
 2. **`bash -u`** (tương đương `set -u` trong script): dùng biến chưa gán là lỗi. Script dừng ngay ở dòng 4 với `unbound variable`, trước khi kịp làm gì. Đây là lý do `set -euo pipefail` có chữ `u` ([LNX-016](/articles/linux-shell-script-dau-tien)).
 3. **`shellcheck`** đọc script mà không chạy, và chỉ ra cả hai vấn đề: `thu_muc_tam` được gán mà không dùng, `thu_muc_tm` được dùng mà không gán, kèm gợi ý «có phải ý bạn là `thu_muc_tam`?».
 
 Thêm một lớp phòng thủ cho mọi lệnh xoá dựa trên biến: `rm -rf -- "${thu_muc_tam:?}"/*`. `${bien:?}` dừng script nếu biến rỗng hoặc chưa gán, kể cả khi không có `set -u`.
 
-<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/linux-shell-script-an-toan/ssh-studio-02.webp" alt="Terminal của SSH Studio: bash xoa-tam-loi in ra lệnh rm -rf với toàn bộ thư mục gốc từ /bin tới /var; bash -u dừng với thông báo thu_muc_tm unbound variable và mã thoát 1; shellcheck báo SC2034 thu_muc_tam không dùng và SC2154 thu_muc_tm chưa gán, gợi ý thu_muc_tam" width="2400" height="1350" loading="lazy"></div><figcaption>SSH Studio · một chữ gõ sai thành <code>rm -rf /*</code>; <code>set -u</code> và <code>shellcheck</code> bắt được</figcaption></figure>
+<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/linux-shell-script-an-toan/ssh-studio-02.webp" alt="Terminal của SSH Studio: shellcheck xoa-tam-loi báo SC2034 thu_muc_tam không được dùng và SC2154 thu_muc_tm chưa được gán, kèm gợi ý tên đúng" width="2400" height="1350" loading="lazy"></div><figcaption>SSH Studio · <code>shellcheck</code> bắt lỗi gõ sai tên biến trước khi chạy</figcaption></figure>
 
 ## 3. `trap` và `mktemp`: dọn file tạm kể cả khi hỏng
 
@@ -128,6 +132,8 @@ an@toinoi-app-01:~/thu-an-toan$ ls /tmp/bao-cao.* 2>/dev/null | wc -l
 0
 ```
 
+<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/linux-shell-script-an-toan/ssh-studio-08.webp" alt="Terminal của SSH Studio: mktemp in tên file ngẫu nhiên trong /tmp, bash thu-trap ghi 17 dòng, grep lỗi với /khong-co, trap vẫn dọn file tạm, mã 2, ls /tmp/bao-cao.* đếm 0" width="2400" height="1350" loading="lazy"></div><figcaption>SSH Studio · <code>trap</code> dọn file tạm kể cả khi script hỏng</figcaption></figure>
+
 - **`mktemp`** tạo một file mới với tên ngẫu nhiên (thay các chữ `X` bằng ký tự ngẫu nhiên), quyền `600`, và in tên đó ra. Không bao giờ trùng với file đã có. `mktemp -d` tạo thư mục. Đừng tự đặt tên kiểu `/tmp/bao-cao.tmp`: hai lần chạy cùng lúc sẽ dùng chung một file, và trên máy nhiều người dùng, người khác có thể tạo sẵn file đó để chờ.
 - **`trap 'LỆNH' EXIT`** đăng ký một lệnh chạy khi script **kết thúc vì bất kỳ lý do gì**: chạy hết, `exit`, lỗi với `set -e`, hay `Ctrl+C`. Trong ví dụ, `grep` thứ hai lỗi, `set -e` dừng script, nhưng `trap` vẫn chạy và xoá file tạm. Mã thoát 2 là của `grep`.
 - Nháy đơn quanh lệnh của `trap` để `$tam` được thay **lúc trap chạy**, không phải lúc đăng ký.
@@ -161,7 +167,7 @@ fi
 
 `exec 9> file` mở file để ghi trên số hiệu 9 và giữ nó mở tới hết script. `flock -n 9` khoá số hiệu đó.
 
-<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/linux-shell-script-an-toan/ssh-studio-03.webp" alt="Terminal của SSH Studio: mktemp in tên file ngẫu nhiên trong /tmp, bash thu-trap ghi 17 dòng, grep lỗi với /khong-co, trap in dòng dọn file tạm, mã thoát 2, không còn file bao-cao trong /tmp; flock -n lấy được khoá, và flock lồng nhau báo khoá đang bị giữ" width="2400" height="1350" loading="lazy"></div><figcaption>SSH Studio · <code>trap</code> dọn file tạm khi script hỏng; <code>flock</code> chặn lần chạy thứ hai</figcaption></figure>
+<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/linux-shell-script-an-toan/ssh-studio-03.webp" alt="Terminal của SSH Studio: flock -n /tmp/thu.lock lấy được khoá, lần flock lồng bên trong báo khoá đang bị giữ" width="2400" height="1350" loading="lazy"></div><figcaption>SSH Studio · <code>flock -n</code>: lần chạy thứ hai không chồng lên lần đầu</figcaption></figure>
 
 ## 5. `sao-luu-log` phiên bản 2
 
@@ -255,11 +261,13 @@ an@toinoi-app-01:~/thu-an-toan$ echo $?
 2
 ```
 
+<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/linux-shell-script-an-toan/ssh-studio-09.webp" alt="Terminal của SSH Studio: vim sao-luu-log bản 2, shellcheck không cảnh báo, ba lần chạy với NGAY 19, 20, 21 và -g 2 xoá bản cũ nhất, ls -l còn hai bản 20 và 21" width="2400" height="1350" loading="lazy"></div><figcaption>SSH Studio · <code>sao-luu-log</code> bản 2: thư mục đích, số bản giữ lại</figcaption></figure>
+
 - Ba lần chạy với `NGAY` khác nhau tạo ba bản; lần thứ ba có `-g 2` nên xoá bản cũ nhất. Còn lại đúng hai bản, quyền `-rw-r-----`.
 - Một `flock` bên ngoài giữ khoá (giả lập một lần chạy khác): script báo và trả 1, không đụng vào file nào.
 - `-g abc` bị từ chối với mã 2 trước khi làm bất cứ việc gì.
 
-<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/linux-shell-script-an-toan/ssh-studio-05.webp" alt="Terminal của SSH Studio: shellcheck không cảnh báo hai script, ba lần chạy sao-luu-log với NGAY 19, 20, 21 tháng 11 và -g 2 xoá bản cũ nhất, ls -l còn hai bản quyền rw-r-----, flock giả lập lần chạy khác khiến script báo đang có lần sao lưu khác và trả 1, -g abc bị từ chối với mã 2" width="2400" height="1350" loading="lazy"></div><figcaption>SSH Studio · <code>sao-luu-log</code> phiên bản 2: giữ N bản, khoá, kiểm tra đầu vào</figcaption></figure>
+<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/linux-shell-script-an-toan/ssh-studio-05.webp" alt="Terminal của SSH Studio: chạy sao-luu-log khi khoá đang bị giữ báo đang có một lần sao lưu khác chạy và mã 1, sao-luu-log -g abc báo cần số nguyên dương và mã 2" width="2400" height="1350" loading="lazy"></div><figcaption>SSH Studio · phiên bản 2 từ chối chạy chồng và tham số sai</figcaption></figure>
 
 ## 6. `shellcheck` trong công việc hằng ngày
 

@@ -4,6 +4,8 @@
 #file bin/bao-cao-log bao-cao-log-v1 01
 bao-cao-log /var/log/toinoi/bao-gia.log
 ls -l bin/bao-cao-log
+#shot 05
+#clear
 chmod u+x bin/bao-cao-log
 bao-cao-log /var/log/toinoi/bao-gia.log
 bash bin/bao-cao-log /var/log/toinoi/bao-gia.log.1
@@ -14,6 +16,8 @@ bao-cao-log
 echo $?
 bao-cao-log /khong-co
 echo $?
+#shot 06
+#clear
 bao-cao-log /var/log/toinoi/bao-gia.log.1 > /dev/null && echo "báo cáo xong"
 ## Khi grep không tìm thấy gì
 grep -v ' ERROR ' /var/log/toinoi/bao-gia.log > ~/tai-lieu/khong-loi.log
@@ -26,6 +30,8 @@ bash -n bin/bao-cao-log && echo "cú pháp ổn"
 bash -x bin/bao-cao-log ~/tai-lieu/khong-loi.log
 grep -c ' ERROR ' ~/tai-lieu/khong-loi.log
 echo $?
+#shot 07
+#clear
 ## Sửa bằng sed, chạy lại
 sed -i 's/\(grep -c .*\))$/\1 || true)/' bin/bao-cao-log
 grep -n 'grep -c' bin/bao-cao-log

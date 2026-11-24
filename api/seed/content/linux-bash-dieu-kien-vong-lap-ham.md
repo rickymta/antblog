@@ -37,6 +37,8 @@ an@toinoi-app-01:~$ [[ bao-gia.log.2.gz == *.gz ]] && echo "file nén"
 file nén
 ```
 
+<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/linux-bash-dieu-kien-vong-lap-ham/ssh-studio-05.webp" alt="Terminal của SSH Studio: [ -r … ] &amp;&amp; echo đọc được, [ -w … ] || echo không ghi được, so_loi=$(grep -c …), [ &quot;$so_loi&quot; -gt 10 ] in 17 lỗi: nhiều hơn 10" width="2400" height="1350" loading="lazy"></div><figcaption>SSH Studio · kiểm tra file và so sánh số với <code>[ ]</code></figcaption></figure>
+
 | Kiểm tra | Đúng khi |
 |---|---|
 | `-e f` / `-f f` / `-d f` | Tồn tại / là file thường / là thư mục |
@@ -84,7 +86,7 @@ fi
 
 Sau `if` có thể là **bất kỳ lệnh nào**, không chỉ `[ ]`: `if grep -q ' ERROR ' "$f"; then …` đọc là «nếu có dòng lỗi». Đây cũng là cách viết đúng thay cho `if [ $(grep -c …) -gt 0 ]`.
 
-<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/linux-bash-dieu-kien-vong-lap-ham/ssh-studio-01.webp" alt="Terminal của SSH Studio: các phép kiểm tra -r và -w trên file log, so sánh số 17 lớn hơn 10 và 9 với -gt, so sánh chuỗi cho thấy 17 đứng trước 9, [[ ]] so mẫu *.gz, và một lệnh if elif else in ít lỗi" width="2400" height="1350" loading="lazy"></div><figcaption>SSH Studio · <code>[ ]</code>, <code>[[ ]]</code> và <code>if</code></figcaption></figure>
+<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/linux-bash-dieu-kien-vong-lap-ham/ssh-studio-01.webp" alt="Terminal của SSH Studio: -gt so sánh số đúng 17 > 9, \> so sánh chuỗi cho thấy &quot;17&quot; đứng trước &quot;9&quot;, [[ … == *.gz ]] khớp mẫu file nén, if elif else in ít lỗi" width="2400" height="1350" loading="lazy"></div><figcaption>SSH Studio · so sánh số và so sánh chuỗi khác nhau; <code>[[ ]]</code> với mẫu; <code>if</code></figcaption></figure>
 
 ## 2. Vòng lặp
 
@@ -101,6 +103,8 @@ an@toinoi-app-01:~$ for f in /var/log/toinoi/bao-gia.log*; do echo "$f"; done
 /var/log/toinoi/bao-gia.log.1
 /var/log/toinoi/bao-gia.log.2.gz
 ```
+
+<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/linux-bash-dieu-kien-vong-lap-ham/ssh-studio-06.webp" alt="Terminal của SSH Studio: for dv in bike car4 car7 delivery đếm yêu cầu của từng dịch vụ, for f in /var/log/toinoi/bao-gia.log* liệt kê ba file log" width="2400" height="1350" loading="lazy"></div><figcaption>SSH Studio · <code>for</code> lặp qua danh sách và qua file</figcaption></figure>
 
 `for BIẾN in DANH_SÁCH; do …; done` chạy thân vòng lặp một lần cho mỗi phần tử. Danh sách có thể viết thẳng ra, có thể là wildcard (shell mở rộng thành tên file), có thể là `"$@"` (mọi tham số của script), hoặc `{1..10}`.
 
@@ -121,6 +125,8 @@ an@toinoi-app-01:~$ grep ' ERROR ' /var/log/toinoi/bao-gia.log | head -n 3 | whi
 
 `while read` đọc đầu ra của một lệnh từng dòng, kể cả khi mỗi dòng có dấu cách. Một chi tiết: vòng `while` đứng sau `|` chạy trong một shell con, nên biến gán bên trong không còn sau vòng lặp. Cần giữ lại, dùng `while read …; do …; done < file` hoặc `< <(lệnh)`.
 
+<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/linux-bash-dieu-kien-vong-lap-ham/ssh-studio-07.webp" alt="Terminal của SSH Studio: grep ERROR | head -n 3 | while read -r ngay gio muc ma dv _ in giờ, mã yêu cầu và dịch vụ của ba lỗi đầu" width="2400" height="1350" loading="lazy"></div><figcaption>SSH Studio · <code>while read</code> tách từng dòng thành các biến</figcaption></figure>
+
 ### `case`: rẽ nhánh theo mẫu
 
 ```text
@@ -140,7 +146,7 @@ esac
 
 `case` so một giá trị với lần lượt từng mẫu wildcard và chạy nhánh đầu tiên khớp. `;;` kết thúc một nhánh; `*)` khớp mọi thứ còn lại. Nhiều mẫu cho một nhánh viết bằng `|`: `*.gz|*.tgz)`. Với những lựa chọn theo dạng chuỗi (đuôi file, tuỳ chọn dòng lệnh, tên môi trường), `case` gọn và dễ đọc hơn một chuỗi `if … elif`.
 
-<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/linux-bash-dieu-kien-vong-lap-ham/ssh-studio-02.webp" alt="Terminal của SSH Studio: vòng for đếm yêu cầu theo bốn dịch vụ, for liệt kê ba file log, while read in giờ, mã yêu cầu và dịch vụ của ba lỗi đầu, và for kết hợp case phân loại ba file thành đang ghi, đã xoay vòng, nén gzip" width="2400" height="1350" loading="lazy"></div><figcaption>SSH Studio · <code>for</code>, <code>while read</code> và <code>case</code></figcaption></figure>
+<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/linux-bash-dieu-kien-vong-lap-ham/ssh-studio-02.webp" alt="Terminal của SSH Studio: for kết hợp case in mỗi file log là đang ghi, đã xoay vòng hay nén gzip" width="2400" height="1350" loading="lazy"></div><figcaption>SSH Studio · <code>case</code> rẽ nhánh theo mẫu tên file</figcaption></figure>
 
 ## 3. Hàm
 
@@ -225,11 +231,13 @@ an@toinoi-app-01:~$ echo $?
 2
 ```
 
+<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/linux-bash-dieu-kien-vong-lap-ham/ssh-studio-08.webp" alt="Terminal của SSH Studio: vim bin/bao-cao-log phiên bản 2, bao-cao-log /var/log/toinoi/bao-gia.log* in ba dòng thẳng cột cho cả file chưa nén và file .gz" width="2400" height="1350" loading="lazy"></div><figcaption>SSH Studio · phiên bản 2 đọc được cả file nén, mỗi file một dòng</figcaption></figure>
+
 - Ba file, ba dòng, file nén được đọc đúng: 302 dòng của ngày 19/11.
 - Một file không tồn tại ở giữa: thông báo ra stderr, hai file còn lại vẫn có báo cáo, mã thoát 1.
 - Không có tham số: thông báo cách dùng, mã thoát 2, đúng như ghi ở đầu file.
 
-<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/linux-bash-dieu-kien-vong-lap-ham/ssh-studio-04.webp" alt="Terminal của SSH Studio: bao-cao-log với ba file in ba dòng thẳng cột gồm số dòng, lỗi và yêu cầu chậm, kể cả bao-gia.log.2.gz; với /khong-co ở giữa thì báo bỏ qua, vẫn in hai file còn lại và trả mã 1; không có tham số thì trả mã 2" width="2400" height="1350" loading="lazy"></div><figcaption>SSH Studio · <code>bao-cao-log</code> phiên bản 2 với nhiều file, file nén và file hỏng</figcaption></figure>
+<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/linux-bash-dieu-kien-vong-lap-ham/ssh-studio-04.webp" alt="Terminal của SSH Studio: bao-cao-log với một file không tồn tại vẫn in hai file đọc được, báo bỏ qua /khong-co và trả mã 1; không tham số in cách dùng và trả mã 2" width="2400" height="1350" loading="lazy"></div><figcaption>SSH Studio · mã thoát của phiên bản 2: 1 khi bỏ qua file, 2 khi dùng sai</figcaption></figure>
 
 ## 5. Tóm tắt cú pháp
 
