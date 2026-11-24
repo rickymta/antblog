@@ -1,0 +1,9 @@
+[Unit]
+Description=Anh chup tai nguyen cua toinoi-app-01
+
+[Service]
+Type=oneshot
+User=baogia
+Group=toinoi
+ExecStart=/usr/local/bin/bao-cao-tai-nguyen
+StandardOutput=append:/var/log/toinoi/tai-nguyen.log

@@ -22,7 +22,7 @@ import { createRequire } from 'node:module';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 
-import { PASSWORD, ROOT, loginCommand, reset, root, scripts } from '../../lib/lab.mjs';
+import { PASSWORD, ROOT, loginCommand, reset, root, runSegment, scripts } from '../../lib/lab.mjs';
 import { open } from './app.mjs';
 
 const REPO = join(ROOT, '..', '..');
@@ -147,7 +147,26 @@ export async function chayPhan({ part, slugs, gui: makeGui, only = [], fresh = t
     slug = slugs[script.id];
     console.log(`${script.name} → ${slug}`);
     const lines = readFileSync(script.path, 'utf8').replace(/\r\n/g, '\n').split('\n');
+    // Đoạn `#may appNN` (Phần 5) chạy trên server khác mà SSH Studio không mở: chạy ngầm bằng
+    // runner để trạng thái đúng như bản ghi, không gõ, không chụp.
+    let khac = null;
+    const chayKhac = () => {
+      if (!khac) return;
+      runSegment(khac.may, khac.lines.join('\n'), { echo: false, dir: join(ROOT, part) });
+      console.log(`  chạy ngầm ${khac.lines.filter((l) => l.trim() && !l.startsWith('#')).length} lệnh trên ${khac.may}`);
+      khac = null;
+    };
     for (const line of lines) {
+      const may = line.match(/^#may (app\d\d)$/);
+      if (may) {
+        chayKhac();
+        if (may[1] !== 'app01') khac = { may: may[1], lines: [] };
+        continue;
+      }
+      if (khac) {
+        khac.lines.push(line);
+        continue;
+      }
       if (!line.trim()) continue;
       let m;
       if (line === '#clear') await a.clear();
@@ -170,17 +189,23 @@ export async function chayPhan({ part, slugs, gui: makeGui, only = [], fresh = t
         if (line.endsWith('\\') || /<</.test(line)) throw new Error('Chưa hỗ trợ lệnh nhiều dòng: ' + line);
         const slow = /^(sudo|find|tree|grep -r|man|cp -r|zcat|tar|shellcheck|xz|zstd|env -i|bash -x)/.test(line);
         await a.run(line, slow ? 1100 : 500);
-        if (/^(sudo|sudoedit)\b/.test(line)) await answerSudo();
+        if (/(^|[|;&(]\s*)(sudo|sudoedit)\b/.test(line)) await answerSudo();
         // Lệnh chạy lâu (apt, timeout …): chờ shell rảnh rồi mới gõ lệnh sau hay chụp ảnh.
         for (let t = 0; t < 600 && !shellIdle(); t++) await sleep(250);
       }
     }
+    chayKhac();
     await a.run('cd', 250);
   }
 
   const all = scripts(part);
   const todo = only.length ? only.map((id) => all.find((s) => s.id === id)) : all;
   for (const s of todo) {
+    // Bảng «Truyền file» của bài trước (upload, Đồng bộ) không thuộc bài này: thu gọn lại.
+    if (await c.eval(`!!document.querySelector('.transfer-panel button[title="Thu gọn"]')`)) {
+      await c.click('.transfer-panel button[title="Thu gọn"]');
+      await sleep(400);
+    }
     // Mỗi bài là một phiên đăng nhập mới, như runner của lab: thoát rồi kết nối lại.
     await play(s);
   }

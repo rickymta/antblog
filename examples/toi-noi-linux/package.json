@@ -22,6 +22,9 @@
     "kiem-tra:p04": "node p04/kiem-tra.mjs",
     "p04": "node run.mjs p04",
     "p04:output": "node run.mjs p04 > p04/OUTPUT.txt",
+    "kiem-tra:p05": "node p05/kiem-tra.mjs",
+    "p05": "node run.mjs p05",
+    "p05:output": "node run.mjs p05 > p05/OUTPUT.txt",
     "p02": "node run.mjs p02",
     "p02:output": "node run.mjs p02 > p02/OUTPUT.txt",
     "test": "node --test \"test/*.test.mjs\""

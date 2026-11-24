@@ -1,0 +1,685 @@
+==== p05/41-ip-cong-ss.sh ====
+
+# Địa chỉ của server
+an@toinoi-app-01:~$ hostname
+toinoi-app-01
+an@toinoi-app-01:~$ ip -br addr
+lo               UNKNOWN        127.0.0.1/8 ::1/128
+eth0@if91        UP             10.20.0.11/24
+an@toinoi-app-01:~$ ip route
+default via 10.20.0.1 dev eth0
+10.20.0.0/24 dev eth0 proto kernel scope link src 10.20.0.11
+an@toinoi-app-01:~$ hostname -I
+10.20.0.11
+an@toinoi-app-01:~$ grep toinoi /etc/hosts
+10.20.0.11      toinoi-app-01
+
+# Dịch vụ đang nghe ở đâu
+an@toinoi-app-01:~$ ss -tln
+State      Recv-Q     Send-Q         Local Address:Port           Peer Address:Port     Process
+LISTEN     0          5                  127.0.0.1:8080                0.0.0.0:*
+LISTEN     0          4096              127.0.0.11:38807               0.0.0.0:*
+LISTEN     0          128                  0.0.0.0:22                  0.0.0.0:*
+LISTEN     0          128                     [::]:22                     [::]:*
+an@toinoi-app-01:~$ sudo ss -tlnp
+State   Recv-Q  Send-Q   Local Address:Port    Peer Address:Port Process
+LISTEN  0       5            127.0.0.1:8080         0.0.0.0:*     users:(("bao-gia",pid=4281,fd=4))
+LISTEN  0       4096        127.0.0.11:38807        0.0.0.0:*
+LISTEN  0       128            0.0.0.0:22           0.0.0.0:*     users:(("sshd",pid=1833,fd=3))
+LISTEN  0       128               [::]:22              [::]:*     users:(("sshd",pid=1833,fd=4))
+an@toinoi-app-01:~$ curl -s http://127.0.0.1:8080/suc-khoe
+{"trang_thai": "ok", "phien_ban": "1.5.0", "pid": 4281, "moi_truong": "production", "so_dich_vu": 4}
+an@toinoi-app-01:~$ curl -sS --connect-timeout 3 http://10.20.0.11:8080/suc-khoe
+curl: (7) Failed to connect to 10.20.0.11 port 8080 after 0 ms: Couldn't connect to server
+
+# 127.0.0.1 hay 0.0.0.0
+an@toinoi-app-01:~$ cd /srv/toinoi/bao-gia/shared/logs
+an@toinoi-app-01:/srv/toinoi/bao-gia/shared/logs$ nohup python3 -m http.server 8081 --bind 0.0.0.0 > /dev/null 2>&1 &
+an@toinoi-app-01:/srv/toinoi/bao-gia/shared/logs$ cd ~
+an@toinoi-app-01:~$ sudo ss -tlnp | grep -E ':(22|8080|8081) '
+LISTEN 0      5          127.0.0.1:8080       0.0.0.0:*    users:(("bao-gia",pid=4281,fd=4))
+LISTEN 0      5            0.0.0.0:8081       0.0.0.0:*    users:(("python3",pid=4344,fd=3))
+LISTEN 0      128          0.0.0.0:22         0.0.0.0:*    users:(("sshd",pid=1833,fd=3))
+LISTEN 0      128             [::]:22            [::]:*    users:(("sshd",pid=1833,fd=4))
+an@toinoi-app-02:~$ hostname
+toinoi-app-02
+an@toinoi-app-02:~$ nc -zv -w 3 toinoi-app-01 22
+Connection to toinoi-app-01 (10.20.0.11) 22 port [tcp/ssh] succeeded!
+an@toinoi-app-02:~$ nc -zv -w 3 toinoi-app-01 8080
+nc: connect to toinoi-app-01 (10.20.0.11) port 8080 (tcp) failed: Connection refused
+an@toinoi-app-02:~$ nc -zv -w 3 toinoi-app-01 8081
+Connection to toinoi-app-01 (10.20.0.11) 8081 port [tcp/tproxy] succeeded!
+an@toinoi-app-02:~$ curl -s http://toinoi-app-01:8081/ | grep -o 'href="[^"]*"' | head -n 3
+href="bao-cao-2026-11-15.txt"
+href="bao-cao-2026-11-21.txt"
+href="bao-cao-2026-11-24.txt"
+
+# Các kết nối đang mở
+an@toinoi-app-01:~$ ss -tn
+State     Recv-Q     Send-Q          Local Address:Port           Peer Address:Port     Process
+an@toinoi-app-01:~$ sudo ss -tnp state established | grep -v 127.0.0.11
+Recv-Q Send-Q Local Address:Port Peer Address:PortProcess
+an@toinoi-app-01:~$ pkill -f 'http.server 8081'
+an@toinoi-app-01:~$ sudo ss -tlnp | grep -c ':8081 '
+0
+
+==== p05/42-dns-ping-curl.sh ====
+
+# Tên được phân giải ở đâu
+an@toinoi-app-01:~$ grep -v '^#' /etc/resolv.conf | grep -v '^$'
+nameserver 127.0.0.11
+options ndots:0
+an@toinoi-app-01:~$ grep -E '^(hosts):' /etc/nsswitch.conf
+hosts:          files dns
+an@toinoi-app-01:~$ getent hosts toinoi-app-02
+10.20.0.12      toinoi-app-02
+an@toinoi-app-01:~$ dig +short toinoi-app-02
+10.20.0.12
+an@toinoi-app-01:~$ dig toinoi-app-02 | grep -A1 'ANSWER SECTION'
+;; ANSWER SECTION:
+toinoi-app-02.          600     IN      A       10.20.0.12
+
+# /etc/hosts đi trước DNS, nhưng dig không đọc nó
+an@toinoi-app-01:~$ echo '127.0.0.1 bao-gia.noi-bo' | sudo tee -a /etc/hosts
+127.0.0.1 bao-gia.noi-bo
+an@toinoi-app-01:~$ getent hosts bao-gia.noi-bo
+127.0.0.1       bao-gia.noi-bo
+an@toinoi-app-01:~$ dig +short bao-gia.noi-bo
+an@toinoi-app-01:~$ curl -s http://bao-gia.noi-bo:8080/suc-khoe
+{"trang_thai": "ok", "phien_ban": "1.5.0", "pid": 4281, "moi_truong": "production", "so_dich_vu": 4}
+
+# ping: máy kia có trả lời không
+an@toinoi-app-01:~$ ping -c 3 toinoi-app-02
+PING toinoi-app-02 (10.20.0.12) 56(84) bytes of data.
+64 bytes from toinoi-app-02.toinoi-linux-lab_lan (10.20.0.12): icmp_seq=1 ttl=64 time=0.078 ms
+64 bytes from toinoi-app-02.toinoi-linux-lab_lan (10.20.0.12): icmp_seq=2 ttl=64 time=0.063 ms
+64 bytes from toinoi-app-02.toinoi-linux-lab_lan (10.20.0.12): icmp_seq=3 ttl=64 time=0.062 ms
+
+--- toinoi-app-02 ping statistics ---
+3 packets transmitted, 3 received, 0% packet loss, time 2026ms
+rtt min/avg/max/mdev = 0.062/0.067/0.078/0.007 ms
+an@toinoi-app-01:~$ ping -c 2 -W 1 192.0.2.10
+PING 192.0.2.10 (192.0.2.10) 56(84) bytes of data.
+
+--- 192.0.2.10 ping statistics ---
+2 packets transmitted, 0 received, 100% packet loss, time 1026ms
+
+
+# Bốn kiểu lỗi khác nhau
+an@toinoi-app-01:~$ curl -sS http://khong-co.toinoi.invalid/
+curl: (6) Could not resolve host: khong-co.toinoi.invalid
+an@toinoi-app-01:~$ curl -sS http://toinoi-app-02:8080/
+curl: (7) Failed to connect to toinoi-app-02 port 8080 after 0 ms: Couldn't connect to server
+an@toinoi-app-01:~$ curl -sS --connect-timeout 3 http://192.0.2.10:8080/
+curl: (28) Failed to connect to 192.0.2.10 port 8080 after 3002 ms: Timeout was reached
+an@toinoi-app-01:~$ curl -s -o /dev/null -w '%{http_code}\n' 'http://bao-gia.noi-bo:8080/bao-gia?dich_vu=xe-tai&km=1'
+400
+
+# curl -v: từng bước của một yêu cầu
+an@toinoi-app-01:~$ curl -sv http://bao-gia.noi-bo:8080/suc-khoe 2>&1 | grep -E '^(\*|>|<) ' | grep -v -E 'Date:|Content-Length'
+* Host bao-gia.noi-bo:8080 was resolved.
+* IPv6: (none)
+* IPv4: 127.0.0.1
+*   Trying 127.0.0.1:8080...
+* Connected to bao-gia.noi-bo (127.0.0.1) port 8080
+> GET /suc-khoe HTTP/1.1
+> Host: bao-gia.noi-bo:8080
+> User-Agent: curl/8.5.0
+> Accept: */*
+>
+* HTTP 1.0, assume close after body
+< HTTP/1.0 200 OK
+< Server: bao-gia/1.5.0 Python/3.12.3
+< Content-Type: application/json; charset=utf-8
+<
+* Closing connection
+an@toinoi-app-01:~$ curl -s -o /dev/null -w 'dns %{time_namelookup}s  ket noi %{time_connect}s  tong %{time_total}s\n' http://bao-gia.noi-bo:8080/suc-khoe
+dns 0.000282s  ket noi 0.000374s  tong 0.000907s
+
+==== p05/43-df-du.sh ====
+
+# df: mỗi hệ thống file còn bao nhiêu
+an@toinoi-app-01:~$ df -h
+Filesystem      Size  Used Avail Use% Mounted on
+overlay        1007G  8.5G  948G   1% /
+tmpfs            64M     0   64M   0% /dev
+shm              64M     0   64M   0% /dev/shm
+tmpfs            16G   56K   16G   1% /run
+tmpfs            16G  4.0K   16G   1% /tmp
+/dev/sdd       1007G  8.5G  948G   1% /etc/hosts
+tmpfs            16G     0   16G   0% /run/lock
+an@toinoi-app-01:~$ df -hT / /tmp /run
+Filesystem     Type     Size  Used Avail Use% Mounted on
+overlay        overlay 1007G  8.5G  948G   1% /
+tmpfs          tmpfs     16G  4.0K   16G   1% /tmp
+tmpfs          tmpfs     16G   56K   16G   1% /run
+
+# du: thư mục nào lớn
+an@toinoi-app-01:~$ sudo du -sh /var/log /srv /opt /home /usr
+33M     /var/log
+401M    /srv
+28K     /opt
+412K    /home
+331M    /usr
+an@toinoi-app-01:~$ sudo du -xh --max-depth=2 /srv | sort -h | tail -n 5
+4.0K    /srv/toinoi/chung
+36K     /srv/toinoi/sao-luu
+401M    /srv
+401M    /srv/toinoi
+401M    /srv/toinoi/bao-gia
+an@toinoi-app-01:~$ sudo find / -xdev -type f -size +100M -printf '%s\t%p\n' 2>/dev/null | sort -n | tail -n 3
+419430400       /srv/toinoi/bao-gia/shared/logs/debug-2026-11.log
+536870912       /srv/dia/du-lieu-01.img
+an@toinoi-app-01:~$ ls -lh /srv/toinoi/bao-gia/shared/logs/debug-2026-11.log
+-rw-r----- 1 baogia toinoi 400M Nov 23 23:59 /srv/toinoi/bao-gia/shared/logs/debug-2026-11.log
+
+# Hết inode khi còn chỗ
+an@toinoi-app-01:~$ sudo mkdir -p /mnt/nho
+an@toinoi-app-01:~$ sudo mount -t tmpfs -o size=20m,nr_inodes=64 tmpfs /mnt/nho
+an@toinoi-app-01:~$ sudo chown an:an /mnt/nho
+an@toinoi-app-01:~$ for i in $(seq 1 100); do touch /mnt/nho/f$i 2>/dev/null || { echo "khong tao duoc file thu $i"; break; }; done
+khong tao duoc file thu 64
+an@toinoi-app-01:~$ df -h /mnt/nho
+Filesystem      Size  Used Avail Use% Mounted on
+tmpfs            20M     0   20M   0% /mnt/nho
+an@toinoi-app-01:~$ df -i /mnt/nho
+Filesystem     Inodes IUsed IFree IUse% Mounted on
+tmpfs              64    64     0  100% /mnt/nho
+an@toinoi-app-01:~$ touch /mnt/nho/them-mot-file
+touch: cannot touch '/mnt/nho/them-mot-file': No space left on device
+an@toinoi-app-01:~$ sudo umount /mnt/nho
+
+# File đã xoá mà vẫn giữ chỗ
+an@toinoi-app-01:~$ sudo mkdir -p /mnt/thu
+an@toinoi-app-01:~$ sudo mount -t tmpfs -o size=100m tmpfs /mnt/thu
+an@toinoi-app-01:~$ sudo chown an:an /mnt/thu
+an@toinoi-app-01:~$ head -c 60M /dev/zero > /mnt/thu/log-lon.log
+an@toinoi-app-01:~$ nohup tail -f /mnt/thu/log-lon.log > /dev/null 2>&1 &
+an@toinoi-app-01:~$ df -h /mnt/thu
+Filesystem      Size  Used Avail Use% Mounted on
+tmpfs           100M   60M   40M  60% /mnt/thu
+an@toinoi-app-01:~$ rm /mnt/thu/log-lon.log
+an@toinoi-app-01:~$ ls /mnt/thu
+an@toinoi-app-01:~$ df -h /mnt/thu
+Filesystem      Size  Used Avail Use% Mounted on
+tmpfs           100M   60M   40M  60% /mnt/thu
+an@toinoi-app-01:~$ lsof -nP +L1 2>/dev/null | grep -E 'COMMAND|/mnt/thu'
+COMMAND  PID USER   FD   TYPE DEVICE SIZE/OFF NLINK NODE NAME
+tail    4594   an    3r   REG  0,103 62914560     0    2 /mnt/thu/log-lon.log (deleted)
+an@toinoi-app-01:~$ pkill -f 'tail -f /mnt/thu'
+an@toinoi-app-01:~$ df -h /mnt/thu
+Filesystem      Size  Used Avail Use% Mounted on
+tmpfs           100M     0  100M   0% /mnt/thu
+an@toinoi-app-01:~$ sudo umount /mnt/thu
+
+==== p05/44-port-forwarding.sh ====
+
+# bao-gia chỉ nghe ở 127.0.0.1
+an@toinoi-app-01:~$ sudo ss -tlnp | grep -E ':(8080|22) '
+LISTEN 0      5          127.0.0.1:8080       0.0.0.0:*    users:(("bao-gia",pid=4281,fd=4))
+LISTEN 0      128          0.0.0.0:22         0.0.0.0:*    users:(("sshd",pid=1833,fd=3))
+LISTEN 0      128             [::]:22            [::]:*    users:(("sshd",pid=1833,fd=4))
+
+# Phía server thấy gì khi có đường hầm
+an@toinoi-app-01:~$ sudo ss -tnp | grep ':8080' | grep -v -E 'TIME-WAIT'
+
+# Mô phỏng laptop của An: một kết nối SSH mở cả ba kiểu đường hầm
+an@toinoi-app-02:~$ mkdir -p ~/may-an && echo 'trang thu tu laptop cua An' > ~/may-an/index.html
+an@toinoi-app-02:~$ nohup python3 -m http.server 8000 --bind 127.0.0.1 --directory ~/may-an > /dev/null 2>&1 &
+an@toinoi-app-02:~$ ss -tln | grep -E ':(18080|1080|8000) '
+LISTEN 0      5          127.0.0.1:8000       0.0.0.0:*
+LISTEN 0      128        127.0.0.1:1080       0.0.0.0:*
+LISTEN 0      128        127.0.0.1:18080      0.0.0.0:*
+LISTEN 0      128            [::1]:18080         [::]:*
+LISTEN 0      128            [::1]:1080          [::]:*
+an@toinoi-app-02:~$ curl -s http://127.0.0.1:18080/suc-khoe
+{"trang_thai": "ok", "phien_ban": "1.5.0", "pid": 4281, "moi_truong": "production", "so_dich_vu": 4}
+an@toinoi-app-02:~$ curl -s --socks5-hostname 127.0.0.1:1080 http://127.0.0.1:8080/suc-khoe
+{"trang_thai": "ok", "phien_ban": "1.5.0", "pid": 4281, "moi_truong": "production", "so_dich_vu": 4}
+an@toinoi-app-02:~$ curl -s --socks5-hostname 127.0.0.1:1080 -o /dev/null -w '%{http_code}\n' http://toinoi-app-01:8080/suc-khoe
+000
+
+# Remote: server mở cổng, kết nối quay về laptop
+an@toinoi-app-01:~$ sudo ss -tlnp | grep ':9090 '
+LISTEN 0      128        127.0.0.1:9090       0.0.0.0:*    users:(("sshd",pid=4649,fd=8))
+LISTEN 0      128            [::1]:9090          [::]:*    users:(("sshd",pid=4649,fd=7))
+an@toinoi-app-01:~$ curl -s http://127.0.0.1:9090/
+trang thu tu laptop cua An
+
+# deploy không được mở đường hầm
+an@toinoi-app-01:~$ sudo sshd -T -C user=deploy,host=ci,addr=10.0.0.5 | grep allowtcpforwarding
+allowtcpforwarding no
+an@toinoi-app-02:~$ pkill -f 'http.server 8000'
+
+==== p05/45-tuong-lua.sh ====
+
+# Trạng thái ban đầu
+an@toinoi-app-01:~$ sudo ufw status
+Status: inactive
+an@toinoi-app-01:~$ sudo nft list ruleset | wc -l
+# Warning: table ip nat is managed by iptables-nft, do not touch!
+21
+an@toinoi-app-01:~$ sudo ufw app list
+Available applications:
+  OpenSSH
+an@toinoi-app-01:~$ sudo ufw app info OpenSSH
+Profile: OpenSSH
+Title: Secure shell server, an rshd replacement
+Description: OpenSSH is a free implementation of the Secure Shell protocol.
+
+Port:
+  22/tcp
+
+# Quy tắc trước, bật sau
+an@toinoi-app-01:~$ sudo ufw default deny incoming
+Default incoming policy changed to 'deny'
+(be sure to update your rules accordingly)
+an@toinoi-app-01:~$ sudo ufw default allow outgoing
+Default outgoing policy changed to 'allow'
+(be sure to update your rules accordingly)
+an@toinoi-app-01:~$ sudo ufw limit OpenSSH
+Rules updated
+Rules updated (v6)
+an@toinoi-app-01:~$ sudo ufw allow from 10.20.0.0/24 to any port 8081 proto tcp comment 'thu muc log noi bo'
+Rules updated
+an@toinoi-app-01:~$ sudo ufw show added
+Added user rules (see 'ufw status' for running firewall):
+ufw limit OpenSSH
+ufw allow from 10.20.0.0/24 to any port 8081 proto tcp comment 'thu muc log noi bo'
+
+# Bật tường lửa: phiên SSH đang mở không bị cắt
+an@toinoi-app-01:~$ sudo ufw --force enable
+Firewall is active and enabled on system startup
+an@toinoi-app-01:~$ sudo ufw status verbose
+Status: active
+Logging: on (low)
+Default: deny (incoming), allow (outgoing), deny (routed)
+New profiles: skip
+
+To                         Action      From
+--                         ------      ----
+22/tcp (OpenSSH)           LIMIT IN    Anywhere
+8081/tcp                   ALLOW IN    10.20.0.0/24               # thu muc log noi bo
+22/tcp (OpenSSH (v6))      LIMIT IN    Anywhere (v6)
+
+an@toinoi-app-01:~$ sudo ufw status numbered
+Status: active
+
+     To                         Action      From
+     --                         ------      ----
+[ 1] OpenSSH                    LIMIT IN    Anywhere
+[ 2] 8081/tcp                   ALLOW IN    10.20.0.0/24               # thu muc log noi bo
+[ 3] OpenSSH (v6)               LIMIT IN    Anywhere (v6)
+
+
+# Thử từ máy khác trong mạng
+an@toinoi-app-01:~$ cd /srv/toinoi/bao-gia/shared/logs
+an@toinoi-app-01:/srv/toinoi/bao-gia/shared/logs$ nohup python3 -m http.server 8081 --bind 0.0.0.0 > /dev/null 2>&1 &
+an@toinoi-app-01:/srv/toinoi/bao-gia/shared/logs$ nohup python3 -m http.server 8082 --bind 0.0.0.0 > /dev/null 2>&1 &
+an@toinoi-app-01:/srv/toinoi/bao-gia/shared/logs$ cd ~
+an@toinoi-app-02:~$ nc -zv -w 3 toinoi-app-01 22
+Connection to toinoi-app-01 (10.20.0.11) 22 port [tcp/ssh] succeeded!
+an@toinoi-app-02:~$ nc -zv -w 3 toinoi-app-01 8081
+Connection to toinoi-app-01 (10.20.0.11) 8081 port [tcp/tproxy] succeeded!
+an@toinoi-app-02:~$ nc -zv -w 3 toinoi-app-01 8082
+nc: connect to toinoi-app-01 (10.20.0.11) port 8082 (tcp) timed out: Operation now in progress
+
+# Sửa và xoá quy tắc
+an@toinoi-app-01:~$ sudo ufw status numbered | grep 8081
+[ 2] 8081/tcp                   ALLOW IN    10.20.0.0/24               # thu muc log noi bo
+an@toinoi-app-01:~$ sudo ufw delete allow from 10.20.0.0/24 to any port 8081 proto tcp
+Rule deleted
+an@toinoi-app-01:~$ sudo ufw status numbered
+Status: active
+
+     To                         Action      From
+     --                         ------      ----
+[ 1] OpenSSH                    LIMIT IN    Anywhere
+[ 2] OpenSSH (v6)               LIMIT IN    Anywhere (v6)
+
+an@toinoi-app-01:~$ pkill -f 'http.server 808[12]'
+
+# ufw chỉ là lớp vỏ: quy tắc thật nằm trong nftables
+an@toinoi-app-01:~$ sudo nft list ruleset | wc -l
+# Warning: table ip nat is managed by iptables-nft, do not touch!
+# Warning: table ip filter is managed by iptables-nft, do not touch!
+# Warning: table ip6 filter is managed by iptables-nft, do not touch!
+412
+an@toinoi-app-01:~$ sudo nft list chain ip filter ufw-user-input
+# Warning: table ip filter is managed by iptables-nft, do not touch!
+table ip filter {
+        chain ufw-user-input {
+                tcp dport 22 ct state new xt match "recent"  counter packets 0 bytes 0
+                tcp dport 22 ct state new xt match "recent"  counter packets 0 bytes 0 jump ufw-user-limit
+                tcp dport 22  counter packets 0 bytes 0 jump ufw-user-limit-accept
+        }
+}
+
+==== p05/46-dong-bo.sh ====
+
+# Đồng bộ từ máy của bạn lên server
+an@toinoi-app-01:~$ mkdir -p ~/bang-gia-moi
+an@toinoi-app-01:~$ ls -la ~/bang-gia-moi
+total 12
+drwxrwxr-x 2 an an 4096 Nov 24 08:12 .
+drwxr-x--- 1 an an 4096 Nov 24 08:12 ..
+an@toinoi-app-01:~$ ls -l ~/bang-gia-moi
+total 8
+-rw-rw-r-- 1 an an 234 Nov 24 08:12 bang-gia.csv
+-rw-rw-r-- 1 an an 175 Nov 24 08:12 ghi-chu.txt
+an@toinoi-app-01:~$ diff /srv/toinoi/bao-gia/current/bang-gia.csv ~/bang-gia-moi/bang-gia.csv
+5a6
+> car7e,Ô tô 7 chỗ điện,16000,5000,32000
+
+# rsync trên một máy: chuẩn bị bản 1.6.0
+an@toinoi-app-01:~$ cp -a /srv/toinoi/bao-gia/releases/1.5.0 /srv/toinoi/bao-gia/releases/1.6.0
+an@toinoi-app-01:~$ cp ~/bang-gia-moi/bang-gia.csv /srv/toinoi/bao-gia/releases/1.6.0/bang-gia.csv
+an@toinoi-app-01:~$ sudo install -d -o an -g toinoi -m 2775 /srv/sao-luu
+an@toinoi-app-01:~$ rsync -a /srv/toinoi/bao-gia/releases/ /srv/sao-luu/releases/
+an@toinoi-app-01:~$ ls /srv/sao-luu/releases
+1.4.2  1.5.0  1.6.0
+an@toinoi-app-01:~$ echo 'ghi chu cu' > /srv/sao-luu/releases/ghi-chu-cu.txt
+an@toinoi-app-01:~$ echo 'ban 1.6.0: them dich vu car7e' > /srv/toinoi/bao-gia/releases/1.6.0/THAY-DOI.txt
+an@toinoi-app-01:~$ rsync -ai --dry-run --delete /srv/toinoi/bao-gia/releases/ /srv/sao-luu/releases/
+*deleting   ghi-chu-cu.txt
+.d..t...... 1.6.0/
+>f+++++++++ 1.6.0/THAY-DOI.txt
+an@toinoi-app-01:~$ rsync -ai --delete /srv/toinoi/bao-gia/releases/ /srv/sao-luu/releases/
+*deleting   ghi-chu-cu.txt
+.d..t...... 1.6.0/
+>f+++++++++ 1.6.0/THAY-DOI.txt
+an@toinoi-app-01:~$ rsync -ai --delete /srv/toinoi/bao-gia/releases/ /srv/sao-luu/releases/
+
+# rsync qua SSH sang toinoi-app-02
+an@toinoi-app-01:~$ ls -l ~/.ssh/dong-bo*
+-rw------- 1 an an 411 Nov 24 08:12 /home/an/.ssh/dong-bo
+-rw-r--r-- 1 an an 103 Nov 24 08:12 /home/an/.ssh/dong-bo.pub
+an@toinoi-app-01:~$ vim ~/.ssh/config
+an@toinoi-app-01:~$ ssh app02 hostname
+Warning: Permanently added 'toinoi-app-02' (ED25519) to the list of known hosts.
+toinoi-app-02
+an@toinoi-app-01:~$ ssh app02 mkdir -p sao-luu
+an@toinoi-app-01:~$ rsync -a --delete --stats /srv/sao-luu/releases/ app02:sao-luu/releases/ | grep -E 'Number of (files|regular files transferred)|Total transferred'
+Number of files: 13 (reg: 9, dir: 4)
+Number of regular files transferred: 9
+Total transferred file size: 12,859 bytes
+an@toinoi-app-01:~$ ssh app02 'ls sao-luu/releases; cat sao-luu/releases/1.6.0/bang-gia.csv | tail -n 1'
+1.4.2
+1.5.0
+1.6.0
+car7e,Ô tô 7 chỗ điện,16000,5000,32000
+an@toinoi-app-01:~$ rsync -ai --delete /srv/sao-luu/releases/ app02:sao-luu/releases/
+
+==== p05/47-dia-mount.sh ====
+
+# Hệ thống file đang được gắn
+an@toinoi-app-01:~$ findmnt -lo TARGET,SOURCE,FSTYPE,SIZE -t overlay,tmpfs
+TARGET    SOURCE  FSTYPE     SIZE
+/         overlay overlay 1006.9G
+/dev      tmpfs   tmpfs       64M
+/dev/shm  shm     tmpfs       64M
+/run      tmpfs   tmpfs     15.6G
+/tmp      tmpfs   tmpfs     15.6G
+/run/lock tmpfs   tmpfs     15.6G
+an@toinoi-app-01:~$ grep -v '^#' /etc/fstab
+
+# Nhà cung cấp vừa gắn thêm một ổ 512 MB
+an@toinoi-app-01:~$ DIA=$(sudo losetup -j /srv/dia/du-lieu-01.img -n -O NAME)
+an@toinoi-app-01:~$ echo $DIA
+/dev/loop2
+an@toinoi-app-01:~$ lsblk -o NAME,SIZE,TYPE,FSTYPE,MOUNTPOINTS $DIA
+NAME   SIZE TYPE FSTYPE MOUNTPOINTS
+loop2  512M loop
+an@toinoi-app-01:~$ sudo blkid $DIA || echo "chua co he thong file"
+chua co he thong file
+
+# Tạo hệ thống file và gắn vào cây thư mục
+an@toinoi-app-01:~$ sudo mkfs.ext4 -q -L du-lieu $DIA
+an@toinoi-app-01:~$ sudo blkid $DIA
+/dev/loop2: LABEL="du-lieu" UUID="eb774cd9-4027-4678-9eeb-047a2bfe097a" BLOCK_SIZE="4096" TYPE="ext4"
+an@toinoi-app-01:~$ sudo mkdir -p /du-lieu
+an@toinoi-app-01:~$ sudo mount $DIA /du-lieu
+an@toinoi-app-01:~$ df -hT /du-lieu
+Filesystem     Type  Size  Used Avail Use% Mounted on
+/dev/loop2     ext4  488M   24K  452M   1% /du-lieu
+an@toinoi-app-01:~$ ls -la /du-lieu
+total 24
+drwxr-xr-x 3 root root  4096 Nov 24 08:12 .
+drwxr-xr-x 1 root root  4096 Nov 24 08:12 ..
+drwx------ 2 root root 16384 Nov 24 08:12 lost+found
+an@toinoi-app-01:~$ sudo chown an:toinoi /du-lieu
+
+# Gắn tự động khi khởi động: fstab theo UUID
+an@toinoi-app-01:~$ UUID=$(sudo blkid -s UUID -o value $DIA)
+an@toinoi-app-01:~$ echo "UUID=$UUID /du-lieu ext4 defaults,nofail 0 2" | sudo tee -a /etc/fstab
+UUID=eb774cd9-4027-4678-9eeb-047a2bfe097a /du-lieu ext4 defaults,nofail 0 2
+an@toinoi-app-01:~$ sudo umount /du-lieu
+an@toinoi-app-01:~$ findmnt /du-lieu || echo "chua gan"
+chua gan
+an@toinoi-app-01:~$ sudo systemctl daemon-reload
+an@toinoi-app-01:~$ sudo mount -a
+an@toinoi-app-01:~$ findmnt -o TARGET,SOURCE,FSTYPE,OPTIONS /du-lieu
+TARGET   SOURCE     FSTYPE OPTIONS
+/du-lieu /dev/loop2 ext4   rw,relatime
+an@toinoi-app-01:~$ echo "luu tren o du lieu" > /du-lieu/thu.txt
+an@toinoi-app-01:~$ ls -l /du-lieu
+total 20
+drwx------ 2 root root 16384 Nov 24 08:12 lost+found
+-rw-rw-r-- 1 an   an      19 Nov 24 08:12 thu.txt
+
+==== p05/48-bo-nho-tai.sh ====
+
+# Bộ nhớ: free và available
+an@toinoi-app-01:~$ free -h
+               total        used        free      shared  buff/cache   available
+Mem:            31Gi       1.6Gi        28Gi        26Mi       1.3Gi        29Gi
+Swap:          8.0Gi          0B       8.0Gi
+an@toinoi-app-01:~$ grep -E '^(MemTotal|MemFree|MemAvailable|Buffers|Cached|SwapTotal|SwapFree|Dirty):' /proc/meminfo
+MemTotal:       32814956 kB
+MemFree:        30089204 kB
+MemAvailable:   31121424 kB
+Buffers:           98000 kB
+Cached:          1219796 kB
+SwapTotal:       8388608 kB
+SwapFree:        8388608 kB
+Dirty:              7044 kB
+an@toinoi-app-01:~$ swapon --show
+NAME     TYPE      SIZE USED PRIO
+/dev/sdc partition   8G   0B   -2
+an@toinoi-app-01:~$ systemctl show bao-gia --no-pager -p MemoryCurrent -p MemoryMax
+MemoryCurrent=9928704
+MemoryMax=209715200
+
+# vmstat lúc rảnh
+an@toinoi-app-01:~$ vmstat 1 4
+procs -----------memory---------- ---swap-- -----io---- -system-- -------cpu-------
+ r  b   swpd   free   buff  cache   si   so    bi    bo   in   cs us sy id wa st gu
+ 1  0      0 30089204  98000 1306260    0    0   359   922 4084    3  1  1 98  0  0  0
+ 0  0      0 30089204  98000 1306264    0    0     0   472 4131 5435  0  1 99  0  0  0
+ 0  0      0 30091496  98000 1306264    0    0     0     0  676  788  0  0 100  0  0  0
+ 0  0      0 30091000  98024 1305544    0    0    12    28 8435 14519  1  1 97  0  0  0
+
+# Nghẽn CPU
+an@toinoi-app-01:~$ nohup tinh-lai-bao-cao > /dev/null 2>&1 &
+an@toinoi-app-01:~$ nohup tinh-lai-bao-cao > /dev/null 2>&1 &
+an@toinoi-app-01:~$ vmstat 1 4
+procs -----------memory---------- ---swap-- -----io---- -system-- -------cpu-------
+ r  b   swpd   free   buff  cache   si   so    bi    bo   in   cs us sy id wa st gu
+ 3  0      0 30088788  98024 1305544    0    0   359   921 4084    3  1  1 98  0  0  0
+ 2  0      0 30088564  98048 1305572    0    0     0   132 1446  838 13  0 87  0  0  0
+ 2  0      0 30088564  98048 1305572    0    0     0     0 4642 5478 13  1 86  0  0  0
+ 2  0      0 30088564  98048 1305572    0    0     0     0 1425  871 13  0 87  0  0  0
+an@toinoi-app-01:~$ uptime
+ 08:13:06 up  1:14,  0 user,  load average: 0.88, 0.54, 0.36
+an@toinoi-app-01:~$ pkill -f tinh-lai-bao-cao
+
+# Nghẽn đĩa: ghi thẳng xuống ổ, bỏ qua cache
+an@toinoi-app-01:~$ for i in 1 2 3 4 5; do dd if=/dev/zero of=/du-lieu/ghi-thu-$i bs=1M count=50 oflag=direct status=none; sleep 1; done &
+an@toinoi-app-01:~$ vmstat 1 4
+procs -----------memory---------- ---swap-- -----io---- -system-- -------cpu-------
+ r  b   swpd   free   buff  cache   si   so    bi    bo   in   cs us sy id wa st gu
+ 1  1      0 29710976 170704 1711412    0    0   289  1161 4164    3  1  1 98  0  0  0
+ 0  0      0 29708136 172856 1714372    0    0     0 125628 11112 17517  1  2 94  2  0  0
+ 0  0      0 29707876 172912 1714724    0    0     0 51360 7796 11678  1  2 97  0  0  0
+ 0  1      0 29703352 174608 1715400    0    0     0 57592 9526 15464  1  2 95  2  0  0
+an@toinoi-app-01:~$ wait
+an@toinoi-app-01:~$ rm /du-lieu/ghi-thu-*
+
+# Ai đang dùng nhiều bộ nhớ
+an@toinoi-app-01:~$ ps -eo pid,user,rss,comm --sort=-rss | head -n 5
+    PID USER       RSS COMMAND
+   4281 baogia   20240 bao-gia
+   3985 root     18020 systemd-journal
+      1 root     12760 systemd
+   1833 root      8100 sshd
+
+==== p05/49-nginx-tls.sh ====
+
+# Cài nginx
+an@toinoi-app-01:~$ sudo apt update 2>&1 | tail -n 1
+All packages are up to date.
+an@toinoi-app-01:~$ sudo apt install -y nginx 2>&1 | grep -E '^Setting up nginx'
+Setting up nginx-common (1.24.0-2ubuntu7.21) ...
+Setting up nginx (1.24.0-2ubuntu7.21) ...
+an@toinoi-app-01:~$ systemctl is-active nginx
+active
+an@toinoi-app-01:~$ sudo ss -tlnpH | grep nginx | awk '{ split($6, p, "\""); print $4, p[2] }'
+0.0.0.0:80 nginx
+[::]:80 nginx
+an@toinoi-app-01:~$ ps -C nginx -o user=,cmd= | sort | uniq -c
+      1 root     nginx: master process /usr/sbin/nginx -g daemon on; master_process on;
+     16 www-data nginx: worker process
+an@toinoi-app-01:~$ curl -s -o /dev/null -w '%{http_code} %{content_type}\n' http://127.0.0.1/
+200 text/html
+
+# Chứng chỉ tự ký cho lab
+an@toinoi-app-01:~$ sudo openssl req -x509 -newkey rsa:2048 -nodes -days 365 -subj '/CN=bao-gia.toinoi.lab' -addext 'subjectAltName=DNS:bao-gia.toinoi.lab' -keyout /etc/ssl/private/bao-gia.toinoi.lab.key -out /etc/ssl/certs/bao-gia.toinoi.lab.crt 2>/dev/null
+an@toinoi-app-01:~$ sudo ls -l /etc/ssl/private/bao-gia.toinoi.lab.key /etc/ssl/certs/bao-gia.toinoi.lab.crt
+-rw-r--r-- 1 root root 1180 Nov 24 08:13 /etc/ssl/certs/bao-gia.toinoi.lab.crt
+-rw------- 1 root root 1704 Nov 24 08:13 /etc/ssl/private/bao-gia.toinoi.lab.key
+an@toinoi-app-01:~$ openssl x509 -in /etc/ssl/certs/bao-gia.toinoi.lab.crt -noout -subject -issuer -dates
+subject=CN = bao-gia.toinoi.lab
+issuer=CN = bao-gia.toinoi.lab
+notBefore=Nov 24 01:13:16 2026 GMT
+notAfter=Nov 24 01:13:16 2027 GMT
+
+# Cấu hình site
+an@toinoi-app-01:~$ sudoedit /etc/nginx/sites-available/bao-gia
+an@toinoi-app-01:~$ sudo ln -s /etc/nginx/sites-available/bao-gia /etc/nginx/sites-enabled/bao-gia
+an@toinoi-app-01:~$ sudo rm /etc/nginx/sites-enabled/default
+an@toinoi-app-01:~$ sudo nginx -t
+nginx: the configuration file /etc/nginx/nginx.conf syntax is ok
+nginx: configuration file /etc/nginx/nginx.conf test is successful
+an@toinoi-app-01:~$ sudo systemctl reload nginx
+
+# Thử từ chính server
+an@toinoi-app-01:~$ echo '127.0.0.1 bao-gia.toinoi.lab' | sudo tee -a /etc/hosts
+127.0.0.1 bao-gia.toinoi.lab
+an@toinoi-app-01:~$ curl -sI http://bao-gia.toinoi.lab/suc-khoe | head -n 3
+HTTP/1.1 301 Moved Permanently
+Server: nginx/1.24.0 (Ubuntu)
+Date: Tue, 24 Nov 2026 01:13:17 GMT
+an@toinoi-app-01:~$ curl -sS https://bao-gia.toinoi.lab/suc-khoe
+curl: (60) SSL certificate problem: self-signed certificate
+More details here: https://curl.se/docs/sslcerts.html
+
+curl failed to verify the legitimacy of the server and therefore could not
+establish a secure connection to it. To learn more about this situation and
+how to fix it, please visit the web page mentioned above.
+an@toinoi-app-01:~$ curl -s --cacert /etc/ssl/certs/bao-gia.toinoi.lab.crt https://bao-gia.toinoi.lab/suc-khoe
+{"trang_thai": "ok", "phien_ban": "1.5.0", "pid": 4281, "moi_truong": "production", "so_dich_vu": 4}
+an@toinoi-app-01:~$ echo | openssl s_client -connect bao-gia.toinoi.lab:443 -servername bao-gia.toinoi.lab 2>/dev/null | grep -E '^(subject|issuer)=|Protocol|Cipher is'
+subject=CN = bao-gia.toinoi.lab
+issuer=CN = bao-gia.toinoi.lab
+New, TLSv1.3, Cipher is TLS_AES_256_GCM_SHA384
+an@toinoi-app-01:~$ sudo tail -n 2 /var/log/nginx/bao-gia.access.log
+127.0.0.1 - - [24/Nov/2026:08:13:17 +0700] "GET /suc-khoe HTTP/1.1" 200 101 "-" "curl/8.5.0"
+127.0.0.1 - - [24/Nov/2026:08:13:17 +0700] "" 400 0 "-" "-"
+
+# Mở 443 cho mạng nội bộ, thử từ toinoi-app-02
+an@toinoi-app-01:~$ sudo ufw allow from 10.20.0.0/24 to any port 443 proto tcp comment 'https bao-gia noi bo'
+Rule added
+an@toinoi-app-01:~$ sudo ufw status | grep 443
+443/tcp                    ALLOW       10.20.0.0/24               # https bao-gia noi bo
+an@toinoi-app-02:~$ curl -sk --resolve bao-gia.toinoi.lab:443:10.20.0.11 https://bao-gia.toinoi.lab/suc-khoe
+{"trang_thai": "ok", "phien_ban": "1.5.0", "pid": 4281, "moi_truong": "production", "so_dich_vu": 4}
+an@toinoi-app-02:~$ curl -sS --connect-timeout 3 http://toinoi-app-01:8080/suc-khoe
+curl: (28) Failed to connect to toinoi-app-01 port 8080 after 3002 ms: Timeout was reached
+an@toinoi-app-01:~$ sudo tail -n 1 /var/log/nginx/bao-gia.access.log
+10.20.0.12 - - [24/Nov/2026:08:13:18 +0700] "GET /suc-khoe HTTP/1.1" 200 101 "-" "curl/8.5.0"
+
+==== p05/50-thuc-hanh.sh ====
+
+# 1. Tường lửa: chỉ những gì cần
+an@toinoi-app-01:~$ sudo ufw status verbose
+Status: active
+Logging: on (low)
+Default: deny (incoming), allow (outgoing), deny (routed)
+New profiles: skip
+
+To                         Action      From
+--                         ------      ----
+22/tcp (OpenSSH)           LIMIT IN    Anywhere
+443/tcp                    ALLOW IN    10.20.0.0/24               # https bao-gia noi bo
+22/tcp (OpenSSH (v6))      LIMIT IN    Anywhere (v6)
+
+an@toinoi-app-01:~$ sudo ss -tlnpH | grep -v 127.0.0 | awk '{ split($6, p, "\""); print $4, p[2] }'
+0.0.0.0:443 nginx
+0.0.0.0:80 nginx
+0.0.0.0:22 sshd
+[::]:22 sshd
+an@toinoi-app-02:~$ nc -zv -w 3 toinoi-app-01 22
+Connection to toinoi-app-01 (10.20.0.11) 22 port [tcp/ssh] succeeded!
+an@toinoi-app-02:~$ nc -zv -w 3 toinoi-app-01 443
+Connection to toinoi-app-01 (10.20.0.11) 443 port [tcp/https] succeeded!
+an@toinoi-app-02:~$ nc -zv -w 3 toinoi-app-01 80
+nc: connect to toinoi-app-01 (10.20.0.11) port 80 (tcp) timed out: Operation now in progress
+
+# 2. Báo cáo tài nguyên định kỳ
+an@toinoi-app-01:~$ sudoedit /usr/local/bin/bao-cao-tai-nguyen
+an@toinoi-app-01:~$ sudo chmod 755 /usr/local/bin/bao-cao-tai-nguyen
+an@toinoi-app-01:~$ bao-cao-tai-nguyen
+=== 2026-11-24 08:13:26 toinoi-app-01
+tai: 0.63 0.50 0.35 / 16 nhan
+bo nho: con dung duoc 30404/32045 MB
+dia /: dung 1%, con 947G
+dia /du-lieu: dung 1%, con 452M
+cong dang nghe: 6
+bao-gia: active, nginx: active
+an@toinoi-app-01:~$ sudoedit /etc/systemd/system/bao-cao-tai-nguyen.service
+an@toinoi-app-01:~$ sudoedit /etc/systemd/system/bao-cao-tai-nguyen.timer
+an@toinoi-app-01:~$ sudo systemctl daemon-reload
+an@toinoi-app-01:~$ sudo systemctl enable --now bao-cao-tai-nguyen.timer
+Created symlink /etc/systemd/system/timers.target.wants/bao-cao-tai-nguyen.timer → /etc/systemd/system/bao-cao-tai-nguyen.timer.
+an@toinoi-app-01:~$ sudo systemctl start bao-cao-tai-nguyen.service
+an@toinoi-app-01:~$ cat /var/log/toinoi/tai-nguyen.log
+=== 2026-11-24 08:13:26 toinoi-app-01
+tai: 0.63 0.50 0.35 / 16 nhan
+bo nho: con dung duoc 30401/32045 MB
+dia /: dung 1%, con 947G
+dia /du-lieu: dung 1%, con 452M
+cong dang nghe: 6
+bao-gia: active, nginx: active
+an@toinoi-app-01:~$ systemctl list-timers bao-cao-tai-nguyen.timer --no-pager | head -n 2
+NEXT                            LEFT LAST PASSED UNIT                     ACTIVATES
+Tue 2026-11-24 08:15:00 +07 1min 33s -         - bao-cao-tai-nguyen.timer bao-cao-tai-nguyen.service
+
+# 3. Bảng kiểm tra bàn giao
+an@toinoi-app-01:~$ findmnt -o TARGET,SOURCE,FSTYPE /du-lieu
+TARGET   SOURCE     FSTYPE
+/du-lieu /dev/loop2 ext4
+an@toinoi-app-01:~$ grep du-lieu /etc/fstab
+UUID=eb774cd9-4027-4678-9eeb-047a2bfe097a /du-lieu ext4 defaults,nofail 0 2
+an@toinoi-app-01:~$ sudo nginx -t 2>&1 | tail -n 1
+nginx: configuration file /etc/nginx/nginx.conf test is successful
+an@toinoi-app-01:~$ curl -s --cacert /etc/ssl/certs/bao-gia.toinoi.lab.crt https://bao-gia.toinoi.lab/suc-khoe
+{"trang_thai": "ok", "phien_ban": "1.5.0", "pid": 4281, "moi_truong": "production", "so_dich_vu": 4}
+an@toinoi-app-01:~$ ssh app02 'ls sao-luu/releases'
+1.4.2
+1.5.0
+1.6.0
+an@toinoi-app-01:~$ systemctl is-active bao-gia nginx ufw bao-cao-tai-nguyen.timer
+active
+active
+active
+active

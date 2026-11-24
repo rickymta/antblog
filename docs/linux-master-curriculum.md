@@ -130,20 +130,22 @@ Lộ trình: `linux-qua-ssh-studio-phan-04`. Lab: `examples/toi-noi-linux/p04` (
 
 ## P05 · Mạng, lưu trữ và giám sát
 
-Đầu vào: P01–P04. Lộ trình dự kiến `-phan-05`.
+Đầu vào: P01–P04. Đầu ra: `toinoi-app-01` chỉ mở SSH (`LIMIT`) và HTTPS cho mạng nội bộ, `bao-gia` chỉ nghe loopback sau nginx có TLS (chứng chỉ tự ký có SAN, HTTP chuyển 301), ổ dữ liệu `/du-lieu` gắn theo UUID với `nofail`, bản sao lưu release trên `toinoi-app-02` bằng rsync qua SSH, báo cáo tài nguyên 15 phút một lần bằng timer.
+
+Lộ trình: `linux-qua-ssh-studio-phan-05`. Lab: `examples/toi-noi-linux/p05` (bài 41…50). Lab có thêm server thứ hai `toinoi-app-02` (10.20.0.12, chỉ trong mạng nội bộ `10.20.0.0/24`); runner có chỉ dẫn `#may app02` để chạy một đoạn trên máy đó. Ảnh lab cài thêm `netcat-openbsd`, `bind9-dnsutils`, `lsof`, `ufw`, `nftables`, `e2fsprogs`; `/usr/share/toinoi-lab/p05` có key đồng bộ và script chuẩn bị (file log 400 MB, ảnh đĩa 512 MB cho loop device). LNX-049 cài nginx từ kho của Ubuntu (cần Internet). Bộ chấm: `npm run kiem-tra:p05` (20 yêu cầu, có kết nối thật từ `toinoi-app-02`).
 
 | ID | Bài / slug | Mức | Làm được sau bài / sản phẩm thực hành | Trạng thái |
 |---|---|---|---|---|
-| LNX-041 | Địa chỉ IP, cổng và `ss`: dịch vụ đang nghe ở đâu<br>`linux-ip-cong-ss` | CB | `ip a`, `ss -tlnp`, phân biệt `127.0.0.1` và `0.0.0.0` | Dự kiến |
-| LNX-042 | DNS và kiểm tra kết nối: `ping`, `dig`, `curl`<br>`linux-dns-ping-curl` | CB | Phân biệt lỗi DNS, lỗi mạng và lỗi ứng dụng | Dự kiến |
-| LNX-043 | Dung lượng đĩa: `df`, `du` và tìm thứ chiếm chỗ<br>`linux-df-du-dung-luong` | CB | Tìm thư mục lớn, hết inode, file đã xoá còn giữ chỗ | Dự kiến |
-| LNX-044 | Port forwarding trong SSH Studio: Local, Remote, Dynamic<br>`linux-ssh-port-forwarding` | TB | Mở dịch vụ nội bộ của `bao-gia` trên máy mình qua tab Ports | Dự kiến |
-| LNX-045 | Tường lửa với `ufw` và nftables<br>`linux-tuong-lua-ufw-nftables` | TB | Chỉ mở cổng cần thiết, không tự khoá cổng SSH | Dự kiến |
-| LNX-046 | Đồng bộ thư mục: Đồng bộ của SSH Studio và `rsync`<br>`linux-dong-bo-rsync-ssh-studio` | TB | So sánh, xem trước, mirror; `rsync -a --delete` có chạy thử | Dự kiến |
-| LNX-047 | Đĩa, phân vùng, hệ thống file và `mount`<br>`linux-dia-phan-vung-mount` | TB | Gắn đĩa dữ liệu, `fstab`, UUID | Dự kiến |
-| LNX-048 | Bộ nhớ và tải: `free`, `vmstat`, load average<br>`linux-bo-nho-tai-he-thong` | NC | Đọc đúng "bộ nhớ trống", swap, nhận ra nghẽn CPU hay I/O | Dự kiến |
-| LNX-049 | TLS và reverse proxy nginx cho bao-gia<br>`linux-nginx-reverse-proxy-tls` | NC | Đặt nginx trước dịch vụ, chứng chỉ tự ký trong lab | Dự kiến |
-| LNX-050 | Thực hành: mạng và giám sát cho toinoi-app-01<br>`linux-thuc-hanh-mang-giam-sat` | NC | Bàn giao cấu hình tường lửa, forward và báo cáo tài nguyên | Dự kiến |
+| LNX-041 | Địa chỉ IP, cổng và `ss`: dịch vụ đang nghe ở đâu<br>`linux-ip-cong-ss` | CB | `ip -br addr`, `ip route`, `/etc/hosts`, `ss -tln`/`-tlnp`/`-tn`, `127.0.0.1` khác `0.0.0.0`, thử bằng `curl` qua loopback và IP nội bộ | Đã viết |
+| LNX-042 | DNS và kiểm tra kết nối: `ping`, `dig`, `curl`<br>`linux-dns-ping-curl` | CB | `resolv.conf`, `nsswitch.conf`, `getent` so với `dig`, thêm tên vào `/etc/hosts`, `ping` (và khi nó im lặng), mã lỗi 6/7/28 của `curl`, `-sv`, `-w` đo thời gian | Đã viết |
+| LNX-043 | Dung lượng đĩa: `df`, `du` và tìm thứ chiếm chỗ<br>`linux-df-du-dung-luong` | CB | `df -hT`, `du -sh`/`--max-depth`, `find -size +100M`, hết inode (`df -i`) trên tmpfs nhỏ, file đã xoá còn mở (`lsof +L1`), dọn log 400 MB đúng cách | Đã viết |
+| LNX-044 | Port forwarding trong SSH Studio: Local, Remote, Dynamic<br>`linux-ssh-port-forwarding` | TB | Tab Ports: Local 18080 → 127.0.0.1:8080 gọi `bao-gia` từ máy mình, `ss` thấy kết nối của `sshd`, Dynamic (SOCKS), `ssh -L/-R/-D` tương ứng | Đã viết |
+| LNX-045 | Tường lửa với `ufw` và nftables<br>`linux-tuong-lua-ufw-nftables` | TB | `ufw default deny incoming`, `allow OpenSSH` trước khi bật, `limit`, 443 chỉ cho `10.20.0.0/24`, `nft list ruleset`, kiểm chứng bằng `nc -zv` từ `toinoi-app-02` | Đã viết |
+| LNX-046 | Đồng bộ thư mục: Đồng bộ của SSH Studio và `rsync`<br>`linux-dong-bo-rsync-ssh-studio` | TB | Đồng bộ thư mục `bang-gia-moi` lên server (so sánh, chiều, Mirror), `rsync -ai`, `--dry-run --delete`, dấu `/` cuối nguồn, key đồng bộ riêng và `rsync` qua SSH sang app02 | Đã viết |
+| LNX-047 | Đĩa, phân vùng, hệ thống file và `mount`<br>`linux-dia-phan-vung-mount` | TB | `lsblk`, `blkid`, `mkfs.ext4 -L`, `mount`, `fstab` theo UUID với `nofail`, `umount` + `mount -a` trước khi khởi động lại, `findmnt` | Đã viết |
+| LNX-048 | Bộ nhớ và tải: `free`, `vmstat`, load average<br>`linux-bo-nho-tai-he-thong` | NC | `free` (available, buff/cache), `/proc/meminfo`, swap, `MemoryCurrent` của dịch vụ, đọc từng cột `vmstat`, tải CPU (`r`, `us`, load) và tải đĩa (`bo`, `wa`), `ps --sort=-rss` | Đã viết |
+| LNX-049 | TLS và reverse proxy nginx cho bao-gia<br>`linux-nginx-reverse-proxy-tls` | NC | Cài nginx, `bao-gia` về loopback, chứng chỉ tự ký có SAN (`openssl req -addext`), site 443 `proxy_pass` với header `X-Forwarded-*`, 80 chuyển 301, `nginx -t`, `curl --cacert`, log truy cập | Đã viết |
+| LNX-050 | Thực hành: mạng và giám sát cho toinoi-app-01<br>`linux-thuc-hanh-mang-giam-sat` | NC | Tường lửa kiểm chứng từ app02, script `bao-cao-tai-nguyen` chạy bằng `baogia` qua timer 15 phút (`StandardOutput=append:`), bảng kiểm tra bàn giao; `kiem-tra` 20 PASS | Đã viết |
 
 ## P06 · Vận hành nhiều server và xử lý sự cố
 

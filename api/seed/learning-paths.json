@@ -685,6 +685,26 @@
     "status": "published"
   },
   {
+    "slug": "linux-qua-ssh-studio-phan-05",
+    "title": "Linux qua SSH Studio · Phần 5 · Mạng, lưu trữ và giám sát",
+    "description": "Server nhìn từ mạng và từ đĩa: địa chỉ IP, route và cổng đang nghe với ip và ss, phân giải tên với DNS, getent và dig, chẩn đoán bằng ping và curl, đĩa đầy với df, du và file đã xoá còn mở, port forwarding qua SSH (local và SOCKS) trong SSH Studio, tường lửa tối thiểu với ufw và nftables, đồng bộ thư mục bằng tính năng Đồng bộ của SSH Studio và rsync qua SSH, gắn ổ dữ liệu mới với fstab theo UUID, đọc bộ nhớ và tải bằng free và vmstat, nginx làm reverse proxy có TLS cho dịch vụ báo giá — kết thúc bằng bài thực hành bàn giao có kiểm chứng từ server thứ hai và báo cáo tài nguyên định kỳ.",
+    "level": "intermediate",
+    "category": "devops-linux",
+    "articles": [
+      "linux-ip-cong-ss",
+      "linux-dns-ping-curl",
+      "linux-df-du-dung-luong",
+      "linux-ssh-port-forwarding",
+      "linux-tuong-lua-ufw-nftables",
+      "linux-dong-bo-rsync-ssh-studio",
+      "linux-dia-phan-vung-mount",
+      "linux-bo-nho-tai-he-thong",
+      "linux-nginx-reverse-proxy-tls",
+      "linux-thuc-hanh-mang-giam-sat"
+    ],
+    "status": "published"
+  },
+  {
     "slug": "ba-p01-tu-duy-phan-tich-nghiep-vu",
     "title": "BA · Phần 1 · Tư duy phân tích nghiệp vụ",
     "description": "Tám bài mở đầu chương trình Business Analysis qua Tới Nơi: tư duy BA, vai trò phối hợp, phân loại yêu cầu, BACCM, mục tiêu đo lường, phạm vi và quyết định khi thiếu bằng chứng. Gồm 3 bài cơ bản, 3 bài trung bình và 2 bài nâng cao; kết thúc bằng hồ sơ đề xuất cải thiện điểm đón.",

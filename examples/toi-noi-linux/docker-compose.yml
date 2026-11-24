@@ -1,31 +1,58 @@
-# Lab "Linux qua SSH Studio và Tới Nơi": một server Ubuntu 24.04 có sshd.
+# Lab "Linux qua SSH Studio và Tới Nơi": server Ubuntu 24.04 có sshd.
 #   docker compose up -d --build --wait
 #   SSH: 127.0.0.1 cổng 2222, người dùng an, mật khẩu toinoi-lab (chỉ dùng cho lab)
+#
+# Từ Phần 5 có thêm toinoi-app-02 (cùng ảnh), chỉ nằm trong mạng nội bộ "lan" của lab, không mở
+# cổng nào ra máy của bạn: dùng để thử cổng, tường lửa và DNS giữa hai máy. IP cố định để bản ghi
+# của lab giống nhau trên mọi máy.
 name: toinoi-linux-lab
+
+x-server: &server
+  build:
+    context: ./docker
+  image: toinoi-linux-lab:p01
+  # systemd làm PID 1 cần quyền quản lý cgroup của chính container.
+  privileged: true
+  cgroup: host
+  tmpfs:
+    - /run
+    - /run/lock
+    - /tmp
+  volumes:
+    - /sys/fs/cgroup:/sys/fs/cgroup:rw
+  mem_limit: 512m
+  healthcheck:
+    test: ["CMD-SHELL", "systemctl is-active --quiet ssh"]
+    interval: 3s
+    timeout: 5s
+    retries: 20
+    start_period: 5s
 
 services:
   app01:
-    build:
-      context: ./docker
-    image: toinoi-linux-lab:p01
+    <<: *server
     container_name: toinoi-app-01
     hostname: toinoi-app-01
-    # systemd làm PID 1 cần quyền quản lý cgroup của chính container.
-    privileged: true
-    cgroup: host
-    tmpfs:
-      - /run
-      - /run/lock
-      - /tmp
-    volumes:
-      - /sys/fs/cgroup:/sys/fs/cgroup:rw
     ports:
       # Chỉ mở cho máy của bạn; không ai trong mạng LAN kết nối được.
       - "127.0.0.1:2222:22"
-    mem_limit: 512m
-    healthcheck:
-      test: ["CMD-SHELL", "systemctl is-active --quiet ssh"]
-      interval: 3s
-      timeout: 5s
-      retries: 20
-      start_period: 5s
+    networks:
+      lan:
+        ipv4_address: 10.20.0.11
+        aliases: [toinoi-app-01]
+
+  app02:
+    <<: *server
+    container_name: toinoi-app-02
+    hostname: toinoi-app-02
+    networks:
+      lan:
+        ipv4_address: 10.20.0.12
+        aliases: [toinoi-app-02]
+
+networks:
+  lan:
+    ipam:
+      config:
+        - subnet: 10.20.0.0/24
+          gateway: 10.20.0.1

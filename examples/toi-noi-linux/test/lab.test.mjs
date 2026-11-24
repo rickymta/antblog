@@ -4,7 +4,7 @@ import { existsSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { test } from 'node:test';
 
-import { ROOT, compile, scripts } from '../lib/lab.mjs';
+import { ROOT, compile, containerOf, scripts, segments } from '../lib/lab.mjs';
 
 test('Phần 1 có đủ 10 kịch bản, đánh số liên tục', () => {
   const ids = scripts('p01').map((s) => s.id);
@@ -172,4 +172,40 @@ test('OUTPUT.txt của Phần 4 có bản ghi của cả 10 bài, không còn m�
   for (const s of scripts('p04')) assert.ok(out.includes(`==== p04/${s.name} ====`), s.name);
   assert.ok(!/\x1b/.test(out), 'không còn ký tự ESC (OSC 8 của systemctl, màu)');
   assert.ok(!/^Hint: You are currently not seeing messages/m.test(out.split('==== p04/36')[1] || ''), 'từ LNX-036 an đọc được journal');
+});
+
+test('Phần 5 có đủ 10 kịch bản, đánh số tiếp từ 41', () => {
+  assert.deepEqual(
+    scripts('p05').map((s) => s.id),
+    ['41', '42', '43', '44', '45', '46', '47', '48', '49', '50'],
+  );
+});
+
+test('#may tách kịch bản thành đoạn theo server, bỏ đoạn chỉ có ghi chú', () => {
+  const segs = segments('# LNX\nhostname\n#may app02\nnc -zv toinoi-app-01 22\n#may app01\n# chỉ ghi chú\n');
+  assert.deepEqual(
+    segs.map((s) => s.may),
+    ['app01', 'app02'],
+  );
+  assert.ok(segs[1].lines.includes('nc -zv toinoi-app-01 22'));
+  assert.equal(segments('ls\n').length, 1);
+  assert.equal(containerOf('app01'), 'toinoi-app-01');
+  assert.equal(containerOf('app02'), 'toinoi-app-02');
+});
+
+test('mọi file được #file/#sudofile nhắc tới đều có trong p05/files', () => {
+  for (const s of scripts('p05')) {
+    const src = readFileSync(s.path, 'utf8');
+    for (const m of src.matchAll(/^#(?:file|check) \S+ (\S+)(?: \d\d)?$|^#sudofile \S+ \S+ (\S+)(?: \d\d)?$/gm)) {
+      const f = m[1] || m[2];
+      assert.ok(existsSync(join(ROOT, 'p05', 'files', f)), `${s.name}: thiếu files/${f}`);
+    }
+  }
+});
+
+test('OUTPUT.txt của Phần 5 có bản ghi của cả 10 bài, có dấu nhắc của toinoi-app-02', () => {
+  const out = readFileSync(join(ROOT, 'p05', 'OUTPUT.txt'), 'utf8');
+  for (const s of scripts('p05')) assert.ok(out.includes(`==== p05/${s.name} ====`), s.name);
+  assert.ok(!/\x1b/.test(out), 'không còn ký tự ESC');
+  assert.match(out, /^an@toinoi-app-02:~\$ /m);
 });

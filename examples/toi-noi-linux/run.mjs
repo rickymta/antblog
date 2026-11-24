@@ -17,7 +17,7 @@ import { join } from 'node:path';
 
 import { CONTAINER, PASSWORD, ROOT, USER, down, reset, root, runScript, scripts, up } from './lib/lab.mjs';
 
-const PARTS = ['p01', 'p02', 'p03', 'p04'];
+const PARTS = ['p01', 'p02', 'p03', 'p04', 'p05'];
 const [cmd, arg] = process.argv.slice(2);
 
 function info() {

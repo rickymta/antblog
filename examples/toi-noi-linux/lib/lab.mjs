@@ -74,6 +74,10 @@ export function down() {
 
 /** Tạo lại container từ ảnh: mọi thay đổi trên server của lab bị xoá. */
 export function reset() {
+  // LNX-047 gắn /srv/dia/du-lieu-01.img thành loop device. Loop device thuộc kernel của máy chạy
+  // Docker, không mất theo container: gỡ đúng thiết bị của lab trước khi xoá container.
+  docker(['exec', CONTAINER, 'sh', '-c',
+    'umount /du-lieu 2>/dev/null; for d in $(losetup -j /srv/dia/du-lieu-01.img -n -O NAME 2>/dev/null); do losetup -d "$d"; done; true']);
   compose(['down', '--volumes', '--remove-orphans'], { stdio: 'ignore' });
   compose(['up', '-d', '--build', '--wait'], { stdio: ['ignore', 'ignore', 'inherit'] });
 }
@@ -103,7 +107,7 @@ export function compile(source, { echo = true, dir = '.' } = {}) {
   ];
   // Trong phiên SSH thật, sudo hỏi mật khẩu ở lần gọi đầu tiên. Runner xác thực sẵn (chỉ ở
   // kịch bản có dùng sudo) nên bản ghi không có dòng "[sudo] password for an:".
-  if (/^\s*(sudo|sudoedit)\b|^#(root|sudofile|login) /m.test(source)) out.push(`echo ${quote(PASSWORD)} | sudo -S -v 2>/dev/null`);
+  if (/(^|[|;&(]\s*)(sudo|sudoedit)\b|^#(root|sudofile|login) /m.test(source)) out.push(`echo ${quote(PASSWORD)} | sudo -S -v 2>/dev/null`);
   out.push(
     // Dấu nhắc giống PS1 mặc định của Ubuntu: user@host:thư-mục$. Hàm trả lại mã thoát của
     // lệnh đứng trước, để `echo $?` trong kịch bản vẫn đúng.
@@ -176,15 +180,39 @@ export function compile(source, { echo = true, dir = '.' } = {}) {
   return out.join('\n') + '\n';
 }
 
+/** Tên container của một server trong lab: app01 → toinoi-app-01. */
+export const containerOf = (may) => 'toinoi-' + may.replace(/^app/, 'app-');
+
+/**
+ * Tách kịch bản thành các đoạn theo chỉ dẫn `#may appNN` (Phần 5): mỗi đoạn chạy trên một server,
+ * trong một phiên đăng nhập riêng của `an`. Kịch bản không có chỉ dẫn này là một đoạn trên app01.
+ */
+export function segments(source) {
+  const out = [{ may: 'app01', lines: [] }];
+  for (const line of source.replace(/\r\n/g, '\n').split('\n')) {
+    const m = line.match(/^#may (app\d\d)$/);
+    if (m) out.push({ may: m[1], lines: [] });
+    else out[out.length - 1].lines.push(line);
+  }
+  return out.filter((seg) => seg.lines.some((l) => l.trim() && !/^# /.test(l)));
+}
+
 /** Chạy một kịch bản; trả về bản ghi (transcript) dạng chữ. */
 export function runScript(path, { echo = true } = {}) {
-  const script = compile(readFileSync(path, 'utf8'), { echo, dir: dirname(path) });
-  const put = docker(['exec', '-i', CONTAINER, 'bash', '-c', 'cat > /run/lab.sh && chmod 644 /run/lab.sh'], {
+  return segments(readFileSync(path, 'utf8'))
+    .map((seg) => runSegment(seg.may, seg.lines.join('\n'), { echo, dir: dirname(path) }))
+    .join('');
+}
+
+export function runSegment(may, source, { echo, dir }) {
+  const container = containerOf(may);
+  const script = compile(source, { echo, dir });
+  const put = docker(['exec', '-i', container, 'bash', '-c', 'cat > /run/lab.sh && chmod 644 /run/lab.sh'], {
     input: script,
   });
   if (put.status !== 0) throw new Error(put.stderr);
   // -t: có TTY, nên `ls` chia cột và sudo nhớ lần xác thực như trong phiên SSH.
-  const r = docker(['exec', '-t', CONTAINER, 'su', '-', USER, '-c', 'bash /run/lab.sh']);
+  const r = docker(['exec', '-t', container, 'su', '-', USER, '-c', 'bash /run/lab.sh']);
   return (r.stdout + r.stderr)
     .replace(/\r\n/g, '\n')
     .replace(/\r/g, '')

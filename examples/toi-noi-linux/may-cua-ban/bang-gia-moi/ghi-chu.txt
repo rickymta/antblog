@@ -1,0 +1,3 @@
+Bảng giá áp dụng từ 01/12/2026 (bản nháp của nhóm kinh doanh).
+- Thêm dịch vụ car7e: ô tô 7 chỗ chạy điện.
+- Các dịch vụ khác giữ nguyên.

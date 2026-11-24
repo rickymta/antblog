@@ -55,7 +55,8 @@ export async function attach() {
 
     /**
      * Tâm của phần tử đầu tiên khớp selector (và chứa `text` nếu có). Khi lọc theo chữ, lấy phần
-     * tử trong cùng. `exact` đòi chữ khớp nguyên văn.
+     * tử trong cùng. `exact` đòi chữ khớp nguyên văn, hoặc khớp dòng đầu (nút có số đếm như «Ports
+1»).
      */
     async locate(sel, text = null, { exact = false, nth = 0 } = {}) {
       const pos = await c.eval(`(() => {
@@ -66,7 +67,7 @@ export async function attach() {
           if (!r.width || !r.height) return false;
           if (text === null) return true;
           const l = label(e), t = e.title || e.getAttribute('aria-label') || '';
-          return exact ? l === text || t === text : l.includes(text) || t.includes(text);
+          return exact ? l === text || t === text || l.split(/\\s*\\n/)[0] === text : l.includes(text) || t.includes(text);
         });
         if (text !== null) els = els.filter((e) => !els.some((o) => o !== e && e.contains(o)));
         const el = els[${nth}];

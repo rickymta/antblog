@@ -1,0 +1,9 @@
+[Unit]
+Description=15 phut mot lan chup tai nguyen cua toinoi-app-01
+
+[Timer]
+OnCalendar=*:0/15
+Persistent=true
+
+[Install]
+WantedBy=timers.target

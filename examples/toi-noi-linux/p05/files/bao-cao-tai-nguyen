@@ -1,0 +1,9 @@
+#!/usr/bin/env bash
+# Ảnh chụp tài nguyên của toinoi-app-01 (LNX-050): một khối mỗi lần chạy, timer gọi 15 phút một lần.
+set -euo pipefail
+echo "=== $(date '+%F %T') $(hostname)"
+echo "tai: $(cut -d' ' -f1-3 /proc/loadavg) / $(nproc) nhan"
+free -m | awk '/^Mem:/ { printf "bo nho: con dung duoc %d/%d MB\n", $7, $2 }'
+df -h --output=target,pcent,avail / /du-lieu 2>/dev/null | tail -n +2 | awk '{ printf "dia %s: dung %s, con %s\n", $1, $2, $3 }'
+echo "cong dang nghe: $(ss -tlnH | wc -l)"
+echo "bao-gia: $(systemctl is-active bao-gia), nginx: $(systemctl is-active nginx)"

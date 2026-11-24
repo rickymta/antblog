@@ -115,6 +115,20 @@ RUN apt-get update \
 COPY fixtures/p04/ /usr/share/toinoi-lab/p04/
 RUN chmod 755 /usr/share/toinoi-lab/p04/chuan-bi.sh
 
+# ---- Phần 5 ----
+# Công cụ mạng và đĩa mà một server Ubuntu thường có: nc, dig, lsof, tường lửa ufw (nftables).
+# nginx KHÔNG cài sẵn: LNX-049 cài bằng apt. Ảnh Ubuntu cho Docker có policy-rc.d chặn gói tự khởi động
+# dịch vụ khi cài; server thật không có, nên gỡ để `apt install nginx` chạy nginx ngay như thật.
+RUN rm -f /usr/sbin/policy-rc.d
+RUN apt-get update \
+ && apt-get install -y --no-install-recommends netcat-openbsd bind9-dnsutils lsof ufw nftables e2fsprogs \
+ && rm -rf /var/lib/apt/lists/*
+# Dữ liệu của lab: key đồng bộ app01 → app02 (LNX-046) và chuan-bi.sh. Chỉ root đọc được.
+COPY fixtures/p05/ /usr/share/toinoi-lab/p05/
+RUN chmod 700 /usr/share/toinoi-lab/p05 \
+ && chmod 600 /usr/share/toinoi-lab/p05/dong-bo /usr/share/toinoi-lab/p05/dong-bo.pub \
+ && chmod 700 /usr/share/toinoi-lab/p05/chuan-bi.sh
+
 EXPOSE 22
 STOPSIGNAL SIGRTMIN+3
 CMD ["/sbin/init"]

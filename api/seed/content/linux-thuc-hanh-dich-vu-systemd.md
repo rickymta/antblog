@@ -195,4 +195,4 @@ Tất cả `PASS` (26 mục với `--boot`) là xong Phần 4. Mục `FAIL` có 
 
 ## Đọc tiếp
 
-Phần 4 khép lại với một dịch vụ chạy đúng cách trên một server. **Phần 5** mở rộng ra ngoài máy: mạng và cổng, tường lửa, truy cập dịch vụ nội bộ bằng port forwarding của SSH Studio, đĩa và giám sát tài nguyên. Xem lại [lộ trình của series](/articles/linux-la-gi-va-ssh-studio).
+Phần 4 khép lại với một dịch vụ chạy đúng cách trên một server. **Phần 5** mở rộng ra ngoài máy: mạng và cổng, tường lửa, truy cập dịch vụ nội bộ bằng port forwarding của SSH Studio, đĩa và giám sát tài nguyên. Bắt đầu với [LNX-041 · Địa chỉ IP, cổng và ss: dịch vụ đang nghe ở đâu](/articles/linux-ip-cong-ss).
