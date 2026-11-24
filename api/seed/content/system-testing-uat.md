@@ -270,9 +270,56 @@ Supporting check UA-02 cũng chạy được bằng Collection Runner của Curl
 
 Thanh tổng ghi **Requests 14 · Tests 16 / 16 (100%) · Thất bại 0**. Hai test đáng đọc nằm ở request «UA-02 · Khách huỷ chuyến» của mỗi iteration: «Huỷ sau 1 phút → phí 0 đ (grace_period)» và «Huỷ sau 3 phút → phí 10000 đ (charged)» — một mốc mỗi bên của biên R-CANCEL-02.
 
+#### Tiêu chí nằm trong tệp dữ liệu, không nằm trong request
+
+Cùng một folder 7 request chạy được hai kịch bản là vì các con số của tiêu chí — số phút, phí, lý do — được đưa ra ngoài request. Request dời đồng hồ chỉ giữ một chỗ trống:
+
+<figure class="tkh-fig">
+<div class="tkh-fig-box"><img src="/images/articles/system-testing/sys-15/02-body-dong-ho-theo-du-lieu.webp" alt="CurlStudio mở request «UA-02 · Dời đồng hồ theo dữ liệu» trong folder SYS-15, tab Body chứa JSON {&quot;now&quot;: &quot;{{now}}&quot;}, biến {{now}} tô đỏ vì chưa có giá trị ngoài runner." width="2000" height="1125" loading="lazy"></div>
+<figcaption><b>Hình 3 · Thời điểm huỷ lấy từ tệp dữ liệu.</b> Thân chỉ có <code>{"now": "{{now}}"}</code>; biến tô đỏ vì ngoài runner chưa có dòng dữ liệu nào để thế vào.</figcaption>
+</figure>
+
+Màu đỏ là lời nhắc thực tế: gửi tay request này sẽ không dời đồng hồ đến đâu cả. Folder chỉ có nghĩa khi chạy kèm `huy-chuyen.json`, giống như tiêu chí UA-02 chỉ kiểm được khi có đủ hai mốc thời gian.
+
+Request huỷ thì cố định, đúng thao tác người khách sẽ làm trong phiên:
+
+<figure class="tkh-fig">
+<div class="tkh-fig-box"><img src="/images/articles/system-testing/sys-15/03-body-huy-chuyen.webp" alt="CurlStudio mở request «UA-02 · Khách huỷ chuyến»: POST {{baseUrl}}/api/trips/{{tripId}}/cancel, tab Body chứa JSON với reason là «Thay đổi kế hoạch»." width="2000" height="1125" loading="lazy"></div>
+<figcaption><b>Hình 4 · Thao tác huỷ của khách.</b> POST tới <code>/api/trips/{{tripId}}/cancel</code> với lý do «Thay đổi kế hoạch»; <code>tripId</code> do bước đặt chuyến của cùng iteration lưu lại.</figcaption>
+</figure>
+
+Phép kiểm ở tab **Tests** đọc kết quả mong đợi từ cùng dòng dữ liệu:
+
+<figure class="tkh-fig">
+<div class="tkh-fig-box"><img src="/images/articles/system-testing/sys-15/04-tests-phi-huy.webp" alt="Tab Tests của request «UA-02 · Khách huỷ chuyến» trong CurlStudio: test HTTP 200, const b = pm.response.json(), rồi một test có tên ghép «Huỷ sau … → phí … đ (…)» từ pm.iterationData, kiểm b.trip.status bằng cancelled, b.cancellationFee bằng fee và b.feeReason bằng reason của dòng dữ liệu." width="2000" height="1125" loading="lazy"></div>
+<figcaption><b>Hình 5 · Oracle đọc từ dòng dữ liệu.</b> Tên test và ba giá trị mong đợi — <code>cancelled</code>, <code>fee</code>, <code>reason</code> — đều lấy qua <code>pm.iterationData</code>.</figcaption>
+</figure>
+
+So với UA-02 trong Vitest ở 6.2, script này kiểm ba trường của response nhưng không kiểm tài xế D101 trở lại `online`, không đọc lại phí đã lưu từ repository và không đếm lần gọi ví. Thêm nữa, kết quả mong đợi giờ nằm trong tệp JSON: ai sửa tệp đó là sửa tiêu chí. Tệp dữ liệu vì vậy cần được business owner xác nhận giống như bảng tiêu chí ở mục 3, chứ không phải chỉ QA tự điền.
+
+#### Console: thứ tự từng bước trong mỗi iteration
+
+<figure class="tkh-fig">
+<div class="tkh-fig-box"><img src="/images/articles/system-testing/sys-15/05-console-ua02.webp" alt="Collection Runner của CurlStudio cho folder SYS-15 với tệp huy-chuyen.json, Requests 14, Tests 16/16 (100%); panel Console 14 dòng bên dưới liệt kê theo thứ tự: /api/test/reset, /api/test/clock, /api/quotes, /api/trips → 201 Created, /accept, /api/test/clock lần hai, rồi /cancel → 200 OK, lặp lại cho iteration thứ hai." width="2000" height="1125" loading="lazy"></div>
+<figcaption><b>Hình 6 · Console của lượt UA-02.</b> Mỗi iteration đi đúng chuỗi reset → clock 09:00 → quotes → trips 201 → accept → clock (dời) → cancel 200.</figcaption>
+</figure>
+
+Hai lệnh `/api/test/clock` trong mỗi iteration là điểm đáng đọc: lệnh đầu đặt 09:00, lệnh sau dời theo dữ liệu, và request huỷ đến ngay sau đó. Giờ ở đầu dòng là giờ máy thật, không phải đồng hồ lab.
+
 Vì sao 3 phút chứ không đúng 2? `FixedClock` trong suite Vitest đứng yên giữa các bước, nên `clock.advanceMinutes(2)` chạm đúng 2 phút 0 giây. Đồng hồ lab trên máy chủ thì vẫn trôi sau khi được dời: giữa request dời đồng hồ và request huỷ luôn có thêm một khoảng thời gian, nên runner không đặt được đúng mốc biên. Folder vì vậy dùng 3 phút; giá trị biên dễ sai nhất vẫn do test Vitest UA-02 ở 6.2 kiểm.
 
-Ảnh này là một supporting check bằng công cụ GUI, cùng loại bằng chứng với 4/4 Vitest ở 6.3: dữ liệu API đúng tiêu chí ở hai mốc. Nó **không** phải phiên UAT — không có đại diện khách hay tài xế thao tác trên `/` và `/driver.html`, không ai được hỏi có hiểu phí và lý do không, không có người ký; bảng ở mục 4 vẫn ghi UA-02 «Phiên: NOT RUN». Chỗ dùng hợp lý của nó là **vật liệu chuẩn bị phiên**: QA chạy folder trước buổi UAT để chắc môi trường và móc đồng hồ hoạt động, và cho business owner xem trước dữ liệu mong đợi của hai lượt huỷ. Lượt chạy là minh hoạ ngày 23/11/2026 (CurlStudio 0.2.1 qua `pnpm tauri dev`, Windows 11, máy chủ lab Node v22.18.0); không cộng vào «4/4» và không quy đổi thành tỷ lệ UAT.
+#### Ghi giới hạn ngay cạnh bằng chứng
+
+Giới hạn ấy không chỉ nằm trong bài viết. Mở **Cài đặt thư mục** của folder SYS-15, tab **Tổng quan**:
+
+<figure class="tkh-fig">
+<div class="tkh-fig-box"><img src="/images/articles/system-testing/sys-15/06-mo-ta-thu-muc.webp" alt="Cài đặt thư mục của folder SYS-15 trong CurlStudio, tab Tổng quan, ô Mô tả dạng Markdown ghi: chạy bằng Collection Runner với data/huy-chuyen.json; huỷ sau 1 phút được miễn phí, sau 3 phút thu 10.000 đ (R-CANCEL-01/02/03/06); đây là supporting check, không thay phiên UAT và chữ ký nghiệp vụ." width="2000" height="1125" loading="lazy"></div>
+<figcaption><b>Hình 7 · Mô tả folder nói rõ đây là gì và không phải là gì.</b> Câu cuối: «Đây là supporting check, không thay phiên UAT và chữ ký nghiệp vụ.»</figcaption>
+</figure>
+
+Mô tả nằm ngay trong collection, nên người mở folder sau này đọc được cách chạy (tệp dữ liệu nào), tiêu chí nào được chạm tới và giới hạn của kết quả — trước khi kịp báo «UA-02 xanh». Nó hỗ trợ đúng điều mục 9.3 yêu cầu: supporting checks được báo tách riêng, không trộn vào số scenario PASS của phiên người dùng.
+
+Các hình 2–7 là một supporting check bằng công cụ GUI, cùng loại bằng chứng với 4/4 Vitest ở 6.3: dữ liệu API đúng tiêu chí ở hai mốc. Chúng **không** phải phiên UAT — không có đại diện khách hay tài xế thao tác trên `/` và `/driver.html`, không ai được hỏi có hiểu phí và lý do không, không có người ký; bảng ở mục 4 vẫn ghi UA-02 «Phiên: NOT RUN». Chỗ dùng hợp lý của nó là **vật liệu chuẩn bị phiên**: QA chạy folder trước buổi UAT để chắc môi trường và móc đồng hồ hoạt động, và cho business owner xem trước dữ liệu mong đợi của hai lượt huỷ. Hình 2 là lượt chạy minh hoạ ngày 23/11/2026, các hình 3–7 chụp ngày 24/11/2026 (CurlStudio 0.2.1 qua `pnpm tauri dev`, Windows 11, máy chủ lab Node v22.18.0); không cộng vào «4/4» và không quy đổi thành tỷ lệ UAT.
 
 ## 7. Thực hành 2 — acceptance kit cho phiên người dùng
 

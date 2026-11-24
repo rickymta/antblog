@@ -301,6 +301,22 @@ Máy chủ cổng 3100 là lab có API kiểm thử (`/api/test/*`) để reset 
 3. **Chọn environment** «Tới Nơi lab (local, API test bật)» ở ô chọn góc phải trên — biến `baseUrl` trỏ `http://localhost:3100`. Environment «Tới Nơi bản triển khai (prod-like)» trỏ `http://localhost:3101`, để dành cho SYS-16.
 4. **Đọc cấu trúc collection.** Cây bên trái «Tới Nơi lab · Kiểm thử hệ thống» có folder `00 · Chuẩn bị lab` (đưa lab về trạng thái cố định), mỗi bài có minh hoạ là một folder mang mã bài (`SYS-01 · Smoke`, `SYS-02 · Sanity voucher`, `SYS-03 · Functional theo bảng cước`…), và folder `SYS-07…09 · Request cho kịch bản tải` làm nguồn cho load test. Chuột phải một folder → **Chạy thư mục** để mở Collection Runner; folder của SYS-03, SYS-04 và SYS-15 cần chọn tệp dữ liệu trong runner bằng **Chọn file**.
 
+Hộp thoại **Nhập** ở bước 2 nhận nhiều loại nguồn, không chỉ collection:
+
+<figure class="tkh-fig">
+<div class="tkh-fig-box"><img src="/images/articles/system-testing/sys-01/04-hop-thoai-nhap.webp" alt="Hộp thoại Nhập của CurlStudio, dòng mô tả nhận Collection Postman v1, v2.0, v2.1, môi trường, globals, bản data dump đầy đủ hoặc lệnh cURL. Giữa là vùng thả file với nút Chọn file…, bên dưới là ô «…hoặc dán văn bản thô (JSON hoặc cURL)» có ví dụ curl https://api.example.com -H 'Accept: application/json'; cuối hộp thoại là hai nút Huỷ và Nhập." width="2000" height="1125" loading="lazy"></div>
+<figcaption><b>Hình 2 · Một cửa nhập cho collection, environment và cURL.</b> Ba tệp của series đều ở định dạng Postman nên đi qua vùng thả file hoặc nút <b>Chọn file…</b>; ô dán văn bản thô dành cho JSON hoặc một lệnh cURL.</figcaption>
+</figure>
+
+Ô dán cURL có ích ngoài việc dựng lab: khi ai đó báo lỗi kèm một lệnh cURL tái hiện, dán vào là có ngay request để gửi lại, không phải chép tay từng header. Sau bước 3, panel **Môi trường** cho biết collection đang trỏ vào đâu:
+
+<figure class="tkh-fig">
+<div class="tkh-fig-box"><img src="/images/articles/system-testing/sys-01/03-moi-truong-local.webp" alt="Panel Môi trường của CurlStudio liệt kê Globals, «Tới Nơi bản triển khai (prod-like)» và «Tới Nơi lab (local, API test bật)», mục cuối có chấm xanh. Editor bên phải hiện biến baseUrl loại default, giá trị http://localhost:3100, nhãn «Đang dùng» và nút Xuất; ghi chú bên dưới nhắc dùng dạng {{variable}} trong URL, header, body và auth, file xuất ra theo định dạng môi trường của Postman." width="2000" height="1125" loading="lazy"></div>
+<figcaption><b>Hình 3 · Environment local đang được dùng.</b> Chấm xanh và nhãn «Đang dùng» chỉ environment hiện hành; <code>baseUrl</code> = <code>http://localhost:3100</code> là lab có API kiểm thử.</figcaption>
+</figure>
+
+Mọi request trong collection viết `{{baseUrl}}/api/…`, nên đổi environment là đổi đích mà không sửa request nào. Chính vì thế, trước mỗi lượt chạy cần nhìn ô environment: chạy nhầm đích thì một kết quả xanh cũng không nói gì về hệ thống mình định kiểm. Nút **Xuất** cho ra tệp môi trường định dạng Postman để chia sẻ cùng collection.
+
 Folder của bài này tự reset dữ liệu, đặt đồng hồ 09:00 ngày 04/11/2026, trời không mưa và ví bình thường trước khi kiểm — cùng các điều kiện kiểm soát như mục 4.1. Lab giới hạn 5 lần tạo chuyến mỗi phút cho mỗi khách (R-API-13): chạy một folder nhiều lần liên tiếp có thể gặp 429, khi đó đợi một phút hoặc chạy folder `00 · Chuẩn bị lab`. Chỉ trỏ collection vào lab cô lập, không trỏ vào hệ thống thật.
 
 ### 4.7. Minh hoạ với CurlStudio
@@ -309,8 +325,24 @@ Chuột phải folder **SYS-01 · Smoke** → **Chạy thư mục**, giữ envir
 
 <figure class="tkh-fig">
 <div class="tkh-fig-box"><img src="/images/articles/system-testing/sys-01/01-runner-smoke.webp" alt="Collection Runner của CurlStudio sau khi chạy folder SYS-01 · Smoke với environment Tới Nơi lab (local, API test bật), 1 iteration, 14 request được chọn và ô «Giữ giá trị biến do script đặt» đang bật. Thanh tổng ghi Requests 14, Tests 20/20 (100%), Thất bại 0, Non-2xx 1; giữa là biểu đồ thời gian response trung bình theo từng request, thang log; bên dưới là danh sách kết quả, mỗi request một dòng có dấu tích và HTTP 200." width="2000" height="1125" loading="lazy"></div>
-<figcaption><b>Hình 2 · Smoke SYS-01 trong Collection Runner.</b> 20/20 test pass trên 14 request. Con số Non-2xx 1 không phải lỗi: đó là SM-02, nơi 401 là kết quả mong đợi. Ba nút HTML · JUnit · JSON ở góc phải trên xuất báo cáo của lượt chạy.</figcaption>
+<figcaption><b>Hình 4 · Smoke SYS-01 trong Collection Runner.</b> 20/20 test pass trên 14 request. Con số Non-2xx 1 không phải lỗi: đó là SM-02, nơi 401 là kết quả mong đợi. Ba nút HTML · JUnit · JSON ở góc phải trên xuất báo cáo của lượt chạy.</figcaption>
 </figure>
+
+Đừng nhận lời giải thích «Non-2xx 1 là SM-02» trên niềm tin. Bấm bộ lọc **Non-2xx (1)** ngay dưới biểu đồ để xem request đó là gì:
+
+<figure class="tkh-fig">
+<div class="tkh-fig-box"><img src="/images/articles/system-testing/sys-01/06-runner-loc-non-2xx.webp" alt="Collection Runner của CurlStudio sau lượt chạy SYS-01 · Smoke, bộ lọc Non-2xx (1) đang chọn. Danh sách kết quả chỉ còn một dòng «SM-02 · Báo giá thiếu danh tính» với mã 401 và hai test ✓ HTTP 401, ✓ Mã lỗi UNAUTHENTICATED; thanh tổng vẫn ghi Tests 20/20, Thất bại 0." width="2000" height="1125" loading="lazy"></div>
+<figcaption><b>Hình 5 · Lọc request có mã ngoài 2xx.</b> Chỉ còn SM-02 với 401 và hai test xanh. Non-2xx là thống kê về mã HTTP, Thất bại mới là phán quyết của oracle.</figcaption>
+</figure>
+
+Hai bộ đếm trả lời hai câu hỏi khác nhau. Ở smoke, một mã 4xx có thể chính là kết quả mong đợi; ngược lại, một response 200 vẫn có thể bị đánh đỏ nếu test kiểm nội dung. Mở request SM-02 để thấy runner đã gửi gì — đúng như mục 4.3, đó là một báo giá hợp lệ nhưng thiếu header danh tính:
+
+<figure class="tkh-fig">
+<div class="tkh-fig-box"><img src="/images/articles/system-testing/sys-01/05-sm02-thieu-danh-tinh.webp" alt="Request «SM-02 · Báo giá thiếu danh tính» trong CurlStudio, tab Headers chỉ có một dòng Content-Type: application/json, không có x-user, kèm dòng ghi chú các header tự thêm là User-Agent, Accept-Encoding, Content-Type. Nửa dưới là response 401 Unauthorized với body error code UNAUTHENTICATED, message «Thiếu hoặc sai header x-user.», Kết quả test 2/2." width="2000" height="1125" loading="lazy"></div>
+<figcaption><b>Hình 6 · SM-02: thiếu <code>x-user</code> thì bị chặn.</b> Tab <b>Headers</b> chỉ có <code>Content-Type</code>; response 401 mang mã <code>UNAUTHENTICATED</code>, khớp assertion của lab code.</figcaption>
+</figure>
+
+Dòng ghi chú dưới bảng header đáng đọc kỹ: CurlStudio tự thêm User-Agent, Accept-Encoding và Content-Type. Với một phép kiểm dựa vào việc *thiếu* header, phải biết công cụ tự chèn những gì; nếu nó tự chèn danh tính, SM-02 sẽ không còn kiểm điều nó tuyên bố.
 
 Oracle nằm trong tab **Tests** của từng request. Request «SM-03 · Khách đọc lại chuyến» gửi `GET {{baseUrl}}/api/trips/{{tripId}}` và kiểm:
 
@@ -326,12 +358,21 @@ pm.test('Đọc lại: completed, 35.000 đ, paid', () => {
 
 <figure class="tkh-fig">
 <div class="tkh-fig-box"><img src="/images/articles/system-testing/sys-01/02-tests-doc-lai-chuyen.webp" alt="Tab request SM-03 · Khách đọc lại chuyến trong CurlStudio, GET {{baseUrl}}/api/trips/{{tripId}}, đang mở tab Tests với script pm.test HTTP 200 và pm.test Đọc lại: completed, 35.000 đ, paid gồm ba dòng pm.expect cho status, fare và paymentStatus. Nửa dưới là tab Kết quả test 2/2: PASS HTTP 200 và PASS Đọc lại: completed, 35.000 đ, paid; trạng thái 200 OK." width="2000" height="1125" loading="lazy"></div>
-<figcaption><b>Hình 3 · Oracle của SM-03 và kết quả của nó.</b> Nửa trên là chính đoạn script ở trên, viết trong tab <b>Tests</b> của request; nửa dưới là <b>Kết quả test 2/2</b> sau khi gửi lại request với <code>tripId</code> do lượt runner để lại. Mỗi <code>pm.test</code> thành một dòng PASS/FAIL có tên — tên test là thứ người đọc báo cáo thấy đầu tiên, nên đặt theo yêu cầu (completed, 35.000 đ, paid) thay vì «test 1».</figcaption>
+<figcaption><b>Hình 7 · Oracle của SM-03 và kết quả của nó.</b> Nửa trên là chính đoạn script ở trên, viết trong tab <b>Tests</b> của request; nửa dưới là <b>Kết quả test 2/2</b> sau khi gửi lại request với <code>tripId</code> do lượt runner để lại. Mỗi <code>pm.test</code> thành một dòng PASS/FAIL có tên — tên test là thứ người đọc báo cáo thấy đầu tiên, nên đặt theo yêu cầu (completed, 35.000 đ, paid) thay vì «test 1».</figcaption>
 </figure>
 
-`tripId` không gõ tay: request «SM-03 · Đặt chuyến (vixanh)» lưu id chuyến vào biến collection bằng `pm.collectionVariables.set`, và runner bật «Giữ giá trị biến do script đặt» (thấy trong Hình 2) để các request sau dùng lại — giống việc lab code lấy `id` từ response thay vì đoán. `Idempotency-Key` sinh mới mỗi lượt bằng `{{$guid}}`. Con số 35.000 vẫn là kết quả tính tay ở mục 3.1, viết cứng trong script, cùng nguyên tắc oracle độc lập. Nếu muốn runner dừng ngay ở bước đỏ đầu tiên như `.expect()` trong Vitest, bật «Dừng chạy khi gặp lỗi đầu tiên».
+`tripId` không gõ tay: request «SM-03 · Đặt chuyến (vixanh)» lưu id chuyến vào biến collection bằng `pm.collectionVariables.set`, và runner bật «Giữ giá trị biến do script đặt» (thấy trong Hình 4) để các request sau dùng lại — giống việc lab code lấy `id` từ response thay vì đoán. `Idempotency-Key` sinh mới mỗi lượt bằng `{{$guid}}`. Con số 35.000 vẫn là kết quả tính tay ở mục 3.1, viết cứng trong script, cùng nguyên tắc oracle độc lập. Nếu muốn runner dừng ngay ở bước đỏ đầu tiên như `.expect()` trong Vitest, bật «Dừng chạy khi gặp lỗi đầu tiên».
 
-**Ảnh này chứng minh gì, không chứng minh gì.** Lượt minh hoạ ngày 23/11/2026 (CurlStudio 0.2.1 chạy bằng `pnpm tauri dev` trên Windows 11; máy chủ lab trên Node v22.18.0, đồng hồ lab cố định 09:00 ngày 04/11/2026) cho thấy ba phép smoke đi được qua HTTP thật tới một máy chủ lab đang chạy với PGlite — khác lab code, vốn gọi Express trong tiến trình qua Supertest. Nó **không** thay `smoke.test.ts`: runner chỉ nhìn thấy response, nên không kiểm được hai lớp assertion còn lại của SM-03 ở mục 4.4 — trạng thái đọc qua repository và sổ ví giả (đúng một lần gọi, khoá `trip:<id>:fare`, tổng 35.000). Thời gian trong biểu đồ đo từ phía CurlStudio, không phải số liệu hiệu năng và không so được với thời lượng Vitest ở mục 4.5. Và như mọi smoke, 20/20 xanh cho phép kiểm tiếp, không cho phép release.
+Bảng kết quả của runner cho biết test nào pass; panel **Console** cho biết lưu lượng HTTP thực sự đã đi ra sao. Xoá Console trước khi chạy để chỉ còn lượt smoke:
+
+<figure class="tkh-fig">
+<div class="tkh-fig-box"><img src="/images/articles/system-testing/sys-01/07-console-luot-smoke.webp" alt="Collection Runner SYS-01 · Smoke với panel Console mở ở nửa dưới, đếm 14 dòng. Mỗi dòng có giờ, method, URL đầy đủ tới localhost:3100, mã trạng thái và thời gian: bốn lệnh /api/test/reset, clock, weather, payment trả 200 OK, GET /api/health 200 OK, POST /api/quotes 401 Unauthorized, POST /api/quotes 200 OK, POST /api/trips 201 Created, tiếp theo là các lệnh của tài xế." width="2000" height="1125" loading="lazy"></div>
+<figcaption><b>Hình 8 · Console của lượt smoke.</b> 14 dòng ứng với 14 request, theo đúng thứ tự chạy: bốn lệnh <code>/api/test/*</code>, health, báo giá 401 rồi 200, đặt chuyến 201, sau đó tới tài xế.</figcaption>
+</figure>
+
+Hai điểm cần đọc đúng. Giờ ở đầu mỗi dòng là giờ của máy chạy CurlStudio, không phải đồng hồ lab 09:00 ngày 04/11/2026 mà folder đã đặt — cước 35.000 phụ thuộc đồng hồ lab, nên khi tái hiện phải ghi đồng hồ lab chứ không phải giờ trong log. Và Console vẫn chỉ là phía client: nó thấy request và mã trạng thái, không thấy sổ ví giả hay khoá `trip:<id>:fare`.
+
+**Các ảnh này chứng minh gì, không chứng minh gì.** Các lượt minh hoạ ngày 23 và 24/11/2026 (CurlStudio 0.2.1 chạy bằng `pnpm tauri dev` trên Windows 11; máy chủ lab trên Node v22.18.0, đồng hồ lab cố định 09:00 ngày 04/11/2026) cho thấy ba phép smoke đi được qua HTTP thật tới một máy chủ lab đang chạy với PGlite — khác lab code, vốn gọi Express trong tiến trình qua Supertest. Nó **không** thay `smoke.test.ts`: runner chỉ nhìn thấy response, nên không kiểm được hai lớp assertion còn lại của SM-03 ở mục 4.4 — trạng thái đọc qua repository và sổ ví giả (đúng một lần gọi, khoá `trip:<id>:fare`, tổng 35.000). Thời gian trong biểu đồ đo từ phía CurlStudio, không phải số liệu hiệu năng và không so được với thời lượng Vitest ở mục 4.5. Và như mọi smoke, 20/20 xanh cho phép kiểm tiếp, không cho phép release.
 
 ## 5. Đọc thất bại và ra quyết định
 

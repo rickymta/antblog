@@ -322,12 +322,53 @@ FN-T06,bike,0.1,422,DISTANCE_OUT_OF_RANGE
 
 Giá trị mong đợi tính tay theo R-FARE-01…08 (xe máy 12.000 + 4.500/km, ô tô 25.000 + 11.000/km, làm tròn lên nghìn, tối thiểu 15.000 với xe máy), không gọi lại mã lab — ví dụ FN-T03: 12.000 + 2.250 = 14.250 < 15.000 ⇒ 15.000; FN-T05: 25.000 + 11.000 × 10 = 135.000. Folder này không có request chuẩn bị, nên chạy folder `00 · Chuẩn bị lab` trước để đồng hồ về 09:00 và trời không mưa. Sau đó chuột phải folder → **Chạy thư mục**, ở mục «File dữ liệu» bấm **Chọn file** và chọn `bang-cuoc.csv`. Body dùng biến `{{vehicle}}` và `{{distanceKm}}`; script lấy `caseId`, `status`, `expected` từ `pm.iterationData`, nên tên test mang luôn mã dòng — cùng ý với tên test của `it.each` ở mục 7.1: dòng nào đỏ thì tên chỉ ngay dòng đó.
 
+Bước chuẩn bị đó không bỏ được: `/api/test/reset` không đặt lại đồng hồ lab, nên nếu một folder trước để đồng hồ ở giờ cao điểm thì cả bảng sẽ lệch oracle. Mở request ra, tab **Body** chỉ là khuôn chờ dữ liệu:
+
 <figure class="tkh-fig">
-<div class="tkh-fig-box"><img src="/images/articles/system-testing/sys-03/01-runner-bang-cuoc.webp" alt="Collection Runner của CurlStudio chạy folder SYS-03 · Functional theo bảng cước với environment Tới Nơi lab (local, API test bật), File dữ liệu bang-cuoc.csv kèm ghi chú 6 dòng → mỗi dòng một iteration, 1 request được chọn. Thanh tổng ghi Requests 6, Tests 12/12 (100%), Thất bại 0, Non-2xx 1. Danh sách kết quả có sáu dòng FN · Báo giá theo bảng dữ liệu: FN-T01 đến FN-T05 trả 200 với cước 35000, 21000, 15000, 80000, 135000; FN-T06 trả 422 với mã lỗi DISTANCE_OUT_OF_RANGE." width="2000" height="1125" loading="lazy"></div>
-<figcaption><b>Hình 3 · Bảng cước chạy theo dữ liệu.</b> Mỗi dòng CSV thành một iteration với hai test (HTTP và cước hoặc mã lỗi), tên test mang <code>caseId</code>. Non-2xx 1 là FN-T06: 0,1 km bị từ chối có chủ đích.</figcaption>
+<div class="tkh-fig-box"><img src="/images/articles/system-testing/sys-03/02-body-bien-du-lieu.webp" alt="Request «FN · Báo giá theo bảng dữ liệu» trong CurlStudio, tab Body là JSON với trường vehicle mang giá trị {{vehicle}} trong nháy kép và trường distanceKm mang {{distanceKm}} không nháy, hai biến này được tô đỏ vì chưa có giá trị để thế khi gửi ngoài runner." width="2000" height="1125" loading="lazy"></div>
+<figcaption><b>Hình 3 · Body là khuôn, dữ liệu nằm ở tệp CSV.</b> <code>{{vehicle}}</code> và <code>{{distanceKm}}</code> tô đỏ: ngoài runner chưa có dòng dữ liệu nào để thế vào.</figcaption>
 </figure>
 
-**Ảnh này chứng minh gì, không chứng minh gì.** Lượt minh hoạ ngày 23/11/2026 (CurlStudio 0.2.1 chạy bằng `pnpm tauri dev` trên Windows 11; máy chủ lab trên Node v22.18.0, đồng hồ lab cố định 09:00 ngày 04/11/2026) cho thấy sáu dòng dữ liệu khớp oracle tính tay trên một máy chủ lab chạy thật, và cho thấy cách thêm test case bằng một dòng CSV thay vì viết thêm code. Nó **không** thay `functional.test.ts`: script chỉ kiểm `total`, không kiểm `beforeDiscount` và `discount` như FN-02, nên loại lỗi «tổng đúng, tiền giảm sai» ở mục 5.2 sẽ lọt qua; bảng không có cao điểm, mưa hay voucher, không có biên thô 0,45/100,04, snapshot giá hay chuyển trạng thái. Mã FN-T01…T06 là của tệp dữ liệu, không trùng FN-01…FN-07 trong ma trận 7.2. Hai dòng ô tô (FN-T04, FN-T05) nằm ngoài phạm vi lab của bài: chúng minh hoạ cách mở sang vùng mới, còn muốn tính là bằng chứng thì phải đưa vào ma trận truy vết và lab code.
+Màu đỏ là cảnh báo có ích: bấm **Gửi** tay lúc này, `distanceKm` không có nháy kép sẽ thành JSON hỏng, và response 400 khi đó nói về cách chạy chứ không nói gì về bảng cước. Phần quyết định pass/fail nằm ở tab **Tests**:
+
+<figure class="tkh-fig">
+<div class="tkh-fig-box"><img src="/images/articles/system-testing/sys-03/03-tests-iteration-data.webp" alt="Tab Tests của request «FN · Báo giá theo bảng dữ liệu» trong CurlStudio, bốn dòng script: const want = pm.iterationData.get('expected'); pm.test ghép tên từ caseId và chữ HTTP với status để kiểm mã trạng thái; if status bằng 200 thì pm.test caseId · cước so với want; else pm.test caseId · mã lỗi so error.code với want. Cột phải là danh sách Đoạn mã mẫu." width="2000" height="1125" loading="lazy"></div>
+<figcaption><b>Hình 4 · Một script cho mọi dòng dữ liệu.</b> <code>want</code> lấy từ cột <code>expected</code>; dòng status 200 thì so cước, dòng còn lại so <code>error.code</code>. Tên test ghép từ <code>caseId</code>.</figcaption>
+</figure>
+
+Script không tự tính cước — nó chỉ so response với cột `expected` đã tính tay. Oracle độc lập ở đây không nằm trong code mà nằm trong tệp dữ liệu, nên tệp dữ liệu cần được review như review code. Chạy với `bang-cuoc.csv`:
+
+<figure class="tkh-fig">
+<div class="tkh-fig-box"><img src="/images/articles/system-testing/sys-03/01-runner-bang-cuoc.webp" alt="Collection Runner của CurlStudio chạy folder SYS-03 · Functional theo bảng cước với environment Tới Nơi lab (local, API test bật), File dữ liệu bang-cuoc.csv kèm ghi chú 6 dòng → mỗi dòng một iteration, 1 request được chọn. Thanh tổng ghi Requests 6, Tests 12/12 (100%), Thất bại 0, Non-2xx 1. Danh sách kết quả có sáu dòng FN · Báo giá theo bảng dữ liệu: FN-T01 đến FN-T05 trả 200 với cước 35000, 21000, 15000, 80000, 135000; FN-T06 trả 422 với mã lỗi DISTANCE_OUT_OF_RANGE." width="2000" height="1125" loading="lazy"></div>
+<figcaption><b>Hình 5 · Bảng cước chạy theo dữ liệu.</b> Mỗi dòng CSV thành một iteration với hai test (HTTP và cước hoặc mã lỗi), tên test mang <code>caseId</code>. Non-2xx 1 là FN-T06: 0,1 km bị từ chối có chủ đích.</figcaption>
+</figure>
+
+Bộ lọc **Non-2xx (1)** xác nhận điều đó trong vài giây:
+
+<figure class="tkh-fig">
+<div class="tkh-fig-box"><img src="/images/articles/system-testing/sys-03/06-loc-non-2xx.webp" alt="Collection Runner SYS-03 chạy với bang-cuoc.csv, thanh tổng Tests 12/12, bộ lọc Non-2xx (1) đang chọn: danh sách chỉ còn dòng FN-T06 với HTTP 422 và test mã lỗi DISTANCE_OUT_OF_RANGE, cả hai đều có dấu tích xanh." width="2000" height="1125" loading="lazy"></div>
+<figcaption><b>Hình 6 · Non-2xx nhưng đúng mong đợi.</b> FN-T06 trả 422 <code>DISTANCE_OUT_OF_RANGE</code> và hai test của nó đều xanh.</figcaption>
+</figure>
+
+Một bảng functional tốt luôn có dòng mong đợi bị từ chối — phân vùng không hợp lệ của mục 4.1. Với những dòng đó, mã 4xx là kết quả đúng; thứ phải kiểm là *mã lỗi nào*, như script đang làm với `error.code`.
+
+**Khi một dòng đỏ: oracle sai hay sản phẩm sai?** Tệp `data/bang-cuoc-oracle-sai.csv` có ba dòng FN-T01…T03, trong đó FN-T02 cố ý ghi 22000 thay vì 21000 (12.000 + 4.500 × 2 = 21.000). Chạy folder với tệp này để xem một dòng đỏ trông thế nào:
+
+<figure class="tkh-fig">
+<div class="tkh-fig-box"><img src="/images/articles/system-testing/sys-03/04-oracle-sai.webp" alt="Collection Runner SYS-03 với File dữ liệu bang-cuoc-oracle-sai.csv (3 dòng): thanh tổng Requests 3, Tests 5/6 (83%), Thất bại 1. Danh sách kết quả: FN-T01 cước 35000 có dấu tích; FN-T02 dấu X đỏ với dòng «cước 22000 — expected 21000 to deeply equal 22000»; FN-T03 cước 15000 có dấu tích." width="2000" height="1125" loading="lazy"></div>
+<figcaption><b>Hình 7 · Một dòng đỏ do oracle cố ý sai.</b> Tests 5/6, Thất bại 1. Tên test «cước 22000» là giá trị mong đợi trong CSV; thông báo «expected 21000 to deeply equal 22000» cho thấy API trả 21000.</figcaption>
+</figure>
+
+Đọc thông báo theo đúng chiều: giá trị thực tế đứng sau «expected», giá trị mong đợi đứng sau «to deeply equal». Trước khi mở defect, tính tay lại dòng đó: 21.000 là đúng theo R-FARE-01, nên lỗi nằm ở oracle. Đây đúng là nguyên tắc cuối mục 8.2 — không sửa giá trị mong đợi để test xanh, nhưng khi nó sai thật thì sửa kèm lý do, chứ không sửa sản phẩm cho khớp tệp dữ liệu.
+
+<figure class="tkh-fig">
+<div class="tkh-fig-box"><img src="/images/articles/system-testing/sys-03/05-loc-that-bai.webp" alt="Cùng lượt chạy với bang-cuoc-oracle-sai.csv, bộ lọc Thất bại (1) đang chọn: danh sách chỉ còn dòng FN-T02 với dấu X đỏ và thông báo expected 21000 to deeply equal 22000." width="2000" height="1125" loading="lazy"></div>
+<figcaption><b>Hình 8 · Lọc riêng dòng thất bại.</b> Bộ lọc <b>Thất bại (1)</b> chỉ giữ FN-T02 — đủ để chép vào defect report hoặc ghi chú sửa oracle.</figcaption>
+</figure>
+
+Với bảng sáu hay sáu trăm dòng, bộ lọc **Thất bại** là chỗ bắt đầu đọc. Nhưng dòng lọc ra chỉ cho biết *dòng nào* lệch; câu hỏi «oracle hay sản phẩm» vẫn phải trả lời bằng phép tính tay và test basis.
+
+**Các ảnh này chứng minh gì, không chứng minh gì.** Các lượt minh hoạ ngày 23 và 24/11/2026 (CurlStudio 0.2.1 chạy bằng `pnpm tauri dev` trên Windows 11; máy chủ lab trên Node v22.18.0, đồng hồ lab cố định 09:00 ngày 04/11/2026) cho thấy sáu dòng dữ liệu khớp oracle tính tay trên một máy chủ lab chạy thật, và cho thấy cách thêm test case bằng một dòng CSV thay vì viết thêm code. Nó **không** thay `functional.test.ts`: script chỉ kiểm `total`, không kiểm `beforeDiscount` và `discount` như FN-02, nên loại lỗi «tổng đúng, tiền giảm sai» ở mục 5.2 sẽ lọt qua; bảng không có cao điểm, mưa hay voucher, không có biên thô 0,45/100,04, snapshot giá hay chuyển trạng thái. Mã FN-T01…T06 là của tệp dữ liệu, không trùng FN-01…FN-07 trong ma trận 7.2. Hai dòng ô tô (FN-T04, FN-T05) nằm ngoài phạm vi lab của bài: chúng minh hoạ cách mở sang vùng mới, còn muốn tính là bằng chứng thì phải đưa vào ma trận truy vết và lab code.
 
 ## 8. Kết quả và cách đọc
 

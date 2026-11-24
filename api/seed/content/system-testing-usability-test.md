@@ -344,13 +344,53 @@ US-A02 chỉ đòi alert *chứa* chữ «Quãng đường». Nội dung đầy 
 <figcaption><b>Hình 2 · Thông điệp lỗi API cho task U2.</b> Response 422 với mã <code>DISTANCE_OUT_OF_RANGE</code>, bốn test của request đều đạt. Chú ý cách viết số trong <code>message</code>: «0.5» dùng dấu chấm, còn «0,1» trong cùng câu dùng dấu phẩy.</figcaption>
 </figure>
 
-Đọc ảnh: trạng thái **422 Unprocessable Entity**, **Kết quả test 4/4**. Bốn test của request kiểm HTTP 422, mã lỗi `DISTANCE_OUT_OF_RANGE`, thông điệp nêu khoảng hợp lệ «0.5 đến 100 km», và thông điệp không lộ chi tiết kỹ thuật. Số 4,9 ms trên thanh response là thời gian phản hồi của API — không phải time-on-task, đúng như anti-pattern ở mục 10.1.
+Đọc ảnh: trạng thái **422 Unprocessable Entity**, **Kết quả test 4/4**. Số 4,9 ms trên thanh response là thời gian phản hồi của API — không phải time-on-task, đúng như anti-pattern ở mục 10.1.
 
-**Ảnh này chứng minh gì.** Ở tầng API, thông điệp cho U2 có nội dung người dùng cần để tự sửa: nói rõ khoảng hợp lệ và giá trị hệ thống đã nhận, không kèm stack hay tên nội bộ. Đây là một kiểm bổ trợ thêm vào bước «dọn đường» của mục 7.1, cùng loại với US-A01 và US-A02.
+#### Request gửi gì, test kiểm gì
 
-**Ảnh này không chứng minh gì.** Nó **không** chứng minh người dùng hiểu thông điệp hay tự sửa được: chưa có user study nào, participant vẫn bằng 0, và 4/4 không đi vào bảng kết quả ở mục 6.3. Ảnh cũng không cho biết trang khách hiển thị nguyên văn thông điệp này hay không; muốn biết thì nhìn trên trang, trong chính phiên quan sát.
+Các hình tiếp theo chụp ngày 24/11/2026 trên cùng request và cùng lab. Trước khi đọc thông điệp, nên xem request đã gửi đúng tình huống của U2 chưa: tab **Body**.
 
-Ảnh còn gợi ý một điểm đáng mang vào phiên. Thông điệp viết «0.5» bằng dấu chấm, trong khi cách viết số kiểu Việt Nam dùng dấu phẩy cho phần thập phân và dấu chấm cho hàng nghìn — như «35.000 đ» (R-UI-04), như «0,1» ngay trong cùng câu và trong prompt U2. Đây là **giả thuyết để quan sát**, chưa phải finding: ghi vào cột «Diễn giải / giả thuyết» của worksheet, rồi để hành vi của người tham gia đã thấy thông điệp (exposed) xác nhận hoặc bác bỏ — ví dụ họ gõ gì vào ô quãng đường ngay sau khi đọc lỗi.
+<figure class="tkh-fig">
+<div class="tkh-fig-box"><img src="/images/articles/system-testing/sys-12/02-body-0-1-km.webp" alt="Tab Body của request UX · Quãng đường 0,1 km chứa JSON kind ride, cityCode SG, vehicle bike và distanceKm 0.1. Phần response bên dưới ghi 422 với message Quãng đường phải từ 0.5 đến 100 km (sau khi làm tròn 0,1 km), kết quả test 4/4." width="2000" height="1125" loading="lazy"></div>
+<figcaption><b>Hình 3 · Đầu vào của tình huống U2.</b> Thân gửi <code>"distanceKm": 0.1</code> — số JSON luôn dùng dấu chấm. Câu trả về có «0,1 km» trong ngoặc, trùng với giá trị vừa gửi.</figcaption>
+</figure>
+
+Request này dựng lại đúng setup «Distance 0.1, chưa submit» của task card U2 ở tầng API: xe máy, TP.HCM, 0,1 km. Cần đọc kỹ phần trong ngoặc: trong mã lab (`src/domain/fare.ts`), «(sau khi làm tròn 0,1 km)» là câu cố định, nói quãng đường được làm tròn tới 0,1 km, chứ không nhắc lại giá trị khách nhập. Với đầu vào 0,1 km, hai con số trùng nhau. Người đọc có thể hiểu câu theo cả hai nghĩa, và đó là thêm một giả thuyết đáng ghi vào worksheet.
+
+Bốn test của request nằm ở tab **Tests**. Chúng là phần «dọn đường» kiểu mục 7.1: kiểm các điều kiện để phiên U2 không vấp lỗi kỹ thuật, không kiểm người dùng.
+
+<figure class="tkh-fig">
+<div class="tkh-fig-box"><img src="/images/articles/system-testing/sys-12/03-tests-thong-diep.webp" alt="Tab Tests của request UX · Quãng đường 0,1 km có năm dòng script: pm.test HTTP 422, pm.test mã lỗi DISTANCE_OUT_OF_RANGE, const msg lấy error.message, pm.test Thông điệp nêu khoảng hợp lệ 0.5–100 km kiểm msg include 0.5 đến 100 km, và pm.test Không lộ chi tiết kỹ thuật kiểm msg không khớp Error, stack hay undefined. Kết quả test 4/4 PASS." width="2000" height="1125" loading="lazy"></div>
+<figcaption><b>Hình 4 · Bốn test cho một thông điệp.</b> Hai test sau đọc chính <code>error.message</code>: phải nêu khoảng hợp lệ, và không được chứa <code>Error</code>, <code>stack</code> hay <code>undefined</code>.</figcaption>
+</figure>
+
+Test «nêu khoảng hợp lệ» dùng `to.include('0.5 đến 100 km')`, tức là đang khoá luôn cách viết «0.5». Nếu sau phiên quan sát, đội quyết định đổi thành «0,5», test này sẽ đỏ và phải sửa theo — oracle ở đây là câu chữ hiện tại, không phải kết luận về usability. Regex ở test cuối chỉ chặn vài dấu hiệu kỹ thuật rõ ràng, không đo được thông điệp có dễ hiểu hay không.
+
+Một điều kiện nữa để thông điệp tiếng Việt đọc được là nó tới client đúng mã hoá. Tab **Headers** của response cho thấy điều đó.
+
+<figure class="tkh-fig">
+<div class="tkh-fig-box"><img src="/images/articles/system-testing/sys-12/04-response-headers.webp" alt="Tab Headers của response 422 liệt kê content-type application/json; charset=utf-8, content-length 130, etag, date, connection keep-alive và keep-alive timeout=5; thanh trạng thái ghi 422 Unprocessable Entity, thời gian 2.7 ms, kích thước 130 B, 4/4." width="2000" height="1125" loading="lazy"></div>
+<figcaption><b>Hình 5 · Mã hoá của thông điệp.</b> <code>charset=utf-8</code> trong <code>content-type</code> cho client biết cách giải mã chữ có dấu như «Quãng đường».</figcaption>
+</figure>
+
+Đây là điều kiện cần, chưa đủ: thiếu `charset=utf-8`, trang khách có thể hiện «Quãng đường» thành ký tự rác và U2 hỏng vì lý do không liên quan tới thiết kế. Có header đúng vẫn chưa nói gì về việc người đọc hiểu câu chữ. Con số 2,7 ms ở lần gửi này khác 4,9 ms ở Hình 2, và cũng không mang ý nghĩa usability nào.
+
+**Các hình này chứng minh gì.** Ở tầng API, thông điệp cho U2 có nội dung người dùng cần để tự sửa: nói rõ khoảng hợp lệ và quy tắc làm tròn, không kèm stack hay tên nội bộ, và được gửi với mã hoá UTF-8. Đây là một kiểm bổ trợ thêm vào bước «dọn đường» của mục 7.1, cùng loại với US-A01 và US-A02.
+
+**Các hình này không chứng minh gì.** Chúng **không** chứng minh người dùng hiểu thông điệp hay tự sửa được: chưa có user study nào, participant vẫn bằng 0, và 4/4 không đi vào bảng kết quả ở mục 6.3. Các hình cũng không cho biết trang khách hiển thị nguyên văn thông điệp này hay không; muốn biết thì nhìn trên trang, trong chính phiên quan sát.
+
+Hình 2 và Hình 3 còn gợi ý một điểm đáng mang vào phiên. Thông điệp viết «0.5» bằng dấu chấm, trong khi cách viết số kiểu Việt Nam dùng dấu phẩy cho phần thập phân và dấu chấm cho hàng nghìn — như «35.000 đ» (R-UI-04), như «0,1» ngay trong cùng câu và trong prompt U2. Đây là **giả thuyết để quan sát**, chưa phải finding: ghi vào cột «Diễn giải / giả thuyết» của worksheet, rồi để hành vi của người tham gia đã thấy thông điệp (exposed) xác nhận hoặc bác bỏ — ví dụ họ gõ gì vào ô quãng đường ngay sau khi đọc lỗi.
+
+#### Dữ liệu có sẵn cho câu hỏi của U1
+
+U1 coi là thành công khi participant báo đúng 35.000 đ. Một câu hỏi có thể nảy ra ngay sau đó là «vì sao lại là 35.000?». Gửi request «SM-03 · Báo giá xe máy 5 km» trong folder «SYS-01 · Smoke» rồi cuộn response tới `fareBreakdown` để xem API có sẵn gì cho câu hỏi đó.
+
+<figure class="tkh-fig">
+<div class="tkh-fig-box"><img src="/images/articles/system-testing/sys-12/05-bang-chi-tiet-cuoc.webp" alt="CurlStudio mở request SM-03 · Báo giá xe máy 5 km của folder SYS-01 · Smoke, response 200 OK với kết quả test 2/2; thân JSON cuộn tới fareBreakdown với base 34500, afterPeak 34500, rainSurcharge 0, beforeDiscount 34500, discount 0, afterDiscount 34500, minimumFare 15000 và total 35000." width="2000" height="1125" loading="lazy"></div>
+<figcaption><b>Hình 6 · Bảng chi tiết cước trong response.</b> Từ <code>base</code> 34500 tới <code>total</code> 35000, mỗi bước tính có một trường riêng: cao điểm, phụ phí mưa, giảm giá, cước tối thiểu.</figcaption>
+</figure>
+
+Khoảng cách 34.500 → 35.000 là bước làm tròn lên bội số 1.000 theo R-FARE-08. API trả đủ dữ liệu để giao diện giải thích từng bước nếu đội muốn. Nhưng «khách có cần, và có hiểu, phần giải thích đó không» là giả thuyết usability, chỉ trả lời được bằng quan sát trong phiên. Hình này chỉ cho thấy dữ liệu tồn tại, không cho biết trang khách có hiển thị nó hay không.
 
 ## 8. Từ quan sát tới finding và ưu tiên
 

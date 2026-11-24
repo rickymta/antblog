@@ -328,7 +328,56 @@ Dossier hỏi mỗi bằng chứng «thuộc lượt chạy nào, trên bản n�
 - **Cùng tên, khác lượt.** Collection run SYS-14 xuất hiện hai lần trong danh sách; tên folder không phải danh tính của bằng chứng.
 - **Lượt đỏ không biến mất.** Nhật ký giữ cả các lượt thất bại trước đó (tab «Tất cả», ô «Chỉ mục thất bại») — chất liệu cho anti-pattern «chạy lại tới khi xanh, chỉ ghi lần xanh» ở mục 10.
 
-Nhưng nhật ký này **chưa phải** bằng chứng release. Nó nằm cục bộ trên một máy, chỉ giữ 30 ngày, và ghi environment chứ không ghi commit: không dòng nào cho biết bản mã nào đang nghe cổng. Theo đúng luật ở mục 5.1, một bằng chứng không gắn được commit là `stale`. Muốn dùng một lượt CurlStudio trong dossier, phải xuất kết quả runner (**HTML · JUnit · JSON**), lưu cùng mã run và commit ứng viên vào nơi lưu trữ release — đúng điều kiện «thời hạn lưu dài hơn vòng đời quyết định» ở mục 9.2. Các lượt trong ảnh là minh hoạ ngày 23/11/2026 (CurlStudio 0.2.1 chạy bằng `pnpm tauri dev` trên Windows 11, máy chủ lab Node v22.18.0), không gắn với ứng viên `2980c69`, và `registry.ts` không đọc chúng: không dòng nào của dossier ở mục 7 dựa vào nhật ký này. Dù nhật ký có xanh hết, luật vẫn không ký thay ai, và đề xuất của lab vẫn là NOT_READY vì SYS-15 chưa chạy.
+#### Lượt đỏ vẫn nằm trong nhật ký
+
+Tab «Load test & runner» chỉ là một lát cắt. Tab **Tất cả** gộp cả request gửi tay và sự kiện của ứng dụng; ảnh dưới chụp ngày 24/11/2026, sau một buổi chụp minh hoạ cho các bài khác, nên số mục đã lớn hơn nhiều so với Hình 2.
+
+<figure class="tkh-fig">
+<div class="tkh-fig-box"><img src="/images/articles/system-testing/sys-17/02-nhat-ky-tat-ca.webp" alt="Nhật ký hoạt động của CurlStudio ở tab Tất cả 166, bên cạnh các tab Requests 29, Load test & runner 120 và Ứng dụng 17. Các mục ngày 11/23/2026 gồm app started, các collection run SYS-01 ghi 14 requests, all passed, request GET SM-03 tests 2/2, dòng Đã tải lại workspace từ ổ đĩa, request POST SN tests 2/2, và hai mục đỏ: Collection run SYS-03 · Functional theo bảng cước 1 of 1 requests failed, File dữ liệu JSON phải là một mảng các object. Chân hộp thoại ghi 166 trên 166 mục, lưu vào activity.jsonl, 26 KB trên 10 MB, giữ 30 ngày." width="2000" height="1125" loading="lazy"></div>
+<figcaption><b>Hình 3 · Tab Tất cả: lượt đỏ nằm giữa các lượt xanh.</b> Nhật ký ghi theo thời gian, không phân biệt lượt nào «đáng giữ».</figcaption>
+</figure>
+
+Mục đỏ «File dữ liệu JSON phải là một mảng các object» đứng ngay sau lượt SYS-03 thất bại: lượt ấy hỏng vì tệp dữ liệu sai dạng, không phải vì sản phẩm sai. Một báo cáo chỉ chép lượt SYS-03 xanh sau đó sẽ làm mất thông tin này.
+
+Bật ô **Chỉ mục thất bại** thì chỉ còn các mục đỏ.
+
+<figure class="tkh-fig">
+<div class="tkh-fig-box"><img src="/images/articles/system-testing/sys-17/03-chi-muc-that-bai.webp" alt="Nhật ký hoạt động với ô Chỉ mục thất bại được bật, chân hộp thoại ghi 7 trên 166 mục. Ngày 11/23/2026: Collection run SYS-03 1 of 1 requests failed và File dữ liệu JSON phải là một mảng các object. Ngày 11/24/2026: SYS-03 1 of 3 requests failed, SYS-03 1 of 1 requests failed, SYS-04 · Tích hợp ví theo chế độ lỗi 1 of 9 requests failed, SYS-04 3 of 27 requests failed, SYS-16 · Post-deploy smoke 1 of 3 requests failed." width="2000" height="1125" loading="lazy"></div>
+<figcaption><b>Hình 4 · Chỉ mục thất bại: 7 trên 166.</b> Mỗi dòng đỏ là một lượt chạy có thật, kể cả những lượt người chạy muốn quên.</figcaption>
+</figure>
+
+Bảy mục này đều có nguyên nhân đã biết: SYS-03 1 of 3 là bảng cước oracle cố ý sai, SYS-03 1 of 1 ngày 24/11 là chạy thiếu tệp dữ liệu, SYS-04 3 of 27 là đồng hồ lab rò từ folder trước, SYS-16 1 of 3 là chạy nhầm environment lab. Nhưng «đã biết» là điều người chạy biết, nhật ký không ghi. Dossier tử tế ghi cả lượt đỏ lẫn lời giải thích, thay vì chỉ giữ lượt xanh cuối cùng.
+
+#### Tìm lại một lượt bằng mã run
+
+Ô **Lọc nhật ký** tìm theo chuỗi. Gõ «run 2026» là ra bốn lượt load test, mỗi lượt kèm mã run.
+
+<figure class="tkh-fig">
+<div class="tkh-fig-box"><img src="/images/articles/system-testing/sys-17/04-loc-ma-run.webp" alt="Nhật ký hoạt động với ô lọc chứa run 2026, chân hộp thoại ghi 4 trên 166 mục. Bốn mục Load test started, mỗi mục ghi preset, environment và mã run: smoke run 20261123-160732-e3be62, custom run 20261123-160824-df679f, smoke run 20261123-160921-d5c8cf, custom run 20261123-161301-fa2df7." width="2000" height="1125" loading="lazy"></div>
+<figcaption><b>Hình 5 · Lọc theo mã run.</b> Mã run là khoá để từ một dòng dossier tìm về đúng lượt đo.</figcaption>
+</figure>
+
+Bốn mã run là bốn lượt khác nhau, trong đó có hai lượt smoke cùng preset. Một dòng dossier ghi `20261123-160921-d5c8cf` trỏ được tới đúng một lượt; dòng ghi «smoke xanh» thì không.
+
+#### Báo cáo và ghi chú của một lượt
+
+Mở lượt `…d5c8cf` trong mục Load test, đầu báo cáo cho thấy những gì công cụ tự biết về lượt chạy.
+
+<figure class="tkh-fig">
+<div class="tkh-fig-box"><img src="/images/articles/system-testing/sys-17/05-dau-bao-cao-luot-chay.webp" alt="Mục Load test của CurlStudio: cột trái có KỊCH BẢN (2) và LẦN CHẠY (4), mỗi lượt có ô chọn để so sánh. Bên phải là Báo cáo 160921 với nhãn ĐẠT, dòng meta 11/23/2026, 11:09:21 PM · 30s · smoke · env Tới Nơi lab (local, API test bật), nút Chạy lại và Xuất, các KPI bắt đầu bằng 16,039 request và phần Thresholds có 2 PASS." width="2000" height="1125" loading="lazy"></div>
+<figcaption><b>Hình 6 · Đầu báo cáo lượt 160921.</b> Thời điểm, thời lượng, preset và environment có sẵn; commit thì không.</figcaption>
+</figure>
+
+Nhãn **ĐẠT** nghĩa là 2 threshold của preset pass, không hơn. Dòng meta có thời điểm, preset và environment, đúng ba trong bốn trường dossier cần; trường thứ tư, commit, phải do người thêm. Ô **Ghi chú** ở cuối báo cáo là chỗ để làm việc đó.
+
+<figure class="tkh-fig">
+<div class="tkh-fig-box"><img src="/images/articles/system-testing/sys-17/06-ghi-chu-luot-chay.webp" alt="Cuối báo cáo load test trong CurlStudio, ô Ghi chú đã lưu với toast Đã lưu ghi chú. Nội dung: Lượt minh hoạ SYS-07 (run 20261123-160921-d5c8cf), máy lab Windows 11, 23/11/2026. Không phải bằng chứng release: chưa gắn commit ứng viên." width="2000" height="1125" loading="lazy"></div>
+<figcaption><b>Hình 7 · Ghi chú gắn ngữ cảnh vào lượt chạy.</b> Ghi chú đi kèm báo cáo HTML xuất ra, nên lời giới hạn không bị tách khỏi con số.</figcaption>
+</figure>
+
+Ghi chú ở đây nói thẳng điều mục 5.1 sẽ kết luận: lượt này chưa gắn commit ứng viên nên không phải bằng chứng release. Công cụ giữ được ghi chú nhưng không biết commit; ai ghi sai commit thì công cụ cũng không phát hiện được.
+
+Nhưng nhật ký này **chưa phải** bằng chứng release. Nó nằm cục bộ trên một máy, chỉ giữ 30 ngày, và ghi environment chứ không ghi commit: không dòng nào cho biết bản mã nào đang nghe cổng. Theo đúng luật ở mục 5.1, một bằng chứng không gắn được commit là `stale`. Muốn dùng một lượt CurlStudio trong dossier, phải xuất kết quả runner (**HTML · JUnit · JSON**), lưu cùng mã run và commit ứng viên vào nơi lưu trữ release — đúng điều kiện «thời hạn lưu dài hơn vòng đời quyết định» ở mục 9.2. Các lượt trong ảnh là minh hoạ ngày 23–24/11/2026 (CurlStudio 0.2.1 chạy bằng `pnpm tauri dev` trên Windows 11, máy chủ lab Node v22.18.0), không gắn với ứng viên `2980c69`, và `registry.ts` không đọc chúng: không dòng nào của dossier ở mục 7 dựa vào nhật ký này. Dù nhật ký có xanh hết, luật vẫn không ký thay ai, và đề xuất của lab vẫn là NOT_READY vì SYS-15 chưa chạy.
 
 ## 7. Kết quả: mong đợi và thực tế
 

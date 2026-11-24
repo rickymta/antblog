@@ -180,6 +180,38 @@ const load = folder('SYS-07…09 · Request cho kịch bản tải', 'Request ng
   req('PERF · Báo giá xe máy 5 km', 'POST', '/api/quotes', { user: 'customer:C001', body: QUOTE_5KM, test: [status(200), "pm.test('Cước 35.000 đ', () => pm.expect(pm.response.json().quote.total).to.eql(35000));"] }),
 ]);
 
+const readTrip = (name, checks) => req(name, 'GET', '/api/trips/{{tripId}}', { user: 'customer:C001', test: [status(200), "const t = pm.response.json().trip;", ...checks] });
+const journey = folder('SYS-05 · Hành trình khách–tài xế qua API', 'Phía API của system test: cùng một chuyến đi qua hai vai trò; sau mỗi chặng, khách đọc lại để đối chiếu với điều trang khách phải hiển thị (R-STATE-02, R-ACCEPT, R-API-05/10/12). Không thay kiểm tra giao diện bằng Playwright.', [
+  ...setup,
+  req('SY · Khách báo giá xe máy 5 km', 'POST', '/api/quotes', { user: 'customer:C001', body: QUOTE_5KM, test: [status(200), "pm.collectionVariables.set('quoteId', pm.response.json().quote.quoteId);"] }),
+  req('SY · Khách đặt chuyến (vixanh)', 'POST', '/api/trips', { user: 'customer:C001', key: '{{$guid}}', body: { quoteId: '{{quoteId}}', paymentMethod: 'vixanh' }, test: [status(201), "pm.collectionVariables.set('tripId', pm.response.json().trip.id);"] }),
+  req('SY · Tài xế D101 xem chuyến khả dụng', 'GET', '/api/driver/available-trips', {
+    user: 'driver:D101',
+    test: [status(200), "const ids = pm.response.json().trips.map((t) => t.id);", "pm.test('Chuyến vừa đặt có trong danh sách của D101 (R-ACCEPT-06)', () => pm.expect(ids).to.include(pm.collectionVariables.get('tripId')));"],
+  }),
+  driverStep('SY · Tài xế D101 nhận chuyến', 'accept', { etaMinutes: 5 }),
+  readTrip('SY · Khách đọc lại sau khi tài xế nhận', ["pm.test('accepted, tài xế D101, ETA 5 phút', () => {", "  pm.expect(t.status).to.eql('accepted');", "  pm.expect(t.driverId).to.eql('D101');", "  pm.expect(t.etaMinutes).to.eql(5);", "});"]),
+  driverStep('SY · Tài xế tới điểm đón', 'arrive'),
+  driverStep('SY · Đón khách', 'pickup'),
+  driverStep('SY · Bắt đầu chuyến', 'start'),
+  readTrip('SY · Khách đọc lại khi đang đi', ["pm.test('in_transit', () => pm.expect(t.status).to.eql('in_transit'));"]),
+  driverStep('SY · Hoàn tất chuyến', 'complete'),
+  readTrip('SY · Khách đọc lại khi kết thúc', ["pm.test('completed, 35.000 đ, paid', () => {", "  pm.expect(t.status).to.eql('completed');", "  pm.expect(t.fare).to.eql(35000);", "  pm.expect(t.paymentStatus).to.eql('paid');", "});"]),
+]);
+
+const quoteTotal = (name, total, why) => req(name, 'POST', '/api/quotes', { user: 'customer:C001', body: QUOTE_5KM, test: [status(200), `pm.test('${why}', () => pm.expect(pm.response.json().quote.total).to.eql(${total}));`] });
+const fareCombos = folder('SYS-06 · Hồi quy tổ hợp cước', 'Hai tổ hợp mà lượt hồi quy 44/78 bỏ sót: mưa ở giờ thường và mưa ở giờ cao điểm. Bản refactor sai trong bài cho 54.000 ở tổ hợp cao điểm + mưa; oracle tính tay theo R-FARE-04/05/08 là 52.000.', [
+  req('Reset dữ liệu mẫu', 'POST', '/api/test/reset', { test: [status(200)] }),
+  req('Trời mưa ở SG', 'POST', '/api/test/weather', { body: { raining: ['SG'] }, test: [status(200)] }),
+  req('Đồng hồ 09:00 (giờ thường)', 'POST', '/api/test/clock', { body: { now: '2026-11-04T09:00:00+07:00' }, test: [status(200)] }),
+  quoteTotal('RG-02 · Thường + mưa', 43000, 'RG-02 · 34.500 + 8.000 → 43.000 đ'),
+  req('Đồng hồ 11:30 (cao điểm)', 'POST', '/api/test/clock', { body: { now: '2026-11-04T11:30:00+07:00' }, test: [status(200)] }),
+  quoteTotal('RG-04 · Cao điểm + mưa', 52000, 'RG-04 · 34.500 × 1,25 + 8.000 → 52.000 đ (bản sai cho 54.000)'),
+  req('Trời tạnh', 'POST', '/api/test/weather', { body: { raining: [] }, test: [status(200)] }),
+  // /api/test/reset không đặt lại đồng hồ: không trả về 09:00 thì folder chạy sau (vd SYS-04) báo giá theo giờ cao điểm.
+  req('Đồng hồ về 09:00', 'POST', '/api/test/clock', { body: { now: '2026-11-04T09:00:00+07:00' }, test: [status(200)] }),
+]);
+
 const collection = {
   info: {
     _postman_id: 'toi-noi-lab-sys',
@@ -188,7 +220,7 @@ const collection = {
     schema: 'https://schema.getpostman.com/json/collection/v2.1.0/collection.json',
   },
   variable: [{ key: 'quoteId', value: '' }, { key: 'tripId', value: '' }],
-  item: [folder('00 · Chuẩn bị lab', 'Đưa lab về trạng thái cố định trước mỗi lượt.', setup), smoke, sanity, functional, integration, authz, usability, idempotency, recovery, uatCancel, postDeploy, load],
+  item: [folder('00 · Chuẩn bị lab', 'Đưa lab về trạng thái cố định trước mỗi lượt.', setup), smoke, sanity, functional, integration, authz, usability, idempotency, recovery, uatCancel, postDeploy, load, journey, fareCombos],
 };
 
 const env = (id, name, baseUrl) => ({
@@ -215,8 +247,17 @@ writeFileSync(new URL('data/che-do-vi.json', out), JSON.stringify([
   { mode: 'decline', paymentStatus: 'failed' },
   { mode: 'error', paymentStatus: 'failed' },
 ], null, 2) + '\n');
+// Bảng cố ý ghi sai FN-T02 (22.000 thay vì 21.000) để xem runner báo đỏ — dùng trong SYS-03, không phải đặc tả.
+writeFileSync(new URL('data/bang-cuoc-oracle-sai.csv', out), [
+  'caseId,vehicle,distanceKm,status,expected',
+  'FN-T01,bike,5,200,35000',
+  'FN-T02,bike,2,200,22000',
+  'FN-T03,bike,0.5,200,15000',
+].join('\n') + '\n');
+// Một chế độ timeout: ví không trả lời, 3 lần thử × 3 giây (R-NFR-05) — dùng trong SYS-04.
+writeFileSync(new URL('data/che-do-vi-timeout.json', out), JSON.stringify([{ mode: 'timeout', paymentStatus: 'failed' }], null, 2) + '\n');
 writeFileSync(new URL('data/huy-chuyen.json', out), JSON.stringify([
   { sau: '1 phút', now: '2026-11-04T09:01:00+07:00', fee: 0, reason: 'grace_period' },
   { sau: '3 phút', now: '2026-11-04T09:03:00+07:00', fee: 10000, reason: 'charged' },
 ], null, 2) + '\n');
-console.log('Đã ghi collection, 2 environment và 3 tệp dữ liệu vào', out.pathname);
+console.log('Đã ghi collection, 2 environment và 5 tệp dữ liệu vào', out.pathname);

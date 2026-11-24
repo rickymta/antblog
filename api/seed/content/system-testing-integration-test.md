@@ -308,16 +308,67 @@ Thời gian khác nhau giữa hai lượt là bình thường — máy đang ch�
 
 Mỗi iteration gồm chín request: reset dữ liệu, đặt chế độ ví theo dòng dữ liệu, báo giá, đặt chuyến VíXanh, tài xế nhận/tới/đón/bắt đầu, cuối cùng hoàn tất và so `paymentStatus` với cột mong đợi trong tệp.
 
+#### Lỗi được tiêm ở đâu, oracle nằm ở đâu
+
+Chỗ thay cho `setMode` của mục 6.3 là request thứ hai trong folder. Nó không chứa chế độ cụ thể nào mà để runner thế giá trị từ dòng dữ liệu vào.
+
+<figure class="tkh-fig">
+<div class="tkh-fig-box"><img src="/images/articles/system-testing/sys-04/02-body-che-do-vi.webp" alt="CurlStudio mở request Đặt chế độ ví theo dữ liệu trong folder SYS-04: phương thức POST tới đường dẫn /api/test/payment, tab Body dạng JSON chỉ có một trường mode với giá trị là biến {{mode}}." width="2000" height="1125" loading="lazy"></div>
+<figcaption><b>Hình 2 · Request đặt chế độ ví.</b> Thân chỉ có <code>{"mode": "{{mode}}"}</code>; giá trị lấy từ tệp dữ liệu của lượt chạy.</figcaption>
+</figure>
+
+Lỗi được đặt đúng ở port thanh toán, trước khi chuyến bắt đầu, giống thứ tự ở mục 6.3. Khác biệt là kênh này chỉ tồn tại khi máy chủ bật API kiểm thử; trên bản triển khai nó phải trả 404 (xem [SYS-16](/articles/system-testing-deployment-test)).
+
+Oracle cũng nằm trong tệp dữ liệu chứ không nằm trong request. Request cuối của folder đọc cả chế độ lẫn trạng thái mong đợi từ dòng đang chạy.
+
+<figure class="tkh-fig">
+<div class="tkh-fig-box"><img src="/images/articles/system-testing/sys-04/03-tests-trang-thai-thanh-toan.webp" alt="Tab Tests của request IN · Hoàn tất và so trạng thái thanh toán: một lệnh pm.test có tên ghép từ pm.iterationData.get('mode'), mũi tên và pm.iterationData.get('paymentStatus'), bên trong so t.paymentStatus của chuyến với paymentStatus lấy từ dòng dữ liệu." width="2000" height="1125" loading="lazy"></div>
+<figcaption><b>Hình 3 · Test so trạng thái thanh toán theo dòng dữ liệu.</b> Tên test và giá trị mong đợi cùng lấy từ <code>pm.iterationData</code>, nên kết quả tự ghi «chế độ → trạng thái».</figcaption>
+</figure>
+
+Thêm một chế độ chỉ cần thêm một dòng vào tệp, không sửa request. Nhưng cần thấy rõ test này chỉ là **một lớp** trong các lớp oracle ở mục 4.2: nó so `paymentStatus` trong response, không nhìn sổ ghi ví hay SQL.
+
+#### Ba chế độ trong một lượt
+
 <figure class="tkh-fig">
 <div class="tkh-fig-box"><img src="/images/articles/system-testing/sys-04/01-runner-che-do-vi.webp" alt="Collection Runner của CurlStudio cho folder SYS-04 · Tích hợp ví theo chế độ lỗi, environment Tới Nơi lab (local, API test bật), tệp dữ liệu che-do-vi.json 3 dòng và chín request được chọn. Thanh tổng hiện Requests 27, Tests 36 / 36 (100%), Thất bại 0, Non-2xx 0. Danh sách kết quả bên phải có dòng hoàn tất chuyến của iteration #2 với test decline → failed và của iteration #3 với test error → failed, mỗi request kèm HTTP 200 hoặc 201." width="2000" height="1125" loading="lazy"></div>
-<figcaption><b>Hình 2 · Runner SYS-04 chạy ba chế độ ví từ tệp dữ liệu.</b> Tên test lấy từ dòng dữ liệu nên đọc ra ngay chế độ nào cho kết quả nào: iteration #2 «decline → failed», iteration #3 «error → failed» (iteration #1 là none → paid, nằm phía trên danh sách). Request hoàn tất chuyến chỉ mất khoảng 8–10 ms.</figcaption>
+<figcaption><b>Hình 4 · Runner SYS-04 chạy ba chế độ ví từ tệp dữ liệu.</b> Tên test lấy từ dòng dữ liệu nên đọc ra ngay chế độ nào cho kết quả nào: iteration #2 «decline → failed», iteration #3 «error → failed» (iteration #1 là none → paid, nằm phía trên danh sách). Request hoàn tất chuyến chỉ mất khoảng 8–10 ms.</figcaption>
 </figure>
 
 Đọc ảnh: **Requests 27** là 3 iteration × 9 request; **Tests 36 / 36 (100%)**; **Non-2xx 0** — kể cả khi ví từ chối hay lỗi, request hoàn tất vẫn trả HTTP 200. Đó đúng là hợp đồng R-PAY-06 ở mục 6.4: hoàn tất chuyến và thu tiền là hai kết quả khác nhau.
 
-Lượt chạy này chứng minh: trên máy chủ chạy riêng, với ba chế độ ví, chuyến vẫn `completed` và `paymentStatus` khớp mong đợi — tương ứng ba dòng IN-03 `none`, `decline`, `error` của bảng 5.2, nhìn từ phía client. Nó **không** chứng minh những gì làm nên integration test của bài: runner chỉ thấy response, không đếm được số lần gọi ví (1 với decline, 3 với error), không thấy khoá idempotency của từng lần, không đọc ledger, không SELECT bảng `trips` hay `drivers`. Một bản lỗi «retry cả decline» (mục 9) vẫn cho runner xanh hoàn toàn, vì `paymentStatus` cuối cùng vẫn là `failed`. Hai dataset `timeout` và `lost_response` cũng không có trong tệp dữ liệu, nên tình huống «không thấy response không có nghĩa provider chưa thu» không được minh hoạ ở đây. Số lần gọi và số tiền đã trừ chỉ kiểm được trong lab code, với fake gateway — đó là giới hạn của kiểm qua API.
+Đường thu bình thường cũng phải có mặt trong cùng lượt. Nếu tệp chỉ có các chế độ lỗi, một bản sai luôn ghi `failed` vẫn cho runner xanh toàn bộ.
 
-Lượt minh hoạ chạy ngày 23/11/2026 bằng CurlStudio 0.2.1 (`pnpm tauri dev`) trên Windows 11, máy chủ lab Node v22.18.0, đồng hồ lab cố định 09:00 ngày 04/11/2026. Nó không thay bảy test case Vitest ở trên, và thời gian 8–10 ms không so được với thời gian chạy của Vitest: khác công cụ, khác ranh giới đo, khác thời điểm.
+<figure class="tkh-fig">
+<div class="tkh-fig-box"><img src="/images/articles/system-testing/sys-04/06-runner-none-paid.webp" alt="Cùng Collection Runner SYS-04 với tệp che-do-vi.json, thanh tổng Tests 36 / 36, danh sách kết quả cuộn tới iteration #1 với dòng test none → paid ở request hoàn tất chuyến." width="2000" height="1125" loading="lazy"></div>
+<figcaption><b>Hình 5 · Iteration #1: đường thu bình thường.</b> Dòng «none → paid» là đối chứng cho hai dòng lỗi ở Hình 4.</figcaption>
+</figure>
+
+Ba dòng đi cùng nhau mới tách được «ví lỗi thì ghi failed» khỏi «lúc nào cũng ghi failed», tương ứng ba dòng IN-03 `none`, `decline`, `error` của bảng 5.2.
+
+#### Chế độ timeout với deadline thật
+
+Lab code rút deadline xuống 50 ms. Máy chủ chạy riêng thì giữ mặc định 3 giây của R-PAY-04, nên tệp `data/che-do-vi-timeout.json` (một dòng: `timeout` → `failed`) cho thấy cái giá của ba lần chờ.
+
+<figure class="tkh-fig">
+<div class="tkh-fig-box"><img src="/images/articles/system-testing/sys-04/04-runner-timeout.webp" alt="Collection Runner SYS-04 với tệp che-do-vi-timeout.json 1 dòng: Requests 9, Tests 12 / 12 (100%), Thất bại 0, Non-2xx 0, TB 1.01 s. Biểu đồ thời gian response theo request cho thấy IN · Hoàn tất và so trạng thái thanh toán mất 9.05 s, các request còn lại từ khoảng 1 ms đến 21 ms." width="2000" height="1125" loading="lazy"></div>
+<figcaption><b>Hình 6 · Một iteration timeout.</b> Request hoàn tất mất 9.05 s, trong khi các bước khác chỉ vài mili giây; kết quả vẫn xanh với «timeout → failed».</figcaption>
+</figure>
+
+Thanh **TB 1.01 s** là trung bình của chín request, bị kéo lên gần như hoàn toàn bởi một request. Đây là con số để hiểu cấu hình, không phải số đo hiệu năng.
+
+<figure class="tkh-fig">
+<div class="tkh-fig-box"><img src="/images/articles/system-testing/sys-04/05-console-timeout.webp" alt="Panel Console của CurlStudio với 9 dòng của một lượt timeout: các lệnh tới /api/test/payment, /api/quotes, /api/trips và accept, arrive, pickup, start đều lúc 10:33:18 AM với vài mili giây; dòng cuối lúc 10:33:27 AM là POST …/complete → 200 OK (9017 ms)." width="2000" height="1125" loading="lazy"></div>
+<figcaption><b>Hình 7 · Console của lượt timeout.</b> Tám dòng đầu cùng giây 10:33:18; dòng <code>/complete</code> ghi 10:33:27 và 9017 ms.</figcaption>
+</figure>
+
+Giờ trong Console là giờ máy thật, không phải đồng hồ lab. Khoảng 9 giây khớp với ba lần gọi, mỗi lần hết giờ sau 3 giây, rồi chuyến vẫn trả 200 với `paymentStatus` `failed`. Nhưng «ba lần gọi» ở đây là **suy ra từ thời gian và cấu hình**; runner không đếm lời gọi. Một bản lỗi chỉ thử một lần với deadline 9 giây cũng cho cùng hình ảnh, còn test IN-03 `timeout` trong lab thì đếm đúng 3.
+
+#### Ảnh chứng minh gì, không chứng minh gì
+
+Các lượt này chứng minh: trên máy chủ chạy riêng, với bốn chế độ ví `none`, `decline`, `error`, `timeout`, chuyến vẫn `completed` và `paymentStatus` khớp mong đợi, nhìn từ phía client. Chúng **không** chứng minh những gì làm nên integration test của bài: runner chỉ thấy response, không đếm được số lần gọi ví (1 với decline, 3 với error), không thấy khoá idempotency của từng lần, không đọc ledger, không SELECT bảng `trips` hay `drivers`. Một bản lỗi «retry cả decline» (mục 9) vẫn cho runner xanh hoàn toàn, vì `paymentStatus` cuối cùng vẫn là `failed`. Dataset `lost_response` không có trong folder này, nên tình huống «không thấy response không có nghĩa provider chưa thu» không được minh hoạ ở đây. Số lần gọi và số tiền đã trừ chỉ kiểm được trong lab code, với fake gateway — đó là giới hạn của kiểm qua API.
+
+Lượt ba chế độ ở Hình 4 chạy ngày 23/11/2026; các hình còn lại chụp ngày 24/11/2026. Cả hai dùng CurlStudio 0.2.1 (`pnpm tauri dev`) trên Windows 11, máy chủ lab Node v22.18.0, đồng hồ lab cố định 09:00 ngày 04/11/2026. Chúng không thay bảy test case Vitest ở trên, và các con số 8–10 ms hay 9.05 s không so được với thời gian chạy của Vitest: khác công cụ, khác ranh giới đo, khác thời điểm, khác deadline.
 
 ## 7. Đọc thất bại và ra quyết định
 

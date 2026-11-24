@@ -342,9 +342,43 @@ Dòng chú thích dưới **Số VU tối đa** tương ứng nhánh `in-flight-
 4. **Latency:** p95 12 ms (p99 17 ms, max 19 ms), trung bình 6.8 ms.
 5. **VU:** tối đa đồng thời 5, bằng số VU cấp phát trước; công cụ không phải cấp thêm VU nào, nên trần 20 chưa bị chạm — giống quan sát «các nhánh drop chưa được kích hoạt» ở mục 6.6.
 
+#### Tải có đều theo từng giây không
+
+Một con số 29.8/s cho cả 40 giây vẫn có thể giấu vài giây hụt rồi vài giây dồn. Cuộn xuống trong cùng báo cáo đã lưu, các biểu đồ theo giây trả lời câu đó.
+
+<figure class="tkh-fig">
+<div class="tkh-fig-box"><img src="/images/articles/system-testing/sys-08/03-virtual-users-ty-le-loi.webp" alt="Phần giữa báo cáo load test 40 giây của CurlStudio: hàng KPI Virtual users 5 đồng thời tối đa, Checks 100.0% với 0 thất bại trên 1,199, Thời lượng 40s, Iteration bị bỏ 0; khung Thresholds với dropped_iterations count == 0 và http_req_duration p(95) &lt; 500 thực tế 12 ms, cả hai PASS. Biểu đồ Throughput giữ quanh 30 request mỗi giây suốt 40 giây; biểu đồ Thời gian phản hồi theo giây dao động khoảng 5–20 ms, ghi chú threshold p95 500 ms nằm ngoài biểu đồ; biểu đồ Virtual users là đường phẳng ở 5; biểu đồ Tỷ lệ lỗi nằm sát 0%." width="2000" height="1125" loading="lazy"></div>
+<figcaption><b>Hình 4 · Throughput, latency, VU và tỷ lệ lỗi theo từng giây.</b> Bốn biểu đồ cùng trục thời gian 0–40 giây, đọc được giây nào lệch khỏi lịch.</figcaption>
+</figure>
+
+Throughput bám mức 30 suốt 40 giây, chỉ có vài giây hụt nhẹ rồi trở lại, và đường lỗi nằm sát 0. Đường **Virtual users** phẳng ở 5 là cỡ pool VU công cụ giữ sẵn, không phải số request đang bay: theo quan hệ ở mục 6.6, 30/s × 6.8 ms ≈ 0,2 request đồng thời, nên phần lớn thời gian 5 VU đứng chờ.
+
+<figure class="tkh-fig">
+<div class="tkh-fig-box"><img src="/images/articles/system-testing/sys-08/04-status-code-theo-thoi-gian.webp" alt="Phần dưới báo cáo load test 40 giây của CurlStudio: biểu đồ Status code theo thời gian chỉ có một màu HTTP 200, khoảng 30 mỗi giây; biểu đồ Thời gian phản hồi theo request của PERF · Báo giá xe máy 5 km; biểu đồ Thời gian phản hồi theo số VU; biểu đồ Băng thông; Apdex; và Phân bố status code với HTTP 200: 1,199." width="2000" height="1125" loading="lazy"></div>
+<figcaption><b>Hình 5 · Status code theo thời gian.</b> Mọi giây chỉ có HTTP 200; tổng cộng 1,199 response.</figcaption>
+</figure>
+
+Khi lượt chạy có lỗi, biểu đồ này cho biết lỗi rơi vào **giây nào** — đầu lượt, giữa hay cuối — để đối chiếu với log server, đúng tinh thần «lỗi HTTP» là bước thứ hai trong thứ tự đọc của mục 7. Ở đây toàn 200, nhưng 200 vẫn chưa nói gì về `total` của báo giá.
+
+Biểu đồ tiếp theo mang tên kiểu JMeter «response time vs threads»: p95 của từng giây xếp theo mức đồng thời.
+
+<figure class="tkh-fig">
+<div class="tkh-fig-box"><img src="/images/articles/system-testing/sys-08/05-thoi-gian-theo-so-vu.webp" alt="Biểu đồ Thời gian phản hồi theo số VU của CurlStudio, chú thích p95 của từng giây theo mức đồng thời: trục ngang 0 tới 5 VU, mọi điểm dồn vào một cột ở mức 5 VU với p95 dưới khoảng 19 ms. Bên cạnh là biểu đồ Băng thông đã nhận và đã gửi, Apdex 100% hài lòng, Phân bố status code HTTP 200: 1,199 và bảng Báo cáo tổng hợp ở cuối." width="2000" height="1125" loading="lazy"></div>
+<figcaption><b>Hình 6 · Thời gian phản hồi theo số VU.</b> Mọi điểm nằm chung một cột vì số VU không đổi suốt lượt.</figcaption>
+</figure>
+
+Biểu đồ này chỉ có ích khi mức đồng thời thay đổi: lúc đó một đường p95 cong vút lên ở một mức VU là dấu hiệu saturation như mục 8.1 mô tả. Với một stage phẳng và pool VU cố định, nó dồn thành một cột và không trả lời được câu hỏi đó — muốn thấy đường cong phải đổi profile, như thí nghiệm của [SYS-09](/articles/system-testing-stress-test).
+
+<figure class="tkh-fig">
+<div class="tkh-fig-box"><img src="/images/articles/system-testing/sys-08/06-bao-cao-tong-hop.webp" alt="Bảng Báo cáo tổng hợp của CurlStudio cho request POST PERF · Báo giá xe máy 5 km và dòng TỔNG: Số mẫu 1,199, trung bình 6.8 ms, trung vị 6.7, p90 11, p95 12, p99 17, nhỏ nhất 2.0, lớn nhất 19 ms, 0.00% lỗi, Throughput 29.8/s; bên dưới là Checks với 1,199 lần đạt." width="2000" height="1125" loading="lazy"></div>
+<figcaption><b>Hình 7 · Báo cáo tổng hợp của lượt 30 iteration/giây.</b> Một request duy nhất trong folder, nên dòng của request trùng dòng TỔNG.</figcaption>
+</figure>
+
+Bảng cho p90 11 ms mà thanh tổng không có, và cho thấy p99 17 ms sát max 19 ms. Với 1,199 mẫu, p99 là mẫu thứ ⌈0,99 × 1.199⌉ = 1.188 — chỉ 11 mẫu đứng trên nó, nên p99 nhạy với vài request chậm lẻ, cùng lời nhắc về nearest-rank ở mục 5.1. Khi workload có nhiều endpoint (mục 8.2), bảng này sẽ có nhiều dòng và mới thật sự hữu ích; một dòng TỔNG gộp các endpoint lại thì che đúng endpoint chậm nhất (mục 8.4).
+
 Hai threshold của preset — `dropped_iterations count == 0` và `http_req_duration p(95) < 500` — là hai trong ba điều kiện của gate ở mục 5.2. Điều kiện thứ ba, **zero errors theo oracle nghiệp vụ**, không có: load test không chạy test script của request, nên không kiểm 35.000 đ trên response nào. Một response 200 sai tiền vẫn qua cả hai threshold — đúng lỗ hổng «0 drop, p95 thấp nhưng sai tiền» mà mục 5.2 cảnh báo.
 
-**Ảnh này cho thấy** cách đọc offered vs achieved load và dropped iterations trên một công cụ GUI. **Ảnh này không cho thấy** tải dự kiến được xử lý *đúng*, và không được đặt cạnh bảng ở mục 6.5 để so: client là phần Rust của CurlStudio ở tiến trình riêng, máy chủ lab Node v22.18.0 chạy độc lập, profile và thời lượng khác, thời điểm khác. Chênh lệch latency giữa hai bên không phải regression hay cải thiện. Lượt này là minh hoạ ngày 23/11/2026 (CurlStudio 0.2.1 chạy bằng `pnpm tauri dev`, Windows 11, đồng hồ lab cố định 09:00 ngày 04/11/2026); bằng chứng của bài vẫn là `load-observed.json`.
+**Các hình 3–7 cho thấy** cách đọc offered vs achieved load và dropped iterations trên một công cụ GUI. **Chúng không cho thấy** tải dự kiến được xử lý *đúng*, và không được đặt cạnh bảng ở mục 6.5 để so: client là phần Rust của CurlStudio ở tiến trình riêng, máy chủ lab Node v22.18.0 chạy độc lập, profile và thời lượng khác, thời điểm khác. Chênh lệch latency giữa hai bên không phải regression hay cải thiện. Lượt này là minh hoạ ngày 23/11/2026 (CurlStudio 0.2.1 chạy bằng `pnpm tauri dev`, Windows 11, đồng hồ lab cố định 09:00 ngày 04/11/2026); bằng chứng của bài vẫn là `load-observed.json`.
 
 ## 7. Đọc báo cáo và phân loại lỗi
 

@@ -294,9 +294,46 @@ Collection CurlStudio giới thiệu ở [SYS-01 · Smoke Test](/articles/system
 <figcaption><b>Hình 2 · Input của lỗi gốc đi qua API của lab đang chạy.</b> Body gửi <code>" giam20 "</code> nguyên trạng, collection không trim hộ; response trả <code>"voucherCode": "GIAM20"</code> đã chuẩn hoá, tab Kết quả test báo 2/2.</figcaption>
 </figure>
 
-Hai test trong tab **Tests** của request này là «HTTP 200» và «Giảm 6.900 đ, còn 28.000 đ» — kiểm cả `discount` lẫn `total` với con số viết cứng từ oracle mục 3.3, đúng lý do đã nêu ở đó: chỉ kiểm tổng thì phép làm tròn có thể che lỗi thứ tự. Body gửi mã nguyên trạng cũng là nguyên tắc của helper `quote` ở mục 5.1: công cụ không được sửa input hộ sản phẩm.
+Body gửi mã nguyên trạng là nguyên tắc của helper `quote` ở mục 5.1: công cụ không được sửa input hộ sản phẩm. Oracle nằm trong tab **Tests** của cùng request:
 
-**Ảnh này chứng minh gì, không chứng minh gì.** Lượt minh hoạ ngày 23/11/2026 (CurlStudio 0.2.1 chạy bằng `pnpm tauri dev` trên Windows 11; máy chủ lab trên Node v22.18.0, đồng hồ lab cố định 09:00 ngày 04/11/2026) cho thấy phần confirmation ở API của SN-02 cũng đúng trên một máy chủ lab chạy thật với PGlite, không chỉ trong kho bộ nhớ của suite. Nhưng folder chỉ có ba trong sáu test case: thiếu SN-01 (so fixture ở cấp hàm, chỉ làm được trong code), SN-04 (ba dạng «không nhập») và SN-06 — test case có trạng thái mà mục 5.4 giải thích là cần nhất, vì hậu quả của thay đổi nằm ở lượt dùng chứ không ở chuỗi. Vì vậy CurlStudio hợp để khám phá nhanh hoặc để người khác tự gửi thử input lỗi; kết luận sanity vẫn dựa trên 8 lượt của `sanity.test.ts`.
+<figure class="tkh-fig">
+<div class="tkh-fig-box"><img src="/images/articles/system-testing/sys-02/02-tests-giam-gia.webp" alt="Request «SN · Mã có khoảng trắng và chữ thường» trong CurlStudio, tab Tests có script pm.test HTTP 200, dòng const q = pm.response.json().quote và pm.test «Giảm 6.900 đ, còn 28.000 đ» với hai pm.expect: q.discount bằng 6900 và q.total bằng 28000. Nửa dưới là Kết quả test 2/2, cả hai dòng PASS." width="2000" height="1125" loading="lazy"></div>
+<figcaption><b>Hình 3 · Hai assertion tiền viết cứng từ oracle.</b> Test thứ hai kiểm <code>discount</code> = 6900 trước rồi mới kiểm <code>total</code> = 28000; cả hai đều PASS.</figcaption>
+</figure>
+
+Đó là lý do đã nêu ở mục 3.3: chỉ kiểm tổng thì phép làm tròn có thể che lỗi thứ tự, vì bản sai «làm tròn rồi mới giảm» cũng ra 28.000. Khi cần biết lệch ở bước nào, cuộn response tới `fareBreakdown`:
+
+<figure class="tkh-fig">
+<div class="tkh-fig-box"><img src="/images/articles/system-testing/sys-02/03-response-tien-giam.webp" alt="Response JSON của báo giá có voucher trong CurlStudio, cuộn tới khối fareBreakdown: base 34500, afterPeak 34500, rainSurcharge 0, beforeDiscount 34500, discount 6900, afterDiscount 27600, minimumFare 15000, total 28000; ở cấp ngoài của quote có discount 6900 và total 28000." width="2000" height="1125" loading="lazy"></div>
+<figcaption><b>Hình 4 · Bảng chi tiết cước khớp từng dòng oracle.</b> 20% của 34.500 là 6.900; 27.600 sau giảm được làm tròn lên thành 28.000.</figcaption>
+</figure>
+
+Các trường đi đúng thứ tự bảng oracle ở mục 3.3: cước cơ bản, cao điểm, mưa, trừ voucher, sàn giá, làm tròn. Bản sai thứ tự sẽ lộ ra ở dòng `discount` (7.000 thay vì 6.900) dù `total` vẫn 28.000 — chính là dòng «Total đúng, discount sai» trong bảng ở mục 6.
+
+Request thứ ba đi nhánh lỗi:
+
+<figure class="tkh-fig">
+<div class="tkh-fig-box"><img src="/images/articles/system-testing/sys-02/04-ma-khong-ton-tai.webp" alt="Request «SN · Mã không tồn tại» trong CurlStudio gửi voucherCode khongco; response 422 Unprocessable Entity với body error code VOUCHER_NOT_FOUND và message «Không tìm thấy voucher KHONGCO.»" width="2000" height="1125" loading="lazy"></div>
+<figcaption><b>Hình 5 · Mã không tồn tại bị từ chối.</b> 422 <code>VOUCHER_NOT_FOUND</code>; thông điệp in mã đã viết hoa «KHONGCO».</figcaption>
+</figure>
+
+Mã gửi đi là `khongco`, thông điệp trả về in `KHONGCO`: chuẩn hoá chạy trước bước tra cứu, cùng đường với SN-02. Đây cũng là phép kiểm âm cho dòng «SN-05 trả 200» ở mục 6 — mã sai bị từ chối chứ không bị coi như không dùng mã. Chạy cả folder thì runner và Console cho cùng một bức tranh:
+
+<figure class="tkh-fig">
+<div class="tkh-fig-box"><img src="/images/articles/system-testing/sys-02/05-runner-console.webp" alt="Collection Runner của CurlStudio sau khi chạy folder SYS-02 · Sanity voucher: thanh tổng ghi Requests 7, Tests 10/10, Non-2xx 1. Panel Console bên dưới có 7 dòng, dòng cuối là POST /api/quotes → 422 Unprocessable Entity." width="2000" height="1125" loading="lazy"></div>
+<figcaption><b>Hình 6 · Sanity voucher chạy cả folder.</b> 10 test trên 7 request: mỗi request chuẩn bị một test, mỗi request SN hai test. Non-2xx duy nhất là 422 có chủ đích ở dòng cuối Console.</figcaption>
+</figure>
+
+Bảy request, mười test, chạy trong một lần bấm — đúng tinh thần sanity: hẹp, nhanh, tập trung vào thay đổi. Ngoài runner, mỗi lần bấm **Gửi** còn được ghi vào panel **Lịch sử**:
+
+<figure class="tkh-fig">
+<div class="tkh-fig-box"><img src="/images/articles/system-testing/sys-02/06-lich-su.webp" alt="Panel Lịch sử của CurlStudio, các request nhóm theo ngày «Hôm nay» và «Mon Nov 23 2026». Mỗi dòng có method, URL như http://localhost:3100/api/quotes hoặc http://localhost:3101/api/quotes, mã trạng thái 200, 401 hoặc 422 và thời gian tính bằng ms." width="2000" height="1125" loading="lazy"></div>
+<figcaption><b>Hình 7 · Lịch sử gửi request.</b> Nhóm theo ngày, mỗi dòng chỉ có method, URL, mã và thời gian; có cả request tới <code>localhost:3101</code> lẫn với lab 3100.</figcaption>
+</figure>
+
+Lịch sử là nhật ký khám phá của người kiểm, tiện để tìm lại một request vừa gửi. Nó không có tên test case, đồng hồ lab, seed hay build như defect report ở mục 6 đòi hỏi, và trộn request của nhiều ngày, nhiều máy chủ, nên không dùng làm bằng chứng sanity.
+
+**Các ảnh này chứng minh gì, không chứng minh gì.** Các lượt minh hoạ ngày 23 và 24/11/2026 (CurlStudio 0.2.1 chạy bằng `pnpm tauri dev` trên Windows 11; máy chủ lab trên Node v22.18.0, đồng hồ lab cố định 09:00 ngày 04/11/2026) cho thấy phần confirmation ở API của SN-02 cũng đúng trên một máy chủ lab chạy thật với PGlite, không chỉ trong kho bộ nhớ của suite. Nhưng folder chỉ có ba trong sáu test case: thiếu SN-01 (so fixture ở cấp hàm, chỉ làm được trong code), SN-04 (ba dạng «không nhập») và SN-06 — test case có trạng thái mà mục 5.4 giải thích là cần nhất, vì hậu quả của thay đổi nằm ở lượt dùng chứ không ở chuỗi. Vì vậy CurlStudio hợp để khám phá nhanh hoặc để người khác tự gửi thử input lỗi; kết luận sanity vẫn dựa trên 8 lượt của `sanity.test.ts`.
 
 ## 6. Đọc thất bại và ra quyết định
 

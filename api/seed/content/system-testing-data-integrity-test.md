@@ -372,7 +372,52 @@ Phần idempotency của đường ghi — header `Idempotency-Key` ở Hình 1 
 
 Lưu ý tên: tiền tố «DI ·» chỉ để nhóm request theo bài; ba request này **không** phải DI-01…06 của mục 5.2. Sáu test case đó đọc trạng thái trong database và không chạy qua CurlStudio.
 
-Ảnh này chứng minh hành vi idempotency **nhìn từ API**: cùng khoá, cùng thân thì cùng chuyến; cùng khoá, thân khác thì bị chặn bằng mã lỗi riêng. Nó **không** cho thấy điều bài này quan tâm nhất: bảng `trips` có đúng một dòng cho báo giá đó, `trip_events` không bị ghi đôi, `quotes.used_by_trip_id` trỏ đúng chuyến, và ràng buộc UNIQUE, CHECK, NOT NULL vẫn còn trong schema. Runner chỉ đọc response — và như mở đầu bài, response đúng vẫn có thể đi cùng một trạng thái dữ liệu sai. Những phần đó cần oracle SQL độc lập với API như các bước 6.2–6.6; lab dùng SQL assertion chính vì lý do này. Lượt chạy trong ảnh là minh hoạ ngày 23/11/2026 (CurlStudio 0.2.1 chạy bằng `pnpm tauri dev` trên Windows 11, máy chủ lab Node v22.18.0), không thay cho 6/6 test Vitest ở mục 6.7.
+#### Mở từng request: khoá, thân và phản hồi
+
+Thanh tổng chỉ nói «xanh». Muốn biết runner thực sự gửi gì, mở request «DI · Gửi lại cùng khoá, cùng thân» ở tab **Headers**.
+
+<figure class="tkh-fig">
+<div class="tkh-fig-box"><img src="/images/articles/system-testing/sys-13/02-headers-idempotency-key.webp" alt="CurlStudio mở request «DI · Gửi lại cùng khoá, cùng thân» trong folder SYS-13, tab Headers có ba header: Content-Type application/json, x-user customer:C001 và Idempotency-Key với giá trị là biến {{idemKey}}." width="2000" height="1125" loading="lazy"></div>
+<figcaption><b>Hình 3 · Khoá idempotency lấy từ biến.</b> Header <code>Idempotency-Key</code> trỏ vào <code>{{idemKey}}</code> chứ không ghi cứng giá trị.</figcaption>
+</figure>
+
+Các folder khác trong collection sinh khoá mới mỗi lần bằng `{{$guid}}`, nên gửi lại không bao giờ trùng khoá. Ở đây khoá được giữ cố định trong một biến để ba request dùng chung — chính điều kiện mà R-IDEM-02 nói tới. Lab code dùng khoá cố định `sys13-book-001` và dựa vào reset giữa các test case (mục 5.1); collection thì dùng khoá có hậu tố số, giá trị cụ thể xem ở Hình 7.
+
+Gửi tay lại request này sau lượt chạy cho thấy phản hồi đầy đủ:
+
+<figure class="tkh-fig">
+<div class="tkh-fig-box"><img src="/images/articles/system-testing/sys-13/03-gui-lai-cung-khoa.webp" alt="Response của request «DI · Gửi lại cùng khoá, cùng thân» trong CurlStudio: trạng thái 201 Created, body JSON có đối tượng trip với id d9f189b9-9d67-47d8-9b11-62e6ef00d964, fare 35000 và status searching; kết quả test 2/2." width="2000" height="1125" loading="lazy"></div>
+<figcaption><b>Hình 4 · Gửi lại cùng khoá, cùng thân.</b> Vẫn là 201 Created, kèm chuyến có id <code>d9f189b9-…-62e6ef00d964</code>, cước 35.000 đ.</figcaption>
+</figure>
+
+Đáng để ý là mã 201 chứ không phải 200: nhìn mã trạng thái thì không phân biệt được «vừa tạo» với «trả lại chuyến cũ». Chỉ khi so `id` với chuyến của lần gửi đầu — việc test R-IDEM-02 làm — mới biết không có chuyến thứ hai. Client nào dựa vào mã 201 để đếm số chuyến sẽ đếm sai.
+
+Request thứ ba đổi đúng một trường trong thân:
+
+<figure class="tkh-fig">
+<div class="tkh-fig-box"><img src="/images/articles/system-testing/sys-13/04-body-than-khac.webp" alt="CurlStudio mở request «DI · Cùng khoá, thân khác», tab Body chứa JSON với quoteId lấy từ biến {{quoteId}} và paymentMethod là vixanh." width="2000" height="1125" loading="lazy"></div>
+<figcaption><b>Hình 5 · Cùng khoá, đổi phương thức thanh toán.</b> Thân gửi <code>"paymentMethod":"vixanh"</code> trong khi lần đầu là <code>cash</code>; khoá và báo giá giữ nguyên.</figcaption>
+</figure>
+
+<figure class="tkh-fig">
+<div class="tkh-fig-box"><img src="/images/articles/system-testing/sys-13/05-khoa-dung-lai-422.webp" alt="Response của request «DI · Cùng khoá, thân khác»: trạng thái 422, body JSON có error code IDEMPOTENCY_KEY_REUSED và message «Idempotency-Key này đã được dùng cho một yêu cầu có nội dung khác.»; kết quả test 2/2." width="2000" height="1125" loading="lazy"></div>
+<figcaption><b>Hình 6 · Khoá đã dùng cho nội dung khác.</b> 422 với mã <code>IDEMPOTENCY_KEY_REUSED</code> và thông điệp nói rõ lý do.</figcaption>
+</figure>
+
+Đây là nửa còn lại của idempotency: hệ thống không âm thầm trả lại chuyến tiền mặt cũ cho một yêu cầu trả bằng VíXanh. Nếu nó làm thế, response vẫn hợp lệ về hình thức nhưng chuyến lưu trong database mang phương thức thanh toán khác với điều client nghĩ — đúng kiểu «response đúng, dữ liệu sai» của bài này.
+
+#### Biến collection: trạng thái dùng chung giữa request
+
+Ba request nối được với nhau là nhờ biến do script đặt. Mở **Cài đặt collection** → tab **Biến**:
+
+<figure class="tkh-fig">
+<div class="tkh-fig-box"><img src="/images/articles/system-testing/sys-13/06-bien-collection.webp" alt="Tab Biến trong Cài đặt collection «Tới Nơi lab · Kiểm thử hệ thống» của CurlStudio, có ba biến: quoteId c40472ea-068a-42ae-95f9-cad9731d2903, tripId d9f189b9-9d67-47d8-9b11-62e6ef00d964 và idemKey sys13-1795491511788. Sidebar trái mở folder SYS-13 với 8 request." width="2000" height="1125" loading="lazy"></div>
+<figcaption><b>Hình 7 · Biến do script đặt sau lượt chạy.</b> <code>tripId</code> trùng với id chuyến ở Hình 4; <code>idemKey</code> là khoá dùng chung của ba request.</figcaption>
+</figure>
+
+Biến collection tiện cho việc nối các bước, nhưng nó cũng là trạng thái dùng chung: request chạy sau đọc giá trị mà request trước để lại, kể cả từ một lượt chạy khác. Gửi tay «DI · Cùng khoá, thân khác» một mình vẫn chạy được vì `quoteId` và `idemKey` còn đó — kết quả lúc ấy phụ thuộc vào lượt chạy trước, không còn là phép kiểm độc lập. Đó là lý do lab dùng `beforeEach` reset như mục 6.1.
+
+Các hình 2–7 chứng minh hành vi idempotency **nhìn từ API**: cùng khoá, cùng thân thì cùng chuyến; cùng khoá, thân khác thì bị chặn bằng mã lỗi riêng. Chúng **không** cho thấy điều bài này quan tâm nhất: bảng `trips` có đúng một dòng cho báo giá đó, `trip_events` không bị ghi đôi, `quotes.used_by_trip_id` trỏ đúng chuyến, và ràng buộc UNIQUE, CHECK, NOT NULL vẫn còn trong schema. Runner chỉ đọc response — và như mở đầu bài, response đúng vẫn có thể đi cùng một trạng thái dữ liệu sai. Những phần đó cần oracle SQL độc lập với API như các bước 6.2–6.6; lab dùng SQL assertion chính vì lý do này. Hình 2 là lượt chạy minh hoạ ngày 23/11/2026, các hình 3–7 chụp ngày 24/11/2026 (CurlStudio 0.2.1 chạy bằng `pnpm tauri dev` trên Windows 11, máy chủ lab Node v22.18.0); chúng không thay cho 6/6 test Vitest ở mục 6.7.
 
 ## 7. Đọc thất bại và ra quyết định
 

@@ -334,9 +334,67 @@ Thực hành ở trên chạy một suite nhỏ chọn theo impact map. Collecti
 
 Đọc ảnh: **Requests (44/78)** — 34 request bị bỏ, và nút đã đổi thành «Chọn tất cả», nhắc rằng đây là tập con. Thanh tổng **Requests 44 · Tests 62 / 62 (100%) · Thất bại 0 · Non-2xx 7**: bảy response non-2xx là lỗi có chủ đích (401/403/404/422) mà test mong đợi, không phải failure. Đọc «Non-2xx 7» mà không biết test mong đợi gì sẽ dễ hiểu sai — cũng như mục 9.5: tỷ lệ pass phải đi kèm mẫu số.
 
-Điều ảnh này chứng minh là một **suite đã định nghĩa** chạy đủ và pass: 44 request được chọn, phần bỏ lại ghi rõ kèm lý do — đúng cách viết báo cáo ở mục 7.3, chọn suite là quyết định có ghi lại chứ không phải «chạy hết». Điều nó **không** chứng minh: lượt xanh này không bắt được fault của bài. Mọi folder đặt đồng hồ 09:00 và trời không mưa trước khi kiểm; ở tổ hợp thường/khô, candidate sai và hàm thật cùng cho 35.000 (bảng mục 4.2). Folder bảng cước SYS-03 lại nằm trong phần bị bỏ. Muốn một suite qua API phủ refactor này, cần thêm request cao điểm + mưa như RG-04/RG-06 — tức là chọn **input kích hoạt**, không phải chạy thêm nhiều request giống nhau.
+Điều ảnh này chứng minh là một **suite đã định nghĩa** chạy đủ và pass: 44 request được chọn, phần bỏ lại ghi rõ kèm lý do — đúng cách viết báo cáo ở mục 7.3, chọn suite là quyết định có ghi lại chứ không phải «chạy hết». Điều nó **không** chứng minh: lượt xanh này không bắt được fault của bài. Lượt chạy ngày 23/11/2026, khi collection chưa có hai folder SYS-05 và SYS-06; mọi folder khi đó đặt đồng hồ 09:00 và trời không mưa trước khi kiểm. Ở tổ hợp thường/khô, candidate sai và hàm thật cùng cho 35.000 (bảng mục 4.2), và folder bảng cước SYS-03 lại nằm trong phần bị bỏ. Muốn một suite qua API phủ refactor này, cần thêm request cao điểm + mưa như RG-04 — tức là chọn **input kích hoạt**, không phải chạy thêm nhiều request giống nhau.
 
-Lượt minh hoạ chạy ngày 23/11/2026 bằng CurlStudio 0.2.1 (`pnpm tauri dev`) trên Windows 11, máy chủ lab Node v22.18.0, đồng hồ lab cố định 09:00 ngày 04/11/2026. Nó không thay tám lượt Vitest RG-01…08, và thời gian trên biểu đồ không so được với số liệu Vitest ở mục 6.5: khác công cụ, khác ranh giới đo, khác thời điểm.
+#### Folder SYS-06: thêm input kích hoạt
+
+Collection nay có folder **SYS-06 · Hồi quy tổ hợp cước** làm đúng việc đó: reset, cho trời mưa ở SG, đặt đồng hồ 09:00 rồi báo giá RG-02, dời đồng hồ sang 11:30 rồi báo giá RG-04, cuối cùng cho trời tạnh và trả đồng hồ về 09:00.
+
+<figure class="tkh-fig">
+<div class="tkh-fig-box"><img src="/images/articles/system-testing/sys-06/02-runner-to-hop-cuoc.webp" alt="Collection Runner chạy folder SYS-06 · Hồi quy tổ hợp cước, environment local, 8 request được chọn: Reset dữ liệu mẫu, Trời mưa ở SG, Đồng hồ 09:00 (giờ thường), RG-02 · Thường + mưa, Đồng hồ 11:30 (cao điểm), RG-04 · Cao điểm + mưa, Trời tạnh, Đồng hồ về 09:00. Thanh tổng Requests 8, Tests 10 / 10 (100%), Thất bại 0, Non-2xx 0; kết quả có dòng RG-02 · 34.500 + 8.000 → 43.000 đ và RG-04 · 34.500 × 1,25 + 8.000 → 52.000 đ (bản sai cho 54.000)." width="2000" height="1125" loading="lazy"></div>
+<figcaption><b>Hình 3 · Runner SYS-06: hai tổ hợp có mưa.</b> Tên test ghi luôn phép tính tay: RG-02 ra 43.000 đ, RG-04 ra 52.000 đ «(bản sai cho 54.000)».</figcaption>
+</figure>
+
+Tên test mang theo oracle tính tay của mục 4.2 và cả giá trị mà candidate sai sẽ cho, nên khi đỏ người đọc biết ngay đó có phải đúng fault của bài hay không. RG-02 vẫn được giữ dù không phân biệt được fault: nó là đối chứng cho thấy phụ phí mưa vẫn cộng đúng ở giờ thường.
+
+Điều kiện kích hoạt nằm ở các request đặt môi trường, không ở request báo giá. Bước dời đồng hồ trông như sau.
+
+<figure class="tkh-fig">
+<div class="tkh-fig-box"><img src="/images/articles/system-testing/sys-06/05-body-dong-ho-cao-diem.webp" alt="Request Đồng hồ 11:30 (cao điểm) trong folder SYS-06: POST tới /api/test/clock, tab Body dạng JSON với trường now có giá trị 2026-11-04T11:30:00+07:00." width="2000" height="1125" loading="lazy"></div>
+<figcaption><b>Hình 4 · Dời đồng hồ lab vào khung cao điểm.</b> Thân <code>{"now": "2026-11-04T11:30:00+07:00"}</code>, cùng mốc 11:30 mà test API của lab dùng ở mục 5.3.</figcaption>
+</figure>
+
+Bỏ request này thì RG-04 thành một ca thường/mưa nữa và không còn phân biệt được fault. Một suite hồi quy qua API vì thế phải giữ cả request chuẩn bị, không chỉ request có assertion.
+
+Với tiền, chỉ so tổng là chưa đủ. Response của RG-04 có bảng chi tiết cước để so từng bước.
+
+<figure class="tkh-fig">
+<div class="tkh-fig-box"><img src="/images/articles/system-testing/sys-06/03-rg04-response.webp" alt="Response của request RG-04 · Cao điểm + mưa, body cuộn tới fareBreakdown: base 34500, afterPeak 43125, rainSurcharge 8000, beforeDiscount 51125, discount 0, afterDiscount 51125, minimumFare 15000, total 52000." width="2000" height="1125" loading="lazy"></div>
+<figcaption><b>Hình 5 · Bảng chi tiết cước của RG-04.</b> 34.500 → 43.125 sau hệ số cao điểm → cộng 8.000 phí mưa thành 51.125 → làm tròn 52.000.</figcaption>
+</figure>
+
+Đây là đúng chuỗi 34.500 → 43.125 → 51.125 mà mục 7.1 dùng để khoanh lỗi tương tác: `rainSurcharge` 8.000 được cộng **sau** `afterPeak`, không bị nhân 1,25. Nếu candidate sai đi vào sản phẩm, chỗ lệch sẽ hiện ngay ở hai trường này chứ không chỉ ở `total`.
+
+<figure class="tkh-fig">
+<div class="tkh-fig-box"><img src="/images/articles/system-testing/sys-06/04-tests-rg04.webp" alt="Tab Tests của request RG-04 với lệnh pm.expect(pm.response.json().quote.total).to.eql(52000); nửa dưới là Kết quả test 2/2, cả hai dòng PASS." width="2000" height="1125" loading="lazy"></div>
+<figcaption><b>Hình 6 · Test của RG-04.</b> Assertion so <code>quote.total</code> với hằng số 52000; kết quả 2/2 PASS.</figcaption>
+</figure>
+
+Giá trị mong đợi là hằng số tính tay, không gọi lại công thức nào, đúng nguyên tắc oracle độc lập của mục 4.2. Test này chỉ so tổng; muốn khoá từng bước như RG-07 thì phải thêm assertion cho `afterPeak` và `rainSurcharge` ở Hình 5. Folder cũng không có request riêng cho RG-03 (cao điểm, trời khô).
+
+#### Hai cách một lượt hồi quy tự đánh lừa
+
+Lý do bỏ SYS-03 khỏi lượt chạy chung ở Hình 2 thấy rõ khi chạy folder đó mà **không chọn tệp dữ liệu**.
+
+<figure class="tkh-fig">
+<div class="tkh-fig-box"><img src="/images/articles/system-testing/sys-06/06-thieu-du-lieu.webp" alt="Collection Runner chạy folder SYS-03 · Functional theo bảng cước mà ô File dữ liệu để trống: Requests 1, Tests 0 / 2 (0%), Thất bại 1, Non-2xx 1. Request FN · Báo giá theo bảng dữ liệu trả 400 với hai dòng lỗi: undefined · HTTP undefined — expected response to have status code NaN but got 400, và undefined · mã lỗi undefined — expected 'INVALID_JSON' to deeply equal undefined." width="2000" height="1125" loading="lazy"></div>
+<figcaption><b>Hình 7 · SYS-03 chạy thiếu tệp dữ liệu.</b> Request trả 400; tên test thành «undefined», mong đợi thành NaN và undefined.</figcaption>
+</figure>
+
+Đây không phải regression: biến trong thân không được thế nên máy chủ nhận JSON hỏng và trả `INVALID_JSON`, còn oracle cũng rỗng vì nó nằm trong tệp. Một suite phụ thuộc dữ liệu phải mang theo dữ liệu; báo cáo «1 thất bại» ở đây vô nghĩa, cũng như một lượt xanh không có dữ liệu sẽ vô nghĩa.
+
+Cách thứ hai khó thấy hơn. Mục 5.3 nói test API của lab dựng hệ thống mới cho mỗi test case nên thứ tự không ảnh hưởng. Máy chủ chạy riêng thì khác: mọi folder dùng chung một đồng hồ lab, và khi chụp ảnh mới phát hiện `/api/test/reset` **không** đặt lại đồng hồ. Để tái hiện, chạy SYS-06 nhưng bỏ chọn bước «Đồng hồ về 09:00», rồi chạy SYS-04 với ba chế độ ví.
+
+<figure class="tkh-fig">
+<div class="tkh-fig-box"><img src="/images/articles/system-testing/sys-06/07-ro-ri-dong-ho.webp" alt="Collection Runner chạy folder SYS-04 · Tích hợp ví theo chế độ lỗi với tệp che-do-vi.json 3 dòng, ngay sau một lượt SYS-06 thiếu bước trả đồng hồ: Requests 27, Tests 33 / 36 (92%), Thất bại 3, Non-2xx 0. Bộ lọc Thất bại (3) đang bật, cả ba iteration của IN · Báo giá xe máy 5 km trả HTTP 200 nhưng đỏ với dòng Cước 35.000 đ (R-FARE-01/08) — expected 44000 to deeply equal 35000." width="2000" height="1125" loading="lazy"></div>
+<figcaption><b>Hình 8 · Rò rỉ đồng hồ giữa hai folder.</b> SYS-04 chạy riêng thì 36/36; chạy sau một SYS-06 bỏ bước trả đồng hồ thì 33/36, cả ba lần báo giá ra 44.000 thay vì 35.000.</figcaption>
+</figure>
+
+Đồng hồ lab còn ở 11:30 nên báo giá xe máy 5 km bị tính cao điểm; SYS-04 không tự đặt giờ nên nhận nguyên trạng thái đó. Đây là lỗi **phụ thuộc thứ tự**: test đúng khi chạy riêng, đỏ khi chạy sau một suite khác, và sản phẩm không có gì sai. Nếu gặp nó trong CI, đây đúng loại «state rò rỉ» mà mục 8.2 bảo phải điều tra trước khi gắn nhãn flaky, và là lý do mục 7.2 đòi môi trường cố định khi bisect. Collection đã sửa bằng cách cho SYS-06 trả đồng hồ về 09:00 ở bước cuối; cách bền hơn là mỗi folder tự đặt mọi trạng thái nó cần.
+
+#### Phạm vi của các hình
+
+Hình 2 chạy ngày 23/11/2026, các hình còn lại chụp ngày 24/11/2026, đều bằng CurlStudio 0.2.1 (`pnpm tauri dev`) trên Windows 11, máy chủ lab Node v22.18.0, đồng hồ lab đặt 09:00 ngày 04/11/2026 khi bắt đầu mỗi folder (SYS-06 dời sang 11:30 giữa chừng). Lượt hỏng ở Hình 7 và Hình 8 là cố ý tạo ra để minh hoạ. Các lượt này không thay tám lượt Vitest RG-01…08, không chạy candidate sai trên máy chủ, và thời gian trên biểu đồ không so được với số liệu Vitest ở mục 6.5: khác công cụ, khác ranh giới đo, khác thời điểm.
 
 ## 7. Gate, báo cáo và xử lý failure
 

@@ -268,14 +268,54 @@ Cùng câu hỏi «một luồng nối tiếp gọi báo giá» có thể dựng
 Đọc báo cáo theo các định nghĩa ở mục 3 (giao diện dùng dấu phẩy ngăn nghìn, dấu chấm thập phân):
 
 - **Mẫu số:** 16,039 request trong 30 giây, tỷ lệ lỗi 0.00%, Checks 100% (0 thất bại trên 16,039).
-- **Phân bố:** p95 2.7 ms, p99 3.3 ms, max 7.9 ms; trung bình 1.8 ms, trung vị 1.7 ms. Bảng tổng hợp (kiểu JMeter aggregate report) cho thêm p90 2.5 ms. Max vẫn gấp mấy lần trung vị — đuôi tồn tại như mục 7.3 đã nói.
+- **Phân bố:** p95 2.7 ms, p99 3.3 ms, max 7.9 ms; trung bình 1.8 ms, trung vị 1.7 ms. Bảng tổng hợp (Hình 5) cho thêm p90 2.5 ms. Max vẫn gấp mấy lần trung vị — đuôi tồn tại như mục 7.3 đã nói.
 - **Throughput:** 532.7/s (đỉnh 616/s) là tốc độ mà 1 VU nối tiếp tự đạt được, không phải offered load, càng không phải công suất.
 - **Gate:** threshold `http_req_duration p(95) < 1000` trùng ngưỡng 1.000 ms mà callout ở mục 4.2 gọi là **giả định bài tập**. PASS chỉ là PASS của gate đó — không phải SLO của Tới Nơi, không phải R-NFR-03.
 - **Iteration bị bỏ 0:** ô này ghi chú «arrival-rate executor» — chỉ số của open model ([SYS-08](/articles/system-testing-load-test)). Trong closed model không có lịch nào để bỏ, nên số 0 không chứng minh gì thêm.
 
-**Ảnh này cho thấy** một baseline có ngưỡng đặt trước dựng được bằng GUI, có báo cáo **Xuất** được. **Ảnh này không cho thấy** độ đúng nghiệp vụ: check mặc định chỉ là «status is 2xx», và load test không chạy test script của request — kể cả test «Cước 35.000 đ» có sẵn trong collection. Một response 200 với `total` sai vẫn được tính là đạt. So với `sample()` ở mục 6.2, đây là phép đo thiếu đúng phần «correctness vẫn là một phần của phép đo».
+#### Nhìn cả phân bố, không chỉ một percentile
+
+Cuộn xuống trong cùng báo cáo đã lưu, CurlStudio vẽ lại 16,039 mẫu dưới hai dạng: heatmap theo thời gian và histogram của cả lượt. Đây là cách thấy hình dạng phân bố mà mục 3 nhắc tới, thay vì chỉ nhìn một con số p95.
+
+<figure class="tkh-fig">
+<div class="tkh-fig-box"><img src="/images/articles/system-testing/sys-07/03-heatmap-phan-bo.webp" alt="Phần giữa báo cáo load test 30 giây của CurlStudio: bên trái là Heatmap latency, số request theo dải latency qua từng giây, phần lớn nằm ở dải 1–2 ms; bên phải là Phân bố thời gian phản hồi của 16,039 request với vạch p50 1.7 ms, p95 2.7 ms, p99 3.3 ms. Bên dưới là biểu đồ Status code theo thời gian chỉ có HTTP 200 và biểu đồ Thời gian phản hồi theo request." width="2000" height="1125" loading="lazy"></div>
+<figcaption><b>Hình 4 · Heatmap và phân bố latency của lượt baseline.</b> Ba vạch p50/p95/p99 nằm sát nhau trong một khối hẹp; phần đuôi tới max 7.9 ms chỉ là vài cột thấp ở cuối histogram.</figcaption>
+</figure>
+
+Heatmap dồn ở hai dải «≤2 ms» và «≤5 ms» suốt 30 giây, chỉ thỉnh thoảng có ô lẻ ở «≤10 ms»; không dải nào dâng dần theo thời gian, nên trong lượt này không thấy dấu hiệu chậm đi khi chạy lâu. Nhưng 30 giây quá ngắn để nói gì về endurance; đó vẫn là việc của một thí nghiệm riêng.
+
+Bảng số tương ứng nằm ngay bên dưới, theo dạng aggregate report quen thuộc của JMeter.
+
+<figure class="tkh-fig">
+<div class="tkh-fig-box"><img src="/images/articles/system-testing/sys-07/04-bao-cao-tong-hop.webp" alt="Phần cuối báo cáo load test của CurlStudio: Apdex với Hài lòng 100%; Phân bố status code HTTP 200: 16,039; Báo cáo tổng hợp với Số mẫu 16,039, trung bình 1.8 ms, trung vị 1.7, p90 2.5, p95 2.7, p99 3.3, nhỏ nhất 1.1, lớn nhất 7.9 ms, độ lệch chuẩn 0.50 ms, 0.00% lỗi, 532.7/s; Checks «status is 2xx» 100% với 16,039 đạt; mục Lỗi ghi không có; cuối cùng là ô Ghi chú." width="2000" height="1125" loading="lazy"></div>
+<figcaption><b>Hình 5 · Báo cáo tổng hợp kiểu JMeter.</b> Một dòng cho cả lượt: mẫu số, các percentile, min/max, độ lệch chuẩn, tỷ lệ lỗi và throughput.</figcaption>
+</figure>
+
+Độ lệch chuẩn 0.50 ms nhỏ, nhưng max 7.9 ms vẫn cách trung bình hơn 12 lần độ lệch chuẩn — đuôi không mô tả được bằng trung bình ± độ lệch chuẩn, đúng lý do mục 3 dùng percentile. Ô **Checks** một lần nữa cho thấy phép kiểm duy nhất là «status is 2xx». Ô **Ghi chú** là chỗ ghi ngữ cảnh mà công cụ không tự biết, như commit ứng viên ([SYS-17](/articles/system-testing-release-dossier) dùng ô này).
+
+**Báo cáo này cho thấy** một baseline có ngưỡng đặt trước dựng được bằng GUI, có báo cáo **Xuất** được. **Nó không cho thấy** độ đúng nghiệp vụ: check mặc định chỉ là «status is 2xx», và load test không chạy test script của request — kể cả test «Cước 35.000 đ» có sẵn trong collection. Một response 200 với `total` sai vẫn được tính là đạt. So với `sample()` ở mục 6.2, đây là phép đo thiếu đúng phần «correctness vẫn là một phần của phép đo».
+
+<figure class="tkh-fig">
+<div class="tkh-fig-box"><img src="/images/articles/system-testing/sys-07/05-xuat-bao-cao.webp" alt="Menu Xuất mở ra từ góc phải trên của báo cáo load test trong CurlStudio, gồm các mục: Báo cáo HTML (nền sáng), Báo cáo HTML (nền tối), Kết quả thô (JSON), Timeline theo từng giây (CSV), Báo cáo tổng hợp (CSV), JUnit XML (CI) và Sao chép bản tóm tắt Markdown." width="2000" height="1125" loading="lazy"></div>
+<figcaption><b>Hình 6 · Các định dạng xuất báo cáo.</b> Từ trang trình bày (HTML), dữ liệu để tính lại (JSON, CSV) tới định dạng cho CI (JUnit XML).</figcaption>
+</figure>
+
+Nếu cần lưu bằng chứng, kèm **Kết quả thô (JSON)** hoặc **Timeline theo từng giây (CSV)** bên cạnh bản HTML — cùng tinh thần lưu 900 mẫu gốc ở mục 6.5: có dữ liệu chi tiết thì người khác mới tính lại và soát được con số, như mục 7.3 đã làm với `baseline-observed.json`. Trước khi dựa vào tệp nào, mở ra xem nó giữ tới mức chi tiết nào; một bản tóm tắt đẹp không thay được dữ liệu gốc.
 
 **Không đặt cạnh bảng 7.2 để so.** p95 2.7 ms khác các con số của báo cáo gốc, nhưng đó không phải regression hay «chậm đi»: client là phần Rust của CurlStudio, tiến trình riêng; máy chủ lab chạy độc lập (Node v22.18.0, PGlite theo README của collection) thay vì app kho bộ nhớ chung tiến trình; đồng hồ do CurlStudio đặt, không phải t0/t1 của Hình 1; thời điểm đo khác. Đổi nhiều yếu tố cùng lúc thì, như mục 7.4, không quy được nguyên nhân. Lượt này là minh hoạ ngày 23/11/2026 (CurlStudio 0.2.1 chạy bằng `pnpm tauri dev`, Windows 11, đồng hồ lab cố định 09:00 ngày 04/11/2026); bằng chứng của bài vẫn là `baseline-observed.json`.
+
+#### Hai lượt giống hệt nhau vẫn lệch nhau
+
+Danh sách **Lần chạy** cũng giữ một lượt Smoke khác, lưu cùng ngày 23/11/2026: cùng folder, cùng preset (1 VU, 30 giây), cùng máy, chạy sớm hơn khoảng 2 phút (11:07:32 PM so với 11:09:21 PM). Không ai sửa mã giữa hai lượt. Tích hai lượt rồi bấm **So sánh**, chọn lượt của Hình 3 làm baseline.
+
+<figure class="tkh-fig">
+<div class="tkh-fig-box"><img src="/images/articles/system-testing/sys-07/06-so-sanh-hai-luot.webp" alt="Tab So sánh các lần chạy của CurlStudio, hai lượt Smoke 30 giây cùng cấu hình: Baseline lúc 11/23/2026 11:09:21 PM và Lần chạy 2 lúc 11:07:32 PM, cả hai nhãn đạt. Throughput 532.7 so với 427.6 req/s (−19.7%), Requests 16,039 so với 12,893 (−19.6%), Latency trung bình 1.8 so với 2.3 ms (+24.4%), p50 1.7 so với 2.1 (+22.7%), p90 2.5 so với 3.3 (+31.0%), p95 2.7 so với 3.5 ms (+28.4%), p99 3.3 so với 4.3 (+28.0%), lớn nhất 7.9 so với 8.3 (+4.4%); Apdex, tỷ lệ check đạt và số VU tối đa đều ±0%. Các thay đổi trên 5% có mũi tên đỏ; dưới bảng là biểu đồ p95 và throughput theo thời gian chồng hai lượt." width="2000" height="1125" loading="lazy"></div>
+<figcaption><b>Hình 7 · So sánh hai lượt Smoke cùng cấu hình.</b> Dòng mô tả trên cùng nói rõ quy ước: xanh là tốt hơn, đỏ là kém hơn, với thay đổi trên 5%.</figcaption>
+</figure>
+
+Gần như mọi dòng đỏ: p95 2.7 → 3.5 ms (+28.4%), throughput 532.7 → 427.6/s (−19.7%). Nếu đây là «trước» và «sau» một thay đổi mã, rất dễ viết thành regression. Nhưng hai lượt không khác gì nhau về mã hay cấu hình — mức lệch 20–30% chính là nhiễu của máy này, giống bài học ở mục 7.4. Biểu đồ p95 theo thời gian bên dưới cho thấy đường của lượt sớm hơn nhìn chung nằm cao hơn nhưng vẫn cắt đường baseline vài lần: độ lệch trải trên cả lượt chứ không do một cú gai, và vẫn chưa có dữ liệu để biết máy lúc đó bận việc gì.
+
+Hai hệ quả cho việc so sánh release (mục 9.3): một cặp lượt không đủ để kết luận regression, cần nhiều lượt mỗi bên và nhìn độ phân tán; còn màu đỏ của công cụ chỉ là ngưỡng 5% cố định, không phải phán quyết thống kê. Hai lượt này được đọc lại từ báo cáo đã lưu, không phải phép đo mới.
 
 ## 7. Kết quả thực đo và cách đọc
 

@@ -281,7 +281,41 @@ So với Hình 1, có ba khác biệt cần ghi vào báo cáo:
 3. **Suy giảm thế nào?** p95 25 ms (p99 30 ms, max 49 ms), trung bình 15 ms; percentile theo giây dao động khoảng 15–45 ms; threshold `p(95) < 500` PASS. VU tối đa 10, bằng số cấp phát trước — trần 100 chưa được dùng tới.
 4. **Sau hạ tải?** Throughput trở về khoảng 30/s và tỷ lệ lỗi vẫn 0%. Đó là quan sát, chưa phải phép đo time-to-recover.
 
-**Ảnh này cho thấy** ở 300/s, lab trên máy này **vẫn chưa chạm điểm gãy** — cùng hướng với «chưa quan sát thấy điểm gãy» ở mục 6.4, nhưng ở mức thấp hơn, nên không thêm thông tin gì về breakpoint. Muốn tìm breakpoint phải tăng tiếp theo bậc, với điều kiện dừng đặt trước. **Ảnh này không cho thấy** capacity, R-NFR-03, hay bất cứ điều gì về production. Cũng đừng đặt các con số này cạnh bảng ở mục 6.2 để so: client là phần Rust của CurlStudio ở tiến trình riêng, máy chủ lab Node v22.18.0 chạy độc lập, profile và thời điểm khác — chênh lệch không phải regression hay cải thiện. Lượt này là minh hoạ ngày 23/11/2026 (CurlStudio 0.2.1 chạy bằng `pnpm tauri dev`, Windows 11, đồng hồ lab cố định 09:00 ngày 04/11/2026); bằng chứng của bài vẫn là `stress-observed.json`.
+#### Pha cao và pha hạ tải theo từng giây
+
+Câu hỏi «suy giảm thế nào» và «sau hạ tải ra sao» cần thấy latency đi cùng tải qua thời gian, không phải một p95 cho cả lượt. Cuộn xuống trong cùng báo cáo đã lưu:
+
+<figure class="tkh-fig">
+<div class="tkh-fig-box"><img src="/images/articles/system-testing/sys-09/03-thoi-gian-phan-hoi-theo-giay.webp" alt="Phần giữa báo cáo load test 1 phút 10 giây của CurlStudio: biểu đồ Throughput hình thang, khoảng 30 request mỗi giây, dâng lên khoảng 300 rồi về khoảng 30, đường thất bại nằm ở 0; biểu đồ Thời gian phản hồi theo giây với p99, p95, p90, trung vị và trung bình dao động khoảng 10–45 ms, có một đỉnh nhọn ở giây đầu, ghi chú threshold p95 500 ms nằm ngoài biểu đồ; biểu đồ Virtual users là đường phẳng ở 10; biểu đồ Tỷ lệ lỗi nằm ở 0%; bên dưới là đầu của heatmap latency và phân bố thời gian phản hồi." width="2000" height="1125" loading="lazy"></div>
+<figcaption><b>Hình 4 · Throughput, latency, VU và tỷ lệ lỗi theo từng giây.</b> Các đường percentile nhích lên trong pha 300/s và hạ xuống khi tải về 30/s; đường VU không đổi.</figcaption>
+</figure>
+
+Hai chi tiết đáng ghi. Đỉnh latency cao nhất nằm ở **giây đầu**, khi tải mới 30/s, chứ không ở pha 300/s — giả thuyết hợp lý là chi phí khởi động (kết nối, JIT), chưa kiểm chứng; nếu đúng, max 49 ms của lượt không nói gì về sức chịu tải. Và đường **Virtual users** đứng yên ở 10 suốt lượt: pool cấp phát trước đủ dùng, trần 100 chưa hề bị chạm.
+
+<figure class="tkh-fig">
+<div class="tkh-fig-box"><img src="/images/articles/system-testing/sys-09/04-thoi-gian-theo-so-vu.webp" alt="Phần dưới báo cáo load test của CurlStudio: biểu đồ Thời gian phản hồi theo số VU với mọi điểm ở mức 10 VU, p95 từng giây trải từ vài ms tới khoảng 46 ms; biểu đồ Băng thông dâng rồi hạ theo tải; Apdex 100%; Phân bố status code 10,198; và đầu bảng Báo cáo tổng hợp với 10,198 mẫu, trung bình 15 ms, p95 25, p99 30, max 49 ms, 145.1/s." width="2000" height="1125" loading="lazy"></div>
+<figcaption><b>Hình 5 · Thời gian phản hồi theo số VU.</b> Mọi điểm cùng một cột 10 VU, nên biểu đồ «response time vs threads» không vẽ được đường suy giảm.</figcaption>
+</figure>
+
+Trong open model, số VU là ngân sách của generator chứ không phải biến điều khiển; tải tăng bằng arrival rate. Kiểm nhanh theo Little's Law: khoảng 300/s × khoảng 20 ms ≈ 6 request đồng thời ở đỉnh, dưới 10 VU có sẵn — khớp với việc pool không cần nở, và cùng kiểu với peak in-flight 24 ở bước 600/s của bảng 6.2. Muốn biểu đồ này có ý nghĩa, phải có pha mà mức đồng thời thật sự leo lên, tức là gần hơn tới saturation.
+
+#### Phân bố gộp nhiều pha
+
+<figure class="tkh-fig">
+<div class="tkh-fig-box"><img src="/images/articles/system-testing/sys-09/05-heatmap-latency.webp" alt="Heatmap latency của CurlStudio cho lượt 1 phút 10 giây: số request theo dải latency qua thời gian, dải ≤50 ms chỉ dày lên trong pha tải cao ở giữa lượt rồi thưa lại; bên phải là Phân bố thời gian phản hồi của 10,198 request với vạch p50 16 ms, p95 25 ms, p99 30 ms, gồm một dải cột thấp ở bên trái và một khối cột cao quanh 20–25 ms. Bên dưới là Status code theo thời gian, toàn HTTP 200, đỉnh khoảng 300 mỗi giây, và Thời gian phản hồi theo request." width="2000" height="1125" loading="lazy"></div>
+<figcaption><b>Hình 6 · Heatmap và phân bố latency của lượt tải cao.</b> Dải latency dịch lên trong pha 300/s rồi trở về khi tải hạ.</figcaption>
+</figure>
+
+Histogram có hai phần: một dải cột thấp bên trái, phần lớn đến từ các pha 30/s, và một khối cột cao quanh 20–25 ms của pha 300/s. Pha cao chiếm phần lớn trong 10,198 request nên kéo p50 lên 16 ms — chính hiện tượng mục 5.4 cảnh báo khi gộp các bước thành một percentile. Script lab tách số liệu theo bước; ở đây muốn tách phải đọc heatmap theo thời gian, hoặc xuất timeline theo giây để tự tính.
+
+<figure class="tkh-fig">
+<div class="tkh-fig-box"><img src="/images/articles/system-testing/sys-09/06-bao-cao-tong-hop.webp" alt="Phần cuối báo cáo load test của CurlStudio: Apdex 100%; Phân bố status code HTTP 200: 10,198; Báo cáo tổng hợp với 10,198 mẫu, trung bình 15 ms, trung vị 16, p90 23, p95 25, p99 30, nhỏ nhất 1.9, lớn nhất 49 ms, độ lệch chuẩn 5.8 ms, 0.00% lỗi, 145.1/s; Checks 10,198 đạt; mục Lỗi ghi không có." width="2000" height="1125" loading="lazy"></div>
+<figcaption><b>Hình 7 · Báo cáo tổng hợp của lượt tải cao.</b> Một dòng duy nhất cho cả lượt 1 phút 10 giây, gộp mọi pha.</figcaption>
+</figure>
+
+Mọi cột của dòng này — p95 25 ms, độ lệch chuẩn 5.8 ms, 145.1/s — đều là số gộp pha thấp với pha cao, nên không mô tả pha nào cả. Trung bình 15 ms thấp hơn trung vị 16 ms cũng là dấu vết của dải latency thấp bên trái histogram. Đọc bảng này như tóm tắt của lượt; câu hỏi stress phải trả lời bằng số liệu theo pha.
+
+**Các hình 3–7 cho thấy** ở 300/s, lab trên máy này **vẫn chưa chạm điểm gãy** — cùng hướng với «chưa quan sát thấy điểm gãy» ở mục 6.4, nhưng ở mức thấp hơn, nên không thêm thông tin gì về breakpoint. Muốn tìm breakpoint phải tăng tiếp theo bậc, với điều kiện dừng đặt trước. **Chúng không cho thấy** capacity, R-NFR-03, hay bất cứ điều gì về production. Cũng đừng đặt các con số này cạnh bảng ở mục 6.2 để so: client là phần Rust của CurlStudio ở tiến trình riêng, máy chủ lab Node v22.18.0 chạy độc lập, profile và thời điểm khác — chênh lệch không phải regression hay cải thiện. Lượt này là minh hoạ ngày 23/11/2026 (CurlStudio 0.2.1 chạy bằng `pnpm tauri dev`, Windows 11, đồng hồ lab cố định 09:00 ngày 04/11/2026); bằng chứng của bài vẫn là `stress-observed.json`.
 
 ## 6. Kết quả thực đo và cách đọc
 

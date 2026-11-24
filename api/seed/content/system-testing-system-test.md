@@ -330,9 +330,56 @@ Bước 4 kiểm hai mặt của kết quả. Phía API có thể xem bằng tay
 
 Đọc ảnh: body có `"status": "completed"`, `"customerId": "C001"`, `"driverId": "D101"`, `"vehicle": "bike"`, `"distanceKm": 5` và `"pricingVersion": "fare-2026.1"`. Tab **Kết quả test 2/2** gồm «HTTP 200» và «Đọc lại: completed, 35.000 đ, paid» — test thứ hai kiểm thêm `fare` và `paymentStatus`, hai trường nằm thấp hơn trong body. Đây chính là dòng «Chỉ kiểm API» của bảng ở mục 6.4, tương ứng phần `toMatchObject` của SY-01.
 
-Ảnh này **không** phải system test theo nghĩa của bài. CurlStudio không thấy trang khách hay trang tài xế, không có hai browser context, không đo được vòng hỏi lại 2 giây, không kiểm nút huỷ bị disabled — tức là bỏ lọt đúng loại lỗi ở đầu bài: API `completed` mà trang khách vẫn «Đang tìm tài xế». Chuyến ở đây cũng được tạo qua API, nên theo mục 4 ta không có bằng chứng nút «Đặt chuyến» hoạt động. Máy chủ là bản chạy theo environment local của collection, không phải server riêng cổng 3115 của config Playwright, nên đây không phải môi trường được báo cáo ở mục 6.5. Phép kiểm khách C002 nhận 404 có folder riêng (SYS-10).
+#### Hành trình hai vai trò qua API
 
-Lượt minh hoạ chạy ngày 23/11/2026 bằng CurlStudio 0.2.1 (`pnpm tauri dev`) trên Windows 11, máy chủ lab Node v22.18.0, đồng hồ lab cố định 09:00 ngày 04/11/2026. Dùng nó để khám phá và chia sẻ cách đọc API; bằng chứng của bài vẫn là ba hành trình Playwright.
+Hình 2 chỉ đọc trạng thái cuối. Folder **SYS-05 · Hành trình khách–tài xế qua API** đi chậm hơn: sau bốn request chuẩn bị (reset, đồng hồ 09:00, trời không mưa, ví bình thường), nó xen kẽ vai khách và vai tài xế như SY-01, và khách đọc lại chuyến sau mỗi mốc. Chuột phải folder → **Chạy thư mục**, không cần tệp dữ liệu.
+
+<figure class="tkh-fig">
+<div class="tkh-fig-box"><img src="/images/articles/system-testing/sys-05/02-runner-hanh-trinh.webp" alt="Collection Runner chạy folder SYS-05 · Hành trình khách–tài xế qua API với environment local: Requests 15, Tests 19 / 19 (100%), Thất bại 0, Non-2xx 0. Danh sách kết quả có các dòng đạt: Chuyến vừa đặt có trong danh sách của D101 (R-ACCEPT-06), accepted, tài xế D101, ETA 5 phút, in_transit, và completed, 35.000 đ, paid." width="2000" height="1125" loading="lazy"></div>
+<figcaption><b>Hình 3 · Runner SYS-05: 15 request, 19 test.</b> Các mốc được kiểm theo thứ tự: chuyến xuất hiện với D101, <code>accepted</code>, <code>in_transit</code>, rồi <code>completed</code>, 35.000 đ, <code>paid</code>.</figcaption>
+</figure>
+
+Mỗi lần khách đọc lại là một oracle trung gian: nếu chuyến kẹt ở một trạng thái, dòng đỏ chỉ ra đúng mốc, thay vì chỉ thấy trạng thái cuối sai. Đây là cách SY-01 chia hành trình thành các điểm chờ ở mục 6.3, nhưng không có trang nào để chờ.
+
+Bước đầu tiên của vai tài xế là thấy chuyến. Để xem response, chạy folder tới bước đặt chuyến rồi gửi tay request «SY · Tài xế D101 xem chuyến khả dụng».
+
+<figure class="tkh-fig">
+<div class="tkh-fig-box"><img src="/images/articles/system-testing/sys-05/03-tai-xe-xem-chuyen-kha-dung.webp" alt="Request SY · Tài xế D101 xem chuyến khả dụng: GET /api/driver/available-trips với header x-user driver:D101, response 200 OK. Body JSON có mảng trips gồm một chuyến với pricingVersion fare-2026.1, kind ride, cityCode SG, customerId C001, driverId null, vehicle bike, status searching, distanceKm 5." width="2000" height="1125" loading="lazy"></div>
+<figcaption><b>Hình 4 · Danh sách chuyến khả dụng của D101.</b> Chuyến của C001 đang <code>searching</code> với <code>"driverId": null</code>.</figcaption>
+</figure>
+
+`driverId` còn `null` và `status` là `searching`: đúng trạng thái trước khi có người nhận. Đây là mặt API của câu hỏi «trang tài xế có thấy chuyến không»; nó không trả lời trang tài xế có hiển thị chuyến đó.
+
+Sau khi gửi «SY · Tài xế D101 nhận chuyến», đổi sang vai khách và đọc lại.
+
+<figure class="tkh-fig">
+<div class="tkh-fig-box"><img src="/images/articles/system-testing/sys-05/04-doc-lai-sau-khi-nhan.webp" alt="Request SY · Khách đọc lại sau khi tài xế nhận: response 200 OK, Kết quả test 2/2, body JSON có customerId C001, driverId D101 và status accepted." width="2000" height="1125" loading="lazy"></div>
+<figcaption><b>Hình 5 · Khách đọc lại sau khi tài xế nhận.</b> Cùng chuyến, giờ có <code>"driverId": "D101"</code> và <code>"status": "accepted"</code>.</figcaption>
+</figure>
+
+So với Hình 4, hai trường đã đổi do hành động của vai khác — đúng loại thay đổi mà trang khách phải nhận qua vòng hỏi lại 2 giây. API đã đổi; trang có đổi hay không thì chỉ SY-01 trả lời được.
+
+Khi tách vai trò, cần chắc request đã đi với đúng danh tính. Tab **Timeline** của request đọc lại cho thấy điều đó.
+
+<figure class="tkh-fig">
+<div class="tkh-fig-box"><img src="/images/articles/system-testing/sys-05/05-timeline.webp" alt="Tab Timeline của request khách đọc lại chuyến: thanh thời gian gồm Chuẩn bị khoảng 0.03 ms, Chờ (TTFB) 2.2 ms, Tải về khoảng 0.02 ms, tổng 2.2 ms; dòng GET http://localhost:3100/api/trips/ kèm mã chuyến (127.0.0.1:3100); mục Header request đã gửi có x-user: customer:C001; response HTTP/1.1 200 OK với content-type application/json; charset=utf-8, content-length 983, etag, date, connection keep-alive." width="2000" height="1125" loading="lazy"></div>
+<figcaption><b>Hình 6 · Timeline: header đã thật sự gửi.</b> Mục «Header request đã gửi» ghi <code>x-user: customer:C001</code>, kèm URL đã thế biến và response <code>HTTP/1.1 200 OK</code>.</figcaption>
+</figure>
+
+Header «đã gửi» khác header «khai báo trong request»: đây là bằng chứng request đọc lại đi với danh tính khách, không phải tài xế. Con số 2.2 ms chỉ mô tả lượt này, không phải phép đo hiệu năng.
+
+<figure class="tkh-fig">
+<div class="tkh-fig-box"><img src="/images/articles/system-testing/sys-05/06-console-hanh-trinh.webp" alt="Runner SYS-05 với panel Console 15 dòng ở dưới: các lệnh POST /api/test/reset, /api/test/clock, /api/test/weather, /api/test/payment, POST /api/quotes 200, POST /api/trips 201 Created, GET /api/driver/available-trips 200, POST …/accept 200, mỗi dòng kèm giờ máy và thời gian." width="2000" height="1125" loading="lazy"></div>
+<figcaption><b>Hình 7 · Console của lượt hành trình.</b> Thứ tự gọi khớp thứ tự vai trò: chuẩn bị, khách báo giá và đặt, tài xế xem rồi nhận chuyến.</figcaption>
+</figure>
+
+Console cho thấy bốn lệnh `/api/test/*` chỉ dùng để chuẩn bị; mọi thay đổi trạng thái chuyến sau đó đi qua API nghiệp vụ, đúng nguyên tắc «kênh điều khiển test không đẩy chuyến tới trạng thái cuối» của Hình 1.
+
+#### Các hình này không phải system test
+
+Các ảnh trên **không** phải system test theo nghĩa của bài. CurlStudio không thấy trang khách hay trang tài xế, không có hai browser context, không đo được vòng hỏi lại 2 giây, không kiểm nút huỷ bị disabled — tức là bỏ lọt đúng loại lỗi ở đầu bài: API `completed` mà trang khách vẫn «Đang tìm tài xế». Folder SYS-05 xanh 19/19 trong khi trang khách hỏng hoàn toàn vẫn là tình huống có thể xảy ra. Chuyến ở đây cũng được tạo qua API, nên theo mục 4 ta không có bằng chứng nút «Đặt chuyến» hoạt động. Máy chủ là bản chạy theo environment local của collection, không phải server riêng cổng 3115 của config Playwright, nên đây không phải môi trường được báo cáo ở mục 6.5. Phép kiểm khách C002 nhận 404 có folder riêng (SYS-10).
+
+Hình 2 chụp ngày 23/11/2026, các hình còn lại ngày 24/11/2026, đều bằng CurlStudio 0.2.1 (`pnpm tauri dev`) trên Windows 11, máy chủ lab Node v22.18.0, đồng hồ lab cố định 09:00 ngày 04/11/2026. Dùng chúng để khám phá và chia sẻ cách đọc API; bằng chứng của bài vẫn là ba hành trình Playwright.
 
 ## 7. Điều tra failure và exit criteria
 

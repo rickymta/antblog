@@ -352,9 +352,67 @@ Ma trận ở trên là phía trình duyệt. Mục 2.1 có nhắc một trục 
 - Dạng đang chọn bắt đầu bằng `curl.exe --%` và escape từng dấu nháy kép trong thân JSON (`\"kind\": \"ride\"`…). Dán nguyên bản bash vào PowerShell, hoặc ngược lại, là cách rất phổ biến để một request đúng trở thành request hỏng chỉ trên máy của một người — đúng kiểu báo lỗi «chỉ máy tôi bị» ở mục 2.3, nhưng ở phía người gọi API.
 - Đoạn code mang theo header `x-user: customer:C001` và `localhost:3100`: đó là danh tính giả và địa chỉ của lab, chỉ dùng trong lab.
 
-**Ảnh này chứng minh gì.** Công cụ sinh được cùng một request ở nhiều dạng, và cách quote khác nhau rõ rệt giữa các shell — một nguồn lỗi tích hợp thường gặp khi tài liệu API chỉ đưa một dạng lệnh. Đây là tương thích ở **phía client API**, gần với dòng «Version contract» và «nhiều client» ở mục 2.1 hơn là với ma trận browser.
+#### Ba shell, ba cách quote
 
-**Ảnh này không chứng minh gì.** Đây **không** phải compatibility test của trình duyệt và không thay ma trận ba Playwright project ở mục 6.1: không có engine, viewport, locale hay timezone nào được kiểm, và trang khách không được mở. Ảnh cũng chỉ cho thấy văn bản được sinh ra; lượt minh hoạ không chạy từng đoạn code trên từng shell. Nếu đội muốn biến nó thành phép kiểm, hãy chạy mỗi dạng trên đúng shell/runtime đích và giữ một oracle chung như mục 4 — báo giá xe máy 5 km lúc 09:00 phải trả 35.000 — chứ không lấy output của dạng đầu tiên làm chuẩn cho các dạng sau.
+Đặt dạng PowerShell cạnh hai dạng cURL còn lại sẽ thấy rõ mỗi shell là một «cấu hình» với luật riêng. Các hình dưới chụp ngày 24/11/2026 trên cùng request và cùng lab. Trước hết là bash.
+
+<figure class="tkh-fig">
+<div class="tkh-fig-box"><img src="/images/articles/system-testing/sys-11/02-doan-code-bash.webp" alt="Hộp thoại Đoạn code chọn dạng cURL (bash): lệnh curl 'http://localhost:3100/api/quotes' với hai dòng --header cho Content-Type: application/json và x-user: customer:C001, --data-raw bọc thân JSON kind ride bằng nháy đơn, cuối là --location; mỗi dòng nối bằng dấu gạch chéo ngược." width="2000" height="1125" loading="lazy"></div>
+<figcaption><b>Hình 3 · cURL cho bash.</b> URL, header và thân đều bọc nháy đơn, nên dấu nháy kép trong JSON giữ nguyên; dòng nối bằng <code>\</code>.</figcaption>
+</figure>
+
+Thân JSON ở đây đọc được như trong tab Body, không có ký tự escape nào. Đây cũng là dạng hay được dán vào tài liệu API nhất, và là dạng dễ hỏng nhất khi người đọc dùng Windows.
+
+<figure class="tkh-fig">
+<div class="tkh-fig-box"><img src="/images/articles/system-testing/sys-11/03-doan-code-cmd.webp" alt="Hộp thoại Đoạn code chọn dạng cURL (cmd.exe): lệnh curl &quot;http://localhost:3100/api/quotes&quot; với các dòng --header bọc nháy kép, mỗi dòng nối bằng dấu mũ ^, và thân JSON trong --data-raw có mọi dấu nháy kép bên trong được viết thành gạch chéo ngược cộng nháy kép." width="2000" height="1125" loading="lazy"></div>
+<figcaption><b>Hình 4 · cURL cho cmd.exe.</b> Cùng request nhưng nối dòng bằng <code>^</code> và bọc bằng nháy kép, nên mọi nháy kép trong JSON phải escape thành <code>\"</code>.</figcaption>
+</figure>
+
+So Hình 3 với Hình 4: ký tự nối dòng khác nhau (`\` và `^`), ký tự bọc khác nhau (nháy đơn và nháy kép). Dán bản bash vào cmd.exe thì cả hai điểm đều sai. Đây là phiên bản phía client của bài học ở mục 7.5: khi một cấu hình đổi nhiều trục cùng lúc mà fail, phải tách từng trục mới biết lỗi do đâu.
+
+#### HTTP thô: mẫu số chung
+
+Mọi dạng ở trên rốt cuộc đều phải sinh ra cùng một thông điệp HTTP. Dạng HTTP (raw) cho thấy thông điệp đó, không qua shell nào.
+
+<figure class="tkh-fig">
+<div class="tkh-fig-box"><img src="/images/articles/system-testing/sys-11/04-doan-code-http-raw.webp" alt="Hộp thoại Đoạn code chọn dạng HTTP (raw): dòng POST /api/quotes HTTP/1.1, các header Host: localhost:3100, Content-Type: application/json và x-user: customer:C001, một dòng trống rồi thân JSON với kind ride, cityCode SG, vehicle bike và distanceKm 5." width="2000" height="1125" loading="lazy"></div>
+<figcaption><b>Hình 5 · Thông điệp HTTP mà mọi dạng phải tạo ra.</b> Dòng request, ba header, một dòng trống và thân JSON — không có dấu nháy hay ký tự nối dòng nào.</figcaption>
+</figure>
+
+Đây là chỗ đặt oracle cho trục «client»: một đoạn code tương thích khi thông điệp nó gửi đi trùng với khối này, và server trả báo giá 35.000 như mục 4.1. Khi một shell cho kết quả lạ, so request thực gửi với khối raw sẽ nhanh hơn đoán cách escape.
+
+#### Thư viện ngôn ngữ: cùng request, khác trách nhiệm
+
+Với thư viện HTTP, chuyện escape chuyển từ shell sang ngôn ngữ, và thêm những quyết định mà dòng lệnh curl không có.
+
+<figure class="tkh-fig">
+<div class="tkh-fig-box"><img src="/images/articles/system-testing/sys-11/05-doan-code-python.webp" alt="Hộp thoại Đoạn code chọn dạng Python – requests: import requests, biến url bằng http://localhost:3100/api/quotes, từ điển headers, payload là một chuỗi JSON đã escape dấu nháy kép và ký tự xuống dòng, rồi requests.request POST với headers, data=payload và timeout=30, cuối cùng in status code và text của response." width="2000" height="1125" loading="lazy"></div>
+<figcaption><b>Hình 6 · Python – requests.</b> Thân gửi đi là một chuỗi đã escape sẵn; đoạn code còn tự đặt <code>timeout=30</code>, một giá trị không có trong request gốc.</figcaption>
+</figure>
+
+`payload` là chuỗi chứ không phải từ điển, nên `Content-Type` phải nằm trong `headers`, giống khối raw ở Hình 5. `timeout=30` là lựa chọn của bộ sinh code; client thật của đội có thể đặt khác, và đó là thêm một trục cấu hình mà dòng lệnh curl không có.
+
+<figure class="tkh-fig">
+<div class="tkh-fig-box"><img src="/images/articles/system-testing/sys-11/06-doan-code-csharp.webp" alt="Hộp thoại Đoạn code chọn dạng C# – HttpClient: using System.Net.Http, tạo new HttpClient(), new HttpRequestMessage với new HttpMethod(&quot;POST&quot;) và http://localhost:3100/api/quotes, request.Headers.TryAddWithoutValidation cho x-user: customer:C001, thân là new StringContent với System.Text.Encoding.UTF8 và application/json, rồi await client.SendAsync(request)." width="2000" height="1125" loading="lazy"></div>
+<figcaption><b>Hình 7 · C# – HttpClient.</b> Header tự định nghĩa đi qua <code>TryAddWithoutValidation</code>, còn kiểu nội dung và mã hoá UTF-8 khai báo trong <code>StringContent</code>, không phải trong danh sách header.</figcaption>
+</figure>
+
+Trong .NET, `Content-Type` thuộc về nội dung chứ không thuộc về request, nên nó chuyển chỗ so với Hình 5. Đoạn code vẫn đúng, nhưng người chép tay theo kiểu «thêm mọi header vào `request.Headers`» sẽ gặp lỗi chỉ có trên .NET. `Encoding.UTF8` cũng quan trọng với API này: nhiều thông điệp lỗi của Tới Nơi viết tiếng Việt có dấu.
+
+#### Thay biến hay giữ biến
+
+Mọi hình trên đều bật «Thay giá trị biến». Tắt ô đó đi thì đoạn code đổi tính chất.
+
+<figure class="tkh-fig">
+<div class="tkh-fig-box"><img src="/images/articles/system-testing/sys-11/07-doan-code-giu-bien.webp" alt="Hộp thoại Đoạn code chọn dạng cURL (bash) với ô Thay giá trị biến tắt: dòng đầu là curl '{{baseUrl}}/api/quotes' thay cho địa chỉ localhost, các header x-user: customer:C001 và thân JSON giữ nguyên, bên dưới là hai nút Chạy trong terminal và Sao chép." width="2000" height="1125" loading="lazy"></div>
+<figcaption><b>Hình 8 · Đoạn code mang tên biến.</b> URL thành <code>{{baseUrl}}/api/quotes</code>: chia sẻ được giữa các environment, nhưng không chạy được nguyên trạng trong shell.</figcaption>
+</figure>
+
+Bản giữ biến hợp để dán vào tài liệu dùng chung: người nhận tự thế `baseUrl` của môi trường mình. Bản đã thay biến thì chạy được ngay, nhưng gắn chặt với `localhost:3100` của lab. Chọn bản nào cũng là chọn một cấu hình, nên ghi rõ trong ticket đoạn lệnh nào đã được chạy, trên shell nào.
+
+**Các hình này chứng minh gì.** Công cụ sinh được cùng một request ở nhiều dạng, và cách quote khác nhau rõ rệt giữa các shell — một nguồn lỗi tích hợp thường gặp khi tài liệu API chỉ đưa một dạng lệnh. Đây là tương thích ở **phía client API**, gần với dòng «Version contract» và «nhiều client» ở mục 2.1 hơn là với ma trận browser.
+
+**Các hình này không chứng minh gì.** Đây **không** phải compatibility test của trình duyệt và không thay ma trận ba Playwright project ở mục 6.1: không có engine, viewport, locale hay timezone nào được kiểm, và trang khách không được mở. Các hình cũng chỉ cho thấy văn bản được sinh ra; lượt minh hoạ không chạy từng đoạn code trên từng shell. Nếu đội muốn biến nó thành phép kiểm, hãy chạy mỗi dạng trên đúng shell/runtime đích và giữ một oracle chung như mục 4 — báo giá xe máy 5 km lúc 09:00 phải trả 35.000 — chứ không lấy output của dạng đầu tiên làm chuẩn cho các dạng sau.
 
 ## 7. Kết quả thực đo và cách đọc lỗi
 

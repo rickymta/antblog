@@ -368,9 +368,60 @@ Ba chi tiết trong ảnh:
 - «RC · Hoàn tất khi ví mất phản hồi» trả 200: lỗi thu tiền không chặn hoàn thành, đúng R-PAY-06.
 - Cùng request đó mất **9,04 s**, trong khi các request khác chỉ tính bằng mili-giây. Máy chủ lab giữ timeout 3 giây của SPEC chứ không rút xuống 30 ms như 6.2, nên con số khớp với 3 lần gọi ví, mỗi lần hết giờ sau 3 giây (R-PAY-04, R-NFR-05). Runner không đếm được lần gọi ví; đây là suy ra từ thời gian.
 
-Dấu ✓ ở test RC-03 phải đọc đúng như callout «RC-03 xanh không có nghĩa là đã phục hồi»: nó xác nhận hệ thống **ghi đúng** chuyến là `failed` theo SPEC, không xác nhận điều gì đã được phục hồi. Nửa kia của mâu thuẫn — ví đã trừ 35.000 với khoá `trip:<id>:fare` — nằm ở phía ví, mà CurlStudio chỉ thấy response HTTP. Trong lab code, `chargedKeys()` và `totalCharged()` của ví giả mới chứng minh được tiền đã bị trừ; còn trong runner, cụm «ví đã trừ tiền» ở tên test là điều ta biết từ thiết kế ví giả (mục 5.3), không phải điều request kiểm được. Folder cũng không gửi lại lệnh hoàn tất sau khi gỡ lỗi, nên phần «complete lại ⇒ 409, không gọi ví thêm» chỉ có trong Vitest. Kết luận giữ nguyên: khoản này **cần đối soát**, không «sửa» bằng cách thu lại với khoá mới.
+#### Chế độ lỗi và oracle nằm ở đâu
 
-Hai giới hạn nữa. Một: 9,04 s là một lượt minh hoạ ngày 23/11/2026 (CurlStudio 0.2.1 qua `pnpm tauri dev`, Windows 11, máy chủ lab Node v22.18.0) — không phải số đo RTO hay hiệu năng, và không so được với thời gian Vitest ở 6.7. Hai: CurlStudio chỉ minh hoạ Thực hành A; restore drill của Thực hành B chạy bằng script PowerShell trên cluster PostgreSQL riêng, không làm bằng CurlStudio.
+Lỗi được tiêm bằng một request bình thường tới API kiểm thử của lab, không phải bằng cách tắt mạng hay sửa máy chủ:
+
+<figure class="tkh-fig">
+<div class="tkh-fig-box"><img src="/images/articles/system-testing/sys-14/03-body-lost-response.webp" alt="CurlStudio mở request «Ví: mất phản hồi» trong folder SYS-14: phương thức POST tới /api/test/payment, tab Body chứa JSON {&quot;mode&quot;: &quot;lost_response&quot;}." width="2000" height="1125" loading="lazy"></div>
+<figcaption><b>Hình 3 · Tiêm lỗi qua API kiểm thử.</b> Thân <code>{"mode": "lost_response"}</code> gửi tới <code>/api/test/payment</code> bật chế độ ví mất phản hồi cho mọi lần gọi sau đó.</figcaption>
+</figure>
+
+Vì chế độ lỗi là trạng thái của máy chủ lab, nó tồn tại cho tới khi có request khác đổi lại. Đó là lý do request cuối folder phải trả ví về bình thường — một bước dọn dẹp, giống `setMode('none')` trong lab code.
+
+Phép kiểm của request hoàn tất nằm ở tab **Tests**:
+
+<figure class="tkh-fig">
+<div class="tkh-fig-box"><img src="/images/articles/system-testing/sys-14/04-tests-rc03.webp" alt="Tab Tests của request «RC · Hoàn tất khi ví mất phản hồi» trong CurlStudio: script kiểm HTTP 200, lấy const t = pm.response.json().trip, test «RC-03 · ghi failed dù ví đã trừ tiền (cần đối soát)» so t.paymentStatus với 'failed', và dòng console.log in paymentStatus." width="2000" height="1125" loading="lazy"></div>
+<figcaption><b>Hình 4 · Oracle của RC-03 phía API.</b> Chỉ một phép so: <code>t.paymentStatus</code> bằng <code>'failed'</code>; dòng <code>console.log</code> in giá trị đó ra Console.</figcaption>
+</figure>
+
+Đặt Hình 4 cạnh đoạn code ở 6.6 thấy ngay khoảng cách: Vitest kiểm thêm `calls` có 3 phần tử và `totalCharged()` bằng 35.000, còn script trong CurlStudio chỉ có `paymentStatus`. Cụm «ví đã trừ tiền» trong tên test là điều ta biết từ thiết kế ví giả, không phải điều script này kiểm được.
+
+#### Console: chín giây nằm ở đâu
+
+Mở **Console** khi chạy lại folder cho thấy từng lệnh gọi theo thứ tự:
+
+<figure class="tkh-fig">
+<div class="tkh-fig-box"><img src="/images/articles/system-testing/sys-14/02-console-hoan-tat-9-giay.webp" alt="Collection Runner của CurlStudio cho folder SYS-14 với Tests 16/16, biểu đồ thời gian response theo request trong đó «RC · Hoàn tất khi ví mất phản hồi» là 9.02 s còn các request khác dưới 20 ms; panel Console 14 dòng bên dưới có các lệnh accept, arrive, pickup, start trả 200 trong vài ms, dòng /complete → 200 OK (9024 ms), dòng log «paymentStatus = failed» và POST /api/test/payment → 200." width="2000" height="1125" loading="lazy"></div>
+<figcaption><b>Hình 5 · Console của một lượt chạy SYS-14 khác.</b> Dòng <code>…/complete → 200 OK (9024 ms)</code> đứng giữa các lệnh vài mili-giây; ngay sau là dòng log <code>paymentStatus = failed</code> từ script ở Hình 4.</figcaption>
+</figure>
+
+Lượt này cho 9.024 ms, lượt ở Hình 2 cho 9,04 s: hai lượt cùng folder lệch nhau vài chục mili-giây, đều quanh mốc 3 × 3 giây. Dòng cuối `POST /api/test/payment → 200` là bước trả ví về bình thường đã chạy. Giờ ở đầu mỗi dòng là giờ máy thật, không phải đồng hồ lab 09:00.
+
+#### Sau sự cố: gửi lại và đọc lại
+
+Folder dừng ở đó, nhưng câu hỏi của recovery test còn tiếp: khi ví đã bình thường, hệ thống xử lý chuyến lệch tiền này thế nào? Sau lượt chạy, gửi tay lại chính request «RC · Hoàn tất khi ví mất phản hồi»:
+
+<figure class="tkh-fig">
+<div class="tkh-fig-box"><img src="/images/articles/system-testing/sys-14/05-hoan-tat-lai-409.webp" alt="CurlStudio gửi lại request «RC · Hoàn tất khi ví mất phản hồi» (POST {{baseUrl}}/api/trips/{{tripId}}/complete): trạng thái 409 Conflict, body có error code INVALID_TRANSITION và message «Không thể thực hiện &quot;complete&quot; khi chuyến đang ở trạng thái &quot;completed&quot;.»; Kết quả test 0/2 màu đỏ." width="2000" height="1125" loading="lazy"></div>
+<figcaption><b>Hình 6 · Hoàn tất lại bị chặn.</b> 409 Conflict với <code>INVALID_TRANSITION</code>. Kết quả test 0/2 đỏ vì request này viết để chờ 200 — lần gửi lại là chủ động, không phải lỗi sản phẩm.</figcaption>
+</figure>
+
+Đây là nửa API của dòng `complete(id).expect(409)` ở 6.6: hệ thống không cho «hoàn tất lại để thu tiền lại» (R-STATE-03). Nửa kia — ví không nhận thêm lần gọi nào — vẫn chỉ có trong Vitest, vì runner không thấy ví giả. Khoản lệch phải xử lý bằng đối soát, không bằng thao tác lại.
+
+Cuối cùng, đọc lại chuyến bằng request «SM-03 · Khách đọc lại chuyến» của folder smoke; biến `tripId` lúc này đang trỏ vào chuyến RC vừa chạy:
+
+<figure class="tkh-fig">
+<div class="tkh-fig-box"><img src="/images/articles/system-testing/sys-14/06-doc-lai-failed.webp" alt="CurlStudio gửi request «SM-03 · Khách đọc lại chuyến» trong folder SYS-01 · Smoke: trạng thái 200 OK, body JSON cuộn tới paymentMethod vixanh, paymentStatus failed, requestedAt, acceptedAt, completedAt; Kết quả test 1/2 màu đỏ." width="2000" height="1125" loading="lazy"></div>
+<figcaption><b>Hình 7 · Chuyến đã hoàn tất nhưng thanh toán failed.</b> Body có <code>"paymentMethod": "vixanh"</code> và <code>"paymentStatus": "failed"</code>; test 1/2 đỏ vì phép kiểm «paid» của smoke không đạt.</figcaption>
+</figure>
+
+Test đỏ ở đây là tín hiệu đúng: smoke chờ chuyến hoàn tất phải `paid`, và nó bắt được chuyến completed mà chưa ghi nhận thanh toán. Trong vận hành thật, một phép kiểm sau sự cố kiểu này là cách tìm ra các chuyến cần đưa vào hàng đợi đối soát. Lưu ý mượn request của folder khác qua biến dùng chung là thao tác minh hoạ; nó chỉ đúng khi biết chắc `tripId` đang trỏ chuyến nào.
+
+Dấu ✓ ở test RC-03 phải đọc đúng như callout «RC-03 xanh không có nghĩa là đã phục hồi»: nó xác nhận hệ thống **ghi đúng** chuyến là `failed` theo SPEC, không xác nhận điều gì đã được phục hồi. Nửa kia của mâu thuẫn — ví đã trừ 35.000 với khoá `trip:<id>:fare` — nằm ở phía ví, mà CurlStudio chỉ thấy response HTTP. Trong lab code, `chargedKeys()` và `totalCharged()` của ví giả mới chứng minh được tiền đã bị trừ. Kết luận giữ nguyên: khoản này **cần đối soát**, không «sửa» bằng cách thu lại với khoá mới.
+
+Hai giới hạn nữa. Một: 9,04 s (Hình 2, ngày 23/11/2026) và 9.024 ms (Hình 5, ngày 24/11/2026) là các lượt minh hoạ (CurlStudio 0.2.1 qua `pnpm tauri dev`, Windows 11, máy chủ lab Node v22.18.0) — không phải số đo RTO hay hiệu năng, và không so được với thời gian Vitest ở 6.7. Hai: CurlStudio chỉ minh hoạ Thực hành A; restore drill của Thực hành B chạy bằng script PowerShell trên cluster PostgreSQL riêng, không làm bằng CurlStudio.
 
 ## 7. Thực hành B — backup/restore thật trên dữ liệu tổng hợp
 

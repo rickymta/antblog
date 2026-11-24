@@ -1,0 +1,4 @@
+caseId,vehicle,distanceKm,status,expected
+FN-T01,bike,5,200,35000
+FN-T02,bike,2,200,22000
+FN-T03,bike,0.5,200,15000

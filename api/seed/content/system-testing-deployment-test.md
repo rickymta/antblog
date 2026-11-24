@@ -291,9 +291,22 @@ Post-deploy smoke cũng chạy được bằng một API client có giao diện,
 2. Chuột phải folder «SYS-16 · Post-deploy smoke» → **Chạy thư mục**; trong runner chọn environment «Tới Nơi bản triển khai (prod-like)» (`baseUrl = http://localhost:3101`).
 3. Chạy, rồi đọc thanh tổng trước, từng dòng sau.
 
+#### Hai environment, hai bản
+
+Collection không chứa địa chỉ máy chủ; mọi request viết `{{baseUrl}}`. Bản nào nhận request do environment quyết định, nên trước khi bấm chạy hãy mở panel **Môi trường** và đọc giá trị thật của biến.
+
+<figure class="tkh-fig">
+<div class="tkh-fig-box"><img src="/images/articles/system-testing/sys-16/02-moi-truong-prod-like.webp" alt="Panel Môi trường của CurlStudio đang chọn «Tới Nơi bản triển khai (prod-like)». Editor bên phải có biến baseUrl với giá trị http://localhost:3101, nút «Dùng môi trường này» chưa được bấm và nút Xuất. Danh sách bên trái còn Globals và «Tới Nơi lab (local, API test bật)»." width="2000" height="1125" loading="lazy"></div>
+<figcaption><b>Hình 3 · Environment prod-like.</b> Chỉ một biến khác nhau giữa hai environment, nhưng biến đó quyết định request đi tới bản nào.</figcaption>
+</figure>
+
+Environment prod-like chỉ đổi `baseUrl` sang `http://localhost:3101`, không đổi request hay test script nào. Nút «Dùng môi trường này» vẫn chưa bấm: xem một environment chưa có nghĩa là đang dùng nó, nên ô góc phải trên mới là thứ cần nhìn khi chạy.
+
+#### Smoke trên bản prod-like
+
 <figure class="tkh-fig">
 <div class="tkh-fig-box"><img src="/images/articles/system-testing/sys-16/01-post-deploy-smoke-prod-like.webp" alt="Collection Runner của CurlStudio chạy folder «SYS-16 · Post-deploy smoke» với environment «Tới Nơi bản triển khai (prod-like)»; ô environment ở góc phải trên và thanh trạng thái cũng hiện tên này. Thanh tổng ghi Requests 3, Tests 4 / 4 (100%), Thất bại 0, Non-2xx 1. Ba dòng kết quả: DP · Health trả 200; DP · API kiểm thử phải đóng gọi POST localhost:3101/api/test/reset nhận 404 với test R-TEST-01 pass; DP · Báo giá 5 km trả 200 với test cước 35.000 đ pass." width="2000" height="1125" loading="lazy"></div>
-<figcaption><b>Hình 3 · Post-deploy smoke trên bản prod-like.</b> Non-2xx duy nhất là 404 của <code>/api/test/reset</code> — kết quả mong đợi, có dấu ✓ «R-TEST-01: /api/test/* trả 404 trên bản triển khai» đi kèm. Mọi URL đều trỏ <code>localhost:3101</code>, không phải cổng 3100 của lab.</figcaption>
+<figcaption><b>Hình 4 · Post-deploy smoke trên bản prod-like.</b> Non-2xx duy nhất là 404 của <code>/api/test/reset</code> — kết quả mong đợi, có dấu ✓ «R-TEST-01: /api/test/* trả 404 trên bản triển khai» đi kèm. Mọi URL đều trỏ <code>localhost:3101</code>, không phải cổng 3100 của lab.</figcaption>
 </figure>
 
 Ba chi tiết đáng đọc trong ảnh:
@@ -302,10 +315,46 @@ Ba chi tiết đáng đọc trong ảnh:
 - **Cùng collection, khác bản.** Đổi environment là chạy cùng các request trên bản khác — đúng tinh thần «build một lần, chỉ cấu hình khác nhau» ở mục 10.1. URL trong từng dòng là bằng chứng runner đã gọi đúng cổng 3101.
 - **Environment đổi cho cả ứng dụng.** Chọn environment trong runner cũng đổi environment chung của CurlStudio (ô góc phải trên). Chạy xong phải đổi lại «Tới Nơi lab (local, API test bật)»; quên bước này thì folder kế tiếp gọi `/api/test/*` vào bản prod-like và nhận 404 ngay ở bước reset.
 
+#### Một request, đọc tới tận cổng
+
+Thanh tổng của runner chỉ nói «đạt». Muốn biết 404 đến từ đâu, đổi environment chung sang prod-like rồi gửi tay request «DP · API kiểm thử phải đóng».
+
+<figure class="tkh-fig">
+<div class="tkh-fig-box"><img src="/images/articles/system-testing/sys-16/05-api-test-404-prod-like.webp" alt="Request «DP · API kiểm thử phải đóng» gửi tay trong CurlStudio, ô environment góc phải trên ghi «Tới Nơi bản triển khai (prod-like)». Response 404 Not Found với body JSON có error.code NOT_FOUND và message «Không có đường dẫn này.», kết quả test 1/1." width="2000" height="1125" loading="lazy"></div>
+<figcaption><b>Hình 5 · API kiểm thử đóng trên bản prod-like.</b> Đây là phép kiểm của DP-02 làm bằng tay: mã <code>NOT_FOUND</code> giống hệt mọi đường dẫn không tồn tại.</figcaption>
+</figure>
+
+Body ghi `NOT_FOUND` «Không có đường dẫn này.», đúng điều DP-02 assert: bản triển khai không để lộ rằng cửa hậu từng có. Tab **Timeline** của cùng request cho biết request đã thực sự đi tới đâu.
+
+<figure class="tkh-fig">
+<div class="tkh-fig-box"><img src="/images/articles/system-testing/sys-16/06-timeline-3101.webp" alt="Tab Timeline của request trên trong CurlStudio. Dòng địa chỉ ghi POST http://localhost:3101/api/test/reset (127.0.0.1:3101); phần RESPONSE ghi HTTP/1.1 404 Not Found và content-type application/json; charset=utf-8." width="2000" height="1125" loading="lazy"></div>
+<figcaption><b>Hình 6 · Timeline: request đi đúng cổng 3101.</b> Địa chỉ kèm IP và cổng thật là bằng chứng request không rơi vào máy chủ lab ở cổng 3100.</figcaption>
+</figure>
+
+Dòng `POST http://localhost:3101/api/test/reset (127.0.0.1:3101)` gắn kết quả 404 với tiến trình nghe cổng 3101. Đó là cổng, chưa phải build: Timeline vẫn không nói tiến trình ấy chạy mã nào.
+
+#### Phép kiểm biết đỏ
+
+DP-05 dạy rằng phép kiểm chưa từng đỏ thì chưa chứng minh được nó kiểm gì. Bản GUI có một cách tái hiện rẻ hơn: chạy folder SYS-16 với environment **local**, tức máy chủ lab ở cổng 3100 có API kiểm thử bật. Đây chính là lỗi vận hành mà gạch đầu dòng thứ ba ở trên cảnh báo, chỉ là theo chiều ngược lại.
+
+<figure class="tkh-fig">
+<div class="tkh-fig-box"><img src="/images/articles/system-testing/sys-16/03-smoke-tren-lab-do.webp" alt="Collection Runner của CurlStudio chạy folder SYS-16 với environment Tới Nơi lab (local, API test bật). Thanh tổng ghi Requests 3, Tests 3 / 4 (75%), Thất bại 1. Dòng «DP · API kiểm thử phải đóng» gọi localhost:3100/api/test/reset nhận 200 và có dấu ✗ với thông điệp R-TEST-01: /api/test/* trả 404 trên bản triển khai — expected response to have status code 404 but got 200." width="2000" height="1125" loading="lazy"></div>
+<figcaption><b>Hình 7 · Cùng folder, chạy nhầm trên lab: đỏ.</b> Health và báo giá vẫn đạt; chỉ phép kiểm cấu hình phát hiện bản này có cửa hậu mở.</figcaption>
+</figure>
+
+Tests 3/4: health và báo giá 35.000 đ trên lab cũng đúng, nên nếu chỉ có hai phép kiểm đó, smoke sẽ xanh trên một bản đang mở `/api/test/*`. Dòng đỏ ghi rõ mong đợi 404 nhưng nhận 200 từ `localhost:3100`. Với folder dài hơn, bộ lọc **Thất bại** giúp đi thẳng tới dòng đó.
+
+<figure class="tkh-fig">
+<div class="tkh-fig-box"><img src="/images/articles/system-testing/sys-16/04-loc-that-bai.webp" alt="Cùng lượt chạy trong Collection Runner, bộ lọc «Thất bại (1)» đang bật nên danh sách chỉ còn dòng «DP · API kiểm thử phải đóng» với lỗi expected response to have status code 404 but got 200." width="2000" height="1125" loading="lazy"></div>
+<figcaption><b>Hình 8 · Lọc thất bại.</b> Một dòng duy nhất, thông điệp của nó đủ để biết lượt chạy đã trỏ nhầm bản.</figcaption>
+</figure>
+
+Thông điệp mang mã yêu cầu R-TEST-01 nên người đọc báo cáo không phải mở test script để hiểu vì sao đỏ. Lượt đỏ này cũng nằm lại trong nhật ký hoạt động của CurlStudio; [SYS-17](/articles/system-testing-release-dossier) dùng chính nhật ký đó để bàn chuyện danh tính của từng lượt chạy.
+
 <div class="tkh-callout tkh-callout--warn">
-<span class="tkh-callout-title">Ảnh này chứng minh gì và không chứng minh gì</span>
-<p><b>Có:</b> trên tiến trình nghe cổng 3101 (máy chủ chạy <code>NODE_ENV=production</code>), health trả 200, API kiểm thử trả 404, báo giá xe máy 5 km đúng 35.000 đ theo oracle tính tay ở mục 3.3.</p>
-<p><b>Không:</b> lab không có endpoint version nên runner <b>không xác nhận được build ID</b> — nó không biết bản nào đang nghe cổng 3101. Folder không đọc log khởi động như DP-03, không đi hết đường tiền như DP-04 (chỉ báo giá, không đặt, hoàn tất hay đọc lại), không có bản cấu hình sai như DP-05 nên không cho thấy phép kiểm biết đỏ, và tiến trình do người khởi động, không có vòng chờ readiness. Staging, canary và rollback thật không được thực hiện. Đây là lượt minh hoạ ngày 23/11/2026 bằng CurlStudio 0.2.1 (<code>pnpm tauri dev</code>) trên Windows 11, máy chủ lab chạy Node v22.18.0; bằng chứng của bài vẫn là DP-01…05 và MG-01…03 trong Vitest.</p>
+<span class="tkh-callout-title">Các ảnh này chứng minh gì và không chứng minh gì</span>
+<p><b>Có:</b> trên tiến trình nghe cổng 3101 (máy chủ chạy <code>NODE_ENV=production</code>), health trả 200, API kiểm thử trả 404, báo giá xe máy 5 km đúng 35.000 đ theo oracle tính tay ở mục 3.3. Phép kiểm R-TEST-01 của folder đỏ khi gặp một bản có API kiểm thử bật.</p>
+<p><b>Không:</b> lab không có endpoint version nên runner <b>không xác nhận được build ID</b> — nó không biết bản nào đang nghe cổng 3101. Folder không đọc log khởi động như DP-03, không đi hết đường tiền như DP-04 (chỉ báo giá, không đặt, hoàn tất hay đọc lại). Lượt đỏ ở Hình 7 chạy trên máy chủ lab, không phải bản <code>NODE_ENV=production</code> thêm cờ <code>TOINOI_TEST_API=1</code> như DP-05, nên nó chỉ cùng tinh thần với DP-05 chứ không thay DP-05. Tiến trình do người khởi động, không có vòng chờ readiness. Staging, canary và rollback thật không được thực hiện. Đây là lượt minh hoạ ngày 23/11/2026 (Hình 4) và 24/11/2026 (các hình còn lại) bằng CurlStudio 0.2.1 (<code>pnpm tauri dev</code>) trên Windows 11, máy chủ lab chạy Node v22.18.0; bằng chứng của bài vẫn là DP-01…05 và MG-01…03 trong Vitest.</p>
 </div>
 
 ## 7. Thực hành B — migration và khả năng rollback
