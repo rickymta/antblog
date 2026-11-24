@@ -29,6 +29,8 @@ gzip: stdout: No space left on device
 /usr/bin/tar: Error is not recoverable: exiting now
 ```
 
+<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/linux-su-co-dia-day-oom/ssh-studio-05.webp" alt="Terminal của SSH Studio: systemctl --failed cho sao-luu-dem.service failed, journalctl lọc gzip: stdout: No space left on device và tar: Wrote only 6144 of 10240 bytes" width="2400" height="1350" loading="lazy"></div><figcaption>SSH Studio · triệu chứng: job sao lưu đêm thất bại vì hết chỗ</figcaption></figure>
+
 `systemctl --failed` liệt kê unit đang ở trạng thái lỗi: nơi đầu tiên nhìn khi «có gì đó đỏ». Journal của unit cho câu trả lời: **`No space left on device`**, `tar` chỉ ghi được một phần file.
 
 ### Bằng chứng
@@ -56,7 +58,7 @@ total 452M
 - `du -xh --max-depth=1`: toàn bộ nằm ở `sao-luu/` (`-x`: không đi sang ổ khác).
 - `ls -lh`: một bản sao lưu mỗi đêm, không ai xoá bản cũ. File 0 byte của đêm qua là bản dở dang.
 
-<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/linux-su-co-dia-day-oom/ssh-studio-01.webp" alt="Terminal của SSH Studio: systemctl --failed có sao-luu-dem.service failed, journal với gzip No space left on device và tar Wrote only, df -h /du-lieu 100%, du cho thấy sao-luu chiếm toàn bộ, ls -lh sáu bản sao lưu 75M và một file 0 byte" width="2400" height="1350" loading="lazy"></div><figcaption>SSH Studio · <code>/du-lieu</code> đầy vì sao lưu không bao giờ được dọn</figcaption></figure>
+<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/linux-su-co-dia-day-oom/ssh-studio-01.webp" alt="Terminal của SSH Studio: df -h /du-lieu cho 452M dùng, 4.0K trống, 100%; du --max-depth=1 chỉ ra /du-lieu/sao-luu 452M; ls -lh liệt kê các bản sao lưu 75M từ 18 đến 23/11 và bản 24/11 rỗng" width="2400" height="1350" loading="lazy"></div><figcaption>SSH Studio · đĩa nào đầy, cái gì chiếm chỗ: các bản sao lưu cũ</figcaption></figure>
 
 ### Sửa và kiểm chứng
 
@@ -81,11 +83,13 @@ Filesystem      Size  Used Avail Use% Mounted on
 /dev/loop2      488M  152M  300M  34% /du-lieu
 ```
 
+<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/linux-su-co-dia-day-oom/ssh-studio-06.webp" alt="Terminal của SSH Studio: ls -t | tail -n +4 liệt kê bốn bản cũ nhất 18 đến 21/11, xargs rm -v xoá cả bốn" width="2400" height="1350" loading="lazy"></div><figcaption>SSH Studio · giữ 3 bản mới nhất, xoá phần còn lại</figcaption></figure>
+
 - Chạy `ls -t … | tail -n +4` một mình trước để **xem** sẽ xoá gì, rồi mới thêm `| xargs rm -v` (`-v` in từng file đã xoá: bằng chứng cho báo cáo).
 - `systemctl reset-failed` xoá trạng thái lỗi cũ, rồi chạy lại job, xác nhận `inactive` (oneshot chạy xong) chứ không còn `failed`.
 - File dở dang của đêm qua đã được job ghi đè bằng bản đầy đủ.
 
-<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/linux-su-co-dia-day-oom/ssh-studio-02.webp" alt="Terminal của SSH Studio: liệt kê bốn bản cũ, xargs rm -v xoá chúng, reset-failed, start sao-luu-dem, is-failed inactive, df -h /du-lieu còn khoảng 300M" width="2400" height="1350" loading="lazy"></div><figcaption>SSH Studio · giữ 3 bản mới nhất, job chạy lại thành công</figcaption></figure>
+<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/linux-su-co-dia-day-oom/ssh-studio-02.webp" alt="Terminal của SSH Studio: systemctl reset-failed sao-luu-dem, start lại job, is-failed in inactive, df -h /du-lieu còn 34%" width="2400" height="1350" loading="lazy"></div><figcaption>SSH Studio · chạy lại job sao lưu sau khi dọn chỗ</figcaption></figure>
 
 Việc phải làm tiếp (vào runbook): đưa bước dọn vào chính job sao lưu (`ExecStartPost=`), và để `kiem-tra-van-hanh` ([LNX-060](/articles/linux-thuc-hanh-runbook-van-hanh)) cảnh báo từ 80%.
 
@@ -104,6 +108,8 @@ Filesystem     Inodes IUsed IFree IUse% Mounted on
 /dev/loop2      32768 32768     0  100% /du-lieu
 ```
 
+<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/linux-su-co-dia-day-oom/ssh-studio-07.webp" alt="Terminal của SSH Studio: touch /du-lieu/bao-cao-moi.txt báo No space left on device, df -h cho 34% dùng, df -i cho 32768 inode đã dùng hết 100%" width="2400" height="1350" loading="lazy"></div><figcaption>SSH Studio · còn chỗ mà không tạo được file: hết inode</figcaption></figure>
+
 `No space left on device`, trong khi `df -h` nói còn gần 300 MB. Thông báo lỗi giống hệt sự cố 1, nhưng nguyên nhân khác: **hết inode** ([LNX-043](/articles/linux-df-du-dung-luong)). Mỗi file cần một inode; ổ ext4 512 MB này chỉ có 32 768 inode, và tất cả đã dùng hết.
 
 ```text
@@ -121,7 +127,7 @@ Filesystem     Inodes IUsed IFree IUse% Mounted on
 - `find … -delete` xoá ngay trong lúc duyệt, không gom danh sách khổng lồ vào một dòng lệnh (`rm phien-*` sẽ báo `Argument list too long`).
 - `df -i` sau đó: còn 1%.
 
-<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/linux-su-co-dia-day-oom/ssh-studio-03.webp" alt="Terminal của SSH Studio: touch báo No space left on device, df -h còn 299M, df -i IUse 100%, đếm file theo thư mục thấy /du-lieu/tam hơn 32000 file, find -delete, df -i còn 1%" width="2400" height="1350" loading="lazy"></div><figcaption>SSH Studio · hết inode: <code>df -h</code> nói còn chỗ, <code>df -i</code> nói 100%</figcaption></figure>
+<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/linux-su-co-dia-day-oom/ssh-studio-03.webp" alt="Terminal của SSH Studio: find /du-lieu | cut | uniq -c chỉ ra /du-lieu/tam có 32751 file, find -name 'phien-*' -delete, df -i trở về 1%" width="2400" height="1350" loading="lazy"></div><figcaption>SSH Studio · tìm thư mục có nhiều file nhất và xoá file phiên tạm</figcaption></figure>
 
 **Bài học**: thấy `No space left on device` thì luôn chạy **cả** `df -h` và `df -i`.
 

@@ -10,10 +10,14 @@ kiem-tra-van-hanh; echo "ma thoat: $?"
 sudo install -d -o an -g toinoi -m 2775 /srv/toinoi/runbook
 #file /srv/toinoi/runbook/van-hanh.md van-hanh.md 03
 grep -c '^## ' /srv/toinoi/runbook/van-hanh.md
+#shot 06
+#xem files /srv/toinoi/runbook 07
 #clear
 ## 3. Diễn tập: bao-gia dừng giữa giờ
 sudo systemctl stop bao-gia
 kiem-tra-van-hanh | grep -E 'LOI|----'
+#shot 05
+#clear
 sed -n '/^## bao-gia/,/^## Đĩa/p' /srv/toinoi/runbook/van-hanh.md | head -n 5
 journalctl -u bao-gia -n 2 --no-pager -o cat
 sudo systemctl start bao-gia

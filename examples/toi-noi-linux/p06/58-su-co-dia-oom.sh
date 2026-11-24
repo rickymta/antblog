@@ -9,6 +9,8 @@
 ## 1. Triệu chứng: job sao lưu đêm thất bại
 systemctl --failed --no-legend
 journalctl -u sao-luu-dem --no-pager -o cat | grep -E 'tar:|gzip:|Failed' | head -n 4
+#shot 05
+#clear
 ## 2. Đĩa nào đầy, cái gì chiếm chỗ
 df -h /du-lieu
 sudo du -xh --max-depth=1 /du-lieu | sort -h
@@ -18,6 +20,8 @@ ls -lh /du-lieu/sao-luu
 ## 3. Xử lý: giữ 3 bản mới nhất, chạy lại job
 ls -t /du-lieu/sao-luu/*.tar.gz | tail -n +4
 ls -t /du-lieu/sao-luu/*.tar.gz | tail -n +4 | xargs rm -v
+#shot 06
+#clear
 sudo systemctl reset-failed sao-luu-dem
 sudo systemctl start sao-luu-dem
 systemctl is-failed sao-luu-dem; df -h /du-lieu
@@ -29,6 +33,8 @@ systemctl is-failed sao-luu-dem; df -h /du-lieu
 touch /du-lieu/bao-cao-moi.txt
 df -h /du-lieu
 df -i /du-lieu
+#shot 07
+#clear
 sudo find /du-lieu -xdev -type f | cut -d/ -f1-3 | sort | uniq -c | sort -n | tail -n 3
 find /du-lieu/tam -type f -name 'phien-*' -delete
 df -i /du-lieu

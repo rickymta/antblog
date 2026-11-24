@@ -96,6 +96,8 @@ an@toinoi-app-02:~$ sudo ufw insert 1 allow from 10.20.0.10 to any port 22 proto
 Rule inserted
 ```
 
+<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/linux-su-co-khong-ssh-duoc/ssh-studio-11.webp" alt="Tab toinoi-app-02 của SSH Studio vẫn hiện lỗi cũ Jump host toinoi-bastion không mở được kết nối tới toinoi-app-02:22 (ConnectFailed) với nút Kết nối lại, dù quy tắc ufw đã được thêm lại" width="2400" height="1350" loading="lazy"></div><figcaption>SSH Studio · sửa xong trên server, tab cũ vẫn giữ lỗi cho tới khi bấm Kết nối lại</figcaption></figure>
+
 Quy tắc cho bastion mất, chỉ còn quy tắc cho app01. Thêm lại vào đầu danh sách (`insert 1`), thử lại bằng `nc` từ bastion trước khi thử SSH Studio.
 
 ## 5. Tình huống 4: server từ chối key
@@ -155,6 +157,10 @@ toinoi-app-02 ED25519 SHA256:RtHbm5duo8D/RDMzT9K2WtYCVwf4ZTjRpWNu9aFVFhw
 ```
 
 <figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/linux-su-co-khong-ssh-duoc/ssh-studio-08.webp" alt="Terminal của SSH Studio trên toinoi-app-01: ssh app02 báo REMOTE HOST IDENTIFICATION HAS CHANGED, ssh-keygen -R toinoi-app-02, ssh app02 hostname ghi nhận host key mới, ssh-keygen -lF in fingerprint RtHbm5 trùng với console" width="2400" height="1350" loading="lazy"></div><figcaption>SSH Studio · cập nhật <code>known_hosts</code> của app01 sau khi đã đối chiếu</figcaption></figure>
+
+<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/linux-su-co-khong-ssh-duoc/ssh-studio-09.webp" alt="Hộp thoại Nhật ký hoạt động của SSH Studio: các dòng lỗi đỏ theo thứ tự thời gian: toinoi-bastion target machine actively refused, Jump host không mở được kết nối tới toinoi-app-02:22, xác thực thất bại, Host key đã thay đổi, rồi Đã kết nối an@toinoi-app-02" width="2400" height="1350" loading="lazy"></div><figcaption>SSH Studio · nhật ký hoạt động: năm tình huống, năm thông báo lỗi khác nhau</figcaption></figure>
+
+<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/linux-su-co-khong-ssh-duoc/ssh-studio-10.webp" alt="Launchpad của SSH Studio, tab Phiên đang mở có đủ ba phiên toinoi-app-01, toinoi-bastion và toinoi-app-02 đều Đã kết nối" width="2400" height="1350" loading="lazy"></div><figcaption>SSH Studio · sau năm sự cố, cả ba server đều kết nối lại được</figcaption></figure>
 
 ## 7. Trình tự khi không SSH được
 

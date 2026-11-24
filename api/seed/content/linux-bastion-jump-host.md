@@ -40,6 +40,8 @@ an@toinoi-bastion:~$ nc -zv -w 3 toinoi-app-02 22
 Connection to toinoi-app-02 (10.20.0.12) 22 port [tcp/ssh] succeeded!
 ```
 
+<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/linux-bastion-jump-host/ssh-studio-07.webp" alt="Terminal của SSH Studio trên toinoi-bastion: cat 10-bastion.conf, sshd -T cho permitrootlogin no, passwordauthentication no, kbdinteractiveauthentication no, x11forwarding no, allowtcpforwarding yes, allowagentforwarding no; ip -br addr cho eth0 10.20.0.10/24" width="2400" height="1350" loading="lazy"></div><figcaption>SSH Studio · cấu hình sshd của bastion: chỉ key, cho chuyển tiếp TCP, không chuyển agent</figcaption></figure>
+
 | Thiết lập | Vì sao |
 |---|---|
 | `PasswordAuthentication no`, `KbdInteractiveAuthentication no` | Máy mở ra ngoài: chỉ nhận key, không cho dò mật khẩu |
@@ -50,7 +52,7 @@ Connection to toinoi-app-02 (10.20.0.12) 22 port [tcp/ssh] succeeded!
 
 Bastion có hai mặt: cổng 2200 trên máy bạn (trên máy ảo thật là IP công khai) và `10.20.0.10` trong mạng nội bộ. Từ đó, cổng 22 của app02 tới được.
 
-<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/linux-bastion-jump-host/ssh-studio-01.webp" alt="Terminal của SSH Studio trên toinoi-bastion: nội dung 10-bastion.conf, sudo sshd -T cho thấy passwordauthentication no, allowagentforwarding no, allowtcpforwarding yes, ip -br addr với 10.20.0.10/24, nc tới toinoi-app-02 cổng 22 succeeded" width="2400" height="1350" loading="lazy"></div><figcaption>SSH Studio · bastion: chỉ nhận key, được phép mở kênh TCP</figcaption></figure>
+<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/linux-bastion-jump-host/ssh-studio-01.webp" alt="Terminal của SSH Studio trên toinoi-bastion: nc -zv -w 3 toinoi-app-02 22 báo Connection to toinoi-app-02 (10.20.0.12) 22 port succeeded" width="2400" height="1350" loading="lazy"></div><figcaption>SSH Studio · từ bastion đi được tới cổng 22 của toinoi-app-02</figcaption></figure>
 
 ## 2. toinoi-app-02 qua jump host
 
@@ -66,6 +68,10 @@ Hai chi tiết dễ nhầm:
 Bấm Kết nối. Lần đầu, SSH Studio hỏi host key **của app02**: mỗi bước nhảy được kiểm tra host key riêng, ghi vào Known Hosts theo địa chỉ `[toinoi-app-02]:22`.
 
 <figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/linux-bastion-jump-host/ssh-studio-03.webp" alt="Hộp thoại Xác nhận danh tính server của SSH Studio cho toinoi-app-02, fingerprint ED25519 SHA256:bbig/ZMau7+NiJi6Wf6YRxtLARwSfq7ZVPTq6EAMm6U" width="2400" height="1350" loading="lazy"></div><figcaption>SSH Studio · đối chiếu host key của <code>toinoi-app-02</code>, kể cả khi đi qua bastion</figcaption></figure>
+
+<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/linux-bastion-jump-host/ssh-studio-09.webp" alt="Trang Known Hosts của SSH Studio: ba mục [127.0.0.1]:2200 của bastion, [127.0.0.1]:2222 của app01 và [toinoi-app-02]:22 ghi theo tên nội bộ của app02" width="2400" height="1350" loading="lazy"></div><figcaption>SSH Studio · app02 được ghi trong Known Hosts theo tên nội bộ, không theo bastion</figcaption></figure>
+
+<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/linux-bastion-jump-host/ssh-studio-10.webp" alt="Trang Servers của SSH Studio: thư mục Hạ tầng có toinoi-bastion, thư mục Production có toinoi-app-01 và toinoi-app-02 với cột Xác thực SSH key · Jump, cả ba đều có phiên hoạt động" width="2400" height="1350" loading="lazy"></div><figcaption>SSH Studio · trang Servers: toinoi-app-02 đi qua jump host</figcaption></figure>
 
 Vì sao vẫn phải đối chiếu khi đã tin bastion? Vì bastion chỉ chuyển byte. Nếu bastion bị chiếm, kẻ tấn công có thể trỏ kênh tới một máy giả; host key của app02 là thứ duy nhất chứng minh đầu kia đúng là app02.
 
@@ -140,6 +146,8 @@ toinoi-app-02
 an@toinoi-app-01:~$ nc -zv -w 3 toinoi-app-02 22
 Connection to toinoi-app-02 (10.20.0.12) 22 port [tcp/ssh] succeeded!
 ```
+
+<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/linux-bastion-jump-host/ssh-studio-08.webp" alt="Terminal của SSH Studio trên toinoi-app-01: ssh app02 hostname in toinoi-app-02, nc -zv toinoi-app-02 22 báo succeeded" width="2400" height="1350" loading="lazy"></div><figcaption>SSH Studio · app01 vẫn tới được app02 để rsync sao lưu</figcaption></figure>
 
 ## 6. Lỗi thường gặp
 

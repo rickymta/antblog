@@ -49,12 +49,14 @@ ssh: Could not resolve hostname toinoi-khong-co: No address associated with host
 LOI: toinoi-khong-co
 ```
 
+<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/linux-nhieu-server-ansible-toi-thieu/ssh-studio-05.webp" alt="Terminal của SSH Studio: vim ~/.ssh/config, ssh toinoi-bastion hostname thêm bastion vào known_hosts, vòng for in uptime và df -h / của toinoi-app-02 và toinoi-bastion" width="2400" height="1350" loading="lazy"></div><figcaption>SSH Studio · vòng lặp SSH đơn giản nhất qua hai máy</figcaption></figure>
+
 - `ssh MÁY 'lệnh'` chạy lệnh trên máy kia rồi thoát; stdout trở về máy mình, nên nối được vào `sed`, `grep` như lệnh tại chỗ.
 - Đặt lệnh trong **nháy đơn**: `$`, `|` được hiểu ở máy kia. Nháy kép thì shell của máy mình mở rộng trước.
 - `| sed "s/^/$h: /"` gắn tên máy vào đầu mỗi dòng: chạy nhiều máy thì phải biết dòng nào của máy nào.
 - Máy không tới được: `ssh` trả mã thoát khác 0, `||` bắt lấy và ghi lỗi, vòng lặp đi tiếp. `ConnectTimeout=3` để một máy chết không giữ cả vòng lặp hai phút.
 
-<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/linux-nhieu-server-ansible-toi-thieu/ssh-studio-01.webp" alt="Terminal của SSH Studio trên toinoi-app-01: vim ~/.ssh/config, ssh toinoi-bastion hostname, vòng lặp in uptime và df của app02 và bastion, vòng lặp gắn tên máy vào PRETTY_NAME, vòng lặp có máy không phân giải được in LOI" width="2400" height="1350" loading="lazy"></div><figcaption>SSH Studio · vòng lặp SSH qua app02 và bastion</figcaption></figure>
+<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/linux-nhieu-server-ansible-toi-thieu/ssh-studio-01.webp" alt="Terminal của SSH Studio trên toinoi-app-01: vòng for đọc PRETTY_NAME của toinoi-app-02 và toinoi-bastion đều là Ubuntu 24.04.5 LTS; vòng có toinoi-khong-co báo Could not resolve hostname và in LOI: toinoi-khong-co" width="2400" height="1350" loading="lazy"></div><figcaption>SSH Studio · vòng lặp SSH: một máy lỗi thì in dòng LOI, các máy khác vẫn chạy</figcaption></figure>
 
 Vòng lặp đủ cho việc **đọc**: thu thập thông tin, kiểm tra nhanh. Việc **sửa cấu hình** trên nhiều máy thì cần thêm: chỉ sửa khi chưa đúng, kiểm tra trước khi áp, nạp lại dịch vụ khi có thay đổi, báo máy nào lỗi. Viết tất cả bằng bash rất dễ sai. Đó là việc của Ansible.
 
@@ -85,6 +87,8 @@ toinoi-bastion | CHANGED | rc=0 >>
  09:41:35 up  2:43,  0 user,  load average: 0.86, 0.53, 0.43
 ```
 
+<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/linux-nhieu-server-ansible-toi-thieu/ssh-studio-06.webp" alt="Terminal của SSH Studio: apt install ansible-core 2.16.3, ansible --version, tạo ~/van-hanh, vim hosts.ini, ansible all -m ping cho toinoi-app-02 và toinoi-bastion đều SUCCESS pong" width="2400" height="1350" loading="lazy"></div><figcaption>SSH Studio · cài Ansible trên app01, <code>-m ping</code> kiểm tra kết nối tới mọi máy</figcaption></figure>
+
 **Inventory** liệt kê máy và nhóm:
 
 ```ini
@@ -104,7 +108,7 @@ ansible_python_interpreter=/usr/bin/python3
 - `ansible all -a 'lệnh'` (module `command`) chạy một lệnh trên mọi máy, song song. `CHANGED` ở đây chỉ có nghĩa là lệnh đã chạy: Ansible không biết một lệnh tuỳ ý có thay đổi gì không.
 - `all` có thể thay bằng tên nhóm (`app`, `ha_tang`) hay tên máy.
 
-<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/linux-nhieu-server-ansible-toi-thieu/ssh-studio-02.webp" alt="Terminal của SSH Studio: cài ansible-core, ansible --version, vim hosts.ini, ansible all -m ping với toinoi-app-02 và toinoi-bastion SUCCESS pong, ansible all -a uptime" width="2400" height="1350" loading="lazy"></div><figcaption>SSH Studio · Ansible ad-hoc: <code>ping</code> và một lệnh trên mọi máy</figcaption></figure>
+<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/linux-nhieu-server-ansible-toi-thieu/ssh-studio-02.webp" alt="Terminal của SSH Studio: ansible all -i hosts.ini -a 'uptime' trả CHANGED rc=0 cho toinoi-bastion và toinoi-app-02 kèm dòng uptime của từng máy" width="2400" height="1350" loading="lazy"></div><figcaption>SSH Studio · Ansible chạy một lệnh trên mọi máy trong inventory</figcaption></figure>
 
 ## 3. Playbook: cùng một chính sách cho mọi máy
 
@@ -177,11 +181,13 @@ toinoi-bastion | CHANGED | rc=0 >>
 maxauthtries 3
 ```
 
+<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/linux-nhieu-server-ansible-toi-thieu/ssh-studio-07.webp" alt="Terminal của SSH Studio: vim ssh-toinoi.yml, tạo ~/.config/ansible-become quyền 600, ansible-playbook chạy lần đầu: Gathering Facts, task Gioi han so lan thu xac thuc changed, handler Nap lai sshd, PLAY RECAP changed=2 trên mỗi máy" width="2400" height="1350" loading="lazy"></div><figcaption>SSH Studio · playbook chạy lần đầu: đổi cấu hình và nạp lại sshd</figcaption></figure>
+
 - Lần đầu: task `changed` trên cả hai máy, handler chạy.
 - **Lần hai: `changed=0`**, handler không chạy. Đây là tính **lặp lại** (*idempotent*): chạy bao nhiêu lần cũng ra cùng trạng thái, nên playbook chạy được định kỳ để kéo máy «lệch» về đúng.
 - `sshd -T` trên mọi máy xác nhận cấu hình đang có hiệu lực.
 
-<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/linux-nhieu-server-ansible-toi-thieu/ssh-studio-04.webp" alt="Terminal của SSH Studio: ansible-playbook lần đầu với changed trên toinoi-app-02 và toinoi-bastion và handler Nap lai sshd, lần hai PLAY RECAP changed=0, sshd -T trên mọi máy có maxauthtries 3" width="2400" height="1350" loading="lazy"></div><figcaption>SSH Studio · lần đầu đổi, lần hai không đổi gì</figcaption></figure>
+<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/linux-nhieu-server-ansible-toi-thieu/ssh-studio-04.webp" alt="Terminal của SSH Studio: chạy playbook lần hai, PLAY RECAP cho changed=0 trên cả hai máy; ansible -a 'sshd -T' --become lọc maxauthtries 3 trên toinoi-app-02 và toinoi-bastion" width="2400" height="1350" loading="lazy"></div><figcaption>SSH Studio · chạy lại không đổi gì, cả hai máy đã có <code>maxauthtries 3</code></figcaption></figure>
 
 ## 4. Lỗi thường gặp
 

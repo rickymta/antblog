@@ -52,6 +52,8 @@ an@toinoi-app-01:~$ systemctl list-unit-files --type=service --state=enabled --n
 bao-gia.service cron.service e2scrub_reap.service getty@.service nginx.service ssh.service systemd-pstore.service ufw.service unattended-upgrades.service
 ```
 
+<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/linux-gia-co-server-fail2ban/ssh-studio-05.webp" alt="Terminal của SSH Studio: ss -tlnpH rút gọn cho nginx 443 và 80, sshd 22; ufw status cho OpenSSH LIMIT và 443/tcp ALLOW từ 10.20.0.0/24" width="2400" height="1350" loading="lazy"></div><figcaption>SSH Studio · checklist: cổng nào mở ra ngoài và tường lửa cho phép gì</figcaption></figure>
+
 | Câu hỏi | Lệnh | Trên app01 |
 |---|---|---|
 | Cổng nào nghe ra ngoài? | `ss -tlnpH` ([LNX-041](/articles/linux-ip-cong-ss)) | 22 (sshd), 80, 443 (nginx); `bao-gia` chỉ loopback |
@@ -62,7 +64,7 @@ bao-gia.service cron.service e2scrub_reap.service getty@.service nginx.service s
 
 Checklist không tự sửa gì: nó tạo ra danh sách việc. Ở đây có hai việc rõ ràng. Tài khoản thử của `cuong` (Phần 3) nên khoá (`sudo usermod -L -s /usr/sbin/nologin cuong`). Còn `allowagentforwarding yes` thì nên tắt, như trên bastion ([LNX-052](/articles/linux-bastion-jump-host)).
 
-<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/linux-gia-co-server-fail2ban/ssh-studio-01.webp" alt="Terminal của SSH Studio: ss rút gọn bằng awk, ufw status, sshd -T với maxauthtries 3, permitrootlogin no, passwordauthentication no, authenticationmethods publickey,keyboard-interactive, danh sách tài khoản có shell, nhóm sudo, các dịch vụ bật sẵn" width="2400" height="1350" loading="lazy"></div><figcaption>SSH Studio · checklist năm câu hỏi trên <code>toinoi-app-01</code></figcaption></figure>
+<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/linux-gia-co-server-fail2ban/ssh-studio-01.webp" alt="Terminal của SSH Studio: sshd -T cho maxauthtries 3, permitrootlogin no, passwordauthentication no, authenticationmethods publickey,keyboard-interactive; awk liệt kê các tài khoản có shell đăng nhập; getent group sudo cho an,binh; các dịch vụ đang bật lúc boot" width="2400" height="1350" loading="lazy"></div><figcaption>SSH Studio · checklist: sshd, tài khoản đăng nhập được, nhóm sudo, dịch vụ bật sẵn</figcaption></figure>
 
 ## 2. fail2ban
 
@@ -113,6 +115,8 @@ Status for the jail: sshd
    |- Total banned:     0
    `- Banned IP list:
 ```
+
+<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/linux-gia-co-server-fail2ban/ssh-studio-06.webp" alt="Terminal của SSH Studio: apt install fail2ban, sudoedit jail.d/toinoi.local, restart fail2ban, fail2ban-client status sshd cho Currently failed 0 và Banned IP list trống" width="2400" height="1350" loading="lazy"></div><figcaption>SSH Studio · fail2ban đã chạy, jail sshd đọc journal của sshd</figcaption></figure>
 
 ## 3. Thử: một máy dò từ app02
 
@@ -171,6 +175,8 @@ an@toinoi-app-01:~$ sudo fail2ban-client status sshd | grep -E 'Currently banned
    |- Currently banned: 0
    `- Banned IP list:
 ```
+
+<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/linux-gia-co-server-fail2ban/ssh-studio-04.webp" alt="Terminal của SSH Studio: fail2ban-client set sshd unbanip 10.20.0.12 in 1, status sshd cho Currently banned 0 và Banned IP list trống" width="2400" height="1350" loading="lazy"></div><figcaption>SSH Studio · gỡ chặn một IP bằng <code>unbanip</code></figcaption></figure>
 
 Người thật bị chặn (đồng nghiệp gõ sai OTP từ quán cà phê) thì gỡ như trên, rồi cân nhắc thêm IP của họ vào `ignoreip`, hoặc tốt hơn: cho họ đi qua bastion.
 

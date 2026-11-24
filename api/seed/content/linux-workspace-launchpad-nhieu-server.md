@@ -52,6 +52,8 @@ Nút **Kết nối tất cả** trên trang Servers (hay trên dòng của một
 
 <figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/linux-workspace-launchpad-nhieu-server/ssh-studio-03.webp" alt="Hộp thoại Xác nhận danh tính server của SSH Studio cho toinoi-bastion tại 127.0.0.1:2200, fingerprint ED25519 SHA256:raPJwwASajL8O9BfMyJrQ/ADRm/KSFNfLDQmA4krHUA, nút Huỷ kết nối và Tin cậy và kết nối" width="2400" height="1350" loading="lazy"></div><figcaption>SSH Studio · lần đầu kết nối <code>toinoi-bastion</code>: đối chiếu fingerprint</figcaption></figure>
 
+<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/linux-workspace-launchpad-nhieu-server/ssh-studio-08.webp" alt="Trang Known Hosts của SSH Studio sau khi Kết nối tất cả: hai mục [127.0.0.1]:2200 của toinoi-bastion và [127.0.0.1]:2222 của toinoi-app-01 cùng fingerprint SHA256" width="2400" height="1350" loading="lazy"></div><figcaption>SSH Studio · Known Hosts có thêm fingerprint của toinoi-bastion</figcaption></figure>
+
 Bastion là máy mới, nên quy tắc của [LNX-002](/articles/linux-dung-lab-docker-ket-noi-ssh-studio) vẫn áp dụng: hỏi Bình fingerprint thật (đọc trên console bằng `ssh-keygen -lf /etc/ssh/ssh_host_ed25519_key.pub`) và chỉ tin khi trùng. Bastion là cửa vào của cả mạng nội bộ: tin nhầm ở đây là đưa mọi kết nối sau đó qua một máy lạ.
 
 Với hơn 3 server, SSH Studio hỏi xác nhận trước khi mở nhiều phiên cùng lúc; server cần mật khẩu hay mã OTP lần lượt hỏi từng cái.
@@ -61,6 +63,8 @@ Với hơn 3 server, SSH Studio hỏi xác nhận trước khi mở nhiều phi�
 Trong tab của bastion:
 
 <figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/linux-workspace-launchpad-nhieu-server/ssh-studio-04.webp" alt="Terminal của SSH Studio trên toinoi-bastion: hostname, who cho thấy phiên của an trên pts/0 từ 10.20.0.1, w -h không in gì, last -n 3 an ghi phiên đang mở (still logged in)" width="2400" height="1350" loading="lazy"></div><figcaption>SSH Studio · <code>who</code>, <code>w</code>, <code>last</code> trên bastion</figcaption></figure>
+
+<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/linux-workspace-launchpad-nhieu-server/ssh-studio-06.webp" alt="Terminal của SSH Studio trên toinoi-app-01: who cho an trên pts/0 từ 10.20.0.1, last -n 3 an cho phiên đang mở và một phiên tmux cũ" width="2400" height="1350" loading="lazy"></div><figcaption>SSH Studio · trên toinoi-app-01: cùng câu hỏi, câu trả lời của máy khác</figcaption></figure>
 
 | Lệnh | Cho biết |
 |---|---|
@@ -77,6 +81,8 @@ Phiên của An đến từ `10.20.0.1`: cổng 2200 trên máy bạn được D
 **Launchpad** không mở kết nối. Nó là bảng theo dõi của mọi workspace: phiên đang mở, server dùng gần đây, port forward, truyền file, và mục **Cần chú ý** (phiên lỗi, kết nối thất bại, truyền file hỏng). Số trên mục Launchpad ở cột trái là số việc cần chú ý; khi không có gì, nó là số phiên đang mở.
 
 <figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/linux-workspace-launchpad-nhieu-server/ssh-studio-05.webp" alt="Launchpad của SSH Studio, tab Phiên đang mở: hai phiên toinoi-app-01 và toinoi-bastion với workspace, thời gian kết nối và nút Mở, Đóng phiên" width="2400" height="1350" loading="lazy"></div><figcaption>SSH Studio · Launchpad: hai phiên đang mở</figcaption></figure>
+
+<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/linux-workspace-launchpad-nhieu-server/ssh-studio-07.webp" alt="Hộp thoại Nhật ký hoạt động của SSH Studio: các dòng Đã lưu server, Đã kết nối an@127.0.0.1 của toinoi-app-01 và toinoi-bastion, cùng các lần tải file và đồng bộ trước đó" width="2400" height="1350" loading="lazy"></div><figcaption>SSH Studio · nhật ký hoạt động ghi lại việc thêm server và kết nối của cả hai máy</figcaption></figure>
 
 Phím tắt: `1`…`6` đổi tab, `J`/`K` chọn dòng, `Enter` mở phiên, `/` tìm. Mở Launchpad từ bất cứ đâu bằng **Ctrl+Shift+D**.
 

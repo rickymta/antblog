@@ -115,6 +115,10 @@ Runbook đặt trong `/srv/toinoi/runbook/` (nhóm `toinoi` ghi được, setgid
 
 <figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/linux-thuc-hanh-runbook-van-hanh/ssh-studio-03.webp" alt="Vim mở /srv/toinoi/runbook/van-hanh.md trong SSH Studio: các mục Vào server, Kiểm tra hằng ngày, bao-gia không trả lời với ba bước, Đĩa hoặc inode trên 80%, Không SSH được, Cập nhật và khởi động lại" width="2400" height="1350" loading="lazy"></div><figcaption>SSH Studio · runbook <code>van-hanh.md</code></figcaption></figure>
 
+<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/linux-thuc-hanh-runbook-van-hanh/ssh-studio-06.webp" alt="Terminal của SSH Studio: install -d tạo /srv/toinoi/runbook cho nhóm toinoi với setgid, vim van-hanh.md, grep -c '^## ' đếm 6 mục" width="2400" height="1350" loading="lazy"></div><figcaption>SSH Studio · runbook là một file Markdown nằm ngay trên server</figcaption></figure>
+
+<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/linux-thuc-hanh-runbook-van-hanh/ssh-studio-07.webp" alt="Khung Files của SSH Studio: Máy của bạn bên trái, Remote server ở /srv/toinoi/runbook bên phải với file van-hanh.md 1.6 KB" width="2400" height="1350" loading="lazy"></div><figcaption>SSH Studio · mở runbook từ khung Files khi cần</figcaption></figure>
+
 Nguyên tắc viết runbook:
 
 - **Mỗi mục bắt đầu từ triệu chứng** người trực nhìn thấy («bao-gia không trả lời»), không từ nguyên nhân («Python lỗi»).
@@ -146,12 +150,14 @@ an@toinoi-app-01:~$ sleep 2; kiem-tra-van-hanh | tail -n 1
 ---- 0 muc LOI
 ```
 
+<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/linux-thuc-hanh-runbook-van-hanh/ssh-studio-05.webp" alt="Terminal của SSH Studio: sudo systemctl stop bao-gia, kiem-tra-van-hanh | grep LOI cho hai dòng LOI: dich vu bao-gia inactive và HTTPS /suc-khoe khong tra loi, tổng 2 muc LOI" width="2400" height="1350" loading="lazy"></div><figcaption>SSH Studio · diễn tập: bao-gia dừng, script kiểm tra bắt được ngay</figcaption></figure>
+
 1. Script báo **2 LOI**: dịch vụ `inactive`, HTTPS không trả lời. Đúng hai triệu chứng của cùng một nguyên nhân.
 2. Mở đúng mục của runbook (`sed -n '/^## bao-gia/,/^## Đĩa/p'` in một mục).
 3. Bước 1 của runbook: journal cho thấy dịch vụ được **dừng** (`Deactivated successfully`), không phải chết vì lỗi. Có ai đó đã dừng nó.
 4. Bước 2: `start`, chạy lại script: **0 LOI**.
 
-<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/linux-thuc-hanh-runbook-van-hanh/ssh-studio-04.webp" alt="Terminal của SSH Studio: systemctl stop bao-gia, kiem-tra-van-hanh lọc ra hai dòng LOI và 2 muc LOI, sed in mục bao-gia không trả lời của runbook, journalctl cho thấy Stopped bao-gia, systemctl start bao-gia, kiem-tra-van-hanh còn 0 muc LOI" width="2400" height="1350" loading="lazy"></div><figcaption>SSH Studio · diễn tập theo runbook: phát hiện, xử lý, kiểm chứng</figcaption></figure>
+<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/linux-thuc-hanh-runbook-van-hanh/ssh-studio-04.webp" alt="Terminal của SSH Studio: sed in mục bao-gia không trả lời của runbook với ba bước xử lý, journalctl -u bao-gia cho Deactivated successfully và Stopped, systemctl start bao-gia, kiem-tra-van-hanh | tail -n 1 in 0 muc LOI" width="2400" height="1350" loading="lazy"></div><figcaption>SSH Studio · làm theo runbook: đọc log, khởi động lại, kiểm tra lại về 0 lỗi</figcaption></figure>
 
 Sau diễn tập, thêm vào runbook điều vừa học: «journal ghi `Stopped`/`Deactivated` nghĩa là có người dừng: hỏi kênh vận hành trước khi bật lại.»
 

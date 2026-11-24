@@ -33,12 +33,14 @@ an@toinoi-app-01:/srv/toinoi/bao-gia$ curl -s --cacert /etc/ssl/certs/bao-gia.to
 {"trang_thai": "ok", "phien_ban": "1.5.0", "pid": 4279, "moi_truong": "production", "so_dich_vu": 4}
 ```
 
+<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/linux-trien-khai-release-symlink/ssh-studio-05.webp" alt="Terminal của SSH Studio: cd /srv/toinoi/bao-gia, ls -l cho current là symlink tới releases/1.5.0, cùng các thư mục releases, scripts, shared" width="2400" height="1350" loading="lazy"></div><figcaption>SSH Studio · cấu trúc triển khai: <code>current</code> là symlink</figcaption></figure>
+
 - `releases/` giữ mọi phiên bản đã triển khai: `1.4.2`, `1.5.0`, `1.6.0` (thư mục chuẩn bị ở [LNX-046](/articles/linux-dong-bo-rsync-ssh-studio)).
 - `current -> releases/1.5.0`: unit systemd dùng `/srv/toinoi/bao-gia/current/bao-gia` ([LNX-036](/articles/linux-systemd-unit-bao-gia)), nên chỉ cần đổi symlink là đổi bản được chạy.
 - `shared/` (cấu hình, log) nằm ngoài mọi release: không bị mất khi đổi bản.
 - Symlink **tương đối** (`releases/1.5.0`): chép cả thư mục sang máy khác vẫn đúng.
 
-<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/linux-trien-khai-release-symlink/ssh-studio-01.webp" alt="Terminal của SSH Studio: ls -l /srv/toinoi/bao-gia với current trỏ tới releases/1.5.0, ls releases với 1.4.2 1.5.0 1.6.0, curl HTTPS trả phien_ban 1.5.0" width="2400" height="1350" loading="lazy"></div><figcaption>SSH Studio · <code>current</code> đang trỏ tới 1.5.0</figcaption></figure>
+<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/linux-trien-khai-release-symlink/ssh-studio-01.webp" alt="Terminal của SSH Studio: ls releases cho 1.4.2, 1.5.0, 1.6.0, readlink current trỏ releases/1.5.0, curl https://bao-gia.toinoi.lab/suc-khoe trả phiên bản 1.5.0" width="2400" height="1350" loading="lazy"></div><figcaption>SSH Studio · đang chạy 1.5.0, đã có sẵn thư mục 1.6.0</figcaption></figure>
 
 ## 2. Đưa bản build vào chỗ
 
@@ -51,6 +53,8 @@ Files releases/1.5.0/bao-gia and releases/1.6.0/bao-gia differ
 an@toinoi-app-01:/srv/toinoi/bao-gia$ grep -m1 PHIEN_BAN releases/1.6.0/bao-gia
 PHIEN_BAN = '1.6.0'
 ```
+
+<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/linux-trien-khai-release-symlink/ssh-studio-06.webp" alt="Terminal của SSH Studio: install bản build bao-gia-1.6.0 vào releases/1.6.0, diff -rq với 1.5.0 cho THAY-DOI.txt mới, bang-gia.csv và bao-gia khác, grep PHIEN_BAN cho 1.6.0" width="2400" height="1350" loading="lazy"></div><figcaption>SSH Studio · bản build 1.6.0 đã vào đúng thư mục release</figcaption></figure>
 
 `diff -rq` so hai release: khác bảng giá, chương trình, và có thêm ghi chú thay đổi. Chưa có gì đang chạy bị đụng tới.
 
@@ -94,6 +98,8 @@ an@toinoi-app-01:/srv/toinoi/bao-gia$ ln -sfn releases/1.5.0 current.moi && mv -
 an@toinoi-app-01:/srv/toinoi/bao-gia$ sleep 1; curl -s --cacert /etc/ssl/certs/bao-gia.toinoi.lab.crt https://bao-gia.toinoi.lab/suc-khoe
 {"trang_thai": "ok", "phien_ban": "1.5.0", "pid": 9024, "moi_truong": "production", "so_dich_vu": 4}
 ```
+
+<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/linux-trien-khai-release-symlink/ssh-studio-07.webp" alt="Terminal của SSH Studio: ln -sfn releases/1.5.0 current.moi &amp;&amp; mv -T current.moi current &amp;&amp; restart bao-gia trên một dòng, curl /suc-khoe trả lại phiên bản 1.5.0" width="2400" height="1350" loading="lazy"></div><figcaption>SSH Studio · quay lui về 1.5.0 bằng một dòng lệnh</figcaption></figure>
 
 Bản cũ vẫn nằm nguyên trong `releases/1.5.0`, nên quay lui chỉ là trỏ `current` về nó và khởi động lại. Không chép, không tải lại, không đoán.
 
@@ -154,6 +160,8 @@ releases/1.6.0
 ```
 
 <figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/linux-trien-khai-release-symlink/ssh-studio-04.webp" alt="Terminal của SSH Studio: trien-khai 1.9.9 báo LOI khong co release, trien-khai 1.6.0 in trien khai 1.6.0 dang chay 1.5.0 rồi OK bao-gia 1.6.0 dang chay, readlink current là releases/1.6.0" width="2400" height="1350" loading="lazy"></div><figcaption>SSH Studio · <code>trien-khai 1.6.0</code>: đổi, kiểm tra, xong</figcaption></figure>
+
+<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/linux-trien-khai-release-symlink/ssh-studio-08.webp" alt="Khung Files của SSH Studio: Máy của bạn bên trái, Remote server ở /srv/toinoi/bao-gia/releases bên phải với ba thư mục 1.4.2, 1.5.0, 1.6.0" width="2400" height="1350" loading="lazy"></div><figcaption>SSH Studio · khung Files: mỗi bản phát hành một thư mục</figcaption></figure>
 
 ## 7. Lỗi thường gặp
 

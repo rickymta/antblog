@@ -2,12 +2,12 @@ PS> Get-Content $env:APPDATA\dev.sshstudio.desktop\workspace.json  # rút gọn:
 {
   "keys": [
     {
-      "id": "5ad32e25-76f9-4fd4-8dcb-857268f2d4b2",
+      "id": "aea9f67e-53e9-4109-8c19-5ec158f0c1e3",
       "name": "an-laptop",
       "algorithm": "ssh-ed25519",
       "fingerprint": "SHA256:yJ42WJZlgwZsUsCCjvAX237jMd5+ssxlWKtoa…",
       "publicKey": "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIFvQW8mH…",
-      "secret": "vaNPkg+15vEPWsht+sMuXx0HWtLTkam5XqGn2X4o13Ft…"
+      "secret": "5HTecJWlfYzdU4ROPAGozgSGb7Pop18GcKQtSypG7BE7…"
     }
   ]
 }
@@ -21,8 +21,8 @@ PS> Get-Content .\ssh-studio-2026-11-24.sshstudio-backup  # rút gọn
     "memory": 19456,
     "iterations": 2,
     "parallelism": 1,
-    "salt": "GJTS/37qQRbZ5bpZ2jmvSQ=="
+    "salt": "QfWU1zOA87lfiHwJK7D4yw=="
   },
-  "nonce": "xemOcaH4sZ7OMbxu",
-  "data": "gL5UpfS/kB0legDfK770gajabnoUCLx2QwRrhss0OFI5…"
+  "nonce": "X4AZj8gdhcL7ZkOg",
+  "data": "4+UvF66rUwNr+IY/eD031MKNMFSLcY9jGcD40yWLW3tK…"
 }

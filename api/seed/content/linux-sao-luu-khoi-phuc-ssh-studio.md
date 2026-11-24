@@ -67,6 +67,8 @@ Trang **SSH Keys** → **Sao lưu**:
 
 <figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/linux-sao-luu-khoi-phuc-ssh-studio/ssh-studio-02.webp" alt="SSH Studio sau khi sao lưu: trang SSH Keys với nút Khôi phục, Sao lưu, Nhập key, Tạo key mới, thông báo Đã sao lưu 3 server, 1 key, 3 known host vào đường dẫn file .sshstudio-backup" width="2400" height="1350" loading="lazy"></div><figcaption>SSH Studio · đã sao lưu</figcaption></figure>
 
+<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/linux-sao-luu-khoi-phuc-ssh-studio/ssh-studio-06.webp" alt="Hộp thoại Nhật ký hoạt động của SSH Studio: dòng cuối Đã sao lưu 3 server, 1 key, 3 known host vào thư mục sao-luu, phía trên là các lần kết nối toinoi-bastion và toinoi-app-02" width="2400" height="1350" loading="lazy"></div><figcaption>SSH Studio · nhật ký ghi lại lần sao lưu và nơi lưu file</figcaption></figure>
+
 Bên trong file chỉ có một phong bì JSON: định dạng, phiên bản, tham số Argon2id, `nonce` và khối `data` đã mã hoá (xem phần thứ hai của khung ở mục 1). Không có tên server hay key nào đọc được.
 
 | Có trong bản sao lưu | Không có |
@@ -95,6 +97,10 @@ Khôi phục của SSH Studio luôn là **gộp** vào workspace hiện tại, k
 - Known host trong bản sao lưu mà **khác** fingerprint đang tin cậy (server đã đổi host key từ lúc sao lưu): SSH Studio cảnh báo và để bạn chọn từng địa chỉ có thay hay không. Mặc định là giữ fingerprint hiện tại. Chỉ chọn thay khi đã đối chiếu như [LNX-023](/articles/linux-host-key-known-hosts).
 
 <figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/linux-sao-luu-khoi-phuc-ssh-studio/ssh-studio-05.webp" alt="Trang Servers của SSH Studio sau khi khôi phục: toinoi-app-02 trở lại ở gốc workspace với xác thực SSH key · Jump, thông báo Đã khôi phục 1 server mới, 0 key mới, 1 known host mới, bỏ qua 3 mục đã có" width="2400" height="1350" loading="lazy"></div><figcaption>SSH Studio · <code>toinoi-app-02</code> trở lại, kể cả jump host và host key</figcaption></figure>
+
+<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/linux-sao-luu-khoi-phuc-ssh-studio/ssh-studio-07.webp" alt="Trang Known Hosts của SSH Studio sau khi khôi phục: lại đủ ba mục [127.0.0.1]:2200, [127.0.0.1]:2222 và [toinoi-app-02]:22 với fingerprint như trước" width="2400" height="1350" loading="lazy"></div><figcaption>SSH Studio · khôi phục trả lại cả fingerprint của toinoi-app-02</figcaption></figure>
+
+<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/linux-sao-luu-khoi-phuc-ssh-studio/ssh-studio-08.webp" alt="Launchpad của SSH Studio sau khi khôi phục, tab Phiên đang mở có toinoi-app-01 đã kết nối, các tab Gần đây và Tất cả server cho 3 server" width="2400" height="1350" loading="lazy"></div><figcaption>SSH Studio · Launchpad: workspace đã đủ ba server, sẵn sàng làm việc tiếp</figcaption></figure>
 
 `toinoi-app-02` quay lại đúng chỗ cũ (gốc workspace: ở [LNX-052](/articles/linux-bastion-jump-host) An chưa chuyển nó vào thư mục Production), vẫn đi qua `toinoi-bastion`, và host key của nó đã được tin: kết nối không hỏi lại fingerprint. Key `an-laptop` và hai server kia đã có nên được bỏ qua.
 

@@ -9,6 +9,7 @@
 #gui them-bastion
 #gui thu-muc
 #gui ket-noi-tat-ca
+#xem known-hosts 08
 #phien bastion
 #clear
 ## Trên toinoi-bastion: ai đang đăng nhập
@@ -22,4 +23,6 @@ last -n 3 an
 ## Trên toinoi-app-01
 who
 last -n 3 an | head -n 3
+#shot 06
 #gui launchpad
+#xem nhat-ky 07

@@ -3,6 +3,8 @@
 ## Checklist: cửa nào đang mở, ai vào được
 sudo ss -tlnpH | grep -v 127.0.0 | awk '{ split($6, p, "\""); print $4, p[2] }'
 sudo ufw status | head -n 7
+#shot 05
+#clear
 sudo sshd -T | grep -E '^(permitrootlogin|passwordauthentication|authenticationmethods|maxauthtries|x11forwarding|allowagentforwarding) '
 awk -F: '$7 !~ /(nologin|false)$/ { print $1, $7 }' /etc/passwd
 getent group sudo
@@ -14,6 +16,7 @@ sudo apt install -y fail2ban 2>&1 | grep -E '^Setting up fail2ban'
 #sudofile sudoedit /etc/fail2ban/jail.d/toinoi.local jail-toinoi.local 02
 sudo systemctl restart fail2ban
 sleep 3; sudo fail2ban-client status sshd
+#shot 06
 #may app02
 #clear
 ## Từ app02: ai đó thử đăng nhập bằng tài khoản không tồn tại
@@ -31,3 +34,4 @@ sudo grep -E 'Found|Ban' /var/log/fail2ban.log | tail -n 5
 ## Gỡ chặn
 sudo fail2ban-client set sshd unbanip 10.20.0.12
 sudo fail2ban-client status sshd | grep -E 'Currently banned|Banned IP'
+#shot 04

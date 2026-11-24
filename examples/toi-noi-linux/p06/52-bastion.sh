@@ -5,10 +5,14 @@
 cat /etc/ssh/sshd_config.d/10-bastion.conf
 sudo sshd -T | grep -E '^(passwordauthentication|kbdinteractiveauthentication|permitrootlogin|allowagentforwarding|allowtcpforwarding|x11forwarding) '
 ip -br addr show eth0
+#shot 07
+#clear
 nc -zv -w 3 toinoi-app-02 22
 #shot 01
 #gui them-app02
 #gui ket-noi-app02
+#xem known-hosts 09
+#xem servers 10
 #phien app02
 #clear
 ## Trên toinoi-app-02, qua bastion
@@ -35,3 +39,4 @@ sudo ufw status
 ## Từ app01: rsync sang app02 vẫn chạy
 ssh app02 hostname
 nc -zv -w 3 toinoi-app-02 22
+#shot 08

@@ -82,11 +82,13 @@ Tue 2026-11-24 23:26:17 +07  13h -         - apt-daily.timer         apt-daily.s
 Wed 2026-11-25 06:45:02 +07  21h -         - apt-daily-upgrade.timer apt-daily-upgrade.service
 ```
 
+<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/linux-cap-nhat-he-thong-an-toan/ssh-studio-07.webp" alt="Terminal của SSH Studio: apt install unattended-upgrades, sudoedit 20auto-upgrades và 52unattended-toinoi, grep 50unattended-upgrades cho các nguồn được vá tự động: distro_codename, -security, ESMApps, ESM" width="2400" height="1350" loading="lazy"></div><figcaption>SSH Studio · cài unattended-upgrades và xem nguồn nào được vá tự động</figcaption></figure>
+
 - **Allowed-Origins** mặc định của Ubuntu: chỉ kho chính và kho `-security` (và ESM nếu có đăng ký). Bản sửa lỗi thường (`-updates`) không tự cài, trừ khi bạn thêm.
 - `--dry-run -v` chạy thử: in những gì sẽ cài mà không cài. Luôn chạy thử sau khi sửa cấu hình.
 - Hai timer có giờ chạy ngẫu nhiên trong ngày, để hàng triệu máy không cùng tải một lúc.
 
-<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/linux-cap-nhat-he-thong-an-toan/ssh-studio-03.webp" alt="Terminal của SSH Studio: cài unattended-upgrades, grep Allowed-Origins trong 50unattended-upgrades, unattended-upgrade --dry-run -v, list-timers apt-daily.timer và apt-daily-upgrade.timer" width="2400" height="1350" loading="lazy"></div><figcaption>SSH Studio · nguồn được tự vá và hai timer</figcaption></figure>
+<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/linux-cap-nhat-he-thong-an-toan/ssh-studio-03.webp" alt="Terminal của SSH Studio: unattended-upgrade --dry-run -v báo No packages found that can be upgraded unattended, list-timers 'apt-daily*' cho apt-daily.timer và apt-daily-upgrade.timer chạy hằng ngày" width="2400" height="1350" loading="lazy"></div><figcaption>SSH Studio · chạy thử unattended-upgrade và hai timer của apt</figcaption></figure>
 
 ## 3. Có cần khởi động lại không
 
@@ -95,6 +97,8 @@ an@toinoi-app-01:~$ ls /var/run/reboot-required 2>/dev/null || echo "chua can kh
 chua can khoi dong lai
 an@toinoi-app-01:~$ cat /var/run/reboot-required.pkgs 2>/dev/null || true
 ```
+
+<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/linux-cap-nhat-he-thong-an-toan/ssh-studio-05.webp" alt="Terminal của SSH Studio: ls /var/run/reboot-required không có, in chua can khoi dong lai, cat reboot-required.pkgs không in gì" width="2400" height="1350" loading="lazy"></div><figcaption>SSH Studio · chưa có bản vá nào đòi khởi động lại</figcaption></figure>
 
 Bản vá kernel, glibc, systemd chỉ có tác dụng khi khởi động lại. Ubuntu đánh dấu bằng file **`/var/run/reboot-required`**, và `reboot-required.pkgs` ghi gói nào gây ra. Vì Tới Nơi tắt `Automatic-Reboot`, runbook ([LNX-060](/articles/linux-thuc-hanh-runbook-van-hanh)) có một mục: thấy file này thì khởi động lại trong khung giờ đã báo. Bản vá cho một thư viện mà dịch vụ đang dùng thì khởi động lại riêng dịch vụ đó là đủ (công cụ `needrestart` liệt kê chúng).
 
@@ -143,6 +147,8 @@ Setting up nginx (1.24.0-2ubuntu7.21) ...
 an@toinoi-app-01:~$ nginx -v
 nginx version: nginx/1.24.0 (Ubuntu)
 ```
+
+<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/linux-cap-nhat-he-thong-an-toan/ssh-studio-06.webp" alt="Terminal của SSH Studio: apt-mark unhold nginx nginx-common, apt install nâng nginx lên 1.24.0-2ubuntu7.21, nginx -v" width="2400" height="1350" loading="lazy"></div><figcaption>SSH Studio · bản vá đã ổn: bỏ giữ và nâng lại nginx</figcaption></figure>
 
 Quay lui bằng apt chỉ được khi bản cũ còn trong kho. Kho Ubuntu giữ bản phát hành gốc và bản mới nhất, không giữ mọi bản trung gian. Muốn quay lui tuỳ ý thì cần ảnh chụp đĩa (snapshot) của máy ảo trước khi vá, hoặc kho gói riêng.
 

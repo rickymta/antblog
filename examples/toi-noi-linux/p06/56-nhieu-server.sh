@@ -4,6 +4,8 @@
 #file ~/.ssh/config ssh-config
 ssh toinoi-bastion hostname
 for h in toinoi-app-02 toinoi-bastion; do echo "== $h"; ssh $h 'uptime; df -h / | tail -n 1'; done
+#shot 05
+#clear
 for h in toinoi-app-02 toinoi-bastion; do ssh $h 'grep PRETTY /etc/os-release' | sed "s/^/$h: /"; done
 for h in toinoi-app-02 toinoi-khong-co; do ssh -o ConnectTimeout=3 $h hostname || echo "LOI: $h"; done
 #shot 01
@@ -14,6 +16,8 @@ ansible --version | head -n 1
 mkdir -p ~/van-hanh && cd ~/van-hanh
 #file hosts.ini hosts.ini
 ansible all -i hosts.ini -m ping
+#shot 06
+#clear
 ansible all -i hosts.ini -a 'uptime'
 #shot 02
 #clear
@@ -23,6 +27,8 @@ mkdir -p ~/.config
 #file ~/.config/ansible-become ansible-become
 chmod 600 ~/.config/ansible-become
 ansible-playbook -i hosts.ini ssh-toinoi.yml --become-password-file ~/.config/ansible-become
+#shot 07
+#clear
 ansible-playbook -i hosts.ini ssh-toinoi.yml --become-password-file ~/.config/ansible-become | tail -n 3
 ansible all -i hosts.ini -a 'sshd -T' --become --become-password-file ~/.config/ansible-become | grep -E 'CHANGED|SUCCESS|maxauthtries'
 #shot 04
