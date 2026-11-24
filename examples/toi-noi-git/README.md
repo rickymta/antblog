@@ -21,9 +21,11 @@ npm run kiem-tra-p03 -- <đường dẫn repository>   # chấm bản clone và 
 npm run p04            # chạy cả Phần 4 (restore, reset, revert, reflog, sửa commit, rebase -i, --onto, patch, rerere)
 npm run setup -- 36    # bài Phần 4 đánh số 31–40; ví dụ 36 là nhánh phụ phí đêm bốn commit lộn xộn
 npm run kiem-tra-p04 -- <đường dẫn repository>   # chấm repository của Minh theo 10 tiêu chí của GIT-040
+npm run p05            # chạy cả Phần 5 (bisect, tìm kiếm, .gitattributes, submodule, LFS, clone nhẹ, bảo trì, ký, hook)
+npm run kiem-tra-p05 -- <đường dẫn repository>   # chấm repository của Minh theo 10 tiêu chí của GIT-050
 ```
 
-Kết quả trên máy viết bài: Phần 1 `# [lab] PASS: 31`, Phần 2 `# [lab] PASS: 23`, Phần 3 `# [lab] PASS: 38`, Phần 4 `# [lab] PASS: 36`, `# [lab] FAIL: 0`, `npm test` 7/7.
+Kết quả trên máy viết bài: Phần 1 `# [lab] PASS: 31`, Phần 2 `# [lab] PASS: 23`, Phần 3 `# [lab] PASS: 38`, Phần 4 `# [lab] PASS: 36`, Phần 5 `# [lab] PASS: 37`, `# [lab] FAIL: 0`, `npm test` 8/8. Phần 5 cần thêm Git LFS (đi kèm Git for Windows) và `ssh-keygen` (có sẵn trong Git for Windows).
 
 ## Vì sao mã hash trong bài trùng với máy bạn
 
@@ -51,6 +53,9 @@ Khác phiên bản git có thể khác câu chữ của vài thông báo (ví d�
 | `p03/NN-*.mjs`, `p03/kiem-tra.mjs`, `p03/OUTPUT.txt` | Bài GIT-021…GIT-030; mỗi bài so ref của Minh, remote và Lan với lịch sử chuẩn (`p03/chung.mjs`) |
 | `lib/history4.mjs` | Lịch sử chuẩn Phần 4: 7 bước (revert, nhánh phụ phí đêm lộn xộn rồi được dọn, `rebase --onto`, patch của Lan qua `git am`, rerere, merge và runbook); `todoEditor()` cho rebase tương tác không cần người gõ |
 | `p04/NN-*.mjs`, `p04/kiem-tra.mjs`, `p04/OUTPUT.txt` | Bài GIT-031…GIT-040 |
+| `lib/history5.mjs` | Lịch sử chuẩn Phần 5: 8 bước (tám commit buổi sáng có một lỗi làm tròn, revert, .gitattributes, submodule `lib/tien-te` với URL tương đối, Git LFS, commit và tag `v1.2.0` ký bằng khoá SSH, hook trong `.githooks`, báo cáo) |
+| `p05/NN-*.mjs`, `p05/kiem-tra.mjs`, `p05/kiem-tra-lam-tron.sh`, `p05/OUTPUT.txt` | Bài GIT-041…GIT-050; `kiem-tra-lam-tron.sh` là "test" cho `git bisect run` |
+| `fixtures/khoa-ky-demo*` | Khoá SSH demo chỉ dùng để ký trong lab (xem `fixtures/README.md`); cố định để chữ ký và mã commit tái lập được |
 | `p01/NN-*.mjs` | Một file cho mỗi bài GIT-001…GIT-010; `start`/`end` = số commit chuẩn ở đầu/cuối bài |
 | `p01/kiem-tra.mjs` | Script chấm repository của GIT-010 (chỉ đọc, mã thoát 0 khi đạt hết) |
 | `p01/OUTPUT.txt` | Kết quả mẫu |

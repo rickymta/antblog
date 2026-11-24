@@ -144,7 +144,7 @@ d508151 Tăng cước mỗi km ô tô 4 chỗ lên 5.000 đ
 
 `4500,` xuất hiện ở commit tạo file (`7ab5adc`) và biến mất ở commit của Lan (`d508151`). Thêm `-p` để xem luôn diff của từng commit tìm được.
 
-Trên GitStudio, cùng việc này là `Ctrl+F` trên đồ thị → phạm vi **Đoạn code thay đổi (toàn bộ lịch sử)**: GitStudio chạy `git log -S<chuỗi>` với `--fixed-strings` và không phân biệt hoa thường.
+Trên GitStudio, cùng việc này là `Ctrl+Shift+F` trên đồ thị → phạm vi **Đoạn code thay đổi (toàn bộ lịch sử)**: GitStudio chạy `git log -S<chuỗi>` với `--fixed-strings` và không phân biệt hoa thường.
 
 <figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/git-blame-lich-su-file-truy-vet/gitstudio-03.webp" alt="Terminal tích hợp của GitStudio chạy git log -S'4500,' --oneline in d508151 và 7ab5adc, rồi git log --oneline --follow --name-status -- docs/bang-gia-cuoc.md in R084 docs/bang-gia.md docs/bang-gia-cuoc.md và A docs/bang-gia.md" width="2000" height="1125" loading="lazy"></div><figcaption>GitStudio · pickaxe và <code>--follow</code> trong terminal tích hợp</figcaption></figure>
 
@@ -160,7 +160,7 @@ Trong Git Bash, lệnh cho ra hai commit như trên. Trong **Windows PowerShell 
 
 - Chọn chuỗi tìm kiếm không có dấu nháy kép, như `4500,` ở trên.
 - Hoặc chạy trong Git Bash: chọn **Git Bash** ở **Tuỳ chọn → Công cụ ngoài → Terminal**, terminal tích hợp mở mới sẽ dùng Git Bash. (Ngoài GitStudio, PowerShell 7.3 trở lên cũng đã sửa cách truyền đối số này.)
-- Hoặc tìm bằng `Ctrl+F` của GitStudio: chuỗi được truyền thẳng cho git, không qua shell nào.
+- Hoặc tìm bằng `Ctrl+Shift+F` của GitStudio: chuỗi được truyền thẳng cho git, không qua shell nào.
 
 Bài học rộng hơn: khi kết quả của một lệnh tìm kiếm "trông hợp lý nhưng hơi lạ", kiểm lại bằng một cách thứ hai.
 
@@ -187,7 +187,7 @@ Bỏ `--no-patch` để xem diff của khoảng dòng đó trong từng commit. 
 | Dòng này do ai viết, trong commit nào? | `git blame` | Blame |
 | File này đã thay đổi những lần nào? | `git log -- <file>` | Lịch sử; Spotlight → `Ctrl+Enter` |
 | … kể cả trước khi đổi tên? | `git log --follow -- <file>` | |
-| Chuỗi này xuất hiện/biến mất khi nào? | `git log -S` | `Ctrl+F` → Đoạn code thay đổi |
+| Chuỗi này xuất hiện/biến mất khi nào? | `git log -S` | `Ctrl+Shift+F` → Đoạn code thay đổi |
 | Dòng nào khớp biểu thức này từng bị sửa? | `git log -G` | |
 | Hàm này đã bị sửa những lần nào? | `git log -L` | |
 | Vì sao đổi? | `git show <commit>` (đọc description) | Bấm commit, đọc Mô tả |

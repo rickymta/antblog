@@ -101,6 +101,8 @@ export function normalize(text) {
   }
   let t = text.replace(/\r\n/g, '\n');
   for (const v of [...variants].sort((a, b) => b.length - a.length)) t = t.split(v).join('<lab>');
+  // Dòng tiến độ của Git LFS có dung lượng và tốc độ truyền, đổi theo máy: chỉ giữ số object.
+  t = t.replace(/(LFS objects: 100% \(\d+\/\d+\)), [^\n]*?, done\./g, '$1, done.');
   return t.replace(/\n+$/, '');
 }
 

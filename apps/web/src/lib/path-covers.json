@@ -363,5 +363,10 @@
     "source": "git-restore-bo-thay-doi",
     "topic": "git",
     "number": 4
+  },
+  "git-qua-gitstudio-phan-05": {
+    "source": "git-bisect-tim-commit-loi",
+    "topic": "git",
+    "number": 5
   }
 }

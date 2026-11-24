@@ -129,20 +129,22 @@ Lộ trình: `git-qua-gitstudio-phan-04` — **đã viết đủ 10 bài ngày 2
 
 ## P05 · Điều tra, repository lớn và bảo trì
 
-Đầu vào: P01–P04. Lộ trình dự kiến `-phan-05`.
+Đầu vào: P01–P04. Đầu ra: lỗi cước được bisect và revert, repository được bảo trì, bản phát hành có chữ ký, hook chung của nhóm.
+
+Lộ trình: `git-qua-gitstudio-phan-05` — **đã viết đủ 10 bài ngày 24/11/2026**, đã thêm vào `api/seed/learning-paths.json`. Lab: `examples/toi-noi-git/p05` (lịch sử chuẩn 8 bước trong `lib/history5.mjs` dựng trên cuối P04: tám commit buổi sáng có một lỗi làm tròn, revert, `.gitattributes`, submodule `lib/tien-te` với URL tương đối, Git LFS, commit và tag `v1.2.0` ký bằng khoá SSH demo cố định trong `fixtures/`, hook trong `.githooks`, báo cáo; 10 file bài, 37 kiểm tra PASS; script chấm `p05/kiem-tra.mjs` 10 tiêu chí; cần Git LFS và `ssh-keygen` có sẵn trong Git for Windows). Từ điển `glossary-candidates/git.json` bổ sung trong lúc viết: 84 mục, 12 mục hoãn. Ghi chú GitStudio 1.0.1 khi viết P05: menu Bisect trên commit và banner Đang bisect (Tốt/Lỗi/Bỏ qua/Kết thúc bisect), không có bisect run; Ctrl+F có phạm vi Đoạn code thay đổi (-S) nhưng không có -G; mục Submodule và Git LFS ở thanh bên; Shallow Clone, Sparse Checkout trong hộp thoại Clone (không có --filter); Bảo trì repository… trong menu tên repository; Tuỳ chọn → Ký commit và huy hiệu chữ ký; hook chạy khi thao tác từ giao diện, không có --no-verify. Chưa seed/deploy lên website.
 
 | ID | Bài / slug | Mức | Làm được sau bài / sản phẩm thực hành | Trạng thái |
 |---|---|---|---|---|
-| GIT-041 | Bisect: tìm commit làm sai cước<br>`git-bisect-tim-commit-loi` | CB | Bisect trên đồ thị (good/bad/skip), `bisect run` với test | Dự kiến |
-| GIT-042 | Tìm kiếm nâng cao trong lịch sử<br>`git-tim-kiem-lich-su-nang-cao` | CB | `log -G`, `grep` theo commit, khoảng commit `A..B`, `A...B` | Dự kiến |
-| GIT-043 | `.gitattributes`: line ending, diff và merge theo loại file<br>`git-gitattributes-line-ending` | CB | Chuẩn hoá CRLF/LF, file nhị phân, diff driver | Dự kiến |
-| GIT-044 | Submodule: dùng chung thư viện tính cước<br>`git-submodule` | TB | Thêm, cập nhật, đồng bộ URL, deinit submodule | Dự kiến |
-| GIT-045 | Git LFS cho file lớn<br>`git-lfs-file-lon` | TB | Track bằng LFS, pull/prune, giới hạn | Dự kiến |
-| GIT-046 | Repository lớn: partial clone, sparse checkout, commit-graph<br>`git-repository-lon` | TB | Clone nhanh, chỉ checkout phần cần | Dự kiến |
-| GIT-047 | Bảo trì: gc, maintenance, fsck, clean<br>`git-bao-tri-gc-maintenance` | TB | Hộp thoại bảo trì của GitStudio và lệnh tương ứng | Dự kiến |
-| GIT-048 | Ký commit và tag: GPG, SSH signing<br>`git-ky-commit-tag` | NC | Ký và xác minh chữ ký, huy hiệu chữ ký trong GitStudio | Dự kiến |
-| GIT-049 | Hook: chặn commit sai trước khi rời máy<br>`git-hook-pre-commit` | NC | `pre-commit`, `commit-msg`, `pre-push`; hook chạy cả khi commit từ GitStudio | Dự kiến |
-| GIT-050 | Thực hành: điều tra lỗi cước và bảo trì repository<br>`git-thuc-hanh-dieu-tra-bao-tri` | NC | Bàn giao báo cáo bisect, hook và kết quả bảo trì | Dự kiến |
+| GIT-041 | Bisect: tìm commit làm sai cước trong 29 commit bằng tìm kiếm nhị phân<br>`git-bisect-tim-commit-loi` | CB | Bisect trên đồ thị (good/bad/skip), `bisect run` với test | Đã viết |
+| GIT-042 | Tìm kiếm nâng cao trong lịch sử: -S, -G, --grep, git grep theo commit, khoảng A..B và A...B<br>`git-tim-kiem-lich-su-nang-cao` | CB | `log -G`, `grep` theo commit, khoảng commit `A..B`, `A...B` | Đã viết |
+| GIT-043 | .gitattributes nâng cao: xuống dòng, diff theo ngôn ngữ, file nhị phân và merge=union<br>`git-gitattributes-line-ending` | CB | Chuẩn hoá CRLF/LF, file nhị phân, diff driver | Đã viết |
+| GIT-044 | Submodule: dùng chung thư viện tiền tệ giữa nhiều repository<br>`git-submodule` | TB | Thêm, cập nhật, đồng bộ URL, deinit submodule | Đã viết |
+| GIT-045 | Git LFS: lưu bản thiết kế bảng giá 700 KB mà không làm phình repository<br>`git-lfs-file-lon` | TB | Track bằng LFS, pull/prune, giới hạn | Đã viết |
+| GIT-046 | Repository lớn: partial clone, shallow clone và sparse checkout để chỉ tải phần cần<br>`git-repository-lon` | TB | Clone nhanh, chỉ checkout phần cần | Đã viết |
+| GIT-047 | Bảo trì repository: count-objects, gc, fsck, commit-graph và git maintenance<br>`git-bao-tri-gc-maintenance` | TB | Hộp thoại bảo trì của GitStudio và lệnh tương ứng | Đã viết |
+| GIT-048 | Ký commit và tag: chứng minh v1.2.0 đúng là do Minh phát hành, bằng khoá SSH hoặc GPG<br>`git-ky-commit-tag` | NC | Ký và xác minh chữ ký, huy hiệu chữ ký trong GitStudio | Đã viết |
+| GIT-049 | Hook: chặn commit sai trước khi rời máy với pre-commit, commit-msg, pre-push<br>`git-hook-pre-commit` | NC | `pre-commit`, `commit-msg`, `pre-push`; hook chạy cả khi commit từ GitStudio | Đã viết |
+| GIT-050 | Thực hành Phần 5: điều tra lỗi cước, bảo trì repository và bàn giao bằng script 10 tiêu chí<br>`git-thuc-hanh-dieu-tra-bao-tri` | NC | Bàn giao báo cáo bisect, hook và kết quả bảo trì | Đã viết |
 
 ## P06 · Quy trình nhóm và tự động hoá
 

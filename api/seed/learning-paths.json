@@ -1508,5 +1508,25 @@
       "git-thuc-hanh-don-lich-su-hoan-tac"
     ],
     "status": "published"
+  },
+  {
+    "slug": "git-qua-gitstudio-phan-05",
+    "title": "Git qua GitStudio · Phần 5 · Điều tra, repository lớn và bảo trì",
+    "description": "Đủ 10 bài GIT-041–GIT-050 qua ba ngày của nhóm Tới Nơi: tìm commit làm sai cước bằng git bisect và bisect run, tìm kiếm nâng cao với -S, -G, git grep và khoảng commit, .gitattributes cho diff C#, file nhị phân và merge=union, thư viện dùng chung bằng submodule, file thiết kế qua Git LFS, partial clone, shallow clone và sparse checkout, bảo trì bằng gc, fsck, commit-graph, ký commit và tag v1.2.0 bằng khoá SSH, hook chung trong .githooks; kết thúc bằng báo cáo điều tra và script chấm 10 tiêu chí. Gồm 3 bài cơ bản, 4 trung bình và 3 nâng cao.",
+    "level": "advanced",
+    "category": "git",
+    "articles": [
+      "git-bisect-tim-commit-loi",
+      "git-tim-kiem-lich-su-nang-cao",
+      "git-gitattributes-line-ending",
+      "git-submodule",
+      "git-lfs-file-lon",
+      "git-repository-lon",
+      "git-bao-tri-gc-maintenance",
+      "git-ky-commit-tag",
+      "git-hook-pre-commit",
+      "git-thuc-hanh-dieu-tra-bao-tri"
+    ],
+    "status": "published"
   }
 ]

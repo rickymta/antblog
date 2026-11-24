@@ -6855,5 +6855,105 @@
       "REVERT",
       "RUNBOOK"
     ]
+  },
+  "git-bisect-tim-commit-loi": {
+    "title": "BISECT",
+    "subtitle": "Tìm commit làm sai cước trong 5 lần thử",
+    "diagram": "target",
+    "labels": [
+      "GOOD",
+      "BAD",
+      "BISECT RUN"
+    ]
+  },
+  "git-tim-kiem-lich-su-nang-cao": {
+    "title": "-S · -G · GREP",
+    "subtitle": "Tìm commit theo nội dung, người viết, khoảng",
+    "diagram": "map",
+    "labels": [
+      "PICKAXE",
+      "A..B",
+      "A...B"
+    ]
+  },
+  "git-gitattributes-line-ending": {
+    "title": ".GITATTRIBUTES",
+    "subtitle": "Xuống dòng, diff C#, nhị phân, merge=union",
+    "diagram": "layers",
+    "labels": [
+      "EOL",
+      "DIFF",
+      "MERGE"
+    ]
+  },
+  "git-submodule": {
+    "title": "SUBMODULE",
+    "subtitle": "Thư viện tiền tệ dùng chung theo commit",
+    "diagram": "network",
+    "labels": [
+      "BÁO GIÁ",
+      "TIỀN TỆ",
+      "APP TÀI XẾ"
+    ]
+  },
+  "git-lfs-file-lon": {
+    "title": "GIT LFS",
+    "subtitle": "File lớn ngoài lịch sử, con trỏ trong commit",
+    "diagram": "storage",
+    "labels": [
+      "CON TRỎ",
+      "LFS",
+      "REMOTE"
+    ]
+  },
+  "git-repository-lon": {
+    "title": "REPOSITORY LỚN",
+    "subtitle": "Partial clone, shallow clone, sparse checkout",
+    "diagram": "split",
+    "labels": [
+      "FILTER",
+      "↔",
+      "DEPTH"
+    ]
+  },
+  "git-bao-tri-gc-maintenance": {
+    "title": "BẢO TRÌ",
+    "subtitle": "gc, fsck, commit-graph, git maintenance",
+    "diagram": "checklist",
+    "labels": [
+      "GC",
+      "FSCK",
+      "COMMIT-GRAPH"
+    ]
+  },
+  "git-ky-commit-tag": {
+    "title": "KÝ COMMIT · TAG",
+    "subtitle": "Khoá SSH, allowed_signers, v1.2.0 có chữ ký",
+    "diagram": "flow",
+    "labels": [
+      "KHOÁ",
+      "KÝ",
+      "XÁC MINH"
+    ]
+  },
+  "git-hook-pre-commit": {
+    "title": "HOOK",
+    "subtitle": "pre-commit, commit-msg, pre-push cho cả nhóm",
+    "diagram": "cycle",
+    "labels": [
+      "PRE-COMMIT",
+      "COMMIT-MSG",
+      "PRE-PUSH"
+    ]
+  },
+  "git-thuc-hanh-dieu-tra-bao-tri": {
+    "title": "PHẦN 5 · LAB",
+    "subtitle": "Điều tra lỗi cước và bảo trì · 10 tiêu chí",
+    "diagram": "matrix",
+    "labels": [
+      "BISECT",
+      "LFS",
+      "KÝ"
+    ]
   }
 }

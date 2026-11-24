@@ -181,4 +181,4 @@ Phần 5 chuyển sang **điều tra**: tìm commit làm sai cước bằng `git
 - [Pro Git, Git Tools](https://git-scm.com/book/en/v2/Git-Tools-Revision-Selection) (Rewriting History, Reset Demystified, Rerere).
 - [git-merge: `--no-ff`](https://git-scm.com/docs/git-merge), [git-rerere](https://git-scm.com/docs/git-rerere).
 
-Bài tiếp theo (Phần 5): GIT-041 · Bisect: tìm commit làm sai cước *(đang viết)*
+Bài tiếp theo (Phần 5): [GIT-041 · Bisect: tìm commit làm sai cước](/articles/git-bisect-tim-commit-loi).

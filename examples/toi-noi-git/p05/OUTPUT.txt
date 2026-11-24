@@ -1,0 +1,648 @@
+
+# ==================== p05/41-bisect-tim-commit-loi.mjs · GIT-041 ====================
+# Báo lỗi: chuyến 3,7 km (30.500 đ) phải làm tròn lên 31.000 đ, app báo 30.000 đ.
+# Bản 1.1.0 còn đúng. Từ đó tới nay có bao nhiêu commit?
+$ git rev-list --count v1.1.0..main
+29
+$ git grep -n "atLeastMinimum / 1000m" v1.1.0 -- src
+v1.1.0:src/BaoGia/FareCalculator.cs:24:        return Math.Ceiling(atLeastMinimum / 1000m) * 1000m;
+$ git grep -n "atLeastMinimum / 1000m" main -- src
+main:src/BaoGia/FareCalculator.cs:24:        return Math.Round(atLeastMinimum / 1000m) * 1000m;
+
+# Bắt đầu bisect: main lỗi, v1.1.0 tốt. Git checkout commit ở giữa để thử.
+$ git bisect start
+status: waiting for both good and bad commits
+$ git bisect bad main
+status: waiting for good commit(s), bad commit known
+$ git bisect good v1.1.0
+Bisecting: 14 revisions left to test after this (roughly 4 steps)
+[17b8c3c3a02ecb3df3c72c6da63bbcfdfd93997d] Tăng phí chờ tối đa lên 50.000 đ
+# Tự kiểm tra commit Git chọn: dòng làm tròn còn Math.Ceiling không?
+$ git grep -n "atLeastMinimum / 1000m" -- src
+src/BaoGia/FareCalculator.cs:24:        return Math.Ceiling(atLeastMinimum / 1000m) * 1000m;
+$ git bisect good
+Bisecting: 7 revisions left to test after this (roughly 3 steps)
+[5f830ad4cc84b3c58a8157d487c21948f2fec42a] Thêm runbook hoàn tác
+
+# Phần còn lại để Git tự chạy: mã thoát 0 = tốt, khác 0 = lỗi
+$ git bisect run sh ../../p05/kiem-tra-lam-tron.sh
+running 'sh' '../../p05/kiem-tra-lam-tron.sh'
+Bisecting: 3 revisions left to test after this (roughly 2 steps)
+[5f5bc153d7f6e41ce7224252d4f1287b8c99aecb] Thêm test phí chờ tính theo giây
+running 'sh' '../../p05/kiem-tra-lam-tron.sh'
+Bisecting: 1 revision left to test after this (roughly 1 step)
+[7297149815fd49c6079a82511c0da9b6df65c7ea] Ghi phụ phí đêm vào tài liệu bảng giá
+running 'sh' '../../p05/kiem-tra-lam-tron.sh'
+Bisecting: 0 revisions left to test after this (roughly 0 steps)
+[6c0a1e8a36a8269173d819c1701dfc3e5f8deab5] Làm gọn phép làm tròn giá cước
+running 'sh' '../../p05/kiem-tra-lam-tron.sh'
+6c0a1e8a36a8269173d819c1701dfc3e5f8deab5 is the first bad commit
+commit 6c0a1e8a36a8269173d819c1701dfc3e5f8deab5
+Author: Trần Minh <minh@toinoi.test>
+Date:   Thu Nov 26 09:00:00 2026 +0700
+
+    Làm gọn phép làm tròn giá cước
+
+ src/BaoGia/FareCalculator.cs | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
+bisect found first bad commit
+$ git bisect log
+git bisect start
+# status: waiting for both good and bad commits
+# bad: [dbb47b7e089026561c3aafb56b48c6661ecf2980] Hướng dẫn chạy riêng test tính cước
+git bisect bad dbb47b7e089026561c3aafb56b48c6661ecf2980
+# status: waiting for good commit(s), bad commit known
+# good: [70b18f6ef606e77c6d57b2ace5cdbd3652a5f7f2] Thêm test cho phụ phí giờ cao điểm
+git bisect good 70b18f6ef606e77c6d57b2ace5cdbd3652a5f7f2
+# good: [17b8c3c3a02ecb3df3c72c6da63bbcfdfd93997d] Tăng phí chờ tối đa lên 50.000 đ
+git bisect good 17b8c3c3a02ecb3df3c72c6da63bbcfdfd93997d
+# good: [5f830ad4cc84b3c58a8157d487c21948f2fec42a] Thêm runbook hoàn tác
+git bisect good 5f830ad4cc84b3c58a8157d487c21948f2fec42a
+# bad: [5f5bc153d7f6e41ce7224252d4f1287b8c99aecb] Thêm test phí chờ tính theo giây
+git bisect bad 5f5bc153d7f6e41ce7224252d4f1287b8c99aecb
+# good: [7297149815fd49c6079a82511c0da9b6df65c7ea] Ghi phụ phí đêm vào tài liệu bảng giá
+git bisect good 7297149815fd49c6079a82511c0da9b6df65c7ea
+# bad: [6c0a1e8a36a8269173d819c1701dfc3e5f8deab5] Làm gọn phép làm tròn giá cước
+git bisect bad 6c0a1e8a36a8269173d819c1701dfc3e5f8deab5
+# first bad commit: [6c0a1e8a36a8269173d819c1701dfc3e5f8deab5] Làm gọn phép làm tròn giá cước
+$ git bisect reset
+Your branch is up to date with 'origin/main'.
+Previous HEAD position was 6c0a1e8 Làm gọn phép làm tròn giá cước
+Switched to branch 'main'
+
+# Commit lỗi đã có trên main và đã push: hoàn tác bằng revert (GIT-033)
+$ git revert --no-edit 6c0a1e8
+[main f1d35ab] Revert "Làm gọn phép làm tròn giá cước"
+ Date: Thu Nov 26 14:00:00 2026 +0700
+ 1 file changed, 2 insertions(+), 2 deletions(-)
+$ git grep -n "atLeastMinimum / 1000m" -- src
+src/BaoGia/FareCalculator.cs:24:        return Math.Ceiling(atLeastMinimum / 1000m) * 1000m;
+$ git push -q
+PASS main làm tròn lên trở lại
+PASS ref của Minh trùng lịch sử chuẩn
+PASS ref của remote trùng lịch sử chuẩn
+PASS ref của Lan trùng lịch sử chuẩn
+
+# ==================== p05/42-tim-kiem-lich-su-nang-cao.mjs · GIT-042 ====================
+# -S (pickaxe): commit làm THAY ĐỔI SỐ LẦN xuất hiện của chuỗi
+$ git log --oneline -S"Math.Round(atLeastMinimum"
+f1d35ab Revert "Làm gọn phép làm tròn giá cước"
+6c0a1e8 Làm gọn phép làm tròn giá cước
+# -G: commit có dòng thêm/bớt khớp biểu thức chính quy (kể cả khi số lần không đổi)
+$ git log --oneline -G"atLeastMinimum / 1000m"
+f1d35ab Revert "Làm gọn phép làm tròn giá cước"
+6c0a1e8 Làm gọn phép làm tròn giá cước
+0d57e4b Làm tròn cước lên bội số 1.000 đ
+
+# Theo thông điệp, người viết, thời gian; kết hợp nhiều điều kiện
+$ git log --oneline -i --grep="phụ phí đêm"
+df432b9 Ghi chú nguồn của hằng số phụ phí đêm
+dedcb0f Đưa tham số phụ phí đêm vào cấu hình
+7297149 Ghi phụ phí đêm vào tài liệu bảng giá
+40d9795 Thêm test phụ phí đêm
+3158035 Thêm phụ phí đêm
+$ git log --oneline --author="Lê Lan" --since="2026-11-26T00:00+07:00"
+dbb47b7 Hướng dẫn chạy riêng test tính cước
+0dcb5a1 Sửa câu chữ tài liệu phí chờ
+7297149 Ghi phụ phí đêm vào tài liệu bảng giá
+$ git log --oneline --grep="đêm" --grep="test" --all-match
+40d9795 Thêm test phụ phí đêm
+
+# Tìm trong nội dung file ở một commit bất kỳ, không cần checkout
+$ git grep -n "Rate" v1.1.0 -- src
+$ git grep -n "Rate" main -- src
+main:src/BaoGia/NightSurcharge.cs:7:    public const decimal Rate = 0.2m;
+main:src/BaoGia/NightSurcharge.cs:16:        return Math.Ceiling(fare * (1 + Rate) / 1000m) * 1000m;
+main:src/BaoGia/appsettings.json:3:    "Rate": 0.2,
+
+# Khoảng commit: hai chấm và ba chấm
+$ git rev-list --count phat-hanh/1.0..main
+38
+$ git rev-list --count main..phat-hanh/1.0
+2
+$ git log --oneline main..phat-hanh/1.0
+c6e65d7 Thêm ghi chú phát hành 1.0.1
+b047783 Làm tròn quãng đường tới 0,1 km trước khi tính cước
+$ git rev-list --left-right --count main...phat-hanh/1.0
+38	2
+$ git merge-base --all main phat-hanh/1.0
+89855d5ae9eeadc33e9969090faabe175773a520
+$ git log --oneline -1 v1.0.0
+89855d5 Chuẩn hoá xuống dòng LF bằng .gitattributes
+
+# Chỉ đi theo cha thứ nhất: lịch sử của main như một chuỗi merge và commit trực tiếp
+$ git log --oneline --first-parent -6
+f1d35ab Revert "Làm gọn phép làm tròn giá cước"
+dbb47b7 Hướng dẫn chạy riêng test tính cước
+df432b9 Ghi chú nguồn của hằng số phụ phí đêm
+dedcb0f Đưa tham số phụ phí đêm vào cấu hình
+0dcb5a1 Sửa câu chữ tài liệu phí chờ
+5f5bc15 Thêm test phí chờ tính theo giây
+$ git log --oneline --merges -3
+90905d3 Merge branch 'tinh-nang/phu-phi-dem'
+d263a4d Merge remote-tracking branch 'lan-fork/sua/tai-lieu-phi-cho'
+e46c89f Merge branch 'tinh-nang/phu-phi-gio-cao-diem'
+PASS ref của Minh trùng lịch sử chuẩn
+PASS ref của remote trùng lịch sử chuẩn
+PASS ref của Lan trùng lịch sử chuẩn
+
+# ==================== p05/43-gitattributes-line-ending.mjs · GIT-043 ====================
+# .gitattributes hiện có (từ GIT-007): xuống dòng và file nhị phân
+$ Get-Content .gitattributes
+# Mọi file văn bản lưu trong repository với xuống dòng LF
+* text=auto eol=lf
+
+# Script Windows cần CRLF khi checkout
+*.cmd text eol=crlf
+*.bat text eol=crlf
+
+# File nhị phân: không diff, không đổi xuống dòng
+*.png binary
+*.webp binary
+$ git check-attr -a -- src/BaoGia/FareCalculator.cs build.cmd docs/logo.png
+src/BaoGia/FareCalculator.cs: text: auto
+src/BaoGia/FareCalculator.cs: eol: lf
+build.cmd: text: set
+build.cmd: eol: crlf
+docs/logo.png: binary: set
+docs/logo.png: diff: unset
+docs/logo.png: merge: unset
+docs/logo.png: text: unset
+docs/logo.png: eol: lf
+$ git ls-files --eol -- README.md src/BaoGia/FareCalculator.cs
+i/lf    w/lf    attr/text=auto eol=lf 	README.md
+i/lf    w/lf    attr/text=auto eol=lf 	src/BaoGia/FareCalculator.cs
+
+# Sửa một dòng giữa hàm Quote: tiêu đề hunk mặc định chỉ đoán theo dòng không thụt lề
+$ git diff -U1
+diff --git a/src/BaoGia/FareCalculator.cs b/src/BaoGia/FareCalculator.cs
+index 46c0047..e2721ca 100644
+--- a/src/BaoGia/FareCalculator.cs
++++ b/src/BaoGia/FareCalculator.cs
+@@ -18,3 +18,3 @@ public static class FareCalculator
+         // Giờ cao điểm: nhân hệ số Peak.Multiplier (mặc định 1, ngoài giờ cao điểm).
+-        // Chưa gồm phí cầu đường, khuyến mãi.
++        // Chưa gồm phí cầu đường, khuyến mãi, phụ phí đêm.
+         var fare = (rule.BaseFare + rule.PerKm * Math.Round(distanceKm, 1, MidpointRounding.AwayFromZero)) * peakMultiplier;
+
+# Khai báo diff=csharp (và thêm vài quy tắc khác): tiêu đề hunk là tên hàm
+$ git diff -U1 -- src
+diff --git a/src/BaoGia/FareCalculator.cs b/src/BaoGia/FareCalculator.cs
+index 46c0047..e2721ca 100644
+--- a/src/BaoGia/FareCalculator.cs
++++ b/src/BaoGia/FareCalculator.cs
+@@ -18,3 +18,3 @@ public static decimal Quote(FareRule rule, decimal distanceKm, decimal peakMulti
+         // Giờ cao điểm: nhân hệ số Peak.Multiplier (mặc định 1, ngoài giờ cao điểm).
+-        // Chưa gồm phí cầu đường, khuyến mãi.
++        // Chưa gồm phí cầu đường, khuyến mãi, phụ phí đêm.
+         var fare = (rule.BaseFare + rule.PerKm * Math.Round(distanceKm, 1, MidpointRounding.AwayFromZero)) * peakMultiplier;
+$ git check-attr diff merge -- src/BaoGia/FareCalculator.cs CHANGELOG.md docs/bang-gia.xlsx
+src/BaoGia/FareCalculator.cs: diff: csharp
+src/BaoGia/FareCalculator.cs: merge: unspecified
+CHANGELOG.md: diff: unspecified
+CHANGELOG.md: merge: union
+docs/bang-gia.xlsx: diff: unset
+docs/bang-gia.xlsx: merge: unset
+
+# Sau khi đổi quy tắc xuống dòng: chuẩn hoá lại file đã commit (ở đây không có gì cần đổi)
+$ git add --renormalize .
+$ git status -s
+M  .gitattributes
+$ git commit -q -am "Khai báo diff và merge theo loại file"
+$ git push -q
+PASS ref của Minh trùng lịch sử chuẩn
+PASS ref của remote trùng lịch sử chuẩn
+PASS ref của Lan trùng lịch sử chuẩn
+
+# ==================== p05/44-submodule.mjs · GIT-044 ====================
+# Lan tách phần định dạng tiền ra repository riêng tien-te (remote của lab: work/remote/tien-te.git)
+$ git init -q --bare -b main <lab>/work/remote/tien-te.git
+$ git clone -q <lab>/work/remote/tien-te.git tien-te
+warning: You appear to have cloned an empty repository.
+$ git commit -q -m "Định dạng tiền Việt Nam"
+$ git push -q origin main
+$ cd ../../bao-gia
+
+# Minh thêm thư viện vào lib/tien-te. Git 2.38+ chặn submodule từ đường dẫn cục bộ:
+# URL tương đối ../tien-te.git: tính từ URL của origin (remote/bao-gia.git), nên đúng cho mọi người clone
+$ git submodule add ../tien-te.git lib/tien-te
+Cloning into '<lab>/work/bao-gia/lib/tien-te'...
+fatal: transport 'file' not allowed
+fatal: clone of '<lab>/work/remote/tien-te.git' into submodule path '<lab>/work/bao-gia/lib/tien-te' failed
+# Remote của lab là thư mục nên cho phép riêng lệnh này; với GitHub/GitLab (https, ssh) không cần.
+$ git -c protocol.file.allow=always submodule add ../tien-te.git lib/tien-te
+Cloning into '<lab>/work/bao-gia/lib/tien-te'...
+done.
+$ Get-Content .gitmodules
+[submodule "lib/tien-te"]
+	path = lib/tien-te
+	url = ../tien-te.git
+$ git status -s
+A  .gitmodules
+A  lib/tien-te
+$ git diff --cached --submodule=short
+diff --git a/.gitmodules b/.gitmodules
+new file mode 100644
+index 0000000..61d504c
+--- /dev/null
++++ b/.gitmodules
+@@ -0,0 +1,3 @@
++[submodule "lib/tien-te"]
++	path = lib/tien-te
++	url = ../tien-te.git
+diff --git a/lib/tien-te b/lib/tien-te
+new file mode 160000
+index 0000000..23f146f
+--- /dev/null
++++ b/lib/tien-te
+@@ -0,0 +1 @@
++Subproject commit 23f146fec27a6b526d573e9b3edab067fe614df7
+$ git commit -q -m "Dùng thư viện tiền tệ chung qua submodule"
+$ git submodule status
+ 23f146fec27a6b526d573e9b3edab067fe614df7 lib/tien-te (heads/main)
+
+# Thư viện có phiên bản mới; repository chính vẫn ghi nhận commit cũ cho tới khi Minh cập nhật
+$ git commit -q -am "Thêm dạng ngắn 31k"
+$ git push -q origin main
+$ git -c protocol.file.allow=always submodule update --remote lib/tien-te
+Submodule path 'lib/tien-te': checked out '02ae86b4a66175d1b290923c36b48c74de3fd17a'
+From <lab>/work/remote/tien-te
+   23f146f..02ae86b  main       -> origin/main
+$ git diff --submodule=log
+Submodule lib/tien-te 23f146f..02ae86b:
+  > Thêm dạng ngắn 31k
+$ git commit -q -am "Cập nhật thư viện tiền tệ: dạng ngắn"
+$ git push -q
+
+# Phía Lan: pull về chỉ có thư mục rỗng và commit được ghi nhận; phải khởi tạo submodule
+$ cd ../lan/bao-gia
+$ git pull -q --ff-only upstream main
+$ git submodule status
+-02ae86b4a66175d1b290923c36b48c74de3fd17a lib/tien-te
+$ git -c protocol.file.allow=always submodule update --init
+Submodule path 'lib/tien-te': checked out '02ae86b4a66175d1b290923c36b48c74de3fd17a'
+Submodule 'lib/tien-te' (<lab>/work/remote/tien-te.git) registered for path 'lib/tien-te'
+Cloning into '<lab>/work/lan/bao-gia/lib/tien-te'...
+done.
+$ git submodule status
+ 02ae86b4a66175d1b290923c36b48c74de3fd17a lib/tien-te (heads/main)
+PASS ref của Minh trùng lịch sử chuẩn
+PASS ref của remote trùng lịch sử chuẩn
+PASS ref của Lan trùng lịch sử chuẩn
+
+# ==================== p05/45-lfs-file-lon.mjs · GIT-045 ====================
+# Bật Git LFS cho repository: cài filter và hook vào .git
+$ git lfs install --local
+Updated Git hooks.
+Git LFS initialized.
+# Theo dõi ảnh thiết kế bằng LFS: mẫu được ghi vào .gitattributes
+$ git lfs track "docs/thiet-ke/*.png"
+Tracking "docs/thiet-ke/*.png"
+$ Get-Content .gitattributes -Tail 1
+docs/thiet-ke/*.png filter=lfs diff=lfs merge=lfs -text
+# Bản thiết kế bảng giá 2027: 720683 byte
+$ git add .gitattributes docs/thiet-ke
+warning: in the working copy of '.gitattributes', CRLF will be replaced by LF the next time Git touches it
+$ git lfs status
+On branch main
+Objects to be pushed to origin/main:
+
+
+Objects to be committed:
+
+	.gitattributes (Git: 1782c2a -> Git: f8e3352)
+	docs/thiet-ke/bang-gia-2027.png (LFS: 307d707)
+
+Objects not staged for commit:
+$ git commit -q -m "Thêm bản thiết kế bảng giá 2027 (Git LFS)"
+# Trong commit chỉ là một file con trỏ vài dòng; nội dung thật nằm trong .git/lfs
+$ git show HEAD:docs/thiet-ke/bang-gia-2027.png
+version https://git-lfs.github.com/spec/v1
+oid sha256:307d70792a590f09d13011c26df36647863dc83bbb774115e3923436ed054316
+size 720683
+$ git lfs ls-files -l
+307d70792a590f09d13011c26df36647863dc83bbb774115e3923436ed054316 * docs/thiet-ke/bang-gia-2027.png
+$ git cat-file -s HEAD:docs/thiet-ke/bang-gia-2027.png
+131
+$ git push -q
+Uploading LFS objects: 100% (1/1), done.
+PASS repository có file lưu bằng LFS
+PASS ref của Minh trùng lịch sử chuẩn
+PASS ref của remote trùng lịch sử chuẩn
+PASS ref của Lan trùng lịch sử chuẩn
+
+# ==================== p05/46-repository-lon.mjs · GIT-046 ====================
+# Máy chủ phải cho phép lọc object khi clone (GitHub, GitLab bật sẵn)
+$ git config uploadpack.allowFilter true
+
+# Clone đủ: mọi commit, mọi phiên bản của mọi file
+$ git clone -q file:///<lab>/work/remote/bao-gia.git clone-du
+$ cd clone-du
+$ git count-objects -v
+count: 0
+size: 0
+in-pack: 229
+packs: 1
+size-pack: 32
+prune-packable: 0
+garbage: 0
+size-garbage: 0
+$ cd ..
+
+# Partial clone --filter=blob:none: đủ commit và tree, blob (nội dung file) chỉ tải khi cần
+$ git clone -q --filter=blob:none file:///<lab>/work/remote/bao-gia.git clone-nhe
+$ cd clone-nhe
+$ git rev-list --count HEAD
+52
+$ git count-objects -v
+count: 0
+size: 0
+in-pack: 191
+packs: 2
+size-pack: 31
+prune-packable: 0
+garbage: 0
+size-garbage: 0
+$ git rev-list --objects --all --missing=print | Select-String "^[?]" | Measure-Object | % Count
+38
+# Xem một file ở bản cũ: Git tải đúng blob đó từ remote rồi in ra
+$ git show v1.0.0:src/BaoGia/FareCalculator.cs | Select-Object -First 3
+namespace ToiNoi.BaoGia;
+
+/// <summary>Bảng giá của một loại dịch vụ, đơn vị đồng.</summary>
+$ git rev-list --objects --all --missing=print | Select-String "^[?]" | Measure-Object | % Count
+37
+$ cd ..
+
+# Shallow clone --depth 1: chỉ commit mới nhất (hợp với CI chỉ cần build)
+$ git clone -q --depth 1 file:///<lab>/work/remote/bao-gia.git clone-nong
+$ cd clone-nong
+$ git log --oneline
+de3f585 Thêm bản thiết kế bảng giá 2027 (Git LFS)
+$ git rev-parse --is-shallow-repository
+true
+$ git fetch -q --deepen 2
+$ git log --oneline
+de3f585 Thêm bản thiết kế bảng giá 2027 (Git LFS)
+c749f21 Cập nhật thư viện tiền tệ: dạng ngắn
+569a9f2 Dùng thư viện tiền tệ chung qua submodule
+$ cd ..
+
+# Sparse checkout: chỉ đưa vài thư mục ra working tree (kết hợp partial clone)
+$ git clone -q --sparse --filter=blob:none file:///<lab>/work/remote/bao-gia.git clone-thua
+$ cd clone-thua
+$ Get-ChildItem -Force -Name .
+.git
+.gitattributes
+.gitignore
+.gitmodules
+README.md
+$ git sparse-checkout set docs
+$ git sparse-checkout list
+docs
+$ Get-ChildItem -Force -Name .
+.git
+.gitattributes
+.gitignore
+.gitmodules
+docs
+README.md
+$ Get-ChildItem -Force -Name docs
+bang-gia-cuoc.md
+phi-cho.md
+runbook-hoan-tac.md
+thiet-ke
+PASS ref của Minh trùng lịch sử chuẩn
+PASS ref của remote trùng lịch sử chuẩn
+PASS ref của Lan trùng lịch sử chuẩn
+
+# ==================== p05/47-bao-tri-gc-maintenance.mjs · GIT-047 ====================
+# Sau bốn phần, kho object toàn object rời (loose): mỗi object một file nén
+$ git count-objects -v
+count: 295
+size: 57
+in-pack: 0
+packs: 0
+size-pack: 0
+prune-packable: 0
+garbage: 0
+size-garbage: 0
+
+# fsck: kiểm tra mọi object. dangling = object không còn ref nào trỏ tới (commit thử, reset, rebase ở Phần 4)
+$ git fsck --full --no-progress
+dangling commit … (1 dòng)
+dangling tree … (4 dòng)
+
+# gc: đóng gói object rời thành pack, nén delta, đóng gói ref; object không còn tham chiếu được giữ 2 tuần rồi mới xoá
+$ git gc -q
+$ git count-objects -v
+count: 0
+size: 0
+in-pack: 295
+packs: 2
+size-pack: 43
+prune-packable: 0
+garbage: 0
+size-garbage: 0
+$ git fsck --full --no-progress --no-dangling
+
+# commit-graph: chỉ mục giúp log, đồ thị, blame, merge-base chạy nhanh trên lịch sử dài
+$ git commit-graph write --reachable --changed-paths
+$ git commit-graph verify
+PASS đã có commit-graph
+
+# maintenance run: chạy từng việc bảo trì theo tên (git maintenance start sẽ đặt lịch chạy định kỳ)
+$ git maintenance run --task=pack-refs
+$ git maintenance run --task=commit-graph
+# Dọn object LFS cũ đã có trên remote (xem trước)
+$ git lfs prune --dry-run
+1 local object, 1 retained, done.
+PASS ref của Minh trùng lịch sử chuẩn
+PASS ref của remote trùng lịch sử chuẩn
+PASS ref của Lan trùng lịch sử chuẩn
+
+# ==================== p05/48-ky-commit-tag.mjs · GIT-048 ====================
+# Ký bằng khoá SSH: định dạng ssh, khoá ký là public key (private key nằm cạnh nó hoặc trong ssh-agent)
+$ git config gpg.format ssh
+$ git config user.signingkey <lab>/fixtures/khoa-ky-demo.pub
+
+# Danh sách người ký tin cậy, commit cùng repository để cả nhóm xác minh được
+$ Get-Content .allowed_signers
+minh@toinoi.test namespaces="git" ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIETm/+hYtvRupU2iS7zX2tz3qxPXIC8pXk19M39U9MDQ
+$ git config gpg.ssh.allowedSignersFile .allowed_signers
+$ git add .allowed_signers
+$ git commit -S -m "Thêm danh sách khoá ký của nhóm"
+[main 1f0a787] Thêm danh sách khoá ký của nhóm
+ 1 file changed, 1 insertion(+)
+ create mode 100644 .allowed_signers
+$ git log --show-signature -1
+commit 1f0a787e22591b78dd1ee8efc78495703af4fefb
+Good "git" signature for minh@toinoi.test with ED25519 key SHA256:ktrw7kr64a2V/wcdx7FKqeY6NQwEDtlodCSRHgsirWw
+Author: Trần Minh <minh@toinoi.test>
+Date:   Sat Nov 28 09:00:00 2026 +0700
+
+    Thêm danh sách khoá ký của nhóm
+$ git verify-commit HEAD
+Good "git" signature for minh@toinoi.test with ED25519 key SHA256:ktrw7kr64a2V/wcdx7FKqeY6NQwEDtlodCSRHgsirWw
+# Commit cũ không ký: verify-commit không in gì và thoát mã 1
+$ git verify-commit HEAD~1
+
+# Tag phát hành có chữ ký
+$ git tag -s v1.2.0 -m "Phát hành 1.2.0: phụ phí đêm, phí chờ theo giây"
+$ git tag -v v1.2.0
+object 1f0a787e22591b78dd1ee8efc78495703af4fefb
+type commit
+tag v1.2.0
+tagger Trần Minh <minh@toinoi.test> 1795833000 +0700
+
+Phát hành 1.2.0: phụ phí đêm, phí chờ theo giây
+Good "git" signature for minh@toinoi.test with ED25519 key SHA256:ktrw7kr64a2V/wcdx7FKqeY6NQwEDtlodCSRHgsirWw
+$ git push -q origin main v1.2.0
+PASS tag v1.2.0 có chữ ký hợp lệ
+PASS ref của Minh trùng lịch sử chuẩn
+PASS ref của remote trùng lịch sử chuẩn
+PASS ref của Lan trùng lịch sử chuẩn
+
+# ==================== p05/49-hook-pre-commit.mjs · GIT-049 ====================
+# Hook mặc định nằm trong .git/hooks: không commit được, mỗi người tự cài. LFS đã đặt vài hook ở đó:
+$ Get-ChildItem -Force -Name .git/hooks
+applypatch-msg.sample
+commit-msg.sample
+fsmonitor-watchman.sample
+post-checkout
+post-commit
+post-merge
+post-update.sample
+pre-applypatch.sample
+pre-commit.sample
+pre-merge-commit.sample
+pre-push
+pre-push.sample
+pre-rebase.sample
+pre-receive.sample
+prepare-commit-msg.sample
+push-to-checkout.sample
+sendemail-validate.sample
+update.sample
+
+# Hook chung của nhóm đặt trong .githooks (commit cùng mã nguồn), mỗi máy trỏ core.hooksPath tới đó
+$ Get-Content .githooks/pre-commit
+#!/bin/sh
+# Chặn commit còn dòng in debug (Console.WriteLine) trong phần thay đổi C# đã stage.
+if git diff --cached -U0 -- '*.cs' | grep -q '^+.*Console\.WriteLine'; then
+  echo "pre-commit: còn Console.WriteLine trong thay đổi .cs đã stage. Bỏ dòng debug rồi commit lại." >&2
+  exit 1
+fi
+exit 0
+$ git add .githooks
+$ git update-index --chmod=+x .githooks/pre-commit .githooks/commit-msg .githooks/pre-push
+$ git ls-files -s .githooks
+100755 ef66397a33d165330a97c36c1a2cfe276ec1072a 0	.githooks/commit-msg
+100755 f5c3dbaeb5c7840b867547f999f70206e7a32307 0	.githooks/pre-commit
+100755 e616ec5596a21186c0fe689565c3e197553ed08c 0	.githooks/pre-push
+$ git commit -q -m "Thêm hook chung của nhóm"
+$ git config core.hooksPath .githooks
+
+# pre-commit chặn dòng debug trong phần thay đổi đã stage
+$ git add src/BaoGia/NightSurcharge.cs
+$ git commit -m "Ghi log khi tính phụ phí đêm"
+pre-commit: còn Console.WriteLine trong thay đổi .cs đã stage. Bỏ dòng debug rồi commit lại.
+$ git restore --staged --worktree src/BaoGia/NightSurcharge.cs
+
+# commit-msg chặn tiêu đề WIP và tiêu đề quá ngắn
+$ git commit --allow-empty -m "WIP phụ phí"
+commit-msg: không commit WIP; viết tiêu đề nói rõ thay đổi.
+$ git commit --allow-empty -m "sửa"
+commit-msg: tiêu đề quá ngắn, cần ít nhất 10 ký tự.
+# --no-verify bỏ qua pre-commit và commit-msg (chỉ dùng khi biết rõ vì sao); bỏ commit thử ngay sau đó
+$ git commit -q --allow-empty --no-verify -m "WIP"
+$ git log --oneline -1
+be0446f WIP
+$ git reset -q --hard HEAD~1
+
+# pre-push kiểm tra quy tắc làm tròn rồi chuyển cho Git LFS; push bình thường đi qua
+$ git push
+To <lab>/work/remote/bao-gia.git
+   1f0a787..21b047b  main -> main
+PASS ref của Minh trùng lịch sử chuẩn
+PASS ref của remote trùng lịch sử chuẩn
+PASS ref của Lan trùng lịch sử chuẩn
+
+# ==================== p05/50-thuc-hanh.mjs · GIT-050 ====================
+# Báo cáo điều tra: commit qua hook của nhóm (pre-commit, commit-msg), push qua pre-push
+$ git add docs/bao-cao-sai-cuoc.md
+$ git commit -q -m "Thêm báo cáo điều tra sai cước"
+$ git push -q
+$ git commit-graph write --reachable --changed-paths
+$ git log --oneline -10
+8ea4486 Thêm báo cáo điều tra sai cước
+21b047b Thêm hook chung của nhóm
+1f0a787 Thêm danh sách khoá ký của nhóm
+de3f585 Thêm bản thiết kế bảng giá 2027 (Git LFS)
+c749f21 Cập nhật thư viện tiền tệ: dạng ngắn
+569a9f2 Dùng thư viện tiền tệ chung qua submodule
+05c09ea Khai báo diff và merge theo loại file
+f1d35ab Revert "Làm gọn phép làm tròn giá cước"
+dbb47b7 Hướng dẫn chạy riêng test tính cước
+df432b9 Ghi chú nguồn của hằng số phụ phí đêm
+PASS ref của Minh trùng lịch sử chuẩn
+PASS ref của remote trùng lịch sử chuẩn
+PASS ref của Lan trùng lịch sử chuẩn
+$ node ../../p05/kiem-tra.mjs .
+ĐẠT      main cục bộ trùng main trên remote
+ĐẠT      lỗi làm tròn đã được revert, main làm tròn lên bội số 1.000 đ
+ĐẠT      không bisect hay thao tác nào dở dang, working tree sạch
+ĐẠT      .gitattributes khai báo diff=csharp cho file C#
+ĐẠT      submodule lib/tien-te đã khởi tạo và đúng commit được ghi nhận
+ĐẠT      bản thiết kế bảng giá lưu bằng Git LFS
+ĐẠT      tag v1.2.0 có chữ ký hợp lệ
+ĐẠT      core.hooksPath = .githooks, hook trong index có quyền chạy (100755)
+ĐẠT      có commit-graph và fsck không báo lỗi
+ĐẠT      main có báo cáo điều tra docs/bao-cao-sai-cuoc.md nhắc bisect
+10/10 tiêu chí đạt
+PASS repository đạt mọi tiêu chí
+
+# Làm hỏng có chủ đích: bỏ core.hooksPath, huỷ khởi tạo submodule, xoá commit-graph
+$ git config --unset core.hooksPath
+$ git submodule deinit -f lib/tien-te
+Cleared directory 'lib/tien-te'
+Submodule 'lib/tien-te' (../tien-te.git) unregistered for path 'lib/tien-te'
+$ Remove-Item .git/objects/info/commit-graph*
+$ node ../../p05/kiem-tra.mjs .
+ĐẠT      main cục bộ trùng main trên remote
+ĐẠT      lỗi làm tròn đã được revert, main làm tròn lên bội số 1.000 đ
+ĐẠT      không bisect hay thao tác nào dở dang, working tree sạch
+ĐẠT      .gitattributes khai báo diff=csharp cho file C#
+CHƯA ĐẠT submodule lib/tien-te đã khởi tạo và đúng commit được ghi nhận — -02ae86b4a66175d1b290923c36b48c74de3fd17a lib/tien-te
+ĐẠT      bản thiết kế bảng giá lưu bằng Git LFS
+ĐẠT      tag v1.2.0 có chữ ký hợp lệ
+CHƯA ĐẠT core.hooksPath = .githooks, hook trong index có quyền chạy (100755) — hooksPath=chưa đặt, 3 hook
+CHƯA ĐẠT có commit-graph và fsck không báo lỗi — chưa ghi commit-graph; 
+ĐẠT      main có báo cáo điều tra docs/bao-cao-sai-cuoc.md nhắc bisect
+7/10 tiêu chí đạt
+PASS kiểm tra bắt được 3 lỗi
+
+# Sửa từng lỗi
+$ git config core.hooksPath .githooks
+$ git -c protocol.file.allow=always submodule update --init
+Submodule path 'lib/tien-te': checked out '02ae86b4a66175d1b290923c36b48c74de3fd17a'
+Submodule 'lib/tien-te' (<lab>/work/remote/tien-te.git) registered for path 'lib/tien-te'
+$ git commit-graph write --reachable --changed-paths
+$ node ../../p05/kiem-tra.mjs .
+ĐẠT      main cục bộ trùng main trên remote
+ĐẠT      lỗi làm tròn đã được revert, main làm tròn lên bội số 1.000 đ
+ĐẠT      không bisect hay thao tác nào dở dang, working tree sạch
+ĐẠT      .gitattributes khai báo diff=csharp cho file C#
+ĐẠT      submodule lib/tien-te đã khởi tạo và đúng commit được ghi nhận
+ĐẠT      bản thiết kế bảng giá lưu bằng Git LFS
+ĐẠT      tag v1.2.0 có chữ ký hợp lệ
+ĐẠT      core.hooksPath = .githooks, hook trong index có quyền chạy (100755)
+ĐẠT      có commit-graph và fsck không báo lỗi
+ĐẠT      main có báo cáo điều tra docs/bao-cao-sai-cuoc.md nhắc bisect
+10/10 tiêu chí đạt
+PASS sửa xong đạt mọi tiêu chí
+
+# [lab] Bài đã chạy: 10
+# [lab] PASS: 37
+# [lab] FAIL: 0
+# [lab] KẾT QUẢ: ĐẠT

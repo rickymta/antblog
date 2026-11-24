@@ -1,7 +1,7 @@
 ---
 slug: git-lich-su-log-do-thi-commit
 title: "Đọc lịch sử: git log, đồ thị commit và tìm commit trong GitStudio"
-summary: "Bộ phận vận hành hỏi tuần trước nhóm đã đổi những gì trong dịch vụ báo giá. Bài này đọc lịch sử bằng git log với --oneline, --graph, --format, lọc theo tác giả, khoảng thời gian, đường dẫn và nội dung commit, dùng khoảng commit A..B, rồi làm cùng các việc đó trên đồ thị commit, ô tìm kiếm Ctrl+F và Spotlight của GitStudio."
+summary: "Bộ phận vận hành hỏi tuần trước nhóm đã đổi những gì trong dịch vụ báo giá. Bài này đọc lịch sử bằng git log với --oneline, --graph, --format, lọc theo tác giả, khoảng thời gian, đường dẫn và nội dung commit, dùng khoảng commit A..B, rồi làm cùng các việc đó trên đồ thị commit, ô tìm kiếm Ctrl+Shift+F và Spotlight của GitStudio."
 category: git
 level: intermediate
 tags: [git, git-006, git-log, git-show, commit-graph, tim-kiem, gitstudio, spotlight, toi-noi]
@@ -175,11 +175,11 @@ Bấm một file trong danh sách để xem diff của file đó trong commit. C
 
 Di chuyển bằng bàn phím: `↑`/`↓` hoặc `K`/`J` chọn commit trước/sau, `Ctrl+Shift+H` nhảy về `HEAD`. Repository có hàng chục nghìn commit thì GitStudio tải dần khi bạn cuộn (mặc định 500 commit đầu, chỉnh ở **Tuỳ chọn → Chung**).
 
-## 8. Tìm commit: `Ctrl+F` và Spotlight
+## 8. Tìm commit: `Ctrl+Shift+F` và Spotlight
 
-**`Ctrl+F`** mở ô tìm kiếm ngay trên đồ thị. Commit khớp được tô đậm, commit không khớp mờ đi, mũi tên lên/xuống nhảy giữa các kết quả (`1/3`). Gõ `Lan`, ba commit của Lê Lan nổi lên:
+**`Ctrl+Shift+F`** mở ô tìm kiếm ngay trên đồ thị (`Ctrl+F` và nút **Tìm kiếm** trên thanh công cụ mở Spotlight). Commit khớp được tô đậm, commit không khớp mờ đi, mũi tên lên/xuống nhảy giữa các kết quả (`1/3`). Gõ `Lan`, ba commit của Lê Lan nổi lên:
 
-<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/git-lich-su-log-do-thi-commit/gitstudio-02.webp" alt="Ô tìm kiếm Ctrl+F trên đồ thị GitStudio với phạm vi Commit đã tải và từ khoá Lan, kết quả 1/3; ba commit của Lê Lan được tô đậm, các commit khác mờ đi" width="2000" height="1125" loading="lazy"></div><figcaption>GitStudio · <code>Ctrl+F</code> trên đồ thị, tương đương <code>git log --author=Lan</code> trên các commit đã tải</figcaption></figure>
+<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/git-lich-su-log-do-thi-commit/gitstudio-02.webp" alt="Ô tìm kiếm Ctrl+Shift+F trên đồ thị GitStudio với phạm vi Commit đã tải và từ khoá Lan, kết quả 1/3; ba commit của Lê Lan được tô đậm, các commit khác mờ đi" width="2000" height="1125" loading="lazy"></div><figcaption>GitStudio · <code>Ctrl+F</code> trên đồ thị, tương đương <code>git log --author=Lan</code> trên các commit đã tải</figcaption></figure>
 
 Danh sách thả xuống bên trái ô tìm kiếm chọn **phạm vi**. "Commit đã tải" lọc ngay trên những commit đang hiển thị (theo nội dung, tác giả, mã hash). Các phạm vi còn lại tìm trong **toàn bộ lịch sử** và chạy đúng một lệnh `git log` bên dưới:
 
@@ -192,7 +192,7 @@ Danh sách thả xuống bên trái ô tìm kiếm chọn **phạm vi**. "Commit
 
 GitStudio truyền chuỗi tìm kiếm như chuỗi cố định (`--fixed-strings`), nên dấu chấm hay dấu ngoặc trong từ khoá không bị hiểu thành biểu thức chính quy.
 
-**Spotlight** (`Ctrl+K`) tìm commit cùng lúc với nhánh, file, tag, stash; hợp khi bạn nhớ mang máng "commit gì đó về làm tròn" mà không biết nó là commit hay tên nhánh. Chọn một commit trong Spotlight, đồ thị cuộn tới và chọn đúng hàng đó.
+**Spotlight** (`Ctrl+K` hoặc `Ctrl+F`) tìm commit cùng lúc với nhánh, file, tag, stash; hợp khi bạn nhớ mang máng "commit gì đó về làm tròn" mà không biết nó là commit hay tên nhánh. Chọn một commit trong Spotlight, đồ thị cuộn tới và chọn đúng hàng đó.
 
 ## 9. Đối chiếu giao diện và lệnh
 
@@ -201,9 +201,9 @@ GitStudio truyền chuỗi tìm kiếm như chuỗi cố định (`--fixed-strin
 | Xem lịch sử | Đồ thị commit | | `git log --oneline --graph` |
 | Xem một commit | Bấm hàng commit | `↑`/`↓`, `J`/`K` | `git show --stat <commit>` |
 | Về commit đang checkout | Biểu tượng định vị trên đồ thị; Spotlight → Về HEAD | `Ctrl+Shift+H` | `git log -1` |
-| Tìm theo tác giả | `Ctrl+F` → Tác giả | | `git log --author=` |
-| Tìm theo nội dung commit | `Ctrl+F` → Nội dung commit | | `git log --grep=` |
-| Tìm theo file | `Ctrl+F` → File hoặc thư mục; Spotlight → file → Lịch sử file | `Ctrl+Enter` trong Spotlight | `git log -- <file>` |
+| Tìm theo tác giả | `Ctrl+Shift+F` → Tác giả | | `git log --author=` |
+| Tìm theo nội dung commit | `Ctrl+Shift+F` → Nội dung commit | | `git log --grep=` |
+| Tìm theo file | `Ctrl+Shift+F` → File hoặc thư mục; Spotlight → file → Lịch sử file | `Ctrl+Enter` trong Spotlight | `git log -- <file>` |
 | Tìm mọi thứ | Spotlight | `Ctrl+K` | |
 
 ## 10. Lỗi thường gặp
@@ -224,7 +224,7 @@ GitStudio truyền chuỗi tìm kiếm như chuỗi cố định (`--fixed-strin
 
 <details><summary><b>Lời giải</b></summary><p><code>git log --oneline --author=Minh -- src tests</code> với repository này. Tổng quát hơn, loại trừ tác giả bằng <code>--perl-regexp --author='^(?!Lê Lan)'</code> (cần Git biên dịch kèm PCRE, Git for Windows có sẵn).</p></details>
 
-**Bài 3.** Trong GitStudio, dùng `Ctrl+F` với phạm vi **Đoạn code thay đổi**, gõ `Math.Ceiling`. Kết quả là commit nào? Viết lệnh tương ứng và chạy trong terminal tích hợp.
+**Bài 3.** Trong GitStudio, dùng `Ctrl+Shift+F` với phạm vi **Đoạn code thay đổi**, gõ `Math.Ceiling`. Kết quả là commit nào? Viết lệnh tương ứng và chạy trong terminal tích hợp.
 
 <details><summary><b>Lời giải</b></summary><p>Commit <code>0d57e4b</code> "Làm tròn cước lên bội số 1.000 đ": commit duy nhất làm thay đổi số lần xuất hiện của chuỗi đó. Lệnh: <code>git log --oneline -S"Math.Ceiling"</code>. GIT-009 giải thích pickaxe kỹ hơn.</p></details>
 
