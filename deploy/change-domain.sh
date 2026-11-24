@@ -18,7 +18,11 @@ cd "$(dirname "$0")/.."
 say()  { printf '\n==> %s\n' "$*"; }
 warn() { printf 'CẢNH BÁO: %s\n' "$*" >&2; }
 die()  { printf 'LỖI: %s\n' "$*" >&2; exit 1; }
-envval() { sed -n "s/^$1=//p" .env | tail -n1; }
+# Giá trị biến trong .env như docker compose đọc: bỏ CR, khoảng trắng hai đầu, cặp nháy bao ngoài.
+envval() {
+  sed -n "s/^$1=//p" .env | tail -n1 \
+    | sed -e 's/\r$//' -e 's/^[[:space:]]*//' -e 's/[[:space:]]*$//' -e 's/^"\(.*\)"$/\1/' -e "s/^'\(.*\)'$/\1/"
+}
 
 command -v docker >/dev/null || die "không thấy lệnh docker."
 [ -f .env ] || die "không thấy .env ở $(pwd)."
@@ -44,7 +48,8 @@ say "1/6 Kiểm DNS các tên miền mới"
 NEW_DOMAIN=$(envval DOMAIN | sed "s/$OLD_RE/$NEW/g")
 NEW_ADMIN=$(envval ADMIN_DOMAIN | sed "s/$OLD_RE/$NEW/g")
 NEW_EXTRA=$(envval CERT_EXTRA_DOMAINS | sed "s/$OLD_RE/$NEW/g")
-NEW_WG=$(envval WG_SERVER_URL | sed "s/$OLD_RE/$NEW/g")
+OLD_WG=$(envval WG_SERVER_URL)
+NEW_WG=$(printf '%s' "$OLD_WG" | sed "s/$OLD_RE/$NEW/g")
 missing=0
 for h in $NEW_DOMAIN $NEW_ADMIN $(echo "$NEW_EXTRA" | tr ',' ' ') $NEW_WG; do
   ip=$(getent ahostsv4 "$h" 2>/dev/null | awk 'NR==1{print $1}')
@@ -56,10 +61,19 @@ done
 # Plugin dns-cloudflare của certbot tìm zone qua đúng API này ⇒ token không thấy zone thì certbot chắc chắn hỏng.
 TOKEN=$(envval CF_API_TOKEN)
 [ -n "$TOKEN" ] && [ -n "$(envval ACME_EMAIL)" ] || die "CF_API_TOKEN hoặc ACME_EMAIL trong .env đang trống."
-ZONE_HITS=$(curl -s -m 20 -H "Authorization: Bearer $TOKEN" "https://api.cloudflare.com/client/v4/zones?name=$NEW" \
-  | grep -o '"count":[0-9]*' | head -n1 | cut -d: -f2)
-[ "${ZONE_HITS:-0}" -ge 1 ] || die "CF_API_TOKEN không thấy zone $NEW. Vào Cloudflare › My Profile › API Tokens, sửa token: \
-Zone › DNS › Edit, Zone Resources thêm zone $NEW — rồi chạy lại. (Chưa đổi gì trên server.)"
+CF_API=https://api.cloudflare.com/client/v4
+ZONE_JSON=$(curl -s -m 20 -H "Authorization: Bearer $TOKEN" "$CF_API/zones?name=$NEW" || true)
+ZONE_HITS=$(printf '%s' "$ZONE_JSON" | grep -o '"count":[0-9]*' | head -n1 | cut -d: -f2)
+if [ "${ZONE_HITS:-0}" -lt 1 ]; then
+  # In trạng thái token + thông báo lỗi của Cloudflare (không in token) để biết sai ở đâu.
+  echo "  Token (độ dài ${#TOKEN} ký tự, 4 ký tự cuối …$(printf '%s' "$TOKEN" | tail -c 4)):"
+  curl -s -m 20 -H "Authorization: Bearer $TOKEN" "$CF_API/user/tokens/verify" \
+    | grep -o '"status":"[^"]*"\|"expires_on":"[^"]*"\|"message":"[^"]*"' | sed 's/^/    verify  /' || true
+  printf '%s' "$ZONE_JSON" | grep -o '"count":[0-9]*\|"message":"[^"]*"' | sed 's/^/    zones   /' || true
+  die "CF_API_TOKEN không thấy zone $NEW. Vào Cloudflare › My Profile › API Tokens, sửa token: \
+Zone › DNS › Edit, Zone Resources thêm zone $NEW (tạo token mới thì nhớ dán vào CF_API_TOKEN trong .env) — rồi chạy lại. \
+(Chưa đổi gì trên server.)"
+fi
 echo "  CF_API_TOKEN thấy zone $NEW."
 
 # --- 2. Sao lưu + sửa .env -----------------------------------------------------------------------------------
@@ -110,10 +124,15 @@ for h in $NEW_DOMAIN $NEW_ADMIN $(echo "$NEW_EXTRA" | tr ',' ' '); do
   printf '  %-32s HTTP %s  %s\n' "$h" "$code" "${info:-KHÔNG ĐỌC ĐƯỢC CHỨNG CHỈ}"
 done
 
+if [ "$NEW_WG" = "$OLD_WG" ]; then
+  VPN_NOTE="không đổi (WG_SERVER_URL=$NEW_WG), giữ nguyên cấu hình đang dùng."
+else
+  VPN_NOTE="lấy lại cấu hình mới ở deploy/wireguard/config/peer_*/peer_*.conf (Endpoint = $NEW_WG)."
+fi
 cat <<EOF
 
 XONG. Việc còn lại làm tay:
-  - Máy khách VPN: lấy lại cấu hình mới ở deploy/wireguard/config/peer_*/peer_*.conf (Endpoint = $NEW_WG).
+  - Máy khách VPN: $VPN_NOTE
   - Khi chạy ổn, xoá chứng chỉ tên cũ (tên cũ không còn xin/gia hạn được):
       docker compose exec certbot certbot delete --cert-name $OLD --non-interactive
   - Cloudflare zone $OLD (khi tên cũ hoạt động lại): Redirect Rule 301 $OLD/* -> https://$NEW_DOMAIN/\${1}
