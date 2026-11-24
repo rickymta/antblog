@@ -37,6 +37,7 @@ nc -zv -w 3 toinoi-app-02 22
 sudo ufw status numbered
 sudo ufw insert 1 allow from 10.20.0.10 to any port 22 proto tcp comment 'SSH qua bastion'
 #phien bastion
+#clear
 nc -zv -w 3 toinoi-app-02 22
 #shot 11
 ## Tình huống 4: server từ chối key

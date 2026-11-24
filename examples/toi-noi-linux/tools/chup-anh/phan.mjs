@@ -33,6 +33,8 @@ export const LOCAL = join(ROOT, 'may-cua-ban');
 
 /** Máy của tab SSH Studio đang gõ (đổi bằng `#phien TÊN`, Phần 6); mặc định toinoi-app-01. */
 let hienTai = 'app01';
+/** true khi một `#gui` có thể đã chuyển sang tab khác: `#phien` kế tiếp phải chuyển tab thật. */
+let lechTab = false;
 /** Lệnh root trên máy của tab đang gõ. */
 const root = (cmd) => rootOn(containerOf(hienTai), cmd);
 
@@ -168,10 +170,11 @@ export async function chayPhan({ part, slugs, gui: makeGui, only = [], fresh = t
       khac = null;
     };
     const doiPhien = async (may) => {
-      if (may === hienTai) return;
+      if (may === hienTai && !lechTab) return;
       if (!gui.phien) throw new Error('Phần này chưa có thao tác chuyển phiên (gui.phien)');
       await gui.phien(may);
       hienTai = may;
+      lechTab = false;
     };
     if (hienTai !== 'app01') await doiPhien('app01');
     for (const line of lines) {
@@ -194,6 +197,9 @@ export async function chayPhan({ part, slugs, gui: makeGui, only = [], fresh = t
       else if ((m = line.match(/^#gui (\S+)$/))) {
         if (!gui[m[1]]) throw new Error('Chưa có thao tác giao diện: ' + m[1]);
         await gui[m[1]]();
+        // Thao tác giao diện có thể đã chuyển sang tab khác (mở kết nối mới, trang khác): `#phien`
+        // kế tiếp phải chuyển tab thật, kể cả khi trùng máy đang gõ trước đó.
+        if (gui.phien) lechTab = true;
       } else if ((m = line.match(/^#root (.+)$/))) root(m[1]);
       else if ((m = line.match(/^#file (\S+) (\S+)(?: (\d\d))?$/))) await vimFile(m[1], m[2], m[3]);
       else if ((m = line.match(/^#sudofile (sudoedit|visudo) (\S+) (\S+)(?: (\d\d))?$/)))

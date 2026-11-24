@@ -165,6 +165,19 @@ async function connect(a, may) {
     }
     await c.eval('location.reload()');
     await sleep(3000);
+  } else if (only.length) {
+    // Chụp lại vài bài: `run.mjs setup` dựng lại host key gốc của bastion và app02, còn SSH Studio
+    // có thể đang nhớ key mà một bài sau đã đổi (LNX-059). Quên key lệch rồi kết nối một lần để
+    // tin lại key gốc, nếu không thì hộp thoại host key chen vào các lỗi mà bài muốn chụp.
+    const d = await invoke(c, 'snapshot');
+    for (const may of ['bastion', 'app02']) {
+      const dc = DIA_CHI[may];
+      if (!d.knownHosts[dc] || d.knownHosts[dc] === fpOf(TEN[may])) continue;
+      console.log(`Tin lại host key gốc của ${dc}`);
+      await invoke(c, 'forget_host', { address: dc });
+      await connect(a, may);
+      await closeAllTabs(c, sleep);
+    }
   }
   await connect(a, 'app01');
   c.close();
@@ -258,6 +271,8 @@ await chayPhan({
     return {
       /** `#phien TÊN`: sang tab của máy đó, mở kết nối nếu chưa có. */
       async phien(may) {
+        // Toast lỗi của bước trước nằm đúng chỗ focusTerminal bấm vào: tắt đi để lệnh gõ vào terminal.
+        await a.dismiss();
         if (await goTab(TEN[may])) return;
         await connect(a, may);
       },

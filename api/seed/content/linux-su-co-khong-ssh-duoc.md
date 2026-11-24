@@ -96,7 +96,7 @@ an@toinoi-app-02:~$ sudo ufw insert 1 allow from 10.20.0.10 to any port 22 proto
 Rule inserted
 ```
 
-<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/linux-su-co-khong-ssh-duoc/ssh-studio-11.webp" alt="Tab toinoi-app-02 của SSH Studio vẫn hiện lỗi cũ Jump host toinoi-bastion không mở được kết nối tới toinoi-app-02:22 (ConnectFailed) với nút Kết nối lại, dù quy tắc ufw đã được thêm lại" width="2400" height="1350" loading="lazy"></div><figcaption>SSH Studio · sửa xong trên server, tab cũ vẫn giữ lỗi cho tới khi bấm Kết nối lại</figcaption></figure>
+<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/linux-su-co-khong-ssh-duoc/ssh-studio-11.webp" alt="Terminal của SSH Studio trên toinoi-bastion sau khi thêm lại quy tắc ufw trên app02: nc -zv -w 3 toinoi-app-02 22 báo Connection to toinoi-app-02 (10.20.0.12) 22 port succeeded" width="2400" height="1350" loading="lazy"></div><figcaption>SSH Studio · kiểm lại từ bastion: cổng 22 của app02 đã mở trở lại</figcaption></figure>
 
 Quy tắc cho bastion mất, chỉ còn quy tắc cho app01. Thêm lại vào đầu danh sách (`insert 1`), thử lại bằng `nc` từ bastion trước khi thử SSH Studio.
 
