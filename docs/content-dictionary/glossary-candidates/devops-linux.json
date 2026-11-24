@@ -65,7 +65,7 @@
       ],
       "scopeNote": "Thuật ngữ riêng của Linux/Unix, cùng nghĩa ở mọi chuyên mục.",
       "occurrences": 14,
-      "mentions": 48,
+      "mentions": 49,
       "outsideSeriesArticles": 5,
       "reviewNote": "Alias \"nhân\" rất dễ bắt nhầm (nhân vật, phép nhân, nguyên nhân là từ khác nhưng \"nhân\" đứng riêng vẫn gặp); chỉ nên giữ \"kernel\"."
     },
@@ -102,7 +102,7 @@
       ],
       "scopeNote": "Ngoài chuyên mục: Azure Cloud Shell, ShellRoute của go_router.",
       "occurrences": 31,
-      "mentions": 141,
+      "mentions": 148,
       "outsideSeriesArticles": 23
     },
     {
@@ -116,8 +116,8 @@
       ],
       "scopeNote": "Thuật ngữ riêng của Linux/Unix, cùng nghĩa ở mọi chuyên mục.",
       "occurrences": 17,
-      "mentions": 61,
-      "outsideSeriesArticles": 16
+      "mentions": 68,
+      "outsideSeriesArticles": 18
     },
     {
       "slug": "ssh",
@@ -132,7 +132,7 @@
       ],
       "scopeNote": "Thuật ngữ riêng của Linux/Unix, cùng nghĩa ở mọi chuyên mục.",
       "occurrences": 60,
-      "mentions": 791,
+      "mentions": 1184,
       "outsideSeriesArticles": 23
     },
     {
@@ -165,7 +165,7 @@
       ],
       "scopeNote": "Thuật ngữ riêng của Linux/Unix, cùng nghĩa ở mọi chuyên mục.",
       "occurrences": 15,
-      "mentions": 64,
+      "mentions": 87,
       "outsideSeriesArticles": 0
     },
     {
@@ -181,7 +181,7 @@
       ],
       "scopeNote": "Thuật ngữ riêng của Linux/Unix, cùng nghĩa ở mọi chuyên mục.",
       "occurrences": 10,
-      "mentions": 83,
+      "mentions": 86,
       "outsideSeriesArticles": 1
     },
     {
@@ -198,8 +198,8 @@
       ],
       "scopeNote": "Ngoài chuyên mục, \"fingerprint\" còn là vân tay sinh trắc học, device fingerprint.",
       "occurrences": 11,
-      "mentions": 79,
-      "outsideSeriesArticles": 7
+      "mentions": 88,
+      "outsideSeriesArticles": 8
     },
     {
       "slug": "known-hosts",
@@ -217,8 +217,8 @@
         "linux-host-key-known-hosts",
         "linux-su-co-khong-ssh-duoc"
       ],
-      "occurrences": 6,
-      "mentions": 46,
+      "occurrences": 9,
+      "mentions": 63,
       "outsideSeriesArticles": 0
     },
     {
@@ -237,8 +237,8 @@
         "linux-shell-dong-lenh-tro-giup"
       ],
       "scopeNote": "\"prompt\" ngoài chuyên mục thường là prompt của mô hình AI.",
-      "occurrences": 13,
-      "mentions": 27,
+      "occurrences": 14,
+      "mentions": 28,
       "outsideSeriesArticles": 4
     },
     {
@@ -255,8 +255,8 @@
       ],
       "scopeNote": "Từ rất chung; chỉ gắn tay ở chỗ định nghĩa.",
       "occurrences": 22,
-      "mentions": 45,
-      "outsideSeriesArticles": 132
+      "mentions": 48,
+      "outsideSeriesArticles": 133
     },
     {
       "slug": "doi-so-lenh",
@@ -270,9 +270,9 @@
         "linux-shell-dong-lenh-tro-giup"
       ],
       "scopeNote": "Ngoài chuyên mục: đối số của hàm trong các series lập trình (cùng nghĩa rộng, khác ngữ cảnh).",
-      "occurrences": 12,
-      "mentions": 19,
-      "outsideSeriesArticles": 33
+      "occurrences": 13,
+      "mentions": 22,
+      "outsideSeriesArticles": 35
     },
     {
       "slug": "alias-shell",
@@ -287,7 +287,7 @@
       ],
       "scopeNote": "Ngoài chuyên mục: alias trong SQL, alias của keyword trong từ điển này.",
       "occurrences": 8,
-      "mentions": 29,
+      "mentions": 35,
       "outsideSeriesArticles": 28
     },
     {
@@ -305,8 +305,8 @@
         "linux-chuyen-huong-pipe"
       ],
       "scopeNote": "Thuật ngữ riêng của Linux/Unix, cùng nghĩa ở mọi chuyên mục.",
-      "occurrences": 16,
-      "mentions": 53,
+      "occurrences": 15,
+      "mentions": 57,
       "outsideSeriesArticles": 56,
       "reviewNote": "Dò toàn site sẽ đánh dấu ở 53 bài ngoài series; soát vài bài trước khi gộp."
     },
@@ -351,7 +351,7 @@
       ],
       "scopeNote": "Thuật ngữ riêng của Linux/Unix, cùng nghĩa ở mọi chuyên mục.",
       "occurrences": 5,
-      "mentions": 9,
+      "mentions": 10,
       "outsideSeriesArticles": 9
     },
     {
@@ -370,8 +370,26 @@
         "linux-trien-khai-release-symlink"
       ],
       "scopeNote": "Thuật ngữ riêng của Linux/Unix, cùng nghĩa ở mọi chuyên mục.",
-      "occurrences": 11,
-      "mentions": 56,
+      "occurrences": 13,
+      "mentions": 64,
+      "outsideSeriesArticles": 0
+    },
+    {
+      "slug": "thu-muc-release",
+      "term": "thư mục release",
+      "english": "release directory",
+      "shortDefinition": "Cách bố trí triển khai: mỗi bản phát hành nằm trong một thư mục riêng (releases/1.5.0, releases/1.6.0), còn symlink current trỏ vào bản đang chạy. Lên bản mới hay quay lui chỉ là đổi đích của symlink rồi khởi động lại dịch vụ.",
+      "caseSensitive": false,
+      "categories": [
+        "devops-linux"
+      ],
+      "relatedArticleSlugs": [
+        "linux-trien-khai-release-symlink",
+        "linux-dong-bo-rsync-ssh-studio"
+      ],
+      "scopeNote": "Chỉ dò trong devops-linux: «release» ở chuyên mục khác (Git) mang nghĩa nhánh hoặc tag phát hành.",
+      "occurrences": 2,
+      "mentions": 2,
       "outsideSeriesArticles": 0
     },
     {
@@ -385,7 +403,7 @@
       ],
       "scopeNote": "Thuật ngữ riêng của Linux/Unix, cùng nghĩa ở mọi chuyên mục.",
       "occurrences": 3,
-      "mentions": 9,
+      "mentions": 10,
       "outsideSeriesArticles": 0
     },
     {
@@ -405,7 +423,7 @@
       ],
       "scopeNote": "Ngoài chuyên mục: wildcard của SQL LIKE, wildcard certificate, wildcard trong CORS.",
       "occurrences": 5,
-      "mentions": 18,
+      "mentions": 21,
       "outsideSeriesArticles": 8
     },
     {
@@ -422,7 +440,7 @@
       ],
       "scopeNote": "Thuật ngữ riêng của Linux/Unix, cùng nghĩa ở mọi chuyên mục.",
       "occurrences": 2,
-      "mentions": 4,
+      "mentions": 5,
       "outsideSeriesArticles": 0
     },
     {
@@ -435,8 +453,8 @@
         "linux-xem-sua-file-van-ban"
       ],
       "scopeNote": "Thuật ngữ riêng của Linux/Unix, cùng nghĩa ở mọi chuyên mục.",
-      "occurrences": 28,
-      "mentions": 101,
+      "occurrences": 29,
+      "mentions": 115,
       "outsideSeriesArticles": 1
     },
     {
@@ -454,7 +472,7 @@
       ],
       "scopeNote": "Thuật ngữ riêng của Linux/Unix, cùng nghĩa ở mọi chuyên mục.",
       "occurrences": 3,
-      "mentions": 20,
+      "mentions": 21,
       "outsideSeriesArticles": 1
     },
     {
@@ -472,7 +490,7 @@
       ],
       "scopeNote": "Ngoài chuyên mục: service account của Kubernetes, của nhà cung cấp đám mây (khái niệm gần nhưng cơ chế khác).",
       "occurrences": 9,
-      "mentions": 14,
+      "mentions": 15,
       "outsideSeriesArticles": 6
     },
     {
@@ -498,8 +516,8 @@
         "linux-sudo-sudoers"
       ],
       "scopeNote": "Thuật ngữ riêng của Linux/Unix, cùng nghĩa ở mọi chuyên mục.",
-      "occurrences": 23,
-      "mentions": 66,
+      "occurrences": 25,
+      "mentions": 85,
       "outsideSeriesArticles": 1
     },
     {
@@ -517,9 +535,9 @@
         "linux-sshd-config-an-toan"
       ],
       "scopeNote": "Ngoài chuyên mục: root cause, root của cây, aggregate root, root account của AWS.",
-      "occurrences": 14,
-      "mentions": 19,
-      "outsideSeriesArticles": 57
+      "occurrences": 16,
+      "mentions": 24,
+      "outsideSeriesArticles": 58
     },
     {
       "slug": "stdin-stdout-stderr",
@@ -535,8 +553,8 @@
         "linux-chuyen-huong-pipe"
       ],
       "scopeNote": "Thuật ngữ riêng của Linux/Unix, cùng nghĩa ở mọi chuyên mục.",
-      "occurrences": 15,
-      "mentions": 44,
+      "occurrences": 16,
+      "mentions": 55,
       "outsideSeriesArticles": 15
     },
     {
@@ -555,7 +573,7 @@
       ],
       "scopeNote": "Ngoài chuyên mục: HTTP redirect, redirect URI của OAuth.",
       "occurrences": 9,
-      "mentions": 15,
+      "mentions": 17,
       "outsideSeriesArticles": 8
     },
     {
@@ -570,7 +588,7 @@
       ],
       "scopeNote": "Ngoài chuyên mục: \"pipe\" hiếm, nhưng \"pipeline\" rất phổ biến với nghĩa khác.",
       "occurrences": 6,
-      "mentions": 10,
+      "mentions": 13,
       "outsideSeriesArticles": 4,
       "reviewNote": "\"pipeline\" ngoài chuyên mục là CI/CD pipeline, aggregation pipeline; không dùng làm alias."
     },
@@ -584,8 +602,8 @@
         "linux-chuyen-huong-pipe"
       ],
       "scopeNote": "Trong bài luôn nằm trong inline code nên bộ dò không bắt; gắn tay nếu cần.",
-      "occurrences": 1,
-      "mentions": 1,
+      "occurrences": 3,
+      "mentions": 3,
       "outsideSeriesArticles": 0
     },
     {
@@ -603,7 +621,7 @@
       "scopeNote": "Thuật ngữ riêng của Linux/Unix, cùng nghĩa ở mọi chuyên mục.",
       "occurrences": 6,
       "mentions": 24,
-      "outsideSeriesArticles": 28,
+      "outsideSeriesArticles": 29,
       "reviewNote": "Dò toàn site sẽ đánh dấu ở 25 bài ngoài series; soát vài bài trước khi gộp."
     },
     {
@@ -620,8 +638,8 @@
       ],
       "scopeNote": "Ngoài chuyên mục: \"tiến trình\" còn là quy trình nghiệp vụ, process của hệ điều hành trong series lập trình.",
       "occurrences": 30,
-      "mentions": 162,
-      "outsideSeriesArticles": 222
+      "mentions": 175,
+      "outsideSeriesArticles": 223
     },
     {
       "slug": "systemd",
@@ -636,7 +654,7 @@
       ],
       "scopeNote": "Thuật ngữ riêng của Linux/Unix, cùng nghĩa ở mọi chuyên mục.",
       "occurrences": 26,
-      "mentions": 93,
+      "mentions": 104,
       "outsideSeriesArticles": 3
     },
     {
@@ -682,8 +700,8 @@
         "linux-bien-moi-truong-path-bashrc"
       ],
       "scopeNote": "Viết hoa, phân biệt với chữ \"path\" (đường dẫn) ở các bài khác.",
-      "occurrences": 3,
-      "mentions": 8,
+      "occurrences": 4,
+      "mentions": 12,
       "outsideSeriesArticles": 10
     },
     {
@@ -697,7 +715,7 @@
       ],
       "scopeNote": "Thuật ngữ riêng của Linux/Unix, cùng nghĩa ở mọi chuyên mục.",
       "occurrences": 1,
-      "mentions": 2,
+      "mentions": 1,
       "outsideSeriesArticles": 0
     },
     {
@@ -739,7 +757,7 @@
       ],
       "scopeNote": "Thuật ngữ riêng của Linux/Unix, cùng nghĩa ở mọi chuyên mục.",
       "occurrences": 5,
-      "mentions": 19,
+      "mentions": 23,
       "outsideSeriesArticles": 0
     },
     {
@@ -755,8 +773,8 @@
         "linux-awk-xu-ly-log"
       ],
       "scopeNote": "Thuật ngữ riêng của Linux/Unix, cùng nghĩa ở mọi chuyên mục.",
-      "occurrences": 6,
-      "mentions": 15,
+      "occurrences": 5,
+      "mentions": 24,
       "outsideSeriesArticles": 0
     },
     {
@@ -771,7 +789,7 @@
       ],
       "scopeNote": "Thuật ngữ riêng của Linux/Unix, cùng nghĩa ở mọi chuyên mục.",
       "occurrences": 4,
-      "mentions": 13,
+      "mentions": 18,
       "outsideSeriesArticles": 0
     },
     {
@@ -786,7 +804,7 @@
       ],
       "scopeNote": "Thuật ngữ riêng của Linux/Unix, cùng nghĩa ở mọi chuyên mục.",
       "occurrences": 5,
-      "mentions": 16,
+      "mentions": 19,
       "outsideSeriesArticles": 0
     },
     {
@@ -801,7 +819,7 @@
       ],
       "scopeNote": "Thuật ngữ riêng của Linux/Unix, cùng nghĩa ở mọi chuyên mục.",
       "occurrences": 2,
-      "mentions": 6,
+      "mentions": 9,
       "outsideSeriesArticles": 0
     },
     {
@@ -819,8 +837,8 @@
         "linux-cron-systemd-timer"
       ],
       "scopeNote": "Cú pháp lịch cron cũng có ở dịch vụ lên lịch của cloud; bản cloud khác chi tiết, nên giới hạn trong chuyên mục.",
-      "occurrences": 11,
-      "mentions": 87,
+      "occurrences": 12,
+      "mentions": 101,
       "outsideSeriesArticles": 11
     },
     {
@@ -880,7 +898,7 @@
       ],
       "scopeNote": "Thuật ngữ riêng của Linux/Unix, cùng nghĩa ở mọi chuyên mục.",
       "occurrences": 1,
-      "mentions": 2,
+      "mentions": 1,
       "outsideSeriesArticles": 0
     },
     {
@@ -897,7 +915,7 @@
       "scopeNote": "\"tách từ\" ở bài xử lý ngôn ngữ có nghĩa khác (tokenization); giới hạn trong chuyên mục.",
       "occurrences": 2,
       "mentions": 3,
-      "outsideSeriesArticles": 7
+      "outsideSeriesArticles": 8
     },
     {
       "slug": "lts",
@@ -910,8 +928,8 @@
         "linux-la-gi-va-ssh-studio"
       ],
       "scopeNote": "Thuật ngữ riêng của Linux/Unix, cùng nghĩa ở mọi chuyên mục.",
-      "occurrences": 3,
-      "mentions": 7,
+      "occurrences": 4,
+      "mentions": 10,
       "outsideSeriesArticles": 1
     },
     {
@@ -928,8 +946,8 @@
         "linux-ssh-agent-passphrase"
       ],
       "scopeNote": "Thuật ngữ riêng của Linux/Unix, cùng nghĩa ở mọi chuyên mục.",
-      "occurrences": 10,
-      "mentions": 24,
+      "occurrences": 11,
+      "mentions": 27,
       "outsideSeriesArticles": 7
     },
     {
@@ -946,8 +964,8 @@
         "linux-ssh-key-ssh-studio"
       ],
       "scopeNote": "Khái niệm mật mã chung, cùng nghĩa trong SSH, TLS, ký mã và các chuyên mục khác.",
-      "occurrences": 7,
-      "mentions": 30,
+      "occurrences": 8,
+      "mentions": 52,
       "outsideSeriesArticles": 9
     },
     {
@@ -965,8 +983,8 @@
         "linux-ssh-agent-passphrase"
       ],
       "scopeNote": "Khái niệm mật mã chung, cùng nghĩa trong SSH, TLS, ký mã và các chuyên mục khác.",
-      "occurrences": 7,
-      "mentions": 27,
+      "occurrences": 8,
+      "mentions": 48,
       "outsideSeriesArticles": 7
     },
     {
@@ -981,7 +999,7 @@
       ],
       "scopeNote": "Tên thuật toán, cùng nghĩa ở mọi chuyên mục.",
       "occurrences": 3,
-      "mentions": 11,
+      "mentions": 13,
       "outsideSeriesArticles": 0
     },
     {
@@ -996,7 +1014,7 @@
       ],
       "scopeNote": "Ngoài chuyên mục: passphrase của khoá GPG, của ví tiền mã hoá (cùng ý: cụm mật khẩu bảo vệ một khoá).",
       "occurrences": 6,
-      "mentions": 41,
+      "mentions": 43,
       "outsideSeriesArticles": 3
     },
     {
@@ -1013,7 +1031,7 @@
       ],
       "scopeNote": "Thuật ngữ riêng của Linux/Unix, cùng nghĩa ở mọi chuyên mục.",
       "occurrences": 3,
-      "mentions": 5,
+      "mentions": 6,
       "outsideSeriesArticles": 2
     },
     {
@@ -1028,7 +1046,7 @@
       ],
       "scopeNote": "Thuật ngữ riêng của Linux/Unix, cùng nghĩa ở mọi chuyên mục.",
       "occurrences": 6,
-      "mentions": 20,
+      "mentions": 21,
       "outsideSeriesArticles": 0
     },
     {
@@ -1066,8 +1084,8 @@
         "linux-thuc-hanh-thu-muc-trien-khai"
       ],
       "scopeNote": "Thuật ngữ riêng của Linux/Unix; trong lập trình còn là tên hàm hệ thống setgid().",
-      "occurrences": 7,
-      "mentions": 26,
+      "occurrences": 8,
+      "mentions": 29,
       "outsideSeriesArticles": 0
     },
     {
@@ -1080,7 +1098,7 @@
       ],
       "scopeNote": "Thuật ngữ riêng của Linux/Unix, cùng nghĩa ở mọi chuyên mục.",
       "occurrences": 2,
-      "mentions": 8,
+      "mentions": 9,
       "outsideSeriesArticles": 0
     },
     {
@@ -1097,7 +1115,7 @@
       ],
       "scopeNote": "Ngoài chuyên mục: ACL của thiết bị mạng và network ACL trên đám mây, ACL của bucket lưu trữ, ACL của Windows/NTFS: cùng ý «danh sách ai được làm gì» nhưng cơ chế khác.",
       "occurrences": 4,
-      "mentions": 45,
+      "mentions": 48,
       "outsideSeriesArticles": 11
     },
     {
@@ -1114,7 +1132,7 @@
       ],
       "scopeNote": "Ngoài chuyên mục: PAM còn là Privileged Access Management trong bảo mật doanh nghiệp, khái niệm khác hẳn.",
       "occurrences": 4,
-      "mentions": 14,
+      "mentions": 15,
       "outsideSeriesArticles": 0
     },
     {
@@ -1132,7 +1150,7 @@
       ],
       "scopeNote": "Chuẩn RFC 6238, cùng nghĩa ở mọi chuyên mục.",
       "occurrences": 10,
-      "mentions": 26,
+      "mentions": 30,
       "outsideSeriesArticles": 2
     },
     {
@@ -1187,8 +1205,8 @@
       ],
       "scopeNote": "Khái niệm chung của ngành, cùng nghĩa ở mọi chuyên mục.",
       "occurrences": 59,
-      "mentions": 257,
-      "outsideSeriesArticles": 61
+      "mentions": 427,
+      "outsideSeriesArticles": 64
     },
     {
       "slug": "ssh-studio",
@@ -1206,7 +1224,7 @@
       ],
       "scopeNote": "Tên công cụ, chỉ một nghĩa.",
       "occurrences": 60,
-      "mentions": 659,
+      "mentions": 1047,
       "outsideSeriesArticles": 0
     },
     {
@@ -1241,8 +1259,8 @@
       ],
       "scopeNote": "Tên bản phân phối, chỉ một nghĩa.",
       "occurrences": 28,
-      "mentions": 74,
-      "outsideSeriesArticles": 5
+      "mentions": 77,
+      "outsideSeriesArticles": 6
     },
     {
       "slug": "openssh",
@@ -1257,7 +1275,7 @@
       ],
       "scopeNote": "Tên phần mềm, chỉ một nghĩa.",
       "occurrences": 11,
-      "mentions": 35,
+      "mentions": 37,
       "outsideSeriesArticles": 1
     },
     {
@@ -1291,7 +1309,7 @@
       "scopeNote": "Khái niệm chung của ngành, cùng nghĩa ở mọi chuyên mục.",
       "occurrences": 6,
       "mentions": 9,
-      "outsideSeriesArticles": 19
+      "outsideSeriesArticles": 21
     },
     {
       "slug": "sha-256",
@@ -1309,8 +1327,8 @@
       ],
       "scopeNote": "Khái niệm chung của ngành, cùng nghĩa ở mọi chuyên mục.",
       "occurrences": 7,
-      "mentions": 14,
-      "outsideSeriesArticles": 13
+      "mentions": 18,
+      "outsideSeriesArticles": 15
     },
     {
       "slug": "thu-muc-hien-tai",
@@ -1329,7 +1347,7 @@
       ],
       "scopeNote": "Trong lập trình còn gọi là current working directory của một tiến trình (cùng khái niệm).",
       "occurrences": 11,
-      "mentions": 22,
+      "mentions": 21,
       "outsideSeriesArticles": 14
     },
     {
@@ -1349,7 +1367,7 @@
       ],
       "scopeNote": "Thuật ngữ riêng của Linux/Unix, cùng nghĩa ở mọi chuyên mục.",
       "occurrences": 6,
-      "mentions": 6,
+      "mentions": 8,
       "outsideSeriesArticles": 1
     },
     {
@@ -1385,7 +1403,7 @@
       ],
       "scopeNote": "Thuật ngữ riêng của Linux/Unix, cùng nghĩa ở mọi chuyên mục.",
       "occurrences": 2,
-      "mentions": 3,
+      "mentions": 5,
       "outsideSeriesArticles": 0
     },
     {
@@ -1401,7 +1419,7 @@
         "linux-quan-ly-nguoi-dung-nhom"
       ],
       "scopeNote": "Thuật ngữ riêng của Linux/Unix, cùng nghĩa ở mọi chuyên mục.",
-      "occurrences": 2,
+      "occurrences": 3,
       "mentions": 5,
       "outsideSeriesArticles": 0
     },
@@ -1459,9 +1477,9 @@
         "linux-sed-sua-van-ban"
       ],
       "scopeNote": "Khái niệm chung của ngành, cùng nghĩa ở mọi chuyên mục.",
-      "occurrences": 4,
+      "occurrences": 5,
       "mentions": 9,
-      "outsideSeriesArticles": 6
+      "outsideSeriesArticles": 8
     },
     {
       "slug": "file-tam",
@@ -1475,8 +1493,8 @@
       ],
       "scopeNote": "Khái niệm chung của ngành, cùng nghĩa ở mọi chuyên mục.",
       "occurrences": 6,
-      "mentions": 21,
-      "outsideSeriesArticles": 8
+      "mentions": 22,
+      "outsideSeriesArticles": 9
     },
     {
       "slug": "file-khoa",
@@ -1492,8 +1510,8 @@
         "linux-shell-script-an-toan"
       ],
       "scopeNote": "Ngoài chuyên mục: khoá của database (row lock, table lock) là cơ chế khác.",
-      "occurrences": 3,
-      "mentions": 7,
+      "occurrences": 4,
+      "mentions": 10,
       "outsideSeriesArticles": 3
     },
     {
@@ -1529,7 +1547,7 @@
       ],
       "scopeNote": "Thuật ngữ riêng của Linux/Unix, cùng nghĩa ở mọi chuyên mục.",
       "occurrences": 2,
-      "mentions": 5,
+      "mentions": 7,
       "outsideSeriesArticles": 0
     },
     {
@@ -1583,8 +1601,8 @@
         "linux-su-co-khong-ssh-duoc"
       ],
       "scopeNote": "Thuật ngữ riêng của Linux/Unix, cùng nghĩa ở mọi chuyên mục.",
-      "occurrences": 3,
-      "mentions": 7,
+      "occurrences": 4,
+      "mentions": 10,
       "outsideSeriesArticles": 0
     },
     {
@@ -1604,7 +1622,7 @@
       ],
       "scopeNote": "Thuật ngữ riêng của Linux/Unix, cùng nghĩa ở mọi chuyên mục.",
       "occurrences": 4,
-      "mentions": 6,
+      "mentions": 8,
       "outsideSeriesArticles": 0
     },
     {
@@ -1621,7 +1639,7 @@
       ],
       "scopeNote": "Thuật ngữ riêng của Linux/Unix, cùng nghĩa ở mọi chuyên mục.",
       "occurrences": 2,
-      "mentions": 7,
+      "mentions": 10,
       "outsideSeriesArticles": 0
     },
     {
@@ -1641,7 +1659,7 @@
       ],
       "scopeNote": "Thuật ngữ riêng của Linux/Unix, cùng nghĩa ở mọi chuyên mục.",
       "occurrences": 13,
-      "mentions": 17,
+      "mentions": 28,
       "outsideSeriesArticles": 0
     },
     {
@@ -1658,7 +1676,7 @@
       ],
       "scopeNote": "Thuật ngữ riêng của Linux/Unix, cùng nghĩa ở mọi chuyên mục.",
       "occurrences": 3,
-      "mentions": 6,
+      "mentions": 7,
       "outsideSeriesArticles": 0
     },
     {
@@ -1694,7 +1712,7 @@
       "scopeNote": "Khái niệm chung của ngành, cùng nghĩa ở mọi chuyên mục.",
       "occurrences": 5,
       "mentions": 6,
-      "outsideSeriesArticles": 4
+      "outsideSeriesArticles": 5
     },
     {
       "slug": "port-forwarding",
@@ -1731,7 +1749,7 @@
       ],
       "scopeNote": "Cùng nghĩa ở mọi chuyên mục (AWS, Azure có dịch vụ bastion riêng).",
       "occurrences": 11,
-      "mentions": 121,
+      "mentions": 138,
       "outsideSeriesArticles": 7
     },
     {
@@ -1750,8 +1768,8 @@
         "linux-journalctl-doc-log"
       ],
       "scopeNote": "Thuật ngữ riêng của Linux/Unix, cùng nghĩa ở mọi chuyên mục.",
-      "occurrences": 3,
-      "mentions": 4,
+      "occurrences": 4,
+      "mentions": 5,
       "outsideSeriesArticles": 0
     },
     {
@@ -1773,9 +1791,9 @@
         "linux-journalctl-doc-log"
       ],
       "scopeNote": "Ngoài chuyên mục: journal entry (bút toán) trong kế toán, journal của hệ thống file là các khái niệm khác.",
-      "occurrences": 13,
-      "mentions": 60,
-      "outsideSeriesArticles": 7
+      "occurrences": 14,
+      "mentions": 61,
+      "outsideSeriesArticles": 8
     },
     {
       "slug": "chmod",
@@ -1792,8 +1810,8 @@
         "linux-acl-setfacl"
       ],
       "scopeNote": "Thuật ngữ riêng của Linux/Unix, cùng nghĩa ở mọi chuyên mục.",
-      "occurrences": 10,
-      "mentions": 22,
+      "occurrences": 13,
+      "mentions": 28,
       "outsideSeriesArticles": 0
     },
     {
@@ -1809,8 +1827,8 @@
         "linux-chuyen-huong-pipe"
       ],
       "scopeNote": "Thuật ngữ riêng của Linux/Unix, cùng nghĩa ở mọi chuyên mục.",
-      "occurrences": 6,
-      "mentions": 10,
+      "occurrences": 23,
+      "mentions": 45,
       "outsideSeriesArticles": 2
     },
     {
@@ -1827,7 +1845,7 @@
       ],
       "scopeNote": "Trong văn bản tiếng Việt của series, «find» chỉ lệnh này.",
       "occurrences": 7,
-      "mentions": 13,
+      "mentions": 18,
       "outsideSeriesArticles": 6
     },
     {
@@ -1843,7 +1861,7 @@
       ],
       "scopeNote": "Cùng nghĩa ở mọi chuyên mục có nói về tiến trình của hệ điều hành.",
       "occurrences": 10,
-      "mentions": 35,
+      "mentions": 37,
       "outsideSeriesArticles": 9
     },
     {
@@ -1860,8 +1878,8 @@
       ],
       "scopeNote": "Ngoài chuyên mục: «tín hiệu» thông thường, signal trong framework giao diện là khái niệm khác.",
       "occurrences": 6,
-      "mentions": 30,
-      "outsideSeriesArticles": 99
+      "mentions": 32,
+      "outsideSeriesArticles": 101
     },
     {
       "slug": "sigterm",
@@ -1874,7 +1892,7 @@
       ],
       "scopeNote": "Thuật ngữ riêng của Linux/Unix, cùng nghĩa ở mọi chuyên mục.",
       "occurrences": 2,
-      "mentions": 5,
+      "mentions": 8,
       "outsideSeriesArticles": 8
     },
     {
@@ -1892,7 +1910,7 @@
       ],
       "scopeNote": "Thuật ngữ riêng của Linux/Unix, cùng nghĩa ở mọi chuyên mục.",
       "occurrences": 2,
-      "mentions": 3,
+      "mentions": 4,
       "outsideSeriesArticles": 6
     },
     {
@@ -1908,8 +1926,8 @@
         "linux-logrotate"
       ],
       "scopeNote": "Thuật ngữ riêng của Linux/Unix, cùng nghĩa ở mọi chuyên mục.",
-      "occurrences": 5,
-      "mentions": 11,
+      "occurrences": 6,
+      "mentions": 12,
       "outsideSeriesArticles": 0
     },
     {
@@ -1929,8 +1947,8 @@
       ],
       "scopeNote": "Ngoài chuyên mục: job của cron, của CI, batch job là các khái niệm khác.",
       "occurrences": 8,
-      "mentions": 40,
-      "outsideSeriesArticles": 89
+      "mentions": 46,
+      "outsideSeriesArticles": 92
     },
     {
       "slug": "nohup",
@@ -1944,7 +1962,7 @@
         "linux-job-nen-nohup-tmux"
       ],
       "scopeNote": "Thuật ngữ riêng của Linux/Unix, cùng nghĩa ở mọi chuyên mục.",
-      "occurrences": 2,
+      "occurrences": 3,
       "mentions": 3,
       "outsideSeriesArticles": 0
     },
@@ -1962,8 +1980,8 @@
         "linux-apt-cai-phan-mem"
       ],
       "scopeNote": "Thuật ngữ riêng của Linux/Unix, cùng nghĩa ở mọi chuyên mục.",
-      "occurrences": 2,
-      "mentions": 28,
+      "occurrences": 3,
+      "mentions": 38,
       "outsideSeriesArticles": 0
     },
     {
@@ -1982,8 +2000,8 @@
         "linux-cap-nhat-he-thong-an-toan"
       ],
       "scopeNote": "Thuật ngữ riêng của Linux/Unix, cùng nghĩa ở mọi chuyên mục.",
-      "occurrences": 6,
-      "mentions": 37,
+      "occurrences": 8,
+      "mentions": 45,
       "outsideSeriesArticles": 1
     },
     {
@@ -1999,7 +2017,7 @@
       ],
       "scopeNote": "Thuật ngữ riêng của Linux/Unix, cùng nghĩa ở mọi chuyên mục.",
       "occurrences": 2,
-      "mentions": 6,
+      "mentions": 7,
       "outsideSeriesArticles": 0
     },
     {
@@ -2039,8 +2057,8 @@
       ],
       "scopeNote": "Ngoài chuyên mục: unit test, đơn vị đo là các nghĩa khác, nên chỉ dò trong chuyên mục Linux.",
       "occurrences": 8,
-      "mentions": 77,
-      "outsideSeriesArticles": 95
+      "mentions": 89,
+      "outsideSeriesArticles": 96
     },
     {
       "slug": "drop-in",
@@ -2078,8 +2096,8 @@
       ],
       "scopeNote": "Ngoài chuyên mục: timer trong lập trình (setTimeout, bộ hẹn giờ) là khái niệm khác.",
       "occurrences": 12,
-      "mentions": 71,
-      "outsideSeriesArticles": 17
+      "mentions": 82,
+      "outsideSeriesArticles": 18
     },
     {
       "slug": "logrotate",
@@ -2094,7 +2112,7 @@
       ],
       "scopeNote": "Thuật ngữ riêng của Linux/Unix, cùng nghĩa ở mọi chuyên mục.",
       "occurrences": 7,
-      "mentions": 24,
+      "mentions": 28,
       "outsideSeriesArticles": 0
     },
     {
@@ -2128,8 +2146,8 @@
       ],
       "scopeNote": "Thuật ngữ riêng của Linux/Unix, cùng nghĩa ở mọi chuyên mục.",
       "occurrences": 3,
-      "mentions": 8,
-      "outsideSeriesArticles": 49
+      "mentions": 9,
+      "outsideSeriesArticles": 50
     },
     {
       "slug": "systemctl",
@@ -2144,8 +2162,8 @@
         "linux-systemd-unit-bao-gia"
       ],
       "scopeNote": "Thuật ngữ riêng của Linux/Unix, cùng nghĩa ở mọi chuyên mục.",
-      "occurrences": 16,
-      "mentions": 29,
+      "occurrences": 18,
+      "mentions": 42,
       "outsideSeriesArticles": 0
     },
     {
@@ -2161,8 +2179,8 @@
         "linux-systemd-unit-bao-gia"
       ],
       "scopeNote": "Thuật ngữ riêng của Linux/Unix, cùng nghĩa ở mọi chuyên mục.",
-      "occurrences": 11,
-      "mentions": 23,
+      "occurrences": 13,
+      "mentions": 32,
       "outsideSeriesArticles": 0
     },
     {
@@ -2181,8 +2199,8 @@
         "linux-tin-hieu-kill"
       ],
       "scopeNote": "Thuật ngữ riêng của Linux/Unix, cùng nghĩa ở mọi chuyên mục.",
-      "occurrences": 6,
-      "mentions": 10,
+      "occurrences": 7,
+      "mentions": 12,
       "outsideSeriesArticles": 0
     },
     {
@@ -2215,9 +2233,9 @@
         "linux-nginx-reverse-proxy-tls"
       ],
       "scopeNote": "Thuật ngữ mạng, cùng nghĩa ở mọi chuyên mục.",
-      "occurrences": 8,
+      "occurrences": 9,
       "mentions": 19,
-      "outsideSeriesArticles": 46
+      "outsideSeriesArticles": 48
     },
     {
       "slug": "ss",
@@ -2233,7 +2251,7 @@
       ],
       "scopeNote": "Chỉ dò trong chuyên mục Linux; «ss» ở nơi khác có thể là viết tắt khác.",
       "occurrences": 7,
-      "mentions": 13,
+      "mentions": 14,
       "outsideSeriesArticles": 0
     },
     {
@@ -2248,8 +2266,8 @@
         "linux-dns-ping-curl"
       ],
       "scopeNote": "Thuật ngữ riêng của Linux/Unix, cùng nghĩa ở mọi chuyên mục.",
-      "occurrences": 3,
-      "mentions": 5,
+      "occurrences": 6,
+      "mentions": 13,
       "outsideSeriesArticles": 0
     },
     {
@@ -2295,7 +2313,7 @@
       ],
       "scopeNote": "Thuật ngữ riêng của Linux/Unix, cùng nghĩa ở mọi chuyên mục.",
       "occurrences": 5,
-      "mentions": 23,
+      "mentions": 25,
       "outsideSeriesArticles": 0
     },
     {
@@ -2350,7 +2368,7 @@
       ],
       "scopeNote": "Thuật ngữ riêng của Linux/Unix, cùng nghĩa ở mọi chuyên mục.",
       "occurrences": 8,
-      "mentions": 43,
+      "mentions": 50,
       "outsideSeriesArticles": 0
     },
     {
@@ -2369,7 +2387,7 @@
       ],
       "scopeNote": "Thuật ngữ riêng của Linux/Unix, cùng nghĩa ở mọi chuyên mục.",
       "occurrences": 2,
-      "mentions": 13,
+      "mentions": 14,
       "outsideSeriesArticles": 0
     },
     {
@@ -2386,7 +2404,7 @@
       ],
       "scopeNote": "Thuật ngữ riêng của Linux/Unix, cùng nghĩa ở mọi chuyên mục.",
       "occurrences": 5,
-      "mentions": 19,
+      "mentions": 21,
       "outsideSeriesArticles": 1
     },
     {
@@ -2404,7 +2422,7 @@
       ],
       "scopeNote": "Cùng nghĩa ở mọi chuyên mục có nói về lưu trữ.",
       "occurrences": 9,
-      "mentions": 29,
+      "mentions": 33,
       "outsideSeriesArticles": 9
     },
     {
@@ -2424,7 +2442,7 @@
       ],
       "scopeNote": "Chỉ dò trong chuyên mục Linux.",
       "occurrences": 5,
-      "mentions": 9,
+      "mentions": 11,
       "outsideSeriesArticles": 10
     },
     {
@@ -2443,7 +2461,7 @@
       ],
       "scopeNote": "Thuật ngữ riêng của Linux/Unix, cùng nghĩa ở mọi chuyên mục.",
       "occurrences": 2,
-      "mentions": 8,
+      "mentions": 13,
       "outsideSeriesArticles": 0
     },
     {
@@ -2459,7 +2477,7 @@
       ],
       "scopeNote": "Thuật ngữ riêng của Linux/Unix, cùng nghĩa ở mọi chuyên mục.",
       "occurrences": 1,
-      "mentions": 3,
+      "mentions": 2,
       "outsideSeriesArticles": 0
     },
     {
@@ -2477,8 +2495,8 @@
         "linux-bo-nho-tai-he-thong"
       ],
       "scopeNote": "Chỉ dò trong chuyên mục Linux; ở nơi khác «bộ nhớ đệm» thường là cache của ứng dụng.",
-      "occurrences": 3,
-      "mentions": 4,
+      "occurrences": 2,
+      "mentions": 3,
       "outsideSeriesArticles": 16
     },
     {
@@ -2493,7 +2511,7 @@
       ],
       "scopeNote": "Thuật ngữ riêng của Linux/Unix, cùng nghĩa ở mọi chuyên mục.",
       "occurrences": 2,
-      "mentions": 10,
+      "mentions": 13,
       "outsideSeriesArticles": 4
     },
     {
@@ -2555,7 +2573,7 @@
       ],
       "scopeNote": "Cùng nghĩa ở mọi chuyên mục.",
       "occurrences": 8,
-      "mentions": 50,
+      "mentions": 64,
       "outsideSeriesArticles": 6
     },
     {
@@ -2574,7 +2592,7 @@
       ],
       "scopeNote": "Ngoài chuyên mục: «chứng chỉ» còn là văn bằng, chứng nhận thông thường.",
       "occurrences": 5,
-      "mentions": 24,
+      "mentions": 28,
       "outsideSeriesArticles": 40
     },
     {
@@ -2686,7 +2704,7 @@
       ],
       "scopeNote": "Thuật ngữ riêng của Linux/Unix, cùng nghĩa ở mọi chuyên mục.",
       "occurrences": 2,
-      "mentions": 7,
+      "mentions": 8,
       "outsideSeriesArticles": 0
     },
     {
@@ -2722,7 +2740,7 @@
       ],
       "scopeNote": "Thuật ngữ riêng của Linux/Unix, cùng nghĩa ở mọi chuyên mục.",
       "occurrences": 3,
-      "mentions": 16,
+      "mentions": 21,
       "outsideSeriesArticles": 0
     },
     {
@@ -2737,7 +2755,7 @@
       ],
       "scopeNote": "Chỉ dò trong chuyên mục Linux; ở nơi khác «jail» còn là chroot jail hay từ thông thường.",
       "occurrences": 1,
-      "mentions": 8,
+      "mentions": 10,
       "outsideSeriesArticles": 0
     },
     {
@@ -2754,7 +2772,7 @@
       ],
       "scopeNote": "Cùng nghĩa ở mọi chuyên mục.",
       "occurrences": 6,
-      "mentions": 18,
+      "mentions": 19,
       "outsideSeriesArticles": 0
     },
     {
@@ -2769,7 +2787,7 @@
       ],
       "scopeNote": "Chỉ dò trong chuyên mục Linux; ở nơi khác playbook có thể là tài liệu quy trình.",
       "occurrences": 2,
-      "mentions": 8,
+      "mentions": 10,
       "outsideSeriesArticles": 2
     },
     {
@@ -2785,7 +2803,7 @@
       ],
       "scopeNote": "Chỉ dò trong chuyên mục Linux; ở nơi khác inventory là tồn kho.",
       "occurrences": 1,
-      "mentions": 2,
+      "mentions": 3,
       "outsideSeriesArticles": 5
     },
     {
