@@ -44,12 +44,14 @@ an@toinoi-app-01:~$ getent group sudo
 sudo:x:27:an,binh
 ```
 
+<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/linux-sudo-sudoers/ssh-studio-05.webp" alt="Terminal của SSH Studio: sudo -l của an cho (ALL : ALL) ALL cùng các Defaults, grep bỏ chú thích của /etc/sudoers thấy %sudo ALL=(ALL:ALL) ALL và @includedir /etc/sudoers.d" width="2400" height="1350" loading="lazy"></div><figcaption>SSH Studio · <code>sudo -l</code> và phần hiệu lực của <code>/etc/sudoers</code></figcaption></figure>
+
 - **`sudo -l`** liệt kê những gì bạn được chạy: `(ALL : ALL) ALL` nghĩa là mọi lệnh, dưới danh nghĩa mọi người dùng và mọi nhóm.
 - Trong `/etc/sudoers`, dòng **`%sudo ALL=(ALL:ALL) ALL`** cấp quyền đó cho cả nhóm `sudo` (dấu `%` chỉ nhóm). An và Bình có quyền vì nằm trong nhóm này.
 - **`Defaults`** đặt hành vi chung. `env_reset` xoá biến môi trường của bạn trước khi chạy lệnh, `secure_path` đặt lại `PATH` an toàn, `use_pty` chạy lệnh trong một terminal riêng để chương trình độc hại không chen được vào terminal của bạn.
 - Dòng cuối **`@includedir /etc/sudoers.d`** đọc thêm mọi file trong thư mục đó. Quy ước tốt: **không sửa `/etc/sudoers`**, mỗi quy tắc mới là một file trong `/etc/sudoers.d/`. Gói phần mềm cập nhật `/etc/sudoers` cũng không đè lên quy tắc của bạn.
 
-<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/linux-sudo-sudoers/ssh-studio-01.webp" alt="Terminal của SSH Studio: sudo -l của an cho (ALL : ALL) ALL cùng các Defaults, nội dung /etc/sudoers bỏ chú thích gồm %sudo ALL=(ALL:ALL) ALL và @includedir /etc/sudoers.d, thư mục sudoers.d chỉ có README, nhóm sudo gồm an và binh" width="2400" height="1350" loading="lazy"></div><figcaption>SSH Studio · quyền sudo của An đến từ nhóm <code>sudo</code></figcaption></figure>
+<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/linux-sudo-sudoers/ssh-studio-01.webp" alt="Terminal của SSH Studio: sudo ls -l /etc/sudoers.d chỉ có README, getent group sudo cho sudo:x:27:an,binh" width="2400" height="1350" loading="lazy"></div><figcaption>SSH Studio · quyền sudo của An đến từ nhóm <code>sudo</code></figcaption></figure>
 
 ### Cú pháp một dòng sudoers
 
@@ -119,6 +121,8 @@ User cuong may run the following commands on toinoi-app-01:
         *, /usr/bin/systemctl restart cron
 ```
 
+<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/linux-sudo-sudoers/ssh-studio-06.webp" alt="Terminal của SSH Studio: visudo -c báo /etc/sudoers.d/cuong bad permissions, should be mode 0440, chmod 440, visudo -c parsed OK, sudo -l -U cuong liệt kê journalctl -u cron *, journalctl -u ssh *, systemctl restart cron với NOPASSWD" width="2400" height="1350" loading="lazy"></div><figcaption>SSH Studio · sửa quyền file <code>sudoers.d/cuong</code> và xem Cường được phép gì</figcaption></figure>
+
 - **`visudo -c`** kiểm tra toàn bộ sudoers, không sửa gì. Cú pháp của file mới ổn, nhưng nó báo **`bad permissions, should be mode 0440`**: `visudo -f` tạo file mới với quyền `0640` (`-rw-r-----`), còn quy ước của sudo cho file sudoers là chỉ đọc, `0440`. Bản sudo hiện tại vẫn đọc file `0640` (nó chỉ từ chối file mà người khác ngoài `root` ghi được), nhưng đừng để cảnh báo nằm đó: một cảnh báo quen mắt sẽ che mất cảnh báo thật lần sau.
 - **`sudo chmod 440`**, chạy lại `visudo -c`: sạch. Với `/etc/sudoers` gốc thì `visudo` giữ nguyên quyền cũ, chỉ file mới tạo bằng `-f` mới cần bước này.
 - **`sudo -l -U cuong`** cho An xem Cường được làm gì, không cần đăng nhập bằng tài khoản của Cường.
@@ -171,6 +175,8 @@ cuong ALL=(root) NOPASSWD /usr/bin/systemctl restart cron
                                                          ^
 ```
 
+<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/linux-sudo-sudoers/ssh-studio-07.webp" alt="Terminal của SSH Studio: cat sudoers-loi thiếu dấu hai chấm sau NOPASSWD, visudo -c -f báo syntax error ở dòng 1 cột 58 kèm dấu ^ chỉ vị trí" width="2400" height="1350" loading="lazy"></div><figcaption>SSH Studio · <code>visudo -c -f</code> bắt lỗi trước khi file được dùng</figcaption></figure>
+
 `visudo -c -f` kiểm tra một file bất kỳ mà không cài nó, và chỉ rõ dòng, cột lỗi. Nếu bạn đang sửa trong `visudo` và lưu một file sai, `visudo` hỏi `What now?`: gõ `e` để sửa tiếp, `x` để thoát mà không ghi gì. **Không chọn `Q`** (ghi file sai, chấp nhận rủi ro).
 
 ## 5. sudo ghi lại mọi lần dùng
@@ -183,7 +189,7 @@ Nov 23 23:36:10 toinoi-app-01 sudo[1893]:    cuong : TTY=pts/0 ; PWD=/home/an ; 
 
 Mỗi lần dùng `sudo`, một dòng nhật ký ghi: ai, từ terminal nào, đang ở thư mục nào, chạy dưới danh nghĩa ai, lệnh gì. Đây là lý do thứ hai để không chia sẻ tài khoản `root`: với `sudo`, nhật ký trả lời được «ai đã khởi động lại cron lúc 2 giờ sáng». Lần bị từ chối cũng được ghi, với `command not allowed`.
 
-<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/linux-sudo-sudoers/ssh-studio-04.webp" alt="Terminal của SSH Studio: cat file sudoers-loi thiếu dấu hai chấm sau NOPASSWD, visudo -c -f báo syntax error ở dòng 1 cột 58 với mũi tên chỉ vị trí, journalctl _COMM=sudo lọc hai dòng của cuong với TTY, PWD, USER=root và COMMAND" width="2400" height="1350" loading="lazy"></div><figcaption>SSH Studio · <code>visudo -c</code> bắt lỗi, và nhật ký của <code>sudo</code></figcaption></figure>
+<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/linux-sudo-sudoers/ssh-studio-04.webp" alt="Terminal của SSH Studio: sudo journalctl _COMM=sudo lọc các dòng cuong : TTY=pts/2 ; PWD=/home/an ; USER=root ; COMMAND=/usr/bin/systemctl restart cron và journalctl -u cron" width="2400" height="1350" loading="lazy"></div><figcaption>SSH Studio · mỗi lệnh sudo của Cường đều có dòng trong journal</figcaption></figure>
 
 ## 6. Đối chiếu thao tác
 

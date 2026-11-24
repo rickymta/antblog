@@ -43,6 +43,8 @@ drwxr-x--- 1 an an 4096 Nov 23 23:36 ..
 -rw-r--r-- 1 an an  142 Nov 23 23:36 known_hosts
 ```
 
+<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/linux-ssh-key-ssh-studio/ssh-studio-07.webp" alt="Terminal của SSH Studio: ssh -o BatchMode=yes an@localhost true báo Permission denied (publickey,password), ls -la ~/.ssh chỉ có known_hosts" width="2400" height="1350" loading="lazy"></div><figcaption>SSH Studio · dò từ phía client: server nhận <code>publickey</code> và <code>password</code></figcaption></figure>
+
 Đây là một mẹo dò từ phía client: `BatchMode=yes` cấm `ssh` hỏi bất cứ điều gì, nên khi không có key phù hợp, nó dừng và in **danh sách phương thức server chấp nhận**: `publickey,password`. Ở LNX-025, danh sách này sẽ chỉ còn `publickey`. (Lần đầu kết nối, `accept-new` tự tin cậy host key của `localhost`; [LNX-023](/articles/linux-host-key-known-hosts) nói về chuyện đó.)
 
 `~/.ssh` của `an` mới chỉ có `known_hosts`. Chưa có `authorized_keys`.
@@ -106,6 +108,8 @@ Bấm **Lưu**. **Đừng đóng phiên đang mở.** Phiên đó đăng nhập 
 
 <figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/linux-ssh-key-ssh-studio/ssh-studio-05.webp" alt="Tab phiên mới tới toinoi-app-01 trong SSH Studio, đã kết nối mà không có hộp thoại mật khẩu nào, hiển thị lời chào của server và dấu nhắc an@toinoi-app-01" width="2400" height="1350" loading="lazy"></div><figcaption>SSH Studio · phiên mới đăng nhập bằng key, không hỏi mật khẩu</figcaption></figure>
 
+<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/linux-ssh-key-ssh-studio/ssh-studio-09.webp" alt="Trang Servers của SSH Studio: toinoi-app-01 (cuong) xác thực Password, toinoi-app-01 xác thực SSH key với 2 phiên hoạt động" width="2400" height="1350" loading="lazy"></div><figcaption>SSH Studio · cột Xác thực trên trang Servers cho biết profile nào đã dùng key</figcaption></figure>
+
 Không có hộp thoại mật khẩu nào. Đây là thói quen nên giữ mỗi khi đổi cách đăng nhập: **thử bằng một phiên thứ hai trước, giữ phiên cũ cho tới khi chắc chắn**.
 
 ## 6. Kiểm chứng trong log của sshd
@@ -114,6 +118,8 @@ Không có hộp thoại mật khẩu nào. Đây là thói quen nên giữ mỗ
 an@toinoi-app-01:~$ sudo journalctl -u ssh --no-pager | grep -E 'Accepted (password|publickey) for an' | tail -n 2
 Nov 23 23:36:08 toinoi-app-01 sshd[1751]: Accepted publickey for an from 127.0.0.1 port 48568 ssh2: ED25519 SHA256:yJ42WJZlgwZsUsCCjvAX237jMd5+ssxlWKtoaNrMTgY
 ```
+
+<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/linux-ssh-key-ssh-studio/ssh-studio-08.webp" alt="Terminal của SSH Studio: journalctl lọc hai dòng Accepted publickey for an kèm fingerprint ED25519 SHA256:yJ42WJZ…" width="2400" height="1350" loading="lazy"></div><figcaption>SSH Studio · log của sshd xác nhận đăng nhập bằng key</figcaption></figure>
 
 `sshd` ghi mỗi lần đăng nhập thành công vào journal của systemd (Phần 4 dạy `journalctl` kỹ hơn), kèm **phương thức** (`publickey`) và **fingerprint của key đã dùng**. Đây là cách duy nhất biết chắc ai vào server bằng key nào. Khi server có nhiều người, đặt tên cho từng key (phần chú thích ở cuối dòng `authorized_keys`, ở đây là `an-laptop`) để đọc log dễ hơn.
 
@@ -145,7 +151,7 @@ Quy tắc cần thuộc:
 | `~/.ssh/authorized_keys` | 600 |
 | Khoá riêng tư (`~/.ssh/id_ed25519`) | 600 |
 
-<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/linux-ssh-key-ssh-studio/ssh-studio-06.webp" alt="Terminal của SSH Studio: journalctl lọc dòng Accepted publickey for an kèm fingerprint ED25519, chmod o+w authorized_keys, journalctl báo Authentication refused: bad ownership or modes for file, chmod 600 trả lại quyền đúng" width="2400" height="1350" loading="lazy"></div><figcaption>SSH Studio · log của sshd: đăng nhập bằng key, và key bị từ chối vì quyền sai</figcaption></figure>
+<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/linux-ssh-key-ssh-studio/ssh-studio-06.webp" alt="Terminal của SSH Studio: chmod o+w authorized_keys, ls -l thấy -rw----w-, journalctl ghi Authentication refused: bad ownership or modes for file authorized_keys, chmod 600 trả lại quyền -rw-------" width="2400" height="1350" loading="lazy"></div><figcaption>SSH Studio · quyền sai trên <code>authorized_keys</code>: sshd lặng lẽ từ chối key</figcaption></figure>
 
 ## 8. Đối chiếu thao tác
 

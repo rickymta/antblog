@@ -36,6 +36,8 @@ group::rwx
 other::---
 ```
 
+<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/linux-acl-setfacl/ssh-studio-04.webp" alt="Terminal của SSH Studio: useradd tạo kiemtoan, id kiemtoan, thư mục logs drwxrws---, kiemtoan ls bị Permission denied, getfacl chỉ có user, group, other, chưa có ACL" width="2400" height="1350" loading="lazy"></div><figcaption>SSH Studio · ba lớp quyền không chừa chỗ cho người thứ tư</figcaption></figure>
+
 - Tài khoản `kiemtoan` không thuộc `toinoi`, nên rơi vào lớp «người khác»: `---`, `Permission denied`.
 - **`getfacl`** in quyền của file dưới dạng danh sách. Khi chưa có ACL, danh sách chỉ có ba dòng tương ứng với `rwx` quen thuộc: `user::` (chủ), `group::` (nhóm), `other::`. `flags: -s-` là bit setgid.
 - `-p` giữ dấu `/` đầu đường dẫn tuyệt đối (mặc định `getfacl` bỏ nó đi và in một cảnh báo).
@@ -96,6 +98,8 @@ an@toinoi-app-01:~$ ls -l /srv/toinoi/bao-gia/shared/logs/moi.txt
 -rw-rw----+ 1 an toinoi 0 Nov 23 23:36 /srv/toinoi/bao-gia/shared/logs/moi.txt
 ```
 
+<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/linux-acl-setfacl/ssh-studio-05.webp" alt="Terminal của SSH Studio: setfacl -d -m u:kiemtoan:r, touch moi.txt, getfacl moi.txt có user:kiemtoan:r-- thừa kế từ ACL mặc định, ls -l hiện -rw-rw----+" width="2400" height="1350" loading="lazy"></div><figcaption>SSH Studio · ACL mặc định: file mới tự có quyền cho kiemtoan</figcaption></figure>
+
 - `-d` (*default*) đặt ACL mặc định cho thư mục.
 - `moi.txt` sinh ra đã có `user:kiemtoan:r--`, và dấu `+`.
 - Dòng `group::rwx #effective:rw-`: mục nhóm ghi `rwx`, nhưng quyền **thật sự** chỉ là `rw-`. Đó là việc của mask.
@@ -121,7 +125,7 @@ cat: /srv/toinoi/bao-gia/shared/logs/moi.txt: Permission denied
 
 `chmod 600` đặt mask thành `---`. Mục `user:kiemtoan:r--` vẫn còn đó, nhưng `#effective:---`, và `kiemtoan` bị từ chối. Mục ACL không mất, chỉ bị «bóp» về không; `chmod 640` sẽ trả lại quyền đọc.
 
-<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/linux-acl-setfacl/ssh-studio-02.webp" alt="Terminal của SSH Studio: setfacl -d -m u:kiemtoan:r, file moi.txt mới tạo có user:kiemtoan:r-- và group::rwx #effective:rw- với mask::rw-, ls -l hiện -rw-rw----+; sau chmod 600 mask thành --- và cả user:kiemtoan lẫn group đều #effective:---, kiemtoan cat bị Permission denied" width="2400" height="1350" loading="lazy"></div><figcaption>SSH Studio · ACL mặc định cho file mới, và <code>chmod</code> hạ mask làm ACL mất tác dụng</figcaption></figure>
+<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/linux-acl-setfacl/ssh-studio-02.webp" alt="Terminal của SSH Studio: chmod 600 moi.txt hạ mask xuống ---, getfacl cho user:kiemtoan:r-- kèm #effective:---, kiemtoan cat moi.txt bị Permission denied" width="2400" height="1350" loading="lazy"></div><figcaption>SSH Studio · <code>chmod</code> hạ mask, quyền ACL thực tế về <code>---</code></figcaption></figure>
 
 ## 5. Gỡ ACL
 
@@ -152,6 +156,8 @@ ls: cannot open directory '/srv/toinoi/bao-gia/shared/logs': Permission denied
 Sau `-x`, `mask::rwx` vẫn còn và `ls` vẫn có `+`; `-b` dọn sạch. Gỡ ACL trên thư mục **không** gỡ ACL đã sinh ra trên các file con; dùng `setfacl -R -x u:kiemtoan DIR` (`-R`: đệ quy) nếu cần. Một cách dễ nhớ hơn cho quyền tạm thời: cấp qua một nhóm (`g:kiemtoan-tam:rx`), rồi thu hồi bằng cách xoá người khỏi nhóm.
 
 <figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/linux-acl-setfacl/ssh-studio-03.webp" alt="Terminal của SSH Studio: setfacl -k gỡ ACL mặc định, setfacl -x u:kiemtoan gỡ mục kiemtoan, getfacl còn user::rwx group::rwx mask::rwx other::---, setfacl -b, ls -ld trở lại drwxrws--- không có dấu cộng, kiemtoan lại bị Permission denied" width="2400" height="1350" loading="lazy"></div><figcaption>SSH Studio · gỡ ACL bằng <code>-k</code>, <code>-x</code>, <code>-b</code></figcaption></figure>
+
+<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/linux-acl-setfacl/ssh-studio-06.webp" alt="Khung Files của SSH Studio: Máy của bạn bên trái, Remote server ở /srv/toinoi/bao-gia/shared/logs bên phải với các file báo cáo và log" width="2400" height="1350" loading="lazy"></div><figcaption>SSH Studio · khung Files chỉ hiện quyền cơ bản; ACL xem bằng <code>getfacl</code></figcaption></figure>
 
 ## 6. ACL và các công cụ khác
 

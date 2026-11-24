@@ -35,14 +35,16 @@ an@toinoi-app-01:~$ ls -l /etc/ssh/ssh_host_*
 -rw------- 1 root root 2610 Nov 22 22:26 /etc/ssh/ssh_host_rsa_key
 -rw-r--r-- 1 root root  574 Nov 22 22:26 /etc/ssh/ssh_host_rsa_key.pub
 an@toinoi-app-01:~$ ssh-keygen -lf /etc/ssh/ssh_host_ed25519_key.pub
-256 SHA256:/fjhnPhFNYvAMC3S/UdkbCQ039oKGZN4rJ96pPyUvkI root@buildkitsandbox (ED25519)
+256 SHA256:XdbHthxW41b5egLlszQzccbZCqZGy/aZMRMGjMIbLjw root@buildkitsandbox (ED25519)
 an@toinoi-app-01:~$ ssh-keyscan -t ed25519 localhost 2>/dev/null | ssh-keygen -lf -
-256 SHA256:/fjhnPhFNYvAMC3S/UdkbCQ039oKGZN4rJ96pPyUvkI localhost (ED25519)
+256 SHA256:XdbHthxW41b5egLlszQzccbZCqZGy/aZMRMGjMIbLjw localhost (ED25519)
 ```
+
+<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/linux-host-key-known-hosts/ssh-studio-07.webp" alt="Terminal của SSH Studio: ls -l sáu file host key RSA, ECDSA, Ed25519 trong /etc/ssh, ssh-keygen -lf và ssh-keyscan cùng in fingerprint Ed25519 SHA256:XdbHthxW41b5…" width="2400" height="1350" loading="lazy"></div><figcaption>SSH Studio · host key trên server: fingerprint đọc từ file và từ mạng trùng nhau</figcaption></figure>
 
 - Server có ba cặp host key: RSA, ECDSA, Ed25519. Client và server thống nhất dùng một loại; với client hiện đại, đó là Ed25519. Khoá riêng tư chỉ `root` đọc được (`-rw-------`).
 - `ssh-keygen -lf` in fingerprint từ file trên server. `ssh-keyscan` hỏi server qua mạng xem nó đưa ra key nào, rồi in fingerprint của key đó. Hai fingerprint trùng nhau.
-- Đây chính là chuỗi `SHA256:/fjhnPhFN…` bạn đã đối chiếu khi kết nối lần đầu ở LNX-002, và là chuỗi nằm trong trang Known Hosts.
+- Đây chính là chuỗi `SHA256:XdbHthxW41b5…` bạn đã đối chiếu khi kết nối lần đầu ở LNX-002, và là chuỗi nằm trong trang Known Hosts.
 
 ### known_hosts của OpenSSH
 
@@ -55,7 +57,7 @@ an@toinoi-app-01:~$ ssh-keygen -F localhost
 
 Mỗi dòng của `known_hosts` là một cặp «tên máy, host key». Trên Ubuntu, phần tên máy được **băm** (`|1|…|…`, do `HashKnownHosts yes` trong `/etc/ssh/ssh_config`): ai đọc được file cũng không biết bạn hay vào những server nào. Vì vậy không `grep` tên máy trong file được nữa; `ssh-keygen -F TÊN` tìm giúp bạn.
 
-<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/linux-host-key-known-hosts/ssh-studio-01.webp" alt="Terminal của SSH Studio: ls -l các file host key trong /etc/ssh, fingerprint Ed25519 SHA256:/fjhnPhFN… đọc từ file và từ ssh-keyscan trùng nhau, nội dung known_hosts với tên máy đã băm, ssh-keygen -F localhost tìm ra dòng 1" width="2400" height="1350" loading="lazy"></div><figcaption>SSH Studio · host key của server và <code>known_hosts</code> phía client</figcaption></figure>
+<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/linux-host-key-known-hosts/ssh-studio-01.webp" alt="Terminal của SSH Studio: cat ~/.ssh/known_hosts in một dòng với tên máy đã băm |1|…| và khoá ssh-ed25519, ssh-keygen -F localhost tìm thấy ở dòng 1" width="2400" height="1350" loading="lazy"></div><figcaption>SSH Studio · <code>known_hosts</code> phía client: tên máy đã băm, tra bằng <code>ssh-keygen -F</code></figcaption></figure>
 
 ## 2. Mô phỏng: server được dựng lại
 
@@ -102,7 +104,7 @@ Phiên SSH Studio đang mở không bị ảnh hưởng: host key chỉ được
 
 SSH Studio không cho «bấm bỏ qua» ngay tại đó. Lối duy nhất là vào trang **Known Hosts** và chủ động quên host, sau khi đã xác minh:
 
-<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/linux-host-key-known-hosts/ssh-studio-04.webp" alt="Trang Known Hosts của SSH Studio với mục [127.0.0.1]:2222, fingerprint cũ SHA256:/fjhnPhFN… và nút Quên host" width="2400" height="1350" loading="lazy"></div><figcaption>SSH Studio · trang <b>Known Hosts</b> vẫn giữ fingerprint cũ</figcaption></figure>
+<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/linux-host-key-known-hosts/ssh-studio-04.webp" alt="Trang Known Hosts của SSH Studio với mục [127.0.0.1]:2222, fingerprint cũ SHA256:XdbHthxW41b5… và nút Quên host" width="2400" height="1350" loading="lazy"></div><figcaption>SSH Studio · trang <b>Known Hosts</b> vẫn giữ fingerprint cũ</figcaption></figure>
 
 ### Xác minh trước khi quên
 
@@ -122,6 +124,8 @@ an@toinoi-app-01:~$ ssh -o BatchMode=yes -o StrictHostKeyChecking=accept-new an@
 Warning: Permanently added 'localhost' (ED25519) to the list of known hosts.
 an@localhost: Permission denied (publickey,password).
 ```
+
+<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/linux-host-key-known-hosts/ssh-studio-09.webp" alt="Terminal của SSH Studio: ssh-keygen -R localhost xoá dòng 1 và giữ bản cũ ở known_hosts.old, ssh accept-new thêm host key mới, Permission denied (publickey,password)" width="2400" height="1350" loading="lazy"></div><figcaption>SSH Studio · phía OpenSSH: <code>ssh-keygen -R</code> rồi nhận key mới</figcaption></figure>
 
 **`ssh-keygen -R TÊN`** xoá mọi dòng của tên đó khỏi `known_hosts` (kể cả dòng đã băm) và giữ bản cũ ở `known_hosts.old`. Lần kết nối sau, `ssh` hỏi như với một server mới. Đừng xoá cả file `known_hosts` cho nhanh: bạn sẽ mất dấu mọi server khác.
 
@@ -145,7 +149,7 @@ Cảnh báo ở trên tốn công của cả nhóm, và tệ hơn, nó dạy m�
 an@toinoi-app-01:~$ sudo cp -a /root/ssh_host_ed25519_key /root/ssh_host_ed25519_key.pub /etc/ssh/
 an@toinoi-app-01:~$ sudo systemctl restart ssh
 an@toinoi-app-01:~$ ssh-keygen -lf /etc/ssh/ssh_host_ed25519_key.pub
-256 SHA256:/fjhnPhFNYvAMC3S/UdkbCQ039oKGZN4rJ96pPyUvkI root@buildkitsandbox (ED25519)
+256 SHA256:XdbHthxW41b5egLlszQzccbZCqZGy/aZMRMGjMIbLjw root@buildkitsandbox (ED25519)
 an@toinoi-app-01:~$ ssh-keygen -R localhost
 /home/an/.ssh/known_hosts updated.
 Original contents retained as /home/an/.ssh/known_hosts.old
@@ -154,11 +158,13 @@ Warning: Permanently added 'localhost' (ED25519) to the list of known hosts.
 an@localhost: Permission denied (publickey,password).
 ```
 
-Host key gốc trở lại, fingerprint `SHA256:/fjhnPhFN…` như trước. Trên lab, An phải quên host thêm một lần vì vừa tin cậy key tạm; trên server thật, nếu khôi phục host key ngay khi cài lại, không client nào thấy cảnh báo cả.
+Host key gốc trở lại, fingerprint `SHA256:XdbHthxW41b5…` như trước. Trên lab, An phải quên host thêm một lần vì vừa tin cậy key tạm; trên server thật, nếu khôi phục host key ngay khi cài lại, không client nào thấy cảnh báo cả.
 
 Các công cụ tạo máy ảo và cấu hình (cloud-init, Ansible, Terraform) có cách giữ hoặc đặt sẵn host key. Với hệ thống lớn có nhiều server tạo và huỷ liên tục, người ta dùng **chứng chỉ SSH** (host certificate) ký bởi một CA nội bộ: client tin CA, không cần nhớ từng host key.
 
-<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/linux-host-key-known-hosts/ssh-studio-06.webp" alt="Terminal của SSH Studio: ssh-keygen -R localhost xoá dòng cũ, accept-new thêm key mới, chép host key cũ từ /root về /etc/ssh, khởi động lại ssh, fingerprint trở về SHA256:/fjhnPhFN…, xoá và thêm lại dòng của localhost trong known_hosts" width="2400" height="1350" loading="lazy"></div><figcaption>SSH Studio · đưa host key cũ về sau khi «dựng lại» server</figcaption></figure>
+<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/linux-host-key-known-hosts/ssh-studio-06.webp" alt="Terminal của SSH Studio: chép host key cũ từ /root về /etc/ssh, khởi động lại ssh, fingerprint trở về SHA256:XdbHthxW41b5…, ssh-keygen -R localhost xoá dòng cũ, accept-new thêm lại dòng của localhost" width="2400" height="1350" loading="lazy"></div><figcaption>SSH Studio · đưa host key cũ về sau khi «dựng lại» server</figcaption></figure>
+
+<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/linux-host-key-known-hosts/ssh-studio-10.webp" alt="Trang Known Hosts của SSH Studio: mục [127.0.0.1]:2222 đã trở lại fingerprint SHA256:XdbHthxW41b5egLlszQzccbZCqZGy/aZMRMGjMIbLjw" width="2400" height="1350" loading="lazy"></div><figcaption>SSH Studio · Known Hosts sau khi host key cũ được đưa về</figcaption></figure>
 
 ## 6. Đối chiếu thao tác
 

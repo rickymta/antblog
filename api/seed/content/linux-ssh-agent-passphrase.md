@@ -37,12 +37,14 @@ an@toinoi-app-01:~$ ssh -o BatchMode=yes localhost hostname
 an@localhost: Permission denied (publickey).
 ```
 
+<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/linux-ssh-agent-passphrase/ssh-studio-04.webp" alt="Terminal của SSH Studio: ssh-keygen tạo id_ed25519 có passphrase, ls -l ~/.ssh thấy id_ed25519 quyền -rw------- và id_ed25519.pub, head -n 1 in BEGIN OPENSSH PRIVATE KEY" width="2400" height="1350" loading="lazy"></div><figcaption>SSH Studio · tạo key Ed25519 có passphrase ngay trên server</figcaption></figure>
+
 - **`ssh-keygen -t ed25519`** tạo cặp key Ed25519; `-C` là chú thích (thường là `người@máy`), `-N` là passphrase, `-f` là file. Bình thường bạn bỏ `-N` và `ssh-keygen` hỏi passphrase hai lần, không hiện ra màn hình.
 - Private key `id_ed25519` có quyền `600`, public key `.pub` là `644`.
 - Nhìn bên ngoài, file có passphrase và không có trông giống nhau (`BEGIN OPENSSH PRIVATE KEY`). `ssh-keygen -y` (in public key từ private key) với passphrase sai cho biết file đã được mã hoá.
 - Public key được thêm vào `authorized_keys` của chính `an`; nhưng `ssh -o BatchMode=yes` (không được hỏi gì) thất bại: `ssh` cần passphrase để dùng key, và không được phép hỏi.
 
-<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/linux-ssh-agent-passphrase/ssh-studio-01.webp" alt="Terminal của SSH Studio: ssh-keygen tạo id_ed25519 có passphrase, ls -l ~/.ssh với id_ed25519 quyền rw------- và id_ed25519.pub rw-r--r--, ssh-keygen -y với passphrase sai báo incorrect passphrase supplied to decrypt private key, ssh BatchMode tới localhost bị Permission denied (publickey)" width="2400" height="1350" loading="lazy"></div><figcaption>SSH Studio · key có passphrase: không có passphrase thì key vô dụng</figcaption></figure>
+<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/linux-ssh-agent-passphrase/ssh-studio-01.webp" alt="Terminal của SSH Studio: ssh-keygen -y với passphrase sai báo incorrect passphrase supplied to decrypt private key, thêm public key vào authorized_keys, ssh -o BatchMode=yes localhost bị Permission denied (publickey)" width="2400" height="1350" loading="lazy"></div><figcaption>SSH Studio · key có passphrase: không có agent thì BatchMode không dùng được</figcaption></figure>
 
 ### Passphrase tốt
 
@@ -62,6 +64,8 @@ an@toinoi-app-01:~$ ssh-add -l
 an@toinoi-app-01:~$ ssh -o BatchMode=yes localhost hostname
 toinoi-app-01
 ```
+
+<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/linux-ssh-agent-passphrase/ssh-studio-05.webp" alt="Terminal của SSH Studio: eval ssh-agent in Agent pid, ssh-add hỏi passphrase rồi Identity added, ssh-add -l liệt kê fingerprint ED25519, ssh BatchMode localhost hostname in toinoi-app-01" width="2400" height="1350" loading="lazy"></div><figcaption>SSH Studio · nhập passphrase một lần, agent giữ key cho các lần sau</figcaption></figure>
 
 - **`ssh-agent -s`** khởi động agent và in ra các lệnh `export SSH_AUTH_SOCK=…` (đường dẫn socket để `ssh` tìm agent); `eval "$(…)"` chạy chúng trong shell hiện tại.
 - **`ssh-add FILE`** hỏi passphrase **một lần**, rồi giao key đã giải mã cho agent. Trên lab, passphrase được nhập tự động; bạn gõ tay.
@@ -108,7 +112,7 @@ toinoi-app-01
 
 **`ssh -G TÊN`** in cấu hình cuối cùng `ssh` sẽ dùng cho tên đó, sau khi gộp mọi khối `Host` và mặc định, giống `sshd -T` ở phía server. Như với `sshd`, giá trị **đầu tiên** khớp sẽ thắng: đặt khối cụ thể lên trước, `Host *` xuống cuối file.
 
-<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/linux-ssh-agent-passphrase/ssh-studio-02.webp" alt="Terminal của SSH Studio: eval ssh-agent in Agent pid, ssh-add thêm id_ed25519, ssh-add -l liệt kê key ED25519 an@toinoi-app-01, ssh BatchMode tới localhost in toinoi-app-01, vim tạo ~/.ssh/config, ssh -G app01 in user an, hostname localhost, port 22, identitiesonly yes, identityfile, ssh app01 hostname thành công" width="2400" height="1350" loading="lazy"></div><figcaption>SSH Studio · <code>ssh-agent</code>, <code>ssh-add</code> và <code>~/.ssh/config</code></figcaption></figure>
+<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/linux-ssh-agent-passphrase/ssh-studio-02.webp" alt="Terminal của SSH Studio: vim ~/.ssh/config, chmod 600, ssh -G app01 cho user an, hostname localhost, port 22, identitiesonly yes, identityfile ~/.ssh/id_ed25519, ssh app01 hostname in toinoi-app-01" width="2400" height="1350" loading="lazy"></div><figcaption>SSH Studio · <code>~/.ssh/config</code>: tên ngắn <code>app01</code> và key riêng</figcaption></figure>
 
 ## 4. Gỡ key, tắt agent
 
@@ -122,6 +126,8 @@ unset SSH_AUTH_SOCK;
 unset SSH_AGENT_PID;
 echo Agent pid 2166 killed;
 ```
+
+<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/linux-ssh-agent-passphrase/ssh-studio-06.webp" alt="Terminal của SSH Studio: ssh-add -D báo All identities removed, ssh-add -l báo The agent has no identities, ssh-agent -k dừng agent" width="2400" height="1350" loading="lazy"></div><figcaption>SSH Studio · gỡ key khỏi agent và tắt agent</figcaption></figure>
 
 `ssh-add -D` xoá mọi key khỏi agent (`-d FILE` xoá một key); `ssh-agent -k` tắt agent của phiên này. Rời máy giữa chừng: `ssh-add -D`, hoặc khoá màn hình nếu agent gắn với phiên đăng nhập.
 

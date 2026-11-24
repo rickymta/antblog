@@ -3,6 +3,7 @@
 ## Server đang chấp nhận những cách đăng nhập nào?
 ssh -o BatchMode=yes -o StrictHostKeyChecking=accept-new an@localhost true
 ls -la ~/.ssh
+#shot 07
 #gui tao-va-nhap-key
 #clear
 ## Cài public key cho tài khoản an
@@ -14,10 +15,13 @@ ls -la ~/.ssh
 ssh-keygen -lf ~/.ssh/authorized_keys
 #shot 03
 #gui chuyen-sang-key
+#xem servers 09
 #login an an-laptop
 #clear
 ## Bằng chứng trong log của sshd
 sudo journalctl -u ssh --no-pager | grep -E 'Accepted (password|publickey) for an' | tail -n 2
+#shot 08
+#clear
 ## Quyền sai: sshd từ chối key
 chmod o+w ~/.ssh/authorized_keys
 ls -l ~/.ssh/authorized_keys

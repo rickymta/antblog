@@ -144,9 +144,9 @@ an@toinoi-app-01:~$ ls -l /etc/ssh/ssh_host_*
 -rw------- 1 root root 2610 Nov 22 22:26 /etc/ssh/ssh_host_rsa_key
 -rw-r--r-- 1 root root  574 Nov 22 22:26 /etc/ssh/ssh_host_rsa_key.pub
 an@toinoi-app-01:~$ ssh-keygen -lf /etc/ssh/ssh_host_ed25519_key.pub
-256 SHA256:/fjhnPhFNYvAMC3S/UdkbCQ039oKGZN4rJ96pPyUvkI root@buildkitsandbox (ED25519)
+256 SHA256:XdbHthxW41b5egLlszQzccbZCqZGy/aZMRMGjMIbLjw root@buildkitsandbox (ED25519)
 an@toinoi-app-01:~$ ssh-keyscan -t ed25519 localhost 2>/dev/null | ssh-keygen -lf -
-256 SHA256:/fjhnPhFNYvAMC3S/UdkbCQ039oKGZN4rJ96pPyUvkI localhost (ED25519)
+256 SHA256:XdbHthxW41b5egLlszQzccbZCqZGy/aZMRMGjMIbLjw localhost (ED25519)
 
 # known_hosts ở phía client
 an@toinoi-app-01:~$ cat ~/.ssh/known_hosts
@@ -190,7 +190,7 @@ an@localhost: Permission denied (publickey,password).
 an@toinoi-app-01:~$ sudo cp -a /root/ssh_host_ed25519_key /root/ssh_host_ed25519_key.pub /etc/ssh/
 an@toinoi-app-01:~$ sudo systemctl restart ssh
 an@toinoi-app-01:~$ ssh-keygen -lf /etc/ssh/ssh_host_ed25519_key.pub
-256 SHA256:/fjhnPhFNYvAMC3S/UdkbCQ039oKGZN4rJ96pPyUvkI root@buildkitsandbox (ED25519)
+256 SHA256:XdbHthxW41b5egLlszQzccbZCqZGy/aZMRMGjMIbLjw root@buildkitsandbox (ED25519)
 an@toinoi-app-01:~$ ssh-keygen -R localhost
 # Host localhost found: line 1
 /home/an/.ssh/known_hosts updated.

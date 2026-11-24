@@ -6,6 +6,8 @@ id kiemtoan
 ls -ld /srv/toinoi/bao-gia/shared/logs
 sudo -u kiemtoan ls /srv/toinoi/bao-gia/shared/logs
 getfacl -p /srv/toinoi/bao-gia/shared/logs
+#shot 04
+#clear
 ## Cấp quyền cho đúng một người
 setfacl -m u:kiemtoan:rx /srv/toinoi/bao-gia/shared/logs
 getfacl -p /srv/toinoi/bao-gia/shared/logs
@@ -20,6 +22,8 @@ setfacl -d -m u:kiemtoan:r /srv/toinoi/bao-gia/shared/logs
 touch /srv/toinoi/bao-gia/shared/logs/moi.txt
 getfacl -p /srv/toinoi/bao-gia/shared/logs/moi.txt
 ls -l /srv/toinoi/bao-gia/shared/logs/moi.txt
+#shot 05
+#clear
 ## mask giới hạn mọi quyền ACL
 chmod 600 /srv/toinoi/bao-gia/shared/logs/moi.txt
 getfacl -p /srv/toinoi/bao-gia/shared/logs/moi.txt
@@ -35,3 +39,4 @@ setfacl -b /srv/toinoi/bao-gia/shared/logs
 ls -ld /srv/toinoi/bao-gia/shared/logs
 sudo -u kiemtoan ls /srv/toinoi/bao-gia/shared/logs
 #shot 03
+#xem files /srv/toinoi/bao-gia/shared/logs 06

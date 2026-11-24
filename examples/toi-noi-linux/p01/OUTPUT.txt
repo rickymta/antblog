@@ -57,7 +57,7 @@ Việc đầu tiên: làm quen với server, rồi chuẩn bị thư mục tri�
 
 # Fingerprint host key của server (so với hộp thoại của SSH Studio)
 an@toinoi-app-01:~$ ssh-keygen -lf /etc/ssh/ssh_host_ed25519_key.pub
-256 SHA256:/fjhnPhFNYvAMC3S/UdkbCQ039oKGZN4rJ96pPyUvkI root@buildkitsandbox (ED25519)
+256 SHA256:XdbHthxW41b5egLlszQzccbZCqZGy/aZMRMGjMIbLjw root@buildkitsandbox (ED25519)
 
 # Dịch vụ SSH đang chạy
 an@toinoi-app-01:~$ systemctl is-active ssh

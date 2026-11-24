@@ -54,6 +54,8 @@ an@toinoi-app-01:~$ oathtool --totp -b "$(head -n 1 ~/.google_authenticator)" | 
 7
 ```
 
+<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/linux-ssh-mfa-totp/ssh-studio-06.webp" alt="Terminal của SSH Studio: vim ~/.google_authenticator, chmod 400, ls -l cho quyền -r--------, oathtool --totp sinh mã từ bí mật, wc -c đếm 7 ký tự (6 chữ số và xuống dòng)" width="2400" height="1350" loading="lazy"></div><figcaption>SSH Studio · bí mật chung của mã OTP, chỉ chủ file đọc được</figcaption></figure>
+
 - Quyền **`400`**: chỉ An đọc được. Module từ chối file có quyền rộng hơn.
 - **`oathtool --totp -b BÍ_MẬT`** tính mã hiện tại từ bí mật, giống ứng dụng điện thoại. Bài in số ký tự (6 số và dấu xuống dòng) thay vì in mã, vì mã đổi mỗi 30 giây.
 
@@ -71,6 +73,8 @@ an@toinoi-app-01:~$ grep -n -E 'google|permit|common-auth' /etc/pam.d/sshd
 6:auth required pam_google_authenticator.so nullok
 7:auth required pam_permit.so
 ```
+
+<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/linux-ssh-mfa-totp/ssh-studio-07.webp" alt="Terminal của SSH Studio: sudoedit /etc/pam.d/sshd, grep -n cho dòng 5 # @include common-auth, dòng 6 auth required pam_google_authenticator.so nullok, dòng 7 auth required pam_permit.so" width="2400" height="1350" loading="lazy"></div><figcaption>SSH Studio · PAM của sshd sau khi sửa: hỏi mã OTP, bỏ mật khẩu Unix</figcaption></figure>
 
 - **`# @include common-auth`**: tắt bước hỏi mật khẩu Unix cho SSH. `sudo` vẫn hỏi mật khẩu như cũ (nó dùng `/etc/pam.d/sudo`).
 - **`auth required pam_google_authenticator.so nullok`**: hỏi mã OTP. `nullok` cho phép người **chưa có** file `~/.google_authenticator` đi qua bước này; tiện khi triển khai dần cho cả nhóm, nhưng cũng nghĩa là ai chưa đăng ký thì chưa có lớp thứ hai. Bỏ `nullok` khi mọi người đã đăng ký xong.
@@ -106,6 +110,8 @@ kbdinteractiveauthentication yes
 authenticationmethods publickey,keyboard-interactive
 an@toinoi-app-01:~$ sudo systemctl reload ssh
 ```
+
+<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/linux-ssh-mfa-totp/ssh-studio-08.webp" alt="Terminal của SSH Studio: sudoedit 05-an-toan.conf, sshd -t báo cú pháp ổn, sshd -T cho usepam yes, kbdinteractiveauthentication yes, authenticationmethods publickey,keyboard-interactive, systemctl reload ssh" width="2400" height="1350" loading="lazy"></div><figcaption>SSH Studio · sshd đòi cả key lẫn mã OTP</figcaption></figure>
 
 ## 5. Đăng nhập bằng SSH Studio
 

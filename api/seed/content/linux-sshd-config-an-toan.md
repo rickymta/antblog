@@ -46,12 +46,14 @@ PermitRootLogin no
 PrintMotd no
 ```
 
+<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/linux-sshd-config-an-toan/ssh-studio-07.webp" alt="Terminal của SSH Studio: sshd -T lọc các tuỳ chọn: maxauthtries 6, permitrootlogin no, pubkeyauthentication yes, passwordauthentication yes, x11forwarding yes; grep bỏ chú thích của sshd_config thấy Include /etc/ssh/sshd_config.d/*.conf" width="2400" height="1350" loading="lazy"></div><figcaption>SSH Studio · cấu hình sshd đang có hiệu lực trước khi sửa</figcaption></figure>
+
 - **`sshd -T`** (*test, extended*) in **toàn bộ** cấu hình có hiệu lực sau khi gộp mọi file và giá trị mặc định, tên tuỳ chọn viết thường. Đây là câu trả lời chắc chắn nhất cho câu hỏi «sshd đang chạy với giá trị nào».
 - Dòng đầu của `sshd_config` là `Include /etc/ssh/sshd_config.d/*.conf`: các file trong thư mục đó được đọc **trước** phần còn lại, theo thứ tự tên.
 - File `10-toinoi-lab.conf` của lab bật `PasswordAuthentication yes` (để những bài đầu dùng mật khẩu được).
 - Hiện tại: mật khẩu được phép, `MaxAuthTries 6`, `X11Forwarding yes`, không giới hạn ai được vào.
 
-<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/linux-sshd-config-an-toan/ssh-studio-01.webp" alt="Terminal của SSH Studio: sshd -T lọc các tuỳ chọn cho thấy passwordauthentication yes, maxauthtries 6, x11forwarding yes, không có allowgroups; sshd_config bỏ chú thích bắt đầu bằng Include /etc/ssh/sshd_config.d/*.conf; file 10-toinoi-lab.conf bật PasswordAuthentication yes" width="2400" height="1350" loading="lazy"></div><figcaption>SSH Studio · cấu hình <code>sshd</code> đang có hiệu lực</figcaption></figure>
+<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/linux-sshd-config-an-toan/ssh-studio-01.webp" alt="Terminal của SSH Studio: ls /etc/ssh/sshd_config.d chỉ có 10-toinoi-lab.conf, cat file đó: PasswordAuthentication yes, KbdInteractiveAuthentication no, PermitRootLogin no, PrintMotd no" width="2400" height="1350" loading="lazy"></div><figcaption>SSH Studio · file cấu hình riêng của lab trong <code>sshd_config.d</code></figcaption></figure>
 
 ## 2. Nhóm được phép SSH
 
@@ -64,6 +66,8 @@ an@toinoi-app-01:~$ sudo usermod -aG ssh-users binh
 an@toinoi-app-01:~$ getent group ssh-users
 ssh-users:x:2002:an,binh
 ```
+
+<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/linux-sshd-config-an-toan/ssh-studio-08.webp" alt="Terminal của SSH Studio: groupadd ssh-users, usermod -aG thêm an và binh, getent group ssh-users cho ssh-users:x:2002:an,binh" width="2400" height="1350" loading="lazy"></div><figcaption>SSH Studio · nhóm <code>ssh-users</code> gồm những người được phép SSH</figcaption></figure>
 
 ## 3. Viết file cấu hình bằng sudoedit
 
@@ -109,6 +113,8 @@ passwordauthentication yes
 allowgroups ssh-users
 ```
 
+<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/linux-sshd-config-an-toan/ssh-studio-09.webp" alt="Terminal của SSH Studio: sudoedit 20-an-toan.conf, sshd -t báo cú pháp ổn, nhưng sshd -T vẫn cho passwordauthentication yes cùng maxauthtries 3 và allowgroups ssh-users" width="2400" height="1350" loading="lazy"></div><figcaption>SSH Studio · cú pháp ổn nhưng <code>PasswordAuthentication</code> vẫn là <code>yes</code></figcaption></figure>
+
 Cú pháp ổn, `AllowGroups` và `MaxAuthTries` đã đổi, nhưng **`passwordauthentication` vẫn là `yes`**. Lý do: với hầu hết tuỳ chọn, `sshd` **giữ giá trị đầu tiên nó đọc được** và bỏ qua các lần đặt sau. Các file trong `sshd_config.d` được đọc theo thứ tự tên: `10-toinoi-lab.conf` đặt `PasswordAuthentication yes` trước, `20-an-toan.conf` đến sau và thua.
 
 Đây là ngược với trực giác của hầu hết file cấu hình khác (nơi dòng sau ghi đè dòng trước), và là lý do phổ biến nhất của câu hỏi «tôi đã tắt mật khẩu rồi mà vẫn đăng nhập được». Cách sửa: đặt tên để file của bạn được đọc trước.
@@ -130,7 +136,7 @@ allowgroups ssh-users
 
 Bây giờ mọi giá trị đúng như ý. Quy trình luôn là: **sửa → `sshd -t` (cú pháp) → `sshd -T` (giá trị thật)**. Chưa bước nào trong số này ảnh hưởng tới server đang chạy.
 
-<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/linux-sshd-config-an-toan/ssh-studio-03.webp" alt="Terminal của SSH Studio: tạo nhóm ssh-users gồm an và binh, sshd -t báo cú pháp ổn nhưng sshd -T vẫn cho passwordauthentication yes; sau khi đổi tên thành 05-an-toan.conf, sshd -T cho passwordauthentication no, kbdinteractiveauthentication no, maxauthtries 3, x11forwarding no, allowgroups ssh-users" width="2400" height="1350" loading="lazy"></div><figcaption>SSH Studio · đổi tên file để «giá trị đầu tiên» là giá trị của bạn</figcaption></figure>
+<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/linux-sshd-config-an-toan/ssh-studio-03.webp" alt="Terminal của SSH Studio: đổi tên 20-an-toan.conf thành 05-an-toan.conf, ls sshd_config.d, sshd -t báo cú pháp ổn, sshd -T cho maxauthtries 3, permitrootlogin no, passwordauthentication no, x11forwarding no, allowgroups ssh-users" width="2400" height="1350" loading="lazy"></div><figcaption>SSH Studio · đổi tên thành <code>05-</code> để file của mình được đọc trước</figcaption></figure>
 
 ## 5. Áp dụng mà không tự khoá mình ngoài cửa
 
@@ -171,7 +177,7 @@ Nov 23 23:36:11 toinoi-app-01 sshd[2004]: Accepted publickey for an from 127.0.0
 
 Cường vẫn dùng `sudo` theo quy tắc của LNX-024 được: quy tắc đó không liên quan tới SSH. Khi Cường cần SSH vào để trực, An thêm Cường vào `ssh-users` và cài key của Cường, như [LNX-022](/articles/linux-ssh-key-ssh-studio).
 
-<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/linux-sshd-config-an-toan/ssh-studio-06.webp" alt="Terminal của SSH Studio: systemctl reload ssh, ssh an@localhost báo Permission denied (publickey), ssh cuong@localhost cũng bị từ chối, journalctl cho dòng User cuong not allowed because none of user's groups are listed in AllowGroups và các dòng Accepted publickey for an" width="2400" height="1350" loading="lazy"></div><figcaption>SSH Studio · log của <code>sshd</code> sau khi áp dụng cấu hình</figcaption></figure>
+<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/linux-sshd-config-an-toan/ssh-studio-06.webp" alt="Terminal của SSH Studio: systemctl reload ssh, ssh cuong@localhost bị Permission denied (publickey), journalctl ghi User cuong not allowed because none of user's groups are listed in AllowGroups và Accepted publickey for an" width="2400" height="1350" loading="lazy"></div><figcaption>SSH Studio · log của sshd: Cường bị chặn bởi <code>AllowGroups</code>, An vào bằng key</figcaption></figure>
 
 ### Nếu đã lỡ khoá mình ngoài cửa
 

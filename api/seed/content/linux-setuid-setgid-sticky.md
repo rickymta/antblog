@@ -50,6 +50,8 @@ an@toinoi-app-01:~$ stat -c '%a %A %U %n' /usr/bin/passwd
 4755 -rwsr-xr-x root /usr/bin/passwd
 ```
 
+<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/linux-setuid-setgid-sticky/ssh-studio-03.webp" alt="Terminal của SSH Studio: ls -l cho /usr/bin/passwd và /usr/bin/sudo quyền -rwsr-xr-x, /etc/shadow -rw-r-----, find -perm -4000 liệt kê các chương trình setuid, stat in 4755 cho passwd" width="2400" height="1350" loading="lazy"></div><figcaption>SSH Studio · setuid: <code>passwd</code> và <code>sudo</code> chạy với quyền root</figcaption></figure>
+
 - `/etc/shadow` chỉ `root` ghi được (`-rw-r-----`, nhóm `shadow` chỉ đọc).
 - `/usr/bin/passwd` có **`rws`** ở phần của chủ và chủ là `root`. Khi An chạy `passwd`, tiến trình chạy với quyền `root`, nên ghi được vào `/etc/shadow`. Chương trình `passwd` tự giới hạn: người thường chỉ đổi được mật khẩu của chính mình, và phải nhập mật khẩu cũ.
 - `sudo` cũng là setuid `root`: đó là cách nó «nâng quyền» được ngay từ đầu.
@@ -86,7 +88,7 @@ an@toinoi-app-01:~$ stat -c '%a %A %n' /srv/toinoi/bao-gia/shared/logs
 - Sau đó, `thu-sau.txt` tự động thuộc nhóm **`toinoi`**, như thư mục. File cũ không đổi; muốn sửa file đã có, dùng `chgrp -R toinoi` một lần.
 - Thư mục con tạo sau cũng thừa kế cả bit setgid, nên cả cây giữ được quy tắc.
 
-<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/linux-setuid-setgid-sticky/ssh-studio-01.webp" alt="Terminal của SSH Studio: ls -l cho thấy /usr/bin/passwd và /usr/bin/sudo có rwsr-xr-x thuộc root, /etc/shadow rw-r-----; find liệt kê 9 file setuid; stat in 4755; thư mục logs đổi từ drwxrwx--- sang drwxrws--- sau chmod g+s, thu-truoc.txt thuộc nhóm an còn thu-sau.txt thuộc nhóm toinoi, stat in 2770" width="2400" height="1350" loading="lazy"></div><figcaption>SSH Studio · setuid trên <code>passwd</code>, setgid trên thư mục log của nhóm</figcaption></figure>
+<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/linux-setuid-setgid-sticky/ssh-studio-01.webp" alt="Terminal của SSH Studio: thư mục logs drwxrwx---, file thu-truoc.txt thuộc nhóm an; sau chmod g+s thành drwxrws---, file thu-sau.txt thuộc nhóm toinoi; stat in 2770" width="2400" height="1350" loading="lazy"></div><figcaption>SSH Studio · setgid trên thư mục: file tạo sau thừa kế nhóm <code>toinoi</code></figcaption></figure>
 
 Cũng cần `umask` cho phép nhóm ghi (`002`, như Ubuntu đặt cho người dùng có nhóm riêng) thì file mới mới là `rw-rw-r--`. setgid lo phần **nhóm**, umask lo phần **quyền**.
 
@@ -102,6 +104,8 @@ an@toinoi-app-01:~$ rm -f /tmp/cua-binh.txt
 rm: cannot remove '/tmp/cua-binh.txt': Operation not permitted
 an@toinoi-app-01:~$ sudo -u binh rm /tmp/cua-binh.txt
 ```
+
+<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/linux-setuid-setgid-sticky/ssh-studio-04.webp" alt="Terminal của SSH Studio: /tmp có quyền drwxrwxrwt, binh tạo cua-binh.txt, an chạy rm -f bị Operation not permitted, binh tự xoá được" width="2400" height="1350" loading="lazy"></div><figcaption>SSH Studio · sticky bit của <code>/tmp</code></figcaption></figure>
 
 - `/tmp` có quyền `drwxrwxrwt`: ai cũng ghi được (`rwx` cho người khác), cộng **`t`** cuối cùng là sticky bit.
 - Không có sticky bit, quyền ghi trên thư mục nghĩa là xoá được **mọi** file trong đó, kể cả file của người khác (xoá file là sửa thư mục, không phải sửa file).
@@ -130,12 +134,14 @@ an@toinoi-app-01:~$ ls /srv/toinoi/chung
 cua-an.txt
 ```
 
+<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/linux-setuid-setgid-sticky/ssh-studio-05.webp" alt="Terminal của SSH Studio: mkdir /srv/toinoi/chung, chown root:toinoi, chmod 3770, ls -ld hiện drwxrws--T, an và binh mỗi người tạo một file, cả hai thuộc nhóm toinoi" width="2400" height="1350" loading="lazy"></div><figcaption>SSH Studio · thư mục chung <code>3770</code>: setgid cộng sticky</figcaption></figure>
+
 - **`3770`** = setgid (2) + sticky (1), rồi `rwx` cho chủ và nhóm, không gì cho người khác.
 - `ls -ld` hiện **`drwxrws--T`**: `s` (setgid và nhóm có `x`), `T` hoa (sticky bật nhưng người khác không có `x`). Chữ `T` hoa ở đây là đúng ý, không phải lỗi.
 - File của An và của Bình đều thuộc nhóm `toinoi`.
 - Bình không xoá được file của An; xoá file của chính mình thì được.
 
-<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/linux-setuid-setgid-sticky/ssh-studio-02.webp" alt="Terminal của SSH Studio: /tmp có drwxrwxrwt, an không xoá được file của binh trong /tmp, tạo /srv/toinoi/chung với chmod 3770 hiển thị drwxrws--T root toinoi, file của an và binh đều thuộc nhóm toinoi, binh không xoá được cua-an.txt nhưng xoá được cua-binh.txt" width="2400" height="1350" loading="lazy"></div><figcaption>SSH Studio · sticky bit trên <code>/tmp</code> và thư mục chung <code>3770</code></figcaption></figure>
+<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/linux-setuid-setgid-sticky/ssh-studio-02.webp" alt="Terminal của SSH Studio: binh không xoá được cua-an.txt trong /srv/toinoi/chung (Operation not permitted), xoá được cua-binh.txt của chính mình, ls chỉ còn cua-an.txt" width="2400" height="1350" loading="lazy"></div><figcaption>SSH Studio · sticky bit trong thư mục chung: chỉ chủ file mới xoá được</figcaption></figure>
 
 ## 6. Đối chiếu thao tác
 

@@ -32,6 +32,8 @@ an /bin/bash
 binh /bin/bash
 ```
 
+<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/linux-quan-ly-nguoi-dung-nhom/ssh-studio-05.webp" alt="Terminal của SSH Studio: getent passwd | awk lọc người dùng thật an và binh, getent passwd | wc -l đếm 24 tài khoản, awk liệt kê các tài khoản có shell đăng nhập root, sync, an, binh" width="2400" height="1350" loading="lazy"></div><figcaption>SSH Studio · ai có tài khoản, ai đăng nhập được</figcaption></figure>
+
 `/etc/passwd` có 24 dòng, nhưng phần lớn không phải người: đó là **tài khoản hệ thống** mà các gói phần mềm tạo ra (`daemon`, `www-data`, `sshd`…). Trên Ubuntu, quy ước là:
 
 | UID | Loại |
@@ -74,7 +76,7 @@ Thư mục riêng mới không trống: `useradd` chép mọi thứ trong **`/et
 
 Ubuntu còn có lệnh `adduser`: một script hỏi từng thông tin (họ tên, mật khẩu…) rồi gọi `useradd`. `adduser` tiện khi gõ tay; trong script và tài liệu vận hành, `useradd` với tuỳ chọn đầy đủ thì rõ ràng và lặp lại được.
 
-<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/linux-quan-ly-nguoi-dung-nhom/ssh-studio-01.webp" alt="Terminal của SSH Studio: liệt kê người dùng thật và các tài khoản có shell đăng nhập, sudo useradd tạo tài khoản cuong, id cuong, thư mục /home/cuong với ba file chép từ /etc/skel" width="2400" height="1350" loading="lazy"></div><figcaption>SSH Studio · tạo tài khoản <code>cuong</code> bằng <code>useradd</code></figcaption></figure>
+<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/linux-quan-ly-nguoi-dung-nhom/ssh-studio-01.webp" alt="Terminal của SSH Studio: sudo useradd --create-home --shell /bin/bash --comment Le Van Cuong cuong, id cuong, sudo ls -la /home/cuong thấy các file chép từ /etc/skel, ls -A /etc/skel" width="2400" height="1350" loading="lazy"></div><figcaption>SSH Studio · <code>useradd</code> tạo tài khoản và thư mục home từ <code>/etc/skel</code></figcaption></figure>
 
 ## 3. Mật khẩu tạm, bắt đổi ở lần đăng nhập đầu
 
@@ -94,6 +96,8 @@ Minimum number of days between password change          : 0
 Maximum number of days between password change          : 99999
 Number of days of warning before password expires       : 7
 ```
+
+<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/linux-quan-ly-nguoi-dung-nhom/ssh-studio-06.webp" alt="Terminal của SSH Studio: passwd -S cuong hiện L, chpasswd đặt mật khẩu tạm, passwd -S hiện P, chage -d 0 bắt đổi mật khẩu, chage -l in password must be changed" width="2400" height="1350" loading="lazy"></div><figcaption>SSH Studio · mật khẩu tạm và <code>chage -d 0</code></figcaption></figure>
 
 - **`passwd -S`** in trạng thái mật khẩu. Cột thứ hai là chìa khoá: `L` (*locked*) là chưa có mật khẩu dùng được, `P` là đã có, `NP` là mật khẩu rỗng. Tài khoản vừa tạo bằng `useradd` ở trạng thái `L`: chưa ai đăng nhập bằng mật khẩu được.
 - **`chpasswd`** đặt mật khẩu từ stdin theo dạng `tên:mật_khẩu`. Lệnh quen thuộc hơn là `sudo passwd cuong`, hỏi mật khẩu hai lần; `chpasswd` dùng được trong script. Đổi lại, mật khẩu nằm trong lịch sử lệnh, nên chỉ dùng cho mật khẩu **tạm** như ở đây.
@@ -125,6 +129,8 @@ Removing user cuong from group trien-khai
 an@toinoi-app-01:~$ groups cuong
 cuong : cuong toinoi
 ```
+
+<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/linux-quan-ly-nguoi-dung-nhom/ssh-studio-07.webp" alt="Terminal của SSH Studio: groupadd trien-khai, usermod -aG toinoi,trien-khai cuong, id cuong, getent group, gpasswd -d gỡ cuong khỏi trien-khai, groups cuong còn cuong toinoi" width="2400" height="1350" loading="lazy"></div><figcaption>SSH Studio · thêm vào nhóm bằng <code>usermod -aG</code>, gỡ bằng <code>gpasswd -d</code></figcaption></figure>
 
 - **`groupadd`** tạo nhóm. Nhóm mới nhận GID tiếp theo (2001).
 - **`usermod -aG`** thêm vào nhóm phụ. Như đã cảnh báo ở LNX-007, **`-a` là bắt buộc**: thiếu nó, danh sách nhóm phụ bị thay toàn bộ.
@@ -169,7 +175,7 @@ Không xoá tài khoản ngay: `userdel -r` xoá cả thư mục riêng, và fil
 
 Ở cuối mục này, An bỏ hạn và mở khoá lại cho Cường, vì Cường vẫn làm việc ở các bài sau.
 
-<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/linux-quan-ly-nguoi-dung-nhom/ssh-studio-03.webp" alt="Terminal của SSH Studio: groupadd trien-khai, usermod -aG thêm cuong vào toinoi và trien-khai, gpasswd -d gỡ khỏi trien-khai, passwd -l khoá, chage -E đặt hạn 31/12/2026 và chage -l hiển thị Account expires Dec 31, 2026, rồi bỏ hạn và mở khoá" width="2400" height="1350" loading="lazy"></div><figcaption>SSH Studio · nhóm, khoá và hạn của tài khoản</figcaption></figure>
+<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/linux-quan-ly-nguoi-dung-nhom/ssh-studio-03.webp" alt="Terminal của SSH Studio: passwd -l khoá cuong, passwd -S hiện L, chage -E đặt ngày hết hạn 31/12/2026, chage -l in Account expires Dec 31 2026, chage -E -1 bỏ hạn, passwd -u mở khoá" width="2400" height="1350" loading="lazy"></div><figcaption>SSH Studio · khoá, đặt hạn và mở khoá tài khoản</figcaption></figure>
 
 ## 6. Tài khoản dịch vụ
 
@@ -190,6 +196,8 @@ an@toinoi-app-01:~$ getent passwd bao-cao || echo "đã xoá"
 đã xoá
 ```
 
+<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/linux-quan-ly-nguoi-dung-nhom/ssh-studio-08.webp" alt="Terminal của SSH Studio: getent passwd baogia với shell /usr/sbin/nologin, sudo su - baogia báo This account is currently not available, echo $? in 1" width="2400" height="1350" loading="lazy"></div><figcaption>SSH Studio · tài khoản dịch vụ không có phiên đăng nhập</figcaption></figure>
+
 `baogia`, tài khoản mà dịch vụ báo giá chạy dưới danh nghĩa đó, khác tài khoản người dùng ở ba điểm:
 
 - **UID dưới 1000** (`--system`): công cụ quản trị và trình đăng nhập đồ hoạ coi nó là tài khoản hệ thống.
@@ -200,7 +208,7 @@ Muốn chạy một lệnh dưới danh nghĩa tài khoản dịch vụ để ki
 
 Mỗi dịch vụ một tài khoản riêng là nguyên tắc «quyền tối thiểu» ở mức hệ điều hành: nếu dịch vụ báo giá bị chiếm quyền, kẻ tấn công chỉ có quyền của `baogia` trên file của `baogia`. Phần 4 cho `bao-gia` chạy bằng systemd dưới đúng tài khoản này.
 
-<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/linux-quan-ly-nguoi-dung-nhom/ssh-studio-04.webp" alt="Terminal của SSH Studio: getent passwd baogia với shell nologin, sudo su - baogia báo This account is currently not available với mã thoát 1, sudo -u baogia id, tạo rồi xoá tài khoản hệ thống bao-cao" width="2400" height="1350" loading="lazy"></div><figcaption>SSH Studio · tài khoản dịch vụ không có shell đăng nhập</figcaption></figure>
+<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/linux-quan-ly-nguoi-dung-nhom/ssh-studio-04.webp" alt="Terminal của SSH Studio: sudo -u baogia id, useradd --system tạo bao-cao không home, shell nologin, nhóm toinoi, getent passwd bao-cao, userdel, getent báo đã xoá" width="2400" height="1350" loading="lazy"></div><figcaption>SSH Studio · tài khoản dịch vụ: <code>useradd --system</code>, không đăng nhập được</figcaption></figure>
 
 ## 7. Các file đứng sau
 

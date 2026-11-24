@@ -44,6 +44,8 @@ drwxr-x--- 3 deploy deploy 4096 Nov 23 23:36 ..
 -rw------- 1 deploy deploy   91 Nov 23 23:36 authorized_keys
 ```
 
+<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/linux-thuc-hanh-khoa-dang-nhap-ssh/ssh-studio-05.webp" alt="Terminal của SSH Studio: useradd tạo deploy trong nhóm toinoi và ssh-users, id deploy, passwd -S deploy cho trạng thái L (không có mật khẩu)" width="2400" height="1350" loading="lazy"></div><figcaption>SSH Studio · tài khoản <code>deploy</code> cho CI, không có mật khẩu</figcaption></figure>
+
 - `useradd --groups toinoi,ssh-users` thêm nhóm phụ ngay khi tạo.
 - **`passwd -S`** báo **`L`** (*locked*): `useradd` không đặt mật khẩu, nên không ai đăng nhập bằng mật khẩu được. Đó là đúng ý: CI chỉ dùng key.
 - **`install -d -m 700 -o deploy -g deploy`** tạo thư mục với quyền và chủ đúng trong một lệnh.
@@ -51,7 +53,7 @@ drwxr-x--- 3 deploy deploy 4096 Nov 23 23:36 ..
 
 Trong thực tế, CI tạo cặp key, giữ private key trong kho bí mật của nó, và chỉ đưa public key cho bạn. Private key của lab nằm sẵn trong server để bài kiểm tra đăng nhập được.
 
-<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/linux-thuc-hanh-khoa-dang-nhap-ssh/ssh-studio-01.webp" alt="Terminal của SSH Studio: useradd tạo deploy với nhóm toinoi và ssh-users, id deploy, passwd -S deploy báo L, install -d tạo .ssh quyền 700, sudo tee ghi khoá công khai deploy@ci vào authorized_keys, chown, chmod 600, ls -la /home/deploy/.ssh" width="2400" height="1350" loading="lazy"></div><figcaption>SSH Studio · tài khoản <code>deploy</code> không mật khẩu, chỉ có key của CI</figcaption></figure>
+<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/linux-thuc-hanh-khoa-dang-nhap-ssh/ssh-studio-01.webp" alt="Terminal của SSH Studio: install -d -m 700 tạo /home/deploy/.ssh, echo public key deploy@ci qua sudo tee vào authorized_keys, chown deploy:deploy, chmod 600, ls -la cho .ssh drwx------ và authorized_keys -rw-------" width="2400" height="1350" loading="lazy"></div><figcaption>SSH Studio · cài public key của CI cho tài khoản <code>deploy</code></figcaption></figure>
 
 ## 2. sudo đúng việc
 
@@ -81,6 +83,8 @@ User deploy may run the following commands on toinoi-app-01:
     (root) NOPASSWD: /usr/bin/systemctl restart bao-gia, /usr/bin/systemctl
         status bao-gia
 ```
+
+<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/linux-thuc-hanh-khoa-dang-nhap-ssh/ssh-studio-06.webp" alt="Terminal của SSH Studio: visudo -f /etc/sudoers.d/deploy, chmod 440, visudo -c parsed OK cả ba file, sudo -l -U deploy chỉ cho systemctl restart bao-gia và systemctl status bao-gia với NOPASSWD" width="2400" height="1350" loading="lazy"></div><figcaption>SSH Studio · <code>deploy</code> chỉ được khởi động lại và xem trạng thái bao-gia</figcaption></figure>
 
 Như ở [LNX-024](/articles/linux-sudo-sudoers), file mới do `visudo -f` tạo có quyền `0640`, nên `chmod 440` ngay rồi mới `visudo -c`. `NOPASSWD` là bắt buộc ở đây (`deploy` không có mật khẩu để nhập), và an toàn vì danh sách lệnh hẹp, có tham số cố định. `systemctl status` mở pager khi chạy ở terminal; CI chạy không có terminal nên không vấp vào đó.
 
@@ -127,9 +131,11 @@ authenticationmethods publickey,keyboard-interactive
 an@toinoi-app-01:~$ sudo systemctl reload ssh
 ```
 
+<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/linux-thuc-hanh-khoa-dang-nhap-ssh/ssh-studio-07.webp" alt="Terminal của SSH Studio: sudoedit 05-an-toan.conf, sshd -t báo cú pháp ổn, sshd -T -C user=deploy cho allowtcpforwarding no và authenticationmethods publickey" width="2400" height="1350" loading="lazy"></div><figcaption>SSH Studio · <code>Match User deploy</code>: chỉ key, không mở tunnel</figcaption></figure>
+
 Cùng một server, hai kết nối khác nhau: `deploy` chỉ cần `publickey` và không có tunnel; `an` cần `publickey,keyboard-interactive` và vẫn được forwarding.
 
-<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/linux-thuc-hanh-khoa-dang-nhap-ssh/ssh-studio-03.webp" alt="Terminal của SSH Studio: visudo -c parsed OK cho sudoers, cuong và deploy, sudo -l -U deploy liệt kê NOPASSWD systemctl restart bao-gia và status bao-gia, sshd -t cú pháp ổn, sshd -T -C user=deploy cho authenticationmethods publickey và allowtcpforwarding no, sshd -T -C user=an cho authenticationmethods publickey,keyboard-interactive và allowtcpforwarding yes" width="2400" height="1350" loading="lazy"></div><figcaption>SSH Studio · <code>sshd -T -C</code>: cấu hình hiệu lực cho từng kết nối</figcaption></figure>
+<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/linux-thuc-hanh-khoa-dang-nhap-ssh/ssh-studio-03.webp" alt="Terminal của SSH Studio: sshd -T -C user=an,host=laptop,addr=10.0.0.9 cho kbdinteractiveauthentication yes, allowtcpforwarding yes, authenticationmethods publickey,keyboard-interactive, rồi systemctl reload ssh" width="2400" height="1350" loading="lazy"></div><figcaption>SSH Studio · với An, cấu hình chung vẫn đòi key cộng mã OTP</figcaption></figure>
 
 ## 4. Kiểm tra bằng những lần đăng nhập thật
 

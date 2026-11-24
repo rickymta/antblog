@@ -4,6 +4,8 @@
 ssh-keygen -q -t ed25519 -C an@toinoi-app-01 -N mot-cum-tu-chi-dung-cho-lab -f ~/.ssh/id_ed25519
 ls -l ~/.ssh
 head -n 1 ~/.ssh/id_ed25519
+#shot 04
+#clear
 ssh-keygen -y -P sai-passphrase -f ~/.ssh/id_ed25519
 cat ~/.ssh/id_ed25519.pub >> ~/.ssh/authorized_keys
 ssh -o BatchMode=yes localhost hostname
@@ -18,6 +20,8 @@ ssh-add ~/.ssh/id_ed25519
 #@ unset SSH_ASKPASS SSH_ASKPASS_REQUIRE
 ssh-add -l
 ssh -o BatchMode=yes localhost hostname
+#shot 05
+#clear
 ## ~/.ssh/config: tên ngắn và key riêng cho từng server
 #file ~/.ssh/config ssh-config
 chmod 600 ~/.ssh/config
@@ -30,4 +34,5 @@ ssh-add -D
 ssh-add -l
 ssh-agent -k
 #root rm -f /usr/local/libexec/lab-askpass
+#shot 06
 #gui agent-ssh-studio

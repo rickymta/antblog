@@ -50,7 +50,7 @@ Lần đầu Docker tải ảnh Ubuntu và cài các gói, mất vài phút. Khi
 Server lab : toinoi-app-01 (Ubuntu 24.04)
 Địa chỉ    : 127.0.0.1   Cổng: 2222
 Người dùng : an   Mật khẩu: toinoi-lab (chỉ dùng cho lab)
-Fingerprint: SHA256:/fjhnPhFNYvAMC3S/UdkbCQ039oKGZN4rJ96pPyUvkI (ED25519)
+Fingerprint: SHA256:XdbHthxW41b5egLlszQzccbZCqZGy/aZMRMGjMIbLjw (ED25519)
 ```
 
 **Fingerprint của bạn sẽ khác** với chuỗi trên: host key được sinh ngẫu nhiên lúc Docker build ảnh. Hãy để cửa sổ này mở; bạn sẽ cần dòng `Fingerprint` ở mục 6. Muốn in lại, chạy `npm run info`.
@@ -186,7 +186,7 @@ Sau khi đăng nhập, bạn có thể tự đọc fingerprint ngay trên server
 
 ```text
 an@toinoi-app-01:~$ ssh-keygen -lf /etc/ssh/ssh_host_ed25519_key.pub
-256 SHA256:/fjhnPhFNYvAMC3S/UdkbCQ039oKGZN4rJ96pPyUvkI root@buildkitsandbox (ED25519)
+256 SHA256:XdbHthxW41b5egLlszQzccbZCqZGy/aZMRMGjMIbLjw root@buildkitsandbox (ED25519)
 ```
 
 `ssh-keygen -l` in fingerprint của một khoá, `-f` chỉ file khoá công khai. `256` là độ dài khoá tính bằng bit, `ED25519` là thuật toán. (Lệnh này chỉ để bạn hiểu fingerprint từ đâu ra. Nó chạy *sau* khi đã kết nối nên không thay được bước đối chiếu ở trên.)
