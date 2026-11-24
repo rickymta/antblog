@@ -28,6 +28,8 @@ bin.usr-is-merged  etc   lib.usr-is-merged  mnt    root  sbin.usr-is-merged  tmp
 boot               home  lib64              opt    run   srv                 usr
 ```
 
+<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/linux-cay-thu-muc-duong-dan/ssh-studio-06.webp" alt="Terminal của SSH Studio: pwd in /home/an, ls / liệt kê các thư mục cấp một bin, boot, dev, etc, home, lib, opt, proc, root, run, srv, sys, tmp, usr, var" width="2400" height="1350" loading="lazy"></div><figcaption>SSH Studio · <code>pwd</code> và gốc <code>/</code> của cây thư mục</figcaption></figure>
+
 `pwd` (*print working directory*) in thư mục bạn đang đứng. `ls /` liệt kê **thư mục gốc** (root directory), ký hiệu là một dấu `/`. Mọi file trên máy đều nằm đâu đó bên dưới nó.
 
 Đĩa thứ hai, ổ USB, ổ mạng không có chữ cái riêng: chúng được **gắn** (mount) vào một thư mục trong cây, và từ đó nội dung của chúng hiện ra như một thư mục thường (Phần 5).
@@ -86,7 +88,7 @@ an@toinoi-app-01:/opt/toinoi/bao-gia$ pwd
 
 Ngoài `..` còn có `.` là **chính thư mục hiện tại**. `.` có vẻ vô dụng cho tới khi bạn cần nói «ngay ở đây»: `cp /etc/hostname .` chép file về thư mục hiện tại, `./kiem-tra-cau-hinh.sh` chạy script nằm ngay đây ([LNX-007](/articles/linux-nguoi-dung-nhom-quyen-file)).
 
-<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/linux-cay-thu-muc-duong-dan/ssh-studio-01.webp" alt="Terminal của SSH Studio: pwd in /home/an, ls / liệt kê các thư mục cấp một, rồi chuỗi lệnh cd và pwd đi từ /var/log tới /var/log/toinoi, quay lên và sang /opt/toinoi/bao-gia; dấu nhắc đổi theo thư mục hiện tại" width="2400" height="1350" loading="lazy"></div><figcaption>SSH Studio · đi lại bằng đường dẫn tuyệt đối và tương đối</figcaption></figure>
+<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/linux-cay-thu-muc-duong-dan/ssh-studio-01.webp" alt="Terminal của SSH Studio: chuỗi lệnh cd và pwd đi từ /var/log vào toinoi, lên một cấp bằng cd .., rồi tới /opt/toinoi/bao-gia bằng đường dẫn tương đối ../../opt/toinoi/bao-gia" width="2400" height="1350" loading="lazy"></div><figcaption>SSH Studio · đi lại bằng đường dẫn tuyệt đối và tương đối</figcaption></figure>
 
 Terminal trong ảnh rộng hơn 100 cột nên `ls /` xếp các mục trên một dòng; bản ghi của lab dùng terminal 100 cột nên chia thành ba dòng. Nội dung như nhau.
 
@@ -100,6 +102,8 @@ an@toinoi-app-01:~$ cd -
 /opt/toinoi/bao-gia
 an@toinoi-app-01:/opt/toinoi/bao-gia$ cd ~
 ```
+
+<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/linux-cay-thu-muc-duong-dan/ssh-studio-05.webp" alt="Terminal của SSH Studio: sau chuỗi cd ở trên, cd về /home/an, cd - quay lại /opt/toinoi/bao-gia, cd ~ về home lần nữa" width="2400" height="1350" loading="lazy"></div><figcaption>SSH Studio · <code>cd</code>, <code>cd -</code> và <code>cd ~</code></figcaption></figure>
 
 | Lệnh | Tới đâu |
 |---|---|
@@ -179,6 +183,8 @@ an@toinoi-app-01:~$ tree /opt/toinoi
 Chuyển phiên sang chế độ **Files**. Khung bên phải, **Remote server**, mở ở thư mục riêng của bạn. Gõ `/` vào ô đường dẫn rồi Enter:
 
 <figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/linux-cay-thu-muc-duong-dan/ssh-studio-03.webp" alt="Chế độ Files của SSH Studio: khung Máy của bạn bên trái trỏ vào thư mục may-cua-ban của lab, khung Remote server bên phải hiển thị thư mục gốc của server với các thư mục boot, dev, etc, home, media, mnt, opt, proc, root, run, srv, sys" width="2400" height="1350" loading="lazy"></div><figcaption>SSH Studio · khung <b>Remote server</b> ở thư mục gốc <code>/</code></figcaption></figure>
+
+<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/linux-cay-thu-muc-duong-dan/ssh-studio-07.webp" alt="SSH Studio ở chế độ Chia đôi: terminal phía trên còn kết quả file và stat của bang-gia.csv, khung Files phía dưới mở /opt/toinoi/bao-gia với bốn file appsettings.json, bang-gia.csv, bi-mat.env, kiem-tra-cau-hinh.sh" width="2400" height="1350" loading="lazy"></div><figcaption>SSH Studio · <b>Chia đôi</b>: gõ lệnh ở trên, nhìn cùng thư mục ở khung Files bên dưới</figcaption></figure>
 
 | Trên khung Files | Lệnh tương ứng |
 |---|---|

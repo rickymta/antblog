@@ -12,6 +12,7 @@ find /var/log -type f -size +20k
 find /var/log -type f -size +20k 2>/dev/null
 find /opt/toinoi -type f -newer /opt/toinoi/bao-gia/bang-gia.csv
 find ~ -type f -mmin -30 -not -name '.*'
+#shot 05
 #clear
 ## find theo quyền và chủ sở hữu
 find /opt/toinoi -type f -perm 600
@@ -27,6 +28,8 @@ grep -c ERROR /var/log/toinoi/bao-gia.log
 grep -n 'q-100057' /var/log/toinoi/bao-gia.log
 grep -n -B1 -A1 'q-100057' /var/log/toinoi/bao-gia.log
 grep -i 'KHOI DONG' /var/log/toinoi/bao-gia.log
+#shot 07
+#clear
 grep -v INFO /var/log/toinoi/bao-gia.log | head -n 4
 grep -E 'ERROR|WARN' /var/log/toinoi/bao-gia.log | wc -l
 grep -E 'cham: 2[0-9]{3} ms' /var/log/toinoi/bao-gia.log
@@ -44,3 +47,4 @@ find ~ -name '*.csv' -exec grep -H 'bike' {} +
 ## Lệnh nằm ở đâu?
 which ls vim tree
 whereis ls
+#shot 06

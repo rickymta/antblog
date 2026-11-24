@@ -6,6 +6,8 @@ id
 id binh
 getent passwd an binh baogia
 getent group toinoi sudo
+#shot 07
+#clear
 ## Đọc quyền của file
 ls -l /opt/toinoi/bao-gia
 cat /opt/toinoi/bao-gia/bi-mat.env
@@ -41,6 +43,8 @@ chmod a-w cau-hinh
 touch cau-hinh/thu.txt
 rm -f cau-hinh/bang-gia.csv.bak
 chmod 755 cau-hinh
+#shot 08
+#clear
 ## Quyền mặc định của file mới
 umask
 touch moi.txt
@@ -53,6 +57,7 @@ rm -r moi.txt moi
 chown binh bang-gia.csv
 chgrp toinoi bang-gia.csv
 sudo chown an:toinoi bang-gia.csv
+#shot 06
 #gui sudo-mat-khau
 ls -l bang-gia.csv
 sudo cat /opt/toinoi/bao-gia/bi-mat.env

@@ -2,9 +2,13 @@
 #clear
 ## Đây là hệ điều hành gì?
 cat /etc/os-release
+#shot 03
+#clear
 ## Kernel và kiến trúc CPU
 uname -s
 uname -srm
+#shot 04
+#clear
 ## Tôi là ai, đang ở máy nào?
 whoami
 hostname
@@ -12,3 +16,4 @@ hostname
 ps -p 1 -o pid,comm
 #shot 01
 #gui song-song-bao-gia
+#xem servers 05

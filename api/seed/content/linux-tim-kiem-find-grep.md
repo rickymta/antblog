@@ -91,6 +91,8 @@ an@toinoi-app-01:~$ find ~ -type f -mmin -30 -not -name '.*'
 /home/an/bao-cao-03.txt
 ```
 
+<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/linux-tim-kiem-find-grep/ssh-studio-05.webp" alt="Terminal của SSH Studio: find /var/log -size +20k kèm lỗi Permission denied rồi bản có 2>/dev/null, find -newer bang-gia.csv, find ~ -mmin -30 liệt kê các file vừa tạo trong home" width="2400" height="1350" loading="lazy"></div><figcaption>SSH Studio · <code>find</code> theo kích thước và thời gian sửa</figcaption></figure>
+
 | Điều kiện | Khớp với |
 |---|---|
 | `-type f` / `-type d` / `-type l` | File thường / thư mục / symlink |
@@ -186,6 +188,8 @@ an@toinoi-app-01:~$ grep -w 8080 /opt/toinoi/bao-gia/appsettings.json
     "Port": 8080,
 ```
 
+<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/linux-tim-kiem-find-grep/ssh-studio-07.webp" alt="Terminal của SSH Studio: grep -c ERROR in 17, grep -n tìm q-100057 ở dòng 59, grep -n -B1 -A1 in thêm một dòng trước và sau, grep -i KHOI DONG không phân biệt hoa thường" width="2400" height="1350" loading="lazy"></div><figcaption>SSH Studio · <code>grep -c</code>, <code>-n</code>, ngữ cảnh <code>-B</code>/<code>-A</code> và <code>-i</code></figcaption></figure>
+
 | Tuỳ chọn | Tác dụng |
 |---|---|
 | `-c` | Chỉ **đếm** số dòng khớp (thay cho `\| wc -l`) |
@@ -229,7 +233,7 @@ Dấu `*` trong regex **khác** dấu `*` của wildcard: trong regex nó nghĩa
 
 Khi mẫu là một chuỗi cố định có ký tự đặc biệt (địa chỉ IP, đường dẫn), dùng `grep -F`: mọi ký tự được hiểu đúng theo mặt chữ.
 
-<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/linux-tim-kiem-find-grep/ssh-studio-03.webp" alt="Terminal của SSH Studio với các lệnh grep trên log bao-gia: -c đếm 17, -n tìm q-100057 ở dòng 59, -B1 -A1 in ngữ cảnh, -i, -v INFO, -E với mẫu ERROR hoặc WARN đếm 41, -E với biểu thức cham: 2[0-9]{3} ms in 7 dòng; phần khớp được tô đỏ" width="2400" height="1350" loading="lazy"></div><figcaption>SSH Studio · <code>grep</code> tô đỏ phần khớp trong từng dòng</figcaption></figure>
+<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/linux-tim-kiem-find-grep/ssh-studio-03.webp" alt="Terminal của SSH Studio: grep -v INFO | head -n 4, grep -E ERROR|WARN | wc -l in 41, grep -E cham: 2[0-9]{3} ms tô đỏ các yêu cầu chậm trên 2 giây, grep -w 8080 trong appsettings.json" width="2400" height="1350" loading="lazy"></div><figcaption>SSH Studio · <code>grep -v</code>, <code>-E</code> với biểu thức chính quy, <code>-w</code> khớp nguyên từ</figcaption></figure>
 
 Trên terminal, `grep` tô đỏ phần khớp (nhờ alias `grep --color=auto` của Ubuntu). Màu này rất có ích khi viết regex: bạn thấy ngay mẫu của mình khớp vào đâu.
 
@@ -286,13 +290,15 @@ an@toinoi-app-01:~$ whereis ls
 ls: /usr/bin/ls /usr/share/man/man1/ls.1.gz
 ```
 
+<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/linux-tim-kiem-find-grep/ssh-studio-06.webp" alt="Terminal của SSH Studio: grep -r bang-gia.csv trong /opt/toinoi kèm lỗi Permission denied, grep -rl, grep -rn --include=*.sh, find -exec grep -H bike, which ls vim tree, whereis ls" width="2400" height="1350" loading="lazy"></div><figcaption>SSH Studio · <code>grep -r</code> trong cả thư mục, ghép với <code>find</code>, và <code>which</code>/<code>whereis</code></figcaption></figure>
+
 `which` in đường dẫn của chương trình sẽ chạy khi bạn gõ tên lệnh (tìm trong `PATH`). `whereis` in thêm vị trí trang `man`. Để biết một cái tên là alias, lệnh dựng sẵn hay chương trình, `type` ([LNX-003](/articles/linux-shell-dong-lenh-tro-giup)) vẫn là lệnh trả lời đầy đủ nhất.
 
 ## 5. Tìm trong terminal của SSH Studio
 
 Có một loại tìm kiếm thứ ba: tìm trong **những gì đã hiện trên màn hình**. Bạn vừa chạy vài lệnh, kết quả dài, và muốn tìm một chữ trong đó mà không chạy lại. Trong terminal của SSH Studio, nhấn **`Ctrl+Shift+F`**:
 
-<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/linux-tim-kiem-find-grep/ssh-studio-04.webp" alt="Terminal của SSH Studio với ô tìm kiếm ở góc trên bên phải đang tìm chữ delivery: ô hiển thị 2/5, các nút Aa, .*, kết quả trước, kết quả sau và đóng; các chỗ khớp trong kết quả grep phía dưới được tô sáng" width="2400" height="1350" loading="lazy"></div><figcaption>SSH Studio · ô tìm trong terminal (<code>Ctrl+Shift+F</code>) tô sáng mọi chỗ khớp</figcaption></figure>
+<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/linux-tim-kiem-find-grep/ssh-studio-04.webp" alt="Terminal của SSH Studio với ô tìm kiếm ở góc trên bên phải đang tìm delivery, hiển thị 2/4 cùng các nút Aa, .*, lên, xuống, đóng; các chữ delivery trong kết quả grep được tô sáng" width="2400" height="1350" loading="lazy"></div><figcaption>SSH Studio · ô tìm kiếm của terminal tô sáng mọi chỗ khớp trên màn hình</figcaption></figure>
 
 Ô tìm kiếm hiện ở góc trên bên phải của terminal. Gõ `delivery`: mọi chỗ khớp trong nội dung terminal (kể cả phần đã cuộn lên) được tô sáng, kèm số thứ tự kết quả đang đứng trên tổng số.
 

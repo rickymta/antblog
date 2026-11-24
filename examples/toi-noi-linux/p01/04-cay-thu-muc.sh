@@ -3,6 +3,8 @@
 ## Tôi đang ở đâu?
 pwd
 ls /
+#shot 06
+#clear
 ## Đường dẫn tuyệt đối và tương đối
 cd /var/log
 pwd
@@ -19,6 +21,7 @@ cd
 pwd
 cd -
 cd ~
+#shot 05
 #clear
 ## Nhìn một thư mục
 ls /opt/toinoi/bao-gia
@@ -38,3 +41,4 @@ file /opt/toinoi/bao-gia/kiem-tra-cau-hinh.sh
 file /usr/bin/ls
 stat /opt/toinoi/bao-gia/bang-gia.csv
 #shot 04
+#xem chia-doi /opt/toinoi/bao-gia 07

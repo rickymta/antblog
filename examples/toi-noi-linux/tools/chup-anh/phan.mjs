@@ -24,6 +24,8 @@ import { join } from 'node:path';
 
 import { MAY, PASSWORD, ROOT, containerOf, loginCommand, reset, rootOn, runSegment, scripts } from '../../lib/lab.mjs';
 import { open } from './app.mjs';
+import { XEM, xem } from './xem.mjs';
+import { ghiWebp } from './ghi-anh.mjs';
 
 const REPO = join(ROOT, '..', '..');
 const sharp = createRequire(join(REPO, 'package.json'))('sharp');
@@ -76,7 +78,7 @@ export async function chayPhan({ part, slugs, gui: makeGui, only = [], fresh = t
     await c.png(png);
     const dir = join(REPO, 'apps', 'web', 'public', 'images', 'articles', slug);
     mkdirSync(dir, { recursive: true });
-    await sharp(png).webp({ quality: 90, effort: 6 }).toFile(join(dir, `ssh-studio-${n}.webp`));
+    await ghiWebp(png, join(dir, `ssh-studio-${n}.webp`));
     console.log('  ảnh', `${slug}/ssh-studio-${n}.webp`);
   }
 
@@ -188,6 +190,7 @@ export async function chayPhan({ part, slugs, gui: makeGui, only = [], fresh = t
       let m;
       if (line === '#clear') await a.clear();
       else if ((m = line.match(/^#shot (\d\d)$/))) await shot(m[1]);
+      else if ((m = line.match(XEM))) await xem({ a, c, sleep, shot, local: LOCAL }, m[1], m[2], m[3]);
       else if ((m = line.match(/^#gui (\S+)$/))) {
         if (!gui[m[1]]) throw new Error('Chưa có thao tác giao diện: ' + m[1]);
         await gui[m[1]]();

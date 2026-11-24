@@ -10,6 +10,7 @@ date +%F >> danh-sach.txt
 cat danh-sach.txt
 date +%F > danh-sach.txt
 cat danh-sach.txt
+#shot 05
 #clear
 ## Hai luồng ra: stdout và stderr
 ls /opt/toinoi /khong-co
@@ -24,6 +25,7 @@ ls /opt/toinoi /khong-co 2> /dev/null
 ## Luồng vào: <
 wc -l /var/log/toinoi/bao-gia.log
 wc -l < /var/log/toinoi/bao-gia.log
+#shot 06
 #clear
 ## Pipe: nối lệnh với nhau
 grep ERROR /var/log/toinoi/bao-gia.log | wc -l
@@ -46,3 +48,4 @@ ls /khong-co 2>&1 | wc -l
 grep -q ERROR /var/log/toinoi/bao-gia.log && echo "co loi trong log"
 grep -q FATAL /var/log/toinoi/bao-gia.log || echo "khong co dong FATAL"
 rm ket-qua.txt loi.txt tat-ca.txt danh-sach.txt
+#shot 07

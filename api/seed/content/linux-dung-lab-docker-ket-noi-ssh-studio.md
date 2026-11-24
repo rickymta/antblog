@@ -236,6 +236,8 @@ Việc đầu tiên: làm quen với server, rồi chuẩn bị thư mục tri�
 — Bình (nhóm hạ tầng)
 ```
 
+<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/linux-dung-lab-docker-ket-noi-ssh-studio/ssh-studio-08.webp" alt="Terminal của SSH Studio ngay sau khi đăng nhập: whoami in an, hostname in toinoi-app-01, pwd in /home/an, ls thấy huong-dan.txt, cat huong-dan.txt in lời nhắn của Bình" width="2400" height="1350" loading="lazy"></div><figcaption>SSH Studio · những lệnh đầu tiên: <code>whoami</code>, <code>hostname</code>, <code>pwd</code>, <code>ls</code>, <code>cat</code></figcaption></figure>
+
 `pwd` in thư mục bạn đang đứng; sau khi đăng nhập đó là thư mục riêng của bạn, `/home/an`. `ls` liệt kê thư mục đó: có một file `huong-dan.txt`. `cat` in nội dung file. Bình đã để lại lời nhắn về việc cần làm; đó là bài thực hành cuối phần.
 
 Kiểm tra dịch vụ SSH, chính thứ đang giữ kết nối của bạn:
@@ -245,13 +247,17 @@ an@toinoi-app-01:~$ systemctl is-active ssh
 active
 ```
 
-<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/linux-dung-lab-docker-ket-noi-ssh-studio/ssh-studio-06.webp" alt="Terminal của SSH Studio với kết quả của whoami, hostname, pwd, ls, cat huong-dan.txt, ssh-keygen -lf và systemctl is-active ssh" width="2400" height="1350" loading="lazy"></div><figcaption>SSH Studio · những lệnh đầu tiên sau khi đăng nhập</figcaption></figure>
+<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/linux-dung-lab-docker-ket-noi-ssh-studio/ssh-studio-06.webp" alt="Terminal của SSH Studio: ssh-keygen -lf /etc/ssh/ssh_host_ed25519_key.pub in fingerprint SHA256 ED25519 của server, systemctl is-active ssh in active" width="2400" height="1350" loading="lazy"></div><figcaption>SSH Studio · fingerprint đọc trên chính server khớp với hộp thoại lúc kết nối; dịch vụ <code>ssh</code> đang chạy</figcaption></figure>
 
 ## 9. Known Hosts: nơi SSH Studio nhớ host key
 
 Bấm **Known Hosts** ở cột bên trái:
 
 <figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/linux-dung-lab-docker-ket-noi-ssh-studio/ssh-studio-07.webp" alt="Trang Known Hosts của SSH Studio có một mục [127.0.0.1]:2222 kèm fingerprint SHA256 và nút Quên host" width="2400" height="1350" loading="lazy"></div><figcaption>SSH Studio · trang <b>Known Hosts</b> sau lần kết nối đầu</figcaption></figure>
+
+<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/linux-dung-lab-docker-ket-noi-ssh-studio/ssh-studio-09.webp" alt="Hộp thoại Nhật ký hoạt động của SSH Studio với hai dòng: Đã lưu server và toinoi-app-01 Đã kết nối an@127.0.0.1, bộ lọc Tất cả và Lỗi, ô tìm kiếm, nút Xoá" width="2400" height="1350" loading="lazy"></div><figcaption>SSH Studio · <b>Nhật ký hoạt động</b> (nút Hoạt động ở thanh trạng thái): mỗi lần lưu server, kết nối, lỗi đều được ghi lại trên máy bạn</figcaption></figure>
+
+<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/linux-dung-lab-docker-ket-noi-ssh-studio/ssh-studio-10.webp" alt="Launchpad của SSH Studio, tab Phiên đang mở: một phiên toinoi-app-01 an@127.0.0.1:2222 thuộc workspace Cá nhân, trạng thái Đã kết nối, chế độ Terminal" width="2400" height="1350" loading="lazy"></div><figcaption>SSH Studio · <b>Launchpad</b>: mọi phiên đang mở của mọi workspace ở một chỗ (Ctrl+Shift+D)</figcaption></figure>
 
 Host key bạn vừa tin cậy được lưu ở đây, gắn với `[127.0.0.1]:2222`. Từ lần kết nối sau, SSH Studio so host key server đưa ra với bản đã lưu. Trùng thì kết nối thẳng, không hỏi nữa. Khác thì SSH Studio **chặn kết nối**: hoặc server đã được cài lại, hoặc có ai đó đang giả làm server.
 

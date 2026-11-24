@@ -85,6 +85,8 @@ total 12
 -rw-r--r-- 1 an an 403 Nov 22 22:27 kiem-tra-cau-hinh.sh
 ```
 
+<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/linux-tao-sao-chep-di-chuyen-xoa-file/ssh-studio-05.webp" alt="Terminal của SSH Studio: cp không có -r báo omitting directory, cp -r chép cả thư mục nhưng báo Permission denied với bi-mat.env, ls -l du-an/ban-sao còn ba file" width="2400" height="1350" loading="lazy"></div><figcaption>SSH Studio · <code>cp -r</code> chép thư mục; file không đọc được thì bị bỏ qua kèm lỗi</figcaption></figure>
+
 Ba điều xảy ra ở đây:
 
 1. Không có `-r`, `cp` từ chối chép thư mục (`omitting directory`).
@@ -172,6 +174,8 @@ an@toinoi-app-01:~$ ls du-an/bao-gia
 cau-hinh  releases  shared
 ```
 
+<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/linux-tao-sao-chep-di-chuyen-xoa-file/ssh-studio-06.webp" alt="Terminal của SSH Studio: touch tạo bao-cao-01 đến 03 và nhap.tmp, ls bao-cao-*, echo rm bao-cao-0[12].txt cho thấy wildcard được mở rộng thành gì, rm, mkdir -p với ngoặc nhọn tạo releases và shared" width="2400" height="1350" loading="lazy"></div><figcaption>SSH Studio · wildcard và ngoặc nhọn: xem trước bằng <code>echo</code> rồi mới <code>rm</code></figcaption></figure>
+
 **Wildcard** (ký tự đại diện) là mẫu khớp với tên file:
 
 | Mẫu | Khớp với |
@@ -225,6 +229,10 @@ Lịch trực tuần 47 (lab)
 Thứ Hai: An
 Thứ Ba: Bình
 ```
+
+<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/linux-tao-sao-chep-di-chuyen-xoa-file/ssh-studio-07.webp" alt="Terminal của SSH Studio sau khi upload: ls -l tai-lieu thấy lich-truc.txt 60 byte, cat in Lịch trực tuần 47 với Thứ Hai An và Thứ Ba Bình" width="2400" height="1350" loading="lazy"></div><figcaption>SSH Studio · file tải lên qua khung Files đọc được ngay bằng lệnh</figcaption></figure>
+
+<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/linux-tao-sao-chep-di-chuyen-xoa-file/ssh-studio-08.webp" alt="Chế độ Files của SSH Studio: khung Máy của bạn có lich-truc.txt, khung Remote server mở /home/an/du-an chỉ còn thư mục bao-gia" width="2400" height="1350" loading="lazy"></div><figcaption>SSH Studio · khung Files nhìn <code>~/du-an</code> sau khi đã dọn bản sao</figcaption></figure>
 
 File có trên server, thuộc về `an`, vì SFTP chạy dưới đúng tài khoản bạn đăng nhập. SSH Studio giữ thời điểm sửa của file gốc khi tải lên, nên nếu làm theo bằng khung Files, cột thời gian của `lich-truc.txt` trên máy bạn sẽ là lúc file được tạo ở máy local, không phải lúc upload.
 

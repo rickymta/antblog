@@ -82,6 +82,8 @@ an@toinoi-app-01:~$ tree /srv/toinoi
 7 directories, 0 files
 ```
 
+<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/linux-thuc-hanh-thu-muc-trien-khai/ssh-studio-05.webp" alt="Terminal của SSH Studio: ls -ld /srv thuộc root, mkdir -p /srv/toinoi/bao-gia bị Permission denied, sudo mkdir -p với brace expansion đang dừng ở dấu nhắc [sudo] password for an" width="2400" height="1350" loading="lazy"></div><figcaption>SSH Studio · <code>/srv</code> thuộc root: cần <code>sudo</code> để tạo cây thư mục</figcaption></figure>
+
 - `/srv` thuộc về `root` với quyền `755`: `an` ở lớp «người khác», không có `w`, nên `mkdir` bị từ chối. Đây là một `Permission denied` chính đáng: tạo thư mục cấp cao của hệ thống là việc cần `sudo`.
 - `sudo mkdir -p` với **brace expansion** tạo cả cây bằng một lệnh. Shell mở rộng `{releases/1.4.2,shared/config,shared/logs}` thành ba đường dẫn trước khi `sudo` chạy.
 - Thư mục tạo bằng `sudo` thuộc về `root`. **`sudo chown -R an:toinoi /srv/toinoi`** giao cả cây cho `an` và nhóm `toinoi`. Từ đây trở đi, phần lớn việc không cần `sudo` nữa.
@@ -99,6 +101,8 @@ an@toinoi-app-01:/srv/toinoi/bao-gia$ cp /opt/toinoi/bao-gia/appsettings.json sh
 an@toinoi-app-01:/srv/toinoi/bao-gia$ sudo cp /opt/toinoi/bao-gia/bi-mat.env shared/config/
 an@toinoi-app-01:/srv/toinoi/bao-gia$ sudo chown an:toinoi shared/config/bi-mat.env
 ```
+
+<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/linux-thuc-hanh-thu-muc-trien-khai/ssh-studio-07.webp" alt="Terminal của SSH Studio trong /srv/toinoi/bao-gia: cp kiem-tra-cau-hinh.sh và bang-gia.csv vào releases/1.4.2, cp appsettings.json vào shared/config, sudo cp bi-mat.env rồi sudo chown an:toinoi" width="2400" height="1350" loading="lazy"></div><figcaption>SSH Studio · đưa bản phát hành 1.4.2 và cấu hình vào chỗ</figcaption></figure>
 
 Ba file đầu `an` đọc được nên `cp` thường là đủ. `bi-mat.env` thuộc `baogia` với quyền `600`, `an` không đọc được ([LNX-007](/articles/linux-nguoi-dung-nhom-quyen-file)). `sudo cp` chép được, nhưng bản sao thuộc về `root`, nên cần thêm `sudo chown`.
 
@@ -147,7 +151,7 @@ Rồi `chmod` từng mục theo đề. Để ý thứ tự của lý lẽ, khôn
 
 Lệnh cuối là một phép kiểm tra tự viết: `find` đưa mọi mục cho `stat`, `stat` in quyền dạng số, chủ, nhóm và đường dẫn, `sort -k3` xếp theo đường dẫn. Chín dòng, đọc một lượt là đối chiếu được với đề. **Đừng tin rằng mình đã gõ đúng; hãy in ra và nhìn.**
 
-<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/linux-thuc-hanh-thu-muc-trien-khai/ssh-studio-02.webp" alt="Terminal của SSH Studio với các lệnh cp, sudo cp, sudo chown, ls -l cho thấy file mới có nhóm an, chgrp -R toinoi, năm lệnh chmod và danh sách quyền dạng số kèm chủ sở hữu của mọi mục do find và stat in ra" width="2400" height="1350" loading="lazy"></div><figcaption>SSH Studio · đặt nhóm và quyền, rồi in ra để đối chiếu</figcaption></figure>
+<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/linux-thuc-hanh-thu-muc-trien-khai/ssh-studio-02.webp" alt="Terminal của SSH Studio: ls -l releases/1.4.2 thấy file mới chép thuộc nhóm an, chgrp -R toinoi, các lệnh chmod 750, 640, 600, 750, 770, rồi find -exec stat in quyền và chủ của từng mục" width="2400" height="1350" loading="lazy"></div><figcaption>SSH Studio · đặt nhóm và quyền đúng cho từng loại file</figcaption></figure>
 
 ## 6. Symlink `current`
 
@@ -192,6 +196,8 @@ an@toinoi-app-01:/srv/toinoi/bao-gia$ grep -o 'dich_vu=[a-z0-9]*' shared/logs/lo
       4 dich_vu=car7
       2 dich_vu=delivery
 ```
+
+<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/linux-thuc-hanh-thu-muc-trien-khai/ssh-studio-06.webp" alt="Terminal của SSH Studio: ln -s releases/1.4.2 current, ls -l thấy current -> releases/1.4.2, chạy current/kiem-tra-cau-hinh.sh, trích 17 dòng ERROR và đếm theo dịch vụ bằng tee" width="2400" height="1350" loading="lazy"></div><figcaption>SSH Studio · symlink <code>current</code> và báo cáo lỗi của ngày 21/11</figcaption></figure>
 
 Ba lệnh, ba kỹ thuật của [LNX-008](/articles/linux-chuyen-huong-pipe):
 
@@ -257,6 +263,8 @@ an@toinoi-app-01:/srv/toinoi/bao-gia$ tree -p /srv/toinoi
 `tree -p` in quyền của từng mục; so với sơ đồ ở mục 1.
 
 <figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/linux-thuc-hanh-thu-muc-trien-khai/ssh-studio-04.webp" alt="Terminal của SSH Studio: binh đọc được ba dòng đầu của appsettings.json, binh bị Permission denied với bi-mat.env, nobody không liệt kê được shared/config, và cây tree -p /srv/toinoi với quyền của từng mục" width="2400" height="1350" loading="lazy"></div><figcaption>SSH Studio · kiểm tra bằng tài khoản khác và cây thư mục bàn giao</figcaption></figure>
+
+<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/linux-thuc-hanh-thu-muc-trien-khai/ssh-studio-08.webp" alt="Chế độ Files của SSH Studio: khung Remote server mở /srv/toinoi/bao-gia với hai thư mục releases, shared và symlink current có biểu tượng liên kết" width="2400" height="1350" loading="lazy"></div><figcaption>SSH Studio · thư mục triển khai bàn giao nhìn từ khung Files</figcaption></figure>
 
 ### Chấm tự động
 

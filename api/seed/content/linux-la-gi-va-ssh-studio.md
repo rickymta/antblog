@@ -104,6 +104,8 @@ Mỗi thao tác trong series được làm theo hai cách khi có thể:
 
 Cách thứ nhất là thứ bạn mang theo được sang mọi server và mọi công cụ. Cách thứ hai giúp bạn nhìn thấy kết quả và làm nhanh những việc lặt vặt. Khi SSH Studio không có giao diện cho một việc (quản lý tiến trình, cài phần mềm, sửa cấu hình dịch vụ), bài chỉ dùng lệnh.
 
+<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/linux-la-gi-va-ssh-studio/ssh-studio-05.webp" alt="Trang Servers của SSH Studio, workspace Cá nhân: một server toinoi-app-01 an@127.0.0.1:2222, nhóm Lab, xác thực Password, trạng thái 1 phiên hoạt động, các nút Kết nối tất cả và Thêm server" width="2400" height="1350" loading="lazy"></div><figcaption>SSH Studio · trang <b>Servers</b>: danh sách server của workspace và trạng thái kết nối</figcaption></figure>
+
 ## 5. Năm lệnh đầu tiên trên server
 
 Đây là những gì An gõ ngay sau khi đăng nhập. Bạn chưa cần làm theo; hãy đọc kết quả để quen mặt chữ. Dòng bắt đầu bằng `an@toinoi-app-01:~$` là **dấu nhắc** (prompt) của shell kèm lệnh An gõ; các dòng bên dưới là kết quả.
@@ -127,6 +129,8 @@ UBUNTU_CODENAME=noble
 LOGO=ubuntu-logo
 ```
 
+<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/linux-la-gi-va-ssh-studio/ssh-studio-03.webp" alt="Terminal của SSH Studio: cat /etc/os-release in PRETTY_NAME Ubuntu 24.04.5 LTS, VERSION_ID 24.04, VERSION_CODENAME noble, ID ubuntu, ID_LIKE debian" width="2400" height="1350" loading="lazy"></div><figcaption>SSH Studio · <code>cat /etc/os-release</code>: server chạy Ubuntu 24.04 LTS</figcaption></figure>
+
 `cat` in nội dung một file ra màn hình. File `/etc/os-release` có trên mọi bản phân phối hiện đại và là nơi đáng tin nhất để biết máy đang chạy gì. Ba dòng cần đọc: `PRETTY_NAME` (tên đầy đủ), `VERSION_ID` (số phiên bản, dùng khi tra tài liệu) và `ID_LIKE=debian` (Ubuntu thuộc họ Debian, nên cài phần mềm bằng `apt` và dùng gói `.deb`).
 
 ### Kernel nào?
@@ -137,6 +141,8 @@ Linux
 an@toinoi-app-01:~$ uname -srm
 Linux 6.18.58.1-microsoft-standard-WSL2 x86_64
 ```
+
+<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/linux-la-gi-va-ssh-studio/ssh-studio-04.webp" alt="Terminal của SSH Studio: uname -s in Linux, uname -srm in Linux 6.18.58.1-microsoft-standard-WSL2 x86_64" width="2400" height="1350" loading="lazy"></div><figcaption>SSH Studio · <code>uname</code>: tên kernel, phiên bản và kiến trúc CPU</figcaption></figure>
 
 `uname` in thông tin về kernel. `-s` là tên kernel, `-r` là phiên bản, `-m` là kiến trúc CPU. `x86_64` là CPU Intel/AMD 64 bit; trên máy ARM (nhiều server đám mây đời mới, máy Mac dùng chip Apple) bạn sẽ thấy `aarch64`.
 
@@ -163,7 +169,7 @@ an@toinoi-app-01:~$ ps -p 1 -o pid,comm
 
 Mỗi chương trình đang chạy là một **tiến trình** (process), có một số định danh là PID. Tiến trình có PID 1 là tiến trình đầu tiên kernel khởi động, và nó khởi động mọi thứ còn lại. Trên Ubuntu, tiến trình đó là **systemd**: systemd bật `sshd` để bạn đăng nhập được, bật các dịch vụ khác, và khởi động lại chúng khi chúng chết. Phần 4 của series dành cho systemd.
 
-<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/linux-la-gi-va-ssh-studio/ssh-studio-01.webp" alt="Terminal của SSH Studio sau khi chạy cat /etc/os-release, uname, whoami, hostname và ps trên server toinoi-app-01" width="2400" height="1350" loading="lazy"></div><figcaption>SSH Studio · chế độ Terminal · năm lệnh đầu tiên trên <code>toinoi-app-01</code></figcaption></figure>
+<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/linux-la-gi-va-ssh-studio/ssh-studio-01.webp" alt="Terminal của SSH Studio trên toinoi-app-01: whoami in an, hostname in toinoi-app-01, ps -p 1 -o pid,comm cho thấy tiến trình số 1 là systemd" width="2400" height="1350" loading="lazy"></div><figcaption>SSH Studio · <code>whoami</code>, <code>hostname</code> và tiến trình số 1 của server</figcaption></figure>
 
 Trong ảnh, thanh trên cùng của phiên có năm nút chế độ xem (Terminal, Files, Chia đôi, Song song, Ports), địa chỉ `an@127.0.0.1:2222` và trạng thái «Đã kết nối». Cột bên trái liệt kê workspace, danh sách server và các phiên đang mở.
 

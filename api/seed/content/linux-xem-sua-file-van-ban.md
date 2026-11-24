@@ -30,6 +30,8 @@ an@toinoi-app-01:~$ cat -n /opt/toinoi/bao-gia/bang-gia.csv
 
 `cat` in toàn bộ file. `-n` đánh số dòng, tiện khi cần nói với đồng nghiệp «xem dòng 3». `cat` hợp với file vài chục dòng. Với file dài hơn một màn hình, `cat` là lựa chọn sai: bạn chỉ thấy phần cuối, và nếu file có vài trăm nghìn dòng thì terminal bận in trong nhiều giây.
 
+<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/linux-xem-sua-file-van-ban/ssh-studio-07.webp" alt="Terminal của SSH Studio: cat huong-dan.txt in lời nhắn ngắn của Bình về server toinoi-app-01 và thư mục /opt/toinoi/bao-gia" width="2400" height="1350" loading="lazy"></div><figcaption>SSH Studio · <code>cat</code> hợp với file ngắn vừa một màn hình</figcaption></figure>
+
 Đây là bảng giá của dịch vụ báo giá: mỗi dòng là một loại dịch vụ với giá mở cửa, giá mỗi km và giá tối thiểu. Phần sau của bài sẽ sửa một bản sao của file này.
 
 ## 2. File dài: đếm trước, rồi xem đầu và cuối
@@ -40,6 +42,8 @@ an@toinoi-app-01:~$ wc -l /var/log/toinoi/bao-gia.log
 an@toinoi-app-01:~$ wc /var/log/toinoi/bao-gia.log
   362  3431 27260 /var/log/toinoi/bao-gia.log
 ```
+
+<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/linux-xem-sua-file-van-ban/ssh-studio-08.webp" alt="Terminal của SSH Studio: cat -n đánh số năm dòng của bang-gia.csv, wc -l đếm 362 dòng log, wc in dòng, từ, byte, head in 10 dòng đầu của bao-gia.log" width="2400" height="1350" loading="lazy"></div><figcaption>SSH Studio · đếm trước bằng <code>wc</code>, rồi xem 10 dòng đầu bằng <code>head</code></figcaption></figure>
 
 **`wc -l`** đếm số dòng. Chạy nó trước khi mở một file lạ là thói quen tốt: nó cho bạn biết nên dùng `cat` hay công cụ khác. Không có tuỳ chọn, `wc` in ba số: dòng, từ, byte.
 
@@ -208,6 +212,8 @@ an@toinoi-app-01:~$ diff /opt/toinoi/bao-gia/bang-gia.csv tai-lieu/bang-gia.csv
 ---
 > bike,Xe máy,9000,2500,12000
 ```
+
+<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/linux-xem-sua-file-van-ban/ssh-studio-09.webp" alt="Terminal của SSH Studio: cat tai-lieu/bang-gia.csv sau khi sửa trong trình sửa file, diff với bản gốc in 2c2: dòng bike 8000 đổi thành 9000" width="2400" height="1350" loading="lazy"></div><figcaption>SSH Studio · <code>diff</code> xác nhận đúng một dòng đã đổi</figcaption></figure>
 
 `diff CŨ MỚI` in những chỗ khác nhau. Cách đọc:
 

@@ -35,6 +35,8 @@ toinoi:x:2000:binh
 sudo:x:27:an,binh
 ```
 
+<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/linux-nguoi-dung-nhom-quyen-file/ssh-studio-07.webp" alt="Terminal của SSH Studio: whoami in an, id cho thấy an thuộc nhóm an và sudo, id binh thấy thêm nhóm toinoi, getent passwd an binh baogia, getent group toinoi sudo" width="2400" height="1350" loading="lazy"></div><figcaption>SSH Studio · người dùng, UID và nhóm: <code>id</code> và <code>getent</code></figcaption></figure>
+
 Mỗi tiến trình trên Linux chạy dưới danh nghĩa một **người dùng** (user) và một tập **nhóm** (group). Kernel không làm việc với tên; nó làm việc với số: **UID** cho người dùng, **GID** cho nhóm. `id` in cả hai:
 
 - `uid=1000(an)`: bạn là người dùng số 1000, tên `an`.
@@ -107,7 +109,7 @@ Khi một tiến trình mở file, kernel chọn **đúng một** trong ba lớp
 
 Thông báo lỗi cho biết ai từ chối: `cat: …: Permission denied` do `cat` in ra, sau khi kernel từ chối cho nó mở file.
 
-<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/linux-nguoi-dung-nhom-quyen-file/ssh-studio-01.webp" alt="Terminal của SSH Studio với whoami, id, id binh, getent passwd, getent group, ls -l /opt/toinoi/bao-gia và hai lỗi Permission denied khi cat bi-mat.env và cat /etc/shadow" width="2400" height="1350" loading="lazy"></div><figcaption>SSH Studio · danh tính của <code>an</code> và hai file <code>an</code> không được đọc</figcaption></figure>
+<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/linux-nguoi-dung-nhom-quyen-file/ssh-studio-01.webp" alt="Terminal của SSH Studio: ls -l /opt/toinoi/bao-gia cho thấy bi-mat.env quyền -rw-------, cat bi-mat.env bị Permission denied, ls -l /etc/passwd /etc/shadow, cat /etc/shadow cũng bị Permission denied" width="2400" height="1350" loading="lazy"></div><figcaption>SSH Studio · đọc quyền của file: hai lần <b>Permission denied</b> có lý do</figcaption></figure>
 
 ## 3. Quyền thực thi
 
@@ -235,6 +237,8 @@ rm: cannot remove 'cau-hinh/bang-gia.csv.bak': Permission denied
 an@toinoi-app-01:~/du-an/bao-gia$ chmod 755 cau-hinh
 ```
 
+<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/linux-nguoi-dung-nhom-quyen-file/ssh-studio-08.webp" alt="Terminal của SSH Studio: chmod a-x cau-hinh làm ls, cat và cd vào thư mục đều bị Permission denied; chmod a-w làm touch và rm trong thư mục bị từ chối; chmod 755 trả lại" width="2400" height="1350" loading="lazy"></div><figcaption>SSH Studio · quyền r, w, x trên thư mục: đọc danh sách, tạo xoá file, đi vào</figcaption></figure>
+
 Hai thí nghiệm:
 
 **Bỏ `x` (`chmod a-x`).** Thư mục còn `r` nên `ls` vẫn in được **tên** `bang-gia.csv.bak`, nhưng kèm một lỗi: không có `x`, `ls` không lấy được thông tin của file để tô màu. Còn `cat` file bên trong và `cd` vào thì bị từ chối hẳn. Thư mục thiếu `x` giống một cuốn danh bạ bạn đọc được tên nhưng không gọi được cho ai.
@@ -267,7 +271,7 @@ File mới có `rw-rw-r--` (664), thư mục mới có `rwxrwxr-x` (775). Con s�
 
 Ubuntu đặt `umask 002` cho người dùng thường vì mỗi người có nhóm riêng, nên cho nhóm quyền ghi không hại gì. Nhiều hệ thống khác (và tài khoản `root`) dùng `022`, cho ra `644` và `755`. Vì vậy **file chứa bí mật phải được `chmod 600` một cách chủ động**; mặc định của hệ thống là «ai cũng đọc được».
 
-<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/linux-nguoi-dung-nhom-quyen-file/ssh-studio-04.webp" alt="Terminal của SSH Studio: sau chmod a-x cau-hinh thì ls báo lỗi kèm tên file, cat và cd bị Permission denied; sau chmod a-w thì touch và rm trong thư mục bị từ chối; umask in 0002, file và thư mục mới có quyền rw-rw-r-- và rwxrwxr-x" width="2400" height="1350" loading="lazy"></div><figcaption>SSH Studio · quyền trên thư mục và <code>umask</code></figcaption></figure>
+<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/linux-nguoi-dung-nhom-quyen-file/ssh-studio-04.webp" alt="Terminal của SSH Studio: umask in 0002, touch moi.txt và mkdir moi, ls -ld cho thấy thư mục moi là drwxrwxr-x và file moi.txt là -rw-rw-r--, rm -r dọn đi" width="2400" height="1350" loading="lazy"></div><figcaption>SSH Studio · <code>umask</code>: quyền mặc định của file và thư mục mới</figcaption></figure>
 
 ## 7. Đổi chủ sở hữu và nhóm; mượn quyền bằng `sudo`
 
@@ -290,6 +294,8 @@ Matching Defaults entries for an on toinoi-app-01:
 User an may run the following commands on toinoi-app-01:
     (ALL : ALL) ALL
 ```
+
+<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/linux-nguoi-dung-nhom-quyen-file/ssh-studio-06.webp" alt="Terminal của SSH Studio: chown và chgrp bị Operation not permitted, sudo chown an:toinoi bang-gia.csv đang dừng ở dấu nhắc [sudo] password for an" width="2400" height="1350" loading="lazy"></div><figcaption>SSH Studio · <code>sudo</code> hỏi mật khẩu của chính An (mật khẩu gõ vào không hiện ra)</figcaption></figure>
 
 **`chown`** đổi chủ sở hữu, **`chgrp`** đổi nhóm; `chown an:toinoi` đổi cả hai. Hai lệnh đầu thất bại với `Operation not permitted`:
 

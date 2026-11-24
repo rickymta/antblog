@@ -1,12 +1,15 @@
 # LNX-006 · Xem và sửa file văn bản
+#clear
 ## Xem cả file
 cat huong-dan.txt
+#shot 07
 #clear
 cat -n /opt/toinoi/bao-gia/bang-gia.csv
 ## File dài: đếm, xem đầu, xem cuối
 wc -l /var/log/toinoi/bao-gia.log
 wc /var/log/toinoi/bao-gia.log
 head /var/log/toinoi/bao-gia.log
+#shot 08
 #clear
 head -n 3 /var/log/toinoi/bao-gia.log
 tail -n 3 /var/log/toinoi/bao-gia.log
@@ -19,6 +22,7 @@ tail -n +361 /var/log/toinoi/bao-gia.log
 #clear
 cat tai-lieu/bang-gia.csv
 diff /opt/toinoi/bao-gia/bang-gia.csv tai-lieu/bang-gia.csv
+#shot 09
 ## Sửa file bằng vim (mục 4): ghi chú của An
 #gui vim-ghi-chu
 #@ printf 'Ghi chú của An\n- 22/11: tăng giá mở cửa xe máy lên 9.000 đ ở bản nháp\n' > tai-lieu/ghi-chu.txt

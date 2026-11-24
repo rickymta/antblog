@@ -20,6 +20,8 @@ import { join } from 'node:path';
 
 import { ROOT, reset, scripts } from '../../lib/lab.mjs';
 import { SERVER, open } from './app.mjs';
+import { XEM, xem } from './xem.mjs';
+import { ghiWebp } from './ghi-anh.mjs';
 
 const REPO = join(ROOT, '..', '..');
 const sharp = createRequire(join(REPO, 'package.json'))('sharp');
@@ -51,7 +53,7 @@ async function shot(n) {
   const dir = join(REPO, 'apps', 'web', 'public', 'images', 'articles', slug);
   mkdirSync(dir, { recursive: true });
   const out = join(dir, `ssh-studio-${n}.webp`);
-  await sharp(png).webp({ quality: 90, effort: 6 }).toFile(out);
+  await ghiWebp(png, out);
   console.log('  ảnh', `${slug}/ssh-studio-${n}.webp`);
 }
 
@@ -266,7 +268,10 @@ async function play(script) {
     if (!line.trim()) continue;
     if (line === '#clear') await a.clear();
     else if (line.startsWith('#shot ')) await shot(line.slice(6).trim());
-    else if (line.startsWith('#gui ')) {
+    else if (XEM.test(line)) {
+      const [, loai, doiSo, so] = line.match(XEM);
+      await xem({ a, c, sleep: a.sleep, shot, local: LOCAL }, loai, doiSo, so);
+    } else if (line.startsWith('#gui ')) {
       const name = line.slice(5).trim();
       if (!gui[name]) throw new Error('Chưa có thao tác giao diện: ' + name);
       await gui[name]();
@@ -288,6 +293,21 @@ const todo = (only.length ? only : order).map((id) => all.find((s) => s.id === i
 if (!only.length) {
   console.log('Tạo lại server lab…');
   reset();
+}
+if (only.length) {
+  // Chụp một phần: lab vừa được `run.mjs setup NN` dựng lại nên phiên cũ đã chết. Đóng mọi tab phiên,
+  // kết nối mới tới server (mật khẩu của lab) trước khi gõ lệnh.
+  for (let i = 0; i < 10 && (await c.exists('button[title="Đóng phiên"]')); i++) {
+    await c.click('button[title="Đóng phiên"]');
+    await sleep(600);
+    if (await c.exists('.confirm-actions button', 'Ngắt kết nối')) await c.click('.confirm-actions button', 'Ngắt kết nối');
+    await sleep(500);
+  }
+  await a.nav('Servers');
+  await sleep(500);
+  await c.click('button.connect');
+  await a.password();
+  await a.submitPassword();
 }
 for (const s of todo) await play(s);
 c.close();

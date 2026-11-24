@@ -39,6 +39,8 @@ an@toinoi-app-01:~$ echo $SHELL
 /bin/bash
 ```
 
+<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/linux-shell-dong-lenh-tro-giup/ssh-studio-05.webp" alt="Terminal của SSH Studio: echo $SHELL in /bin/bash, bash --version in GNU bash 5.2.21 kèm dòng giấy phép GPLv3" width="2400" height="1350" loading="lazy"></div><figcaption>SSH Studio · shell đang dùng là <code>bash</code></figcaption></figure>
+
 `echo` in lại những gì đứng sau nó. `$SHELL` là một **biến môi trường**: shell thay `$SHELL` bằng giá trị của biến trước khi chạy `echo`. Biến môi trường là nội dung của Phần 2; ở đây chỉ cần biết dấu `$` đứng trước một cái tên nghĩa là «lấy giá trị».
 
 ## 2. Ba phần của một dòng lệnh
@@ -122,6 +124,8 @@ drwxr-xr-x 1 root   root   4096 Nov 22 22:26 ..
 drwxr-xr-x 1 baogia toinoi 4096 Nov 20 09:20 bao-gia
 ```
 
+<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/linux-shell-dong-lenh-tro-giup/ssh-studio-06.webp" alt="Terminal của SSH Studio: ls -la liệt kê cả file ẩn trong thư mục home của an, ls -la /opt/toinoi thấy thư mục bao-gia thuộc baogia nhóm toinoi" width="2400" height="1350" loading="lazy"></div><figcaption>SSH Studio · gộp tuỳ chọn: <code>ls -la</code> bằng <code>ls -l -a</code>, có thêm đối số đường dẫn</figcaption></figure>
+
 `ls -l -a`, `ls -la` và `ls -al` là một. Dạng dài của `-a` là `--all`; tuỳ chọn dài không gộp được, phải viết từng cái. Đó là câu trả lời cho ba câu hỏi của An.
 
 Lệnh cuối có thêm đối số `/opt/toinoi`: liệt kê thư mục đó thay vì thư mục hiện tại. Phần lớn lệnh làm việc với file đều theo cách này: không có đối số thì dùng thư mục hiện tại.
@@ -171,6 +175,8 @@ Full documentation <https://www.gnu.org/software/coreutils/whoami>
 or available locally via: info '(coreutils) whoami invocation'
 ```
 
+<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/linux-shell-dong-lenh-tro-giup/ssh-studio-07.webp" alt="Terminal của SSH Studio: type ls báo alias ls --color=auto, type cd báo shell builtin, type date báo /usr/bin/date, whoami --help in cách dùng và các tuỳ chọn" width="2400" height="1350" loading="lazy"></div><figcaption>SSH Studio · <code>type</code> cho biết lệnh là alias, lệnh dựng sẵn hay chương trình; <code>--help</code> in tóm tắt</figcaption></figure>
+
 Dòng `Usage:` là cú pháp. Ngoặc vuông `[OPTION]` nghĩa là không bắt buộc; dấu ba chấm nghĩa là lặp lại được. `ls --help` dài hơn nhiều, hơn trăm dòng; bài [LNX-006](/articles/linux-xem-sua-file-van-ban) chỉ cách đọc một kết quả dài từng trang.
 
 Lệnh dựng sẵn của bash như `cd` không có `--help`; dùng `help cd`.
@@ -186,6 +192,8 @@ passwd (1)           - change user password
 passwd (1ssl)        - OpenSSL application commands
 passwd (5)           - the password file
 ```
+
+<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/linux-shell-dong-lenh-tro-giup/ssh-studio-08.webp" alt="Terminal của SSH Studio: man -f ls in ls (1) list directory contents, man -f date passwd liệt kê date (1), passwd (1), passwd (1ssl), passwd (5)" width="2400" height="1350" loading="lazy"></div><figcaption>SSH Studio · <code>man -f</code>: một tên, nhiều mục trong các section khác nhau của man</figcaption></figure>
 
 `man -f` in một dòng mô tả cho mỗi trang tài liệu có tên đó. Số trong ngoặc là **mục** (section) của tài liệu: mục 1 là lệnh cho người dùng, mục 5 là định dạng file, mục 8 là lệnh quản trị. `passwd` có ở cả mục 1 (lệnh đổi mật khẩu) và mục 5 (định dạng file `/etc/passwd`). Mặc định `man passwd` mở mục 1; muốn mục 5, gõ `man 5 passwd`.
 

@@ -68,6 +68,8 @@ an@toinoi-app-01:~/tai-lieu$ cat danh-sach.txt
 2026-11-22
 ```
 
+<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/linux-chuyen-huong-pipe/ssh-studio-05.webp" alt="Terminal của SSH Studio sau khi đăng nhập lại: id đã có nhóm toinoi, ls /opt/toinoi/bao-gia ghi vào danh-sach.txt, date +%F >> nối thêm một dòng, date +%F > ghi đè chỉ còn ngày" width="2400" height="1350" loading="lazy"></div><figcaption>SSH Studio · <code>&gt;</code> ghi đè, <code>&gt;&gt;</code> nối thêm</figcaption></figure>
+
 - **`>`** nối stdout vào file. File chưa có thì được tạo; **file đã có thì bị xoá trắng trước khi lệnh chạy**.
 - **`>>`** ghi **nối thêm** vào cuối file.
 
@@ -130,6 +132,8 @@ an@toinoi-app-01:~/tai-lieu$ wc -l /var/log/toinoi/bao-gia.log
 an@toinoi-app-01:~/tai-lieu$ wc -l < /var/log/toinoi/bao-gia.log
 362
 ```
+
+<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/linux-chuyen-huong-pipe/ssh-studio-06.webp" alt="Terminal của SSH Studio: năm biến thể chuyển hướng của ls /opt/toinoi /khong-co, rồi wc -l có tên file và wc -l < chỉ in số 362" width="2400" height="1350" loading="lazy"></div><figcaption>SSH Studio · <code>&lt;</code>: lệnh đọc từ stdin nên không in tên file</figcaption></figure>
 
 **`<`** nối stdin vào một file. Hai lệnh trên cho cùng con số, khác một chi tiết: lệnh đầu nhận **tên file** làm đối số nên in tên file; lệnh sau chỉ nhận **dữ liệu** qua stdin, không biết dữ liệu từ đâu tới, nên chỉ in số. Dạng sau gọn khi bạn cần đúng một con số để dùng tiếp trong script.
 
@@ -252,6 +256,8 @@ co loi trong log
 an@toinoi-app-01:~/tai-lieu$ grep -q FATAL /var/log/toinoi/bao-gia.log || echo "khong co dong FATAL"
 khong co dong FATAL
 ```
+
+<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/linux-chuyen-huong-pipe/ssh-studio-07.webp" alt="Terminal của SSH Studio: tee vừa in vừa ghi loi-theo-dich-vu.txt, ls -l, ls /khong-co | wc -l in 0 còn 2>&amp;1 | wc -l in 1, grep -q với &amp;&amp; và ||, rm dọn các file thử" width="2400" height="1350" loading="lazy"></div><figcaption>SSH Studio · pipe chỉ mang stdout; <code>&amp;&amp;</code> và <code>||</code> theo mã thoát</figcaption></figure>
 
 | Viết | Nghĩa |
 |---|---|

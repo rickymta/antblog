@@ -15,6 +15,7 @@ ls -l tai-lieu
 cp /opt/toinoi/bao-gia du-an/ban-sao
 cp -r /opt/toinoi/bao-gia du-an/ban-sao
 ls -l du-an/ban-sao
+#shot 05
 #clear
 ## Đổi tên và di chuyển
 mv tai-lieu/ghi-chu.txt tai-lieu/nhat-ky.txt
@@ -37,8 +38,11 @@ rm bao-cao-0[12].txt nhap.tmp
 ls
 mkdir -p du-an/bao-gia/{releases,shared}
 ls du-an/bao-gia
+#shot 06
 ## File do SSH Studio tải lên (khung Files, mục 6 của bài)
 #gui upload-lich-truc
 #@ printf 'Lịch trực tuần 47 (lab)\nThứ Hai: An\nThứ Ba: Bình\n' > tai-lieu/lich-truc.txt
 ls -l tai-lieu
 cat tai-lieu/lich-truc.txt
+#shot 07
+#xem files /home/an/du-an 08
