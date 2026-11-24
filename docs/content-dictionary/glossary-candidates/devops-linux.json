@@ -3,9 +3,9 @@
   "category": "devops-linux",
   "generatedAt": "2026-11-24",
   "source": {
-    "articles": 30,
+    "articles": 40,
     "checkedAgainst": "api/seed/terminology.json (working tree 22/11/2026, 422 mục) và các file khác trong glossary-candidates/",
-    "occurrencesMethod": "Như postgresql.json: occurrences = số bài trong series (Phần 1–3, 30 bài linux-*) có ít nhất một chỗ khớp term/english/aliases trong văn xuôi; mentions = tổng số chỗ khớp; outsideSeriesArticles = số bài ngoài series có chỗ khớp. Bỏ frontmatter, khối code, inline code, <pre>/<code>/<script>/<style>, thẻ HTML (giữ alt/title/aria-label), đích liên kết, URL. Ranh giới từ Unicode, tôn trọng caseSensitive. Phần lớn tên lệnh trong series nằm trong inline code nên không được tính. Cập nhật lại khi viết các phần sau."
+    "occurrencesMethod": "Như postgresql.json: occurrences = số bài trong series (Phần 1–4, 40 bài linux-*) có ít nhất một chỗ khớp term/english/aliases trong văn xuôi; mentions = tổng số chỗ khớp; outsideSeriesArticles = số bài ngoài series có chỗ khớp. Bỏ frontmatter, khối code, inline code, <pre>/<code>/<script>/<style>, thẻ HTML (giữ alt/title/aria-label), đích liên kết, URL. Ranh giới từ Unicode, tôn trọng caseSensitive. Phần lớn tên lệnh trong series nằm trong inline code nên không được tính. Cập nhật lại khi viết các phần sau."
   },
   "conflicts": [
     {
@@ -39,8 +39,8 @@
         "linux-la-gi-va-ssh-studio"
       ],
       "scopeNote": "Thuật ngữ riêng của Linux/Unix, cùng nghĩa ở mọi chuyên mục.",
-      "occurrences": 4,
-      "mentions": 25,
+      "occurrences": 9,
+      "mentions": 37,
       "outsideSeriesArticles": 5,
       "reviewNote": "Alias \"nhân\" rất dễ bắt nhầm (nhân vật, phép nhân, nguyên nhân là từ khác nhưng \"nhân\" đứng riêng vẫn gặp); chỉ nên giữ \"kernel\"."
     },
@@ -76,8 +76,8 @@
         "linux-shell-dong-lenh-tro-giup"
       ],
       "scopeNote": "Ngoài chuyên mục: Azure Cloud Shell, ShellRoute của go_router.",
-      "occurrences": 21,
-      "mentions": 113,
+      "occurrences": 26,
+      "mentions": 133,
       "outsideSeriesArticles": 22
     },
     {
@@ -90,8 +90,8 @@
         "linux-shell-dong-lenh-tro-giup"
       ],
       "scopeNote": "Thuật ngữ riêng của Linux/Unix, cùng nghĩa ở mọi chuyên mục.",
-      "occurrences": 11,
-      "mentions": 50,
+      "occurrences": 14,
+      "mentions": 58,
       "outsideSeriesArticles": 15
     },
     {
@@ -106,8 +106,8 @@
         "linux-dung-lab-docker-ket-noi-ssh-studio"
       ],
       "scopeNote": "Thuật ngữ riêng của Linux/Unix, cùng nghĩa ở mọi chuyên mục.",
-      "occurrences": 30,
-      "mentions": 417,
+      "occurrences": 40,
+      "mentions": 512,
       "outsideSeriesArticles": 19
     },
     {
@@ -139,8 +139,8 @@
         "linux-sshd-config-an-toan"
       ],
       "scopeNote": "Thuật ngữ riêng của Linux/Unix, cùng nghĩa ở mọi chuyên mục.",
-      "occurrences": 6,
-      "mentions": 28,
+      "occurrences": 7,
+      "mentions": 29,
       "outsideSeriesArticles": 0
     },
     {
@@ -209,8 +209,8 @@
         "linux-shell-dong-lenh-tro-giup"
       ],
       "scopeNote": "\"prompt\" ngoài chuyên mục thường là prompt của mô hình AI.",
-      "occurrences": 9,
-      "mentions": 23,
+      "occurrences": 11,
+      "mentions": 25,
       "outsideSeriesArticles": 3
     },
     {
@@ -226,8 +226,8 @@
         "linux-shell-dong-lenh-tro-giup"
       ],
       "scopeNote": "Từ rất chung; chỉ gắn tay ở chỗ định nghĩa.",
-      "occurrences": 15,
-      "mentions": 37,
+      "occurrences": 18,
+      "mentions": 41,
       "outsideSeriesArticles": 123
     },
     {
@@ -277,8 +277,8 @@
         "linux-chuyen-huong-pipe"
       ],
       "scopeNote": "Thuật ngữ riêng của Linux/Unix, cùng nghĩa ở mọi chuyên mục.",
-      "occurrences": 12,
-      "mentions": 46,
+      "occurrences": 13,
+      "mentions": 47,
       "outsideSeriesArticles": 54,
       "reviewNote": "Dò toàn site sẽ đánh dấu ở 53 bài ngoài series; soát vài bài trước khi gộp."
     },
@@ -308,8 +308,8 @@
         "linux-cay-thu-muc-duong-dan"
       ],
       "scopeNote": "Thuật ngữ riêng của Linux/Unix, cùng nghĩa ở mọi chuyên mục.",
-      "occurrences": 5,
-      "mentions": 10,
+      "occurrences": 6,
+      "mentions": 11,
       "outsideSeriesArticles": 5
     },
     {
@@ -322,8 +322,8 @@
         "linux-cay-thu-muc-duong-dan"
       ],
       "scopeNote": "Thuật ngữ riêng của Linux/Unix, cùng nghĩa ở mọi chuyên mục.",
-      "occurrences": 4,
-      "mentions": 8,
+      "occurrences": 5,
+      "mentions": 9,
       "outsideSeriesArticles": 7
     },
     {
@@ -341,8 +341,8 @@
         "linux-thuc-hanh-thu-muc-trien-khai"
       ],
       "scopeNote": "Thuật ngữ riêng của Linux/Unix, cùng nghĩa ở mọi chuyên mục.",
-      "occurrences": 5,
-      "mentions": 38,
+      "occurrences": 7,
+      "mentions": 45,
       "outsideSeriesArticles": 0
     },
     {
@@ -406,8 +406,8 @@
         "linux-xem-sua-file-van-ban"
       ],
       "scopeNote": "Thuật ngữ riêng của Linux/Unix, cùng nghĩa ở mọi chuyên mục.",
-      "occurrences": 16,
-      "mentions": 84,
+      "occurrences": 20,
+      "mentions": 90,
       "outsideSeriesArticles": 1
     },
     {
@@ -424,8 +424,8 @@
         "linux-nguoi-dung-nhom-quyen-file"
       ],
       "scopeNote": "Thuật ngữ riêng của Linux/Unix, cùng nghĩa ở mọi chuyên mục.",
-      "occurrences": 2,
-      "mentions": 18,
+      "occurrences": 3,
+      "mentions": 20,
       "outsideSeriesArticles": 1
     },
     {
@@ -438,11 +438,12 @@
       ],
       "relatedArticleSlugs": [
         "linux-nguoi-dung-nhom-quyen-file",
-        "linux-quan-ly-nguoi-dung-nhom"
+        "linux-quan-ly-nguoi-dung-nhom",
+        "linux-systemd-unit-bao-gia"
       ],
       "scopeNote": "Ngoài chuyên mục: service account của Kubernetes, của nhà cung cấp đám mây (khái niệm gần nhưng cơ chế khác).",
-      "occurrences": 5,
-      "mentions": 9,
+      "occurrences": 8,
+      "mentions": 13,
       "outsideSeriesArticles": 6
     },
     {
@@ -468,8 +469,8 @@
         "linux-sudo-sudoers"
       ],
       "scopeNote": "Thuật ngữ riêng của Linux/Unix, cùng nghĩa ở mọi chuyên mục.",
-      "occurrences": 8,
-      "mentions": 37,
+      "occurrences": 13,
+      "mentions": 51,
       "outsideSeriesArticles": 1
     },
     {
@@ -487,8 +488,8 @@
         "linux-sshd-config-an-toan"
       ],
       "scopeNote": "Ngoài chuyên mục: root cause, root của cây, aggregate root, root account của AWS.",
-      "occurrences": 7,
-      "mentions": 12,
+      "occurrences": 10,
+      "mentions": 15,
       "outsideSeriesArticles": 57
     },
     {
@@ -505,8 +506,8 @@
         "linux-chuyen-huong-pipe"
       ],
       "scopeNote": "Thuật ngữ riêng của Linux/Unix, cùng nghĩa ở mọi chuyên mục.",
-      "occurrences": 9,
-      "mentions": 35,
+      "occurrences": 13,
+      "mentions": 42,
       "outsideSeriesArticles": 13
     },
     {
@@ -524,8 +525,8 @@
         "linux-chuyen-huong-pipe"
       ],
       "scopeNote": "Ngoài chuyên mục: HTTP redirect, redirect URI của OAuth.",
-      "occurrences": 5,
-      "mentions": 11,
+      "occurrences": 7,
+      "mentions": 13,
       "outsideSeriesArticles": 8
     },
     {
@@ -539,8 +540,8 @@
         "linux-chuyen-huong-pipe"
       ],
       "scopeNote": "Ngoài chuyên mục: \"pipe\" hiếm, nhưng \"pipeline\" rất phổ biến với nghĩa khác.",
-      "occurrences": 4,
-      "mentions": 7,
+      "occurrences": 5,
+      "mentions": 9,
       "outsideSeriesArticles": 4,
       "reviewNote": "\"pipeline\" ngoài chuyên mục là CI/CD pipeline, aggregation pipeline; không dùng làm alias."
     },
@@ -571,8 +572,8 @@
         "linux-tim-kiem-find-grep"
       ],
       "scopeNote": "Thuật ngữ riêng của Linux/Unix, cùng nghĩa ở mọi chuyên mục.",
-      "occurrences": 5,
-      "mentions": 23,
+      "occurrences": 6,
+      "mentions": 24,
       "outsideSeriesArticles": 25,
       "reviewNote": "Dò toàn site sẽ đánh dấu ở 25 bài ngoài series; soát vài bài trước khi gộp."
     },
@@ -585,11 +586,12 @@
         "devops-linux"
       ],
       "relatedArticleSlugs": [
-        "linux-la-gi-va-ssh-studio"
+        "linux-la-gi-va-ssh-studio",
+        "linux-tien-trinh-ps-top"
       ],
       "scopeNote": "Ngoài chuyên mục: \"tiến trình\" còn là quy trình nghiệp vụ, process của hệ điều hành trong series lập trình.",
-      "occurrences": 13,
-      "mentions": 33,
+      "occurrences": 21,
+      "mentions": 117,
       "outsideSeriesArticles": 221
     },
     {
@@ -599,11 +601,13 @@
       "categories": [],
       "relatedArticleSlugs": [
         "linux-la-gi-va-ssh-studio",
-        "linux-dung-lab-docker-ket-noi-ssh-studio"
+        "linux-dung-lab-docker-ket-noi-ssh-studio",
+        "linux-systemd-systemctl",
+        "linux-systemd-unit-bao-gia"
       ],
       "scopeNote": "Thuật ngữ riêng của Linux/Unix, cùng nghĩa ở mọi chuyên mục.",
-      "occurrences": 5,
-      "mentions": 10,
+      "occurrences": 14,
+      "mentions": 74,
       "outsideSeriesArticles": 2
     },
     {
@@ -631,8 +635,8 @@
         "linux-bien-moi-truong-path-bashrc"
       ],
       "scopeNote": "Cùng nghĩa ở mọi chuyên mục (Docker, cloud, ứng dụng).",
-      "occurrences": 3,
-      "mentions": 13,
+      "occurrences": 5,
+      "mentions": 16,
       "outsideSeriesArticles": 65,
       "reviewNote": "Dò toàn site sẽ đánh dấu ở 65 bài ngoài series; soát vài bài trước khi gộp."
     },
@@ -676,8 +680,8 @@
         "linux-shell-script-dau-tien"
       ],
       "scopeNote": "Thuật ngữ riêng của Linux/Unix, cùng nghĩa ở mọi chuyên mục.",
-      "occurrences": 4,
-      "mentions": 10,
+      "occurrences": 5,
+      "mentions": 13,
       "outsideSeriesArticles": 0
     },
     {
@@ -752,8 +756,8 @@
         "linux-cut-sort-uniq-tr"
       ],
       "scopeNote": "Thuật ngữ riêng của Linux/Unix, cùng nghĩa ở mọi chuyên mục.",
-      "occurrences": 3,
-      "mentions": 13,
+      "occurrences": 4,
+      "mentions": 15,
       "outsideSeriesArticles": 0
     },
     {
@@ -782,11 +786,12 @@
         "devops-linux"
       ],
       "relatedArticleSlugs": [
-        "linux-thuc-hanh-script-sao-luu-log"
+        "linux-thuc-hanh-script-sao-luu-log",
+        "linux-cron-systemd-timer"
       ],
       "scopeNote": "Cú pháp lịch cron cũng có ở dịch vụ lên lịch của cloud; bản cloud khác chi tiết, nên giới hạn trong chuyên mục.",
-      "occurrences": 7,
-      "mentions": 60,
+      "occurrences": 10,
+      "mentions": 86,
       "outsideSeriesArticles": 10
     },
     {
@@ -827,11 +832,12 @@
       "categories": [],
       "relatedArticleSlugs": [
         "linux-bien-moi-truong-path-bashrc",
-        "linux-cut-sort-uniq-tr"
+        "linux-cut-sort-uniq-tr",
+        "linux-logrotate"
       ],
       "scopeNote": "Thuật ngữ riêng của Linux/Unix, cùng nghĩa ở mọi chuyên mục.",
-      "occurrences": 2,
-      "mentions": 3,
+      "occurrences": 3,
+      "mentions": 4,
       "outsideSeriesArticles": 0
     },
     {
@@ -992,8 +998,8 @@
         "linux-thuc-hanh-khoa-dang-nhap-ssh"
       ],
       "scopeNote": "Thuật ngữ riêng của Linux/Unix, cùng nghĩa ở mọi chuyên mục.",
-      "occurrences": 5,
-      "mentions": 19,
+      "occurrences": 6,
+      "mentions": 20,
       "outsideSeriesArticles": 0
     },
     {
@@ -1011,8 +1017,8 @@
         "linux-setuid-setgid-sticky"
       ],
       "scopeNote": "Thuật ngữ riêng của Linux/Unix; trong lập trình còn là tên hàm hệ thống setuid().",
-      "occurrences": 3,
-      "mentions": 17,
+      "occurrences": 4,
+      "mentions": 19,
       "outsideSeriesArticles": 0
     },
     {
@@ -1031,8 +1037,8 @@
         "linux-thuc-hanh-thu-muc-trien-khai"
       ],
       "scopeNote": "Thuật ngữ riêng của Linux/Unix; trong lập trình còn là tên hàm hệ thống setgid().",
-      "occurrences": 5,
-      "mentions": 24,
+      "occurrences": 6,
+      "mentions": 25,
       "outsideSeriesArticles": 0
     },
     {
@@ -1096,8 +1102,8 @@
         "linux-ssh-mfa-totp"
       ],
       "scopeNote": "Chuẩn RFC 6238, cùng nghĩa ở mọi chuyên mục.",
-      "occurrences": 4,
-      "mentions": 19,
+      "occurrences": 7,
+      "mentions": 22,
       "outsideSeriesArticles": 2
     },
     {
@@ -1151,8 +1157,8 @@
         "linux-shell-dong-lenh-tro-giup"
       ],
       "scopeNote": "Khái niệm chung của ngành, cùng nghĩa ở mọi chuyên mục.",
-      "occurrences": 30,
-      "mentions": 155,
+      "occurrences": 40,
+      "mentions": 201,
       "outsideSeriesArticles": 46
     },
     {
@@ -1166,8 +1172,8 @@
         "linux-dung-lab-docker-ket-noi-ssh-studio"
       ],
       "scopeNote": "Tên công cụ, chỉ một nghĩa.",
-      "occurrences": 30,
-      "mentions": 354,
+      "occurrences": 40,
+      "mentions": 440,
       "outsideSeriesArticles": 0
     },
     {
@@ -1183,8 +1189,8 @@
         "linux-dung-lab-docker-ket-noi-ssh-studio"
       ],
       "scopeNote": "Cùng nghĩa ở mọi chuyên mục (DevOps, AWS, Azure, các lab database).",
-      "occurrences": 4,
-      "mentions": 16,
+      "occurrences": 5,
+      "mentions": 18,
       "outsideSeriesArticles": 102
     },
     {
@@ -1201,8 +1207,8 @@
         "linux-dung-lab-docker-ket-noi-ssh-studio"
       ],
       "scopeNote": "Tên bản phân phối, chỉ một nghĩa.",
-      "occurrences": 17,
-      "mentions": 41,
+      "occurrences": 20,
+      "mentions": 52,
       "outsideSeriesArticles": 5
     },
     {
@@ -1289,8 +1295,8 @@
         "linux-bien-moi-truong-path-bashrc"
       ],
       "scopeNote": "Trong lập trình còn gọi là current working directory của một tiến trình (cùng khái niệm).",
-      "occurrences": 8,
-      "mentions": 18,
+      "occurrences": 11,
+      "mentions": 22,
       "outsideSeriesArticles": 10
     },
     {
@@ -1309,8 +1315,8 @@
         "linux-quan-ly-nguoi-dung-nhom"
       ],
       "scopeNote": "Thuật ngữ riêng của Linux/Unix, cùng nghĩa ở mọi chuyên mục.",
-      "occurrences": 4,
-      "mentions": 4,
+      "occurrences": 5,
+      "mentions": 5,
       "outsideSeriesArticles": 1
     },
     {
@@ -1378,8 +1384,8 @@
         "linux-bien-moi-truong-path-bashrc"
       ],
       "scopeNote": "Thuật ngữ riêng của Linux/Unix, cùng nghĩa ở mọi chuyên mục.",
-      "occurrences": 1,
-      "mentions": 2,
+      "occurrences": 2,
+      "mentions": 3,
       "outsideSeriesArticles": 1
     },
     {
@@ -1435,8 +1441,8 @@
         "linux-chuyen-huong-pipe"
       ],
       "scopeNote": "Khái niệm chung của ngành, cùng nghĩa ở mọi chuyên mục.",
-      "occurrences": 3,
-      "mentions": 14,
+      "occurrences": 5,
+      "mentions": 19,
       "outsideSeriesArticles": 8
     },
     {
@@ -1453,8 +1459,8 @@
         "linux-shell-script-an-toan"
       ],
       "scopeNote": "Ngoài chuyên mục: khoá của database (row lock, table lock) là cơ chế khác.",
-      "occurrences": 2,
-      "mentions": 3,
+      "occurrences": 3,
+      "mentions": 7,
       "outsideSeriesArticles": 2
     },
     {
@@ -1598,8 +1604,8 @@
         "linux-ssh-mfa-totp"
       ],
       "scopeNote": "Thuật ngữ riêng của Linux/Unix, cùng nghĩa ở mọi chuyên mục.",
-      "occurrences": 3,
-      "mentions": 5,
+      "occurrences": 8,
+      "mentions": 12,
       "outsideSeriesArticles": 0
     },
     {
@@ -1667,8 +1673,8 @@
         "linux-thuc-hanh-khoa-dang-nhap-ssh"
       ],
       "scopeNote": "Ngoài SSH còn có port forwarding trên router/NAT: cùng ý «chuyển kết nối từ cổng này sang cổng khác», cơ chế khác.",
-      "occurrences": 2,
-      "mentions": 2,
+      "occurrences": 3,
+      "mentions": 3,
       "outsideSeriesArticles": 1
     },
     {
@@ -1701,11 +1707,12 @@
       ],
       "relatedArticleSlugs": [
         "linux-cay-thu-muc-duong-dan",
-        "linux-thuc-hanh-khoa-dang-nhap-ssh"
+        "linux-thuc-hanh-khoa-dang-nhap-ssh",
+        "linux-journalctl-doc-log"
       ],
       "scopeNote": "Thuật ngữ riêng của Linux/Unix, cùng nghĩa ở mọi chuyên mục.",
-      "occurrences": 2,
-      "mentions": 2,
+      "occurrences": 3,
+      "mentions": 4,
       "outsideSeriesArticles": 0
     },
     {
@@ -1723,11 +1730,12 @@
       "relatedArticleSlugs": [
         "linux-sshd-config-an-toan",
         "linux-sudo-sudoers",
-        "linux-ssh-mfa-totp"
+        "linux-ssh-mfa-totp",
+        "linux-journalctl-doc-log"
       ],
       "scopeNote": "Ngoài chuyên mục: journal entry (bút toán) trong kế toán, journal của hệ thống file là các khái niệm khác.",
-      "occurrences": 2,
-      "mentions": 3,
+      "occurrences": 8,
+      "mentions": 48,
       "outsideSeriesArticles": 7
     },
     {
@@ -1779,9 +1787,376 @@
         "linux-setuid-setgid-sticky"
       ],
       "scopeNote": "Trong văn bản tiếng Việt của series, «find» chỉ lệnh này.",
-      "occurrences": 4,
-      "mentions": 9,
+      "occurrences": 5,
+      "mentions": 10,
       "outsideSeriesArticles": 6
+    },
+    {
+      "slug": "pid",
+      "term": "PID",
+      "english": "process ID",
+      "shortDefinition": "Số hiệu kernel gán cho mỗi tiến trình lúc nó đang sống; PPID là PID của tiến trình cha. PID dùng để gửi tín hiệu (kill PID), tra /proc/PID; PID được tái sử dụng sau khi tiến trình thoát. PID 1 là systemd.",
+      "caseSensitive": true,
+      "categories": [],
+      "relatedArticleSlugs": [
+        "linux-tien-trinh-ps-top",
+        "linux-tin-hieu-kill"
+      ],
+      "scopeNote": "Cùng nghĩa ở mọi chuyên mục có nói về tiến trình của hệ điều hành.",
+      "occurrences": 8,
+      "mentions": 33,
+      "outsideSeriesArticles": 9
+    },
+    {
+      "slug": "tin-hieu",
+      "term": "tín hiệu",
+      "english": "signal",
+      "shortDefinition": "Thông báo ngắn kernel giao cho một tiến trình (SIGTERM, SIGINT, SIGHUP, SIGKILL…). Tiến trình có thể làm theo mặc định (thường là thoát), bắt để tự xử lý, hoặc bỏ qua; riêng SIGKILL và SIGSTOP không bắt hay bỏ qua được.",
+      "categories": [
+        "devops-linux"
+      ],
+      "relatedArticleSlugs": [
+        "linux-tin-hieu-kill",
+        "linux-job-nen-nohup-tmux"
+      ],
+      "scopeNote": "Ngoài chuyên mục: «tín hiệu» thông thường, signal trong framework giao diện là khái niệm khác.",
+      "occurrences": 5,
+      "mentions": 29,
+      "outsideSeriesArticles": 99
+    },
+    {
+      "slug": "sigterm",
+      "term": "SIGTERM",
+      "shortDefinition": "Tín hiệu số 15, «xin dừng»: kill PID và systemctl stop gửi nó trước. Chương trình được bắt nó để ghi nốt dữ liệu, xoá file tạm, nhả khoá rồi mới thoát. Luôn thử SIGTERM trước SIGKILL.",
+      "caseSensitive": true,
+      "categories": [],
+      "relatedArticleSlugs": [
+        "linux-tin-hieu-kill"
+      ],
+      "scopeNote": "Thuật ngữ riêng của Linux/Unix, cùng nghĩa ở mọi chuyên mục.",
+      "occurrences": 2,
+      "mentions": 5,
+      "outsideSeriesArticles": 8
+    },
+    {
+      "slug": "sigkill",
+      "term": "SIGKILL",
+      "aliases": [
+        "kill -9"
+      ],
+      "shortDefinition": "Tín hiệu số 9: kernel gỡ tiến trình ngay, chương trình không bắt được nên không dọn dẹp gì (file khoá, file tạm, dữ liệu ghi dở nằm lại). Là lựa chọn cuối khi tiến trình không phản hồi SIGTERM.",
+      "caseSensitive": true,
+      "categories": [],
+      "relatedArticleSlugs": [
+        "linux-tin-hieu-kill",
+        "linux-systemd-unit-bao-gia"
+      ],
+      "scopeNote": "Thuật ngữ riêng của Linux/Unix, cùng nghĩa ở mọi chuyên mục.",
+      "occurrences": 1,
+      "mentions": 1,
+      "outsideSeriesArticles": 6
+    },
+    {
+      "slug": "sighup",
+      "term": "SIGHUP",
+      "english": "hangup",
+      "shortDefinition": "Tín hiệu số 1. Gửi tới shell và các job khi terminal hay phiên SSH đóng, mặc định làm chúng thoát (nohup bỏ qua nó). Với dịch vụ, quy ước dùng SIGHUP để nạp lại cấu hình hoặc mở lại file log (systemctl reload).",
+      "caseSensitive": true,
+      "categories": [],
+      "relatedArticleSlugs": [
+        "linux-job-nen-nohup-tmux",
+        "linux-systemd-unit-bao-gia",
+        "linux-logrotate"
+      ],
+      "scopeNote": "Thuật ngữ riêng của Linux/Unix, cùng nghĩa ở mọi chuyên mục.",
+      "occurrences": 5,
+      "mentions": 11,
+      "outsideSeriesArticles": 0
+    },
+    {
+      "slug": "job-nen",
+      "term": "job nền",
+      "english": "background job",
+      "aliases": [
+        "job"
+      ],
+      "shortDefinition": "Lệnh chạy nền trong shell (thêm & ở cuối). jobs liệt kê, %1 trỏ tới job số 1, fg đưa lên trước, Ctrl+Z tạm dừng, bg cho chạy tiếp. Job thuộc về shell và terminal đã chạy nó, nên chết theo phiên SSH trừ khi dùng nohup hoặc tmux.",
+      "categories": [
+        "devops-linux"
+      ],
+      "relatedArticleSlugs": [
+        "linux-job-nen-nohup-tmux",
+        "linux-tin-hieu-kill"
+      ],
+      "scopeNote": "Ngoài chuyên mục: job của cron, của CI, batch job là các khái niệm khác.",
+      "occurrences": 6,
+      "mentions": 24,
+      "outsideSeriesArticles": 87
+    },
+    {
+      "slug": "nohup",
+      "term": "nohup",
+      "shortDefinition": "Lệnh chạy một chương trình với SIGHUP bị bỏ qua, để nó không chết khi phiên SSH đóng. Output không chuyển hướng thì đổ vào nohup.out. Không cho phép quay lại màn hình của chương trình; cần vậy thì dùng tmux.",
+      "caseSensitive": true,
+      "categories": [
+        "devops-linux"
+      ],
+      "relatedArticleSlugs": [
+        "linux-job-nen-nohup-tmux"
+      ],
+      "scopeNote": "Thuật ngữ riêng của Linux/Unix, cùng nghĩa ở mọi chuyên mục.",
+      "occurrences": 2,
+      "mentions": 3,
+      "outsideSeriesArticles": 0
+    },
+    {
+      "slug": "tmux",
+      "term": "tmux",
+      "english": "terminal multiplexer",
+      "shortDefinition": "Chương trình giữ các phiên terminal sống trên server: SSH đứt thì phiên tmux vẫn chạy, kết nối lại và tmux attach là thấy đúng màn hình đang dở. Phím tắt bắt đầu bằng Ctrl+B (d để tách ra, c mở cửa sổ mới).",
+      "caseSensitive": true,
+      "categories": [
+        "devops-linux"
+      ],
+      "relatedArticleSlugs": [
+        "linux-job-nen-nohup-tmux",
+        "linux-apt-cai-phan-mem"
+      ],
+      "scopeNote": "Thuật ngữ riêng của Linux/Unix, cùng nghĩa ở mọi chuyên mục.",
+      "occurrences": 2,
+      "mentions": 28,
+      "outsideSeriesArticles": 0
+    },
+    {
+      "slug": "apt",
+      "term": "apt",
+      "aliases": [
+        "apt-get"
+      ],
+      "shortDefinition": "Trình quản lý gói của Ubuntu và Debian: apt update tải danh sách gói từ kho, apt install cài kèm phụ thuộc, apt remove/purge gỡ, apt upgrade nâng cấp, apt-mark hold ghim phiên bản. Mọi gói đều được kiểm tra chữ ký.",
+      "caseSensitive": true,
+      "categories": [
+        "devops-linux"
+      ],
+      "relatedArticleSlugs": [
+        "linux-apt-cai-phan-mem"
+      ],
+      "scopeNote": "Thuật ngữ riêng của Linux/Unix, cùng nghĩa ở mọi chuyên mục.",
+      "occurrences": 4,
+      "mentions": 22,
+      "outsideSeriesArticles": 1
+    },
+    {
+      "slug": "dpkg",
+      "term": "dpkg",
+      "shortDefinition": "Công cụ quản lý gói .deb ở tầng dưới apt: dpkg -l liệt kê gói đã cài (ii là đã cài, rc là đã gỡ còn cấu hình), dpkg -L liệt kê file của một gói, dpkg -S cho biết một file thuộc gói nào. Không tự tải phụ thuộc.",
+      "caseSensitive": true,
+      "categories": [
+        "devops-linux"
+      ],
+      "relatedArticleSlugs": [
+        "linux-apt-cai-phan-mem"
+      ],
+      "scopeNote": "Thuật ngữ riêng của Linux/Unix, cùng nghĩa ở mọi chuyên mục.",
+      "occurrences": 2,
+      "mentions": 6,
+      "outsideSeriesArticles": 0
+    },
+    {
+      "slug": "kho-goi",
+      "term": "kho gói",
+      "english": "package repository",
+      "aliases": [
+        "repository gói"
+      ],
+      "shortDefinition": "Máy chủ chứa các gói phần mềm đã ký và danh sách của chúng. Trên Ubuntu 24.04 khai báo trong /etc/apt/sources.list.d/ubuntu.sources, theo suite (noble, noble-updates, noble-security) và component (main, universe…).",
+      "categories": [
+        "devops-linux"
+      ],
+      "relatedArticleSlugs": [
+        "linux-apt-cai-phan-mem"
+      ],
+      "scopeNote": "Ngoài chuyên mục: «repository» của Git là khái niệm khác.",
+      "occurrences": 1,
+      "mentions": 2,
+      "outsideSeriesArticles": 0
+    },
+    {
+      "slug": "systemd-unit",
+      "term": "unit",
+      "english": "systemd unit",
+      "aliases": [
+        "file unit",
+        "unit file"
+      ],
+      "shortDefinition": "Một thứ systemd quản lý, mô tả bằng file văn bản: dịch vụ (.service), hẹn giờ (.timer), nhóm mục tiêu (.target), socket, mount. File của gói nằm trong /usr/lib/systemd/system, file người quản trị viết nằm trong /etc/systemd/system.",
+      "categories": [
+        "devops-linux"
+      ],
+      "relatedArticleSlugs": [
+        "linux-systemd-systemctl",
+        "linux-systemd-unit-bao-gia"
+      ],
+      "scopeNote": "Ngoài chuyên mục: unit test, đơn vị đo là các nghĩa khác, nên chỉ dò trong chuyên mục Linux.",
+      "occurrences": 5,
+      "mentions": 67,
+      "outsideSeriesArticles": 95
+    },
+    {
+      "slug": "drop-in",
+      "term": "drop-in",
+      "aliases": [
+        "file drop-in"
+      ],
+      "shortDefinition": "File cấu hình .conf đặt trong thư mục TÊN.d (ví dụ bao-gia.service.d, journald.conf.d) để ghi đè hay thêm đúng những dòng cần đổi, không sửa file gốc. Bản cập nhật của gói không ghi đè lên nó; xoá file là bỏ thay đổi.",
+      "categories": [
+        "devops-linux"
+      ],
+      "relatedArticleSlugs": [
+        "linux-thuc-hanh-dich-vu-systemd",
+        "linux-journalctl-doc-log"
+      ],
+      "scopeNote": "Thuật ngữ riêng của Linux/Unix, cùng nghĩa ở mọi chuyên mục.",
+      "occurrences": 3,
+      "mentions": 15,
+      "outsideSeriesArticles": 0
+    },
+    {
+      "slug": "systemd-timer",
+      "term": "systemd timer",
+      "aliases": [
+        "timer"
+      ],
+      "shortDefinition": "Unit .timer kích hoạt một unit .service cùng tên theo lịch (OnCalendar=) hoặc sau một khoảng (OnBootSec=). Persistent=true chạy bù việc bị lỡ khi máy tắt; kết quả vào journal. Xem bằng systemctl list-timers.",
+      "categories": [
+        "devops-linux"
+      ],
+      "relatedArticleSlugs": [
+        "linux-cron-systemd-timer",
+        "linux-logrotate"
+      ],
+      "scopeNote": "Ngoài chuyên mục: timer trong lập trình (setTimeout, bộ hẹn giờ) là khái niệm khác.",
+      "occurrences": 7,
+      "mentions": 51,
+      "outsideSeriesArticles": 17
+    },
+    {
+      "slug": "logrotate",
+      "term": "logrotate",
+      "shortDefinition": "Công cụ xoay vòng file log theo lịch hoặc kích thước: đổi tên file đang ghi, tạo file mới, nén và xoá bản cũ, rồi chạy postrotate để báo chương trình mở file mới. Cấu hình ở /etc/logrotate.d, chạy hằng ngày bằng logrotate.timer.",
+      "caseSensitive": true,
+      "categories": [
+        "devops-linux"
+      ],
+      "relatedArticleSlugs": [
+        "linux-logrotate"
+      ],
+      "scopeNote": "Thuật ngữ riêng của Linux/Unix, cùng nghĩa ở mọi chuyên mục.",
+      "occurrences": 5,
+      "mentions": 22,
+      "outsideSeriesArticles": 0
+    },
+    {
+      "slug": "cgroup",
+      "term": "cgroup",
+      "english": "control group",
+      "shortDefinition": "Cơ chế của kernel gom các tiến trình thành nhóm để theo dõi và giới hạn tài nguyên (CPU, bộ nhớ). systemd đặt mỗi dịch vụ vào một cgroup riêng, nên biết chính xác tiến trình nào thuộc dịch vụ nào và áp được MemoryMax=.",
+      "categories": [
+        "devops-linux"
+      ],
+      "relatedArticleSlugs": [
+        "linux-systemd-systemctl",
+        "linux-thuc-hanh-dich-vu-systemd"
+      ],
+      "scopeNote": "Thuật ngữ riêng của Linux/Unix, cùng nghĩa ở mọi chuyên mục.",
+      "occurrences": 4,
+      "mentions": 5,
+      "outsideSeriesArticles": 0
+    },
+    {
+      "slug": "load-average",
+      "term": "load average",
+      "shortDefinition": "Số tiến trình trung bình đang chạy hoặc chờ CPU (và chờ đĩa) trong 1, 5 và 15 phút, in bởi uptime và top. So với số nhân CPU (nproc): thấp hơn số nhân là CPU còn rảnh.",
+      "categories": [
+        "devops-linux"
+      ],
+      "relatedArticleSlugs": [
+        "linux-tien-trinh-ps-top"
+      ],
+      "scopeNote": "Thuật ngữ riêng của Linux/Unix, cùng nghĩa ở mọi chuyên mục.",
+      "occurrences": 1,
+      "mentions": 3,
+      "outsideSeriesArticles": 49
+    },
+    {
+      "slug": "systemctl",
+      "term": "systemctl",
+      "shortDefinition": "Lệnh điều khiển systemd: status, start, stop, restart, reload một dịch vụ; enable/disable cho lần boot sau; list-units, list-timers, cat, show, --failed để xem trạng thái; daemon-reload sau khi sửa file unit.",
+      "caseSensitive": true,
+      "categories": [
+        "devops-linux"
+      ],
+      "relatedArticleSlugs": [
+        "linux-systemd-systemctl",
+        "linux-systemd-unit-bao-gia"
+      ],
+      "scopeNote": "Thuật ngữ riêng của Linux/Unix, cùng nghĩa ở mọi chuyên mục.",
+      "occurrences": 10,
+      "mentions": 21,
+      "outsideSeriesArticles": 0
+    },
+    {
+      "slug": "journalctl",
+      "term": "journalctl",
+      "shortDefinition": "Lệnh đọc journal của systemd: -u lọc theo unit, -n số dòng, --since khoảng thời gian, -p mức ưu tiên, -f theo dõi trực tiếp, -o định dạng. Người dùng thường cần thuộc nhóm systemd-journal hoặc adm để xem log hệ thống.",
+      "caseSensitive": true,
+      "categories": [
+        "devops-linux"
+      ],
+      "relatedArticleSlugs": [
+        "linux-journalctl-doc-log",
+        "linux-systemd-unit-bao-gia"
+      ],
+      "scopeNote": "Thuật ngữ riêng của Linux/Unix, cùng nghĩa ở mọi chuyên mục.",
+      "occurrences": 10,
+      "mentions": 22,
+      "outsideSeriesArticles": 0
+    },
+    {
+      "slug": "pgrep",
+      "term": "pgrep",
+      "aliases": [
+        "pkill"
+      ],
+      "shortDefinition": "Tìm PID theo tiêu chí: -u người dùng, -f khớp cả dòng lệnh, -a in kèm dòng lệnh. pkill dùng cùng tiêu chí để gửi tín hiệu; chạy pgrep -a trước để xem mình sắp dừng những gì.",
+      "caseSensitive": true,
+      "categories": [
+        "devops-linux"
+      ],
+      "relatedArticleSlugs": [
+        "linux-tien-trinh-ps-top",
+        "linux-tin-hieu-kill"
+      ],
+      "scopeNote": "Thuật ngữ riêng của Linux/Unix, cùng nghĩa ở mọi chuyên mục.",
+      "occurrences": 3,
+      "mentions": 7,
+      "outsideSeriesArticles": 0
+    },
+    {
+      "slug": "top",
+      "term": "top",
+      "shortDefinition": "Lệnh xem tiến trình liên tục, sắp theo CPU: dòng đầu có load average, bộ nhớ, rồi bảng tiến trình. P/M sắp theo CPU/bộ nhớ, u lọc người dùng, k gửi tín hiệu, q thoát; top -b -n 1 in một lần cho script.",
+      "caseSensitive": true,
+      "categories": [
+        "devops-linux"
+      ],
+      "relatedArticleSlugs": [
+        "linux-tien-trinh-ps-top"
+      ],
+      "scopeNote": "Chỉ dò trong chuyên mục Linux; ở nơi khác «top» là từ thông thường.",
+      "occurrences": 2,
+      "mentions": 4,
+      "outsideSeriesArticles": 25
     }
   ],
   "deferred": [
@@ -1814,11 +2189,6 @@
       "slug": "mktemp-flock",
       "term": "mktemp",
       "reason": "mktemp và flock luôn xuất hiện trong inline code; bộ dò không bắt. Đề xuất lại nếu bài sau nhắc trong văn xuôi."
-    },
-    {
-      "slug": "logrotate",
-      "term": "logrotate",
-      "reason": "Phần 4 (LNX-039) mới dạy; hiện chỉ được nhắc trước."
     },
     {
       "slug": "ghi-nguyen-tu",
@@ -1874,6 +2244,41 @@
       "slug": "etc-passwd",
       "term": "/etc/passwd",
       "reason": "Đường dẫn file, luôn nằm trong code; mục uid-gid và shell-dang-nhap mô tả nội dung của nó."
+    },
+    {
+      "slug": "namespace",
+      "term": "namespace (kernel)",
+      "reason": "Chỉ nhắc một lần ở LNX-040 để giải thích sandbox của systemd; đề xuất lại nếu Phần 5–6 nói về container."
+    },
+    {
+      "slug": "tien-trinh-mo-coi",
+      "term": "tiến trình mồ côi",
+      "reason": "Orphan process; một lần ở LNX-031, đã giải nghĩa tại chỗ."
+    },
+    {
+      "slug": "zombie",
+      "term": "zombie",
+      "reason": "Trạng thái Z trong ps; chỉ có trong bảng của LNX-031."
+    },
+    {
+      "slug": "rss",
+      "term": "RSS",
+      "reason": "Resident set size; trùng chữ với RSS (nguồn tin) ở chuyên mục khác, chỉ dùng ở LNX-031."
+    },
+    {
+      "slug": "muc-uu-tien-journal",
+      "term": "mức ưu tiên",
+      "reason": "Mức syslog của journal (err, warning, info); cụm «mức ưu tiên» quá chung để tự liên kết. Mục journalctl có nhắc -p."
+    },
+    {
+      "slug": "oncalendar",
+      "term": "OnCalendar",
+      "reason": "Tuỳ chọn của timer; giải thích tại chỗ ở LNX-038, mục systemd-timer đủ."
+    },
+    {
+      "slug": "environmentfile",
+      "term": "EnvironmentFile",
+      "reason": "Tuỳ chọn của unit; giải thích tại chỗ ở LNX-036."
     }
   ]
 }

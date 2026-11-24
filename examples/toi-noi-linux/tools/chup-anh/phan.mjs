@@ -32,8 +32,20 @@ export const LOCAL = join(ROOT, 'may-cua-ban');
 /** Thư mục hiện tại của shell trong phiên SSH (shell con trực tiếp của sshd). */
 function sessionCwd() {
   return root(
-    "for p in $(pgrep -f 'sshd: an@pts'); do for c in $(pgrep -P $p -x bash); do readlink /proc/$c/cwd; done; done | head -n 1",
+    "for p in $(pgrep -f '^sshd: an@pts'); do for c in $(pgrep -P $p -x bash); do readlink /proc/$c/cwd; done; done | head -n 1",
   );
+}
+
+/**
+ * Shell của phiên SSH đang rảnh: nhóm tiến trình foreground của terminal chính là shell (không còn
+ * lệnh nào chạy ở foreground; job chạy nền không tính). Không thấy shell nào thì coi như rảnh.
+ */
+export function shellIdle() {
+  const busy = root(
+    "for p in $(pgrep -f '^sshd: an@pts'); do for c in $(pgrep -P $p -x bash); do " +
+      't=$(ps -o tpgid= -p $c | tr -d " "); [ "$t" = "$c" ] || echo ban; done; done | head -n 1',
+  );
+  return busy !== 'ban';
 }
 
 function resolvePath(p) {
@@ -83,7 +95,7 @@ export async function chayPhan({ part, slugs, gui: makeGui, only = [], fresh = t
   /** Gõ một file bằng vim: xoá nội dung cũ (nếu có), :set paste, gõ từng dòng, lưu. */
   /** sudo đang chờ mật khẩu: còn tiến trình sudo mà chưa có tiến trình con nào. */
   function sudoWaiting() {
-    const out = root('for p in $(pgrep -x sudo); do [ -z "$(pgrep -P $p)" ] && echo y; done | head -n 1');
+    const out = root('for p in $(pgrep -x "sudo|sudoedit"); do [ -z "$(pgrep -P $p)" ] && echo y; done | head -n 1');
     return out === 'y';
   }
   async function answerSudo() {
@@ -159,6 +171,8 @@ export async function chayPhan({ part, slugs, gui: makeGui, only = [], fresh = t
         const slow = /^(sudo|find|tree|grep -r|man|cp -r|zcat|tar|shellcheck|xz|zstd|env -i|bash -x)/.test(line);
         await a.run(line, slow ? 1100 : 500);
         if (/^(sudo|sudoedit)\b/.test(line)) await answerSudo();
+        // Lệnh chạy lâu (apt, timeout …): chờ shell rảnh rồi mới gõ lệnh sau hay chụp ảnh.
+        for (let t = 0; t < 600 && !shellIdle(); t++) await sleep(250);
       }
     }
     await a.run('cd', 250);

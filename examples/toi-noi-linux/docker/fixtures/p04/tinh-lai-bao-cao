@@ -1,0 +1,11 @@
+#!/usr/bin/env bash
+# Script của Bình (lab LNX-031, LNX-032): tính lại báo cáo cả tháng, ăn trọn một nhân CPU.
+# Nhận SIGTERM thì xoá file tạm rồi thoát: đây là cách một chương trình "biết dừng".
+tam=/tmp/tinh-lai-bao-cao.$$.tmp
+log=/tmp/tinh-lai-bao-cao.log
+echo "$(date '+%F %T') bat dau, pid $$, file tam $tam" >> "$log"
+: > "$tam"
+trap 'echo "$(date "+%F %T") nhan SIGTERM: xoa $tam, thoat" >> "$log"; rm -f "$tam"; exit 143' TERM
+while :; do
+  for ((i = 0; i < 200000; i++)); do :; done
+done

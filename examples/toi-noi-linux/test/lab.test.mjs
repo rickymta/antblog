@@ -142,3 +142,34 @@ test('OUTPUT.txt của Phần 3 có bản ghi của cả 10 bài', () => {
   for (const s of scripts('p03')) assert.ok(out.includes(`==== p03/${s.name} ====`), s.name);
   assert.doesNotMatch(out, /(^|[\s'"=])toinoi-lab($|[\s'"])/m, 'không in mật khẩu của lab');
 });
+
+test('Phần 4 có đủ 10 kịch bản, đánh số tiếp từ 31', () => {
+  assert.deepEqual(
+    scripts('p04').map((s) => s.id),
+    ['31', '32', '33', '34', '35', '36', '37', '38', '39', '40'],
+  );
+});
+
+test('#ngat gửi SIGHUP cho mọi job, xoá bảng job và về thư mục home, không in gì', () => {
+  const sh = compile('sleep 600 &\n#ngat\njobs\n');
+  assert.match(sh, /for __j in \$\(jobs -p\); do kill -HUP "\$__j" 2>\/dev\/null; done; disown -a; cd ~/);
+  assert.doesNotMatch(sh, /__p '#ngat'/);
+  assert.equal((sh.match(/__p '/g) || []).length, 2);
+});
+
+test('mọi file được #file/#sudofile nhắc tới đều có trong p04/files', () => {
+  for (const s of scripts('p04')) {
+    const src = readFileSync(s.path, 'utf8');
+    for (const m of src.matchAll(/^#(?:file|check) \S+ (\S+)(?: \d\d)?$|^#sudofile \S+ \S+ (\S+)(?: \d\d)?$/gm)) {
+      const f = m[1] || m[2];
+      assert.ok(existsSync(join(ROOT, 'p04', 'files', f)), `${s.name}: thiếu files/${f}`);
+    }
+  }
+});
+
+test('OUTPUT.txt của Phần 4 có bản ghi của cả 10 bài, không còn mã điều khiển', () => {
+  const out = readFileSync(join(ROOT, 'p04', 'OUTPUT.txt'), 'utf8');
+  for (const s of scripts('p04')) assert.ok(out.includes(`==== p04/${s.name} ====`), s.name);
+  assert.ok(!/\x1b/.test(out), 'không còn ký tự ESC (OSC 8 của systemctl, màu)');
+  assert.ok(!/^Hint: You are currently not seeing messages/m.test(out.split('==== p04/36')[1] || ''), 'từ LNX-036 an đọc được journal');
+});

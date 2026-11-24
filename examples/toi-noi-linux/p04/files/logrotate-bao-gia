@@ -1,0 +1,14 @@
+# Xoay vòng log yêu cầu của bao-gia (LNX-039): mỗi ngày, giữ 14 bản, nén từ bản thứ hai.
+/var/log/toinoi/bao-gia.log {
+    daily
+    rotate 14
+    compress
+    delaycompress
+    missingok
+    notifempty
+    su baogia toinoi
+    create 0644 baogia toinoi
+    postrotate
+        systemctl reload bao-gia.service > /dev/null 2>&1 || true
+    endscript
+}

@@ -1,0 +1,9 @@
+#!/usr/bin/env bash
+# Script xuất dữ liệu cũ của Bình (lab LNX-032): một chương trình viết ẩu, bỏ qua SIGTERM,
+# SIGINT và SIGHUP. Chỉ SIGKILL dừng được nó, và khi đó file khoá của nó nằm lại.
+khoa=/tmp/xuat-du-lieu.lock
+echo $$ > "$khoa"
+trap '' TERM INT HUP
+while :; do
+  sleep 5
+done

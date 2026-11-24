@@ -1,0 +1,9 @@
+#!/usr/bin/env bash
+# Việc chạy lâu của An (lab LNX-034): xuất N chuyến (mặc định 120), mỗi 2 giây một lô 10 chuyến,
+# in tiến độ ra stdout.
+tong=${1:-120}
+for ((da = 10; da <= tong; da += 10)); do
+  sleep 2
+  echo "$(date '+%T') da xuat $da/$tong chuyen"
+done
+echo "$(date '+%T') xong"

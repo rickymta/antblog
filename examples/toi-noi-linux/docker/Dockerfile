@@ -104,6 +104,17 @@ RUN chmod 700 /usr/share/toinoi-lab/p03 \
  && chmod 600 /usr/share/toinoi-lab/p03/* \
  && chmod 700 /usr/share/toinoi-lab/p03/askpass-*
 
+# ---- Phần 4 ----
+# python3 để chạy bao-gia 1.5.0 (chỉ dùng thư viện chuẩn), logrotate như mọi server Ubuntu
+# (ảnh Docker không có sẵn). jq và tmux KHÔNG cài sẵn: LNX-033 cài chúng bằng apt.
+# apt in tiến độ dạng thường (không thanh tiến độ màu) để bản ghi của lab đọc được.
+RUN apt-get update \
+ && apt-get install -y --no-install-recommends python3-minimal logrotate \
+ && rm -rf /var/lib/apt/lists/* \
+ && printf '%s\n' 'Dpkg::Progress-Fancy "0";' 'APT::Color "0";' > /etc/apt/apt.conf.d/99-toinoi-lab
+COPY fixtures/p04/ /usr/share/toinoi-lab/p04/
+RUN chmod 755 /usr/share/toinoi-lab/p04/chuan-bi.sh
+
 EXPOSE 22
 STOPSIGNAL SIGRTMIN+3
 CMD ["/sbin/init"]

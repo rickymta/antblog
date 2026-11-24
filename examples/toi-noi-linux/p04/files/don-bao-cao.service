@@ -1,0 +1,8 @@
+[Unit]
+Description=Don bao cao cu hon 14 ngay cua bao-gia
+
+[Service]
+Type=oneshot
+User=baogia
+Group=toinoi
+ExecStart=/usr/bin/find /srv/toinoi/bao-gia/shared/logs -name 'bao-cao-*.txt' -mtime +14 -print -delete

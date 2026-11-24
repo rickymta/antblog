@@ -31,6 +31,9 @@
 
    node tools/chup-anh/p03.mjs          # đưa server về đầu LNX-021 rồi chụp cả Phần 3
    npm run kiem-tra:p03
+
+   node tools/chup-anh/p04.mjs          # đưa server về đầu LNX-031 rồi chụp cả Phần 4
+   npm run kiem-tra:p04
    ```
 
    Ảnh ghi vào `apps/web/public/images/articles/<slug>/ssh-studio-NN.webp` (WebP, chất lượng 90, dùng `sharp` của repo).
@@ -41,7 +44,9 @@
 - Mật khẩu gõ vào hộp thoại là mật khẩu của lab (`toinoi-lab`); hộp thoại hiện dấu chấm.
 - Master key của vault vẫn nằm trong kho khoá của hệ điều hành dưới service `dev.sshstudio.desktop` (tên service cố định trong mã nguồn), dùng chung với bản SSH Studio đã cài. Công cụ chỉ đọc, không ghi đè.
 - Từ Phần 2, các dòng `#file` được gõ thật bằng vim (`:set paste`, gõ từng dòng, `:wq`) rồi đối chiếu SHA-256 với file mẫu trong `pNN/files/`; `#check` đối chiếu sau một thao tác `#gui`. Nội dung lệch là công cụ dừng ngay.
-- `cdp.mjs`: client CDP tối thiểu. `app.mjs`: thao tác mức người dùng (kết nối, gõ lệnh, khung Files). `p01.mjs`: trình tự của Phần 1. `phan.mjs`: trình phát kịch bản dùng chung từ Phần 2. `p02.mjs`, `p03.mjs`: thao tác giao diện của Phần 2, Phần 3.
+- `cdp.mjs`: client CDP tối thiểu. `app.mjs`: thao tác mức người dùng (kết nối, gõ lệnh, khung Files). `p01.mjs`: trình tự của Phần 1. `phan.mjs`: trình phát kịch bản dùng chung từ Phần 2. `p02.mjs`, `p03.mjs`, `p04.mjs`: thao tác giao diện của Phần 2, 3, 4.
+- Sau mỗi lệnh, trình phát đợi tới khi shell của phiên SSH rảnh (nhóm tiến trình foreground của terminal là chính shell), nên lệnh chạy lâu như `apt install` hay `timeout 4 journalctl -f` xong rồi mới gõ lệnh sau hay chụp ảnh. Job chạy nền không tính.
+- Từ Phần 4, mỗi lần kết nối cần key và mã OTP (Phần 3). `p04.mjs` quên host key cũ nếu ảnh lab được dựng lại (fingerprint đổi), đợi 35 giây sau setup vì `RATE_LIMIT 3 30` của mã OTP, và với mỗi lần kết nối đợi sang khung 30 giây mới. Các dòng `#gui ngat-ket-noi`, `ket-noi-lai` đóng hẳn tab phiên (shell trên server nhận SIGHUP thật) rồi kết nối lại.
 - Phần 3 bắt đầu bằng việc đưa SSH Studio về trạng thái đầu phần: server dùng mật khẩu, không có key nào trong thư viện, không có hồ sơ của `cuong`, Known Hosts chỉ còn host key gốc. Các dòng `#sudofile` được gõ bằng vim mở qua `sudoedit`/`visudo`, mật khẩu sudo được trả lời khi `sudo` đang chờ.
 - Nhập key ở LNX-022 dùng hộp thoại chọn file thật của Windows: `chon-file.ps1` tìm hộp thoại của tiến trình `ssh-studio` và **dán** đường dẫn của `may-cua-ban/khoa-lab/an-laptop` qua clipboard (không gõ từng phím, để bộ gõ tiếng Việt đang bật không làm sai ký tự). `chon-file.ps1 -Cancel` đóng hộp thoại còn sót.
 - LNX-028 thử phương thức Agent khi dịch vụ `ssh-agent` của Windows đang tắt; công cụ không bật dịch vụ đó và không đổi cấu hình Windows.

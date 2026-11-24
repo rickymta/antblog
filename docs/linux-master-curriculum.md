@@ -111,20 +111,22 @@ Lộ trình: `linux-qua-ssh-studio-phan-03`. Lab: `examples/toi-noi-linux/p03` (
 
 ## P04 · Tiến trình, dịch vụ và gói phần mềm
 
-Đầu vào: P01–P03. Đầu ra: `bao-gia` chạy bằng systemd. Lộ trình dự kiến `-phan-04`.
+Đầu vào: P01–P03. Đầu ra: `bao-gia` 1.5.0 chạy bằng unit systemd (tài khoản `baogia`, `EnvironmentFile=`, `ExecStartPre=`, `Restart=on-failure`, reload bằng SIGHUP) có drop-in siết quyền, log trong journal (giới hạn bằng drop-in của journald), timer dọn báo cáo `Persistent=true`, logrotate cho log yêu cầu.
+
+Lộ trình: `linux-qua-ssh-studio-phan-04`. Lab: `examples/toi-noi-linux/p04` (bài 31…40). Ảnh lab cài thêm `python3-minimal`, `logrotate`; `/usr/share/toinoi-lab/p04` có `bao-gia` 1.5.0 (Python, chỉ thư viện chuẩn) và các script mẫu cho bài tiến trình. LNX-033 cài `jq`, `tmux` từ kho của Ubuntu (cần Internet). Runner có thêm chỉ dẫn `#ngat` (mô phỏng mất kết nối SSH: shell gửi SIGHUP cho các job); công cụ chụp ảnh đóng tab thật trong SSH Studio. Bộ chấm: `npm run kiem-tra:p04` (24 yêu cầu; `-- --boot` thêm 2 mục sau khi khởi động lại server).
 
 | ID | Bài / slug | Mức | Làm được sau bài / sản phẩm thực hành | Trạng thái |
 |---|---|---|---|---|
-| LNX-031 | Tiến trình: `ps`, `top`, PID và cây tiến trình<br>`linux-tien-trinh-ps-top` | CB | Tìm tiến trình theo tên/người dùng, đọc CPU và bộ nhớ | Dự kiến |
-| LNX-032 | Tín hiệu và dừng tiến trình: `kill`, SIGTERM, SIGKILL<br>`linux-tin-hieu-kill` | CB | Dừng đúng cách, vì sao `kill -9` là lựa chọn cuối | Dự kiến |
-| LNX-033 | Cài phần mềm bằng `apt`<br>`linux-apt-cai-phan-mem` | CB | Cập nhật, cài, gỡ, tìm gói chứa một file, ghim phiên bản | Dự kiến |
-| LNX-034 | Job nền, `nohup` và `tmux`: việc chạy lâu không chết theo phiên SSH<br>`linux-job-nen-nohup-tmux` | TB | Giữ việc chạy khi mất kết nối, nối lại phiên trong SSH Studio | Dự kiến |
-| LNX-035 | systemd: `systemctl` và trạng thái dịch vụ<br>`linux-systemd-systemctl` | TB | start/stop/enable, đọc `status`, phụ thuộc giữa các unit | Dự kiến |
-| LNX-036 | Viết unit systemd cho bao-gia<br>`linux-systemd-unit-bao-gia` | TB | Unit có người dùng riêng, `Restart=`, biến môi trường từ file | Dự kiến |
-| LNX-037 | `journalctl`: đọc log của dịch vụ<br>`linux-journalctl-doc-log` | TB | Lọc theo unit/thời gian/mức, theo dõi trực tiếp, giới hạn dung lượng journal | Dự kiến |
-| LNX-038 | Lên lịch: cron và systemd timer<br>`linux-cron-systemd-timer` | NC | Chọn cron hay timer, việc bị lỡ khi server tắt | Dự kiến |
-| LNX-039 | logrotate và dọn log<br>`linux-logrotate` | NC | Xoay vòng log của `bao-gia`, nén, giữ theo số ngày | Dự kiến |
-| LNX-040 | Thực hành: đưa bao-gia thành dịch vụ systemd<br>`linux-thuc-hanh-dich-vu-systemd` | NC | Bàn giao unit, timer, logrotate có bộ kiểm tra | Dự kiến |
+| LNX-031 | Tiến trình: `ps`, `top`, PID và cây tiến trình<br>`linux-tien-trinh-ps-top` | CB | PID/PPID, `/proc`, `ps aux`, `ps -ef --forest`, `pgrep -a -u -f`, `top` tương tác và `-b`, load average, `free` trong container | Đã viết |
+| LNX-032 | Tín hiệu và dừng tiến trình: `kill`, SIGTERM, SIGKILL<br>`linux-tin-hieu-kill` | CB | `kill -l`, SIGTERM có dọn dẹp, `Operation not permitted`, `SigIgn`/`SigCgt`, SIGKILL để lại file khoá, `pkill -e`, `killall -v` | Đã viết |
+| LNX-033 | Cài phần mềm bằng `apt`<br>`linux-apt-cai-phan-mem` | CB | Kho gói, `apt update`/`upgrade`, `search`/`show`/`policy`, cài `jq tmux sysstat`, `dpkg -l -L -S`, remove/purge (`rc`), autoremove, `apt-mark hold`, `history.log` | Đã viết |
+| LNX-034 | Job nền, `nohup` và `tmux`: việc chạy lâu không chết theo phiên SSH<br>`linux-job-nen-nohup-tmux` | TB | `&`, `jobs`, SIGHUP khi đóng tab SSH Studio (job thường chết, `nohup` sống), `tmux new -d`, `capture-pane`, gắn lại sau khi đứt kết nối | Đã viết |
+| LNX-035 | systemd: `systemctl` và trạng thái dịch vụ<br>`linux-systemd-systemctl` | TB | PID 1, unit, `list-units`, đọc `status`, `is-active`/`show`/`cat`, start/stop với enable/disable (symlink `.wants`), `list-dependencies`, `--failed`, nhóm `systemd-journal` | Đã viết |
+| LNX-036 | Viết unit systemd cho bao-gia<br>`linux-systemd-unit-bao-gia` | TB | Unit `bao-gia.service` (`Type=exec`, `User=`, hai `EnvironmentFile=`, `ExecStartPre=`, `ExecReload=`, `Restart=`), lỗi `203/EXEC`, `current` → 1.5.0, `kill -9` thấy tự khởi động lại | Đã viết |
+| LNX-037 | `journalctl`: đọc log của dịch vụ<br>`linux-journalctl-doc-log` | TB | `journalctl -u -n --since -o`, mức ưu tiên và tiền tố `<N>`, `-p err` lần theo lỗi reload, trường `_UID`/`_PID`, `-f` trong SSH Studio, drop-in `journald.conf.d`, vacuum | Đã viết |
+| LNX-038 | Lên lịch: cron và systemd timer<br>`linux-cron-systemd-timer` | NC | cron (crontab, `/etc/crontab`, `cron.daily`) và `list-timers`, cặp service `oneshot` + timer dọn báo cáo, `systemd-analyze calendar`/`verify`, `Persistent=true`, `RandomizedDelaySec`, so sánh cron với timer | Đã viết |
+| LNX-039 | logrotate và dọn log<br>`linux-logrotate` | NC | `logrotate.timer`, `logrotate.conf`, `/etc/logrotate.d/bao-gia` (daily, rotate 14, compress, delaycompress, su, create, postrotate reload), `-d`, `-f -v`, kiểm chứng file mới nhờ SIGHUP | Đã viết |
+| LNX-040 | Thực hành: đưa bao-gia thành dịch vụ systemd<br>`linux-thuc-hanh-dich-vu-systemd` | NC | Drop-in siết quyền (ProtectSystem=strict, ReadWritePaths, ProtectHome, PrivateTmp, NoNewPrivileges, MemoryMax), `systemd-analyze security`, `deploy` chỉ restart; `kiem-tra` 24 PASS (26 với `--boot`) | Đã viết |
 
 ## P05 · Mạng, lưu trữ và giám sát
 

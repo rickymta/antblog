@@ -1,0 +1,19 @@
+[Unit]
+Description=bao-gia: dich vu bao gia cua Toi Noi
+After=network.target
+
+[Service]
+Type=exec
+User=baogia
+Group=toinoi
+WorkingDirectory=/srv/toinoi/bao-gia/current
+EnvironmentFile=/srv/toinoi/bao-gia/shared/config/bao-gia.env
+EnvironmentFile=/srv/toinoi/bao-gia/shared/config/bi-mat.env
+ExecStartPre=/srv/toinoi/bao-gia/current/kiem-tra-cau-hinh.sh
+ExecStart=/srv/toinoi/bao-gia/current/bao-gia
+ExecReload=/bin/kill -HUP $MAINPID
+Restart=on-failure
+RestartSec=2
+
+[Install]
+WantedBy=multi-user.target

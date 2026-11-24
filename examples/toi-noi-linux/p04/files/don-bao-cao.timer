@@ -1,0 +1,10 @@
+[Unit]
+Description=Moi dem 02:30 don bao cao cu cua bao-gia
+
+[Timer]
+OnCalendar=*-*-* 02:30:00
+Persistent=true
+RandomizedDelaySec=5min
+
+[Install]
+WantedBy=timers.target

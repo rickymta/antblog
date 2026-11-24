@@ -24,6 +24,8 @@
 //   #login NGƯỜI KEY [otp]
 //                     mô phỏng một lần đăng nhập SSH từ phía client (root chạy ssh tới 127.0.0.1
 //                     bằng key /usr/share/toinoi-lab/p03/KEY, kèm mã OTP nếu có), không in
+//   #ngat             mô phỏng mất kết nối SSH rồi đăng nhập lại (Phần 4): như bash khi nhận SIGHUP,
+//                     gửi SIGHUP tới mọi job của shell, rồi coi như phiên mới (bảng job rỗng, về ~)
 
 import { spawnSync } from 'node:child_process';
 import { readFileSync, readdirSync } from 'node:fs';
@@ -115,6 +117,10 @@ export function compile(source, { echo = true, dir = '.' } = {}) {
       if (echo) out.push(`printf '\\n# %s\\n' ${quote(line.slice(3))}`);
       continue;
     }
+    if (line === '#ngat') {
+      out.push('for __j in $(jobs -p); do kill -HUP "$__j" 2>/dev/null; done; disown -a; cd ~; sleep 1');
+      continue;
+    }
     if (line.startsWith('#wait ')) {
       out.push(`sleep ${Number(line.slice(6))}`);
       continue;
@@ -182,6 +188,8 @@ export function runScript(path, { echo = true } = {}) {
   return (r.stdout + r.stderr)
     .replace(/\r\n/g, '\n')
     .replace(/\r/g, '')
+    // systemctl in đường dẫn dạng liên kết OSC 8 (ESC ] 8 ;; URL ESC \); giữ chữ, bỏ mã điều khiển.
+    .replace(/\x1b\]8;[^\x07\x1b]*(\x07|\x1b\\)/g, '')
     .replace(/\x1b\[[0-9;?]*[A-Za-z]/g, '')
     // Shell tương tác báo lỗi bằng tên "-bash", không phải tên file kịch bản.
     .replace(/^\/run\/lab\.sh: line \d+: /gm, '-bash: ')

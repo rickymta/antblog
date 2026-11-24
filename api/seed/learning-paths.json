@@ -665,6 +665,26 @@
     "status": "published"
   },
   {
+    "slug": "linux-qua-ssh-studio-phan-04",
+    "title": "Linux qua SSH Studio · Phần 4 · Tiến trình, dịch vụ và gói phần mềm",
+    "description": "Những gì đang chạy trên server: tiến trình, PID và cây tiến trình với ps và top, tín hiệu và cách dừng đúng (SIGTERM trước, SIGKILL sau cùng), cài phần mềm bằng apt và dpkg, giữ việc chạy lâu sống sót khi SSH đứt bằng nohup và tmux, systemd và systemctl, viết unit cho dịch vụ báo giá với tài khoản riêng và Restart=, đọc log bằng journalctl, lên lịch bằng cron và systemd timer, xoay vòng log bằng logrotate — kết thúc bằng bài thực hành siết dịch vụ bằng drop-in và bộ chấm có khởi động lại cả server.",
+    "level": "intermediate",
+    "category": "devops-linux",
+    "articles": [
+      "linux-tien-trinh-ps-top",
+      "linux-tin-hieu-kill",
+      "linux-apt-cai-phan-mem",
+      "linux-job-nen-nohup-tmux",
+      "linux-systemd-systemctl",
+      "linux-systemd-unit-bao-gia",
+      "linux-journalctl-doc-log",
+      "linux-cron-systemd-timer",
+      "linux-logrotate",
+      "linux-thuc-hanh-dich-vu-systemd"
+    ],
+    "status": "published"
+  },
+  {
     "slug": "ba-p01-tu-duy-phan-tich-nghiep-vu",
     "title": "BA · Phần 1 · Tư duy phân tích nghiệp vụ",
     "description": "Tám bài mở đầu chương trình Business Analysis qua Tới Nơi: tư duy BA, vai trò phối hợp, phân loại yêu cầu, BACCM, mục tiêu đo lường, phạm vi và quyết định khi thiếu bằng chứng. Gồm 3 bài cơ bản, 3 bài trung bình và 2 bài nâng cao; kết thúc bằng hồ sơ đề xuất cải thiện điểm đón.",

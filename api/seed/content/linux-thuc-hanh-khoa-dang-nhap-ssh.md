@@ -211,4 +211,4 @@ Dùng lại cho mọi server mới của nhóm:
 
 ## Đọc tiếp
 
-Phần 3 khép lại với một server mà ai được vào, vào bằng gì, làm được gì đều đã rõ. **Phần 4** chuyển sang việc của server khi đã có người vào: tiến trình, dịch vụ `systemd`, log và tài nguyên. Trong lúc chờ, xem lại [lộ trình của series](/articles/linux-la-gi-va-ssh-studio).
+Phần 3 khép lại với một server mà ai được vào, vào bằng gì, làm được gì đều đã rõ. **Phần 4** chuyển sang việc của server khi đã có người vào: tiến trình, dịch vụ `systemd`, log và lịch chạy. Bắt đầu với [LNX-031 · Tiến trình: ps, top, PID và cây tiến trình](/articles/linux-tien-trinh-ps-top).
