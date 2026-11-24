@@ -36,6 +36,8 @@ Port:
   22/tcp
 ```
 
+<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/linux-tuong-lua-ufw-nftables/ssh-studio-04.webp" alt="Terminal của SSH Studio: ufw status báo inactive, nft list ruleset chỉ 21 dòng, ufw app list có OpenSSH, ufw app info OpenSSH cho cổng 22/tcp" width="2400" height="1350" loading="lazy"></div><figcaption>SSH Studio · trạng thái ban đầu: tường lửa chưa bật</figcaption></figure>
+
 - `inactive`: tường lửa chưa bật; nftables chỉ có vài quy tắc của Docker.
 - **Hồ sơ ứng dụng** (`ufw app list`): gói phần mềm khai báo cổng của mình. `OpenSSH` là cổng `22/tcp`. Dùng tên hồ sơ dễ đọc hơn số cổng, và đúng cả khi gói đổi cổng.
 
@@ -68,7 +70,7 @@ ufw allow from 10.20.0.0/24 to any port 8081 proto tcp comment 'thu muc log noi 
 
 **`ufw show added`** liệt kê quy tắc đã thêm **khi tường lửa còn tắt**. Đây là thói quen cứu mạng: **luôn có quy tắc cho SSH trước khi bật**. Bật `default deny` mà chưa cho SSH là tự khoá mình ngoài cửa ngay lập tức.
 
-<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/linux-tuong-lua-ufw-nftables/ssh-studio-01.webp" alt="Terminal của SSH Studio: ufw status inactive, nft list ruleset 21 dòng, ufw app list có OpenSSH, ufw app info OpenSSH cổng 22/tcp, default deny incoming, default allow outgoing, limit OpenSSH, allow từ 10.20.0.0/24 tới cổng 8081 kèm comment, ufw show added liệt kê hai quy tắc" width="2400" height="1350" loading="lazy"></div><figcaption>SSH Studio · viết quy tắc trước khi bật</figcaption></figure>
+<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/linux-tuong-lua-ufw-nftables/ssh-studio-01.webp" alt="Terminal của SSH Studio: ufw default deny incoming, default allow outgoing, ufw limit OpenSSH, ufw allow from 10.20.0.0/24 to any port 8081 với chú thích thu muc log noi bo, ufw show added liệt kê hai quy tắc đã thêm" width="2400" height="1350" loading="lazy"></div><figcaption>SSH Studio · viết quy tắc trước khi bật tường lửa</figcaption></figure>
 
 ## 3. Bật tường lửa
 
@@ -97,12 +99,14 @@ Status: active
 [ 3] OpenSSH (v6)               LIMIT IN    Anywhere (v6)
 ```
 
+<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/linux-tuong-lua-ufw-nftables/ssh-studio-06.webp" alt="Terminal của SSH Studio: sudo ufw --force enable báo Firewall is active and enabled on system startup, ufw status verbose cho Default: deny (incoming), allow (outgoing) và các quy tắc 22/tcp LIMIT IN, 8081/tcp ALLOW IN từ 10.20.0.0/24" width="2400" height="1350" loading="lazy"></div><figcaption>SSH Studio · bật tường lửa: phiên SSH đang mở không bị cắt</figcaption></figure>
+
 - Gõ tay, `sudo ufw enable` hỏi `Command may disrupt existing ssh connections. Proceed (y|n)?`. Bản ghi dùng `--force` để không hỏi; đừng dùng nó cho tới khi đã chắc có quy tắc SSH.
 - **Phiên SSH Studio đang mở không bị cắt**: tường lửa của ufw cho qua mọi kết nối đã thiết lập. Dù vậy, **mở thêm một phiên mới để thử** trước khi đóng phiên cũ, như với `sshd` ([LNX-025](/articles/linux-sshd-config-an-toan)).
 - `status verbose` cho cả mặc định (`deny (incoming), allow (outgoing), deny (routed)`) và nhật ký (`Logging: on (low)`): gói bị chặn được ghi vào log của kernel.
 - `status numbered` đánh số quy tắc, dùng để xoá hay chèn theo vị trí.
 
-<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/linux-tuong-lua-ufw-nftables/ssh-studio-02.webp" alt="Terminal của SSH Studio: sudo ufw --force enable báo Firewall is active and enabled on system startup, status verbose với Default deny incoming allow outgoing, 22/tcp OpenSSH LIMIT IN Anywhere, 8081/tcp ALLOW IN 10.20.0.0/24 kèm ghi chú, status numbered đánh số [1] [2] [3]; phiên SSH vẫn tiếp tục" width="2400" height="1350" loading="lazy"></div><figcaption>SSH Studio · bật <code>ufw</code>, phiên đang mở không bị cắt</figcaption></figure>
+<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/linux-tuong-lua-ufw-nftables/ssh-studio-02.webp" alt="Terminal của SSH Studio: sudo ufw status numbered đánh số ba quy tắc: [1] OpenSSH LIMIT IN, [2] 8081/tcp ALLOW IN từ 10.20.0.0/24, [3] OpenSSH (v6)" width="2400" height="1350" loading="lazy"></div><figcaption>SSH Studio · <code>ufw status numbered</code>: số thứ tự để sửa hoặc xoá quy tắc</figcaption></figure>
 
 ## 4. Thử từ máy khác
 
@@ -153,11 +157,13 @@ table ip filter {
 }
 ```
 
+<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/linux-tuong-lua-ufw-nftables/ssh-studio-05.webp" alt="Terminal của SSH Studio: chạy http.server 8081 và 8082, ufw status numbered | grep 8081, ufw delete allow from 10.20.0.0/24 to any port 8081 báo Rule deleted, status numbered chỉ còn hai quy tắc OpenSSH" width="2400" height="1350" loading="lazy"></div><figcaption>SSH Studio · xoá quy tắc bằng cách lặp lại nó sau <code>ufw delete</code></figcaption></figure>
+
 - **`ufw delete <quy tắc>`** xoá bằng chính câu lệnh đã thêm (chắc chắn hơn xoá theo số, vì số đổi khi danh sách đổi). `ufw delete 2` cũng được, sau khi xem `status numbered`.
 - Từ 21 dòng, nftables giờ có hơn 400 dòng: các chuỗi (*chain*) `ufw-before-input`, `ufw-user-input`, `ufw-after-input`… mà ufw dựng. Chuỗi `ufw-user-input` chứa đúng quy tắc của An: ba dòng cho cổng 22 với module `recent` (cơ chế của `limit`).
 - Đừng sửa thẳng các bảng đó (`do not touch!`): ufw sẽ ghi đè. Cần quy tắc phức tạp hơn ufw cho phép thì viết thẳng nftables trong `/etc/nftables.conf` và **không** dùng ufw song song.
 
-<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/linux-tuong-lua-ufw-nftables/ssh-studio-03.webp" alt="Terminal của SSH Studio: chạy hai http.server 8081 và 8082, từ app02 nc tới 22 và 8081 succeeded còn 8082 timed out, ufw delete quy tắc 8081, status numbered còn hai quy tắc OpenSSH, nft list ruleset hơn 400 dòng với cảnh báo do not touch, chain ufw-user-input với các dòng tcp dport 22 jump ufw-user-limit" width="2400" height="1350" loading="lazy"></div><figcaption>SSH Studio · thử từ máy khác, xoá quy tắc, và quy tắc thật trong nftables</figcaption></figure>
+<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/linux-tuong-lua-ufw-nftables/ssh-studio-03.webp" alt="Terminal của SSH Studio: pkill hai http.server, nft list ruleset | wc -l tăng lên 412 dòng, nft list chain ip filter ufw-user-input cho các quy tắc tcp dport 22 với ct state new và recent" width="2400" height="1350" loading="lazy"></div><figcaption>SSH Studio · ufw chỉ là lớp vỏ: quy tắc thật nằm trong nftables</figcaption></figure>
 
 Trên máy ảo đám mây còn có **tường lửa của nhà cung cấp** (security group, firewall rule của VPC) chặn trước khi gói tới server. Hai lớp bổ sung cho nhau; khi «không vào được», kiểm tra cả hai.
 

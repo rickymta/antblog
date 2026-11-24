@@ -4,6 +4,8 @@
 ## Địa chỉ của server
 hostname
 ip -br addr
+#shot 04
+#clear
 ip route
 hostname -I
 grep toinoi /etc/hosts
@@ -14,6 +16,8 @@ ss -tln
 sudo ss -tlnp
 curl -s http://127.0.0.1:8080/suc-khoe
 curl -sS --connect-timeout 3 http://10.20.0.11:8080/suc-khoe
+#shot 05
+#clear
 ## 127.0.0.1 hay 0.0.0.0
 cd /srv/toinoi/bao-gia/shared/logs
 nohup python3 -m http.server 8081 --bind 0.0.0.0 > /dev/null 2>&1 &
@@ -31,6 +35,8 @@ curl -s http://toinoi-app-01:8081/ | grep -o 'href="[^"]*"' | head -n 3
 #clear
 ## Các kết nối đang mở
 ss -tn
+#shot 06
+#clear
 sudo ss -tnp state established | grep -v 127.0.0.11
 pkill -f 'http.server 8081'
 sudo ss -tlnp | grep -c ':8081 '

@@ -4,9 +4,11 @@
 sudo ss -tlnp | grep -E ':(8080|22) '
 #shot 01
 #gui forward-local
+#xem servers 07
 ## Phía server thấy gì khi có đường hầm
 sudo ss -tnp | grep ':8080' | grep -v -E 'TIME-WAIT'
 #gui forward-xong
+#xem nhat-ky 08
 #may app02
 ## Mô phỏng laptop của An: một kết nối SSH mở cả ba kiểu đường hầm
 mkdir -p ~/may-an && echo 'trang thu tu laptop cua An' > ~/may-an/index.html
@@ -23,6 +25,7 @@ sudo ss -tlnp | grep ':9090 '
 curl -s http://127.0.0.1:9090/
 ## deploy không được mở đường hầm
 sudo sshd -T -C user=deploy,host=ci,addr=10.0.0.5 | grep allowtcpforwarding
+#shot 06
 #may app02
 #root pkill -f 'ssh -i /usr/share/toinoi-lab/p03/an-laptop'
 pkill -f 'http.server 8000'

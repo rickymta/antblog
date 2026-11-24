@@ -39,6 +39,8 @@ MemoryCurrent=9928704
 MemoryMax=209715200
 ```
 
+<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/linux-bo-nho-tai-he-thong/ssh-studio-06.webp" alt="Terminal của SSH Studio: free -h cho Mem total 31Gi, used 1.5Gi, free 28Gi, buff/cache 1.9Gi, available 29Gi, Swap 8.0Gi" width="2400" height="1350" loading="lazy"></div><figcaption>SSH Studio · <code>free -h</code>: nhìn cột available, không nhìn free</figcaption></figure>
+
 | Cột | Nghĩa |
 |---|---|
 | `used` | Bộ nhớ chương trình đang giữ |
@@ -52,7 +54,7 @@ MemoryMax=209715200
 - **Swap** là vùng đĩa dùng thay RAM khi thiếu. Dùng một ít không sao; dùng liên tục (cột `si`/`so` của `vmstat` khác 0) là server đang chậm vì đọc ghi đĩa thay RAM.
 - **Bộ nhớ của một dịch vụ**: systemd đếm theo cgroup ([LNX-035](/articles/linux-systemd-systemctl)). `bao-gia` đang dùng khoảng 10 MB, trần là 200 MB (`MemoryMax` của [LNX-040](/articles/linux-thuc-hanh-dich-vu-systemd)).
 
-<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/linux-bo-nho-tai-he-thong/ssh-studio-01.webp" alt="Terminal của SSH Studio: free -h với total, used, free, buff/cache, available, /proc/meminfo với MemTotal, MemFree, MemAvailable, Cached, Dirty, swapon --show, systemctl show bao-gia với MemoryCurrent khoảng 10 MB và MemoryMax 209715200" width="2400" height="1350" loading="lazy"></div><figcaption>SSH Studio · <code>free</code>: nhìn <b>available</b>, không nhìn <b>free</b></figcaption></figure>
+<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/linux-bo-nho-tai-he-thong/ssh-studio-01.webp" alt="Terminal của SSH Studio: grep /proc/meminfo cho MemTotal, MemFree, MemAvailable, Buffers, Cached, SwapTotal, SwapFree, Dirty; swapon --show có /dev/sdc 8G chưa dùng; systemctl show bao-gia cho MemoryCurrent khoảng 9.9 MB và MemoryMax 200 MB" width="2400" height="1350" loading="lazy"></div><figcaption>SSH Studio · <code>/proc/meminfo</code>, swap và bộ nhớ của riêng bao-gia</figcaption></figure>
 
 ## 2. vmstat: một dòng mỗi giây
 
@@ -92,13 +94,15 @@ an@toinoi-app-01:~$ uptime
 an@toinoi-app-01:~$ pkill -f tinh-lai-bao-cao
 ```
 
+<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/linux-bo-nho-tai-he-thong/ssh-studio-04.webp" alt="Terminal của SSH Studio: vmstat 1 4 lúc rảnh, cột r và b bằng 0, id khoảng 98-99%, wa 0" width="2400" height="1350" loading="lazy"></div><figcaption>SSH Studio · <code>vmstat</code> lúc server rảnh</figcaption></figure>
+
 - **Lúc rảnh**: `r` 0, `id` gần 100.
 - **Hai tiến trình ăn CPU** (`tinh-lai-bao-cao` từ [LNX-031](/articles/linux-tien-trinh-ps-top)): **`r` = 2** liên tục, `us` tăng lên khoảng 13%. Trên 16 nhân, hai nhân bận là 2/16 ≈ 12,5%: con số khớp. Trên một máy ảo 2 nhân, đó sẽ là 100%.
 - **`uptime`**: load average tăng dần từ 0,3 về phía 2: số tiến trình trung bình đang chạy hoặc chờ. Đo trong vài giây nên con số 1 phút mới lên tới 0,88; để thêm vài phút nó sẽ tiến tới 2. So với số nhân ([LNX-031](/articles/linux-tien-trinh-ps-top)).
 
 **Nghẽn CPU** trông như thế này: `r` lớn hơn số nhân, `id` gần 0, `us` (hoặc `sy`) cao.
 
-<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/linux-bo-nho-tai-he-thong/ssh-studio-02.webp" alt="Terminal của SSH Studio: vmstat 1 4 lúc rảnh với id 99-100, chạy hai tinh-lai-bao-cao nền, vmstat với cột r bằng 2 và us khoảng 13, uptime với load average đang tăng, pkill dừng chúng" width="2400" height="1350" loading="lazy"></div><figcaption>SSH Studio · tải CPU: cột <code>r</code> và <code>us</code></figcaption></figure>
+<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/linux-bo-nho-tai-he-thong/ssh-studio-02.webp" alt="Terminal của SSH Studio: chạy hai tinh-lai-bao-cao nền, vmstat 1 4 cho cột r lên 2 và us 13%, uptime cho load average 0.26, pkill dừng hai tiến trình" width="2400" height="1350" loading="lazy"></div><figcaption>SSH Studio · nghẽn CPU: cột <code>r</code> và <code>us</code> tăng</figcaption></figure>
 
 ## 3. Nghẽn đĩa
 
@@ -122,13 +126,15 @@ an@toinoi-app-01:~$ ps -eo pid,user,rss,comm --sort=-rss | head -n 5
    1833 root      8100 sshd
 ```
 
+<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/linux-bo-nho-tai-he-thong/ssh-studio-05.webp" alt="Terminal của SSH Studio: vòng lặp dd ghi 50 MB với oflag=direct vào /du-lieu chạy nền, vmstat 1 4 cho cột bo khoảng 51200 và b lên 1, wait rồi xoá file thử" width="2400" height="1350" loading="lazy"></div><figcaption>SSH Studio · nghẽn đĩa: cột <code>bo</code> tăng khi ghi thẳng xuống ổ</figcaption></figure>
+
 - `dd … oflag=direct` ghi thẳng xuống ổ dữ liệu, bỏ qua cache, để thấy đĩa thật làm việc. Đĩa của máy chạy Docker (SSD cục bộ) ghi 200 MB chỉ mất khoảng 0,1 giây, nên vòng lặp ghi 50 MB mỗi giây trong 5 giây để `vmstat` kịp thấy.
 - Từ dòng thứ hai của `vmstat`: **`bo` ≈ 50 000** KB/giây (dòng có 125 628 là lúc hai lần ghi rơi vào cùng một giây), **`b` = 1** ở vài dòng (`dd` đang chờ đĩa), `wa` lên 2%.
 - Trên một máy ảo với đĩa mạng (vài nghìn IOPS), cùng thao tác kéo dài nhiều giây, cột **`b`** (chờ đĩa) lớn hơn 0 và **`wa`** lên vài chục phần trăm. Đó là dấu hiệu của **nghẽn đĩa**: CPU còn rảnh, nhưng tiến trình phải đợi đĩa. Nâng CPU không giúp gì.
 
 **Ai tốn bộ nhớ nhất**: `ps --sort=-rss` (RSS: bộ nhớ thật, [LNX-031](/articles/linux-tien-trinh-ps-top)). Trên server lab nhỏ, `bao-gia` và `journald` đứng đầu, mỗi cái khoảng 20 MB.
 
-<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/linux-bo-nho-tai-he-thong/ssh-studio-03.webp" alt="Terminal của SSH Studio: vòng lặp dd ghi 50 MB mỗi giây thẳng xuống /du-lieu chạy nền, vmstat với cột bo từ 50 000 tới 100 000 KB mỗi giây, wait, xoá file thử, ps sắp theo RSS với bao-gia, systemd-journal, systemd, sshd ở đầu" width="2400" height="1350" loading="lazy"></div><figcaption>SSH Studio · tải đĩa: cột <code>bo</code> và <code>wa</code></figcaption></figure>
+<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/linux-bo-nho-tai-he-thong/ssh-studio-03.webp" alt="Terminal của SSH Studio: ps -eo pid,user,rss,comm --sort=-rss | head -n 5 cho bao-gia của baogia dùng nhiều bộ nhớ nhất, sau đó systemd-journald, systemd, sshd" width="2400" height="1350" loading="lazy"></div><figcaption>SSH Studio · ai đang dùng nhiều bộ nhớ nhất</figcaption></figure>
 
 ## 4. Chẩn đoán nhanh
 

@@ -57,6 +57,8 @@ HTTP 200
 
 <figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/linux-ssh-port-forwarding/ssh-studio-03.webp" alt="Tab Ports của SSH Studio với đường hầm Local 127.0.0.1:18080 → 127.0.0.1:8080 trạng thái Đang chạy và cột Kết nối đếm số kết nối đang mở trên tổng số" width="2400" height="1350" loading="lazy"></div><figcaption>SSH Studio · đường hầm đang chạy, cột <b>Kết nối</b> đếm số kết nối qua nó</figcaption></figure>
 
+<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/linux-ssh-port-forwarding/ssh-studio-07.webp" alt="Trang Servers của SSH Studio khi đường hầm Local đang chạy: toinoi-app-01 xác thực SSH key với 1 phiên hoạt động, hồ sơ toinoi-app-01 (cuong) dùng mật khẩu đang báo lỗi xác thực" width="2400" height="1350" loading="lazy"></div><figcaption>SSH Studio · trang Servers: phiên đang mở đường hầm vẫn chỉ là một phiên</figcaption></figure>
+
 Ô **Lưu vào server** (bỏ chọn ở đây) ghi đường hầm vào hồ sơ server: lần kết nối sau SSH Studio tự bật lại. Tiện cho đường hầm dùng hằng ngày, như một cơ sở dữ liệu chỉ nghe ở localhost.
 
 ### Phía server thấy gì
@@ -68,6 +70,8 @@ an@toinoi-app-01:~$ sudo ss -tnp | grep ':8080' | grep -v -E 'TIME-WAIT'
 Trong SSH Studio, khi máy Windows đang giữ một kết nối qua đường hầm, `ss` trên server cho thấy **`sshd`** (tiến trình của phiên An) nối tới `127.0.0.1:8080`. Với `bao-gia`, yêu cầu đến từ `127.0.0.1`, như mọi yêu cầu nội bộ. (Bản ghi chữ của lab không có dòng này vì runner không mở đường hầm từ SSH Studio.)
 
 <figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/linux-ssh-port-forwarding/ssh-studio-04.webp" alt="Terminal của SSH Studio: sudo ss -tnp lọc cổng 8080 thấy kết nối ESTAB từ tiến trình sshd tới 127.0.0.1:8080 do đường hầm tạo ra" width="2400" height="1350" loading="lazy"></div><figcaption>SSH Studio · trên server: <code>sshd</code> chuyển kết nối tới <code>127.0.0.1:8080</code></figcaption></figure>
+
+<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/linux-ssh-port-forwarding/ssh-studio-08.webp" alt="Hộp thoại Nhật ký hoạt động của SSH Studio: các dòng Đã kết nối an@127.0.0.1 và Phiên đã đóng của toinoi-app-01 theo thời gian, ô lọc Tất cả và Lỗi" width="2400" height="1350" loading="lazy"></div><figcaption>SSH Studio · nhật ký hoạt động ghi lại các lần kết nối và đóng phiên</figcaption></figure>
 
 ## 3. Remote và Dynamic
 
@@ -104,6 +108,8 @@ trang thu tu laptop cua An
 an@toinoi-app-01:~$ sudo sshd -T -C user=deploy,host=ci,addr=10.0.0.5 | grep allowtcpforwarding
 allowtcpforwarding no
 ```
+
+<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/linux-ssh-port-forwarding/ssh-studio-06.webp" alt="Terminal của SSH Studio: ss -tlnp thấy sshd nghe 127.0.0.1:9090 và [::1]:9090 do Remote forward mở, curl 127.0.0.1:9090 trả trang thu tu laptop cua An, sshd -T -C user=deploy cho allowtcpforwarding no" width="2400" height="1350" loading="lazy"></div><figcaption>SSH Studio · Remote forward: server mở cổng 9090, kết nối quay về laptop; deploy không được mở đường hầm</figcaption></figure>
 
 - **Local**: `127.0.0.1:18080` trên «laptop» trả về đúng `/suc-khoe` của server.
 - **Dynamic**: `curl --socks5-hostname 127.0.0.1:1080` gửi yêu cầu qua proxy; `http://127.0.0.1:8080` được hiểu **từ phía server**, nên tới `bao-gia`. Nhưng `http://toinoi-app-01:8080` thì không (`000`): từ chính server, tên đó là `10.20.0.11`, mà `bao-gia` không nghe ở địa chỉ đó. «Đích tính từ phía server» là chỗ hay nhầm nhất của đường hầm.

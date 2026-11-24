@@ -3,6 +3,7 @@
 ## Đồng bộ từ máy của bạn lên server
 mkdir -p ~/bang-gia-moi
 ls -la ~/bang-gia-moi
+#shot 06
 #gui dong-bo-len
 #check ~/bang-gia-moi/bang-gia.csv bang-gia-moi.csv
 #check ~/bang-gia-moi/ghi-chu.txt ghi-chu-bang-gia.txt
@@ -16,6 +17,8 @@ cp ~/bang-gia-moi/bang-gia.csv /srv/toinoi/bao-gia/releases/1.6.0/bang-gia.csv
 sudo install -d -o an -g toinoi -m 2775 /srv/sao-luu
 rsync -a /srv/toinoi/bao-gia/releases/ /srv/sao-luu/releases/
 ls /srv/sao-luu/releases
+#shot 07
+#clear
 echo 'ghi chu cu' > /srv/sao-luu/releases/ghi-chu-cu.txt
 echo 'ban 1.6.0: them dich vu car7e' > /srv/toinoi/bao-gia/releases/1.6.0/THAY-DOI.txt
 rsync -ai --dry-run --delete /srv/toinoi/bao-gia/releases/ /srv/sao-luu/releases/
@@ -34,6 +37,8 @@ ls -l ~/.ssh/dong-bo*
 #file ~/.ssh/config ssh-config
 ssh app02 hostname
 ssh app02 mkdir -p sao-luu
+#shot 08
+#clear
 rsync -a --delete --stats /srv/sao-luu/releases/ app02:sao-luu/releases/ | grep -E 'Number of (files|regular files transferred)|Total transferred'
 ssh app02 'ls sao-luu/releases; cat sao-luu/releases/1.6.0/bang-gia.csv | tail -n 1'
 rsync -ai --delete /srv/sao-luu/releases/ app02:sao-luu/releases/

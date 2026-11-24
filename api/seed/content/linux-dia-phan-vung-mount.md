@@ -48,11 +48,13 @@ an@toinoi-app-01:~$ sudo blkid $DIA || echo "chua co he thong file"
 chua co he thong file
 ```
 
+<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/linux-dia-phan-vung-mount/ssh-studio-04.webp" alt="Terminal của SSH Studio: findmnt -lo TARGET,SOURCE,FSTYPE,SIZE -t overlay,tmpfs liệt kê / overlay 1006.9G và các tmpfs /dev, /dev/shm, /run, /tmp, /run/lock; grep /etc/fstab không có dòng nào" width="2400" height="1350" loading="lazy"></div><figcaption>SSH Studio · các hệ thống file đang được gắn, fstab còn trống</figcaption></figure>
+
 - `findmnt` liệt kê hệ thống file đã gắn ở đâu; `-l` in dạng danh sách thay vì cây, `-t` lọc theo loại. Trong lab, `/` là `overlay` (ổ gốc của container); trên máy ảo thật nó thường là `ext4` hay `xfs` trên `/dev/sda1`. Các `tmpfs` nằm trong RAM. `/etc/fstab` của lab chưa có dòng nào.
 - Ổ mới xuất hiện: `lsblk` thấy thiết bị 512 MB, chưa có `FSTYPE`, chưa gắn đâu. `blkid` không đọc ra gì: ổ trống.
 - `DIA=$(…)` lưu tên thiết bị vào một biến shell, để các lệnh sau không phải gõ lại (và để bài chạy đúng dù trên máy bạn nó là `loop3`).
 
-<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/linux-dia-phan-vung-mount/ssh-studio-01.webp" alt="Terminal của SSH Studio: findmnt -t overlay,tmpfs liệt kê / là overlay và các tmpfs, fstab trống, DIA lấy tên loop device /dev/loop2, lsblk cho loop2 512M chưa có FSTYPE và MOUNTPOINTS, blkid báo chua co he thong file" width="2400" height="1350" loading="lazy"></div><figcaption>SSH Studio · ổ mới: có thiết bị, chưa có hệ thống file</figcaption></figure>
+<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/linux-dia-phan-vung-mount/ssh-studio-01.webp" alt="Terminal của SSH Studio: DIA=$(sudo losetup -j … -O NAME) cho /dev/loop2, lsblk cho loop2 512M loại loop chưa có FSTYPE, blkid báo chua co he thong file" width="2400" height="1350" loading="lazy"></div><figcaption>SSH Studio · ổ mới 512 MB: có thiết bị nhưng chưa có hệ thống file</figcaption></figure>
 
 ## 2. Tạo hệ thống file và gắn vào
 
@@ -73,12 +75,14 @@ drwx------ 2 root root 16384 Nov 24 08:12 lost+found
 an@toinoi-app-01:~$ sudo chown an:toinoi /du-lieu
 ```
 
+<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/linux-dia-phan-vung-mount/ssh-studio-05.webp" alt="Terminal của SSH Studio: sudo mkfs.ext4 -q -L du-lieu $DIA, blkid cho /dev/loop2 LABEL du-lieu, UUID và TYPE ext4" width="2400" height="1350" loading="lazy"></div><figcaption>SSH Studio · <code>mkfs.ext4</code> tạo hệ thống file, <code>blkid</code> đọc nhãn và UUID</figcaption></figure>
+
 - **`mkfs.ext4 -L du-lieu`** tạo hệ thống file `ext4`, đặt **nhãn** `du-lieu`. **Mọi dữ liệu cũ trên thiết bị bị xoá**: kiểm tra đúng tên thiết bị trước khi chạy.
 - **`blkid`** giờ thấy nhãn, loại, và **UUID**: mã định danh duy nhất sinh lúc tạo hệ thống file.
 - **`mount THIẾT_BỊ THƯ_MỤC`** gắn vào (thư mục phải có sẵn). `df -hT` thấy 488 MB dùng được (phần còn lại là bảng inode, nhật ký của ext4 và 5% để dành cho `root`).
 - `lost+found` là thư mục của `fsck`, nơi chứa mảnh file cứu được sau lỗi. Thư mục gốc của ổ mới thuộc `root`; An đổi cho `an:toinoi`.
 
-<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/linux-dia-phan-vung-mount/ssh-studio-02.webp" alt="Terminal của SSH Studio: mkfs.ext4 -L du-lieu, blkid thấy LABEL du-lieu, UUID và TYPE ext4, mkdir /du-lieu, mount, df -hT ext4 488M, ls -la với lost+found, chown an:toinoi" width="2400" height="1350" loading="lazy"></div><figcaption>SSH Studio · tạo <code>ext4</code> và gắn vào <code>/du-lieu</code></figcaption></figure>
+<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/linux-dia-phan-vung-mount/ssh-studio-02.webp" alt="Terminal của SSH Studio: mkdir /du-lieu, mount $DIA /du-lieu, df -hT cho /dev/loop2 ext4 488M, ls -la thấy lost+found, chown an:toinoi /du-lieu" width="2400" height="1350" loading="lazy"></div><figcaption>SSH Studio · gắn ổ vào <code>/du-lieu</code> và giao cho An</figcaption></figure>
 
 ## 3. Gắn tự động khi khởi động: fstab
 
@@ -108,12 +112,16 @@ drwx------ 2 root root 16384 Nov 24 08:12 lost+found
 -rw-rw-r-- 1 an   an      19 Nov 24 08:12 thu.txt
 ```
 
+<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/linux-dia-phan-vung-mount/ssh-studio-06.webp" alt="Terminal của SSH Studio: lấy UUID bằng blkid -s UUID -o value, sudo tee -a thêm dòng UUID=… /du-lieu ext4 defaults,nofail 0 2 vào fstab, umount /du-lieu, findmnt báo chua gan" width="2400" height="1350" loading="lazy"></div><figcaption>SSH Studio · thêm dòng fstab theo UUID, gỡ ổ ra để thử</figcaption></figure>
+
 - **Theo UUID, không theo tên thiết bị.** Tên `/dev/sdb`, `/dev/loop2` có thể đổi giữa các lần khởi động (thêm ổ khác, đổi thứ tự). UUID đi theo hệ thống file.
 - **`nofail`**: nếu ổ vắng mặt lúc boot, server vẫn khởi động, chỉ không có `/du-lieu`. Thiếu nó, một ổ dữ liệu hỏng có thể khiến server dừng ở chế độ khẩn cấp: đúng loại sự cố không SSH vào được để sửa. Lab rất cần `nofail`: loop device mất khi container khởi động lại.
 - Cột 6 = `2`: kiểm tra bằng `fsck` sau ổ gốc.
 - **Thử trước khi khởi động lại**: `umount`, rồi `sudo mount -a` gắn mọi thứ trong `fstab` chưa được gắn. Sai cú pháp, sai UUID sẽ lộ ra ngay ở đây, chứ không phải lúc boot. `systemctl daemon-reload` vì systemd đọc `fstab` thành các unit `.mount`.
 
-<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/linux-dia-phan-vung-mount/ssh-studio-03.webp" alt="Terminal của SSH Studio: lấy UUID bằng blkid -s UUID -o value, sudo tee -a /etc/fstab ghi dòng UUID /du-lieu ext4 defaults,nofail 0 2, umount, findmnt báo chua gan, daemon-reload, mount -a, findmnt thấy /du-lieu từ /dev/loop2 ext4 rw,relatime, ghi thử một file" width="2400" height="1350" loading="lazy"></div><figcaption>SSH Studio · <code>fstab</code> theo UUID, kiểm tra bằng <code>mount -a</code></figcaption></figure>
+<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/linux-dia-phan-vung-mount/ssh-studio-03.webp" alt="Terminal của SSH Studio: systemctl daemon-reload, mount -a gắn lại từ fstab, findmnt cho /du-lieu /dev/loop2 ext4 rw,relatime, ghi thu.txt rồi ls -l /du-lieu" width="2400" height="1350" loading="lazy"></div><figcaption>SSH Studio · <code>mount -a</code> đọc fstab và gắn lại ổ</figcaption></figure>
+
+<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/linux-dia-phan-vung-mount/ssh-studio-07.webp" alt="Khung Files của SSH Studio: Máy của bạn bên trái, Remote server ở /du-lieu bên phải với lost+found và thu.txt 19 B" width="2400" height="1350" loading="lazy"></div><figcaption>SSH Studio · khung Files mở thẳng thư mục trên ổ vừa gắn</figcaption></figure>
 
 ## 4. Đối chiếu thao tác
 

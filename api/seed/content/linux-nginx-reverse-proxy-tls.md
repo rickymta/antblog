@@ -35,11 +35,13 @@ an@toinoi-app-01:~$ curl -s -o /dev/null -w '%{http_code} %{content_type}\n' htt
 200 text/html
 ```
 
+<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/linux-nginx-reverse-proxy-tls/ssh-studio-05.webp" alt="Terminal của SSH Studio: apt update báo All packages are up to date, apt install -y nginx in Setting up nginx-common và nginx 1.24.0, systemctl is-active nginx in active" width="2400" height="1350" loading="lazy"></div><figcaption>SSH Studio · cài nginx bằng apt, dịch vụ chạy ngay</figcaption></figure>
+
 Trên Ubuntu, cài xong là nginx chạy ngay (dịch vụ `nginx.service`, [LNX-035](/articles/linux-systemd-systemctl)) với trang mặc định ở cổng 80. Một tiến trình chủ (*master*) chạy bằng `root` (để mở cổng 80, 443) và các tiến trình con (*worker*) chạy bằng `www-data` làm việc thật: `ps -C nginx` đếm được 16 worker vì mặc định `worker_processes auto` lấy theo số nhân, mà container thấy 16 nhân của máy chạy Docker.
 
 `ss -tlnpH` bỏ dòng tiêu đề; `awk` ([LNX-015](/articles/linux-awk-xu-ly-log)) cắt cột tiến trình `users:(("nginx",pid=…` theo dấu `"` và chỉ in địa chỉ nghe cùng tên chương trình. Không có `awk`, mỗi dòng liệt kê đủ 17 PID của nginx và tràn cả màn hình.
 
-<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/linux-nginx-reverse-proxy-tls/ssh-studio-01.webp" alt="Terminal của SSH Studio: apt update, apt install nginx, systemctl is-active nginx active, ss qua awk thấy nginx nghe 0.0.0.0:80 và [::]:80, ps -C nginx đếm 1 master chạy bằng root và 16 worker chạy bằng www-data, curl 127.0.0.1 trả 200 text/html" width="2400" height="1350" loading="lazy"></div><figcaption>SSH Studio · cài <code>nginx</code></figcaption></figure>
+<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/linux-nginx-reverse-proxy-tls/ssh-studio-01.webp" alt="Terminal của SSH Studio: ss -tlnpH cho nginx nghe 0.0.0.0:80 và [::]:80, ps -C nginx đếm 1 master process của root và 16 worker process của www-data, curl 127.0.0.1 trả 200 text/html" width="2400" height="1350" loading="lazy"></div><figcaption>SSH Studio · nginx đã chạy: một master của root, các worker của www-data</figcaption></figure>
 
 ## 2. Chứng chỉ tự ký cho lab
 
@@ -69,6 +71,8 @@ issuer=CN = bao-gia.toinoi.lab
 notBefore=Nov 24 01:13:16 2026 GMT
 notAfter=Nov 24 01:13:16 2027 GMT
 ```
+
+<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/linux-nginx-reverse-proxy-tls/ssh-studio-06.webp" alt="Terminal của SSH Studio: openssl req -x509 tạo khoá rsa:2048 và chứng chỉ tự ký 365 ngày cho CN=bao-gia.toinoi.lab, ls -l cho file .crt -rw-r--r-- và .key -rw-------, openssl x509 in subject, issuer, notBefore, notAfter" width="2400" height="1350" loading="lazy"></div><figcaption>SSH Studio · chứng chỉ tự ký: subject và issuer trùng nhau</figcaption></figure>
 
 Khoá riêng `600` chỉ `root` đọc, chứng chỉ `644` ai cũng đọc. `subject` và `issuer` trùng nhau: dấu hiệu của chứng chỉ tự ký.
 
@@ -117,6 +121,8 @@ nginx: configuration file /etc/nginx/nginx.conf test is successful
 an@toinoi-app-01:~$ sudo systemctl reload nginx
 ```
 
+<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/linux-nginx-reverse-proxy-tls/ssh-studio-07.webp" alt="Terminal của SSH Studio: sudoedit site bao-gia, ln -s vào sites-enabled, xoá site default, nginx -t báo syntax is ok và test is successful, systemctl reload nginx" width="2400" height="1350" loading="lazy"></div><figcaption>SSH Studio · bật site và kiểm tra cấu hình bằng <code>nginx -t</code> trước khi reload</figcaption></figure>
+
 **`nginx -t`** kiểm tra cú pháp và đường dẫn chứng chỉ **trước** khi `reload`: cùng tinh thần `sshd -t`, `visudo -c`. `reload` thay cấu hình không cắt kết nối đang có.
 
 ## 4. Thử từ chính server
@@ -146,13 +152,15 @@ an@toinoi-app-01:~$ sudo tail -n 2 /var/log/nginx/bao-gia.access.log
 127.0.0.1 - - [24/Nov/2026:08:13:17 +0700] "" 400 0 "-" "-"
 ```
 
+<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/linux-nginx-reverse-proxy-tls/ssh-studio-08.webp" alt="Terminal của SSH Studio: thêm bao-gia.toinoi.lab vào /etc/hosts, curl -sI http trả 301 Moved Permanently từ nginx/1.24.0, curl https báo SSL certificate problem: self-signed certificate" width="2400" height="1350" loading="lazy"></div><figcaption>SSH Studio · HTTP chuyển sang HTTPS; curl chưa tin chứng chỉ tự ký</figcaption></figure>
+
 - HTTP trả **`301 Moved Permanently`** sang HTTPS.
 - `curl https://…` từ chối: **`SSL certificate problem: self-signed certificate`**. Đó là `curl` làm đúng việc: không ai nó tin đã ký chứng chỉ này.
 - **`--cacert FILE`**: tin đúng chứng chỉ này (như cài nó vào máy người dùng). Giờ thì thành công, và `/suc-khoe` trả lời qua nginx. Đừng tập thói quen `curl -k` (bỏ kiểm tra): với `-k`, kẻ đứng giữa ([LNX-023](/articles/linux-host-key-known-hosts)) cũng «thành công».
 - **`openssl s_client`** xem bắt tay TLS: chứng chỉ server đưa ra (`subject`, `issuer`), giao thức `TLSv1.3`, bộ mã hoá.
 - Access log ghi từng yêu cầu. Dòng `"" 400` là kết nối của `openssl s_client` đóng mà không gửi yêu cầu HTTP nào.
 
-<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/linux-nginx-reverse-proxy-tls/ssh-studio-03.webp" alt="Terminal của SSH Studio: thêm bao-gia.toinoi.lab vào /etc/hosts, curl -sI cho 301 Moved Permanently, curl https báo SSL certificate problem self-signed certificate, curl --cacert trả JSON của bao-gia, openssl s_client với subject và issuer CN bao-gia.toinoi.lab, TLSv1.3, access log với GET /suc-khoe 200" width="2400" height="1350" loading="lazy"></div><figcaption>SSH Studio · HTTPS qua nginx, và chứng chỉ tự ký</figcaption></figure>
+<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/linux-nginx-reverse-proxy-tls/ssh-studio-03.webp" alt="Terminal của SSH Studio: curl --cacert với chứng chỉ của lab trả trạng thái ok, openssl s_client cho subject và issuer CN=bao-gia.toinoi.lab, TLSv1.3, cipher TLS_AES_256_GCM_SHA384, access log có dòng GET /suc-khoe 200" width="2400" height="1350" loading="lazy"></div><figcaption>SSH Studio · tin đúng chứng chỉ thì HTTPS hoạt động, xem giao thức bằng <code>openssl s_client</code></figcaption></figure>
 
 ## 5. Mở cho mạng nội bộ
 
@@ -173,7 +181,7 @@ an@toinoi-app-01:~$ sudo tail -n 1 /var/log/nginx/bao-gia.access.log
 - Từ `toinoi-app-02`, `--resolve` gán tên cho địa chỉ ngay trong lệnh (thay cho sửa `/etc/hosts`). HTTPS qua nginx trả lời; cổng 8080 vẫn bị chặn (timeout).
 - Access log thấy yêu cầu đến từ `10.20.0.12`.
 
-<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/linux-nginx-reverse-proxy-tls/ssh-studio-04.webp" alt="Terminal của SSH Studio: ufw allow 443 từ 10.20.0.0/24, ufw status có dòng 443 ALLOW 10.20.0.0/24, tail access log với yêu cầu GET /suc-khoe từ 10.20.0.12 trả 200" width="2400" height="1350" loading="lazy"></div><figcaption>SSH Studio · mở 443 cho mạng nội bộ, yêu cầu từ app02 vào log</figcaption></figure>
+<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/linux-nginx-reverse-proxy-tls/ssh-studio-04.webp" alt="Terminal của SSH Studio: ufw allow 443 từ 10.20.0.0/24 với chú thích https bao-gia noi bo, ufw status | grep 443, access log có yêu cầu từ 10.20.0.12 (toinoi-app-02) GET /suc-khoe 200" width="2400" height="1350" loading="lazy"></div><figcaption>SSH Studio · mở 443 cho mạng nội bộ, log ghi nhận yêu cầu từ toinoi-app-02</figcaption></figure>
 
 ### Với tên miền thật
 

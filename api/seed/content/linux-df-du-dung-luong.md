@@ -34,6 +34,8 @@ tmpfs          tmpfs     16G  4.0K   16G   1% /tmp
 tmpfs          tmpfs     16G   56K   16G   1% /run
 ```
 
+<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/linux-df-du-dung-luong/ssh-studio-04.webp" alt="Terminal của SSH Studio: df -h liệt kê overlay ở /, các tmpfs /dev, /run, /tmp và /etc/hosts trên /dev/sdd; df -hT / /tmp /run thêm cột Type" width="2400" height="1350" loading="lazy"></div><figcaption>SSH Studio · <code>df</code>: mỗi hệ thống file còn bao nhiêu chỗ</figcaption></figure>
+
 - **`df -h`**: mỗi **hệ thống file** đang gắn (cột `Mounted on`), tổng, đã dùng, còn trống, phần trăm. `-h` đổi ra K, M, G.
 - **`-T`** thêm loại: `overlay` (lớp file của container), `tmpfs` (nằm trong RAM, mất khi khởi động lại), `ext4` (đĩa thật, sẽ gặp ở [LNX-047](/articles/linux-dia-phan-vung-mount)).
 - Một server thật thường có `/` trên `ext4` hoặc `xfs`, có thể có thêm `/var` hoặc `/data` trên đĩa riêng. Câu hỏi đầu tiên luôn là: **đĩa nào** đầy?
@@ -66,7 +68,7 @@ an@toinoi-app-01:~$ ls -lh /srv/toinoi/bao-gia/shared/logs/debug-2026-11.log
 
 Trước khi xoá, hỏi chủ của nó (ở đây là Bình). Với log đang được ghi, xoá file chưa chắc đã trả lại chỗ (mục 4); cách an toàn là làm rỗng nó (`sudo truncate -s 0 FILE`) hoặc để logrotate ([LNX-039](/articles/linux-logrotate)) lo.
 
-<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/linux-df-du-dung-luong/ssh-studio-01.webp" alt="Terminal của SSH Studio: df -h với overlay ở / và các tmpfs, df -hT, sudo du -sh /var/log /srv /opt /home /usr với /srv 401M, du --max-depth=2 sắp theo cỡ, find các file trên 100M liệt kê debug-2026-11.log 400 MB và du-lieu-01.img" width="2400" height="1350" loading="lazy"></div><figcaption>SSH Studio · <code>df</code>, <code>du</code>, <code>find</code> tìm thứ chiếm chỗ</figcaption></figure>
+<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/linux-df-du-dung-luong/ssh-studio-01.webp" alt="Terminal của SSH Studio: sudo du -sh cho /srv 401M lớn nhất, du --max-depth=2 /srv chỉ ra /srv/toinoi/bao-gia, find -size +100M tìm debug-2026-11.log 400M và du-lieu-01.img, ls -lh xác nhận file log 400M" width="2400" height="1350" loading="lazy"></div><figcaption>SSH Studio · <code>du</code> và <code>find</code> chỉ ra file log debug 400 MB</figcaption></figure>
 
 ## 3. Hết inode khi vẫn còn chỗ
 
@@ -91,12 +93,14 @@ touch: cannot touch '/mnt/nho/them-mot-file': No space left on device
 an@toinoi-app-01:~$ sudo umount /mnt/nho
 ```
 
+<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/linux-df-du-dung-luong/ssh-studio-05.webp" alt="Terminal của SSH Studio: tạo /mnt/nho, mount tmpfs size=20m,nr_inodes=64, chown cho an, vòng for touch 100 file dừng ở file thứ 64" width="2400" height="1350" loading="lazy"></div><figcaption>SSH Studio · hệ thống file nhỏ chỉ có 64 inode</figcaption></figure>
+
 - Tới file thứ 64 thì không tạo được nữa. (`tmpfs` dùng một inode cho chính thư mục gốc.)
 - **`df -h`**: dùng 0%, còn 20 MB. **`df -i`**: `IUse% 100%`. Thông báo vẫn là `No space left on device`, thông báo chung cho cả hai kiểu đầy.
 
 Khi gặp «No space left» mà `df -h` còn trống, chạy `df -i`. Tìm thư mục có nhiều file nhất bằng `sudo find / -xdev -type d -exec sh -c 'echo $(ls -A "$1" | wc -l) "$1"' _ {} \; | sort -n | tail`, hoặc đơn giản hơn với `du --inodes` (có trên coreutils mới).
 
-<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/linux-df-du-dung-luong/ssh-studio-02.webp" alt="Terminal của SSH Studio: mount tmpfs 20m với nr_inodes=64, vòng lặp touch dừng ở file thứ 64, df -h vẫn còn 20M trống, df -i báo 64 inode dùng 100%, touch thêm báo No space left on device" width="2400" height="1350" loading="lazy"></div><figcaption>SSH Studio · hết inode trong khi còn chỗ</figcaption></figure>
+<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/linux-df-du-dung-luong/ssh-studio-02.webp" alt="Terminal của SSH Studio: df -h /mnt/nho còn 20M trống (0% dùng), df -i cho 64 inode đã dùng hết (100%), touch báo No space left on device, umount /mnt/nho" width="2400" height="1350" loading="lazy"></div><figcaption>SSH Studio · còn chỗ nhưng hết inode: <code>df -i</code> mới thấy</figcaption></figure>
 
 ## 4. File đã xoá mà vẫn giữ chỗ
 
@@ -124,6 +128,8 @@ tmpfs           100M     0  100M   0% /mnt/thu
 an@toinoi-app-01:~$ sudo umount /mnt/thu
 ```
 
+<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/linux-df-du-dung-luong/ssh-studio-06.webp" alt="Terminal của SSH Studio: mount tmpfs 100m ở /mnt/thu, tạo log-lon.log 60M, tail -f giữ file, df -h 60% dùng, rm log-lon.log, ls trống nhưng df vẫn 60M dùng" width="2400" height="1350" loading="lazy"></div><figcaption>SSH Studio · xoá file mà dung lượng không trả lại</figcaption></figure>
+
 1. Một file log 60 MB, đang được một tiến trình (`tail -f`) mở để đọc.
 2. `rm` xoá file: `ls` không còn thấy nó.
 3. **`df` vẫn báo 60 MB đã dùng.** `rm` chỉ xoá **tên** (liên kết) của file. Dữ liệu chỉ được giải phóng khi không còn tên nào **và** không còn tiến trình nào mở nó.
@@ -132,7 +138,7 @@ an@toinoi-app-01:~$ sudo umount /mnt/thu
 
 Đây là chuyện hằng ngày trên server: ai đó xoá file log lớn của một dịch vụ đang chạy để «giải phóng chỗ», và chẳng có gì được giải phóng. Dịch vụ vẫn ghi tiếp vào file không còn tên. Cách đúng: `truncate -s 0` thay vì `rm`, hoặc `rm` rồi `systemctl reload`/`restart` dịch vụ ([LNX-039](/articles/linux-logrotate)).
 
-<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/linux-df-du-dung-luong/ssh-studio-03.webp" alt="Terminal của SSH Studio: mount tmpfs 100m, tạo file 60M, tail -f giữ nó, df 60M used, rm file, ls rỗng nhưng df vẫn 60M, lsof +L1 thấy tail với log-lon.log (deleted), pkill tail, df về 0" width="2400" height="1350" loading="lazy"></div><figcaption>SSH Studio · <code>lsof +L1</code>: file đã xoá vẫn chiếm chỗ</figcaption></figure>
+<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/linux-df-du-dung-luong/ssh-studio-03.webp" alt="Terminal của SSH Studio: lsof +L1 cho tiến trình tail giữ log-lon.log (deleted), pkill tail, df -h /mnt/thu trở về 0 dùng, umount /mnt/thu" width="2400" height="1350" loading="lazy"></div><figcaption>SSH Studio · <code>lsof +L1</code> tìm tiến trình giữ file đã xoá</figcaption></figure>
 
 ## 5. Đối chiếu thao tác
 

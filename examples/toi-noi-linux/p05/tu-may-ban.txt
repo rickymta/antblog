@@ -1,4 +1,4 @@
 PS> curl.exe http://127.0.0.1:18080/suc-khoe
-{"trang_thai": "ok", "phien_ban": "1.5.0", "pid": 4286, "moi_truong": "production", "so_dich_vu": 4}
+{"trang_thai": "ok", "phien_ban": "1.5.0", "pid": 4294, "moi_truong": "production", "so_dich_vu": 4}
 
 HTTP 200

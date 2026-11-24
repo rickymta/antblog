@@ -19,6 +19,8 @@ Nhóm kinh doanh gửi An bảng giá mới, có thêm dịch vụ ô tô 7 ch�
 
 Trong khung **Files** ([LNX-005](/articles/linux-tao-sao-chep-di-chuyen-xoa-file)), mở thư mục `bang-gia-moi` ở bên máy bạn và `/home/an/bang-gia-moi` (vừa tạo, còn trống) ở bên server, rồi bấm **Đồng bộ** ở thanh công cụ:
 
+<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/linux-dong-bo-rsync-ssh-studio/ssh-studio-06.webp" alt="Terminal của SSH Studio: mkdir -p ~/bang-gia-moi, ls -la cho thư mục còn trống" width="2400" height="1350" loading="lazy"></div><figcaption>SSH Studio · thư mục đích trên server trước khi đồng bộ</figcaption></figure>
+
 <figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/linux-dong-bo-rsync-ssh-studio/ssh-studio-01.webp" alt="Hộp thoại Đồng bộ thư mục của SSH Studio: thư mục local bang-gia-moi trên máy Windows, chiều Local → Remote được chọn, thư mục remote /home/an/bang-gia-moi, danh sách bang-gia.csv và ghi-chu.txt chỉ có ở local được đánh dấu để tải lên, ô Mirror chưa chọn, nút Đồng bộ" width="2400" height="1350" loading="lazy"></div><figcaption>SSH Studio · <b>Đồng bộ thư mục</b>: so sánh trước, chọn chiều, rồi mới chép</figcaption></figure>
 
 - SSH Studio **so sánh** hai bên theo kích thước và thời gian sửa đổi, liệt kê file chỉ có ở một bên hoặc khác nhau, và chọn sẵn những file sẽ chép theo **chiều** đang chọn (Local → Remote hay ngược lại).
@@ -39,7 +41,7 @@ an@toinoi-app-01:~$ diff /srv/toinoi/bao-gia/current/bang-gia.csv ~/bang-gia-moi
 
 `diff` ([LNX-006](/articles/linux-xem-sua-file-van-ban)) xác nhận khác biệt duy nhất: dòng `car7e` mới.
 
-<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/linux-dong-bo-rsync-ssh-studio/ssh-studio-03.webp" alt="Terminal của SSH Studio: ls -l ~/bang-gia-moi với bang-gia.csv và ghi-chu.txt, diff với bảng giá hiện tại chỉ ra một dòng thêm car7e, Ô tô 7 chỗ điện" width="2400" height="1350" loading="lazy"></div><figcaption>SSH Studio · kiểm tra trên server</figcaption></figure>
+<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/linux-dong-bo-rsync-ssh-studio/ssh-studio-03.webp" alt="Terminal của SSH Studio sau khi đồng bộ: ls -l ~/bang-gia-moi có bang-gia.csv 234 byte và ghi-chu.txt 175 byte, diff với bảng giá đang chạy chỉ khác một dòng car7e" width="2400" height="1350" loading="lazy"></div><figcaption>SSH Studio · kiểm tra trên server: file đã lên, bảng giá mới thêm dịch vụ car7e</figcaption></figure>
 
 ## 2. rsync trên một máy
 
@@ -65,6 +67,8 @@ an@toinoi-app-01:~$ rsync -ai --delete /srv/toinoi/bao-gia/releases/ /srv/sao-lu
 an@toinoi-app-01:~$ rsync -ai --delete /srv/toinoi/bao-gia/releases/ /srv/sao-luu/releases/
 ```
 
+<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/linux-dong-bo-rsync-ssh-studio/ssh-studio-07.webp" alt="Terminal của SSH Studio: cp -a tạo releases/1.6.0 từ 1.5.0, chép bảng giá mới vào, install -d tạo /srv/sao-luu với setgid, rsync -a releases sang /srv/sao-luu/releases, ls cho 1.4.2 1.5.0 1.6.0" width="2400" height="1350" loading="lazy"></div><figcaption>SSH Studio · chuẩn bị bản 1.6.0 và sao lưu lần đầu bằng <code>rsync -a</code></figcaption></figure>
+
 | Tuỳ chọn | Ý nghĩa |
 |---|---|
 | `-a` (*archive*) | Đệ quy, giữ quyền, chủ, thời gian, symlink: bản sao «giống hệt» |
@@ -76,7 +80,7 @@ Chi tiết quan trọng nhất: **dấu `/` cuối nguồn**. `releases/` nghĩa
 
 Quy trình an toàn với `--delete` là **luôn chạy `--dry-run` trước**, đọc các dòng `*deleting`, rồi mới chạy thật. Một đường dẫn gõ nhầm với `--delete` có thể xoá cả thư mục đích. Lần chạy thứ ba không in gì: hai bên đã giống nhau, rsync không chép lại.
 
-<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/linux-dong-bo-rsync-ssh-studio/ssh-studio-04.webp" alt="Terminal của SSH Studio: chuẩn bị release 1.6.0 với bảng giá mới, tạo /srv/sao-luu, rsync -a lần đầu, ls ba release, thêm ghi-chu-cu.txt ở đích và THAY-DOI.txt ở nguồn, rsync -ai --dry-run --delete in *deleting ghi-chu-cu.txt và >f+++++++++ 1.6.0/THAY-DOI.txt, chạy thật in cùng nội dung, lần ba không in gì" width="2400" height="1350" loading="lazy"></div><figcaption>SSH Studio · <code>rsync -ai --dry-run --delete</code>: xem trước rồi mới làm</figcaption></figure>
+<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/linux-dong-bo-rsync-ssh-studio/ssh-studio-04.webp" alt="Terminal của SSH Studio: tạo ghi-chu-cu.txt ở bản sao lưu và THAY-DOI.txt ở nguồn, rsync -ai --dry-run --delete in *deleting ghi-chu-cu.txt và >f+++++++++ 1.6.0/THAY-DOI.txt, chạy thật cho cùng kết quả, chạy lần nữa không in gì" width="2400" height="1350" loading="lazy"></div><figcaption>SSH Studio · <code>rsync -ai --dry-run</code> trước, chạy thật sau, lần hai không còn gì để làm</figcaption></figure>
 
 ## 3. rsync qua SSH sang toinoi-app-02
 
@@ -113,13 +117,15 @@ car7e,Ô tô 7 chỗ điện,16000,5000,32000
 an@toinoi-app-01:~$ rsync -ai --delete /srv/sao-luu/releases/ app02:sao-luu/releases/
 ```
 
+<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/linux-dong-bo-rsync-ssh-studio/ssh-studio-08.webp" alt="Terminal của SSH Studio: ls -l ~/.ssh/dong-bo* cho private key -rw------- và public key, vim ~/.ssh/config, ssh app02 hostname thêm toinoi-app-02 vào known_hosts và in toinoi-app-02, ssh app02 mkdir -p sao-luu" width="2400" height="1350" loading="lazy"></div><figcaption>SSH Studio · key riêng cho việc đồng bộ và tên ngắn <code>app02</code></figcaption></figure>
+
 - Lần đầu, `accept-new` ghi nhận host key của app02 ([LNX-023](/articles/linux-host-key-known-hosts)); sau đó host key đổi thì sẽ bị chặn như thường.
 - `--stats` tóm tắt: 9 file được chép, khoảng 12 KB. Lần sau chỉ phần thay đổi đi qua mạng.
 - Bảng giá của 1.6.0 đã có mặt trên app02.
 
 Một key không passphrase là một rủi ro có chủ đích: giới hạn nó bằng những gì nó mở được (chỉ một tài khoản trên một máy). Có thể chặt hơn nữa bằng `command=` và `restrict` trong `authorized_keys` của app02, để key đó **chỉ** chạy được rsync (bài tập 3).
 
-<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/linux-dong-bo-rsync-ssh-studio/ssh-studio-05.webp" alt="Terminal của SSH Studio: key dong-bo quyền 600, vim ~/.ssh/config, ssh app02 hostname với Permanently added toinoi-app-02, rsync --stats qua SSH chép 9 file, ssh app02 liệt kê 1.4.2 1.5.0 1.6.0 và dòng car7e, rsync lần hai không in gì" width="2400" height="1350" loading="lazy"></div><figcaption>SSH Studio · <code>rsync</code> qua SSH sang <code>toinoi-app-02</code></figcaption></figure>
+<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/linux-dong-bo-rsync-ssh-studio/ssh-studio-05.webp" alt="Terminal của SSH Studio: rsync -a --delete --stats sang app02:sao-luu/releases cho Number of files 13, 9 file được chuyển, ssh app02 ls thấy 1.4.2, 1.5.0, 1.6.0 và dòng car7e cuối bảng giá, rsync lần hai không in gì" width="2400" height="1350" loading="lazy"></div><figcaption>SSH Studio · rsync qua SSH: lần đầu chép hết, lần sau chỉ chép phần đổi</figcaption></figure>
 
 ## 4. Đối chiếu thao tác
 

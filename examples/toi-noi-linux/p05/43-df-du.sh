@@ -3,6 +3,8 @@
 ## df: mỗi hệ thống file còn bao nhiêu
 df -h
 df -hT / /tmp /run
+#shot 04
+#clear
 ## du: thư mục nào lớn
 sudo du -sh /var/log /srv /opt /home /usr
 sudo du -xh --max-depth=2 /srv | sort -h | tail -n 5
@@ -15,6 +17,8 @@ sudo mkdir -p /mnt/nho
 sudo mount -t tmpfs -o size=20m,nr_inodes=64 tmpfs /mnt/nho
 sudo chown an:an /mnt/nho
 for i in $(seq 1 100); do touch /mnt/nho/f$i 2>/dev/null || { echo "khong tao duoc file thu $i"; break; }; done
+#shot 05
+#clear
 df -h /mnt/nho
 df -i /mnt/nho
 touch /mnt/nho/them-mot-file
@@ -32,6 +36,8 @@ df -h /mnt/thu
 rm /mnt/thu/log-lon.log
 ls /mnt/thu
 df -h /mnt/thu
+#shot 06
+#clear
 lsof -nP +L1 2>/dev/null | grep -E 'COMMAND|/mnt/thu'
 pkill -f 'tail -f /mnt/thu'
 #wait 1

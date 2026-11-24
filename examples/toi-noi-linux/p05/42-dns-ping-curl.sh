@@ -6,6 +6,8 @@ grep -E '^(hosts):' /etc/nsswitch.conf
 getent hosts toinoi-app-02
 dig +short toinoi-app-02
 dig toinoi-app-02 | grep -A1 'ANSWER SECTION'
+#shot 04
+#clear
 ## /etc/hosts đi trước DNS, nhưng dig không đọc nó
 echo '127.0.0.1 bao-gia.noi-bo' | sudo tee -a /etc/hosts
 getent hosts bao-gia.noi-bo
@@ -16,9 +18,13 @@ curl -s http://bao-gia.noi-bo:8080/suc-khoe
 ## ping: máy kia có trả lời không
 ping -c 3 toinoi-app-02
 ping -c 2 -W 1 192.0.2.10
+#shot 05
+#clear
 ## Bốn kiểu lỗi khác nhau
 curl -sS http://khong-co.toinoi.invalid/
 curl -sS http://toinoi-app-02:8080/
+#shot 06
+#clear
 curl -sS --connect-timeout 3 http://192.0.2.10:8080/
 curl -s -o /dev/null -w '%{http_code}\n' 'http://bao-gia.noi-bo:8080/bao-gia?dich_vu=xe-tai&km=1'
 #shot 02

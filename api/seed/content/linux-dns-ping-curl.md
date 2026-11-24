@@ -34,6 +34,8 @@ an@toinoi-app-01:~$ dig toinoi-app-02 | grep -A1 'ANSWER SECTION'
 toinoi-app-02.          600     IN      A       10.20.0.12
 ```
 
+<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/linux-dns-ping-curl/ssh-studio-04.webp" alt="Terminal của SSH Studio: resolv.conf có nameserver 127.0.0.11, nsswitch.conf cho hosts: files dns, getent hosts và dig +short toinoi-app-02 cùng trả 10.20.0.12, dig ANSWER SECTION với TTL 600 bản ghi A" width="2400" height="1350" loading="lazy"></div><figcaption>SSH Studio · tên được phân giải ở đâu: <code>resolv.conf</code>, <code>nsswitch.conf</code>, <code>dig</code></figcaption></figure>
+
 - **`hosts: files dns`**: hỏi file `/etc/hosts` trước, không có thì hỏi DNS.
 - **`/etc/resolv.conf`**: máy chủ DNS cần hỏi. Ở lab là `127.0.0.11`, DNS nội bộ của Docker, biết tên các container. Trên máy ảo đám mây thường là DNS của nhà cung cấp; trên Ubuntu cài bình thường là `127.0.0.53` của `systemd-resolved`.
 - **`getent hosts TÊN`** phân giải **như chương trình thật** (theo `nsswitch`): đây là câu trả lời mà `curl`, `ssh`, `bao-gia` sẽ nhận được.
@@ -55,7 +57,7 @@ An đặt tên `bao-gia.noi-bo` cho chính server trong `/etc/hosts`. `getent` v
 
 `sudo tee -a` là cách ghi vào file của `root` từ một pipe: `sudo echo … >> /etc/hosts` không chạy, vì phần `>>` do shell của bạn làm, không có quyền `root` ([LNX-008](/articles/linux-chuyen-huong-pipe)).
 
-<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/linux-dns-ping-curl/ssh-studio-01.webp" alt="Terminal của SSH Studio: resolv.conf với nameserver 127.0.0.11, nsswitch hosts files dns, getent hosts và dig +short toinoi-app-02 ra 10.20.0.12, ANSWER SECTION của dig, thêm bao-gia.noi-bo vào /etc/hosts bằng sudo tee -a, getent thấy 127.0.0.1 còn dig +short không trả gì, curl qua tên mới trả JSON" width="2400" height="1350" loading="lazy"></div><figcaption>SSH Studio · <code>getent</code> theo <code>/etc/hosts</code>, <code>dig</code> thì không</figcaption></figure>
+<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/linux-dns-ping-curl/ssh-studio-01.webp" alt="Terminal của SSH Studio: thêm 127.0.0.1 bao-gia.noi-bo vào /etc/hosts bằng sudo tee -a, getent hosts trả 127.0.0.1, dig +short không trả gì, curl http://bao-gia.noi-bo:8080/suc-khoe vẫn trả trạng thái ok" width="2400" height="1350" loading="lazy"></div><figcaption>SSH Studio · <code>/etc/hosts</code> đi trước DNS, nhưng <code>dig</code> không đọc nó</figcaption></figure>
 
 ## 3. ping: máy kia có trả lời không
 
@@ -76,6 +78,8 @@ PING 192.0.2.10 (192.0.2.10) 56(84) bytes of data.
 2 packets transmitted, 0 received, 100% packet loss, time 1026ms
 ```
 
+<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/linux-dns-ping-curl/ssh-studio-05.webp" alt="Terminal của SSH Studio: ping -c 3 toinoi-app-02 nhận đủ 3 gói, rtt khoảng 0.1 ms; ping -c 2 -W 1 192.0.2.10 mất 100% gói" width="2400" height="1350" loading="lazy"></div><figcaption>SSH Studio · <code>ping</code>: máy trả lời và máy im lặng</figcaption></figure>
+
 **`ping`** gửi gói ICMP «echo request» và đo thời gian phản hồi. `toinoi-app-02` trả lời cả 3 gói, mỗi gói dưới 0,1 ms (cùng máy chủ Docker). `192.0.2.10` thuộc dải dành riêng cho tài liệu, không ai dùng: 100% gói mất.
 
 Ping thành công nghĩa là **máy** tới được, không nói gì về **dịch vụ**. Ngược lại, nhiều server và tường lửa chặn ICMP: ping thất bại chưa chắc máy đã chết. Kiểm tra dịch vụ thì kiểm tra đúng cổng (`nc -zv`, `curl`).
@@ -93,6 +97,8 @@ an@toinoi-app-01:~$ curl -s -o /dev/null -w '%{http_code}\n' 'http://bao-gia.noi
 400
 ```
 
+<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/linux-dns-ping-curl/ssh-studio-06.webp" alt="Terminal của SSH Studio: curl tới khong-co.toinoi.invalid báo Could not resolve host, curl tới toinoi-app-02:8080 báo Failed to connect: Couldn't connect to server" width="2400" height="1350" loading="lazy"></div><figcaption>SSH Studio · hai kiểu lỗi đầu: sai tên và cổng không có ai nghe</figcaption></figure>
+
 | Thông báo | Nghĩa | Ai xem |
 |---|---|---|
 | `(6) Could not resolve host` | **DNS**: tên không phân giải được | DNS, `/etc/hosts`, gõ sai tên |
@@ -104,7 +110,7 @@ Mã lỗi `(6)`, `(7)`, `(28)` là mã thoát của `curl` (`echo $?`), dùng đ
 
 Thời gian ghi trong thông báo cũng là manh mối: bị từ chối thì trả lời ngay, còn tường lửa chặn thì phải đợi tới hết `--connect-timeout`.
 
-<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/linux-dns-ping-curl/ssh-studio-02.webp" alt="Terminal của SSH Studio: ping toinoi-app-02 ba gói trả lời 0% packet loss, ping 192.0.2.10 mất 100%, curl tên .invalid báo Could not resolve host, curl toinoi-app-02:8080 báo Couldn't connect sau 0 ms, curl 192.0.2.10 báo Timeout sau 3002 ms, mã HTTP 400 cho dịch vụ không hợp lệ" width="2400" height="1350" loading="lazy"></div><figcaption>SSH Studio · <code>ping</code> và bốn kiểu lỗi của <code>curl</code></figcaption></figure>
+<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/linux-dns-ping-curl/ssh-studio-02.webp" alt="Terminal của SSH Studio: curl tới 192.0.2.10:8080 báo Failed to connect sau 3002 ms: Timeout was reached, curl -w '%{http_code}' cho yêu cầu dịch vụ không hợp lệ in 400" width="2400" height="1350" loading="lazy"></div><figcaption>SSH Studio · lỗi hết giờ và lỗi HTTP 400 của ứng dụng</figcaption></figure>
 
 ## 5. curl -v: từng bước của một yêu cầu
 

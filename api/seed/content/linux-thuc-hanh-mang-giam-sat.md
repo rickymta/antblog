@@ -56,7 +56,7 @@ nc: connect to toinoi-app-01 (10.20.0.11) port 80 (tcp) timed out: Operation now
 
 Kiểm tra «từ ngoài nhìn vào» luôn phải làm **từ một máy khác**: từ chính server, loopback đi vòng qua tường lửa và mọi thứ trông như mở.
 
-<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/linux-thuc-hanh-mang-giam-sat/ssh-studio-01.webp" alt="Terminal của SSH Studio: sudo ufw status verbose với 22/tcp OpenSSH LIMIT IN Anywhere và 443/tcp ALLOW IN 10.20.0.0/24, sudo ss -tlnpH bỏ loopback, rút gọn bằng awk, thấy nginx ở 443 và 80, sshd ở 22" width="2400" height="1350" loading="lazy"></div><figcaption>SSH Studio · tường lửa và các cổng nghe ra ngoài</figcaption></figure>
+<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/linux-thuc-hanh-mang-giam-sat/ssh-studio-01.webp" alt="Terminal của SSH Studio: sudo ufw status verbose cho Default deny (incoming), 22/tcp LIMIT IN, 443/tcp ALLOW IN từ 10.20.0.0/24; ss -tlnpH bỏ 127.0.0 còn nginx ở 0.0.0.0:443 và 0.0.0.0:80, sshd ở 22" width="2400" height="1350" loading="lazy"></div><figcaption>SSH Studio · tường lửa và các cổng đang nghe ra ngoài</figcaption></figure>
 
 ## 2. Báo cáo tài nguyên định kỳ
 
@@ -126,9 +126,13 @@ NEXT                            LEFT LAST PASSED UNIT                     ACTIVA
 Tue 2026-11-24 08:15:00 +07 1min 33s -         - bao-cao-tai-nguyen.timer bao-cao-tai-nguyen.service
 ```
 
+<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/linux-thuc-hanh-mang-giam-sat/ssh-studio-05.webp" alt="Terminal của SSH Studio: sudoedit bao-cao-tai-nguyen, chmod 755, chạy thử in tải 0.72 / 16 nhân, bộ nhớ còn dùng được, đĩa / và /du-lieu, 6 cổng đang nghe, bao-gia và nginx active" width="2400" height="1350" loading="lazy"></div><figcaption>SSH Studio · chạy tay script báo cáo trước khi giao cho timer</figcaption></figure>
+
+<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/linux-thuc-hanh-mang-giam-sat/ssh-studio-06.webp" alt="Terminal của SSH Studio: sudoedit file .service và .timer, daemon-reload, enable --now bao-cao-tai-nguyen.timer tạo symlink trong timers.target.wants, start service để chạy ngay" width="2400" height="1350" loading="lazy"></div><figcaption>SSH Studio · bật timer 15 phút và chạy service một lần</figcaption></figure>
+
 Log này là thứ nhóm vận hành mở khi có sự cố: «lúc 2 giờ sáng tải và bộ nhớ thế nào?» Nó cũng cần được xoay vòng: bài tập 2.
 
-<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/linux-thuc-hanh-mang-giam-sat/ssh-studio-03.webp" alt="Terminal của SSH Studio: chạy bao-cao-tai-nguyen in khối === với tải, bộ nhớ dùng được, dung lượng / và /du-lieu, số cổng nghe, bao-gia active và nginx active; daemon-reload, enable --now timer, start service, cat /var/log/toinoi/tai-nguyen.log có khối do service vừa ghi, list-timers với lần chạy tới ở phút chia hết cho 15" width="2400" height="1350" loading="lazy"></div><figcaption>SSH Studio · báo cáo tài nguyên chạy bằng timer</figcaption></figure>
+<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/linux-thuc-hanh-mang-giam-sat/ssh-studio-03.webp" alt="Terminal của SSH Studio: cat /var/log/toinoi/tai-nguyen.log có khối báo cáo với tải, bộ nhớ, đĩa /, đĩa /du-lieu, số cổng đang nghe, trạng thái bao-gia và nginx; list-timers cho lần chạy kế tiếp sau 7 phút" width="2400" height="1350" loading="lazy"></div><figcaption>SSH Studio · báo cáo tài nguyên được ghi vào log, timer hẹn lần kế tiếp</figcaption></figure>
 
 ## 3. Bảng kiểm tra bàn giao
 
@@ -153,7 +157,9 @@ active
 active
 ```
 
-<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/linux-thuc-hanh-mang-giam-sat/ssh-studio-04.webp" alt="Terminal của SSH Studio: findmnt /du-lieu ext4, dòng UUID trong fstab, nginx -t successful, curl --cacert HTTPS trả JSON của bao-gia, ssh app02 liệt kê ba release đã sao lưu, systemctl is-active của bao-gia, nginx, ufw và timer đều active" width="2400" height="1350" loading="lazy"></div><figcaption>SSH Studio · bảng kiểm tra bàn giao</figcaption></figure>
+<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/linux-thuc-hanh-mang-giam-sat/ssh-studio-07.webp" alt="Terminal của SSH Studio: findmnt cho /du-lieu trên /dev/loop2 ext4, grep fstab có dòng UUID … /du-lieu ext4 defaults,nofail 0 2, nginx -t báo test is successful" width="2400" height="1350" loading="lazy"></div><figcaption>SSH Studio · ổ dữ liệu đã gắn và có trong fstab, cấu hình nginx hợp lệ</figcaption></figure>
+
+<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/linux-thuc-hanh-mang-giam-sat/ssh-studio-04.webp" alt="Terminal của SSH Studio: curl --cacert https://bao-gia.toinoi.lab/suc-khoe trả ok, ssh app02 ls sao-luu/releases cho 1.4.2, 1.5.0, 1.6.0, systemctl is-active bao-gia nginx ufw bao-cao-tai-nguyen.timer đều active" width="2400" height="1350" loading="lazy"></div><figcaption>SSH Studio · bảng kiểm tra bàn giao: HTTPS, bản sao lưu, các dịch vụ</figcaption></figure>
 
 ## 4. Chấm cả Phần 5
 

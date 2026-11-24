@@ -34,6 +34,8 @@ an@toinoi-app-01:~$ grep toinoi /etc/hosts
 10.20.0.11      toinoi-app-01
 ```
 
+<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/linux-ip-cong-ss/ssh-studio-04.webp" alt="Terminal của SSH Studio: hostname in toinoi-app-01, ip -br addr cho lo 127.0.0.1/8 và eth0 UP 10.20.0.11/24" width="2400" height="1350" loading="lazy"></div><figcaption>SSH Studio · tên và địa chỉ IP của server</figcaption></figure>
+
 - **`ip -br addr`** (`-br`: dạng gọn) liệt kê **giao diện mạng** và địa chỉ của chúng. `lo` là giao diện **loopback**: địa chỉ `127.0.0.1` (IPv4) và `::1` (IPv6) chỉ dẫn về chính máy này, không bao giờ ra mạng. `eth0` là card mạng nối vào mạng nội bộ, địa chỉ `10.20.0.11/24` (`/24`: cùng mạng với mọi địa chỉ `10.20.0.x`).
 - **`ip route`**: gói tin đi đâu. Đích trong `10.20.0.0/24` đi thẳng qua `eth0`; mọi đích khác đi qua **gateway** `10.20.0.1` (`default via`).
 - **`hostname -I`**: các địa chỉ của máy, không tính loopback.
@@ -41,7 +43,7 @@ an@toinoi-app-01:~$ grep toinoi /etc/hosts
 
 Trên một máy ảo đám mây, `eth0` (hay `ens5`, `enp0s3`) thường có một địa chỉ riêng như vậy; địa chỉ công khai nằm ở thiết bị NAT của nhà cung cấp, server không thấy trực tiếp.
 
-<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/linux-ip-cong-ss/ssh-studio-01.webp" alt="Terminal của SSH Studio: hostname toinoi-app-01, ip -br addr với lo 127.0.0.1/8 và eth0 10.20.0.11/24, ip route với default via 10.20.0.1 và mạng 10.20.0.0/24, hostname -I, dòng toinoi-app-01 trong /etc/hosts" width="2400" height="1350" loading="lazy"></div><figcaption>SSH Studio · địa chỉ và tuyến của <code>toinoi-app-01</code></figcaption></figure>
+<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/linux-ip-cong-ss/ssh-studio-01.webp" alt="Terminal của SSH Studio: ip route cho default via 10.20.0.1 dev eth0 và mạng 10.20.0.0/24, hostname -I in 10.20.0.11, grep toinoi /etc/hosts cho 10.20.0.11 toinoi-app-01" width="2400" height="1350" loading="lazy"></div><figcaption>SSH Studio · đường đi mặc định và tên máy trong <code>/etc/hosts</code></figcaption></figure>
 
 ## 2. Cổng và dịch vụ đang nghe
 
@@ -65,6 +67,8 @@ an@toinoi-app-01:~$ curl -s http://127.0.0.1:8080/suc-khoe
 an@toinoi-app-01:~$ curl -sS --connect-timeout 3 http://10.20.0.11:8080/suc-khoe
 curl: (7) Failed to connect to 10.20.0.11 port 8080 after 0 ms: Couldn't connect to server
 ```
+
+<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/linux-ip-cong-ss/ssh-studio-05.webp" alt="Terminal của SSH Studio: ss -tln liệt kê các cổng LISTEN, sudo ss -tlnp thêm cột Process với sshd và bao-gia, curl 127.0.0.1:8080 trả ok, curl 10.20.0.11:8080 báo Failed to connect" width="2400" height="1350" loading="lazy"></div><figcaption>SSH Studio · bao-gia chỉ nghe trên 127.0.0.1, gọi qua IP của eth0 thì bị từ chối</figcaption></figure>
 
 **`ss`** (*socket statistics*) là công cụ hiện đại thay cho `netstat`:
 
@@ -100,7 +104,7 @@ LISTEN 0      128             [::]:22            [::]:*    users:(("sshd",pid=18
 
 Cột cuối của `sudo ss -tlnp` cho biết tiến trình nào giữ socket: `sshd`, `bao-gia`, `python3`. Đây là cách nhanh nhất trả lời «cái gì đang chiếm cổng 8081?».
 
-<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/linux-ip-cong-ss/ssh-studio-02.webp" alt="Terminal của SSH Studio: ss -tln với 0.0.0.0:22, 127.0.0.1:8080, sudo ss -tlnp có tên tiến trình sshd và bao-gia, curl qua 127.0.0.1 trả JSON còn qua 10.20.0.11 bị Couldn't connect, chạy python3 -m http.server 8081 nghe ở 0.0.0.0, ss thấy cổng 8081 của python3" width="2400" height="1350" loading="lazy"></div><figcaption>SSH Studio · <code>ss -tlnp</code>: ai nghe ở địa chỉ nào</figcaption></figure>
+<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/linux-ip-cong-ss/ssh-studio-02.webp" alt="Terminal của SSH Studio: chạy python3 -m http.server 8081 --bind 0.0.0.0 bằng nohup trong thư mục logs, sudo ss -tlnp cho 0.0.0.0:22 sshd, 0.0.0.0:8081 python3, 127.0.0.1:8080 bao-gia, [::]:22 sshd" width="2400" height="1350" loading="lazy"></div><figcaption>SSH Studio · 8081 nghe trên mọi địa chỉ, 8080 chỉ nghe trên 127.0.0.1</figcaption></figure>
 
 Từ `toinoi-app-02`, thử ba cổng bằng **`nc -zv`** (`-z`: chỉ thử kết nối, không gửi gì; `-v`: in kết quả):
 
@@ -139,9 +143,11 @@ an@toinoi-app-01:~$ sudo ss -tlnp | grep -c ':8081 '
 0
 ```
 
+<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/linux-ip-cong-ss/ssh-studio-06.webp" alt="Terminal của SSH Studio: ss -tn cho một kết nối ESTAB từ 10.20.0.1:33338 tới 10.20.0.11:22" width="2400" height="1350" loading="lazy"></div><figcaption>SSH Studio · <code>ss -tn</code>: kết nối SSH của chính phiên đang dùng</figcaption></figure>
+
 **`ss -tn`** (không `-l`) liệt kê kết nối đã thiết lập. Bản ghi của lab không có kết nối nào (runner không đi qua SSH). Trong SSH Studio, bạn thấy chính phiên của mình: `10.20.0.11:22` nối với một cổng cao của địa chỉ gateway, trạng thái `ESTAB`, tiến trình `sshd`.
 
-<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/linux-ip-cong-ss/ssh-studio-03.webp" alt="Terminal của SSH Studio: ss -tn và sudo ss -tnp state established cho thấy kết nối SSH của phiên đang mở từ cổng 22 của 10.20.0.11 tới địa chỉ gateway, pkill dừng http.server 8081, ss đếm 0 socket ở cổng 8081" width="2400" height="1350" loading="lazy"></div><figcaption>SSH Studio · kết nối đang mở, và tắt dịch vụ thử</figcaption></figure>
+<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/linux-ip-cong-ss/ssh-studio-03.webp" alt="Terminal của SSH Studio: sudo ss -tnp state established cho kết nối SSH 10.20.0.11:22 từ 10.20.0.1 của sshd, pkill -f http.server 8081, ss -tlnp | grep -c :8081 in 0" width="2400" height="1350" loading="lazy"></div><figcaption>SSH Studio · kết nối đang mở và dọn máy chủ thử 8081</figcaption></figure>
 
 ## 5. Đối chiếu thao tác
 
