@@ -23,9 +23,12 @@ npm run setup -- 36    # bài Phần 4 đánh số 31–40; ví dụ 36 là nhá
 npm run kiem-tra-p04 -- <đường dẫn repository>   # chấm repository của Minh theo 10 tiêu chí của GIT-040
 npm run p05            # chạy cả Phần 5 (bisect, tìm kiếm, .gitattributes, submodule, LFS, clone nhẹ, bảo trì, ký, hook)
 npm run kiem-tra-p05 -- <đường dẫn repository>   # chấm repository của Minh theo 10 tiêu chí của GIT-050
+npm run p06            # chạy cả Phần 6 (Conventional Commits, semver, nhiều repository, CI, bí mật lỡ commit, CODEOWNERS, subtree, cấu hình, sự cố)
+npm run setup -- 53    # bài Phần 6 đánh số 51–60; 53 dựng thêm app-tai-xe và tien-te cạnh bao-gia để mở workspace
+npm run kiem-tra-p06 -- <đường dẫn repository>   # chấm repository của Minh theo 10 tiêu chí của GIT-060
 ```
 
-Kết quả trên máy viết bài: Phần 1 `# [lab] PASS: 31`, Phần 2 `# [lab] PASS: 23`, Phần 3 `# [lab] PASS: 38`, Phần 4 `# [lab] PASS: 36`, Phần 5 `# [lab] PASS: 37`, `# [lab] FAIL: 0`, `npm test` 8/8. Phần 5 cần thêm Git LFS (đi kèm Git for Windows) và `ssh-keygen` (có sẵn trong Git for Windows).
+Kết quả trên máy viết bài: Phần 1 `# [lab] PASS: 31`, Phần 2 `# [lab] PASS: 23`, Phần 3 `# [lab] PASS: 38`, Phần 4 `# [lab] PASS: 36`, Phần 5 `# [lab] PASS: 37`, Phần 6 `# [lab] PASS: 44`, `# [lab] FAIL: 0`, `npm test` 9/9. Phần 5 và 6 cần thêm Git LFS (đi kèm Git for Windows) và `ssh-keygen` (có sẵn trong Git for Windows). Script `.sh` của lab chạy bằng `sh` trong PATH, hoặc `bin/sh.exe` của Git for Windows khi chạy từ PowerShell (`shPath()` trong `lib/lab.mjs`).
 
 ## Vì sao mã hash trong bài trùng với máy bạn
 
@@ -55,6 +58,8 @@ Khác phiên bản git có thể khác câu chữ của vài thông báo (ví d�
 | `p04/NN-*.mjs`, `p04/kiem-tra.mjs`, `p04/OUTPUT.txt` | Bài GIT-031…GIT-040 |
 | `lib/history5.mjs` | Lịch sử chuẩn Phần 5: 8 bước (tám commit buổi sáng có một lỗi làm tròn, revert, .gitattributes, submodule `lib/tien-te` với URL tương đối, Git LFS, commit và tag `v1.2.0` ký bằng khoá SSH, hook trong `.githooks`, báo cáo) |
 | `p05/NN-*.mjs`, `p05/kiem-tra.mjs`, `p05/kiem-tra-lam-tron.sh`, `p05/OUTPUT.txt` | Bài GIT-041…GIT-050; `kiem-tra-lam-tron.sh` là "test" cho `git bisect run` |
+| `lib/history6.mjs` | Lịch sử chuẩn Phần 6: 10 bước, 30/11–07/12/2026 (Conventional Commits và `scripts/changelog.sh`, tag `v1.3.0`/`v1.3.1`/`v1.4.0` có chữ ký, nhánh phát hành, repository `app-tai-xe` và `tien-te` cho bài nhiều repository, CI và `scripts/phien-ban.sh`, khoá API giả trong fork của Lan xoá bằng `filter-branch`, CODEOWNERS và ADR, thư viện tiền tệ chuyển sang `git subtree`, `docs/git/toinoi.gitconfig`, revert một push nhầm, runbook phát hành) |
+| `p06/NN-*.mjs`, `p06/kiem-tra.mjs`, `p06/OUTPUT.txt` | Bài GIT-051…GIT-060 |
 | `fixtures/khoa-ky-demo*` | Khoá SSH demo chỉ dùng để ký trong lab (xem `fixtures/README.md`); cố định để chữ ký và mã commit tái lập được |
 | `p01/NN-*.mjs` | Một file cho mỗi bài GIT-001…GIT-010; `start`/`end` = số commit chuẩn ở đầu/cuối bài |
 | `p01/kiem-tra.mjs` | Script chấm repository của GIT-010 (chỉ đọc, mã thoát 0 khi đạt hết) |

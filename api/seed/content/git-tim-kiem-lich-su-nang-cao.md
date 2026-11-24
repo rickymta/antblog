@@ -1,7 +1,7 @@
 ---
 slug: git-tim-kiem-lich-su-nang-cao
 title: "Tìm kiếm nâng cao trong lịch sử: -S, -G, --grep, git grep theo commit, khoảng A..B và A...B"
-summary: "Sau vụ sai cước, nhóm muốn trả lời nhanh những câu hỏi kiểu: ai từng đổi phép làm tròn, commit nào nhắc phụ phí đêm, nhánh phát hành có gì main chưa có. Bài này phân biệt pickaxe -S với -G, kết hợp --grep, --author, --since, --all-match; tìm trong nội dung file ở commit bất kỳ bằng git grep; đọc khoảng hai chấm, ba chấm với rev-list --left-right, merge-base, --first-parent, --merges; và ô tìm commit trên đồ thị (Ctrl+Shift+F) của GitStudio."
+summary: "Sau vụ sai cước, nhóm muốn trả lời nhanh những câu hỏi kiểu: ai từng đổi phép làm tròn, commit nào nhắc phụ phí đêm, nhánh phát hành có gì main chưa có. Bài này phân biệt pickaxe -S với -G, kết hợp --grep, --author, --since, --all-match; tìm trong nội dung file ở commit bất kỳ bằng git grep; đọc khoảng hai chấm, ba chấm với rev-list --left-right, merge-base, --first-parent, --merges; và Spotlight của GitStudio."
 category: git
 level: beginner
 tags: [git, git-042, git-log, pickaxe, git-grep, revision-range, gitstudio, toi-noi]
@@ -120,11 +120,11 @@ e46c89f Merge branch 'tinh-nang/phu-phi-gio-cao-diem'
 
 ## 6. Trên GitStudio
 
-`Ctrl+Shift+F` mở ô tìm kiếm trên đồ thị (GIT-006; `Ctrl+F` mở Spotlight). Danh sách phạm vi bên trái ô: **Commit đã tải** lọc ngay trên các commit đang hiển thị; các phạm vi còn lại tìm trong **toàn bộ lịch sử** của mọi nhánh: **Nội dung commit** (`--grep`), **Tác giả** (`--author`), **Đoạn code thay đổi** (`-S`) và **File hoặc thư mục** (`-- <đường dẫn>`). Mỗi lần tìm một phạm vi; chuỗi được hiểu nguyên văn (`--fixed-strings`) và không phân biệt hoa thường (`-i`). Kết quả hiện thành danh sách "Tìm thấy N commit" ngay dưới ô, commit khớp được tô đậm trên đồ thị, phím mũi tên nhảy giữa kết quả. Muốn kết hợp nhiều điều kiện (`--grep` và `--author` cùng lúc, `--since`), dùng terminal.
+Ô tìm của GitStudio là **Spotlight** (`Ctrl+K`, `Ctrl+F`, GIT-006). Với commit, Spotlight tìm theo tiêu đề, tác giả, thân commit, mã hash trong các commit đồ thị đã tải, và từ 3 ký tự trở lên thì tìm thêm **nội dung commit trong toàn bộ lịch sử** của mọi nhánh: tương đương `git log --all -i --fixed-strings --grep=<chuỗi>`, tối đa 30 kết quả. Gõ `phụ phí đêm`, nhóm **Commit** ra đúng những commit mà lệnh `--grep` ở mục 2 liệt kê. Spotlight không kết hợp nhiều điều kiện và không tìm theo đoạn code bị thay đổi.
 
-Không có `-G`, khoảng `A..B` hay `git grep` theo commit trên giao diện; gõ trong terminal tích hợp. Chuột phải nhánh → **So sánh main → …** (GIT-026) cho biết số commit chỉ có ở mỗi bên.
+Không có `-S`, `-G`, `--author` trên toàn bộ lịch sử, `--since`, khoảng `A..B` hay `git grep` theo commit trên giao diện: gõ trong terminal tích hợp. Vì vậy truy vết lỗi làm tròn ở mục 1 (`-S"Math.Round(atLeastMinimum"`) làm bằng lệnh. Chuột phải nhánh → **So sánh main → …** (GIT-026) cho biết số commit chỉ có ở mỗi bên.
 
-<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/git-tim-kiem-lich-su-nang-cao/gitstudio-01.webp" alt="Ô tìm commit trên đồ thị GitStudio mở bằng Ctrl+Shift+F, phạm vi Đoạn code thay đổi (toàn bộ lịch sử), từ khoá Math.Round(atLeastMinimum; danh sách Tìm thấy 2 commit gồm commit revert và commit Làm gọn phép làm tròn giá cước, được tô đậm trên đồ thị" width="2000" height="1125" loading="lazy"></div><figcaption>GitStudio · Ctrl+Shift+F với phạm vi Đoạn code thay đổi (git log -S)</figcaption></figure>
+<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/git-tim-kiem-lich-su-nang-cao/gitstudio-01.webp" alt="Spotlight của GitStudio với từ khoá phụ phí đêm: nhóm Khớp nhất và nhóm Commit liệt kê năm commit có cụm từ đó, trùng kết quả git log -i --grep ở mục 2; khung bên phải xem trước commit Ghi chú nguồn của hằng số phụ phí đêm" width="2000" height="1125" loading="lazy"></div><figcaption>GitStudio · Spotlight tìm nội dung commit, tương đương git log -i --grep</figcaption></figure>
 
 <figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/git-tim-kiem-lich-su-nang-cao/gitstudio-02.webp" alt="Terminal tích hợp của GitStudio chạy git rev-list --left-right --count main...phat-hanh/1.0 in 38 và 2, và git log --oneline main..phat-hanh/1.0 liệt kê hai commit vá của nhánh phát hành, tiếp theo là git merge-base và git log --oneline --first-parent" width="2000" height="1125" loading="lazy"></div><figcaption>GitStudio · terminal: so hai nhánh bằng khoảng commit</figcaption></figure>
 
@@ -132,10 +132,10 @@ Không có `-G`, khoảng `A..B` hay `git grep` theo commit trên giao diện; g
 
 | Câu hỏi | GitStudio | Lệnh |
 |---|---|---|
-| Commit nào thêm/bỏ chuỗi X? | Ctrl+Shift+F → Đoạn code thay đổi | `git log -S"X"` |
+| Commit nào thêm/bỏ chuỗi X? | (terminal) | `git log -S"X"` |
 | Commit nào sửa dòng khớp regex? | (terminal) | `git log -G"regex"` |
-| Commit nào nhắc chủ đề? | Ctrl+Shift+F → Nội dung commit | `git log --grep="…" -i` |
-| Ai sửa gì từ ngày D? | Ctrl+Shift+F → Tác giả (không lọc ngày) | `git log --author=… --since=D` |
+| Commit nào nhắc chủ đề? | Spotlight, gõ từ khoá | `git log --all --grep="…" -i` |
+| Ai sửa gì từ ngày D? | Spotlight, gõ tên (chỉ commit đã tải, không lọc ngày) | `git log --author=… --since=D` |
 | File ở commit cũ có chuỗi X không? | (terminal) | `git grep -n X <commit> -- <thư mục>` |
 | Nhánh B có gì A chưa có? | Chuột phải nhánh → So sánh | `git log A..B` |
 | Hai nhánh lệch nhau bao nhiêu? | | `git rev-list --left-right --count A...B` |

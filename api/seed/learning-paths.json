@@ -1548,5 +1548,25 @@
       "git-thuc-hanh-dieu-tra-bao-tri"
     ],
     "status": "published"
+  },
+  {
+    "slug": "git-qua-gitstudio-phan-06",
+    "title": "Git qua GitStudio · Phần 6 · Quy trình nhóm và tự động hoá",
+    "description": "Đủ 10 bài GIT-051–GIT-060, phần cuối của series: Conventional Commits và CHANGELOG sinh từ lịch sử, phát hành theo semver với tag có chữ ký và nhánh phát hành, Workspace và Launchpad của GitStudio cho nhiều repository, Git trong CI (fetch-depth, phiên bản từ tag, quyền token), xử lý khoá API lỡ commit, monorepo hay nhiều repository với CODEOWNERS và ADR, gộp và tách repository bằng subtree, cấu hình git chung của nhóm, sổ tay sự cố; kết thúc bằng phát hành 1.4.0 theo runbook và script chấm 10 tiêu chí. Gồm 3 bài cơ bản, 4 trung bình và 3 nâng cao.",
+    "level": "advanced",
+    "category": "git",
+    "articles": [
+      "git-conventional-commits-changelog",
+      "git-phat-hanh-semver",
+      "git-workspace-launchpad",
+      "git-trong-ci",
+      "git-bi-mat-lo-commit",
+      "git-monorepo-hay-nhieu-repository",
+      "git-gop-tach-repository",
+      "git-hieu-nang-hang-ngay",
+      "git-su-co-thuong-gap",
+      "git-thuc-hanh-quy-trinh-phat-hanh"
+    ],
+    "status": "published"
   }
 ]

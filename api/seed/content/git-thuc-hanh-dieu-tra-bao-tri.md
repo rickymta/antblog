@@ -155,4 +155,4 @@ Phần 6 (cuối series) là **quy trình nhóm và tự động hoá**: quy ư�
 
 - [Pro Git, Git Tools](https://git-scm.com/book/en/v2/Git-Tools-Revision-Selection) và [Customizing Git](https://git-scm.com/book/en/v2/Customizing-Git-Git-Configuration).
 
-Bài tiếp theo (Phần 6): GIT-051 · Conventional Commits và changelog *(đang viết)*
+Bài tiếp theo (Phần 6): [GIT-051 · Conventional Commits và CHANGELOG](/articles/git-conventional-commits-changelog).

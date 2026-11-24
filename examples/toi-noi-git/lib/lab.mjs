@@ -88,6 +88,22 @@ export function splitArgs(line) {
   return out;
 }
 
+let shCache;
+/**
+ * Đường dẫn sh để chạy script .sh của lab. Trên Windows, PowerShell không có sh trong PATH (chỉ Git Bash có):
+ * khi đó dùng bin/sh.exe đi kèm Git for Windows, suy ra từ `git --exec-path`.
+ */
+export function shPath() {
+  if (shCache) return shCache;
+  shCache = 'sh';
+  if (process.platform === 'win32' && spawnSync('sh', ['-c', 'exit 0']).error) {
+    const exec = (spawnSync('git', ['--exec-path'], { encoding: 'utf8' }).stdout ?? '').trim();
+    const sh = resolve(exec, '..', '..', '..', 'bin', 'sh.exe');
+    if (exec && existsSync(sh)) shCache = sh;
+  }
+  return shCache;
+}
+
 /** Thay đường dẫn tuyệt đối của lab bằng <lab> để kết quả giống nhau trên mọi máy. */
 export function normalize(text) {
   const variants = new Set([LAB, LAB.split(sep).join('/'), LAB.split('\\').join('/')]);

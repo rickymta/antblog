@@ -1,7 +1,7 @@
 ---
 slug: git-lich-su-log-do-thi-commit
 title: "Đọc lịch sử: git log, đồ thị commit và tìm commit trong GitStudio"
-summary: "Bộ phận vận hành hỏi tuần trước nhóm đã đổi những gì trong dịch vụ báo giá. Bài này đọc lịch sử bằng git log với --oneline, --graph, --format, lọc theo tác giả, khoảng thời gian, đường dẫn và nội dung commit, dùng khoảng commit A..B, rồi làm cùng các việc đó trên đồ thị commit, ô tìm kiếm Ctrl+Shift+F và Spotlight của GitStudio."
+summary: "Bộ phận vận hành hỏi tuần trước nhóm đã đổi những gì trong dịch vụ báo giá. Bài này đọc lịch sử bằng git log với --oneline, --graph, --format, lọc theo tác giả, khoảng thời gian, đường dẫn và nội dung commit, dùng khoảng commit A..B, rồi làm cùng các việc đó trên đồ thị commit, Spotlight của GitStudio."
 category: git
 level: intermediate
 tags: [git, git-006, git-log, git-show, commit-graph, tim-kiem, gitstudio, spotlight, toi-noi]
@@ -175,24 +175,27 @@ Bấm một file trong danh sách để xem diff của file đó trong commit. C
 
 Di chuyển bằng bàn phím: `↑`/`↓` hoặc `K`/`J` chọn commit trước/sau, `Ctrl+Shift+H` nhảy về `HEAD`. Repository có hàng chục nghìn commit thì GitStudio tải dần khi bạn cuộn (mặc định 500 commit đầu, chỉnh ở **Tuỳ chọn → Chung**).
 
-## 8. Tìm commit: `Ctrl+Shift+F` và Spotlight
+## 8. Tìm commit bằng Spotlight
 
-**`Ctrl+Shift+F`** mở ô tìm kiếm ngay trên đồ thị (`Ctrl+F` và nút **Tìm kiếm** trên thanh công cụ mở Spotlight). Commit khớp được tô đậm, commit không khớp mờ đi, mũi tên lên/xuống nhảy giữa các kết quả (`1/3`). Gõ `Lan`, ba commit của Lê Lan nổi lên:
+**Spotlight** là ô tìm chung của repository: mở bằng `Ctrl+K`, `Ctrl+F` hoặc nút **Tìm kiếm** ở góc phải thanh công cụ. Chưa gõ gì thì Spotlight liệt kê các nhánh cục bộ và vài thao tác hay dùng (pull, push, fetch, tạo nhánh, stash, đi tới HEAD, terminal). Gõ từ khoá thì kết quả chia nhóm **Khớp nhất**, **Nhánh**, **Commit**, **File**, **Tag**, **Stash**, **Thao tác**.
 
-<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/git-lich-su-log-do-thi-commit/gitstudio-02.webp" alt="Ô tìm kiếm Ctrl+Shift+F trên đồ thị GitStudio với phạm vi Commit đã tải và từ khoá Lan, kết quả 1/3; ba commit của Lê Lan được tô đậm, các commit khác mờ đi" width="2000" height="1125" loading="lazy"></div><figcaption>GitStudio · <code>Ctrl+F</code> trên đồ thị, tương đương <code>git log --author=Lan</code> trên các commit đã tải</figcaption></figure>
+Với commit, Spotlight tìm hai tầng:
 
-Danh sách thả xuống bên trái ô tìm kiếm chọn **phạm vi**. "Commit đã tải" lọc ngay trên những commit đang hiển thị (theo nội dung, tác giả, mã hash). Các phạm vi còn lại tìm trong **toàn bộ lịch sử** và chạy đúng một lệnh `git log` bên dưới:
+- **Trong các commit đồ thị đã tải**: tiêu đề, tên tác giả, thân commit, hoặc phần đầu mã hash (gõ từ 2 ký tự).
+- **Trong toàn bộ lịch sử** của mọi nhánh, theo nội dung commit (gõ từ 3 ký tự): Spotlight hỏi git (`git log --all -i --fixed-strings --grep=<chuỗi>`, tối đa 30 kết quả) và hiện "Đang tìm trong toàn bộ lịch sử…" trong lúc chờ. Tầng này tìm được cả commit cũ mà đồ thị chưa tải tới.
 
-| Phạm vi trong GitStudio | Lệnh tương ứng |
-|---|---|
-| Nội dung commit (toàn bộ lịch sử) | `git log --grep=<chuỗi> -i` |
-| Tác giả (toàn bộ lịch sử) | `git log --author=<chuỗi>` |
-| Đoạn code thay đổi (toàn bộ lịch sử) | `git log -S<chuỗi>` (pickaxe, GIT-009) |
-| File hoặc thư mục (toàn bộ lịch sử) | `git log -- <đường dẫn>` |
+Gõ `Lan`: ba commit của Lê Lan nổi lên (khớp theo tác giả), commit mới nhất ở nhóm **Khớp nhất**, hai commit còn lại ở nhóm **Commit**. Khung bên phải xem trước tác giả, ngày, mã SHA, thông điệp và các file đổi của kết quả đang chọn. `↑`/`↓` chọn kết quả, `Enter` chọn commit đó trên đồ thị (đồ thị cuộn tới đúng hàng), `Esc` đóng.
 
-GitStudio truyền chuỗi tìm kiếm như chuỗi cố định (`--fixed-strings`), nên dấu chấm hay dấu ngoặc trong từ khoá không bị hiểu thành biểu thức chính quy.
+<figure class="tkh-fig"><div class="tkh-fig-box"><img src="/images/articles/git-lich-su-log-do-thi-commit/gitstudio-02.webp" alt="Spotlight của GitStudio với từ khoá Lan: nhóm Khớp nhất có commit Đổi tên tài liệu thành bang-gia-cuoc.md, nhóm Commit có hai commit khác của Lê Lan; khung bên phải xem trước tác giả, ngày, SHA và file đổi" width="2000" height="1125" loading="lazy"></div><figcaption>GitStudio · Spotlight (<code>Ctrl+K</code>): tìm commit theo tác giả, tương đương <code>git log --author=Lan</code> trên các commit đã tải</figcaption></figure>
 
-**Spotlight** (`Ctrl+K` hoặc `Ctrl+F`) tìm commit cùng lúc với nhánh, file, tag, stash; hợp khi bạn nhớ mang máng "commit gì đó về làm tròn" mà không biết nó là commit hay tên nhánh. Chọn một commit trong Spotlight, đồ thị cuộn tới và chọn đúng hàng đó.
+| Gõ trong Spotlight | Spotlight tìm | Lệnh tương ứng |
+|---|---|---|
+| Tên tác giả | Commit đã tải có tác giả khớp | `git log --author=<chuỗi>` |
+| Từ trong tiêu đề, thân commit | Commit đã tải, rồi toàn bộ lịch sử | `git log --all -i --fixed-strings --grep=<chuỗi>` |
+| Phần đầu mã hash | Commit có mã bắt đầu bằng chuỗi đó | `git show <mã>` |
+| Tên file | File đang được theo dõi; `Ctrl+Enter` mở **Lịch sử file** | `git log --follow -- <file>` |
+
+Chuỗi tìm kiếm là chuỗi cố định, không phân biệt hoa thường, nên dấu chấm hay dấu ngoặc trong từ khoá không bị hiểu thành biểu thức chính quy. Spotlight không tìm theo **đoạn code bị thay đổi** (pickaxe `-S`, GIT-009) hay theo tác giả trên toàn bộ lịch sử chưa tải: hai việc đó làm bằng lệnh ở các mục trên, trong terminal tích hợp.
 
 ## 9. Đối chiếu giao diện và lệnh
 
@@ -200,18 +203,19 @@ GitStudio truyền chuỗi tìm kiếm như chuỗi cố định (`--fixed-strin
 |---|---|---|---|
 | Xem lịch sử | Đồ thị commit | | `git log --oneline --graph` |
 | Xem một commit | Bấm hàng commit | `↑`/`↓`, `J`/`K` | `git show --stat <commit>` |
-| Về commit đang checkout | Biểu tượng định vị trên đồ thị; Spotlight → Về HEAD | `Ctrl+Shift+H` | `git log -1` |
-| Tìm theo tác giả | `Ctrl+Shift+F` → Tác giả | | `git log --author=` |
-| Tìm theo nội dung commit | `Ctrl+Shift+F` → Nội dung commit | | `git log --grep=` |
-| Tìm theo file | `Ctrl+Shift+F` → File hoặc thư mục; Spotlight → file → Lịch sử file | `Ctrl+Enter` trong Spotlight | `git log -- <file>` |
-| Tìm mọi thứ | Spotlight | `Ctrl+K` | |
+| Về commit đang checkout | Biểu tượng định vị trên đồ thị; Spotlight → Đi tới HEAD | `Ctrl+Shift+H` | `git log -1` |
+| Tìm theo tác giả | Spotlight, gõ tên (commit đã tải) | `Ctrl+K` | `git log --author=` |
+| Tìm theo nội dung commit | Spotlight, gõ từ khoá (cả lịch sử) | `Ctrl+K` | `git log --all --grep=` |
+| Tìm theo file | Spotlight → file → Lịch sử file | `Ctrl+Enter` trong Spotlight | `git log -- <file>` |
+| Tìm theo đoạn code thay đổi | (terminal) | | `git log -S"<chuỗi>"` |
+| Tìm nhánh, file, tag, stash, thao tác | Spotlight | `Ctrl+K`, `Ctrl+F` | |
 
 ## 10. Lỗi thường gặp
 
 - **Terminal "treo" sau `git log`.** Đang ở trình phân trang; bấm `q`. Thêm `-n 20` hoặc `--oneline` để in ít hơn.
 - **`--since=yesterday` cho kết quả khác nhau giữa hai máy.** Ngày tương đối tính theo múi giờ và giờ hiện tại của máy chạy lệnh. Báo cáo cần tái lập thì ghi rõ ngày giờ kèm múi giờ.
 - **Quên `--` trước đường dẫn trùng tên nhánh.** `git log docs` sẽ hiểu `docs` là nhánh nếu có nhánh tên đó. `git log -- docs` luôn hiểu là đường dẫn.
-- **`--author` và `--grep` cùng lúc ra "hoặc".** Mặc định Git lấy commit khớp *một trong hai*; thêm `--all-match` để bắt khớp *cả hai*. GitStudio luôn dùng `--all-match` khi tìm toàn bộ lịch sử.
+- **`--author` và `--grep` cùng lúc ra "hoặc".** Mặc định Git lấy commit khớp *một trong hai*; thêm `--all-match` để bắt khớp *cả hai*.
 - **Tìm theo đường dẫn bỏ sót lịch sử trước khi đổi tên file.** Xem `--follow` ở GIT-009.
 
 ## 11. Bài tập
@@ -224,9 +228,9 @@ GitStudio truyền chuỗi tìm kiếm như chuỗi cố định (`--fixed-strin
 
 <details><summary><b>Lời giải</b></summary><p><code>git log --oneline --author=Minh -- src tests</code> với repository này. Tổng quát hơn, loại trừ tác giả bằng <code>--perl-regexp --author='^(?!Lê Lan)'</code> (cần Git biên dịch kèm PCRE, Git for Windows có sẵn).</p></details>
 
-**Bài 3.** Trong GitStudio, dùng `Ctrl+Shift+F` với phạm vi **Đoạn code thay đổi**, gõ `Math.Ceiling`. Kết quả là commit nào? Viết lệnh tương ứng và chạy trong terminal tích hợp.
+**Bài 3.** Trong Spotlight, gõ `Math.Ceiling`. Vì sao nhóm **Commit** không có commit nào, dù chuỗi đó có trong code? Tìm commit đã đưa chuỗi đó vào bằng lệnh nào?
 
-<details><summary><b>Lời giải</b></summary><p>Commit <code>0d57e4b</code> "Làm tròn cước lên bội số 1.000 đ": commit duy nhất làm thay đổi số lần xuất hiện của chuỗi đó. Lệnh: <code>git log --oneline -S"Math.Ceiling"</code>. GIT-009 giải thích pickaxe kỹ hơn.</p></details>
+<details><summary><b>Lời giải</b></summary><p>Spotlight tìm commit theo tiêu đề, tác giả, thân commit và mã hash, không theo nội dung code. Chạy <code>git log --oneline -S"Math.Ceiling"</code> trong terminal tích hợp: ra commit <code>0d57e4b</code> "Làm tròn cước lên bội số 1.000 đ", commit duy nhất làm thay đổi số lần xuất hiện của chuỗi đó. GIT-009 giải thích pickaxe kỹ hơn.</p></details>
 
 ## 12. Đọc tiếp
 

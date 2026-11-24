@@ -6955,5 +6955,105 @@
       "LFS",
       "KÝ"
     ]
+  },
+  "git-conventional-commits-changelog": {
+    "title": "CONVENTIONAL COMMITS",
+    "subtitle": "Tiêu đề commit có cấu trúc, CHANGELOG tự sinh",
+    "diagram": "checklist",
+    "labels": [
+      "FEAT",
+      "FIX",
+      "CHANGELOG"
+    ]
+  },
+  "git-phat-hanh-semver": {
+    "title": "SEMVER",
+    "subtitle": "Tag có chữ ký, nhánh phát hành, bản vá 1.3.1",
+    "diagram": "flow",
+    "labels": [
+      "1.3.0",
+      "PHÁT HÀNH/1.3",
+      "1.3.1"
+    ]
+  },
+  "git-workspace-launchpad": {
+    "title": "WORKSPACE",
+    "subtitle": "Nhiều repository trên một trang",
+    "diagram": "network",
+    "labels": [
+      "BÁO GIÁ",
+      "APP TÀI XẾ",
+      "TIỀN TỆ"
+    ]
+  },
+  "git-trong-ci": {
+    "title": "GIT TRONG CI",
+    "subtitle": "Clone nông, tag, phiên bản, quyền token",
+    "diagram": "flow",
+    "labels": [
+      "CHECKOUT",
+      "DESCRIBE",
+      "BUILD"
+    ]
+  },
+  "git-bi-mat-lo-commit": {
+    "title": "BÍ MẬT LỠ COMMIT",
+    "subtitle": "Xoay khoá trước, rồi xoá khỏi lịch sử",
+    "diagram": "checklist",
+    "labels": [
+      "XOAY KHOÁ",
+      "VIẾT LẠI",
+      "FORCE-WITH-LEASE"
+    ]
+  },
+  "git-monorepo-hay-nhieu-repository": {
+    "title": "MONOREPO?",
+    "subtitle": "Dữ liệu để quyết định, CODEOWNERS, ADR",
+    "diagram": "split",
+    "labels": [
+      "MỘT",
+      "↔",
+      "NHIỀU"
+    ]
+  },
+  "git-gop-tach-repository": {
+    "title": "SUBTREE",
+    "subtitle": "Gộp và tách repository giữ lịch sử",
+    "diagram": "blocks",
+    "labels": [
+      "ADD",
+      "SPLIT",
+      "BLAME"
+    ]
+  },
+  "git-hieu-nang-hang-ngay": {
+    "title": "GIT MỖI NGÀY",
+    "subtitle": "Alias, cấu hình chung, phím tắt",
+    "diagram": "code",
+    "labels": [
+      "ALIAS",
+      "INCLUDE",
+      "PHÍM TẮT"
+    ]
+  },
+  "git-su-co-thuong-gap": {
+    "title": "SỰ CỐ GIT",
+    "subtitle": "index.lock, detached HEAD, push nhầm main",
+    "diagram": "matrix",
+    "labels": [
+      "LOCK",
+      "DETACHED",
+      "REVERT"
+    ]
+  },
+  "git-thuc-hanh-quy-trinh-phat-hanh": {
+    "title": "PHÁT HÀNH 1.4.0",
+    "subtitle": "Runbook và script chấm 10 tiêu chí",
+    "diagram": "target",
+    "labels": [
+      "RUNBOOK",
+      "TAG",
+      "10/10"
+    ]
   }
 }

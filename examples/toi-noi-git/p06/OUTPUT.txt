@@ -1,0 +1,652 @@
+
+# ==================== p06/51-conventional-commits-changelog.mjs · GIT-051 ====================
+# Tiêu đề commit tới nay viết tự do: khó lọc "tính năng mới" hay "sửa lỗi" để ghi CHANGELOG
+$ git log --format=%s -6
+Thêm báo cáo điều tra sai cước
+Thêm hook chung của nhóm
+Thêm danh sách khoá ký của nhóm
+Thêm bản thiết kế bảng giá 2027 (Git LFS)
+Cập nhật thư viện tiền tệ: dạng ngắn
+Dùng thư viện tiền tệ chung qua submodule
+
+# Quy ước của nhóm (CONTRIBUTING.md) và hook commit-msg kiểm tra tiêu đề
+$ git add CONTRIBUTING.md .githooks/commit-msg
+$ git commit -q -m "docs: quy ước commit theo Conventional Commits"
+
+# Tiêu đề kiểu cũ bị hook từ chối
+$ git commit --allow-empty -m "Sửa lỗi phí chờ"
+commit-msg: tiêu đề phải có dạng <loại>(<phạm vi>): <mô tả>, ví dụ fix(phi-cho): báo lỗi khi số giây chờ âm
+commit-msg: loại hợp lệ: feat fix perf docs test refactor style build ci chore revert
+
+# Các commit trong ngày theo quy ước
+$ git commit -q -m "feat(cuoc): phụ phí ngày lễ 30%"
+$ git commit -q -m "test(cuoc): test phụ phí ngày lễ"
+$ git commit -q -m "fix(phi-cho): báo lỗi khi số giây chờ âm"
+$ git commit -q -m "docs(readme): ví dụ phụ phí ngày lễ"
+$ git log --oneline v1.2.0..main
+8415f73 docs(readme): ví dụ phụ phí ngày lễ
+76636c1 fix(phi-cho): báo lỗi khi số giây chờ âm
+1212722 test(cuoc): test phụ phí ngày lễ
+096203a feat(cuoc): phụ phí ngày lễ 30%
+e11d08e docs: quy ước commit theo Conventional Commits
+8ea4486 Thêm báo cáo điều tra sai cước
+21b047b Thêm hook chung của nhóm
+
+# Lọc theo loại: chỉ tính năng mới, chỉ sửa lỗi
+$ git log --format=%s -E --grep="^feat(\(.*\))?!?:" v1.2.0..main
+feat(cuoc): phụ phí ngày lễ 30%
+$ git log --format=%s -E --grep="^fix(\(.*\))?!?:" v1.2.0..main
+fix(phi-cho): báo lỗi khi số giây chờ âm
+
+# Script sinh một mục CHANGELOG từ tiêu đề commit
+$ git add scripts/changelog.sh
+$ git update-index --chmod=+x scripts/changelog.sh
+$ git commit -q -m "build: script sinh changelog từ tiêu đề commit"
+$ sh scripts/changelog.sh 1.3.0 2026-11-30 v1.2.0
+## 1.3.0 (2026-11-30)
+
+### Tính năng mới
+- cuoc: phụ phí ngày lễ 30%
+
+### Sửa lỗi
+- phi-cho: báo lỗi khi số giây chờ âm
+$ git add CHANGELOG.md
+$ git commit -q -m "chore(release): 1.3.0"
+$ git push -q
+$ git show --stat --format=%s HEAD
+chore(release): 1.3.0
+
+ CHANGELOG.md | 12 ++++++++++++
+ 1 file changed, 12 insertions(+)
+PASS CHANGELOG có mục 1.3.0 với một tính năng và một sửa lỗi
+PASS ref của Minh trùng lịch sử chuẩn
+PASS ref của remote trùng lịch sử chuẩn
+PASS ref của Lan trùng lịch sử chuẩn
+
+# ==================== p06/52-phat-hanh-semver.mjs · GIT-052 ====================
+# Từ 1.2.0 có một tính năng mới (feat) và một sửa lỗi: tăng MINOR → 1.3.0
+$ git tag -l "v*" --sort=-version:refname
+v1.2.0
+v1.1.0
+v1.0.1
+v1.0.0
+$ git tag -s v1.3.0 -m "Phát hành 1.3.0: phụ phí ngày lễ"
+$ git tag -v v1.3.0
+object dcc452cdfd59cf4329dc19eee6a1538b51a4a76c
+type commit
+tag v1.3.0
+tagger Trần Minh <minh@toinoi.test> 1796090400 +0700
+
+Phát hành 1.3.0: phụ phí ngày lễ
+Good "git" signature for minh@toinoi.test with ED25519 key SHA256:ktrw7kr64a2V/wcdx7FKqeY6NQwEDtlodCSRHgsirWw
+$ git push -q origin main v1.3.0
+
+# Nhánh phát hành: nơi vá bản 1.3.x trong khi main đi tiếp
+$ git switch -c phat-hanh/1.3 v1.3.0
+Switched to a new branch 'phat-hanh/1.3'
+$ git push -q -u origin phat-hanh/1.3
+
+# Lỗi trong 1.3.0: phụ phí ngày lễ ra 39.650 đ, không làm tròn lên bội số 1.000 đ. Vá trên nhánh phát hành
+$ git commit -q -am "fix(cuoc): làm tròn phụ phí ngày lễ lên bội số 1.000 đ"
+# Chỉ có fix: tăng PATCH → 1.3.1
+$ sh scripts/changelog.sh 1.3.1 2026-12-01 v1.3.0
+## 1.3.1 (2026-12-01)
+
+### Sửa lỗi
+- cuoc: làm tròn phụ phí ngày lễ lên bội số 1.000 đ
+$ git commit -q -am "chore(release): 1.3.1"
+$ git tag -s v1.3.1 -m "Phát hành 1.3.1: làm tròn phụ phí ngày lễ"
+$ git push -q origin phat-hanh/1.3 v1.3.1
+
+# Đưa bản vá và mục CHANGELOG về main
+$ git switch main
+Your branch is up to date with 'origin/main'.
+Switched to branch 'main'
+$ git merge --no-ff --no-edit phat-hanh/1.3
+Merge made by the 'ort' strategy.
+ CHANGELOG.md                                | 5 +++++
+ src/BaoGia/HolidaySurcharge.cs              | 2 +-
+ tests/BaoGia.Tests/HolidaySurchargeTests.cs | 3 +++
+ 3 files changed, 9 insertions(+), 1 deletion(-)
+$ git push -q
+$ git log --oneline --graph -5
+*   e6aa6ed Merge branch 'phat-hanh/1.3'
+|\  
+| * 42b7cf8 chore(release): 1.3.1
+| * fd4d362 fix(cuoc): làm tròn phụ phí ngày lễ lên bội số 1.000 đ
+|/  
+* dcc452c chore(release): 1.3.0
+* a450402 build: script sinh changelog từ tiêu đề commit
+
+# Phiên bản của một commit bất kỳ: tag gần nhất + số commit sau tag + mã commit
+$ git describe
+v1.3.1-1-ge6aa6ed
+$ git describe v1.3.1
+v1.3.1
+$ git describe --tags --abbrev=0 main
+v1.3.1
+$ git branch -r --contains v1.3.1
+  origin/HEAD -> origin/main
+  origin/main
+  origin/phat-hanh/1.3
+$ git tag --merged phat-hanh/1.3 --sort=-version:refname -l "v1.3*"
+v1.3.1
+v1.3.0
+PASS main chứa bản vá 1.3.1
+PASS ref của Minh trùng lịch sử chuẩn
+PASS ref của remote trùng lịch sử chuẩn
+PASS ref của Lan trùng lịch sử chuẩn
+
+# ==================== p06/53-workspace-launchpad.mjs · GIT-053 ====================
+# Lab dựng thêm hai repository cạnh bao-gia: app-tai-xe (Flutter, có việc dở chưa commit)
+# và tien-te (bản clone thư viện của Minh, Lan vừa push thêm một commit)
+$ cd ..
+$ Get-ChildItem -Force -Name .
+app-tai-xe
+bao-gia
+lan
+remote
+thu-vien
+tien-te
+
+# Từng repository một: nhánh, đồng bộ với upstream, thay đổi chưa commit
+$ git -C bao-gia status -sb
+## main...origin/main
+$ git -C app-tai-xe status -sb
+## main...origin/main
+ M lib/main.dart
+$ git -C tien-te status -sb
+## main...origin/main [behind 1]
+
+# "Fetch tất cả" của workspace = fetch từng repository
+$ git -C bao-gia fetch -q --tags --prune --all
+$ git -C app-tai-xe fetch -q --tags --prune --all
+$ git -C tien-te fetch -q --tags --prune --all
+$ git -C tien-te rev-list --left-right --count main...origin/main
+0	1
+
+# "Pull tất cả" chỉ fast-forward repository đang chậm hơn upstream, không tạo merge commit
+$ git -C tien-te pull --ff-only
+Updating 02ae86b..31d0d96
+Fast-forward
+ README.md | 3 +++
+ 1 file changed, 3 insertions(+)
+ create mode 100644 README.md
+$ git -C tien-te log --oneline -3
+31d0d96 docs: cách dùng Vnd.Format và Vnd.Short
+02ae86b Thêm dạng ngắn 31k
+23f146f Định dạng tiền Việt Nam
+
+# Việc dở trong app tài xế (tab WIP của Launchpad)
+$ git -C app-tai-xe diff --stat
+ lib/main.dart | 2 ++
+ 1 file changed, 2 insertions(+)
+PASS tien-te đã khớp origin/main
+PASS ref của Minh trùng lịch sử chuẩn
+PASS ref của remote trùng lịch sử chuẩn
+PASS ref của Lan trùng lịch sử chuẩn
+
+# ==================== p06/54-git-trong-ci.mjs · GIT-054 ====================
+# Workflow CI và script tính phiên bản từ tag
+$ git add .github scripts/phien-ban.sh
+$ git update-index --chmod=+x scripts/phien-ban.sh
+$ git commit -q -m "ci: build, test và tính phiên bản từ tag trên mỗi push"
+$ git push -q
+$ sh scripts/phien-ban.sh
+1.3.2-dev.2+g384c2e8
+
+# Máy CI clone như actions/checkout mặc định (fetch-depth: 1): một commit, không tag
+$ cd ..
+$ git clone -q --depth 1 file:///<lab>/work/remote/bao-gia.git ci-nong
+$ cd ci-nong
+$ git log --oneline
+384c2e8 ci: build, test và tính phiên bản từ tag trên mỗi push
+$ git tag -l
+$ sh scripts/phien-ban.sh
+phien-ban: không tìm thấy tag v*: CI cần checkout đủ lịch sử và tag (fetch-depth: 0)
+
+# Sửa: lấy đủ lịch sử và tag (tương đương fetch-depth: 0)
+$ git fetch -q --unshallow --tags
+$ sh scripts/phien-ban.sh
+1.3.2-dev.2+g384c2e8
+$ cd ..
+
+# Hoặc partial clone: đủ commit và tag, nội dung file cũ chỉ tải khi cần (GIT-046).
+# Máy chủ phải cho phép lọc object (GitHub, GitLab bật sẵn; remote của lab bật bằng lệnh dưới)
+$ git -C remote/bao-gia.git config uploadpack.allowFilter true
+$ git clone -q --filter=blob:none file:///<lab>/work/remote/bao-gia.git ci-nhe
+$ cd ci-nhe
+$ git describe --tags --match "v[0-9]*"
+v1.3.1-2-g384c2e8
+# Job chạy cho tag (on: push: tags) thì đứng đúng commit của tag: phiên bản không có hậu tố dev
+$ git describe --tags --match "v[0-9]*" v1.3.1
+v1.3.1
+$ cd ../bao-gia
+PASS phiên bản của main là bản dev sau 1.3.1
+PASS ref của Minh trùng lịch sử chuẩn
+PASS ref của remote trùng lịch sử chuẩn
+PASS ref của Lan trùng lịch sử chuẩn
+
+# ==================== p06/55-bi-mat-lo-commit.mjs · GIT-055 ====================
+# Lan làm tính năng bản đồ trong fork, lỡ commit file cấu hình staging có khoá API
+$ cd ../lan/bao-gia
+$ git fetch -q upstream
+$ git switch -c tinh-nang/ban-do upstream/main
+branch 'tinh-nang/ban-do' set up to track 'upstream/main'.
+Switched to a new branch 'tinh-nang/ban-do'
+$ git add src/BaoGia
+$ git commit -q -m "feat(ban-do): ước lượng quãng đường bằng dịch vụ bản đồ"
+$ git add tests
+$ git commit -q -m "test(ban-do): làm tròn quãng đường một chữ số thập phân"
+$ git push -q -u origin tinh-nang/ban-do
+
+# Minh review pull request, thấy khoá. Tìm mọi commit có chuỗi giống khoá trong mọi nhánh:
+$ git log --all --oneline -G "tn_live_[A-Za-z0-9_]{8,}"
+61ae7ea feat(ban-do): ước lượng quãng đường bằng dịch vụ bản đồ
+$ git show --stat --format=%s HEAD~1
+feat(ban-do): ước lượng quãng đường bằng dịch vụ bản đồ
+
+ src/BaoGia/MapsDistance.cs          | 12 ++++++++++++
+ src/BaoGia/appsettings.Staging.json |  7 +++++++
+ 2 files changed, 19 insertions(+)
+
+# Bước 1 (ngoài Git): thu hồi khoá cũ, cấp khoá mới trên trang quản trị dịch vụ bản đồ.
+# Khoá đã lên remote coi như đã lộ: xoá khỏi lịch sử không làm nó an toàn trở lại.
+
+# Bước 2: viết lại nhánh, bỏ file khỏi mọi commit của nhánh
+# (git filter-repo --invert-paths --path src/BaoGia/appsettings.Staging.json --refs upstream/main..tinh-nang/ban-do;
+#  lab dùng filter-branch có sẵn trong Git để không phải cài thêm)
+$ git filter-branch -f --prune-empty --index-filter "git rm -q --cached --ignore-unmatch src/BaoGia/appsettings.Staging.json" -- upstream/main..tinh-nang/ban-do
+$ git update-ref -d refs/original/refs/heads/tinh-nang/ban-do
+$ git log --oneline upstream/main..tinh-nang/ban-do
+650584f test(ban-do): làm tròn quãng đường một chữ số thập phân
+0872435 feat(ban-do): ước lượng quãng đường bằng dịch vụ bản đồ
+$ git show --stat --format=%s HEAD~1
+feat(ban-do): ước lượng quãng đường bằng dịch vụ bản đồ
+
+ src/BaoGia/MapsDistance.cs | 12 ++++++++++++
+ 1 file changed, 12 insertions(+)
+
+# Bước 3: không để tái diễn: bỏ qua file, ghi cách cấu hình khoá
+$ git add .gitignore docs/ban-do.md README.md
+$ git commit -q -m "chore(ban-do): khoá API đọc từ biến môi trường, không commit"
+
+# Bước 4: thay nhánh trên remote. --force-with-lease chỉ ghi đè nếu remote vẫn là bản mình đã thấy
+$ git push -q --force-with-lease origin tinh-nang/ban-do
+# Bản cũ vẫn còn trong reflog và object rời: quên reflog, xoá object không còn ai trỏ tới
+$ git reflog expire --expire=now --all
+$ git gc -q --prune=now
+$ git log --all --oneline -G "tn_live_[A-Za-z0-9_]{8,}"
+PASS nhánh của Lan và fork không còn khoá
+
+# Minh merge pull request (bản đã sạch), rồi thêm chặn khoá vào hook pre-commit của nhóm
+$ cd ../../bao-gia
+$ git fetch -q ../remote/lan-bao-gia.git tinh-nang/ban-do
+$ git merge -q --no-ff -m "Merge pull request #7 từ lan/tinh-nang/ban-do" FETCH_HEAD
+$ git add src/BaoGia/appsettings.Thu.json
+$ git commit -q -m "chore(ban-do): thử cấu hình"
+pre-commit: có khoá API (tn_live_…) trong thay đổi đã stage. Đưa khoá vào biến môi trường rồi commit lại.
+$ git rm -q --cached src/BaoGia/appsettings.Thu.json
+$ git commit -q -am "chore(hook): chặn khoá API tn_live_ trong thay đổi đã stage"
+$ git push -q
+PASS lịch sử main không có khoá
+PASS ref của Minh trùng lịch sử chuẩn
+PASS ref của remote trùng lịch sử chuẩn
+PASS ref của Lan trùng lịch sử chuẩn
+
+# ==================== p06/56-monorepo-hay-nhieu-repository.mjs · GIT-056 ====================
+# Dữ liệu cho quyết định: thay đổi từ 1.2.0 rơi vào thư mục nào, ai viết
+$ git diff --dirstat=files,5 v1.2.0 main
+  17.6% .githooks/
+   5.8% .github/workflows/
+  11.7% docs/
+  11.7% scripts/
+  17.6% src/BaoGia/
+  11.7% tests/BaoGia.Tests/
+$ git shortlog -sn --no-merges v1.2.0..main
+    10	Trần Minh
+     6	Lê Lan
+
+# Hai repository có từng chung một commit nào không? (đổi cả hai cùng lúc là dấu hiệu nên gộp)
+$ git -C ../app-tai-xe log --format="%ad %s" --date=short
+2026-12-02 feat(gia): hiện giá ước tính từ dịch vụ báo giá
+2026-12-02 feat: màn hình nhận chuyến
+$ git log --format="%ad %s" --date=short --since="2026-12-02T00:00+07:00" --until="2026-12-02T23:59+07:00" main
+2026-12-02 ci: build, test và tính phiên bản từ tag trên mỗi push
+
+# CODEOWNERS: ai phải review thay đổi ở từng khu vực
+$ git add .github/CODEOWNERS
+$ git commit -q -m "chore: CODEOWNERS cho từng khu vực"
+
+# Ghi quyết định (ADR) cạnh code để người sau biết vì sao
+$ git add docs/quyet-dinh
+$ git commit -q -m "docs(quyet-dinh): giữ hai repository, gộp thư viện tiền tệ vào báo giá"
+$ git push -q
+$ git log --oneline -3
+9acc830 docs(quyet-dinh): giữ hai repository, gộp thư viện tiền tệ vào báo giá
+2c3569c chore: CODEOWNERS cho từng khu vực
+c1459f4 chore(hook): chặn khoá API tn_live_ trong thay đổi đã stage
+PASS có CODEOWNERS và ADR
+PASS ref của Minh trùng lịch sử chuẩn
+PASS ref của remote trùng lịch sử chuẩn
+PASS ref của Lan trùng lịch sử chuẩn
+
+# ==================== p06/57-gop-tach-repository.mjs · GIT-057 ====================
+# Hiện tại: thư viện tiền tệ là submodule, trỏ tới một commit của repository tien-te
+$ git submodule status
+ 02ae86b4a66175d1b290923c36b48c74de3fd17a lib/tien-te (remotes/origin/HEAD)
+$ git -C ../remote/tien-te.git log --oneline main
+31d0d96 docs: cách dùng Vnd.Format và Vnd.Short
+02ae86b Thêm dạng ngắn 31k
+23f146f Định dạng tiền Việt Nam
+
+# Bước 1: bỏ submodule (gỡ khỏi index và .gitmodules, xoá bản clone trong .git/modules)
+$ git submodule deinit -q -f lib/tien-te
+$ git rm -q lib/tien-te
+$ git rm -q -f .gitmodules
+$ Remove-Item -Recurse -Force .git/modules/lib/tien-te
+$ git status -s
+D  .gitmodules
+D  lib/tien-te
+$ git commit -q -m "refactor(tien-te): bỏ submodule lib/tien-te"
+
+# Bước 2: gộp toàn bộ lịch sử tien-te vào thư mục lib/tien-te bằng một merge commit
+$ git subtree add --prefix=lib/tien-te ../remote/tien-te.git main -m "refactor(tien-te): gộp thư viện tiền tệ bằng subtree, giữ lịch sử"
+git fetch ../remote/tien-te.git main
+From ../remote/tien-te
+ * branch            main       -> FETCH_HEAD
+Added dir 'lib/tien-te'
+$ git log --oneline --graph -6
+*   e35b76c refactor(tien-te): gộp thư viện tiền tệ bằng subtree, giữ lịch sử
+|\  
+| * 31d0d96 docs: cách dùng Vnd.Format và Vnd.Short
+| * 02ae86b Thêm dạng ngắn 31k
+| * 23f146f Định dạng tiền Việt Nam
+* 470f477 refactor(tien-te): bỏ submodule lib/tien-te
+* 9acc830 docs(quyet-dinh): giữ hai repository, gộp thư viện tiền tệ vào báo giá
+$ git ls-files lib/tien-te
+lib/tien-te/README.md
+lib/tien-te/src/Vnd.cs
+$ git blame -s lib/tien-te/src/Vnd.cs
+^23f146f src/Vnd.cs  1) namespace ToiNoi.TienTe;
+^23f146f src/Vnd.cs  2) 
+^23f146f src/Vnd.cs  3) /// <summary>Định dạng số tiền theo kiểu Việt Nam: 31.000 đ.</summary>
+^23f146f src/Vnd.cs  4) public static class Vnd
+^23f146f src/Vnd.cs  5) {
+^23f146f src/Vnd.cs  6)     public static string Format(decimal amount) =>
+^23f146f src/Vnd.cs  7)         string.Format(System.Globalization.CultureInfo.GetCultureInfo("vi-VN"), "{0:N0} đ", amount);
+02ae86b4 src/Vnd.cs  8) 
+02ae86b4 src/Vnd.cs  9)     /// <summary>Dạng ngắn cho màn hình nhỏ: 31k.</summary>
+02ae86b4 src/Vnd.cs 10)     public static string Short(decimal amount) => $"{amount / 1000m:0.#}k";
+^23f146f src/Vnd.cs 11) }
+$ git push -q
+
+# Đi ngược lại: subtree split dựng lại lịch sử chỉ của một thư mục; ra đúng commit cuối của tien-te
+$ git subtree split -q --prefix=lib/tien-te
+31d0d96dd4ecc7ed33c38f75c1baaa371b4a1301
+$ git -C ../remote/tien-te.git rev-parse main
+31d0d96dd4ecc7ed33c38f75c1baaa371b4a1301
+PASS subtree split trùng commit cuối của tien-te
+
+# Tách: bộ phận vận hành nhận một repository chỉ có docs/, giữ lịch sử từng file
+$ git init -q --bare -b main ../remote/tai-lieu.git
+$ git subtree split -q --prefix=docs -b tach/tai-lieu
+$ git push -q file:///<lab>/work/remote/tai-lieu.git tach/tai-lieu:main
+$ git branch -q -D tach/tai-lieu
+$ git -C ../remote/tai-lieu.git log --oneline -4 main
+5eb92be docs(quyet-dinh): giữ hai repository, gộp thư viện tiền tệ vào báo giá
+057d37a chore(ban-do): khoá API đọc từ biến môi trường, không commit
+3239963 Thêm báo cáo điều tra sai cước
+93f6480 Thêm bản thiết kế bảng giá 2027 (Git LFS)
+$ git -C ../remote/tai-lieu.git ls-tree --name-only main
+ban-do.md
+bang-gia-cuoc.md
+bao-cao-sai-cuoc.md
+phi-cho.md
+quyet-dinh
+runbook-hoan-tac.md
+thiet-ke
+PASS không còn .gitmodules, lib/tien-te là thư mục thường
+PASS ref của Minh trùng lịch sử chuẩn
+PASS ref của remote trùng lịch sử chuẩn
+PASS ref của Lan trùng lịch sử chuẩn
+
+# ==================== p06/58-hieu-nang-hang-ngay.mjs · GIT-058 ====================
+# Cấu hình khuyến nghị của nhóm nằm trong repository, review như code
+$ git add docs/git
+$ git commit -q -m "docs: cấu hình git khuyến nghị cho nhóm"
+$ git push -q
+
+# Mỗi người bật một lần cho repository (Git không tự đọc cấu hình từ repository, vì lý do an toàn)
+$ git config --local include.path ../docs/git/toinoi.gitconfig
+$ git config --show-origin --get pull.ff
+file:.git/../docs/git/toinoi.gitconfig	only
+$ git config --show-scope --get-regexp "^alias\."
+local	alias.st status -sb
+local	alias.lg log --oneline --graph --decorate -12
+local	alias.last log -1 --stat
+local	alias.unstage restore --staged
+local	alias.amend commit --amend --no-edit
+local	alias.nhanh branch --format='%(committerdate:short) %(refname:short)'
+
+# Dùng alias
+$ git st
+## main...origin/main
+$ git lg
+* a772579 (HEAD -> main, origin/main, origin/HEAD) docs: cấu hình git khuyến nghị cho nhóm
+*   e35b76c refactor(tien-te): gộp thư viện tiền tệ bằng subtree, giữ lịch sử
+|\  
+| * 31d0d96 docs: cách dùng Vnd.Format và Vnd.Short
+| * 02ae86b Thêm dạng ngắn 31k
+| * 23f146f Định dạng tiền Việt Nam
+* 470f477 refactor(tien-te): bỏ submodule lib/tien-te
+* 9acc830 docs(quyet-dinh): giữ hai repository, gộp thư viện tiền tệ vào báo giá
+* 2c3569c chore: CODEOWNERS cho từng khu vực
+* c1459f4 chore(hook): chặn khoá API tn_live_ trong thay đổi đã stage
+*   f13ca60 Merge pull request #7 từ lan/tinh-nang/ban-do
+|\  
+| * 4be468e chore(ban-do): khoá API đọc từ biến môi trường, không commit
+| * 650584f test(ban-do): làm tròn quãng đường một chữ số thập phân
+$ git nhanh
+2026-12-04 main
+2026-12-01 phat-hanh/1.3
+2026-11-19 phat-hanh/1.0
+$ git tag -l "v1.*"
+v1.3.1
+v1.3.0
+v1.2.0
+v1.1.0
+v1.0.1
+v1.0.0
+
+# Cấu hình của bạn vẫn thắng nếu đặt sau include (ví dụ muốn pull bằng rebase)
+$ git config --local pull.rebase true
+$ git config --show-origin --get-regexp "^pull\."
+file:.git/config	pull.rebase true
+file:.git/../docs/git/toinoi.gitconfig	pull.ff only
+$ git config --local --unset pull.rebase
+PASS alias st chạy được và pull.ff = only
+PASS ref của Minh trùng lịch sử chuẩn
+PASS ref của remote trùng lịch sử chuẩn
+PASS ref của Lan trùng lịch sử chuẩn
+
+# ==================== p06/59-su-co-thuong-gap.mjs · GIT-059 ====================
+# Sự cố 1: index.lock còn sót (git bị tắt ngang, hai chương trình cùng chạy git)
+$ git add docs/ghi-chu.md
+fatal: Unable to create '<lab>/work/bao-gia/.git/index.lock': File exists.
+
+Another git process seems to be running in this repository, e.g.
+an editor opened by 'git commit'. Please make sure all processes
+are terminated then try again. If it still fails, a git process
+may have crashed in this repository earlier:
+remove the file manually to continue.
+# Chắc chắn không còn tiến trình git nào (đóng GitStudio, IDE, terminal khác), rồi mới xoá file khoá
+$ Remove-Item .git/index.lock
+$ git add docs/ghi-chu.md
+$ git restore --staged docs/ghi-chu.md
+
+# Sự cố 2: commit trong lúc detached HEAD rồi chuyển đi
+$ git switch --detach v1.3.1
+HEAD is now at 42b7cf8 chore(release): 1.3.1
+$ git commit -q --allow-empty -m "test(cuoc): thử lại lỗi làm tròn trên 1.3.1"
+$ git switch main
+Your branch is up to date with 'origin/main'.
+Warning: you are leaving 1 commit behind, not connected to
+any of your branches:
+
+  68a37d4 test(cuoc): thử lại lỗi làm tròn trên 1.3.1
+
+If you want to keep it by creating a new branch, this may be a good time
+to do so with:
+
+ git branch <new-branch-name> 68a37d4
+
+Switched to branch 'main'
+# Commit chưa mất: reflog còn nhớ (GIT-034). Tạo nhánh để giữ, hoặc bỏ đi nếu chỉ là thử
+$ git reflog -3 --format="%h %gs"
+a772579 checkout: moving from 68a37d4517b5390c67421c9706f112c7b5521f78 to main
+68a37d4 commit: test(cuoc): thử lại lỗi làm tròn trên 1.3.1
+42b7cf8 checkout: moving from main to v1.3.1
+$ git branch thu/lam-tron-1.3.1 68a37d4
+$ git log --oneline -1 thu/lam-tron-1.3.1
+68a37d4 test(cuoc): thử lại lỗi làm tròn trên 1.3.1
+$ git branch -D thu/lam-tron-1.3.1
+Deleted branch thu/lam-tron-1.3.1 (was 68a37d4).
+
+# Sự cố 3: push nhầm lên main một thay đổi chưa được duyệt
+$ git commit -q -am "chore(ban-do): bật ước lượng quãng đường mặc định"
+$ git push -q
+# main đã chia sẻ: không reset hay force push. Giữ thay đổi trên nhánh riêng, revert trên main
+$ git branch tinh-nang/ban-do-mac-dinh
+$ git revert --no-edit HEAD
+[main c52b396] Revert "chore(ban-do): bật ước lượng quãng đường mặc định"
+ Date: Fri Dec 4 14:20:00 2026 +0700
+ 1 file changed, 3 deletions(-)
+$ git push -q
+$ git log --oneline -3
+c52b396 Revert "chore(ban-do): bật ước lượng quãng đường mặc định"
+07d9ea8 chore(ban-do): bật ước lượng quãng đường mặc định
+a772579 docs: cấu hình git khuyến nghị cho nhóm
+$ git diff main~2 main --stat
+PASS main không còn bật mặc định, nhánh riêng còn giữ
+PASS ref của Minh trùng lịch sử chuẩn
+PASS ref của remote trùng lịch sử chuẩn
+PASS ref của Lan trùng lịch sử chuẩn
+
+# ==================== p06/60-thuc-hanh-quy-trinh-phat-hanh.mjs · GIT-060 ====================
+# Runbook phát hành vào repository
+$ git add docs/quy-trinh-phat-hanh.md
+$ git commit -q -m "docs: runbook quy trình phát hành"
+
+# 1. Chuẩn bị: main trùng origin/main, bản trước và các commit kể từ đó
+$ git push -q
+$ git status -sb
+## main...origin/main
+$ git describe --tags --abbrev=0
+v1.3.1
+$ git log --oneline --no-merges v1.3.1..main
+701d469 docs: runbook quy trình phát hành
+c52b396 Revert "chore(ban-do): bật ước lượng quãng đường mặc định"
+07d9ea8 chore(ban-do): bật ước lượng quãng đường mặc định
+a772579 docs: cấu hình git khuyến nghị cho nhóm
+470f477 refactor(tien-te): bỏ submodule lib/tien-te
+9acc830 docs(quyet-dinh): giữ hai repository, gộp thư viện tiền tệ vào báo giá
+2c3569c chore: CODEOWNERS cho từng khu vực
+c1459f4 chore(hook): chặn khoá API tn_live_ trong thay đổi đã stage
+4be468e chore(ban-do): khoá API đọc từ biến môi trường, không commit
+650584f test(ban-do): làm tròn quãng đường một chữ số thập phân
+0872435 feat(ban-do): ước lượng quãng đường bằng dịch vụ bản đồ
+384c2e8 ci: build, test và tính phiên bản từ tag trên mỗi push
+31d0d96 docs: cách dùng Vnd.Format và Vnd.Short
+02ae86b Thêm dạng ngắn 31k
+23f146f Định dạng tiền Việt Nam
+# Có feat → tăng MINOR: 1.4.0
+
+# 2. CHANGELOG
+$ sh scripts/changelog.sh 1.4.0 2026-12-07 v1.3.1
+## 1.4.0 (2026-12-07)
+
+### Tính năng mới
+- ban-do: ước lượng quãng đường bằng dịch vụ bản đồ
+$ git commit -q -am "chore(release): 1.4.0"
+
+# 3. Tag có chữ ký, nhánh phát hành, push một lần
+$ git tag -s v1.4.0 -m "Phát hành 1.4.0: ước lượng quãng đường bằng bản đồ"
+$ git tag -v v1.4.0
+object a1d5679e3670bb19168b4d1c50599372637afedc
+type commit
+tag v1.4.0
+tagger Trần Minh <minh@toinoi.test> 1796611500 +0700
+
+Phát hành 1.4.0: ước lượng quãng đường bằng bản đồ
+Good "git" signature for minh@toinoi.test with ED25519 key SHA256:ktrw7kr64a2V/wcdx7FKqeY6NQwEDtlodCSRHgsirWw
+$ git branch phat-hanh/1.4 v1.4.0
+$ git push -q origin main phat-hanh/1.4 v1.4.0
+$ sh scripts/phien-ban.sh
+1.4.0
+PASS ref của Minh trùng lịch sử chuẩn
+PASS ref của remote trùng lịch sử chuẩn
+PASS ref của Lan trùng lịch sử chuẩn
+
+# 4. Chấm theo 10 tiêu chí
+$ node ../../p06/kiem-tra.mjs .
+ĐẠT      main cục bộ trùng main trên remote
+ĐẠT      working tree sạch, không thao tác dở, không còn index.lock
+ĐẠT      mọi commit từ khi áp dụng quy ước đều theo Conventional Commits
+ĐẠT      CHANGELOG có 1.4.0, 1.3.1, 1.3.0 (mới nhất trên cùng) và có runbook phát hành
+ĐẠT      tag v1.4.0 có chữ ký hợp lệ, trỏ đúng main và đã push
+ĐẠT      remote có phat-hanh/1.4 ở v1.4.0 và phat-hanh/1.3 chứa v1.3.1
+ĐẠT      không còn khoá API trong lịch sử của mọi nhánh
+ĐẠT      CI checkout đủ lịch sử (fetch-depth: 0), scripts/phien-ban.sh ra 1.4.0
+ĐẠT      core.hooksPath = .githooks; commit-msg kiểm tra Conventional Commits, pre-commit chặn khoá API
+ĐẠT      thư viện tiền tệ gộp bằng subtree (split ra đúng commit cuối của tien-te), có CODEOWNERS
+10/10 tiêu chí đạt
+PASS repository đạt mọi tiêu chí
+
+# Tag phát hành đã push thì không xoá được: hook pre-receive của remote (GIT-027) chặn
+$ git push -q origin --delete v1.4.0
+remote: Từ chối: tag phát hành refs/tags/v1.4.0 đã có, không được sửa hay xoá        
+To <lab>/work/remote/bao-gia.git
+ ! [remote rejected] v1.4.0 (pre-receive hook declined)
+error: failed to push some refs to '<lab>/work/remote/bao-gia.git'
+
+# Làm hỏng có chủ đích: xoá nhánh phát hành trên remote, tắt hook chung, để sót index.lock
+$ git push -q origin --delete phat-hanh/1.4
+$ git config --unset core.hooksPath
+$ New-Item .git/index.lock
+$ node ../../p06/kiem-tra.mjs .
+ĐẠT      main cục bộ trùng main trên remote
+CHƯA ĐẠT working tree sạch, không thao tác dở, không còn index.lock — index.lock
+ĐẠT      mọi commit từ khi áp dụng quy ước đều theo Conventional Commits
+ĐẠT      CHANGELOG có 1.4.0, 1.3.1, 1.3.0 (mới nhất trên cùng) và có runbook phát hành
+ĐẠT      tag v1.4.0 có chữ ký hợp lệ, trỏ đúng main và đã push
+CHƯA ĐẠT remote có phat-hanh/1.4 ở v1.4.0 và phat-hanh/1.3 chứa v1.3.1 — phat-hanh/1.4: chưa có; phat-hanh/1.3: đúng
+ĐẠT      không còn khoá API trong lịch sử của mọi nhánh
+ĐẠT      CI checkout đủ lịch sử (fetch-depth: 0), scripts/phien-ban.sh ra 1.4.0
+CHƯA ĐẠT core.hooksPath = .githooks; commit-msg kiểm tra Conventional Commits, pre-commit chặn khoá API — hooksPath=chưa đặt
+ĐẠT      thư viện tiền tệ gộp bằng subtree (split ra đúng commit cuối của tien-te), có CODEOWNERS
+7/10 tiêu chí đạt
+PASS kiểm tra bắt được 3 lỗi
+
+# Sửa: xoá index.lock (sau khi chắc không còn tiến trình git), bật lại hook, push lại nhánh
+$ Remove-Item .git/index.lock
+$ git config core.hooksPath .githooks
+$ git push -q origin phat-hanh/1.4
+$ node ../../p06/kiem-tra.mjs .
+ĐẠT      main cục bộ trùng main trên remote
+ĐẠT      working tree sạch, không thao tác dở, không còn index.lock
+ĐẠT      mọi commit từ khi áp dụng quy ước đều theo Conventional Commits
+ĐẠT      CHANGELOG có 1.4.0, 1.3.1, 1.3.0 (mới nhất trên cùng) và có runbook phát hành
+ĐẠT      tag v1.4.0 có chữ ký hợp lệ, trỏ đúng main và đã push
+ĐẠT      remote có phat-hanh/1.4 ở v1.4.0 và phat-hanh/1.3 chứa v1.3.1
+ĐẠT      không còn khoá API trong lịch sử của mọi nhánh
+ĐẠT      CI checkout đủ lịch sử (fetch-depth: 0), scripts/phien-ban.sh ra 1.4.0
+ĐẠT      core.hooksPath = .githooks; commit-msg kiểm tra Conventional Commits, pre-commit chặn khoá API
+ĐẠT      thư viện tiền tệ gộp bằng subtree (split ra đúng commit cuối của tien-te), có CODEOWNERS
+10/10 tiêu chí đạt
+PASS sửa xong đạt mọi tiêu chí
+
+# [lab] Bài đã chạy: 10
+# [lab] PASS: 44
+# [lab] FAIL: 0
+# [lab] KẾT QUẢ: ĐẠT
